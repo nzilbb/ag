@@ -42,17 +42,19 @@ public class TestDefaultOffsetGenerator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants")
-               .setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Words")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
+    g.setSchema(new Schema(
+                  "who", "turn", null, "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true)));
 
     g.addAnchor(new Anchor("turnStart", 0.0)); // turn start
     g.addAnchor(new Anchor("a0", null)); // the
@@ -132,24 +134,24 @@ public class TestDefaultOffsetGenerator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants")
-               .setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true)
-               .setPeersOverlap(true)
-               .setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Words")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
-    g.addLayer(new Layer("language", "Language")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
-               
+    g.setSchema(new Schema(
+                  "who", "turn", null, "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("language", "Language")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true)));
+                
     g.addAnchor(new Anchor("turnStart", 0.0)); // turn start
     g.addAnchor(new Anchor("a0", null)); // the
     g.addAnchor(new Anchor("a1", null)); // quick
@@ -230,18 +232,20 @@ public class TestDefaultOffsetGenerator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants")
-               .setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Words")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
-
+    g.setSchema(new Schema(
+                  "who", "turn", null, "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true)));
+ 
     g.addAnchor(new Anchor("turnStart", 0.0)); // turn start
     g.getAnchor("turnStart").setConfidence(Constants.CONFIDENCE_MANUAL);
     g.addAnchor(new Anchor("a0", 0.1)); // the
@@ -334,21 +338,23 @@ public class TestDefaultOffsetGenerator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants")
-               .setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Words")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
-    g.addLayer(new Layer("language", "Language")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
+    g.setSchema(new Schema(
+                  "who", "turn", null, "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("language", "Language")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true)));
 
     g.addAnchor(new Anchor("turnStart", 0.0)); // turn start
     g.getAnchor("turnStart").setConfidence(Constants.CONFIDENCE_MANUAL);
@@ -446,21 +452,23 @@ public class TestDefaultOffsetGenerator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants")
-               .setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Words")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
-    g.addLayer(new Layer("utterance", "Utterance")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(true)
-               .setParentId("turn").setParentIncludes(true));
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("utterance", "Utterance")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true)));
     
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
 
@@ -560,23 +568,165 @@ public class TestDefaultOffsetGenerator {
     }
   }
 
+  /** Dangling utterance tags don't interfere with partitioning. 
+   * This test ensures that utterance meta-data (word count, rate, htk timestamp, etc.)
+   * doesn't interfere with word interpolatation even if the meta tags are imperfectly linked,
+   * e.g. if the end anchor is not the same.
+   * (Ideally, such tags should be strictly 'parallel' to the utterance, but the reality of
+   *  graph validation, merging, normalization, etc. is that sometimes they're de-linked.)
+   */
+  @Test public void utteranceTags() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("utterance", "Utterance")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("htk", "HTK Time")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true)));
+    
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+    g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_NONE)); // the
+    g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+    g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+    g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+    g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
+
+    g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+    g.addAnchor(new Anchor("htkEnd", 0.4, Constants.CONFIDENCE_MANUAL)); // unlinked HTK end anchor
+
+    g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+    g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+    g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+    g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+    // no confidence set for a44 and a54
+    g.addAnchor(new Anchor("a44", 5.1)); // dog
+    g.addAnchor(new Anchor("a54", null)); // end of dog
+
+    // no confidence set for a7
+    g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(new Annotation(
+                      "participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+    g.addAnnotation(new Annotation(
+                      "turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+
+    g.addAnnotation(
+      new Annotation(
+        "utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+    g.addAnnotation(
+      new Annotation(
+        "utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+    
+    g.addAnnotation(
+      new Annotation(
+        "htk1", "HTK", "htk", "turnStart", "htkEnd", "turn1"));
+    g.addAnnotation(
+      new Annotation(
+        "htk2", "HTK", "htk", "utteranceChange", "turnEnd", "turn1"));
+      
+    g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+    g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04a", "turn1"));
+
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn1"));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn1"));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn1"));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
+    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
+
+    g.trackChanges();
+    
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
+    generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
+    generator.setDebug(true);
+    try {
+      generator.transform(g);
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
+
+      // test the values are what we expected
+
+      // test the changes are recorded
+      Set<String> changeStrings = changes.stream()
+        .map(Change::toString).collect(Collectors.toSet());
+      assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
+      assertEquals(Double.valueOf(0.1), g.getAnchor("a01").getOffset());
+      assertEquals(Double.valueOf(0.2), g.getAnchor("a02").getOffset());
+      // yay for inexact floating point representations!
+      assertEquals(Double.valueOf(0.30000000000000004), g.getAnchor("a03").getOffset());
+      assertEquals(Double.valueOf(0.4), g.getAnchor("a04a").getOffset());
+      assertEquals(Double.valueOf(0.4), g.getAnchor("a04b").getOffset());
+      assertEquals(Double.valueOf(1.4), g.getAnchor("a14").getOffset());
+      assertEquals(Double.valueOf(2.4), g.getAnchor("a24").getOffset());
+      assertEquals(Double.valueOf(3.4), g.getAnchor("a34").getOffset());
+      assertEquals(Double.valueOf(4.4), g.getAnchor("a44").getOffset());
+      assertEquals(Double.valueOf(5.4), g.getAnchor("a54").getOffset());
+
+      // collapsed back to start of turn
+      assertTrue(changeStrings.contains("Update a0: offset = 0.0 (was 0.01)"));
+      // collapsed forward to end of utterancew 
+      assertTrue(changeStrings.contains("Update a04a: offset = 0.4 (was 0.04)"));
+      // then the rest interpolated between
+      assertTrue(changeStrings.contains("Update a01: offset = 0.1 (was 0.02)"));
+      assertTrue(changeStrings.contains("Update a02: offset = 0.2 (was 0.03)"));
+      assertTrue(changeStrings.contains("Update a03: offset = 0.30000000000000004 (was 0.04)"));
+      // collapsed back to start of utterance
+      assertTrue(changeStrings.contains("Update a04b: offset = 0.4 (was 2.0)"));
+      // collapsed forward to end of utterance
+      assertTrue(changeStrings.contains("Update a54: offset = 5.4 (was null)"));
+      // then the rest interpolated between
+      assertTrue(changeStrings.contains("Update a14: offset = 1.4 (was 3.3)"));
+      assertTrue(changeStrings.contains("Update a24: offset = 2.4 (was 4.4)"));
+      assertTrue(changeStrings.contains("Update a34: offset = 3.4 (was 5.0)"));
+      assertTrue(changeStrings.contains("Update a44: offset = 4.4 (was 5.1)"));
+      assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
+
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
   /** Test words uttered by different speakers are interpolated independently. */
   @Test public void overlappingInterpolation() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants")
-               .setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Words")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
+    g.setSchema(new Schema(
+                  "who", "turn", null, "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true)));
 
     // john smith
     g.addAnchor(new Anchor("turn1Start", 0.0)); // turn start
@@ -700,20 +850,22 @@ public class TestDefaultOffsetGenerator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants")
-               .setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Words")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
-    g.addLayer(new Layer("noise", "Noise")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(true).setSaturated(false));
+    g.setSchema(new Schema(
+                  "who", "turn", null, "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("noise", "Noise")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(false)));
 
     g.addAnchor(new Anchor("turnStart", 0.0)); // turn start & noise1
     g.addAnchor(new Anchor("a1", null)); // noise2
@@ -790,35 +942,37 @@ public class TestDefaultOffsetGenerator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants")
-               .setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Words")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
-    g.addLayer(new Layer("topic", "Topics")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false));
-    g.addLayer(new Layer("noise", "Noises")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false));
-    g.addLayer(new Layer("orthography", "Orthography")
-               .setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(false).setPeersOverlap(false).setSaturated(true)
-               .setParentId("word").setParentIncludes(true));
-    g.addLayer(new Layer("dependency", "Dependency")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("word").setParentIncludes(false));
-    g.addLayer(new Layer("phone", "Phone")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(true)
-               .setParentId("word").setParentIncludes(true));
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("topic", "Topics")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false),
+                  new Layer("noise", "Noises")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false),
+                  new Layer("orthography", "Orthography")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(false).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("word").setParentIncludes(true),
+                  new Layer("dependency", "Dependency")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("word").setParentIncludes(false),
+                  new Layer("phone", "Phone")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("word").setParentIncludes(true)));
 
     // topic
     g.addAnchor(new Anchor("topic1Start", null));
@@ -1006,21 +1160,27 @@ public class TestDefaultOffsetGenerator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants")
-               .setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Words")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
-    g.addLayer(new Layer("utterance", "Utterance")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(true)
-               .setParentId("turn").setParentIncludes(true));
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("utterance", "Utterance")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("htk", "HTK Time")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true)));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
 
@@ -1128,32 +1288,27 @@ public class TestDefaultOffsetGenerator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants")
-               .setAlignment(Constants.ALIGNMENT_NONE) 
-               .setPeers(true)
-               .setPeersOverlap(true)
-               .setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true)
-               .setPeersOverlap(false)
-               .setSaturated(false)
-               .setParentId("who")
-               .setParentIncludes(true));
-    g.addLayer(new Layer("utterance", "Utterance")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true)
-               .setPeersOverlap(false)
-               .setSaturated(true)
-               .setParentId("turn")
-               .setParentIncludes(true));
-    g.addLayer(new Layer("word", "Words")
-               .setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true)
-               .setPeersOverlap(false)
-               .setSaturated(false)
-               .setParentId("turn")
-               .setParentIncludes(true));
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("utterance", "Utterance")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("htk", "HTK Time")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true)));
 
     g.addAnchor(new Anchor("utteranceStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
     g.addAnchor(new Anchor("a0", 0.0, Constants.CONFIDENCE_DEFAULT)); // the
@@ -1262,18 +1417,24 @@ public class TestDefaultOffsetGenerator {
     g.setId("my graph");
     g.setCorpus("cc");
     
-    g.addLayer(new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Orthographic Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
-    g.addLayer(new Layer("gram", "Grammatical Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true)
-               .setParentId("word").setParentIncludes(true));
-
+    g.setSchema(new Schema(
+                  "who", "turn", null, "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("gram", "Grammatical Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true)
+                  .setParentId("word").setParentIncludes(true)));
+    
     // john smith
     g.addAnchor(new Anchor("turn1Start", 0.0)); // turn start
     g.addAnchor(new Anchor("a0", 0.0)); // I
@@ -1386,17 +1547,23 @@ public class TestDefaultOffsetGenerator {
     g.setId("my graph");
     g.setCorpus("cc");
     
-    g.addLayer(new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Orthographic Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
-    g.addLayer(new Layer("gram", "Grammatical Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true)
-               .setParentId("word").setParentIncludes(true));
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("gram", "Grammatical Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true)
+                  .setParentId("word").setParentIncludes(true)));
 
     // john smith
     g.addAnchor(new Anchor("turn1Start", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
@@ -1635,17 +1802,27 @@ public class TestDefaultOffsetGenerator {
     Graph g = new Graph();
     g.setId("g");
     
-    g.addLayer(new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
-               .setPeers(true).setPeersOverlap(true).setSaturated(true));
-    g.addLayer(new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("who").setParentIncludes(true));
-    g.addLayer(new Layer("utterance", "Lines").setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(true)
-               .setParentId("turn").setParentIncludes(true));
-    g.addLayer(new Layer("word", "Orthographic Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
-               .setPeers(true).setPeersOverlap(false).setSaturated(false)
-               .setParentId("turn").setParentIncludes(true));
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("utterance", "Utterance")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("htk", "HTK Time")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true)));
 
     // create a graph with a huge number of words
     int wordCount = 10000; 

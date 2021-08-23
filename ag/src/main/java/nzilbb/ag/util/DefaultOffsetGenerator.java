@@ -384,6 +384,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
   protected Vector<Anchor> getOrderedAnchorsForDescendantsOf(Annotation parent)
     throws TransformationException {
     log("getAnchorsForDescendantsOf(", parent, ")");
+    final Schema schema = parent.getGraph().getSchema();
     
     // we're only interested in certain child layers
     List<Layer> childLayers = parent.getLayer().getChildren().values().stream()
@@ -424,7 +425,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
     // while there are still child annotations
     while(childAnnotations.size() > 0) {
       Annotation next = null;
-      // find while layer the next annotation comes from 
+      // find which layer the next annotation comes from 
       for (Queue<Annotation> layer : childAnnotations) {
         Annotation candidate = layer.peek();
         if (next == null) {
@@ -489,6 +490,21 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
           break;
         }
       } // next layer
+      
+      // ignore utterance tags - i.e. annotations simultaneous with an utterance start and end
+      // e.g. utterance HTK tags that have become unlinked
+      if (!next.getLayerId().equals(schema.getUtteranceLayerId())) {
+        final Annotation finalNext = next;
+        Optional<Annotation> simultaneousUtterance 
+          = next.getStart().startOf(schema.getUtteranceLayerId()).stream()
+          .filter(utt -> utt.getEnd() != null)
+          .filter(utt -> utt.getEnd().getOffset().equals(finalNext.getEnd().getOffset()))
+          .findAny();
+        if (simultaneousUtterance.isPresent()) {
+          log(" next ", next, " simultneousUtterance ", simultaneousUtterance.get());
+          continue;
+        }
+      } // not an utterance
       
       // is the next annotation's start anchor after the one we're waiting for?
       if (waitingFor != null && next.getStart().getOffset() != null
