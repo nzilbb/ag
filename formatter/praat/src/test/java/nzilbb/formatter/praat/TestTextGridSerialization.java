@@ -60,6 +60,7 @@ public class TestTextGridSerialization {
          new Layer("word", "Words", 2, true, false, false, "turn", true),
          new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
          new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+      
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance.TextGrid")) };
       
@@ -563,6 +564,11 @@ public class TestTextGridSerialization {
          new Layer("phone", "Phones", 2, true, true, true, "word", true),
          new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
          new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+
+      // word layer can have a transcriber module as manager
+      // make sure that doesn't interfere with tier/layer mapping
+      schema.getLayer("word").put("layer_manager_id", "nzilbb.transcriber.deepspeech");
+      
       // access file
       NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance_word.TextGrid")) };
       
@@ -577,6 +583,10 @@ public class TestTextGridSerialization {
       // load the stream
       ParameterSet defaultParamaters = deserializer.load(streams, schema);
       //for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+      assertEquals("word tier is mapped by default",
+                   "word", ((Layer)defaultParamaters.get("tier2").getValue()).getId());
+      assertEquals("other word tier is mapped by default",
+                   "word", ((Layer)defaultParamaters.get("tier2").getValue()).getId());
       assertEquals(6, defaultParamaters.size());
 
       // configure the deserialization

@@ -677,11 +677,15 @@ public class TextGridSerialization
          }
          p.setPossibleValues(vPossiblLayers);
          if (p.getValue() != null) {
-            String layerManager = (String)((Layer)p.getValue()).get("layer_manager_id");
-            if (layerManager != null && layerManager.length() > 0) {
-               // never suggest a generated layer by default TODO find a formal way to avoid this hack
-               p.setValue(null);
-            }
+           Layer defaultLayer = (Layer)p.getValue();
+           String layerManager = (String)defaultLayer.get("layer_manager_id");
+           // never suggest a generated layer by default TODO find a formal way to avoid this hack
+           if (layerManager != null && layerManager.length() > 0 
+               // except the word layer, which might have a transcriber module as manager
+               && !schema.getWordLayerId().equals(defaultLayer.getId())) { 
+             
+             p.setValue(null);
+           }
          }
          mappings.addParameter(p);
       } // next tier
