@@ -35,10 +35,7 @@ import javax.sound.sampled.*;
  * optional resampling.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public class FragmentExtractor
-  implements MediaConverter
-{
+public class FragmentExtractor implements MediaConverter {
   // Attributes:   
   
   /**
@@ -100,8 +97,7 @@ public class FragmentExtractor
   /**
    * Default constructor.
    */
-  public FragmentExtractor()
-  {
+  public FragmentExtractor() {
   } // end of constructor
 
   // MediaConverter methods
@@ -115,41 +111,33 @@ public class FragmentExtractor
    * @return A list of configuration parameters must be set before the converter can be used.
    * @throws MediaException If an error occurs.
    */
-  public ParameterSet configure(ParameterSet configuration) throws MediaException
-  {
+  public ParameterSet configure(ParameterSet configuration) throws MediaException {
     Parameter sampleRate = configuration.get("sampleRate");
-    if (sampleRate == null)
-    {
+    if (sampleRate == null) {
       sampleRate = new Parameter(
         "sampleRate", Integer.class, "Sample rate", "Sample rate in Hz", false);
       configuration.addParameter(sampleRate);
     }
-    if (getSampleRate() != null)
-    {
+    if (getSampleRate() != null) {
       sampleRate.setValue(getSampleRate());
     }
     
     Parameter start = configuration.get("start");
-    if (start == null)
-    {
+    if (start == null) {
       start = new Parameter(
         "start", Double.class, "Start", "Start time in seconds", true);
       configuration.addParameter(start);
     }
-    if (getStart() != null)
-    {
+    if (getStart() != null) {
       start.setValue(getStart());
     }
     
     Parameter end = configuration.get("end");
-    if (end == null)
-    {
-      end = new Parameter(
-        "end", Double.class, "End", "End time in seconds", true);
+    if (end == null) {
+      end = new Parameter("end", Double.class, "End", "End time in seconds", true);
       configuration.addParameter(end);
     }
-    if (getEnd() != null)
-    {
+    if (getEnd() != null) {
       end.setValue(getEnd());
     }
 
@@ -162,11 +150,12 @@ public class FragmentExtractor
    * Determines whether this converter supports conversion between the given types.
    * @param sourceType The MIME type of the source media.
    * @param destinationType The MIME type of the destination format.
-   * @return true if the converter can convert from the sourceType to the destinationType, false otherwise.
+   * @return true if the converter can convert from the sourceType to the destinationType,
+   * false otherwise. 
    * @throws MediaException If an error occurs.
    */
-  public boolean conversionSupported(String sourceType, String destinationType) throws MediaException
-  {
+  public boolean conversionSupported(String sourceType, String destinationType)
+    throws MediaException {
     return sourceType.startsWith("audio/wav") && destinationType.startsWith("audio/wav");
   }
 
@@ -179,16 +168,16 @@ public class FragmentExtractor
    * @return A thread that is processing the media.
    * @throws MediaException If an error occurs.
    */
-  public MediaThread start(String sourceType, File source, String destinationType, File destination) throws MediaException
-  {
+  public MediaThread start(
+    String sourceType, File source, String destinationType, File destination)
+    throws MediaException {
+    
     final File finalDestination = destination;
 
-    try
-    {
+    try {
       AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(source);
       AudioFormat format = audioInputStream.getFormat();
-      if (getSampleRate() != null)
-      {
+      if (getSampleRate() != null) {
          format = new AudioFormat(getSampleRate(), 16, format.getChannels(), true, true);
       }
       audioInputStream = AudioSystem.getAudioInputStream(format, audioInputStream);
@@ -196,19 +185,15 @@ public class FragmentExtractor
         = new TruncatingAudioInputStream(audioInputStream, getStart(), getEnd());
       
       MediaThread thread = new MediaThread(new Runnable() {
-          public void run()
-          {
-            try
-            {
+          public void run() {
+            try {
               ((MediaThread)Thread.currentThread()).setPercentComplete(1);
               
               // run the resampling
               AudioSystem.write(stream, AudioFileFormat.Type.WAVE, finalDestination);
               
               ((MediaThread)Thread.currentThread()).setPercentComplete(100);
-            }
-            catch (Throwable t)
-            {
+            } catch (Throwable t) {
               ((MediaThread)Thread.currentThread()).setLastError(t);
               finalDestination.delete(); 
             }
@@ -216,16 +201,11 @@ public class FragmentExtractor
         });
       thread.start();
       return thread;
-    }
-    catch(Exception e)
-    {
+    } catch(Exception e) {
       throw new MediaException(e);
-    }
-    catch(Error er)
-    {
+    } catch(Error er) {
       throw new MediaException(er);
-    }
-      
+    }    
   }
    
 } // end of class FragmentExtractor
