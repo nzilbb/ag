@@ -33,9 +33,8 @@ import javax.sound.sampled.*;
  * between the given start time and end time.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class TruncatingAudioInputStream
-   extends AudioInputStream
-{
+public class TruncatingAudioInputStream extends AudioInputStream {
+  
   // Attributes:
   
   /**
@@ -71,8 +70,7 @@ public class TruncatingAudioInputStream
    * @param dNewStartSeconds Start time in seconds
    */
   public TruncatingAudioInputStream setStartSeconds(double dNewStartSeconds) 
-    throws IOException
-  { 
+    throws IOException { 
     dStartSeconds = dNewStartSeconds; 
     
     // calculate start byte
@@ -81,7 +79,7 @@ public class TruncatingAudioInputStream
     lStartByte = (long)(iBytesPerSecond * dStartSeconds);
     
     isInputStream.skip(lStartByte);
-
+    
     return this;
   }
   
@@ -102,8 +100,7 @@ public class TruncatingAudioInputStream
    * EndSeconds mutator
    * @param dNewEndSeconds End time in seconds. Can be 0 to indicate the end of the stream.
    */
-  public TruncatingAudioInputStream setEndSeconds(double dNewEndSeconds) 
-  { 
+  public TruncatingAudioInputStream setEndSeconds(double dNewEndSeconds) { 
     dEndSeconds = dNewEndSeconds; 
     
     // calculate end byte
@@ -112,7 +109,7 @@ public class TruncatingAudioInputStream
     lEndByte = (long)(iBytesPerSecond * dEndSeconds);
     
     lLengthBytes = lEndByte - lStartByte;
-
+    
     return this;
   }
   
@@ -125,21 +122,16 @@ public class TruncatingAudioInputStream
    * Constructor
    */
   public TruncatingAudioInputStream(AudioInputStream audioInputStream, double dStart, double dEnd)
-    throws IOException
-  {
-    super(
-	    new ByteArrayInputStream(new byte[0]), 
-	    audioInputStream.getFormat(), 
-	    AudioSystem.NOT_SPECIFIED);
+    throws IOException {
+    super(new ByteArrayInputStream(
+            new byte[0]), audioInputStream.getFormat(), AudioSystem.NOT_SPECIFIED);
     
     setInputStream(audioInputStream);
     setStartSeconds(dStart);
     setEndSeconds(dEnd);
   } // end of constructor
   
-  public int read()
-    throws	IOException
-  {
+  public int read() throws IOException {
     // have we already finished?
     if (lLengthBytes <= 0 && getEndSeconds() > 0) return -1;
     int iByteRead = getInputStream().read();
@@ -150,9 +142,7 @@ public class TruncatingAudioInputStream
     return iByteRead;
   }
 
-  public int read(byte[] abData, int nOffset, int nLength)
-    throws	IOException
-  {
+  public int read(byte[] abData, int nOffset, int nLength) throws IOException {
     // have we already finished?
     if (lLengthBytes <= 0 && getEndSeconds() > 0) return -1;
     
@@ -174,51 +164,37 @@ public class TruncatingAudioInputStream
    * Obtains the length of the audio data contained in the file, expressed in sample frames.
    * @return the number of sample frames of audio data in the file
    */
-  public long getFrameLength()
-  {
+  public long getFrameLength() {
     // calculate size in frames, based on the length in bytes
     // and the frame size
-    if (getEndSeconds() > 0)
-    {
-	    return (lEndByte - lStartByte) / getFormat().getFrameSize();
+    if (getEndSeconds() > 0) {
+      return (lEndByte - lStartByte) / getFormat().getFrameSize();
+    } else {
+      return getInputStream().getFrameLength() - (lStartByte / getFormat().getFrameSize());
     }
-    else
-    {
-	    return getInputStream().getFrameLength() - (lStartByte / getFormat().getFrameSize());
-	 }
   }
   
-  public long skip(long lLength)
-    throws	IOException
-  {
+  public long skip(long lLength) throws IOException {
     return getInputStream().skip(lLength);
   }
   
-  public int available()
-    throws	IOException
-  {
+  public int available() throws IOException {
     return getInputStream().available();
   }
   
-  public void close()
-    throws	IOException
-  {
+  public void close() throws IOException {
     getInputStream().close();
   }
   
-  public void mark(int nReadLimit)
-  {
+  public void mark(int nReadLimit) {
     getInputStream().mark(nReadLimit);
   }
   
-  public void reset()
-    throws	IOException
-  {
+  public void reset() throws IOException {
     getInputStream().reset();
   }
   
-  public boolean markSupported()
-  {
+  public boolean markSupported() {
     return getInputStream().markSupported();
   }
 
