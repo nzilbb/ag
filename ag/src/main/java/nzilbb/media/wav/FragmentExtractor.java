@@ -181,6 +181,21 @@ public class FragmentExtractor implements MediaConverter {
          format = new AudioFormat(getSampleRate(), 16, format.getChannels(), true, true);
       }
       audioInputStream = AudioSystem.getAudioInputStream(format, audioInputStream);
+
+      // ensure that the end time is not past the end of this file
+      if (getEnd() != null || getStart() != null) {
+        long frames = audioInputStream.getFrameLength();
+        if (frames > 0) {
+          double durationInSeconds = ((double)frames) / format.getFrameRate();
+          if (getStart() != null && getStart() > durationInSeconds) {
+            setStart(durationInSeconds);
+          }
+          if (getEnd() != null && getEnd() > durationInSeconds) {
+            setEnd(durationInSeconds);
+          }
+        }
+      }
+      
       final AudioInputStream stream
         = new TruncatingAudioInputStream(audioInputStream, getStart(), getEnd());
       
