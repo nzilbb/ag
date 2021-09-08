@@ -439,13 +439,23 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
             } else if (candidate.getStart().getOffset().equals(next.getStart().getOffset())) {
               Double nextOffsetMax = next.getEnd().getOffsetMax();
               Double candidateOffsetMax = candidate.getEnd().getOffsetMax();
+              log("same starts ", next, " and ", candidate, " nextOffsetMax: ", nextOffsetMax, " candidateOffsetMax: ", candidateOffsetMax);
               // starts are the same, so longest first
               if (nextOffsetMax == null) {
                 // no end offset counts as 'shorter'
                 next = candidate;
-              } else if (candidateOffsetMax != null
-                         && candidateOffsetMax > nextOffsetMax) {
-                next = candidate;
+              } else if (candidateOffsetMax != null) {
+                if (candidateOffsetMax > nextOffsetMax) {
+                  next = candidate;
+                } else if (candidateOffsetMax.equals(nextOffsetMax) // maxes are the same
+                           // but the candidate has and end offset (e.g. utterance)
+                           && candidate.getEnd().getOffset() != null
+                           // and the current 'next' doesn't (e.g. first word of utterance)
+                           && next.getEnd().getOffset() == null) {
+                  // so if it's between an utterance and a word that's the beginning of a chain
+                  // to the end of the utterance, then the utterance is first
+                  next = candidate;
+                }
               } // else candidateOffsetMax() == null so it's 'shorter' than next
             } // else candidate.start > next.start, so no change in next
           } else { // at least one of the start offsets isn't set
@@ -498,6 +508,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
         Optional<Annotation> simultaneousUtterance 
           = next.getStart().startOf(schema.getUtteranceLayerId()).stream()
           .filter(utt -> utt.getEnd() != null)
+          .filter(utt -> utt.getEnd().getOffset() != null)
           .filter(utt -> utt.getEnd().getOffset().equals(finalNext.getEnd().getOffset()))
           .findAny();
         if (simultaneousUtterance.isPresent()) {
@@ -519,7 +530,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
       if (next.getStart() != parentStart) { // (but not the parent start, which is always the 1st)
         orderedAnchors.remove(next.getStart()); // (remove it first - last add counts)
         orderedAnchors.add(next.getStart());
-        log(" added start ", next.getStart());
+        log(" added start ", next.getStart(), " "+orderedAnchors);
         // add all descendants of this child
         orderedAnchors.addAll(
           getOrderedAnchorsForDescendantsOf(next).stream()
@@ -846,7 +857,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
   /** Command line interface entrypoint: reads JSON-encoded transcripts from stdin,
    * generates default anchor offsets, and writes them to stdout. */
   public static void main(String argv[]) {
-    Validator cli = new Validator();
+    DefaultOffsetGenerator cli = new DefaultOffsetGenerator();
     if (cli.processArguments(argv)) {
       cli.start();
     }
