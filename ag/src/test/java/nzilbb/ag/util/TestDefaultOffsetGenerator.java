@@ -568,6 +568,96 @@ public class TestDefaultOffsetGenerator {
     }
   }
 
+  /** Interpolation before normalization (i.e. with words linked to utterances) 
+   * and with a blank utterance. */
+  @Test public void blankUtteranceBeforeNormalization() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("utterance", "Utterance")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true)));
+    
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+    // blank utterance
+    g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+    // jumps starts with utterance
+    g.addAnchor(new Anchor("a14", null, Constants.CONFIDENCE_AUTOMATIC)); // over
+    g.addAnchor(new Anchor("a24", null, Constants.CONFIDENCE_AUTOMATIC)); // a
+    g.addAnchor(new Anchor("a34", null, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+    g.addAnchor(new Anchor("a44", null)); // dog
+    // end of dog is also end of utterance
+
+    g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(new Annotation(
+                      "participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+    g.addAnnotation(new Annotation(
+                      "turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+
+    g.addAnnotation( // blank utterance
+      new Annotation(
+        "utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+    g.addAnnotation(
+      new Annotation(
+        "utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+      
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "utteranceChange",  "a14", "turn1"));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn1"));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn1"));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
+    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "turnEnd", "turn1"));
+
+    g.trackChanges();
+    
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
+    generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
+    //generator.setDebug(true);
+    try {
+      generator.transform(g);
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
+
+      // test the values are what we expected
+
+      // test the changes are recorded
+      Set<String> changeStrings = changes.stream()
+        .map(Change::toString).collect(Collectors.toSet());
+      System.out.println(""+changeStrings);
+      assertEquals(Double.valueOf(1.4), g.getAnchor("a14").getOffset());
+      assertEquals(Double.valueOf(2.4), g.getAnchor("a24").getOffset());
+      assertEquals(Double.valueOf(3.4), g.getAnchor("a34").getOffset());
+      assertEquals(Double.valueOf(4.4), g.getAnchor("a44").getOffset());
+
+      assertTrue(changeStrings.contains("Update a14: offset = 1.4 (was null)"));
+      assertTrue(changeStrings.contains("Update a24: offset = 2.4 (was null)"));
+      assertTrue(changeStrings.contains("Update a34: offset = 3.4 (was null)"));
+      assertTrue(changeStrings.contains("Update a44: offset = 4.4 (was null)"));
+      assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
+
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
   /** Dangling utterance tags don't interfere with partitioning. 
    * This test ensures that utterance meta-data (word count, rate, htk timestamp, etc.)
    * doesn't interfere with word interpolatation even if the meta tags are imperfectly linked,
@@ -660,7 +750,7 @@ public class TestDefaultOffsetGenerator {
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
     generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
     generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
-    generator.setDebug(true);
+    //generator.setDebug(true);
     try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
@@ -1541,7 +1631,7 @@ public class TestDefaultOffsetGenerator {
   }
   
   /** Ensure aligned chained sub-word annotations (e.g. grammatical words within orthographic
-   * words) get re-aligned after forces/manual alignment. */
+   * words) get re-aligned after forced/manual alignment. */
   @Test public void chainedSubWordAnnotationsAfterRealignment() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -1660,6 +1750,151 @@ public class TestDefaultOffsetGenerator {
       assertEquals("Grammatical word offset set - wanna 2",
                    // yay for rounding errors
                    Double.valueOf(2.1999999999999997), g.getAnchor("a16").getOffset());
+
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
+  /** Ensure multiple aligned chained sub-word annotations (e.g. grammatical words within
+   * orthographic words) don't interfere with each other. */
+  @Test public void multipleOverlaidSubWordLayers() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+    
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("gram", "Grammatical Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true)
+                  .setParentId("word").setParentIncludes(true),
+                  new Layer("phone", "Aligned phones")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("word").setParentIncludes(true)));
+
+    // john smith
+    g.addAnchor(new Anchor("turn1Start", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+    // I'm -> I + am - was 0.0-1.0, but now 1.9-2.0 - middle anchor moves forward
+    g.addAnchor(new Anchor("a0", 1.9, Constants.CONFIDENCE_AUTOMATIC)); // I /ai/
+    g.addAnchor(new Anchor("a192", 1.92, Constants.CONFIDENCE_AUTOMATIC)); // /m/
+    g.addAnchor(new Anchor("a05", 0.5, Constants.CONFIDENCE_DEFAULT)); // 'm
+    // wanna -> want + to or want a, was 2.0-3.0, but now 2.0-2.3 - middle anchors move back
+    g.addAnchor(new Anchor("a1", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // wanna /w/
+    g.addAnchor(new Anchor("a21", 2.1, Constants.CONFIDENCE_AUTOMATIC)); // /a/
+    g.addAnchor(new Anchor("a22", 2.2, Constants.CONFIDENCE_AUTOMATIC)); // /n/
+    g.addAnchor(new Anchor("a225", 2.25, Constants.CONFIDENCE_AUTOMATIC)); // /@/
+    g.addAnchor(new Anchor("a13", 2.33, Constants.CONFIDENCE_DEFAULT)); // to
+    g.addAnchor(new Anchor("a16", 2.66, Constants.CONFIDENCE_DEFAULT)); // a
+    g.addAnchor(new Anchor("a2", 2.3, Constants.CONFIDENCE_AUTOMATIC)); // jolly /j/
+    g.addAnchor(new Anchor("a24", 2.4, Constants.CONFIDENCE_AUTOMATIC)); // /o/
+    g.addAnchor(new Anchor("a25", 2.5, Constants.CONFIDENCE_AUTOMATIC)); // /l/
+    g.addAnchor(new Anchor("a26", 2.6, Constants.CONFIDENCE_AUTOMATIC)); // /i/
+    g.addAnchor(new Anchor("a3", 3.0, Constants.CONFIDENCE_AUTOMATIC)); // well /w/
+    g.addAnchor(new Anchor("a32", 3.2, Constants.CONFIDENCE_AUTOMATIC)); // /e/
+    g.addAnchor(new Anchor("a36", 3.6, Constants.CONFIDENCE_AUTOMATIC)); // /l/
+    g.addAnchor(new Anchor("a4", 4.0, Constants.CONFIDENCE_AUTOMATIC)); // end of well
+    g.addAnchor(new Anchor("turn1End", 9.0, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    // participants
+    g.addAnnotation(
+      new Annotation("participant1", "john smith", "who", "turn1Start", "turn1End", "my graph"));
+      
+    // turns
+    g.addAnnotation(
+      new Annotation("turn1", "john smith", "turn", "turn1Start", "turn1End", "participant1"));
+      
+    // words
+    // "I'm" splits into "I am"
+    g.addAnnotation(new Annotation("I'm",   "I'm",   "word", "a0", "a1", "turn1"));
+    // "wanna" splits two possible ways "want to" and "want a"
+    g.addAnnotation(new Annotation("wanna", "wanna", "word", "a1", "a2", "turn1"));
+    g.addAnnotation(new Annotation("jolly", "jolly", "word", "a2", "a3", "turn1"));
+    g.addAnnotation(new Annotation("well",  "well",   "word", "a3", "a4", "turn1"));
+
+    // phones
+    g.addAnnotation(new Annotation("ai",   "ai",   "phone", "a0", "a192", "I'm"));
+    g.addAnnotation(new Annotation("m",   "m",   "phone", "a192", "a1", "I'm"));
+    g.addAnnotation(new Annotation("w",   "w",   "phone", "a1", "a21", "wanna"));
+    g.addAnnotation(new Annotation("a",   "a",   "phone", "a21", "a22", "wanna"));
+    g.addAnnotation(new Annotation("n",   "n",   "phone", "a22", "a225", "wanna"));
+    g.addAnnotation(new Annotation("@",   "@",   "phone", "a225", "a2", "wanna"));
+    g.addAnnotation(new Annotation("j",   "j",   "phone", "a2", "a24", "jolly"));
+    g.addAnnotation(new Annotation("o",   "o",   "phone", "a24", "a25", "jolly"));
+    g.addAnnotation(new Annotation("l",   "l",   "phone", "a25", "a26", "jolly"));
+    g.addAnnotation(new Annotation("i",   "i",   "phone", "a26", "a3", "jolly"));
+    g.addAnnotation(new Annotation("ww",   "w",   "phone", "a3", "a32", "well"));
+    g.addAnnotation(new Annotation("e",   "e",   "phone", "a32", "a36", "well"));
+    g.addAnnotation(new Annotation("ll",   "l",   "phone", "a36", "a4", "well"));
+
+    // grammatical words
+    g.addAnnotation(new Annotation("gram_I",   "I",   "gram", "a0", "a05", "I'm"));
+    g.addAnnotation(new Annotation("gram_'m",   "am",   "gram", "a05", "a1", "I'm"));
+
+    // analysis 1 "want to"
+    g.addAnnotation(new Annotation("gram_want1", "want", "gram", "a1", "a13", "wanna"));
+    g.addAnnotation(new Annotation("gram_to1", "to", "gram", "a13", "a2", "wanna"));
+    
+    // analysis 2 "want a"
+    g.addAnnotation(new Annotation("gram_want2", "want", "gram", "a1", "a16", "wanna"));
+    g.addAnnotation(new Annotation("gram_a2", "a", "gram", "a16", "a2", "wanna"));
+    
+    g.addAnnotation(new Annotation("gram_jolly", "jolly", "gram", "a2", "a3", "jolly"));
+    g.addAnnotation(new Annotation("gram_well",  "well",   "gram", "a3", "a4", "well"));
+
+    assertEquals("no initial changes to graph: " + g.getChanges(), 0, g.getChanges().size());
+
+    g.trackChanges();
+
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    // generator.setDebug(true);
+    try {
+      generator.transform(g);
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
+
+      // orthographic words are unchanged
+      assertEquals("Word anchors unchanged", Double.valueOf(1.9), g.getAnchor("a0").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(2.0), g.getAnchor("a1").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(2.3), g.getAnchor("a2").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(3.0), g.getAnchor("a3").getOffset());
+      assertEquals("Word anchors unchanged", Double.valueOf(4.0), g.getAnchor("a4").getOffset());
+
+      // phone anchors unchanged
+      assertEquals("Phone anchors unchanged", Double.valueOf(1.92), g.getAnchor("a192").getOffset());
+      assertEquals("Phone anchors unchanged", Double.valueOf(2.1), g.getAnchor("a21").getOffset());
+      assertEquals("Phone anchors unchanged", Double.valueOf(2.2), g.getAnchor("a22").getOffset());
+      assertEquals("Phone anchors unchanged", Double.valueOf(2.25), g.getAnchor("a225").getOffset());
+      assertEquals("Phone anchors unchanged", Double.valueOf(2.4), g.getAnchor("a24").getOffset());
+      assertEquals("Phone anchors unchanged", Double.valueOf(2.5), g.getAnchor("a25").getOffset());
+      assertEquals("Phone anchors unchanged", Double.valueOf(2.6), g.getAnchor("a26").getOffset());
+      assertEquals("Phone anchors unchanged", Double.valueOf(3.2), g.getAnchor("a32").getOffset());
+      assertEquals("Phone anchors unchanged", Double.valueOf(3.6), g.getAnchor("a36").getOffset());
+
+      // grammatical words are anchored
+
+      // I + 'm anchors at the mid point
+      assertEquals("Grammatical word offset set - I'm",
+                   Double.valueOf(1.92), g.getAnchor("a05").getOffset());
+
+      // wann + a - two analyses, anchor points are spread evenly across the word
+      assertEquals("Grammatical word offset set - wanna 1",
+                   Double.valueOf(2.25), g.getAnchor("a13").getOffset());
+      assertEquals("Grammatical word offset set - wanna 2",
+                   // yay for rounding errors
+                   Double.valueOf(2.275), g.getAnchor("a16").getOffset());
 
     } catch(TransformationException exception) {
       fail(exception.toString());
