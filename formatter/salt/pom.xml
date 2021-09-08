@@ -24,7 +24,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.0.1,)</version>
+      <version>[1.0.5,)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -43,7 +43,10 @@
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
-            <manifest addDefaultImplementationEntries="true" />
+            <manifest addDefaultImplementationEntries="true">
+              <addClasspath>true</addClasspath>
+              <mainClass>${formatter.class}</mainClass>
+            </manifest>
             <manifestEntries>
               <nzilbb-ag-serialize-GraphSerializer>${formatter.class}</nzilbb-ag-serialize-GraphSerializer>
               <nzilbb-ag-serialize-GraphDeserializer>${formatter.class}</nzilbb-ag-serialize-GraphDeserializer>
