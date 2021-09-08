@@ -21,6 +21,7 @@
 //
 package nzilbb.ag.util;
 
+import java.util.Arrays;
 import java.util.Queue;
 import java.util.Optional;
 import java.util.LinkedHashSet;
@@ -28,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Vector;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.cli.Transform;
@@ -209,7 +211,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
    * <p>Anchors with null offset, with no "confidence" attribute, or with the
    * "confidence" attribute set to equal or below {@link #defaultOffsetThreshold}, may
    * have their offset set to a default, computed value.  
-   * <p>Strings of candidate anchors are have their offsets set by linear interpolation
+   * <p>Strings of candidate anchors have their offsets set by linear interpolation
    * between bounding anchors. 
    * <p>Strings are determined by:
    * <ul>
@@ -239,6 +241,143 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
     if (debug) setLog(new Vector<String>());
     setErrors(new Vector<String>());
 
+    Predicate<Anchor> boundingAnchor
+      = anchor -> (anchor.getOffset() != null && getConfidence(anchor) > defaultOffsetThreshold)
+      // @offsetGenerated is used to avoid setting the offset over and over in different chains
+      || anchor.containsKey("@offsetGenerated");
+
+    List<String> preferredChainLayers = null;
+    if (graph.getSchema().getWordLayer() != null) {
+      // prioritize chains through words, so words are generally evenly spread
+      preferredChainLayers = Arrays.asList(graph.getSchema().getWordLayerId());
+    }
+
+    if (graph.getSchema().getUtteranceLayer() != null
+        && graph.getSchema().getWordLayer() != null) {
+      
+      // first spread words evenly through turns
+      for (Annotation utterance : graph.list(graph.getSchema().getUtteranceLayerId())) {
+        if (utterance.getStart() == null
+            || utterance.getStart().getOffset() == null
+            || utterance.getEnd() == null
+            || utterance.getEnd().getOffset() == null) continue;
+        log("utterance ", utterance);
+        
+        // gather up anchors
+        LinkedHashSet<Anchor> sequence = new LinkedHashSet<Anchor>();
+        sequence.add(utterance.getStart());
+        for (Annotation word : utterance.list(graph.getSchema().getWordLayerId())) {
+          log("word ", word);
+          // add the word's start anchor
+          sequence.add(word.getStart());
+          // find the anchor chain that moves forward from here, until the end of the utterance
+          // this will catch any words with unset offsets (not returned by utterance.list()
+          // and also words with intervening noise/comment chains
+          AnchorChain wordChain = AnchorChain.ChainForwardUntil(
+            word.getStart(), preferredChainLayers, anchor ->
+            anchor.getOffset() != null && anchor.getOffset() >= utterance.getEnd().getOffset());
+          // if the last anchor in the chain is past the end
+          if (wordChain.lastElement().getOffset() != null
+              && wordChain.lastElement().getOffset() > utterance.getEnd().getOffset()) {
+            // remove it
+            wordChain.remove(wordChain.lastElement());
+          }
+          sequence.addAll(wordChain);
+        } // next word
+        sequence.add(utterance.getEnd());
+        log("utterance sequence ", sequence.toString());
+
+        // interpolate them
+        iterpolateAnchors(sequence.iterator());
+
+        // tag the anchors, so that the become bounds for future chaining
+        // e.g. word's are evenly spread through utterances,
+        // and then phones are evenly spread through words without changing word bounds
+        sequence.stream().forEach(a->a.put("@offsetGenerated", Boolean.TRUE));
+        
+      } // next utterance
+    } // utterance and word layers are defined
+    
+    // iterate through all anchors, finding chains that require offsets set as we go
+    for (Anchor anchor : graph.getAnchors().values()) {
+      log("anchor ", anchor);
+      // is this anchor part of a series of anchors that need their offsets to be generated?
+      if (!boundingAnchor.test(anchor)) { // needs the offset
+        // find the whole chain this anchor is part of
+        AnchorChain chainBefore =
+          AnchorChain.ChainBackwardUntil(anchor, preferredChainLayers, boundingAnchor);
+        log("ChainBackwardUntil ", chainBefore.toString());
+        AnchorChain chainAfter =
+          AnchorChain.ChainForwardUntil(anchor, preferredChainLayers, boundingAnchor);
+        log("ChainForwardUntil ", chainAfter.toString());
+        
+        AnchorChain chain = new AnchorChain();
+        chain.addAll(chainBefore);
+        chain.add(anchor);
+        chain.addAll(chainAfter);
+        log("chain ", chain.toString());
+
+        // it's possible for child annotations to have no offsets but the parent to have them
+        // so if the first/last anchor is the from a bounding child, add the parent anchor
+        if (!boundingAnchor.test(chain.firstElement())) {
+          log("unbound chain start");
+          Optional<Annotation> boundingParent
+            = chain.firstElement().getStartingAnnotations().stream()
+            .filter(ann -> ann.getParent() != null)
+            .filter(ann -> ann.getParent() != graph)
+            .filter(ann -> ann.getParent().first(ann.getLayerId()) == ann)
+            .map(ann -> ann.getParent())
+            .findAny();
+          if (boundingParent.isPresent()) {
+            // prepend the chain with the parent's start
+            chain.insertElementAt(boundingParent.get().getStart(), 0);
+            log("start bound now ", boundingParent.get().getStart(), " - ", boundingParent.get());
+          }
+        } // unset first offset
+        if (!boundingAnchor.test(chain.lastElement())) {
+          log("unbound chain end");
+          Optional<Annotation> boundingParent
+            = chain.lastElement().getEndingAnnotations().stream()
+            .filter(ann -> ann.getParent() != null)
+            .filter(ann -> ann.getParent() != graph)
+            .filter(ann -> ann.getParent().last(ann.getLayerId()) == ann)
+            .map(ann -> ann.getParent())
+            .findAny();
+          if (boundingParent.isPresent()) {
+            // append the chain with the parent's end
+            chain.add(boundingParent.get().getEnd());
+            log("end bound now ", boundingParent.get().getEnd(), " - ", boundingParent.get());
+          }
+        } // unset first offset
+        
+        // if there's a chain with defined bounds
+        if (chain.size() > 1
+            && chain.firstElement().getOffset() != null
+            && chain.lastElement().getOffset() != null) {
+          
+          // bookend the chain with immovable sentinels
+          chain.insertElementAt(
+            new Anchor(null, chain.firstElement().getOffset(), getDefaultOffsetThreshold() + 1)
+            , 0);
+          chain.add(
+            new Anchor(null, chain.lastElement().getOffset(), getDefaultOffsetThreshold() + 1));
+          
+          // iterpolate the anchor offsets between the start and the end
+          iterpolateAnchors(chain.iterator());
+          
+          // tag the anchors, so that the become bounds for future chaining
+          // e.g. word's are evenly spread through utterances,
+          // and then phones are evenly spread through words without changing word bounds
+          chain.stream().forEach(a->a.put("@offsetGenerated", Boolean.TRUE));
+          
+        } // can interpolate
+      } // anchor that needs interpolating
+    } // next anchor
+
+    // clear the @offsetGenerated flags
+    graph.getAnchors().values().stream().forEach(a->a.remove("@offsetGenerated"));
+
+    /*
     // before going to great effort, check there are any anchors at all that might be affected
     boolean anchorsUnderThreshold = false;
     for (Anchor a : graph.getAnchors().values()) {
@@ -371,6 +510,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
       } // next layer
       // log("Layers complete");
     }
+    */
     return graph;
   }
    

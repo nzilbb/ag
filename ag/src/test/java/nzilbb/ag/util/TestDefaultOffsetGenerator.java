@@ -69,19 +69,21 @@ public class TestDefaultOffsetGenerator {
     g.addAnchor(new Anchor("a9", null)); // end of dog
     g.addAnchor(new Anchor("turnEnd", 9.0)); // turn end
 
-    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    g.addAnnotation(
+      new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
-    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+    g.addAnnotation(
+      new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
       
-    g.addAnnotation(new Annotation("the", "the", "word", "a0", "a1", "turn1", 1));
+    g.addAnnotation(new Annotation("the", "the",     "word", "a0", "a1", "turn1", 1));
     g.addAnnotation(new Annotation("quick", "quick", "word", "a1", "a2", "turn1", 2));
     g.addAnnotation(new Annotation("brown", "brown", "word", "a2", "a3", "turn1", 3));
-    g.addAnnotation(new Annotation("fox", "fox", "word", "a3", "a4", "turn1", 4));
+    g.addAnnotation(new Annotation("fox", "fox",     "word", "a3", "a4", "turn1", 4));
     g.addAnnotation(new Annotation("jumps", "jumps", "word", "a4", "a5", "turn1", 5));
-    g.addAnnotation(new Annotation("over", "over", "word", "a5", "a6", "turn1", 6));
-    g.addAnnotation(new Annotation("a", "a", "word", "a6", "a7", "turn1", 7));
-    g.addAnnotation(new Annotation("lazy", "lazy", "word", "a7", "a8", "turn1", 8));
-    g.addAnnotation(new Annotation("dog", "dog", "word", "a8", "a9", "turn1", 9));
+    g.addAnnotation(new Annotation("over", "over",   "word", "a5", "a6", "turn1", 6));
+    g.addAnnotation(new Annotation("a", "a",         "word", "a6", "a7", "turn1", 7));
+    g.addAnnotation(new Annotation("lazy", "lazy",   "word", "a7", "a8", "turn1", 8));
+    g.addAnnotation(new Annotation("dog", "dog",     "word", "a8", "a9", "turn1", 9));
 
     g.trackChanges();
 
@@ -271,9 +273,11 @@ public class TestDefaultOffsetGenerator {
     g.addAnchor(new Anchor("turnEnd", 7.0)); // turn end
     g.getAnchor("turnEnd").setConfidence(Constants.CONFIDENCE_MANUAL);
 
-    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    g.addAnnotation(
+      new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
       
-    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+    g.addAnnotation(
+      new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
       
     g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a05", "turn1"));
     g.addAnnotation(new Annotation("quick", "quick", "word", "a05", "a1", "turn1"));
@@ -283,14 +287,14 @@ public class TestDefaultOffsetGenerator {
     g.addAnnotation(new Annotation("over",  "over",  "word", "a3",  "a4", "turn1"));
     g.addAnnotation(new Annotation("a",     "a",     "word", "a4",  "a5", "turn1"));
     g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a5",  "a6", "turn1"));
-    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a6",  "a7", "turn1"));
+    g.addAnnotation(new Annotation("dog",   "dog",   "word", "a6",  "a7", "turn1"));
 
     g.trackChanges();
     
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
     generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
     generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
-    // generator.setDebug(true);
+    //generator.setDebug(true);
     try {
       generator.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
@@ -328,6 +332,7 @@ public class TestDefaultOffsetGenerator {
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
 
     } catch(TransformationException exception) {
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
       fail(exception.toString());
     }
   }
@@ -1093,7 +1098,7 @@ public class TestDefaultOffsetGenerator {
     g.addAnchor(new Anchor("b12", null)); // l
     g.addAnchor(new Anchor("b13", null)); // ue
     g.addAnchor(new Anchor("b14", null)); // end of blue & ue
-    g.addAnchor(new Anchor("turn2End", 14.5)); // turn end
+    g.addAnchor(new Anchor("turn2End", 12.5)); // turn end
 
     // topics
     // one independent
@@ -1167,7 +1172,7 @@ public class TestDefaultOffsetGenerator {
     g.trackChanges();
 
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
-    // generator.setDebug(true);
+    //generator.setDebug(true);
     try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
@@ -1195,10 +1200,10 @@ public class TestDefaultOffsetGenerator {
       // word and phone anchors evenly spread amongst each other
       assertEquals(Double.valueOf(11.5), g.getAnchor("b11").getOffset());
       assertEquals("Phones evenly spread - 1/3",
-                   Double.valueOf(12.5), g.getAnchor("b12").getOffset());
+                   Double.valueOf(11.5 + 1.0/3.0), g.getAnchor("b12").getOffset());
       assertEquals("Phones evenly spread - 2/3",
-                   Double.valueOf(13.5), g.getAnchor("b13").getOffset());
-      assertEquals(Double.valueOf(14.5), g.getAnchor("b14").getOffset());
+                   Double.valueOf(11.5 + 2.0/3.0), g.getAnchor("b13").getOffset());
+      assertEquals(Double.valueOf(12.5), g.getAnchor("b14").getOffset());
 
       // topic left unchanged (it's a top-level layer)
       assertNull(g.getAnchor("topic1Start").getOffset());
@@ -1207,6 +1212,7 @@ public class TestDefaultOffsetGenerator {
       // test the changes are recorded
       Set<String> changeStrings = changes.stream()
         .map(Change::toString).collect(Collectors.toSet());
+      System.out.println(""+changeStrings);
 
       // collapsed back to start of turn
       assertTrue(changeStrings.contains("Update a0: offset = 0.0 (was null)"));
@@ -1225,15 +1231,15 @@ public class TestDefaultOffsetGenerator {
       // collapsed back to start of turn
       assertTrue(changeStrings.contains("Update b6: offset = 6.5 (was null)"));
       // collapsed forward to end of turn
-      assertTrue(changeStrings.contains("Update b14: offset = 14.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b14: offset = 12.5 (was null)"));
       // then the rest interpolated between
       assertTrue(changeStrings.contains("Update b7: offset = 7.5 (was null)"));
       assertTrue(changeStrings.contains("Update b8: offset = 8.5 (was null)"));
       assertTrue(changeStrings.contains("Update b9: offset = 9.5 (was null)"));
       assertTrue(changeStrings.contains("Update b10: offset = 10.5 (was null)"));
       assertTrue(changeStrings.contains("Update b11: offset = 11.5 (was null)"));
-      assertTrue(changeStrings.contains("Update b12: offset = 12.5 (was null)"));
-      assertTrue(changeStrings.contains("Update b13: offset = 13.5 (was null)"));
+      assertTrue(changeStrings.contains("Update b12: offset = 11.833333333333334 (was null)"));
+      assertTrue(changeStrings.contains("Update b13: offset = 12.166666666666666 (was null)"));
 
       assertEquals("no extra changes to graph - " + changes + " vs. " +g.getChanges(), 
                    changes.size(), g.getChanges().size());
@@ -1619,11 +1625,11 @@ public class TestDefaultOffsetGenerator {
       assertEquals("Grammatical word offset set - I'm",
                    Double.valueOf(0.5), g.getAnchor("a05").getOffset());
 
-      // wann + a - two analyses, anchor points are spread evenly across the word
+      // wann + a - two analyses, interpolated independently
       assertEquals("Grammatical word offset set - wanna 1",
-                   Double.valueOf(1.0 + 1.0/3.0), g.getAnchor("a13").getOffset());
+                   Double.valueOf(1.5), g.getAnchor("a13").getOffset());
       assertEquals("Grammatical word offset set - wanna 2",
-                   Double.valueOf(1.0 + 2.0/3.0), g.getAnchor("a16").getOffset());
+                   Double.valueOf(1.5), g.getAnchor("a16").getOffset());
 
     } catch(TransformationException exception) {
       fail(exception.toString());
@@ -1744,12 +1750,11 @@ public class TestDefaultOffsetGenerator {
       assertEquals("Grammatical word offset set - I'm",
                    Double.valueOf(1.95), g.getAnchor("a05").getOffset());
 
-      // wann + a - two analyses, anchor points are spread evenly across the word
+      // wann + a - two analyses, anchors interpolated independently
       assertEquals("Grammatical word offset set - wanna 1",
-                   Double.valueOf(2.1), g.getAnchor("a13").getOffset());
+                   Double.valueOf(2.15), g.getAnchor("a13").getOffset());
       assertEquals("Grammatical word offset set - wanna 2",
-                   // yay for rounding errors
-                   Double.valueOf(2.1999999999999997), g.getAnchor("a16").getOffset());
+                   Double.valueOf(2.15), g.getAnchor("a16").getOffset());
 
     } catch(TransformationException exception) {
       fail(exception.toString());
@@ -1887,14 +1892,14 @@ public class TestDefaultOffsetGenerator {
 
       // I + 'm anchors at the mid point
       assertEquals("Grammatical word offset set - I'm",
-                   Double.valueOf(1.92), g.getAnchor("a05").getOffset());
+                   Double.valueOf(1.95), g.getAnchor("a05").getOffset());
 
-      // wann + a - two analyses, anchor points are spread evenly across the word
+      // wann + a - two analyses, anchors interpolated independently
       assertEquals("Grammatical word offset set - wanna 1",
-                   Double.valueOf(2.25), g.getAnchor("a13").getOffset());
+                   Double.valueOf(2.15), g.getAnchor("a13").getOffset());
       assertEquals("Grammatical word offset set - wanna 2",
                    // yay for rounding errors
-                   Double.valueOf(2.275), g.getAnchor("a16").getOffset());
+                   Double.valueOf(2.15), g.getAnchor("a16").getOffset());
 
     } catch(TransformationException exception) {
       fail(exception.toString());
@@ -2030,7 +2035,6 @@ public class TestDefaultOffsetGenerator {
       fail(exception.toString());
     }                      
   }
-
 
   /** Test offset generation completes in a timely manner */
   @Test public void performance() {
