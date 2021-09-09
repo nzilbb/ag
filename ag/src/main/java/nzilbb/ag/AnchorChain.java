@@ -60,6 +60,7 @@ public class AnchorChain extends Vector<Anchor> {
         for (String layerId : preferLayerIds) {
           if (currentAnchor.getStartOf().containsKey(layerId)) {
             for (Annotation startsHere : currentAnchor.getStartOf().get(layerId)) {
+              if (startsHere.getChange() == Change.Operation.Destroy) continue;
               nextAnchor = startsHere.getEnd();
               if (nextAnchor == currentAnchor) { // skip instants
                 nextAnchor = null; 
@@ -79,6 +80,7 @@ public class AnchorChain extends Vector<Anchor> {
         // try any annotations that start here
         for (String layerId : currentAnchor.getStartOf().keySet()) {
           for (Annotation startsHere : currentAnchor.getStartOf().get(layerId)) {
+            if (startsHere.getChange() == Change.Operation.Destroy) continue;
             nextAnchor = startsHere.getEnd();
             if (nextAnchor == currentAnchor) { // skip instants
               nextAnchor = null; 
@@ -129,6 +131,7 @@ public class AnchorChain extends Vector<Anchor> {
         for (String layerId : preferLayerIds) {
           if (currentAnchor.getEndOf().containsKey(layerId)) {
             for (Annotation endsHere : currentAnchor.getEndOf().get(layerId)) {
+              if (endsHere.getChange() == Change.Operation.Destroy) continue;
               nextAnchor = endsHere.getStart();
               if (nextAnchor == currentAnchor) { // skip instants
                 nextAnchor = null; 
@@ -148,6 +151,7 @@ public class AnchorChain extends Vector<Anchor> {
         // try any annotations that start here
         for (String layerId : currentAnchor.getEndOf().keySet()) {
           for (Annotation endsHere : currentAnchor.getEndOf().get(layerId)) {
+            if (endsHere.getChange() == Change.Operation.Destroy) continue;
             nextAnchor = endsHere.getStart();
             if (nextAnchor == currentAnchor) { // skip instants
               nextAnchor = null; 
