@@ -405,7 +405,7 @@ public class TestDefaultOffsetGenerator {
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
     generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
     generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
-    generator.setDebug(true);
+    //generator.setDebug(true);
     try {
       generator.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
@@ -862,6 +862,84 @@ public class TestDefaultOffsetGenerator {
       assertTrue(changeStrings.contains("Update a34: offset = 3.4 (was null)"));
       assertTrue(changeStrings.contains("Update a44: offset = 4.4 (was null)"));
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
+
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
+  /** Interpolation before normalization (i.e. with words linked to utterances) 
+   * and with two simultaneous linked utterances by different speaekers. */
+  @Test public void simultaneousSpeecgBeforeNormalization() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("utterance", "Utterance")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true)));
+    
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start, third1, half1
+    g.addAnchor(new Anchor("a2", null)); // third2
+    g.addAnchor(new Anchor("a3", null)); // half2
+    g.addAnchor(new Anchor("a4", null));  // third3
+    g.addAnchor(new Anchor("turnEnd", 6.0, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(new Annotation(
+                      "participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    g.addAnnotation(new Annotation(
+                      "participant2", "jane doe", "who", "turnStart", "turnEnd", "my graph"));
+      
+    g.addAnnotation(new Annotation(
+                      "turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+    g.addAnnotation(new Annotation(
+                      "turn2", "jane doe", "turn", "turnStart", "turnEnd", "participant2"));
+
+    g.addAnnotation( // blank utterance
+      new Annotation(
+        "utterance1", "john smith", "utterance", "turnStart", "turnEnd", "turn1"));
+    g.addAnnotation(
+      new Annotation(
+        "utterance2", "jane doe", "utterance", "turnStart", "turnEnd", "turn2"));
+      
+    g.addAnnotation(new Annotation("third1", "third1", "word", "turnStart",  "a2", "turn1"));
+    g.addAnnotation(new Annotation("third2", "third2", "word", "a2",  "a4", "turn1"));
+    g.addAnnotation(new Annotation("third3", "third3", "word", "a4",  "turnEnd", "turn1"));
+
+    g.addAnnotation(new Annotation("half1", "half1", "word", "turnStart",  "a3", "turn2"));
+    g.addAnnotation(new Annotation("half2", "half2", "word", "a3",  "turnEnd", "turn2"));
+
+    g.trackChanges();
+    
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    generator.setDebug(true);
+    try {
+      generator.transform(g);
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
+
+      // test the values are what we expected
+
+      // test the changes are recorded
+      Set<String> changeStrings = changes.stream()
+        .map(Change::toString).collect(Collectors.toSet());
+      assertEquals(Double.valueOf(2.0), g.getAnchor("a2").getOffset());
+      assertEquals(Double.valueOf(3.0), g.getAnchor("a3").getOffset());
+      assertEquals(Double.valueOf(4.0), g.getAnchor("a4").getOffset());
 
     } catch(TransformationException exception) {
       fail(exception.toString());

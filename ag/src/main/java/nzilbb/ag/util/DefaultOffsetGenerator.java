@@ -71,21 +71,22 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
    * @see #getLog()
    * @see #log(Object...)
    */
-  protected boolean debug = false;
+  protected Boolean debug = Boolean.FALSE;
   /**
    * Getter for {@link #debug}: Whether a log of messages should be kept for reporting.
    * @return Whether a log of messages should be kept for reporting.
    * @see #getLog()
    * @see #log(Object...)
    */
-  public boolean getDebug() { return debug; }
+  public Boolean getDebug() { return debug; }
   /**
    * Setter for {@link #debug}: Whether a log of messages should be kept for reporting.
    * @param newDebug Whether a log of messages should be kept for reporting.
    * @see #getLog()
    * @see #log(Object...)
    */
-  public DefaultOffsetGenerator setDebug(boolean newDebug) { debug = newDebug; return this; }
+  @Switch("Print verbose debug logging")
+  public DefaultOffsetGenerator setDebug(Boolean newDebug) { debug = newDebug; return this; }
 
   /**
    * Messages for debugging.
@@ -257,8 +258,10 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
       preferredChainLayers.add(graph.getSchema().getWordLayerId());
     }
 
+    final String turnLayerId = graph.getSchema().getTurnLayerId();
     if (graph.getSchema().getUtteranceLayer() != null
-        && graph.getSchema().getWordLayer() != null) {
+        && graph.getSchema().getWordLayer() != null
+        && turnLayerId != null) {
       
       // first spread words evenly through turns
       for (Annotation utterance : graph.list(graph.getSchema().getUtteranceLayerId())) {
@@ -269,8 +272,11 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
         if (utterance.getChange() == Change.Operation.Destroy) continue;
         log("utterance ", utterance);
         
-        // gather up anchors
+        // gather up anchors of descendants in the same turn
+        final Annotation turn = utterance.first(turnLayerId);
         LinkedHashSet<Anchor> sequence = new LinkedHashSet<Anchor>();
+        sequence.add( // prepend immovable sentinel
+          new Anchor(null, utterance.getStart().getOffset(), getDefaultOffsetThreshold() + 1));
         sequence.add(utterance.getStart());
         for (Annotation word : utterance.list(graph.getSchema().getWordLayerId())) {
           if (word.getChange() == Change.Operation.Destroy) continue;
@@ -281,7 +287,11 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
           // this will catch any words with unset offsets (not returned by utterance.list()
           // and also words with intervening noise/comment chains
           AnchorChain wordChain = AnchorChain.ChainForwardUntil(
-            word.getStart(), preferredChainLayers, anchor ->
+            word.getStart(), preferredChainLayers, 
+            annotation -> // only follow annotations...
+            !annotation.getLayer().isAncestor(turnLayerId) // ... that have no turn
+            || annotation.first(turnLayerId) == turn, // ... or are in the same turn as utterance
+            anchor -> // stop when we get beyond the bounds of the utterance
             anchor.getOffset() != null && anchor.getOffset() >= utterance.getEnd().getOffset());
           // if the last anchor in the chain is past the end
           if (wordChain.lastElement().getOffset() != null
@@ -292,7 +302,9 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
           sequence.addAll(wordChain);
         } // next word
         sequence.add(utterance.getEnd());
-        log("utterance sequence ", sequence.toString());
+        sequence.add( // append immovable sentinel
+          new Anchor(null, utterance.getEnd().getOffset(), getDefaultOffsetThreshold() + 1));
+        log("utterance sequence ", sequence.toString(), " utterance end ", utterance.getEnd());
 
         // interpolate them
         iterpolateAnchors(sequence.iterator());
@@ -312,10 +324,10 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
       if (!boundingAnchor.test(anchor)) { // needs the offset
         // find the whole chain this anchor is part of
         AnchorChain chainBefore =
-          AnchorChain.ChainBackwardUntil(anchor, preferredChainLayers, boundingAnchor);
+          AnchorChain.ChainBackwardUntil(anchor, preferredChainLayers, null, boundingAnchor);
         log("ChainBackwardUntil ", chainBefore.toString());
         AnchorChain chainAfter =
-          AnchorChain.ChainForwardUntil(anchor, preferredChainLayers, boundingAnchor);
+          AnchorChain.ChainForwardUntil(anchor, preferredChainLayers, null, boundingAnchor);
         log("ChainForwardUntil ", chainAfter.toString());
         
         AnchorChain chain = new AnchorChain();
@@ -424,7 +436,8 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
               nextSetAnchor = anchor;
               break;
             } else {
-              String message = "Could not determine bounds, starting from " + logAnchor(lastSetAnchor) 
+              String message = "Could not determine bounds, starting from "
+                + logAnchor(lastSetAnchor) 
                 + " after " + logAnchor(unsetAnchors.lastElement());
               log("ERROR: ", message);
               throw new TransformationException(this, message);
@@ -584,7 +597,13 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
   public static void main(String argv[]) {
     DefaultOffsetGenerator cli = new DefaultOffsetGenerator();
     if (cli.processArguments(argv)) {
-      cli.start();
+      try {
+        cli.start();
+      } finally {
+        if (cli.getDebug()) {
+          for (String message : cli.log) System.err.println(message); 
+        }
+      }
     }
   }
 

@@ -106,38 +106,38 @@ public class TestAnchorChain {
     g.addAnnotation(new Annotation("Spanish", "es", "language", "a7", "a9", "turn1", 9));
 
     AnchorChain chain = AnchorChain.ChainForwardUntil(
-      g.getAnchor("a5"), Arrays.asList("word"), a->a.getOffset() != null);    
+      g.getAnchor("a5"), Arrays.asList("word"), null, a->a.getOffset() != null);    
     assertEquals("forward", "a6 a7 a7.5 a8",
                  chain.stream().map(a->a.getId()).collect(Collectors.joining(" ")));
 
     chain = AnchorChain.ChainBackwardUntil(
-      g.getAnchor("a5"), Arrays.asList("word"), a->a.getOffset() != null);
+      g.getAnchor("a5"), Arrays.asList("word"), null, a->a.getOffset() != null);
     assertEquals("backward", "a1 a1.5 a2 a3 a4",
                  chain.stream().map(a->a.getId()).collect(Collectors.joining(" ")));
     
     chain = AnchorChain.ChainForwardUntil(
-      g.getAnchor("a5"), Arrays.asList("word"), null);
+      g.getAnchor("a5"), Arrays.asList("word"), null, null);
     assertEquals("forward (no condition)", "a6 a7 a7.5 a8 a9",
                  chain.stream().map(a->a.getId()).collect(Collectors.joining(" ")));
 
     chain = AnchorChain.ChainBackwardUntil(
-      g.getAnchor("a5"), Arrays.asList("word"), null);
+      g.getAnchor("a5"), Arrays.asList("word"), null, null);
     assertEquals("backward (no condition)", "a0 a1 a1.5 a2 a3 a4",
                  chain.stream().map(a->a.getId()).collect(Collectors.joining(" ")));
 
     chain = AnchorChain.ChainForwardUntil(
-      g.getAnchor("a5"), Arrays.asList("language"), null);
+      g.getAnchor("a5"), Arrays.asList("language"), null, null);
     assertEquals("forward prioritising language", "a6 a7 a9",
                  chain.stream().map(a->a.getId()).collect(Collectors.joining(" ")));
 
     // with no preferred layers, it will follow the language path because "l" < "w"
     chain = AnchorChain.ChainForwardUntil(
-      g.getAnchor("a5"), null, a->a.getOffset() != null);    
+      g.getAnchor("a5"), null, null, a->a.getOffset() != null);    
     assertEquals("forward (no preferred layers)", "a6 a7 a9",
                  chain.stream().map(a->a.getId()).collect(Collectors.joining(" ")));
 
     chain = AnchorChain.ChainBackwardUntil(
-      g.getAnchor("a5"), null, a->a.getOffset() != null);
+      g.getAnchor("a5"), null, null, a->a.getOffset() != null);
     assertEquals("backward (no preferred layers)", "a1 a1.5 a2 a3 a4",
                  chain.stream().map(a->a.getId()).collect(Collectors.joining(" ")));
     

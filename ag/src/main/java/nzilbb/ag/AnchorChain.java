@@ -40,15 +40,18 @@ public class AnchorChain extends Vector<Anchor> {
    * @param preferLayerIds Layer IDs of layers to traverse through preferentially. These
    * will be tried in order first, looking for a path. If not path is found, other layers
    * will be traversed.
-   * @param condition Stop when an anchor meets this condition 
-   * - i.e. when <code>condition.test(anchor)</code> returns true. This anchor will be
+   * @param follow Traverse annotations that meet this condition 
+   * - i.e. ignore linking annotations where <code>follow.test(annotation)</code> returns false.
+   * @param boundary Stop when an anchor meets this condition 
+   * - i.e. when <code>boundary.test(anchor)</code> returns true. This anchor will be
    * returned as part of the chain. Can be null.
    * @return A chain of anchors from the given anchor (which is excluded) until the anchor that
-   * met the given condition (which is included).
+   * met the given boundary condition (which is included).
    */
   public static AnchorChain ChainForwardUntil(
-    Anchor start, List<String> preferLayerIds, Predicate<Anchor> condition) {
-    if (condition == null) condition = a -> false; // default condition is never met
+    Anchor start, List<String> preferLayerIds, Predicate<Annotation> follow, Predicate<Anchor> boundary) {
+    if (boundary == null) boundary = a -> false; // default condition is never met
+    if (follow == null) follow = a -> true; // default condition is to always follow
     AnchorChain chain = new AnchorChain();
     
     Anchor currentAnchor = start;
@@ -61,6 +64,7 @@ public class AnchorChain extends Vector<Anchor> {
           if (currentAnchor.getStartOf().containsKey(layerId)) {
             for (Annotation startsHere : currentAnchor.getStartOf().get(layerId)) {
               if (startsHere.getChange() == Change.Operation.Destroy) continue;
+              if (!follow.test(startsHere)) continue;
               nextAnchor = startsHere.getEnd();
               if (nextAnchor == currentAnchor) { // skip instants
                 nextAnchor = null; 
@@ -81,6 +85,7 @@ public class AnchorChain extends Vector<Anchor> {
         for (String layerId : currentAnchor.getStartOf().keySet()) {
           for (Annotation startsHere : currentAnchor.getStartOf().get(layerId)) {
             if (startsHere.getChange() == Change.Operation.Destroy) continue;
+            if (!follow.test(startsHere)) continue;
             nextAnchor = startsHere.getEnd();
             if (nextAnchor == currentAnchor) { // skip instants
               nextAnchor = null; 
@@ -99,7 +104,7 @@ public class AnchorChain extends Vector<Anchor> {
         // can't go any further
         break;
       }
-    } while (!condition.test(currentAnchor));
+    } while (!boundary.test(currentAnchor));
     
     return chain;
   } // end of ChainForwardUntil()
@@ -111,15 +116,18 @@ public class AnchorChain extends Vector<Anchor> {
    * @param preferLayerIds Layer IDs of layers to traverse through preferentially. These
    * will be tried in order first, looking for a path. If not path is found, other layers
    * will be traversed.
-   * @param condition Stop when an anchor meets this condition 
-   * - i.e. when <code>condition.test(anchor)</code> returns true. This anchor will be
+   * @param follow Follow annotations that meet this condition 
+   * - i.e. ignore linking annotations where <code>follow.test(annotation)</code> returns false.
+   * @param boundary Stop when an anchor meets this condition 
+   * - i.e. when <code>boundary.test(anchor)</code> returns true. This anchor will be
    * returned as part of the chain.
    * @return A chain of anchors from the given anchor (which is excluded) until the anchor that
-   * met the given condition (which is included).
+   * met the given boundary condition (which is included).
    */
   public static AnchorChain ChainBackwardUntil(
-    Anchor start, List<String> preferLayerIds, Predicate<Anchor> condition) {
-    if (condition == null) condition = a -> false; // default condition is never met
+    Anchor start, List<String> preferLayerIds, Predicate<Annotation> follow, Predicate<Anchor> boundary) {
+    if (boundary == null) boundary = a -> false; // default condition is never met
+    if (follow == null) follow = a -> true; // default condition is to always follow
     AnchorChain chain = new AnchorChain();
     
     Anchor currentAnchor = start;
@@ -132,6 +140,7 @@ public class AnchorChain extends Vector<Anchor> {
           if (currentAnchor.getEndOf().containsKey(layerId)) {
             for (Annotation endsHere : currentAnchor.getEndOf().get(layerId)) {
               if (endsHere.getChange() == Change.Operation.Destroy) continue;
+              if (!follow.test(endsHere)) continue;
               nextAnchor = endsHere.getStart();
               if (nextAnchor == currentAnchor) { // skip instants
                 nextAnchor = null; 
@@ -152,6 +161,7 @@ public class AnchorChain extends Vector<Anchor> {
         for (String layerId : currentAnchor.getEndOf().keySet()) {
           for (Annotation endsHere : currentAnchor.getEndOf().get(layerId)) {
             if (endsHere.getChange() == Change.Operation.Destroy) continue;
+            if (!follow.test(endsHere)) continue;
             nextAnchor = endsHere.getStart();
             if (nextAnchor == currentAnchor) { // skip instants
               nextAnchor = null; 
@@ -170,7 +180,7 @@ public class AnchorChain extends Vector<Anchor> {
         // can't go any further
         break;
       }
-    } while (!condition.test(currentAnchor));
+    } while (!boundary.test(currentAnchor));
     
     return chain;
   } // end of ChainBackwardUntil()
