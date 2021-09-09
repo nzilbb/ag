@@ -246,10 +246,15 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
       // @offsetGenerated is used to avoid setting the offset over and over in different chains
       || anchor.containsKey("@offsetGenerated");
 
-    List<String> preferredChainLayers = null;
-    if (graph.getSchema().getWordLayer() != null) {
-      // prioritize chains through words, so words are generally evenly spread
-      preferredChainLayers = Arrays.asList(graph.getSchema().getWordLayerId());
+    final List<String> preferredChainLayers = new Vector<String>();
+    if (graph.getSchema().getWordLayer() != null) {      
+      // prioritize chains through aligned word child layers so phones are generally evenly spread
+      graph.getSchema().getWordLayer()
+        .getChildren().values().stream()
+        .filter(layer -> layer.getAlignment() > Constants.ALIGNMENT_NONE)
+        .forEach(layer -> preferredChainLayers.add(layer.getId()));
+      // then prioritize chains through words, so words are generally evenly spread
+      preferredChainLayers.add(graph.getSchema().getWordLayerId());
     }
 
     if (graph.getSchema().getUtteranceLayer() != null
@@ -261,12 +266,14 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
             || utterance.getStart().getOffset() == null
             || utterance.getEnd() == null
             || utterance.getEnd().getOffset() == null) continue;
+        if (utterance.getChange() == Change.Operation.Destroy) continue;
         log("utterance ", utterance);
         
         // gather up anchors
         LinkedHashSet<Anchor> sequence = new LinkedHashSet<Anchor>();
         sequence.add(utterance.getStart());
         for (Annotation word : utterance.list(graph.getSchema().getWordLayerId())) {
+          if (word.getChange() == Change.Operation.Destroy) continue;
           log("word ", word);
           // add the word's start anchor
           sequence.add(word.getStart());
