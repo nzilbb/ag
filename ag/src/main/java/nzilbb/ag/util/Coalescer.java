@@ -151,16 +151,18 @@ public class Coalescer implements GraphTransformer {
    * @param following The following annotation, which will be deleted.
    */
   public void mergeAnnotations(Annotation preceding, Annotation following) {
+    
+    Anchor originalPrecedingEnd = preceding.getEnd();
     // set anchor
     if (preceding.getEnd().getOffset() == null
         || following.getEnd().getOffset() == null
         || preceding.getEnd().getOffset() < following.getEnd().getOffset()) {
       preceding.setEnd(following.getEnd());
     }
-    Vector<Annotation> toRemove = new Vector<Annotation>();
     
     // for each child layer
     for (String childLayerId : following.getAnnotations().keySet()) {
+      
       // move everything from following to preceding
       int ordinal = 1;
       if (preceding.getAnnotations().containsKey(childLayerId)) {
@@ -175,6 +177,14 @@ public class Coalescer implements GraphTransformer {
         // and finally, we set the new parent, without appending (to skip the peer-checking step)
         child.setParent(preceding, false);
       } // next child annotation
+
+      // saturated child layers can't have gaps
+      if (preceding.getGraph().getLayer().getSaturated()) {
+        // children linked to the original preceding end need re-linking to the following start
+        for (Annotation endingPrecedingChild : originalPrecedingEnd.endOf(childLayerId)) {
+          endingPrecedingChild.setEnd(following.getStart());
+        } // next child ending here
+      } // saturated child layer
     } // next child layer
 
     following.destroy();

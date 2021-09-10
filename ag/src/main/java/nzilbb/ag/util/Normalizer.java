@@ -150,28 +150,31 @@ public class Normalizer extends Transform implements GraphTransformer {
         }
         if (schema.getWordLayerId() != null) {
           Annotation lastUtterance = null;
-          for (Annotation utterance : turn.getAnnotations(schema.getUtteranceLayerId())) {
-            if (!participant.getLabel().equals(utterance.getLabel())) {
-              utterance.setLabel(participant.getLabel());
-            }
-            // check utterances are chained together
-            if (lastUtterance != null 
-                && !utterance.getStartId().equals(lastUtterance.getEndId())) { // not chained
-              // change the last utterance end
-              Anchor newEnd = utterance.getStart();
-              // change all annotations with this turn that end there
-              // to instead end gat the start of this utterance
-              // this will include lastUtterance itself, and any words/phones it might 
-              // share anchors with
-              for (Annotation ending : lastUtterance.getEnd().getEndingAnnotations()) {
-                if (turn == ending.first(schema.getTurnLayerId())) {
-                  ending.setEnd(newEnd);
-                }
-              } // next ending annotation
-            }
-            lastUtterance = utterance;
-          } // next utterance
-        }
+          SortedSet<Annotation> utterances = turn.getAnnotations(schema.getUtteranceLayerId());
+          if (utterances != null) { // could be an incomplete graph
+            for (Annotation utterance : utterances) {
+              if (!participant.getLabel().equals(utterance.getLabel())) {
+                utterance.setLabel(participant.getLabel());
+              }
+              // check utterances are chained together
+              if (lastUtterance != null 
+                  && !utterance.getStartId().equals(lastUtterance.getEndId())) { // not chained
+                // change the last utterance end
+                Anchor newEnd = utterance.getStart();
+                // change all annotations with this turn that end there
+                // to instead end gat the start of this utterance
+                // this will include lastUtterance itself, and any words/phones it might 
+                // share anchors with
+                for (Annotation ending : lastUtterance.getEnd().getEndingAnnotations()) {
+                  if (turn == ending.first(schema.getTurnLayerId())) {
+                    ending.setEnd(newEnd);
+                  }
+                } // next ending annotation
+              }
+              lastUtterance = utterance;
+            } // next utterance
+          } // there are utterances
+        } // there is a word layer
       } // next turn
     } // next participant
    

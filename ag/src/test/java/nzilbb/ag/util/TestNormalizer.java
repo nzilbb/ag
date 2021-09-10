@@ -212,7 +212,7 @@ public class TestNormalizer {
     }
   }
 
-  /** Test that congtiguous turns are not joined when there's no minimum pause length. */
+  /** Test that contiguous turns are not joined when there's no minimum pause length. */
   @Test public void joinTurnsNoMinimumTurnPauseLength() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -400,6 +400,12 @@ public class TestNormalizer {
       assertEquals("ordinal changed", 4, g.getAnnotation("lazy").getOriginalOrdinal());
       assertEquals("ordinal changed", 9, g.getAnnotation("dog").getOrdinal());
       assertEquals("ordinal changed", 5, g.getAnnotation("dog").getOriginalOrdinal());
+
+      assertEquals("utterance1 linked to utterance2",
+                   g.getAnnotation("utterance2").getStartId(),
+                   g.getAnnotation("utterance1").getEndId());
+      assertEquals("utterance1 linked to utterance2 by utterance2.start",
+                   "utteranceStart", g.getAnnotation("utterance1").getEndId());
     } catch(TransformationException exception) {
       fail(exception.toString());
     }
@@ -492,6 +498,10 @@ public class TestNormalizer {
       assertEquals("turn not changed", "turn2", g.getAnnotation("a").getParentId());
       assertEquals("turn not changed", "turn2", g.getAnnotation("lazy").getParentId());
       assertEquals("turn not changed", "turn2", g.getAnnotation("dog").getParentId());
+      
+      assertNotEquals("utterance1 not linked to utterance2",
+                      g.getAnnotation("utterance2").getStartId(),
+                      g.getAnnotation("utterance1").getEndId());
     } catch(TransformationException exception) {
       fail(exception.toString());
     }
