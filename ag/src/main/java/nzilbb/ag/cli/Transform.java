@@ -22,6 +22,8 @@
 package nzilbb.ag.cli;
 
 import java.io.File;
+import nzilbb.ag.Annotation;
+import nzilbb.ag.Change;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
 import nzilbb.ag.GraphTransformer;
@@ -119,8 +121,14 @@ public class Transform extends CommandLineProgram {
           System.out.println(",");
         }
 
+        // track changes so that destroyed annotations are tracked
+        graph.trackChanges();
+
         // transform
         graph = transformer.transform(graph);
+
+        // ensure any annotations marked for destruction are not output
+        graph.commit();
         
         // serialize as JSON
         s.configure(s.configure(new ParameterSet(), graph.getSchema()), graph.getSchema());
