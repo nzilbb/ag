@@ -1667,7 +1667,7 @@ public class Graph extends Annotation {
       }
     } // next annotation
 
-      // anchors
+    // anchors
     Iterator<Anchor> iAnchor = getAnchors().values().iterator();
     while (iAnchor.hasNext()) {
       Anchor a = iAnchor.next();
@@ -1770,15 +1770,19 @@ public class Graph extends Annotation {
         changes.addAll(super.getChanges());
         // all anchors must be created
         for (Anchor a : getAnchors().values()) {
-          a.create();
-          changes.addAll(a.getChanges());
+          if (a.getChange() != Change.Operation.Destroy) { // don't include destroyed objects
+            a.create();
+            changes.addAll(a.getChanges());
+          }
         } // next anchor
         // all annotations must be created
         LayerTraversal<Vector<Change>> createTraversal
           = new LayerTraversal<Vector<Change>>(changes, this, true) {
               protected void pre(Annotation a) { // parents before children
-                a.create();
-                result.addAll(a.getChanges());
+                if (a.getChange() != Change.Operation.Destroy) { // don't include destroyed objects
+                  a.create();
+                  result.addAll(a.getChanges());
+                }
               }
               protected void except(Annotation a) { pre(a); }
             };
