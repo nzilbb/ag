@@ -293,13 +293,15 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
             || annotation.first(turnLayerId) == turn, // ... or are in the same turn as utterance
             anchor -> // stop when we get beyond the bounds of the utterance
             anchor.getOffset() != null && anchor.getOffset() >= utterance.getEnd().getOffset());
-          // if the last anchor in the chain is past the end
-          if (wordChain.lastElement().getOffset() != null
-              && wordChain.lastElement().getOffset() > utterance.getEnd().getOffset()) {
-            // remove it
-            wordChain.remove(wordChain.lastElement());
+          if (wordChain.size() > 0) {
+            // if the last anchor in the chain is past the end
+            if (wordChain.lastElement().getOffset() != null
+                && wordChain.lastElement().getOffset() > utterance.getEnd().getOffset()) {
+              // remove it
+              wordChain.remove(wordChain.lastElement());
+            }
+            sequence.addAll(wordChain);
           }
-          sequence.addAll(wordChain);
         } // next word
         sequence.add(utterance.getEnd());
         sequence.add( // append immovable sentinel
