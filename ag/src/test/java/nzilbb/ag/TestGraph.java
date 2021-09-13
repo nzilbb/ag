@@ -689,6 +689,9 @@ public class TestGraph {
 
     assertNull("ensure created annotations are removed by rollback", g.getAnnotation("word5"));
 
+    // delete one word, to ensure it's not included in changes after g.create()
+    g.getAnnotation("word3").destroy();
+    
     g.create();
     assertEquals(Change.Operation.Create, g.getChange());
     changes = g.getChanges();
@@ -726,21 +729,17 @@ public class TestGraph {
     assertEquals("Update word2: endId = a3 (was null)", changes.get(i++).toString());
     assertEquals("Update word2: parentId = turn1 (was null)", changes.get(i++).toString());
     assertEquals("Update word2: ordinal = 2 (was null)", changes.get(i++).toString());
-    assertEquals("Create word3", changes.get(i++).toString());
-    assertEquals("Update word3: label = brown (was null)", changes.get(i++).toString());
-    assertEquals("Update word3: startId = a3 (was null)", changes.get(i++).toString());
-    assertEquals("Update word3: endId = a4 (was null)", changes.get(i++).toString());
-    assertEquals("Update word3: parentId = turn1 (was null)", changes.get(i++).toString());
-    assertEquals("Update word3: ordinal = 3 (was null)", changes.get(i++).toString());
-    assertEquals("Create word4", changes.get(i++).toString());
+    assertEquals("word3 is skipped because it was destroyed (and so should not be created)",
+                 "Create word4", changes.get(i++).toString());
     assertEquals("Update word4: label = fox (was null)", changes.get(i++).toString());
     assertEquals("Update word4: startId = a4 (was null)", changes.get(i++).toString());
     assertEquals("Update word4: endId = a5 (was null)", changes.get(i++).toString());
     assertEquals("Update word4: parentId = turn1 (was null)", changes.get(i++).toString());
-    assertEquals("Update word4: ordinal = 4 (was null)", changes.get(i++).toString());
+    assertEquals("word4 has ordinal 3 because word3 isn't there",
+                 "Update word4: ordinal = 3 (was null)", changes.get(i++).toString());
     assertEquals(i, changes.size());
 
-    g.commit();
+    g.commit(); // removes word3
     assertEquals(Change.Operation.NoChange, g.getChange());
 
     g.destroy();
@@ -750,8 +749,8 @@ public class TestGraph {
     // children deleted before parents
     assertEquals("Destroy word1", changes.get(i++).toString());
     assertEquals("Destroy word2", changes.get(i++).toString());
-    assertEquals("Destroy word3", changes.get(i++).toString());
-    assertEquals("Destroy word4", changes.get(i++).toString());
+    assertEquals("word3 isn't there, so word4 is after word2",
+                 "Destroy word4", changes.get(i++).toString());
     // parents deleted after children
     assertEquals("Destroy turn1", changes.get(i++).toString());
     assertEquals("Destroy turnStart", changes.get(i++).toString());
@@ -766,7 +765,7 @@ public class TestGraph {
 
   }
 
-  /** Test grph changes are reported in the correct order. */
+  /** Test graph changes are reported in the correct order. */
   @Test public void changeOrder() {
     Graph g = new Graph();
     g.trackChanges();
