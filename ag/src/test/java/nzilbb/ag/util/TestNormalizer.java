@@ -836,6 +836,274 @@ public class TestNormalizer {
     }
   }
 
+  /** Ensure that words don't link across utterance boundaries. */
+  @Test public void noInterUtteranceLinks() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+    Layer[] layers = {
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
+    g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
+
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+    g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT)); // the
+    g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+    g.addAnchor(new Anchor("a02", null)); // brown
+    g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+    
+    g.addAnchor(new Anchor("a04", 0.4, Constants.CONFIDENCE_AUTOMATIC)); // fox end, over start
+    g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+    g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+    g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+    g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+    g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // dog
+    g.addAnchor(new Anchor("a54", null)); // end of dog
+
+    g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+
+    g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+    g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+      
+    g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+    g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04", "turn1"));
+
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04",  "a14", "turn1"));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn1"));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn1"));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
+    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
+
+    g.getAnnotation("jumps").setLabel("test");
+    g.createTag(g.getAnnotation("jumps"), "pos", "V");
+
+    g.trackChanges();
+    Normalizer n = new Normalizer();
+    try {
+      n.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
+
+      assertNotEquals("fox and jumps are not linked",
+                      g.getAnnotation("fox").getEndId(), g.getAnnotation("jumps").getStartId());
+      assertEquals("fox end has the right offset",
+                   Double.valueOf(0.4), g.getAnnotation("fox").getEnd().getOffset());
+      assertEquals("jumps start has the right offset",
+                   Double.valueOf(0.4), g.getAnnotation("jumps").getStart().getOffset());
+      assertEquals("fox end has the right confidence",
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   g.getAnnotation("fox").getEnd().getConfidence().intValue());
+      assertEquals("jumps start has the right confidence",
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   g.getAnnotation("jumps").getStart().getConfidence().intValue());
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
+  /** Ensure that words don't overflow utterance boundaries. */
+  @Test public void noOverflowingUtterances() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+    Layer[] layers = {
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
+    g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
+
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+    g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT)); // the
+    g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+    g.addAnchor(new Anchor("a02", null)); // brown
+    g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox    
+    g.addAnchor(new Anchor("a04a", 0.41, Constants.CONFIDENCE_DEFAULT)); // fox end
+    
+    g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+    g.addAnchor(new Anchor("a04b", 0.39, Constants.CONFIDENCE_DEFAULT)); // over start
+    g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+    g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+    g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+    g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // dog
+    g.addAnchor(new Anchor("a54", null)); // end of dog
+
+    g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+
+    g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+    g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+      
+    g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+    g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04a", "turn1"));
+
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn1"));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn1"));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn1"));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
+    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
+
+    g.getAnnotation("jumps").setLabel("test");
+    g.createTag(g.getAnnotation("jumps"), "pos", "V");
+
+    g.trackChanges();
+    Normalizer n = new Normalizer();
+    try {
+      n.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
+
+      assertNotEquals("fox and jumps are not linked",
+                      g.getAnnotation("fox").getEndId(), g.getAnnotation("jumps").getStartId());
+      assertEquals("fox end has the right offset",
+                   Double.valueOf(0.4), g.getAnnotation("fox").getEnd().getOffset());
+      assertEquals("jumps start has the right offset",
+                   Double.valueOf(0.4), g.getAnnotation("jumps").getStart().getOffset());
+      assertEquals("fox end has the right confidence",
+                   Constants.CONFIDENCE_NONE,
+                   g.getAnnotation("fox").getEnd().getConfidence().intValue());
+      assertEquals("jumps start has the right confidence",
+                   Constants.CONFIDENCE_NONE,
+                   g.getAnnotation("jumps").getStart().getConfidence().intValue());
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
+  /** Ensure that words don't link <b>and</b> overflow across utterance boundaries. */
+  @Test public void noOverflowingInterlinkedUtterances() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+    Layer[] layers = {
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
+    g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
+
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+    g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT)); // the
+    g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+    g.addAnchor(new Anchor("a02", null)); // brown
+    g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox    
+    
+    g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+    g.addAnchor(new Anchor("a04", 0.41, Constants.CONFIDENCE_AUTOMATIC)); // fox end, over start
+    g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+    g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+    g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+    g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // dog
+    g.addAnchor(new Anchor("a54", null)); // end of dog
+
+    g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+
+    g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+    g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+      
+    g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+    g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04", "turn1"));
+
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04",  "a14", "turn1"));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn1"));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn1"));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
+    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
+
+    g.getAnnotation("jumps").setLabel("test");
+    g.createTag(g.getAnnotation("jumps"), "pos", "V");
+
+    g.trackChanges();
+    Normalizer n = new Normalizer();
+    try {
+      n.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
+
+      assertNotEquals("fox and jumps are not linked",
+                      g.getAnnotation("fox").getEndId(), g.getAnnotation("jumps").getStartId());
+      assertEquals("fox end has the right offset",
+                   Double.valueOf(0.4), g.getAnnotation("fox").getEnd().getOffset());
+      assertEquals("jumps start has the right offset",
+                   Double.valueOf(0.41), g.getAnnotation("jumps").getStart().getOffset());
+      assertEquals("fox end has the right confidence",
+                   Constants.CONFIDENCE_NONE,
+                   g.getAnnotation("fox").getEnd().getConfidence().intValue());
+      assertEquals("jumps start has the right confidence",
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   g.getAnnotation("jumps").getStart().getConfidence().intValue());
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+  
   /** Ensure utterances are chained within their turns. */
   @Test public void chainUtterancesWithinTurns() {
     Graph g = new Graph();

@@ -21,7 +21,9 @@
 //
 package nzilbb.ag.util;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.Vector;
 import nzilbb.ag.*;
@@ -38,11 +40,11 @@ import nzilbb.util.Switch;
  * number of children in a given parent, for words </li> 
  *  <li> words do not share anchors with turns nor utterances </li>
  *  <li> turn and utterance labels are the participant names </li>
- *  <li> Optionally, if the graph has a single un-named speaker, then the speaker renamed
+ *  <li> optionally, if the graph has a single un-named speaker, then the speaker renamed
  *       to be the same as the espisode name </li> 
  *  <li> ensures that utterances within a turn are chained together </li>
- *  <li> TODO: fills in missing utterances </li>
- *  <li> TODO: fills in missing turns </li>
+ *  <li> ensure that words don't overflow their utterance </li>
+ *  <li> ensure words aren't linked to subsequent words in a different utterance </li>
  * </ul>
  * For this transformer to work, the {@link Schema} of the graph must have its 
  * {@link Schema#turnLayerId}, {@link Schema#utteranceLayerId}, {@link Schema#wordLayerId}, 
@@ -194,7 +196,7 @@ public class Normalizer extends Transform implements GraphTransformer {
             || word.getStart().isEndOn(schema.getUtteranceLayerId())) {
           // disconnect start
           final Anchor oldStart = word.getStart();
-               
+
           // create a new anchor
           final Anchor newStart = new Anchor(
             null, word.getStart().getOffset(),
@@ -243,6 +245,60 @@ public class Normalizer extends Transform implements GraphTransformer {
         } // disconnect end
       } // next word
     }
+
+    if (graph.getSchema().getTurnLayer() != null
+        && graph.getSchema().getUtteranceLayer() != null
+        && graph.getSchema().getWordLayer() != null) {
+      // ensure word chains don't cross utterance boundaries...
+      String wordLayerId = graph.getSchema().getWordLayerId();
+      
+      // tag each word with its utterance
+      for (Annotation word : graph.all(wordLayerId)) {
+        Optional<Annotation> utterance = Arrays.stream(
+          word.midpointIncludingAnnotationsOn(graph.getSchema().getUtteranceLayerId()))
+          .filter(utt -> utt.getParentId().equals(word.getParentId()))
+          .findAny();
+        if (utterance.isPresent()) {
+          word.put("@utterance", utterance.get());
+        }
+      } // next word
+
+      // now check each word for inter-utterance links and overflow...
+      for (Annotation word : graph.all(wordLayerId)) {
+        Annotation utterance = (Annotation)word.get("@utterance");
+        if (utterance == null) continue;
+        
+        // check for inter-utterance links...
+        for (Annotation followingWord : word.getEnd().startOf(wordLayerId)) {
+          Object followingUtterance = followingWord.get("@utterance");
+          if (followingUtterance != null
+              && utterance != followingUtterance) {
+            // words are linked but utterances are different
+            // so unlink them by creating a new end annotation
+            word.setEnd(
+              graph.addAnchor(
+                new Anchor(followingWord.getStart())));
+            break;
+          } // words are linked but utterances are different
+        } // next linked word
+        
+        // check for utterance overflow
+        if (word.getStart().getOffset() != null && utterance.getStart().getOffset() != null
+            && word.getStart().getOffset() < utterance.getStart().getOffset()) {
+          // word starts before utterance, so move word start forward
+          word.getStart().setOffset(utterance.getStart().getOffset());
+          word.getStart().setConfidence(Constants.CONFIDENCE_NONE);
+        } // checked word.start
+        if (word.getEnd().getOffset() != null && utterance.getEnd().getOffset() != null
+            && word.getEnd().getOffset() > utterance.getEnd().getOffset()) {
+          // word ends before utterance, so move word end back
+          word.getEnd().setOffset(utterance.getEnd().getOffset());
+          word.getEnd().setConfidence(Constants.CONFIDENCE_NONE);
+        } // checked word.end
+      } // next word
+      
+    } // turn/utterance/word layers specified
+    
     if (maxLabelLength != null) {
       // ensure no annotation has a label longer than the limit
       for (Annotation a : graph.getAnnotationsById().values()) {
