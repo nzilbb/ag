@@ -1787,7 +1787,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           lastAlignedAnchor = end;
 	       
           if (start.getOffset() > end.getOffset()) { // start and end in reverse order
-            String message = "Utterance start is after end: " 
+            String message = graph.getId() + ": Utterance start is after end: " 
               + synchronisedMatcher.group(2) + "_" + synchronisedMatcher.group(3);
             if (errors == null) errors = new SerializationException(message);
             errors.addError(SerializationException.ErrorType.Alignment, message);
