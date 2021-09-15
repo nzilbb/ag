@@ -49,7 +49,7 @@ import nzilbb.util.Timers;
  */
 public class TextGridSerialization
   extends TextGrid implements GraphDeserializer, GraphSerializer {
-   
+  
   // Attributes:     
   protected Vector<String> warnings;
   /**
@@ -221,13 +221,17 @@ public class TextGridSerialization
    */
   protected Boolean bUseConventions = Boolean.FALSE;
   /**
-   * Getter for {@link #bUseConventions}: Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
-   * @return Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
+   * Getter for {@link #bUseConventions}: Whether to use text conventions for comment,
+   * noise, lexical, and pronounce annotations. 
+   * @return Whether to use text conventions for comment, noise, lexical, and pronounce
+   * annotations. 
    */
   public Boolean getUseConventions() { return bUseConventions; }
   /**
-   * Setter for {@link #bUseConventions}: Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
-   * @param bNewTranscriptOnly Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
+   * Setter for {@link #bUseConventions}: Whether to use text conventions for comment,
+   * noise, lexical, and pronounce annotations. 
+   * @param bNewTranscriptOnly Whether to use text conventions for comment, noise,
+   * lexical, and pronounce annotations. 
    */
   public void setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; }
    
@@ -238,18 +242,20 @@ public class TextGridSerialization
    */
   protected Boolean renameShortNumericSpeakers = Boolean.FALSE;
   /**
-   * Getter for {@link #renameShortNumericSpeakers}: Short speaker names like "S1" should be prefixed with the transcript name during import.
-   * @return Short speaker names like "S1" should be prefixed with the transcript name during import.
+   * Getter for {@link #renameShortNumericSpeakers}: Short speaker names like "S1" should
+   * be prefixed with the transcript name during import. 
+   * @return Short speaker names like "S1" should be prefixed with the transcript name
+   * during import. 
    */
   public Boolean getRenameShortNumericSpeakers() { return renameShortNumericSpeakers; }
   /**
-   * Setter for {@link #renameShortNumericSpeakers}: Short speaker names like "S1" should be prefixed with the transcript name during import.
-   * @param newRenameShortNumericSpeakers Short speaker names like "S1" should be prefixed with the transcript name during import.
+   * Setter for {@link #renameShortNumericSpeakers}: Short speaker names like "S1" should
+   * be prefixed with the transcript name during import. 
+   * @param newRenameShortNumericSpeakers Short speaker names like "S1" should be prefixed
+   * with the transcript name during import. 
    */
   public void setRenameShortNumericSpeakers(Boolean newRenameShortNumericSpeakers) { renameShortNumericSpeakers = newRenameShortNumericSpeakers; }
 
-  // IStreamDeserializer methods:
-   
   /**
    * Returns the deserializer's descriptor.
    * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
@@ -360,15 +366,19 @@ public class TextGridSerialization
   protected ParameterSet mappings;
 
   /**
-   * Sets parameters for deserializer as a whole.  This might include database connection parameters, locations of supporting files, etc.
-   * <p>When the deserializer is installed, this method should be invoked with an empty parameter
+   * Sets parameters for deserializer as a whole.  This might include database connection
+   * parameters, locations of supporting files, etc. 
+   * <p> When the deserializer is installed, this method should be invoked with an empty parameter
    *  set, to discover what (if any) general configuration is required. If parameters are
    *  returned, and user interaction is possible, then the user may be presented with an
    *  interface for setting/confirming these parameters.
-   * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
+   * <p> {@link GraphSerializer} and {@link GraphDeserializer} method.
    * @param configuration The configuration for the deserializer. 
    * @param schema The layer schema, definining layers and the way they interrelate.
-   * @return A list of configuration parameters (still) must be set before {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list, {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
+   * @return A list of configuration parameters (still) must be set before
+   * {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list,
+   * {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list,
+   * this method must be invoked again with the returned parameters' values set. 
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema) {
     setSchema(schema);
@@ -381,8 +391,10 @@ public class TextGridSerialization
     for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
 
     // create a list of layers we need and possible matching layer names
-    LinkedHashMap<Parameter,List<String>> layerToPossibilities = new LinkedHashMap<Parameter,List<String>>();
-    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();
+    LinkedHashMap<Parameter,List<String>> layerToPossibilities
+      = new LinkedHashMap<Parameter,List<String>>();
+    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates
+      = new HashMap<String,LinkedHashMap<String,Layer>>();
 
     // do we need to ask for participant/turn/utterance/word layers?
     LinkedHashMap<String,Layer> possibleParticipantLayers = new LinkedHashMap<String,Layer>();
@@ -534,11 +546,12 @@ public class TextGridSerialization
    * @param streams A list of named streams that contain all the
    *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
    * @param schema The layer schema, definining layers and the way they interrelate.
-   * @return A list of parameters that require setting before {@link GraphDeserializer#deserialize()}
-   * can be invoked. This may be an empty list, and may include parameters with the value already
-   * set to a workable default. If there are parameters, and user interaction is possible, then
-   * the user may be presented with an interface for setting/confirming these parameters, before
-   * they are then passed to {@link GraphDeserializer#setParameters(ParameterSet)}.
+   * @return A list of parameters that require setting before
+   * {@link GraphDeserializer#deserialize()} can be invoked. This may be an empty list,
+   * and may include parameters with the value already set to a workable default. If there
+   * are parameters, and user interaction is possible, then the user may be presented with
+   * an interface for setting/confirming these parameters, before they are then passed to
+   * {@link GraphDeserializer#setParameters(ParameterSet)}. 
    * @throws SerializationException If the graph could not be loaded.
    * @throws IOException On IO error.
    */
@@ -614,7 +627,7 @@ public class TextGridSerialization
       }
     } // next layer
 
-      // map tiers to layers by name
+    // map tiers to layers by name
     Layer ignore = new Layer();
     ignore.setId("[ignore tier]");      
     for (int t = 0; t < getTiers().size(); t++) {
@@ -648,7 +661,7 @@ public class TextGridSerialization
       }
       Layer layer = getSchema().getLayer(sName);
       if (layer == null) { // no exact match
-        // try a prefix-match - i.e. "transcript - John Smith" should map to the "transcript" layer
+        // try a prefix-match - i.e. "word - John Smith" should map to the "word" layer
         // ignore spaces too
         String sNameNoWhitespace = sName.replaceAll("\\s","");
         for (Layer mappableLayer : vPossiblLayers) {
@@ -695,7 +708,9 @@ public class TextGridSerialization
   }
 
   /**
-   * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
+   * Sets parameters for a given deserialization operation, after loading the serialized
+   * form of the graph. This might include mappings from format-specific objects like
+   * tiers to graph layers, etc. 
    * <p>{@link GraphDeserializer} method.
    * @param parameters The configuration for a given deserialization operation.
    * @throws SerializationParametersMissingException If not all required parameters have a value.
@@ -724,10 +739,6 @@ public class TextGridSerialization
         }
       }
     }
-    if (iTurnLayerMapped + iUtteranceLayerMapped + iWordLayerMapped == 0) {
-      throw new SerializationParametersMissingException(
-        "There are no turn, utterance, or word mappings");
-    }
   }
 
   /**
@@ -740,7 +751,8 @@ public class TextGridSerialization
    * <p>{@link GraphDeserializer} method.
    * @return A list of valid (if incomplete) {@link Graph}s. 
    * @throws SerializerNotConfiguredException if the object has not been configured.
-   * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+   * @throws SerializationParametersMissingException if the parameters for this particular
+   * graph have not been set. 
    * @throws SerializationException if errors occur during deserialization.
    */
   public Graph[] deserialize() 
@@ -750,7 +762,8 @@ public class TextGridSerialization
     if (timers != null) timers.start("deserialize");
     if (participantLayer == null) throw new SerializerNotConfiguredException("Participant layer not set");
     if (turnLayer == null) throw new SerializerNotConfiguredException("Turn layer not set");
-    if (utteranceLayer == null) throw new SerializerNotConfiguredException("Utterance layer not set");
+    if (utteranceLayer == null)
+      throw new SerializerNotConfiguredException("Utterance layer not set");
     if (wordLayer == null) throw new SerializerNotConfiguredException("Word layer not set");
     if (schema == null) throw new SerializerNotConfiguredException("Layer schema not set");
 
@@ -1156,12 +1169,12 @@ public class TextGridSerialization
       if (timers != null) timers.end("set word turns");
     } // word layer mapped
 
-      // now we have participants,
-      // and turns with participant name labels and parents, 
-      // and utterances with parents
-      // and words with parents
-
-      // need to ensure that other required parents are set
+    // now we have participants,
+    // and turns with participant name labels and parents, 
+    // and utterances with parents
+    // and words with parents
+    
+    // need to ensure that other required parents are set
     if (timers != null) timers.start("set parents");
     for (Annotation a : graph.getAnnotationsById().values()) {
       if (a.getParentId() == null) {
@@ -1282,7 +1295,9 @@ public class TextGridSerialization
   }
 
   /**
-   * Moves all of the children of the following turn into the preceding turn, set the the end of the preceding to the end of the following, and marks the following for deletion.
+   * Moves all of the children of the following turn into the preceding turn, set the the
+   * end of the preceding to the end of the following, and marks the following for
+   * deletion. 
    * @param preceding The preceding, surviving turn.
    * @param following The following turn, which will be deleted.
    * @return The changes for this merge.
@@ -1311,7 +1326,7 @@ public class TextGridSerialization
 
   /**
    * Determines which layers, if any, must be present in the graph that will be serialized.
-   * <p>{@link GraphSerializer} method.
+   * <p> {@link GraphSerializer} method.
    * @return A list of IDs of layers that must be present in the graph that will be serialized.
    * @throws SerializationParametersMissingException If not all required parameters have a value.
    */
@@ -1354,7 +1369,9 @@ public class TextGridSerialization
    * @return A list of named streams that contain the serialization in the given format. 
    * @throws SerializerNotConfiguredException if the object has not been configured.
    */
-  public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+  public void serialize(
+    Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
+    Consumer<String> warnings, Consumer<SerializationException> errors) 
     throws SerializerNotConfiguredException {
     graphCount = graphs.getExactSizeIfKnown();
     graphs.forEachRemaining(graph -> {
@@ -1528,7 +1545,7 @@ public class TextGridSerialization
       } // layer of intervals
     } // next layer
 
-      // ensure all tiers are correctly padded out to the end
+    // ensure all tiers are correctly padded out to the end
     setXmax(graph.getSortedAnchors().last().getOffset());
     padIntervalTiersToXmax();
 
