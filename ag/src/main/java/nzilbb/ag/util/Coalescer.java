@@ -181,7 +181,9 @@ public class Coalescer implements GraphTransformer {
       // saturated child layers can't have gaps
       if (preceding.getGraph().getLayer().getSaturated()) {
         // children linked to the original preceding end need re-linking to the following start
-        for (Annotation endingPrecedingChild : originalPrecedingEnd.endOf(childLayerId)) {
+        Vector<Annotation> endingPrecedingChildren = // avoid ConcurrentModificationException
+          new Vector<Annotation>(originalPrecedingEnd.endOf(childLayerId));
+        for (Annotation endingPrecedingChild : endingPrecedingChildren) {
           endingPrecedingChild.setEnd(following.getStart());
         } // next child ending here
       } // saturated child layer
