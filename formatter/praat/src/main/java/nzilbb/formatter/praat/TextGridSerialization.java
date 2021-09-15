@@ -760,11 +760,6 @@ public class TextGridSerialization
     SerializationException {
       
     if (timers != null) timers.start("deserialize");
-    if (participantLayer == null) throw new SerializerNotConfiguredException("Participant layer not set");
-    if (turnLayer == null) throw new SerializerNotConfiguredException("Turn layer not set");
-    if (utteranceLayer == null)
-      throw new SerializerNotConfiguredException("Utterance layer not set");
-    if (wordLayer == null) throw new SerializerNotConfiguredException("Word layer not set");
     if (schema == null) throw new SerializerNotConfiguredException("Layer schema not set");
 
     // if there are errors, accumlate as many as we can before throwing SerializationException
@@ -776,18 +771,6 @@ public class TextGridSerialization
     graph.setId(getId());
     // creat the 0 anchor to prevent graph tagging from creating one with no confidence
     Anchor graphStart = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
-
-    // add layers to the graph
-    // we don't just copy the whole schema, because that would imply that all the extra layers
-    // contained no annotations, which is not necessarily true
-    graph.addLayer((Layer)participantLayer.clone());
-    graph.getSchema().setParticipantLayerId(participantLayer.getId());
-    graph.addLayer((Layer)turnLayer.clone());
-    graph.getSchema().setTurnLayerId(turnLayer.getId());
-    graph.addLayer((Layer)utteranceLayer.clone());
-    graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
-    graph.addLayer((Layer)wordLayer.clone());
-    graph.getSchema().setWordLayerId(wordLayer.getId());
 
     graph.setOffsetUnits(Constants.UNIT_SECONDS);
     graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
@@ -817,14 +800,39 @@ public class TextGridSerialization
       } // tier is mapped to a layer
     } // next tier
 
-    if (!wordLayerMapped) {
-      // add convention layers, as we'll be breaking utterances into tokens
-      if (lexicalLayer != null) graph.addLayer((Layer)lexicalLayer.clone());
-      if (pronounceLayer != null) graph.addLayer((Layer)pronounceLayer.clone());
-      if (commentLayer != null) graph.addLayer((Layer)commentLayer.clone());
-      if (noiseLayer != null) graph.addLayer((Layer)noiseLayer.clone());	 
-    }
-
+    // add standard layers to the graph?
+    boolean textGridIsTranscript = turnLayerMapped || utteranceLayerMapped || wordLayerMapped;
+    if (textGridIsTranscript) { 
+      // there's a tier for transcription, so all standard layers must be present
+      if (participantLayer == null)
+        throw new SerializerNotConfiguredException("Participant layer not set");
+      if (turnLayer == null)
+        throw new SerializerNotConfiguredException("Turn layer not set");
+      if (utteranceLayer == null)
+        throw new SerializerNotConfiguredException("Utterance layer not set");
+      if (wordLayer == null)
+        throw new SerializerNotConfiguredException("Word layer not set");
+      
+      // we don't just copy the whole schema, because that would imply that all the extra layers
+      // contained no annotations, which is not necessarily true
+      graph.addLayer((Layer)participantLayer.clone());
+      graph.getSchema().setParticipantLayerId(participantLayer.getId());
+      graph.addLayer((Layer)turnLayer.clone());
+      graph.getSchema().setTurnLayerId(turnLayer.getId());
+      graph.addLayer((Layer)utteranceLayer.clone());
+      graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
+      graph.addLayer((Layer)wordLayer.clone());
+      graph.getSchema().setWordLayerId(wordLayer.getId());
+      
+      if (!wordLayerMapped && getUseConventions()) {
+        // add convention layers, as we'll be breaking utterances into tokens
+        if (lexicalLayer != null) graph.addLayer((Layer)lexicalLayer.clone());
+        if (pronounceLayer != null) graph.addLayer((Layer)pronounceLayer.clone());
+        if (commentLayer != null) graph.addLayer((Layer)commentLayer.clone());
+        if (noiseLayer != null) graph.addLayer((Layer)noiseLayer.clone());	 
+      }
+    } // textGrid is a transcript
+    
     int iLastWordOrdinal = 0;
       
     // turn tiers of annotations into layers of annotations
@@ -990,184 +998,191 @@ public class TextGridSerialization
       if (timers != null) timers.end("set utterance turns");
     } // both utterance and turn layers mapped
 
-      // now we have turns with participant name labels, 
-      // and utterances with parents, that maybe need tokenizing
+    // now we have turns with participant name labels, 
+    // and utterances with parents, that maybe need tokenizing
 
+    if (textGridIsTranscript) {
       // ensure participants are set
-    HashMap<String,Annotation> participantsByName = new HashMap<String,Annotation>();
-    if (timers != null) timers.start("set turn participants");
-    int ordinal = 1;
-    for (Annotation turn : graph.all(turnLayer.getId())) {
-      if (!participantsByName.containsKey(turn.getLabel())) { // create participant
-        Annotation who = new Annotation(null, turn.getLabel(), participantLayer.getId());
-        who.setConfidence(Constants.CONFIDENCE_MANUAL);
-        graph.addAnnotation(who);
-        participantsByName.put(turn.getLabel(), who);
-      }
-      if (timers != null) timers.start("set turn parent");
-      // set ordinal first, then don't allow appending in setParent, to save a performance hit
-      turn.setOrdinal(participantsByName.get(turn.getLabel()).getAnnotations(turnLayer.getId()).size() + 1);
-      turn.setParent(participantsByName.get(turn.getLabel()), false);
-      if (timers != null) timers.end("set turn parent"); 
-    } // next turn
-    if (timers != null) timers.end("set turn participants");
-
-    // have to track changes to be able to mark things for destrucion...
+      HashMap<String,Annotation> participantsByName = new HashMap<String,Annotation>();
+      if (timers != null) timers.start("set turn participants");
+      int ordinal = 1;
+      for (Annotation turn : graph.all(turnLayer.getId())) {
+        if (!participantsByName.containsKey(turn.getLabel())) { // create participant
+          Annotation who = new Annotation(null, turn.getLabel(), participantLayer.getId());
+          who.setConfidence(Constants.CONFIDENCE_MANUAL);
+          graph.addAnnotation(who);
+          participantsByName.put(turn.getLabel(), who);
+        }
+        if (timers != null) timers.start("set turn parent");
+        // set ordinal first, then don't allow appending in setParent, to save a performance hit
+        turn.setOrdinal(participantsByName.get(turn.getLabel()).getAnnotations(turnLayer.getId()).size() + 1);
+        turn.setParent(participantsByName.get(turn.getLabel()), false);
+        if (timers != null) timers.end("set turn parent"); 
+      } // next turn
+      if (timers != null) timers.end("set turn participants");
+    }
+    
+    // have to track changes to be able to mark things for destruction...
     graph.trackChanges(); 
 
-    // join subsequent turns by the same speaker...
-    // for each participant (assumed to be parent of turn)
-    if (timers != null) timers.start("join subsequent turns");
-    for (Annotation participant : graph.all(participantLayer.getId())) {
-      TreeSet<Annotation> annotations = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
-      annotations.addAll(participant.getAnnotations(turnLayer.getId()));
-      Annotation[] turns = annotations.toArray(new Annotation[0]);
-      // go back through all the turns, looking for a turn for the same speaker that is
-      // joined to, or overlaps, this one	 
-      for (int i = turns.length - 2; i >= 0; i--) {
-        Annotation preceding = turns[i];
-        Annotation following = turns[i + 1];
-        if (preceding.getEnd().getOffset() != null && following.getStart().getOffset() != null
-            && preceding.getEnd().getOffset() >= following.getStart().getOffset()) {
-          mergeTurns(preceding, following);
-          following.destroy();
-        }
-      } // next preceding turn
-    } // next turn parent
-    graph.commit();
-    if (timers != null) timers.end("join subsequent turns");
-      
+    if (textGridIsTranscript) {
+      // join subsequent turns by the same speaker...
+      // for each participant (assumed to be parent of turn)
+      if (timers != null) timers.start("join subsequent turns");
+      for (Annotation participant : graph.all(participantLayer.getId())) {
+        TreeSet<Annotation> annotations
+          = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+        annotations.addAll(participant.getAnnotations(turnLayer.getId()));
+        Annotation[] turns = annotations.toArray(new Annotation[0]);
+        // go back through all the turns, looking for a turn for the same speaker that is
+        // joined to, or overlaps, this one	 
+        for (int i = turns.length - 2; i >= 0; i--) {
+          Annotation preceding = turns[i];
+          Annotation following = turns[i + 1];
+          if (preceding.getEnd().getOffset() != null && following.getStart().getOffset() != null
+              && preceding.getEnd().getOffset() >= following.getStart().getOffset()) {
+            mergeTurns(preceding, following);
+            following.destroy();
+          }
+        } // next preceding turn
+      } // next turn parent
+      graph.commit();
+      if (timers != null) timers.end("join subsequent turns");
+    }
+    
     // now we have participants,
     // and rationalized turns with participant name labels and parents, 
     // and utterances with parents, that maybe need tokenizing
 
-    if (!wordLayerMapped) { // tokenize utterances and apply conventions
-      if (timers != null) timers.start("tokenize");
-      // ensure we have an utterance tokenizer
-      if (getTokenizer() == null) {
-        setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
-      }
-      try {
-        tokenizer.transform(graph);
-      } catch(TransformationException exception) {
-        if (errors == null) errors = new SerializationException();
-        if (errors.getCause() == null) errors.initCause(exception);
-        errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
-      }
-      graph.commit();
-      if (timers != null) timers.end("tokenize");
-      if (getUseConventions()) {
-        if (timers != null) timers.start("conventions");
+    if (textGridIsTranscript) {
+      if (!wordLayerMapped) { // tokenize utterances and apply conventions
+        if (timers != null) timers.start("tokenize");
+        // ensure we have an utterance tokenizer
+        if (getTokenizer() == null) {
+          setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
+        }
         try {
-          // word {comment comment} word
-          SpanningConventionTransformer commentTransformer = new SpanningConventionTransformer(
-            getWordLayer().getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
-            commentLayer==null?null:commentLayer.getId(), "$1", "$1", false, false);
-          commentTransformer.transform(graph);
-          graph.commit();
-	       
-          // word [noise noise] word
-          SpanningConventionTransformer noiseTransformer = new SpanningConventionTransformer(
-            getWordLayer().getId(), "\\[(.*)", "(.*)\\]", true, null, null, 
-            noiseLayer==null?null:noiseLayer.getId(), "$1", "$1", false, false);
-          noiseTransformer.transform(graph);
-          graph.commit();
-	       
-          // word[pronounce]
-          ConventionTransformer pronounceTransformer = new ConventionTransformer(
-            getWordLayer().getId(), "(.+)\\[(.*)\\](\\p{Punct}*)", "$1$3", 
-            pronounceLayer==null?null:pronounceLayer.getId(), "$2");
-          pronounceTransformer.transform(graph);
-          graph.commit();
-	       
-          // word(lexical)
-          ConventionTransformer lexicalTransformer = new ConventionTransformer(
-            getWordLayer().getId(), "(.+)\\((.*)\\)(\\p{Punct}*)", "$1$3", 
-            lexicalLayer==null?null:lexicalLayer.getId(), "$2");
-          lexicalTransformer.transform(graph);
-          graph.commit();
-
-          // run word[pronounce] again, in case some were masked by lexical tags:
-          // word[pronounce](lexical)
-          pronounceTransformer.transform(graph);
-          graph.commit();
-
+          tokenizer.transform(graph);
         } catch(TransformationException exception) {
           if (errors == null) errors = new SerializationException();
           if (errors.getCause() == null) errors.initCause(exception);
           errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
         }
-        if (timers != null) timers.end("conventions");
-      } // apply transcription conventions
-      try {
-        // clump non-orthographic 'words' with real words
-        OrthographyClumper clumper = new OrthographyClumper(
-          wordLayer.getId(), utteranceLayer.getId());	  
-        clumper.transform(graph);
         graph.commit();
-      } catch(TransformationException exception) {
-        if (errors == null) errors = new SerializationException();
-        if (errors.getCause() == null) errors.initCause(exception);
-        errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
-      }
-    } else { // word layer mapped
-      if (timers != null) timers.start("set word turns");
-      // ensure word parent turns are set
-      for (Annotation word : graph.all(wordLayer.getId())) {
-        if (word.getParent() == null) {
-          Annotation[] possibleTurns = word.includingAnnotationsOn(turnLayer.getId());
-          if (possibleTurns.length == 1) { // must be this one
-            word.setParent(possibleTurns[0]);
-          } else if (possibleTurns.length > 1) { // multiple possible turns
-            // use the turn whose label is included in the utterance's tier name
-            // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
-            Tier wordTier = (Tier)word.get("@tier");
-            assert wordTier != null : "wordTier != null - " + word;
-            Annotation turn = null;
-            for (Annotation possibleTurn : possibleTurns) {
-              // is the label (the speaker) a part of the utterance's tier name?
-              if (wordTier.getName().indexOf(possibleTurn.getLabel()) >= 0) {
-                // multiple parents could match 
-                // e.g. "sp1" and "Interviewer sp1" both are suffixes of "word - Interviewer sp1"
-                // so we go with the longest one
-                if (turn == null
-                    || possibleTurn.getLabel().length() > turn.getLabel().length()) {
-                  turn = possibleTurn;
-                } // longest match so far
-              } // label is a part of the tier name
-            } // next possible turn
-            if (turn != null) word.setParent(turn);
-          } // multiple possible turns
-        } // parent not set
-        if (word.getParent() == null) { // parent still not set
-          // maybe children don't quite line up with parents, so use midpoint-including instead
-          Annotation[] possibleTurns = word.midpointIncludingAnnotationsOn(turnLayer.getId());
-          if (possibleTurns.length == 1) { // must be this one
-            word.setParent(possibleTurns[0]);
-          } else if (possibleTurns.length > 1) { // multiple possible turns
-            // use the turn whose label is included in the utterance's tier name
-            // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
-            Tier wordTier = (Tier)word.get("@tier");
-            assert wordTier != null : "wordTier != null - " + word;
-            Annotation turn = null;
-            for (Annotation possibleTurn : possibleTurns) {
-              // is the label (the speaker) a part of the utterance's tier name?
-              if (wordTier.getName().indexOf(possibleTurn.getLabel()) >= 0) {
-                // multiple parents could match 
-                // e.g. "sp1" and "Interviewer sp1" both are suffixes of "word - Interviewer sp1"
-                // so we go with the longest one
-                if (turn == null
-                    || possibleTurn.getLabel().length() > turn.getLabel().length()) {
-                  turn = possibleTurn;
-                } // longest match so far
-              } // label is a part of the tier name
-            } // next possible turn
-            if (turn != null) word.setParent(turn);
-          } // multiple possible turns
-        } // parent still not set
-      } // next utterance
-      if (timers != null) timers.end("set word turns");
-    } // word layer mapped
+        if (timers != null) timers.end("tokenize");
+        if (getUseConventions()) {
+          if (timers != null) timers.start("conventions");
+          try {
+            // word {comment comment} word
+            SpanningConventionTransformer commentTransformer = new SpanningConventionTransformer(
+              getWordLayer().getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
+              commentLayer==null?null:commentLayer.getId(), "$1", "$1", false, false);
+            commentTransformer.transform(graph);
+            graph.commit();
+            
+            // word [noise noise] word
+            SpanningConventionTransformer noiseTransformer = new SpanningConventionTransformer(
+              getWordLayer().getId(), "\\[(.*)", "(.*)\\]", true, null, null, 
+              noiseLayer==null?null:noiseLayer.getId(), "$1", "$1", false, false);
+            noiseTransformer.transform(graph);
+            graph.commit();
+            
+            // word[pronounce]
+            ConventionTransformer pronounceTransformer = new ConventionTransformer(
+              getWordLayer().getId(), "(.+)\\[(.*)\\](\\p{Punct}*)", "$1$3", 
+              pronounceLayer==null?null:pronounceLayer.getId(), "$2");
+            pronounceTransformer.transform(graph);
+            graph.commit();
+            
+            // word(lexical)
+            ConventionTransformer lexicalTransformer = new ConventionTransformer(
+              getWordLayer().getId(), "(.+)\\((.*)\\)(\\p{Punct}*)", "$1$3", 
+              lexicalLayer==null?null:lexicalLayer.getId(), "$2");
+            lexicalTransformer.transform(graph);
+            graph.commit();
+            
+            // run word[pronounce] again, in case some were masked by lexical tags:
+            // word[pronounce](lexical)
+            pronounceTransformer.transform(graph);
+            graph.commit();
+            
+          } catch(TransformationException exception) {
+            if (errors == null) errors = new SerializationException();
+            if (errors.getCause() == null) errors.initCause(exception);
+            errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
+          }
+          if (timers != null) timers.end("conventions");
+        } // apply transcription conventions
+        try {
+          // clump non-orthographic 'words' with real words
+          OrthographyClumper clumper = new OrthographyClumper(
+            wordLayer.getId(), utteranceLayer.getId());	  
+          clumper.transform(graph);
+          graph.commit();
+        } catch(TransformationException exception) {
+          if (errors == null) errors = new SerializationException();
+          if (errors.getCause() == null) errors.initCause(exception);
+          errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
+        }
+      } else { // word layer mapped
+        if (timers != null) timers.start("set word turns");
+        // ensure word parent turns are set
+        for (Annotation word : graph.all(wordLayer.getId())) {
+          if (word.getParent() == null) {
+            Annotation[] possibleTurns = word.includingAnnotationsOn(turnLayer.getId());
+            if (possibleTurns.length == 1) { // must be this one
+              word.setParent(possibleTurns[0]);
+            } else if (possibleTurns.length > 1) { // multiple possible turns
+              // use the turn whose label is included in the utterance's tier name
+              // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
+              Tier wordTier = (Tier)word.get("@tier");
+              assert wordTier != null : "wordTier != null - " + word;
+              Annotation turn = null;
+              for (Annotation possibleTurn : possibleTurns) {
+                // is the label (the speaker) a part of the utterance's tier name?
+                if (wordTier.getName().indexOf(possibleTurn.getLabel()) >= 0) {
+                  // multiple parents could match 
+                  // e.g. "sp1" and "Interviewer sp1" both are suffixes of "word - Interviewer sp1"
+                  // so we go with the longest one
+                  if (turn == null
+                      || possibleTurn.getLabel().length() > turn.getLabel().length()) {
+                    turn = possibleTurn;
+                  } // longest match so far
+                } // label is a part of the tier name
+              } // next possible turn
+              if (turn != null) word.setParent(turn);
+            } // multiple possible turns
+          } // parent not set
+          if (word.getParent() == null) { // parent still not set
+            // maybe children don't quite line up with parents, so use midpoint-including instead
+            Annotation[] possibleTurns = word.midpointIncludingAnnotationsOn(turnLayer.getId());
+            if (possibleTurns.length == 1) { // must be this one
+              word.setParent(possibleTurns[0]);
+            } else if (possibleTurns.length > 1) { // multiple possible turns
+              // use the turn whose label is included in the utterance's tier name
+              // e.g. the turn might be "John Smith" and the utterance tier might be "utterance - John Smith"
+              Tier wordTier = (Tier)word.get("@tier");
+              assert wordTier != null : "wordTier != null - " + word;
+              Annotation turn = null;
+              for (Annotation possibleTurn : possibleTurns) {
+                // is the label (the speaker) a part of the utterance's tier name?
+                if (wordTier.getName().indexOf(possibleTurn.getLabel()) >= 0) {
+                  // multiple parents could match 
+                  // e.g. "sp1" and "Interviewer sp1" both are suffixes of "word - Interviewer sp1"
+                  // so we go with the longest one
+                  if (turn == null
+                      || possibleTurn.getLabel().length() > turn.getLabel().length()) {
+                    turn = possibleTurn;
+                  } // longest match so far
+                } // label is a part of the tier name
+              } // next possible turn
+              if (turn != null) word.setParent(turn);
+            } // multiple possible turns
+          } // parent still not set
+        } // next utterance
+        if (timers != null) timers.end("set word turns");
+      } // word layer mapped
+    } // TextGrid is a transcript
 
     // now we have participants,
     // and turns with participant name labels and parents, 
@@ -1562,7 +1577,10 @@ public class TextGridSerialization
 
       // return a named stream from the file
       String name = IO.SafeFileNameUrl(graph.getId());
-      if (!name.toLowerCase().endsWith(".textgrid")) name += ".TextGrid";
+      // remove the extension, whatever it may be
+      if (!name.toLowerCase().endsWith(".textgrid")) {
+        name = IO.WithoutExtension(name) + ".TextGrid";
+      }
       return new NamedStream(in, name);
     } catch(Exception exception) {
       errors = new SerializationException();

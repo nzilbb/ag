@@ -1,0 +1,146 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 530.12 
+tiers? <exists> 
+size = 1 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "emotion" 
+        xmin = 0 
+        xmax = 530.12 
+        intervals: size = 33 
+        intervals [1]:
+            xmin = 0 
+            xmax = 17.361156398104264 
+            text = "neutral" 
+        intervals [2]:
+            xmin = 17.361156398104264 
+            xmax = 22.46925118483412 
+            text = "" 
+        intervals [3]:
+            xmin = 22.46925118483412 
+            xmax = 47.04414959699282 
+            text = "anxious" 
+        intervals [4]:
+            xmin = 47.04414959699282 
+            xmax = 52.277929122054 
+            text = "" 
+        intervals [5]:
+            xmin = 52.277929122054 
+            xmax = 62.851977850050176 
+            text = "anxious" 
+        intervals [6]:
+            xmin = 62.851977850050176 
+            xmax = 74.31751513022145 
+            text = "" 
+        intervals [7]:
+            xmin = 74.31751513022145 
+            xmax = 97.71405056369787 
+            text = "anxious" 
+        intervals [8]:
+            xmin = 97.71405056369787 
+            xmax = 110.2455283650406 
+            text = "sad" 
+        intervals [9]:
+            xmin = 110.2455283650406 
+            xmax = 116.9920686494008 
+            text = "" 
+        intervals [10]:
+            xmin = 116.9920686494008 
+            xmax = 128.5443418534081 
+            text = "anxious" 
+        intervals [11]:
+            xmin = 128.5443418534081 
+            xmax = 150.98707175134402 
+            text = "" 
+        intervals [12]:
+            xmin = 150.98707175134402 
+            xmax = 166.19195148542155 
+            text = "happy" 
+        intervals [13]:
+            xmin = 166.19195148542155 
+            xmax = 179.4824727074349 
+            text = "" 
+        intervals [14]:
+            xmin = 179.4824727074349 
+            xmax = 211.16703174699413 
+            text = "sad" 
+        intervals [15]:
+            xmin = 211.16703174699413 
+            xmax = 220.04444088139712 
+            text = "" 
+        intervals [16]:
+            xmin = 220.04444088139712 
+            xmax = 229.99027969401376 
+            text = "anxious" 
+        intervals [17]:
+            xmin = 229.99027969401376 
+            xmax = 264.06813893933867 
+            text = "" 
+        intervals [18]:
+            xmin = 264.06813893933867 
+            xmax = 272.74226216208746 
+            text = "sad" 
+        intervals [19]:
+            xmin = 272.74226216208746 
+            xmax = 285.2409935503281 
+            text = "" 
+        intervals [20]:
+            xmin = 285.2409935503281 
+            xmax = 293.9151167730769 
+            text = "anxious" 
+        intervals [21]:
+            xmin = 293.9151167730769 
+            xmax = 317.421399315756 
+            text = "" 
+        intervals [22]:
+            xmin = 317.421399315756 
+            xmax = 332.3529331683282 
+            text = "anxious" 
+        intervals [23]:
+            xmin = 332.3529331683282 
+            xmax = 349.1172125380777 
+            text = "" 
+        intervals [24]:
+            xmin = 349.1172125380777 
+            xmax = 370.3329927810891 
+            text = "anxious" 
+        intervals [25]:
+            xmin = 370.3329927810891 
+            xmax = 401.63391688071886 
+            text = "" 
+        intervals [26]:
+            xmin = 401.63391688071886 
+            xmax = 416.47630550631123 
+            text = "anxious" 
+        intervals [27]:
+            xmin = 416.47630550631123 
+            xmax = 441.614227879475 
+            text = "" 
+        intervals [28]:
+            xmin = 441.614227879475 
+            xmax = 451.9749861733138 
+            text = "sad" 
+        intervals [29]:
+            xmin = 451.9749861733138 
+            xmax = 461.53188475973656 
+            text = "" 
+        intervals [30]:
+            xmin = 461.53188475973656 
+            xmax = 487.30988318722797 
+            text = "happy" 
+        intervals [31]:
+            xmin = 487.30988318722797 
+            xmax = 489.35263195245136 
+            text = "" 
+        intervals [32]:
+            xmin = 489.35263195245136 
+            xmax = 493.304176976148 
+            text = "happy" 
+        intervals [33]:
+            xmin = 493.304176976148 
+            xmax = 530.12 
+            text = "" 

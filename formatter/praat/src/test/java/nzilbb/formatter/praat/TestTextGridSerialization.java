@@ -1514,6 +1514,99 @@ public class TestTextGridSerialization {
       }
    }
 
+  /** Test that a TextGrid with only annotation intervals, no turns/utterances/words, can
+   * be deserialized.  */
+  @Test public void intervals_only()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("comment", "Comment")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false),
+      new Layer("noise", "Noise")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false),
+      new Layer("emotion", "Emotions")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("lexical", "Lexical")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("pronounce", "Pronounce")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "test_intervals_only.TextGrid")) };
+    
+    // create deserializer
+    TextGridSerialization deserializer = new TextGridSerialization();
+    
+    // general configuration
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    assertEquals(6, deserializer.configure(configuration, schema).size());
+    
+    // load the stream
+    ParameterSet defaultParamaters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals(1, defaultParamaters.size());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParamaters);
+    
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+    
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+    assertEquals("No warnings", 0, deserializer.getWarnings().length);
+      
+    assertEquals("test_intervals_only.TextGrid", g.getId());
+
+    // no standard layers
+    assertNull("No participant layer in the schema", g.getLayer("who"));
+    assertNull("No turn layer in the schema", g.getLayer("turn"));
+    assertNull("No utterance layer in the schema", g.getLayer("utterance"));
+    assertNull("No word layer in the schema", g.getLayer("word"));
+    assertEquals(0, g.all("who").length);
+    assertEquals(0, g.all("turn").length);
+    assertEquals(0, g.all("utterance").length);
+    assertEquals(0, g.all("word").length);
+      
+    // intervals
+    Annotation[] annotations = g.all("emotion");
+    assertEquals(17, annotations.length);
+
+    assertEquals(Double.valueOf(0.0), annotations[0].getStart().getOffset());
+    assertEquals(Double.valueOf(17.361156398104264), annotations[0].getEnd().getOffset());
+    assertEquals("neutral", annotations[0].getLabel());
+    assertEquals(g, annotations[0].getParent());
+    
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+    }
+  }
+
    @Test public void performance()  throws Exception {
       Schema schema = new Schema(
          "participant", "turn", "utterance", "word",
