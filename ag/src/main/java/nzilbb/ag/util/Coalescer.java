@@ -23,6 +23,7 @@ package nzilbb.ag.util;
 
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.Vector;
 import nzilbb.ag.*;
 
@@ -105,7 +106,12 @@ public class Coalescer implements GraphTransformer {
     // join subsequent peers with the same label...
     // for each parent
     for (Annotation parent : graph.all(graph.getLayer(layerId).getParentId())) {
-      Annotation[] peers = parent.annotations(layerId);
+      TreeSet<Annotation> annotations = new TreeSet<Annotation>(
+        // ensure we get children in anchor order
+        new AnnotationComparatorByAnchor());
+      annotations.addAll(parent.getAnnotations(layerId));
+
+      Annotation[] peers = annotations.toArray(new Annotation[0]);;
       // go back through all the peers, looking for a peer with the same label that is
       // joined to, or overlaps, this one
 

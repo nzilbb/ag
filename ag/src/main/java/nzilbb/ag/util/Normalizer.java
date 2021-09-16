@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.Vector;
 import nzilbb.ag.*;
 import nzilbb.ag.cli.Transform;
@@ -154,7 +155,10 @@ public class Normalizer extends Transform implements GraphTransformer {
           Annotation lastUtterance = null;
           SortedSet<Annotation> utterances = turn.getAnnotations(schema.getUtteranceLayerId());
           if (utterances != null) { // could be an incomplete graph
-            for (Annotation utterance : utterances) {
+            SortedSet<Annotation> utterancesByAnchor
+              = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+            utterancesByAnchor.addAll(utterances);
+            for (Annotation utterance : utterancesByAnchor) {
               if (!participant.getLabel().equals(utterance.getLabel())) {
                 utterance.setLabel(participant.getLabel());
               }
@@ -164,7 +168,7 @@ public class Normalizer extends Transform implements GraphTransformer {
                 // change the last utterance end
                 Anchor newEnd = utterance.getStart();
                 // change all annotations with this turn that end there
-                // to instead end gat the start of this utterance
+                // to instead end at the start of this utterance
                 // this will include lastUtterance itself, and any words/phones it might 
                 // share anchors with
                 for (Annotation ending : lastUtterance.getEnd().getEndingAnnotations()) {
