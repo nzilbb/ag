@@ -2347,7 +2347,17 @@ public class TestGraph {
     parts = Graph.ParseFragmentId("test.trs");
     assertNull("Full graph name fails", parts);
   }
-   
+
+  /** Ensure fragment IDs are correctly generated. */
+  @Test public void FragmentId() {
+    assertEquals("no extension",
+                 "test__123.456-456.789", Graph.FragmentId("test", 123.456, 456.789));
+    assertEquals("with extension",
+                 "test__123.456-456.789", Graph.FragmentId("test.trs", 123.456, 456.789));
+    assertEquals("with extension and dots in name",
+                 "test1.2__123.456-456.789", Graph.FragmentId("test1.2.trs", 123.456, 456.789));
+  }
+
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.ag.TestGraph");
   }

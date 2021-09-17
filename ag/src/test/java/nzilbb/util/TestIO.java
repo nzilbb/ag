@@ -47,6 +47,8 @@ public class TestIO {
    @Test public void WithoutExtension() throws Exception {
       assertEquals("Simple case",
                    "name", IO.WithoutExtension("name.ext"));
+      assertEquals("Including digit",
+                   "video", IO.WithoutExtension("video.mp4"));
       assertEquals("Multiple dots",
                    "something__1.234-5.678",
                    IO.WithoutExtension("something__1.234-5.678.TextGrid"));
