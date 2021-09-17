@@ -349,7 +349,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
             .filter(ann -> ann.getParent().first(ann.getLayerId()) == ann)
             .map(ann -> ann.getParent())
             .findAny();
-          if (boundingParent.isPresent()) {
+          if (boundingParent.isPresent() && boundingParent.get().getStart() != null) {
             // prepend the chain with the parent's start
             chain.insertElementAt(boundingParent.get().getStart(), 0);
             log("start bound now ", boundingParent.get().getStart(), " - ", boundingParent.get());
@@ -364,7 +364,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
             .filter(ann -> ann.getParent().last(ann.getLayerId()) == ann)
             .map(ann -> ann.getParent())
             .findAny();
-          if (boundingParent.isPresent()) {
+          if (boundingParent.isPresent() && boundingParent.get().getEnd() != null) {
             // append the chain with the parent's end
             chain.add(boundingParent.get().getEnd());
             log("end bound now ", boundingParent.get().getEnd(), " - ", boundingParent.get());
