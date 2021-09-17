@@ -44,6 +44,7 @@ import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.LayerTraversal;
 import nzilbb.util.ClonedProperty;
+import nzilbb.util.IO;
 import nzilbb.util.Timers;
 
 /**
@@ -329,7 +330,7 @@ public class Graph extends Annotation {
    * <var>graphId-without-extension</var>__<var>startOffset</var>-<var>endOffset</var> 
    */
   public static String FragmentId(String graphId, Double startOffset, Double endOffset) {
-    return graphId.replaceAll("\\.[^.]+","")
+    return IO.WithoutExtension(graphId)
       + "__" + offsetFormat.format(startOffset) 
       + "-" + offsetFormat.format(endOffset);
   } // end of FragmentId()
@@ -343,7 +344,7 @@ public class Graph extends Annotation {
    * <var>graphId-without-extension</var>__<var>startOffset</var>-<var>endOffset</var> 
    */
   public static String FragmentId(Graph graph, Double startOffset, Double endOffset) {
-    return graph.getId().replaceAll("\\.[^.]+","")
+    return IO.WithoutExtension(graph.getId())
       + "__" + offsetFormat.format(startOffset) 
       + "-" + offsetFormat.format(endOffset);
   } // end of FragmentId()
