@@ -437,7 +437,7 @@ public class PatternTagger extends Annotator {
          
          for (Annotation token : graph.all(sourceLayerId)) {
             if (token.containsKey("@notTarget")) {
-               // while we're here, we remove the @notSpanish mark
+               // while we're here, we remove the @notTarget mark
                token.remove("@notTarget");
             } else { // Target language, so tag it
                matchToken(token);
@@ -467,6 +467,11 @@ public class PatternTagger extends Annotator {
       boolean tagsLayer = sourceLayer.getAlignment() == Constants.ALIGNMENT_NONE
          && sourceLayer.getPeers();
       Layer sourceParentLayer = sourceLayer.getParent();
+
+      // delete any existing annotations
+      for (Annotation preexisting : graph.all(destinationLayer.getId())) {
+        preexisting.destroy();
+      }
       
       int newAnnotationCount = 0;
       int updatedAnnotationCount = 0;

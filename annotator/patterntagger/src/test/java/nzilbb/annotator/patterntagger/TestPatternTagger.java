@@ -921,6 +921,12 @@ public class TestPatternTagger {
          .setPeers(true)
          .setParentId(schema.getTurnLayerId())
          .setType(Constants.TYPE_STRING));
+
+      // also add pre-existing annotation, which should be deleted
+      Annotation deleteMe = g.addAnnotation(
+        new Annotation().setLayerId("story").setLabel("delete-me")
+        .setStartId(g.getOrCreateAnchorAt(10).getId())
+        .setEndId(g.getOrCreateAnchorAt(30).getId()));
       
       annotator.setSchema(schema);
       
@@ -981,17 +987,22 @@ public class TestPatternTagger {
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                    37, g.all("word").length);
-      assertEquals("double check there are no annotations: "+Arrays.asList(g.all("story")),
-                   0, g.all("story").length);
+      assertEquals("double check there's a pre-existing annotation: "+Arrays.asList(g.all("story")),
+                   1, g.all("story").length);
       // run the annotator
       annotator.transform(g);
       Annotation[] annotations = g.all("story");
       assertEquals("Correct number of tokens "+Arrays.asList(annotations),
-                   1, annotations.length);
+                   // including the pre-existing one
+                   2, annotations.length);
       Annotation tag = annotations[0];
       assertEquals("Annotation correct", "story", tag.getLabel());
       assertEquals("Marked for creation",
                    Change.Operation.Create, tag.getChange());
+      assertEquals("Pre-exicting annotation deleted",
+                   deleteMe, annotations[1]);
+      assertEquals("Marked for deletion",
+                   Change.Operation.Destroy, deleteMe.getChange());
       
       String tagged = Arrays.stream(tag.all("word")) // stream of Annotation
          .map(annotation->annotation.getLabel()) // stream of String
