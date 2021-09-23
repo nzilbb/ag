@@ -149,31 +149,45 @@ public class Validator extends Transform implements GraphTransformer {
    */
   protected Integer defaultOffsetThreshold = Integer.valueOf(Constants.CONFIDENCE_DEFAULT);
   /**
-   * Getter for {@link #defaultOffsetThreshold}: The confidence threshold for default anchor offset computation, or null to skip default offset computation.
-   * @return The confidence threshold for default anchor offset computation, or null to skip default offset computation.
+   * Getter for {@link #defaultOffsetThreshold}: The confidence threshold for default
+   * anchor offset computation, or null to skip default offset computation. 
+   * @return The confidence threshold for default anchor offset computation, or null to
+   * skip default offset computation. 
    */
   public Integer getDefaultOffsetThreshold() { return defaultOffsetThreshold; }
   /**
-   * Setter for {@link #defaultOffsetThreshold}: The confidence threshold for default anchor offset computation, or null to skip default offset computation.
-   * @param newDefaultOffsetThreshold The confidence threshold for default anchor offset computation, or null to skip default offset computation.
+   * Setter for {@link #defaultOffsetThreshold}: The confidence threshold for default
+   * anchor offset computation, or null to skip default offset computation. 
+   * @param newDefaultOffsetThreshold The confidence threshold for default anchor offset
+   * computation, or null to skip default offset computation. 
    */
   @Switch("The confidence threshold for default anchor offset computation")
   public Validator setDefaultOffsetThreshold(Integer newDefaultOffsetThreshold) { defaultOffsetThreshold = newDefaultOffsetThreshold; return this; }
    
   /**
-   * Whether to validate all annotations on all layers (true) or perform a 'smart' validation tries to validate only parts of the graph that have actually changed (false - the default).
+   * Whether to validate all annotations on all layers (true) or perform a 'smart'
+   * validation tries to validate only parts of the graph that have actually changed
+   * (false - the default). 
    * @see #getFullValidation()
    * @see #setFullValidation(boolean)
    */
   protected boolean fullValidation = false;
   /**
-   * Getter for {@link #fullValidation}: Whether to validate all annotations on all layers (true) or perform a 'smart' validation tries to validate only parts of the graph that have actually changed (false - the default).
-   * @return Whether to validate all annotations on all layers (true) or perform a 'smart' validation tries to validate only parts of the graph that have actually changed (false - the default).
+   * Getter for {@link #fullValidation}: Whether to validate all annotations on all layers
+   * (true) or perform a 'smart' validation tries to validate only parts of the graph that
+   * have actually changed (false - the default). 
+   * @return Whether to validate all annotations on all layers (true) or perform a 'smart'
+   * validation tries to validate only parts of the graph that have actually changed
+   * (false - the default). 
    */
   public boolean getFullValidation() { return fullValidation; }
   /**
-   * Setter for {@link #fullValidation}: Whether to validate all annotations on all layers (true) or perform a 'smart' validation tries to validate only parts of the graph that have actually changed (false - the default).
-   * @param newFullValidation Whether to validate all annotations on all layers (true) or perform a 'smart' validation tries to validate only parts of the graph that have actually changed (false - the default).
+   * Setter for {@link #fullValidation}: Whether to validate all annotations on all layers
+   * (true) or perform a 'smart' validation tries to validate only parts of the graph that
+   * have actually changed (false - the default). 
+   * @param newFullValidation Whether to validate all annotations on all layers (true) or
+   * perform a 'smart' validation tries to validate only parts of the graph that have
+   * actually changed (false - the default). 
    */
   @Switch("Force full validation")
   public Validator setFullValidation(boolean newFullValidation) { fullValidation = newFullValidation; return this; }
@@ -185,7 +199,8 @@ public class Validator extends Transform implements GraphTransformer {
    */
   protected Integer maxLabelLength = null;
   /**
-   * Getter for {@link #maxLabelLength}: Maximum allowed label length, or null (the default) for no limit.
+   * Getter for {@link #maxLabelLength}: Maximum allowed label length, or null (the
+   * default) for no limit. 
    * @return Maximum allowed label length, or null for no limit.
    */
   public Integer getMaxLabelLength() { return maxLabelLength; }
@@ -227,6 +242,7 @@ public class Validator extends Transform implements GraphTransformer {
           if (annotation.getParentId() == null) {
             needMoreValidation = true;
           } else {
+            // TODO no validation for top level aligned layers that have no children
             switch(annotation.getChange()) {
               case Destroy:
                 // need to validate if a deleted annotation has children
