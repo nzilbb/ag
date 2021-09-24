@@ -472,7 +472,10 @@ public class TestMorTagger {
     assertEquals("Correct number of stems "+morAnnotations,
                  9, morAnnotations.size());
     mors = morAnnotations.iterator();
-    assertEquals("I'll", "I", mors.next().getLabel());
+    Annotation mor = mors.next();
+    assertEquals("I'll", "I", mor.getLabel());
+    assertEquals("intermediate anchor confidence",
+                 (Integer)Constants.CONFIDENCE_DEFAULT, mor.getEnd().getConfidence());
     assertEquals("I'll", "will", mors.next().getLabel());
     assertEquals("sing", "sing", mors.next().getLabel());
     assertEquals("and", "and", mors.next().getLabel());

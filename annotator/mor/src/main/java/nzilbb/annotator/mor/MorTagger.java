@@ -1190,6 +1190,7 @@ public class MorTagger extends Annotator {
              // set the offset
              if (tokenStartOffset != null && tokenDuration != null) {
                a.setOffset(tokenStartOffset + (t * tokenDuration / chaTags.size()));
+               a.setConfidence(Constants.CONFIDENCE_DEFAULT);
              }
            }
            // use new anchor in the original graph
@@ -1206,6 +1207,7 @@ public class MorTagger extends Annotator {
              // set the offset
              if (tokenStartOffset != null && tokenDuration != null) {
                a.setOffset(tokenStartOffset + (t * tokenDuration / chaTags.size()));
+               a.setConfidence(Constants.CONFIDENCE_DEFAULT);
              }
            }
            // use new anchor in the original graph
