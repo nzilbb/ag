@@ -304,6 +304,17 @@ public class TestMorTagger {
 
     assertEquals("John has one tag", 1, firstWord.all("mor").length);
 
+    // ensure all word children are inside the word bounds
+    for (Annotation word : g.all("word")) {
+      for (String l : word.getAnnotations().keySet()) {
+        for (Annotation tag : word.getAnnotations().get(l)) {
+          assertTrue(
+            "word " + word.getId() + " ("+word.getStart()+"-"+word.getEnd()+")"
+            +" contains "+l+" child "+tag.getId() + " ("+tag.getStart()+"-"+tag.getEnd()+")",
+            word.includes(tag));
+        } // next child 
+      } // next child layer
+    } // next word
   }
 
   /** Can configure the annotator to target only specific outputs (pos and stem) */
@@ -470,6 +481,19 @@ public class TestMorTagger {
     assertEquals("my", "my", mors.next().getLabel());
     assertEquals("blogging-morting", "bloggingmorting", mors.next().getLabel());
     assertEquals("lazily", "laze", mors.next().getLabel());
+
+    // ensure all word children are inside the word bounds
+    for (Annotation word : g.all("word")) {
+      for (String l : word.getAnnotations().keySet()) {
+        for (Annotation tag : word.getAnnotations().get(l)) {
+          assertTrue(
+            "word " + word + " ("+word.getStart()+"-"+word.getEnd()+")"
+            +" contains "+l+" child "+tag + " ("+tag.getStart()+"-"+tag.getEnd()+")",
+            word.includes(tag));
+        } // next child 
+      } // next child layer
+    } // next word
+
   }
 
   /** Configuring a different input layer works */
@@ -625,6 +649,18 @@ public class TestMorTagger {
     assertEquals("my", "my", mors.next().getLabel());
     assertEquals("blogging-morting", "bloggingmorting", mors.next().getLabel());
     assertEquals("lazily", "laze", mors.next().getLabel());
+
+    // ensure all word children are inside the word bounds
+    for (Annotation word : g.all("word")) {
+      for (String l : word.getAnnotations().keySet()) {
+        for (Annotation tag : word.getAnnotations().get(l)) {
+          assertTrue(
+            "word " + word.getId() + " ("+word.getStart()+"-"+word.getEnd()+")"
+            +" contains "+l+" child "+tag.getId() + " ("+tag.getStart()+"-"+tag.getEnd()+")",
+            word.includes(tag));
+        } // next child 
+      } // next child layer
+    } // next word
   }
 
   @Test public void setInvalidTaskParameters() throws Exception {

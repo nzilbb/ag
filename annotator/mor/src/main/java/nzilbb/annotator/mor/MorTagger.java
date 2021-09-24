@@ -33,6 +33,7 @@ import java.io.StringBufferInputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.SortedSet;
 import java.util.Vector;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
@@ -46,7 +47,7 @@ import nzilbb.ag.serialize.SerializationException;
 import nzilbb.ag.serialize.SerializationParametersMissingException;
 import nzilbb.ag.serialize.SerializerNotConfiguredException;
 import nzilbb.ag.serialize.util.NamedStream;
-import nzilbb.ag.util.DefaultOffsetGenerator;
+//import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.util.Normalizer;
 import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.*;
@@ -268,7 +269,6 @@ public class MorTagger extends Annotator {
    * @return null if upload was successful, an error message otherwise.
    */
   public String uploadZip(File file) {
-    System.out.println("uploadZip " + file.getName());
     if (!file.getName().endsWith(".zip")) {
       return file.getName() + " is not a .zip file.";
     }
@@ -1130,14 +1130,19 @@ public class MorTagger extends Annotator {
         }
       } // next utterance
 
-      // if any words are anchored
-      boolean alignedWords = Arrays.stream(graph.all(schema.getWordLayerId()))
-        .filter(w->w.getAnchored()).findAny().isPresent();
-      if (alignedWords) {
-        // ensure mor tags are also anchored
-        // (they can be chained across the duration of the word, with null offsets)
-        new DefaultOffsetGenerator().transform(graph);
-      }
+      // if any words are anchored TODO re-enable this when we totally trust DefaultOffsetGenerator
+      // boolean alignedWords = Arrays.stream(graph.all(schema.getWordLayerId()))
+      //   .filter(w->w.getAnchored()).findAny().isPresent();
+      // if (alignedWords) {
+      //   // ensure mor tags are also anchored
+      //   // (they can be chained across the duration of the word, with null offsets)
+      //   new DefaultOffsetGenerator().transform(graph);
+      // }
+      
+      // this flag is recognized by LaBB-CAT as a signal not to waste time validating the
+      // graph structure, as we've only deleted/added annotations on our output layer,
+      // not changed anchors or any other layers
+      graph.put("@valid", Boolean.TRUE); // TODO remove this
       
       setStatus("Finished " + graph.getId());
       return graph;
@@ -1170,7 +1175,11 @@ public class MorTagger extends Annotator {
      String layerId, Annotation chaWord, Annotation originalToken, Graph graph) {
      
      if (layerId != null) {
-       for (Annotation chaTag : chaWord.getAnnotations(layerId)) {
+       SortedSet<Annotation> chaTags = chaWord.getAnnotations(layerId);
+       Double tokenStartOffset = originalToken.getStart().getOffset();
+       Double tokenDuration = originalToken.getDuration();
+       int t = 0; // tag index for calculating offsets
+       for (Annotation chaTag : chaTags) {
          Anchor start = originalToken.getStart();
          if (!chaTag.getStartId().equals(chaWord.getStartId())) { // chained annotation
            if (!chaTag.getStart().containsKey("@new")) {
@@ -1178,10 +1187,15 @@ public class MorTagger extends Annotator {
              Anchor a = new Anchor();
              a.create();
              chaTag.getStart().put("@new", graph.addAnchor(a));
+             // set the offset
+             if (tokenStartOffset != null && tokenDuration != null) {
+               a.setOffset(tokenStartOffset + (t * tokenDuration / chaTags.size()));
+             }
            }
            // use new anchor in the original graph
            start = (Anchor)chaTag.getStart().get("@new");
          }
+         t++; // increment tag index for calculating offsets
          Anchor end = originalToken.getEnd();
          if (!chaTag.getEndId().equals(chaWord.getEndId())) { // chained annotation
            if (!chaTag.getEnd().containsKey("@new")) {
@@ -1189,6 +1203,10 @@ public class MorTagger extends Annotator {
              Anchor a = new Anchor();
              a.create();
              chaTag.getEnd().put("@new", graph.addAnchor(a));
+             // set the offset
+             if (tokenStartOffset != null && tokenDuration != null) {
+               a.setOffset(tokenStartOffset + (t * tokenDuration / chaTags.size()));
+             }
            }
            // use new anchor in the original graph
            end = (Anchor)chaTag.getEnd().get("@new");
@@ -1208,8 +1226,8 @@ public class MorTagger extends Annotator {
          a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
          a.create();
          graph.addAnnotation(a);
-       }
-     }
+       } // next tag
+     } // layerId != null
    } // end of copyAnnotations()
 
 }
