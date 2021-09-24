@@ -379,6 +379,11 @@ public class PatternTagger extends Annotator {
          annotateSpans(graph, sourceLayer, destinationLayer);
       } // span-based tagging
 
+      // this flag is recognized by LaBB-CAT as a signal not to waste time validating the
+      // graph structure, as we've only deleted/added annotations on our output layer,
+      // not changed anchors or any other layers
+      graph.put("@valid", Boolean.TRUE); // TODO remove this
+
       setRunning(false);
       return graph;
    }
