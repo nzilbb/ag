@@ -22,6 +22,7 @@
 package nzilbb.ag.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Queue;
 import java.util.Optional;
 import java.util.LinkedHashSet;
@@ -263,14 +264,45 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
         && graph.getSchema().getWordLayer() != null
         && turnLayerId != null) {
       
-      // first spread words evenly through turns
+      // first spread words evenly through utterances...
+
+      // assign words to each utterance
+      for (Annotation turn : graph.list(graph.getSchema().getTurnLayerId())) {
+        Iterator<Annotation> utterances
+          = new AnnotationsByAnchor(turn.getAnnotations(graph.getSchema().getUtteranceLayerId()))
+          .stream().filter(u -> u.getStart().getOffset() != null).iterator();
+        if (!utterances.hasNext()) continue;
+        Annotation currentUtterance = utterances.next();
+        currentUtterance.put("@words", new Vector<Annotation>());
+        Annotation nextUtterance = utterances.hasNext()?utterances.next():null;
+        for (Annotation word : turn.getAnnotations(graph.getSchema().getWordLayerId())) {
+          if (word.getStart() == null) continue; // ?!
+          if (// the start is inside the next utterance...
+            (word.getStart().getOffset() != null 
+             && nextUtterance != null
+             && word.getStart().getOffset() >= nextUtterance.getStart().getOffset())
+            || // ...or the start offset is null and the end is inside the next utterance
+            (word.getStart().getOffset() == null
+             && word.getEnd().getOffset() != null
+             && nextUtterance != null
+             && word.getEnd().getOffset() > nextUtterance.getStart().getOffset())) {
+            // next utterance
+            currentUtterance = nextUtterance;
+            currentUtterance.put("@words", new Vector<Annotation>());
+            nextUtterance = utterances.hasNext()?utterances.next():null;
+          } // next utterance
+          log("utt ", currentUtterance, " word ", word);
+          ((Vector<Annotation>)currentUtterance.get("@words")).add(word);
+        } // next word
+      } // next turn
+        
       for (Annotation utterance : graph.list(graph.getSchema().getUtteranceLayerId())) {
         if (utterance.getStart() == null
             || utterance.getStart().getOffset() == null
             || utterance.getEnd() == null
             || utterance.getEnd().getOffset() == null) continue;
         if (utterance.getChange() == Change.Operation.Destroy) continue;
-        log("utterance ", utterance);
+        log("utterance ", utterance, " words ", utterance.get("@words"));
         
         // gather up anchors of descendants in the same turn
         final Annotation turn = utterance.first(turnLayerId);
@@ -278,21 +310,53 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
         sequence.add( // prepend immovable sentinel
           new Anchor(null, utterance.getStart().getOffset(), getDefaultOffsetThreshold() + 1));
         sequence.add(utterance.getStart());
-        for (Annotation word : utterance.list(graph.getSchema().getWordLayerId())) {
+        boolean firstWord = true;
+        Vector<Annotation> words = (Vector<Annotation>)utterance.get("@words");
+        if (words == null) continue; // no words assigned to this utterance
+        
+        for (Annotation word : words) {
           if (word.getChange() == Change.Operation.Destroy) continue;
           log("word ", word);
+          if (firstWord) {
+            // the first word may be preceded by words with no offset, so look backwards
+            AnchorChain wordChain = AnchorChain.ChainBackwardUntil(
+              word.getStart(), preferredChainLayers,
+              annotation -> // only follow annotations...
+              !annotation.getLayer().isAncestor(turnLayerId) // ... that have no turn
+              || annotation.first(turnLayerId) == turn, //  or are in the same turn as utterance
+              anchor ->        // stop when we get beyond the bounds of the word or utterance
+              (anchor.getOffset() != null
+               && anchor.getOffset() <= utterance.getStart().getOffset()));
+            if (wordChain.size() > 0) {
+              // log("word chain: ", wordChain, "first anchor: ", wordChain.firstElement(),
+              //     " utt start: ", utterance.getStart());
+              // if the first anchor in the chain is before the start
+              if (wordChain.firstElement().getOffset() != null
+                  && wordChain.firstElement().getOffset() < utterance.getStart().getOffset()) {
+                // remove it
+                wordChain.remove(wordChain.firstElement());
+              }
+              sequence.addAll(wordChain);
+            }
+            
+            firstWord = false;
+          } // firstWord
           // add the word's start anchor
           sequence.add(word.getStart());
           // find the anchor chain that moves forward from here, until the end of the utterance
           // this will catch any words with unset offsets (not returned by utterance.list()
           // and also words with intervening noise/comment chains
+          log(" word ", word, " chainForwardUntil ", utterance.getEnd());
           AnchorChain wordChain = AnchorChain.ChainForwardUntil(
-            word.getStart(), preferredChainLayers, 
+            word.getStart(), preferredChainLayers,
             annotation -> // only follow annotations...
             !annotation.getLayer().isAncestor(turnLayerId) // ... that have no turn
             || annotation.first(turnLayerId) == turn, // ... or are in the same turn as utterance
-            anchor -> // stop when we get beyond the bounds of the utterance
-            anchor.getOffset() != null && anchor.getOffset() >= utterance.getEnd().getOffset());
+            anchor ->        // stop when we get beyond the bounds of the utterance
+            (anchor == word.getEnd()
+             || (anchor.getOffset() != null
+                 && anchor.getOffset() >= utterance.getEnd().getOffset())));
+          log(" chain ", wordChain);
           if (wordChain.size() > 0) {
             // if the last anchor in the chain is past the end
             if (wordChain.lastElement().getOffset() != null
@@ -300,6 +364,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
               // remove it
               wordChain.remove(wordChain.lastElement());
             }
+            log(" chain now ", wordChain);
             sequence.addAll(wordChain);
           }
         } // next word
@@ -319,7 +384,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
       } // next utterance
     } // utterance and word layers are defined
     
-    // iterate through all anchors, finding chains that require offsets set as we go
+    // now iterate through all anchors, finding chains that require offsets set as we go
     for (Anchor anchor : graph.getAnchors().values()) {
       log("anchor ", anchor);
       // is this anchor part of a series of anchors that need their offsets to be generated?
@@ -372,31 +437,51 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
         } // unset first offset
         
         // if there's a chain with defined bounds
-        if (chain.size() > 1
-            && chain.firstElement().getOffset() != null
-            && chain.lastElement().getOffset() != null) {
-          
-          // bookend the chain with immovable sentinels
-          chain.insertElementAt(
-            new Anchor(null, chain.firstElement().getOffset(), getDefaultOffsetThreshold() + 1)
-            , 0);
-          chain.add(
-            new Anchor(null, chain.lastElement().getOffset(), getDefaultOffsetThreshold() + 1));
-          
-          // iterpolate the anchor offsets between the start and the end
-          iterpolateAnchors(chain.iterator());
-          
-          // tag the anchors, so that the become bounds for future chaining
-          // e.g. word's are evenly spread through utterances,
-          // and then phones are evenly spread through words without changing word bounds
-          chain.stream().forEach(a->a.put("@offsetGenerated", Boolean.TRUE));
-          
-        } // can interpolate
+        if (chain.size() > 1) {
+          Optional<Double> startOffset = chain.stream()
+            .filter(a -> a.getOffset() != null)
+            .map(a -> a.getOffset())
+            .findFirst();
+          Vector<Anchor> reverseChain = new Vector<Anchor>(chain);
+          Collections.reverse(reverseChain);
+          Optional<Double> endOffset = reverseChain.stream()
+            .filter(a -> a.getOffset() != null)
+            .map(a -> a.getOffset())
+            .findFirst();
+
+          if (startOffset.isPresent() && endOffset.isPresent()) {
+            
+            // bookend the chain with immovable sentinels
+            chain.insertElementAt(
+              new Anchor(null, startOffset.get(), getDefaultOffsetThreshold() + 1), 0);
+            chain.add(
+              new Anchor(null, endOffset.get(), getDefaultOffsetThreshold() + 1));
+            
+            // iterpolate the anchor offsets between the start and the end
+            iterpolateAnchors(chain.iterator());
+            
+            // tag the anchors, so that the become bounds for future chaining
+            // e.g. word's are evenly spread through utterances,
+            // and then phones are evenly spread through words without changing word bounds
+            chain.stream().forEach(a->a.put("@offsetGenerated", Boolean.TRUE));
+            
+          } // can interpolate
+        }
       } // anchor that needs interpolating
     } // next anchor
 
     // clear the @offsetGenerated flags
     graph.getAnchors().values().stream().forEach(a->a.remove("@offsetGenerated"));
+
+    // ensure all offsets are set
+    List<Anchor> unsetOffsets = graph.getAnchors().values().stream()
+      .filter(anchor -> anchor.getChange() != Change.Operation.Destroy)
+      .filter(anchor -> anchor.isLinked())
+      .filter(anchor -> anchor.getOffset() == null)
+      .collect(Collectors.toList());
+    if (unsetOffsets.size() > 0) {
+      throw new TransformationException(this, "Could not determine offsets: " + unsetOffsets);
+    }
 
     return graph;
   }
@@ -497,20 +582,27 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
             double dIncrement = dDuration / (unsetAnchors.size() + 1);
             log("from: ", lastSetAnchor, " to ", nextSetAnchor,
                 " duration: ", dDuration, " increment: ", dIncrement);
-            int i = 0;
-            for (Anchor unset : unsetAnchors) {
-              i++;
-              double newOffset = dStart + i * dIncrement;
-              if (unset.getOffset() == null 
-                  || unset.getOffset().doubleValue() != newOffset
-                  // upgrade confidence even if unset.offset == newOffset
-                  || getConfidence(unset) < getConfidence()) {
-                log("setting: ", unset, " offset to ", newOffset);
-                unset
-                  .setOffset(newOffset)
-                  .setConfidence(getConfidence());
-              }
-            } // next unset anchor
+            if (dDuration < 0) {
+              String message = "Negative duration from " + logAnchor(lastSetAnchor)
+                + " to " + logAnchor(nextSetAnchor);
+              log("ERROR: ", message);
+              //TODO make this optional? throw new TransformationException(this, message);
+            } else {
+              int i = 0;
+              for (Anchor unset : unsetAnchors) {
+                i++;
+                double newOffset = dStart + i * dIncrement;
+                if (unset.getOffset() == null 
+                    || unset.getOffset().doubleValue() != newOffset
+                    // upgrade confidence even if unset.offset == newOffset
+                    || getConfidence(unset) < getConfidence()) {
+                  log("setting: ", unset, " offset to ", newOffset);
+                  unset
+                    .setOffset(newOffset)
+                    .setConfidence(getConfidence());
+                }
+              } // next unset anchor
+            } // not backwards!
           } // unsetAnchors.size() > 0
         } // unsetAnchors.size() > 0
 		  
