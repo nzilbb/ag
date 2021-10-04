@@ -239,56 +239,34 @@ public class Validator extends Transform implements GraphTransformer {
       for (Annotation annotation : graph.getAnnotationsById().values()) {
         if (!needMoreValidation) { // haven't found any interesting changes yet
           // we don't validate if the only changes are to tag layers with no children etc.
-          if (annotation.getParentId() == null) {
+          if (annotation.getParentId() == null
+              && annotation.getLayer().getParentId() != null
+              && annotation.getLayer().getParentId() != graph.getSchema().getRoot().getId()) {
             needMoreValidation = true;
           } else {
-            // TODO no validation for top level aligned layers that have no children
-            switch(annotation.getChange()) {
-              case Destroy:
-                // need to validate if a deleted annotation has children
-                if (annotation.getAnnotations().size() > 0) {
-                  log("Destroyed annotation has children: ", annotation.getId());
-                  needMoreValidation = true;
-                }
-                break;
-              case Create:
-                // need to validate if it has children, 
-                // or it's an aligned layer (check relationships between children)
-                if (maxLabelLength != null) {
-                  log("New annotation and maxLabelLength set: ", annotation.getId());
-                  needMoreValidation = true;
-                } else if (annotation.getLayer().getAlignment() != Constants.ALIGNMENT_NONE) {
-                  log("New annotation on aligned layer: ", annotation.getId());
-                  needMoreValidation = true;
-                } else if (annotation.getAnnotations().size() > 0) {
-                  log("New annotation has children: ", annotation.getId());
-                  needMoreValidation = true;
-                }
-                break;
-              case Update:
-                if (maxLabelLength != null && annotation.get("originalLabel") != null) {
-                  log("Changed annotation label and maxLabelLength set: ", annotation.getId());
-                  needMoreValidation = true;
-                } else if (annotation.getLayer().getAlignment() != Constants.ALIGNMENT_NONE) {
-                  log("Changed annotation on aligned layer: ", annotation.getId());
-                  needMoreValidation = true;
-                } else if (annotation.getAnnotations().size() > 0) {
-                  log("Changed annotation has children: ", annotation.getId());
-                  needMoreValidation = true;
-                }
-                break;
-            } // what type of change it is
+            if (annotationNeedsValidation(annotation)) {
+              needMoreValidation = true;              
+            }
           } // parent ID is set
         } // no interesting changes yet
       } // next annotation
       if (!needMoreValidation) { // haven't found any interesting changes yet
         for (Anchor anchor : graph.getAnchors().values()) {
-          if (anchor.getChange() != Change.Operation.NoChange) {
-            log("Anchor changed: ", anchor.getId());
-            needMoreValidation = true;
-            break;
-          }
-        }
+          if (anchor.getChange() != Change.Operation.NoChange) { // changed anchor
+            // is it linked to an annotation that's not new?
+            Vector<Annotation> linkedAnnotations = new Vector<Annotation>();
+            linkedAnnotations.addAll(anchor.getStartingAnnotations());
+            linkedAnnotations.addAll(anchor.getEndingAnnotations());
+            for (Annotation annotation : linkedAnnotations) {
+              if (annotation.getChange() != Change.Operation.Create) {
+                log("Anchor changed: ", anchor.getId());
+                needMoreValidation = true;
+                break;
+              }
+            } // next linked annotation
+          } // changed anchor
+          if (needMoreValidation) break; // already found something interesting
+        } // next anchor
       }
     }
 
@@ -333,8 +311,131 @@ public class Validator extends Transform implements GraphTransformer {
         log("Skipping default offset generation");
       }
     } // default offset threshold
+
+    // ensure there are no backwards annotations on system layers
+    Vector<String> checkLayers = new Vector<String>();
+    if (graph.getSchema().getTurnLayerId() != null) {
+      checkLayers.add(graph.getSchema().getTurnLayerId());
+    }
+    if (graph.getSchema().getUtteranceLayerId() != null) {
+      checkLayers.add(graph.getSchema().getUtteranceLayerId());
+    }
+    if (graph.getSchema().getWordLayerId() != null) {
+      checkLayers.add(graph.getSchema().getWordLayerId());
+    }
+    if (graph.getSchema().getLayer("segment") != null) {
+      checkLayers.add("segment");
+    }
+    for (Anchor a : graph.getAnchors().values()) {
+      if (a.getOffset() == null) continue;
+      if (a.getChange() == Change.Operation.Update) {
+        for (String layerId : checkLayers) {
+          if (a.getStartOf().containsKey(layerId)) {
+            for (Annotation startsHere : a.getStartOf().get(layerId)) {
+              if (startsHere.getChange() == Change.Operation.Destroy) continue;
+              Anchor end = startsHere.getEnd();
+              if (end != null
+                  && end.getOffset() != null
+                  && end.getOffset() < a.getOffset()) {
+                throw new TransformationException(
+                  this,
+                  "Annotation " + startsHere.getId()
+                  +" ("+startsHere.getLayerId()+")"
+                  +" \""+startsHere.getLabel()+"\""
+                  +" would be backwards after validation: "
+                  + startsHere.getStart() + " - " + startsHere.getEnd());
+              } // backwards
+            } // next annotation that starts here
+          } // annotations start here
+          if (a.getEndOf().containsKey(layerId)) {
+            for (Annotation endsHere : a.getEndOf().get(layerId)) {
+              if (endsHere.getChange() == Change.Operation.Destroy) continue;
+              Anchor start = endsHere.getStart();
+              if (start != null
+                  && start.getOffset() != null
+                  && start.getOffset() > a.getOffset()) {
+                throw new TransformationException(
+                  this,
+                  "Annotation " + endsHere.getId()
+                  +" ("+endsHere.getLayerId()+")"
+                  +" \""+endsHere.getLabel()+"\""
+                  +" would be backwards after validation: "
+                  + endsHere.getStart() + " - " + endsHere.getEnd());
+              } // backwards
+            } // next annotation that ends here
+          } // annotations end here
+        } // next layer
+      } // anchor changed
+    } // next anchor
+    
     return graph;
   }
+
+  /**
+   * Determines whether an annotation has changes that generate the need for validation.
+   * @param annotation
+   * @return true if the annotation has changes that require validation, false otherwise.
+   */
+  protected boolean annotationNeedsValidation(Annotation annotation) {
+    Layer layer = annotation.getLayer();
+    if (annotation.getParentId() == null
+        && layer.getParentId() != null
+        && layer.getParentId() != annotation.getGraph().getSchema().getRoot().getId()) {
+      return true; // needs a parent
+    }
+    boolean basicChecks = false;
+    switch(annotation.getChange()) {
+      case Destroy:
+        // need to validate if a deleted annotation has children
+        if (annotation.getAnnotations().size() > 0) {
+          log("Destroyed annotation has children: ", annotation.getId());
+          return true;
+        }
+        break;
+      case Create:
+        basicChecks = true;
+        break;
+      case Update:
+        basicChecks = true;
+        break;
+    } // what type of change it is
+    
+    if (basicChecks) {
+      if (maxLabelLength != null) {
+        if (annotation.getLabel().length() > maxLabelLength) {
+          log("New annotation and maxLabelLength set: ", annotation.getId());
+          return true;
+        }
+      }
+      if (annotation.getLayer().getAlignment() != Constants.ALIGNMENT_NONE) {
+        if (annotation.getStart() != null) { // (could be graph fragment)
+          if (annotation.getStart().getOffset() == null) {
+            log("Annotation null start offset: ", annotation.getId());
+            return true;
+          }
+          if (annotation.getEnd().getOffset() == null) {
+            log("Annotation null end offset: ", annotation.getId());
+            return true;
+          }
+          if (annotation.getDuration() < 0) {
+            log("Annotation negative duration: ", annotation.getId());
+            return true;
+          }
+          if (layer.getParentIncludes()) {
+            if (annotation.getParent() != null
+                && !annotation.getParent().includes(annotation)) {
+              log("Annotation not included in parent: ", annotation.getId());
+              return true;
+            }
+          }
+        } else if (annotation.getAnnotations().size() > 0) {
+          log("Annotation has children: ", annotation.getId());
+          return true;
+        }
+      } // not ALIGNMENT_NONE
+    }
+    return false;
+  } // end of annotationNeedsValidation()
 
   /**
    * Check label length.
