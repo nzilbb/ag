@@ -57,11 +57,8 @@ import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class TestMerger
-{      
-  @Test public void identityMerge() 
-    throws Exception
-  {
+public class TestMerger {      
+  @Test public void identityMerge() throws Exception {
     Schema schema = defaultSchema();
 
     File f = new File(getDir(), "identity.json");

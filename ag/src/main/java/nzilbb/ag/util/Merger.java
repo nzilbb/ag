@@ -560,16 +560,41 @@ public class Merger
     // map graphs together manually, to help top-level parent determination
     setCounterparts(graph, editedGraph); 
     for (Layer layer : topDownLayersInEditedGraph) {
-      TreeSet<Annotation> uneditedAnnotations 
-        = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
-      uneditedAnnotations.addAll(Arrays.asList(graph.all(layer.getId())));
+
+      // for direct descendents of 'turn' (i.e. 'utterance' and 'word')
+      // allow mapping across the the whole graph, so that if the edits involve partitioning
+      // turns differently, utterances/words can migrate to a neighboring turn
+      // TODO disabling this might be a good idea, and also would also be generally less resource hungry
+      if ((schema.getTurnLayerId() != null
+           && schema.getTurnLayerId().equals(layer.getParentId()))
+          // (or it's a top level layer)
+          || layer.getParentId() == null) {
+        
+        TreeSet<Annotation> uneditedAnnotations 
+          = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
+        uneditedAnnotations.addAll(Arrays.asList(graph.all(layer.getId())));
+        
+        TreeSet<Annotation> editedAnnotations 
+          = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
+        editedAnnotations.addAll(Arrays.asList(editedGraph.all(layer.getId())));
 	 
-      TreeSet<Annotation> editedAnnotations 
-        = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
-      editedAnnotations.addAll(Arrays.asList(editedGraph.all(layer.getId())));
-	 
-      // (no changes to track:)
-      mapAnnotationsForMerge(layer, uneditedAnnotations, editedAnnotations); 
+        mapAnnotationsForMerge(layer, uneditedAnnotations, editedAnnotations);
+      } else { // otherwise, only allow peers to map - i.e. annotations with the mapped parents
+        for (Annotation parent : graph.all(layer.getParentId())) {
+          if (parent.containsKey("@other")) {
+            TreeSet<Annotation> uneditedAnnotations 
+              = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
+            uneditedAnnotations.addAll(parent.getAnnotations(layer.getId()));
+
+            Annotation editedParent = (Annotation)parent.get("@other");
+            TreeSet<Annotation> editedAnnotations 
+              = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
+            editedAnnotations.addAll(editedParent.getAnnotations(layer.getId()));
+            
+            mapAnnotationsForMerge(layer, uneditedAnnotations, editedAnnotations);
+          } // the parent has a counterpart in the edited graph
+        } // next parent
+      } // not a turn child layer (utterance or word)
     } // next layer
 
     // phase 2. - reconcile unmapped annotations
@@ -694,8 +719,8 @@ public class Merger
   /**
    * PHASE 1: Maps annotations from another fragment to annotations in this fragment, in order to
    * then compute change deltas. 
-   * <p>Corresponding annotations in each graph are linked by having the "@other" attribute set.
-   * <p>Only annotations with the same participant (if any) can be linked as counterparts.
+   * <p> Corresponding annotations in each graph are linked by having the "@other" attribute set.
+   * <p> Only annotations with the same participant (if any) can be linked as counterparts.
    * @param layer Layer definition to use.
    * @param these Annotations from one layer in the graph to be merged into.
    * @param those Annotations from the same layer in {@link #editedGraph}.
@@ -731,9 +756,10 @@ public class Merger
     } else { // split annotations out by participant
       // annotations from different participants are never paired, so split the lists by 
       // participant and then map them 
-      // - this way, simultaneous speech doesn't turn into a whole bunch of unnecessary adds and deletes
-      // - this should improve memory usage too, because, with luck, the two lists to get minimum edit
-      //   path from are shorter in each case
+      // - this way, simultaneous speech doesn't turn into a whole bunch of
+      //   unnecessary adds and deletes
+      // - this should improve memory usage too, because, with luck,
+      //   the two lists to get minimum edit path from are shorter in each case
 	 
       for (Annotation an : these) {
         String who = "";

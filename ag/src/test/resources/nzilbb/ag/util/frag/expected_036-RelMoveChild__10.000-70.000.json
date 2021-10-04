@@ -125,13 +125,13 @@
             "offset": 0.42,
             "confidence": 50
         },
-        "n_480": {
+        "3": {
             "offset": 0.48,
-            "confidence": 50
+            "confidence": 100
         },
-        "n_500": {
+        "1": {
             "offset": 0.5,
-            "confidence": 50
+            "confidence": 100
         },
         "n_550": {
             "offset": 0.55,
@@ -228,7 +228,7 @@
                                     "confidence": 50,
                                     "tag": [
                                         {
-                                            "id": "es_50_1",
+                                            "id": "4",
                                             "label": "phone-tag",
                                             "startId": "n_270",
                                             "endId": "n_300",
@@ -279,7 +279,7 @@
                             "id": "ew_0_4",
                             "label": "86-2-1",
                             "startId": "n_401",
-                            "endId": "n_500",
+                            "endId": "3",
                             "confidence": 100,
                             "segments": [
                                 {
@@ -293,14 +293,7 @@
                                     "id": "es_1_11",
                                     "label": "86-2-1-2",
                                     "startId": "n_420",
-                                    "endId": "n_480",
-                                    "confidence": 50
-                                },
-                                {
-                                    "id": "es_1_12",
-                                    "label": "86-2-1-3",
-                                    "startId": "n_480",
-                                    "endId": "n_500",
+                                    "endId": "3",
                                     "confidence": 50
                                 }
                             ]
@@ -308,14 +301,21 @@
                         {
                             "id": "ew_0_5",
                             "label": "86-2-2",
-                            "startId": "n_500",
+                            "startId": "3",
                             "endId": "n_600",
                             "confidence": 100,
                             "segments": [
                                 {
+                                    "id": "2",
+                                    "label": "86-2-1-3",
+                                    "startId": "3",
+                                    "endId": "1",
+                                    "confidence": 50
+                                },
+                                {
                                     "id": "es_1_13",
                                     "label": "86-2-2-1",
-                                    "startId": "n_500",
+                                    "startId": "1",
                                     "endId": "n_550",
                                     "confidence": 50
                                 },
