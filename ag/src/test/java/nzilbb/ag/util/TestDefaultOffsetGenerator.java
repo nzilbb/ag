@@ -731,7 +731,7 @@ public class TestDefaultOffsetGenerator {
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
     generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
     generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
-    // generator.setDebug(true);
+    //generator.setDebug(true);
     try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
@@ -779,6 +779,349 @@ public class TestDefaultOffsetGenerator {
     }
   }
 
+  /** Utterances partition boundaries of interpolation, and utternces share anchors with words. */
+  @Test public void utterancesPartitionWordsInTurnBeforeNormalization() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("utterance", "Utterance")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true)));
+
+    // turn start and the start
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); 
+
+    g.addAnchor(new Anchor("a01", null)); // quick
+    g.addAnchor(new Anchor("a02", null)); // brown
+    g.addAnchor(new Anchor("a03", null)); // fox
+
+    // utterance boundary and jumps start
+    g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); 
+
+    g.addAnchor(new Anchor("a14", null)); // over
+    g.addAnchor(new Anchor("a24", null)); // a
+    g.addAnchor(new Anchor("a34", null)); // lazy
+    g.addAnchor(new Anchor("a44", null)); // dog
+    g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(new Annotation(
+                      "participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+    g.addAnnotation(new Annotation(
+                      "turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+
+    g.addAnnotation(
+      new Annotation(
+        "utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+    g.addAnnotation(
+      new Annotation(
+        "utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+      
+    g.addAnnotation(new Annotation("the",   "the",   "word", "turnStart",  "a01", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+    g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "utteranceChange", "turn1"));
+
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "utteranceChange",  "a14", "turn1"));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn1"));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn1"));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
+    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "turnEnd", "turn1"));
+
+    g.trackChanges();
+    
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
+    generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
+    generator.setDebug(true);
+    try {
+      generator.transform(g);
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
+
+      // test the values are what we expected
+
+      // test the changes are recorded
+      Set<String> changeStrings = changes.stream()
+        .map(Change::toString).collect(Collectors.toSet());
+      assertEquals(Double.valueOf(0.1), g.getAnchor("a01").getOffset());
+      assertEquals(Double.valueOf(0.2), g.getAnchor("a02").getOffset());
+      // yay for inexact floating point representations!
+      assertEquals(Double.valueOf(0.30000000000000004), g.getAnchor("a03").getOffset());
+      assertEquals(Double.valueOf(1.4), g.getAnchor("a14").getOffset());
+      assertEquals(Double.valueOf(2.4), g.getAnchor("a24").getOffset());
+      assertEquals(Double.valueOf(3.4), g.getAnchor("a34").getOffset());
+      assertEquals(Double.valueOf(4.4), g.getAnchor("a44").getOffset());
+
+      // then the rest interpolated between
+      assertTrue(changeStrings.contains("Update a01: offset = 0.1 (was null)"));
+      assertTrue(changeStrings.contains("Update a02: offset = 0.2 (was null)"));
+      assertTrue(changeStrings.contains("Update a03: offset = 0.30000000000000004 (was null)"));
+      // then the rest interpolated between
+      assertTrue(changeStrings.contains("Update a14: offset = 1.4 (was null)"));
+      assertTrue(changeStrings.contains("Update a24: offset = 2.4 (was null)"));
+      assertTrue(changeStrings.contains("Update a34: offset = 3.4 (was null)"));
+      assertTrue(changeStrings.contains("Update a44: offset = 4.4 (was null)"));
+      assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
+
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
+  /** First word of utterance can have null offsets and still be interpolated. */
+  @Test public void firstWordNullOffset() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("utterance", "Utterance")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true)));
+    
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+    // null first word anchor:
+    g.addAnchor(new Anchor("a0", null, Constants.CONFIDENCE_NONE)); // the
+    
+    g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+    g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+    g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+    g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
+
+    g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+    // null first words anchor:
+    g.addAnchor(new Anchor("a04b", null, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+    
+    g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+    g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+    g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+    // no confidence set for a44 and a54
+    g.addAnchor(new Anchor("a44", 5.1)); // dog
+    g.addAnchor(new Anchor("a54", null)); // end of dog
+
+    // no confidence set for a7
+    g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(new Annotation(
+                      "participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+    g.addAnnotation(new Annotation(
+                      "turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+
+    g.addAnnotation(
+      new Annotation(
+        "utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+    g.addAnnotation(
+      new Annotation(
+        "utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+      
+    g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+    g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04a", "turn1"));
+
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn1"));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn1"));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn1"));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
+    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
+
+    g.trackChanges();
+    
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
+    generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
+    generator.setDebug(true);
+    try {
+      generator.transform(g);
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
+
+      // test the values are what we expected
+
+      // test the changes are recorded
+      Set<String> changeStrings = changes.stream()
+        .map(Change::toString).collect(Collectors.toSet());
+      assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
+      assertEquals(Double.valueOf(0.1), g.getAnchor("a01").getOffset());
+      assertEquals(Double.valueOf(0.2), g.getAnchor("a02").getOffset());
+      // yay for inexact floating point representations!
+      assertEquals(Double.valueOf(0.30000000000000004), g.getAnchor("a03").getOffset());
+      assertEquals(Double.valueOf(0.4), g.getAnchor("a04a").getOffset());
+      assertEquals(Double.valueOf(0.4), g.getAnchor("a04b").getOffset());
+      assertEquals(Double.valueOf(1.4), g.getAnchor("a14").getOffset());
+      assertEquals(Double.valueOf(2.4), g.getAnchor("a24").getOffset());
+      assertEquals(Double.valueOf(3.4), g.getAnchor("a34").getOffset());
+      assertEquals(Double.valueOf(4.4), g.getAnchor("a44").getOffset());
+      assertEquals(Double.valueOf(5.4), g.getAnchor("a54").getOffset());
+
+      // collapsed back to start of turn
+      assertTrue(changeStrings.contains("Update a0: offset = 0.0 (was null)"));
+      // collapsed forward to end of utterancew 
+      assertTrue(changeStrings.contains("Update a04a: offset = 0.4 (was 0.04)"));
+      // then the rest interpolated between
+      assertTrue(changeStrings.contains("Update a01: offset = 0.1 (was 0.02)"));
+      assertTrue(changeStrings.contains("Update a02: offset = 0.2 (was 0.03)"));
+      assertTrue(changeStrings.contains("Update a03: offset = 0.30000000000000004 (was 0.04)"));
+      // collapsed back to start of utterance
+      assertTrue(changeStrings.contains("Update a04b: offset = 0.4 (was null)"));
+      // collapsed forward to end of utterance
+      assertTrue(changeStrings.contains("Update a54: offset = 5.4 (was null)"));
+      // then the rest interpolated between
+      assertTrue(changeStrings.contains("Update a14: offset = 1.4 (was 3.3)"));
+      assertTrue(changeStrings.contains("Update a24: offset = 2.4 (was 4.4)"));
+      assertTrue(changeStrings.contains("Update a34: offset = 3.4 (was 5.0)"));
+      assertTrue(changeStrings.contains("Update a44: offset = 4.4 (was 5.1)"));
+      assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
+
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
+  /** Words are interpolated between their peers even if they're not chained and have null
+   * offsets. */ 
+  @Test public void nonChainedNullOffsetWords() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("utterance", "Utterance")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true)));
+    
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+    g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_NONE)); // the
+    g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+    g.addAnchor(new Anchor("a02a", 0.03, Constants.CONFIDENCE_DEFAULT)); // end of quick
+    // peer isn't chained and has null offsets
+    g.addAnchor(new Anchor("a02b", null, Constants.CONFIDENCE_DEFAULT)); // brown
+    g.addAnchor(new Anchor("a03a", null, Constants.CONFIDENCE_DEFAULT)); // end of brown
+    
+    g.addAnchor(new Anchor("a03b", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+    g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
+
+    g.addAnchor(new Anchor("utteranceChange", 0.6, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+    g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+    g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+    g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+    g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+    // no confidence set for a44 and a54
+    g.addAnchor(new Anchor("a44", 5.1)); // dog
+    g.addAnchor(new Anchor("a54", null)); // end of dog
+
+    // no confidence set for a7
+    g.addAnchor(new Anchor("turnEnd", 5.6, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(new Annotation(
+                      "participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+    g.addAnnotation(new Annotation(
+                      "turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+
+    g.addAnnotation(
+      new Annotation(
+        "utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+    g.addAnnotation(
+      new Annotation(
+        "utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+      
+    g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1", 1));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02a", "turn1", 2));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a02b",  "a03a", "turn1", 3));
+    g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03b", "a04a", "turn1", 4));
+
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn1", 5));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn1", 6));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn1", 7));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1", 8));
+    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1", 9));
+
+    g.trackChanges();
+    
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
+    generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
+    //generator.setDebug(true);
+    try {
+      generator.transform(g);
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+      Set<Change> changes = g.getTracker().getChanges();
+
+      // test the values are what we expected
+
+      // test the changes are recorded
+      Set<String> changeStrings = changes.stream()
+        .map(Change::toString).collect(Collectors.toSet());
+      assertEquals(Double.valueOf(0.0), g.getAnchor("a0").getOffset());
+      // yay for inexact floating point representations!
+      assertEquals(Double.valueOf(0.09999999999999999), g.getAnchor("a01").getOffset());
+      assertEquals(Double.valueOf(0.19999999999999998), g.getAnchor("a02a").getOffset());
+      assertEquals("null start interpolated",
+                   Double.valueOf(0.3), g.getAnchor("a02b").getOffset());
+      assertEquals("null end interpolated",
+                   Double.valueOf(0.39999999999999997), g.getAnchor("a03a").getOffset());
+      assertEquals(Double.valueOf(0.49999999999999994), g.getAnchor("a03b").getOffset());
+      assertEquals(Double.valueOf(0.6), g.getAnchor("a04a").getOffset());
+      assertEquals(Double.valueOf(0.6), g.getAnchor("a04b").getOffset());
+      assertEquals(Double.valueOf(1.6), g.getAnchor("a14").getOffset());
+      assertEquals(Double.valueOf(2.6), g.getAnchor("a24").getOffset());
+      assertEquals(Double.valueOf(3.6), g.getAnchor("a34").getOffset());
+      assertEquals(Double.valueOf(4.6), g.getAnchor("a44").getOffset());
+      assertEquals(Double.valueOf(5.6), g.getAnchor("a54").getOffset());
+
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
   /** Interpolation before normalization (i.e. with words linked to utterances) 
    * and with a blank utterance. */
   @Test public void blankUtteranceBeforeNormalization() {
@@ -797,6 +1140,7 @@ public class TestDefaultOffsetGenerator {
                   .setParentId("who").setParentIncludes(true),
                   new Layer("word", "Words")
                   .setAlignment(Constants.ALIGNMENT_INTERVAL)
+
                   .setPeers(true).setPeersOverlap(false).setSaturated(false)
                   .setParentId("turn").setParentIncludes(true),
                   new Layer("utterance", "Utterance")
@@ -870,7 +1214,7 @@ public class TestDefaultOffsetGenerator {
 
   /** Interpolation before normalization (i.e. with words linked to utterances) 
    * and with two simultaneous linked utterances by different speaekers. */
-  @Test public void simultaneousSpeecgBeforeNormalization() {
+  @Test public void simultaneousSpeechBeforeNormalization() {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
@@ -926,7 +1270,7 @@ public class TestDefaultOffsetGenerator {
     g.trackChanges();
     
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
-    generator.setDebug(true);
+    //generator.setDebug(true);
     try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
@@ -1353,8 +1697,8 @@ public class TestDefaultOffsetGenerator {
                   .setParentId("word").setParentIncludes(true)));
 
     // topic
-    g.addAnchor(new Anchor("topic1Start", null));
-    g.addAnchor(new Anchor("topic1End", null));
+    g.addAnchor(new Anchor("topic1Start", 1.0));
+    g.addAnchor(new Anchor("topic1End", 2.0));
 
     // john smith
     g.addAnchor(new Anchor("turn1Start", 0.0)); // turn start
@@ -1489,8 +1833,8 @@ public class TestDefaultOffsetGenerator {
       assertEquals(Double.valueOf(14.5), g.getAnchor("b14").getOffset());
 
       // topic left unchanged (it's a top-level layer)
-      assertNull(g.getAnchor("topic1Start").getOffset());
-      assertNull(g.getAnchor("topic1End").getOffset());
+      assertEquals(Double.valueOf(1.0), g.getAnchor("topic1Start").getOffset());
+      assertEquals(Double.valueOf(2.0), g.getAnchor("topic1End").getOffset());
 
       // test the changes are recorded
       Set<String> changeStrings = changes.stream()
@@ -2318,6 +2662,99 @@ public class TestDefaultOffsetGenerator {
     }                      
   }
 
+  /** Test all anchors wil be set, even when there are unbound chains. */
+  @Test public void unboundAnnotations() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.setSchema(new Schema(
+                  null, null, null, null,
+                  new Layer("topic", "Topic")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true)));
+    
+    g.addAnchor(new Anchor("unboundStart", null)); // topic1 start
+    g.addAnchor(new Anchor("a10", 10.0)); // topic1 end, topic2 start
+    g.addAnchor(new Anchor("a20", null)); // topic2 end, topic3 start
+    g.addAnchor(new Anchor("a30", 30.0)); // topic3 end, topic4 start
+    g.addAnchor(new Anchor("unboundEnd", null)); // topic4 end
+
+    g.addAnnotation(
+      new Annotation(
+        "topic1", "unboundTopicAtStart", "topic", "unboundStart", "a10", "my graph"));
+    g.addAnnotation(
+      new Annotation(
+        "topic2", "boundTopicAtStart", "topic", "a10", "a20", "my graph"));
+    g.addAnnotation(
+      new Annotation(
+        "topic3", "boundTopicAtEnd", "topic", "a20", "a30", "my graph"));
+    g.addAnnotation(
+      new Annotation(
+        "topic4", "unboundTopicAtEnd", "topic", "a30", "unboundEnd", "my graph"));
+      
+    g.trackChanges();
+
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    // generator.setDebug(true);
+    try {
+      generator.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
+      if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
+
+      // test the values are what we expected
+      assertEquals(Double.valueOf(10.0), g.getAnchor("unboundStart").getOffset());
+      assertEquals(Double.valueOf(10.0), g.getAnchor("a10").getOffset());
+      assertEquals(Double.valueOf(20.0), g.getAnchor("a20").getOffset());
+      assertEquals(Double.valueOf(30.0), g.getAnchor("a30").getOffset());
+      assertEquals(Double.valueOf(30.0), g.getAnchor("unboundEnd").getOffset());
+
+      // test the changes are recorded
+      Set<String> changeStrings = changes.stream()
+        .map(Change::toString).collect(Collectors.toSet());
+      // collapsed forward to end of annotation
+      assertTrue(changeStrings.contains("Update unboundStart: offset = 10.0 (was null)"));
+      // interpolated
+      assertTrue(changeStrings.contains("Update a20: offset = 20.0 (was null)"));
+      // collapsed back to start of annotation
+      assertTrue(changeStrings.contains("Update unboundEnd: offset = 30.0 (was null)"));
+      assertEquals("no extra changes to graph: " + g.getChanges(),
+                   changes.size(), g.getChanges().size());
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
+  /** Test exception is thrown if it's impossible to determine any offsets. */
+  @Test public void isolatedNullOffsets() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.setSchema(new Schema(
+                  null, null, null, null,
+                  new Layer("topic", "Topic")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true)));
+    
+    g.addAnchor(new Anchor("unboundStart", null)); // topic1 start
+    g.addAnchor(new Anchor("unboundEnd", null)); // topic4 end
+
+    g.addAnnotation(
+      new Annotation(
+        "topic1", "unboundTopicAtStart", "topic", "unboundStart", "unboundEnd", "my graph"));
+      
+    g.trackChanges();
+
+    DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
+    // generator.setDebug(true);
+    try {
+      generator.transform(g);
+      fail("Isolated unset offsets fail");
+    } catch(TransformationException exception) {
+    }
+  }
+
   /** Test offset generation completes in a timely manner */
   @Test public void performance() {
     Graph g = new Graph();
@@ -2371,8 +2808,9 @@ public class TestDefaultOffsetGenerator {
           new Annotation("turn"+t+"-utt"+u, participant.getLabel(), "utterance",
                          lastAnchor.getId(), utteranceEnd.getId(), turn.getId()));
         // create words
+        Anchor lastWordAnchor = new Anchor();
         for (int w = 0; w < wordsPerUtterance; w++) {
-          Anchor start = new Anchor();
+          Anchor start = lastWordAnchor;
           if (w == 0) {
             start.setOffset(lastAnchor.getOffset());
           }
@@ -2385,6 +2823,7 @@ public class TestDefaultOffsetGenerator {
           g.addAnnotation(
             new Annotation(null, utterance.getId() + "-word" + w, "word",
                            start.getId(), end.getId(), turn.getId()));
+          lastWordAnchor = end;
         } // next word
         lastAnchor = utteranceEnd;
       } // next utterance
