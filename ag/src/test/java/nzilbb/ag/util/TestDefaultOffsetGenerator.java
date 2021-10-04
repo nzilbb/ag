@@ -848,7 +848,7 @@ public class TestDefaultOffsetGenerator {
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
     generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
     generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
-    generator.setDebug(true);
+    // generator.setDebug(true);
     try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
@@ -962,7 +962,7 @@ public class TestDefaultOffsetGenerator {
     DefaultOffsetGenerator generator = new DefaultOffsetGenerator();
     generator.setDefaultAnchorConfidence(Constants.CONFIDENCE_NONE);
     generator.setDefaultOffsetThreshold(Constants.CONFIDENCE_AUTOMATIC);
-    generator.setDebug(true);
+    // generator.setDebug(true);
     try {
       generator.transform(g);
       if (generator.getLog() != null) for (String m : generator.getLog()) System.out.println(m);
