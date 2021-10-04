@@ -69,6 +69,9 @@ public class AnchorChain extends Vector<Anchor> {
               if (nextAnchor == currentAnchor) { // skip instants
                 nextAnchor = null; 
               }
+              if (chain.contains(nextAnchor)) { // avoid loops
+                nextAnchor = null; 
+              }
               if (nextAnchor != null) { // found a path, drop out
                 break;
               }
@@ -88,6 +91,9 @@ public class AnchorChain extends Vector<Anchor> {
             if (!follow.test(startsHere)) continue;
             nextAnchor = startsHere.getEnd();
             if (nextAnchor == currentAnchor) { // skip instants
+              nextAnchor = null; 
+            }
+            if (chain.contains(nextAnchor)) { // avoid loops
               nextAnchor = null; 
             }
             if (nextAnchor != null) { // found a path, drop out
