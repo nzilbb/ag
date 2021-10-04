@@ -102,6 +102,8 @@
       var maxOffset = 0;
       for (var a in ag.anchors) maxOffset = Math.max(maxOffset, ag.anchors[a].offset);
       var xFactor = maxOffset * 2;
+      if (maxOffset < 10) xFactor *= 50;
+      if (maxOffset < 1) xFactor *= 50;
       var nodeArray = [];
       // ensure simultaneous anchors aren't superimposed
       var lastOffset = -1.0;
@@ -215,7 +217,7 @@
   
   function showAnnotation(hash) {
       var id = hash.replace(/^#/,"");
-      agvis.fit({ nodes: [ id ], animation: true});
+      agvis.fit({ nodes: [ id ], animation: false});
       agvis.selectNodes([ id ]);
   }
 
