@@ -466,6 +466,38 @@ public class Anchor
          ending.setEnd(newEnd);
       } // next annotion ending here
    } // end of moveEndingAnnotations()
+  
+   /**
+    * Determines whether the anchor is the start or end of any annotation.
+    * @return true if the anchor is the start or end of any annotation not marked for destruction.
+    */
+   public boolean isLinked()
+   {
+     for (String layerId : getStartOf().keySet())
+     {
+       for (Annotation a : startOf(layerId))
+       {
+         if (a.getChange() != Change.Operation.Destroy
+             && a.getStart() == this)
+         {
+           return true;
+         }
+       }
+     }
+     for (String layerId : getEndOf().keySet())
+     {
+       for (Annotation a : endOf(layerId))
+       {
+         if (a.getChange() != Change.Operation.Destroy
+             && a.getEnd() == this)
+         {
+           return true;
+         }
+       }
+     }
+     return false;
+   } // end of isLinked()
+
 
    /**
     * Returns the minimum possible offset for this anchor.  If the offset is set,
