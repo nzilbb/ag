@@ -888,6 +888,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                 }
               } // next layer
             }
+            // TODO Noises->noise and COMMENTS->comment
             if (layer == null) { // no exact match
               // try a prefix-match - i.e. "word - John Smith" should map to the "word" layer
               // ignore spaces too
@@ -1014,7 +1015,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
   public Graph[] deserialize() 
     throws SerializerNotConfiguredException, SerializationParametersMissingException,
     SerializationException {
-      
+
     if (mappingsDependOnTurn) {
       if (participantLayer == null)
         throw new SerializerNotConfiguredException("Participant layer not set");
@@ -1281,9 +1282,14 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
         for (Annotation annotation : symbolicAnnotations) {
           errors.addError(
             SerializationException.ErrorType.InvalidDocument,
-            "Annotation " + annotation.getId() + " on tier " + annotation.get("@tierId")
-            + ": Cannot find referenced annotation: " + annotation.get("@annotationRef"));
+            "Annotation " + annotation.getId()
+            + " \"" + annotation.getLabel() + "\" on tier " + annotation.get("@tierId")
+            + ": Cannot find referenced annotation: " + annotation.get("@annotationRef")
+            + (ignoreBlankAnnotations?
+               " - the referenced annotation may be blank,"
+               +" and blank annotations are configured to be ignored.":""));
         } // next unreferenceable annotation
+        break;
       } // didn't resulve any references this time around
     } // there are still symbolic annotations to process
     
