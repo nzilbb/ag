@@ -411,6 +411,132 @@ public class TestNormalizer {
     }
   }
 
+  /** Test that minimum turn pause length is respected when joining contiguous turns, but
+   * if there are shared anchors with the turn of another speaker, the other speaker turn
+   * isn't changed. */
+  @Test public void joinTurnsMinimumTurnPauseLengthSharedAnchors() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");      
+    Layer[] layers = {
+      new Layer("who", "Participants")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterance")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pos", "POS")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true)};
+    g.setSchema(new Schema(layers, "who", "turn", "utterance", "word"));
+
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+    g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT)); // the
+    g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+    g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+    g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+    g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
+
+    g.addAnchor(new Anchor("other-a01", 0.01, Constants.CONFIDENCE_DEFAULT)); // ah
+    g.addAnchor(new Anchor("other-a02", 0.02, Constants.CONFIDENCE_DEFAULT)); // hah
+    g.addAnchor(new Anchor("other-a03", 0.03, Constants.CONFIDENCE_DEFAULT)); // hah
+
+    g.addAnchor(new Anchor("utteranceEnd", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+    g.addAnchor(new Anchor("utteranceStart", 1.0, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+    g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+    g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+    g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+    g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+    g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // dog
+    g.addAnchor(new Anchor("a54", null)); // end of dog
+
+    g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    g.addAnnotation(new Annotation("participant2", "jane doe", "who", "turnStart", "utteranceEnd", "my graph"));
+      
+    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "turnStart", "utteranceEnd", "participant1"));
+    g.addAnnotation(new Annotation("other-turn1", "jane dow", "turn", "turnStart", "utteranceEnd", "participant2"));
+    g.addAnnotation(new Annotation("turn2", "john smith", "turn", "utteranceStart", "turnEnd", "participant1"));
+    
+
+    g.addAnnotation(new Annotation("utterance1", "john smith", "utterance", "turnStart", "utteranceEnd", "turn1"));
+    g.addAnnotation(new Annotation("other-utterance1", "jane doe", "utterance", "turnStart", "utteranceEnd", "other-turn1"));
+    g.addAnnotation(new Annotation("utterance2", "john smith", "utterance", "utteranceStart", "turnEnd", "turn2"));
+      
+    g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+    g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04a", "turn1"));
+
+    g.addAnnotation(new Annotation("ah",  "ah",  "word", "other-a01", "other-a02", "other-turn1"));
+    g.addAnnotation(new Annotation("huh", "huh", "word", "other-a02", "other-a03", "other-turn1"));
+
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn2"));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn2"));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn2"));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn2"));
+    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn2"));
+
+    g.getAnnotation("jumps").setLabel("test");
+    g.createTag(g.getAnnotation("jumps"), "pos", "V");
+
+    g.trackChanges();
+    Normalizer n = new Normalizer();
+    // minimum long enough to bridge the gap
+    n.setMinimumTurnPauseLength(1.0);
+    try {
+      n.transform(g);
+      Set<Change> changes = g.getTracker().getChanges();
+      
+      assertNotEquals("changes: " + changes, 0, changes.size());
+
+      assertEquals("turn1 end later", "turnEnd", g.getAnnotation("turn1").getEndId());
+      assertEquals("turn2 deleted", Change.Operation.Destroy, g.getAnnotation("turn2").getChange());
+      assertEquals("turn changed", "turn1", g.getAnnotation("jumps").getParentId());
+      assertEquals("turn changed", "turn1", g.getAnnotation("over").getParentId());
+      assertEquals("turn changed", "turn1", g.getAnnotation("a").getParentId());
+      assertEquals("turn changed", "turn1", g.getAnnotation("lazy").getParentId());
+      assertEquals("turn changed", "turn1", g.getAnnotation("dog").getParentId());
+
+      assertEquals("other-turn1 end unchanged",
+                   "utteranceEnd", g.getAnnotation("other-turn1").getEndId());
+      assertEquals("other-utterance1 end unchanged",
+                   "utteranceEnd", g.getAnnotation("other-utterance1").getEndId());
+
+      assertEquals("ordinal changed", 5, g.getAnnotation("jumps").getOrdinal());
+      assertEquals("ordinal changed", 1, g.getAnnotation("jumps").getOriginalOrdinal());
+      assertEquals("ordinal changed", 6, g.getAnnotation("over").getOrdinal());
+      assertEquals("ordinal changed", 2, g.getAnnotation("over").getOriginalOrdinal());
+      assertEquals("ordinal changed", 7, g.getAnnotation("a").getOrdinal());
+      assertEquals("ordinal changed", 3, g.getAnnotation("a").getOriginalOrdinal());
+      assertEquals("ordinal changed", 8, g.getAnnotation("lazy").getOrdinal());
+      assertEquals("ordinal changed", 4, g.getAnnotation("lazy").getOriginalOrdinal());
+      assertEquals("ordinal changed", 9, g.getAnnotation("dog").getOrdinal());
+      assertEquals("ordinal changed", 5, g.getAnnotation("dog").getOriginalOrdinal());
+
+      assertEquals("utterance1 linked to utterance2",
+                   g.getAnnotation("utterance2").getStartId(),
+                   g.getAnnotation("utterance1").getEndId());
+      assertEquals("utterance1 linked to utterance2 by utterance2.start",
+                   "utteranceStart", g.getAnnotation("utterance1").getEndId());
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
   /** Ensure turns are not joined when minimum pause length is too short. */
   @Test public void joinTurnsMinimumTurnPauseLengthTooShort() {
     Graph g = new Graph();

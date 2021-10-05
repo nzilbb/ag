@@ -190,7 +190,10 @@ public class Coalescer implements GraphTransformer {
         Vector<Annotation> endingPrecedingChildren = // avoid ConcurrentModificationException
           new Vector<Annotation>(originalPrecedingEnd.endOf(childLayerId));
         for (Annotation endingPrecedingChild : endingPrecedingChildren) {
-          endingPrecedingChild.setEnd(following.getStart());
+          // but only our own children
+          if (endingPrecedingChild.getParentId().equals(preceding.getId())) {
+            endingPrecedingChild.setEnd(following.getStart());
+          } // own child
         } // next child ending here
       } // saturated child layer
     } // next child layer
