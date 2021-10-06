@@ -268,14 +268,20 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
 
       // assign words to each utterance
       for (Annotation turn : graph.list(graph.getSchema().getTurnLayerId())) {
+        if (turn.getChange() == Change.Operation.Destroy) continue;
+        log("turn ", turn);
         Iterator<Annotation> utterances
           = new AnnotationsByAnchor(turn.getAnnotations(graph.getSchema().getUtteranceLayerId()))
-          .stream().filter(u -> u.getStart().getOffset() != null).iterator();
+          .stream()
+          .filter(u -> u.getChange() != Change.Operation.Destroy)
+          .filter(u -> u.getStart().getOffset() != null)
+          .iterator();
         if (!utterances.hasNext()) continue;
         Annotation currentUtterance = utterances.next();
         currentUtterance.put("@words", new Vector<Annotation>());
         Annotation nextUtterance = utterances.hasNext()?utterances.next():null;
         for (Annotation word : turn.getAnnotations(graph.getSchema().getWordLayerId())) {
+          if (word.getChange() == Change.Operation.Destroy) continue;
           if (word.getStart() == null) continue; // ?!
           if (// the start is inside the next utterance...
             (word.getStart().getOffset() != null 
@@ -286,10 +292,15 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
              && word.getEnd().getOffset() != null
              && nextUtterance != null
              && word.getEnd().getOffset() > nextUtterance.getStart().getOffset())) {
-            // next utterance
-            currentUtterance = nextUtterance;
+            // check it's not an empty utterance
+            do {
+              // next utterance
+              currentUtterance = nextUtterance;
+              nextUtterance = utterances.hasNext()?utterances.next():null;
+            } while (word.getStart().getOffset() != null 
+                     && nextUtterance != null
+                     && word.getStart().getOffset() >= nextUtterance.getStart().getOffset());
             currentUtterance.put("@words", new Vector<Annotation>());
-            nextUtterance = utterances.hasNext()?utterances.next():null;
           } // next utterance
           log("utt ", currentUtterance, " word ", word);
           ((Vector<Annotation>)currentUtterance.get("@words")).add(word);
@@ -382,6 +393,10 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
         sequence.stream().forEach(a->a.put("@offsetGenerated", Boolean.TRUE));
         
       } // next utterance
+      // remove links from utterances to their words
+      for (Annotation utterance : graph.list(graph.getSchema().getUtteranceLayerId())) {
+        utterance.remove("@words");
+      }
     } // utterance and word layers are defined
     
     // now iterate through all anchors, finding chains that require offsets set as we go
@@ -585,6 +600,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
             if (dDuration < 0) {
               String message = "Negative duration from " + logAnchor(lastSetAnchor)
                 + " to " + logAnchor(nextSetAnchor);
+              //System.out.println(message);
               log("ERROR: ", message);
               //TODO make this optional? throw new TransformationException(this, message);
             } else {
@@ -682,7 +698,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
         } 
       }	 
       log.add(s.toString());
-      // System.out.println(s.toString());
+      System.out.println(s.toString());
     }
   } // end of log()
 
