@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonObject;
 import nzilbb.ag.*;
@@ -730,6 +732,36 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
       } // next transcript
       percentComplete = 100;
       if (transcriptException != null) throw transcriptException;
+    } finally {
+      ignoreSetPercentComplete = false;
+    }
+  } // end of transformTranscripts()
+  
+  /**
+   * Transforms all graphs (or fragments) from the given stream.
+   * <p> This can be overridden for optimized cross-graph updates. The default
+   * implementation simply calls {@link GraphTransformer#transform(Graph)} serially for
+   * each graph. 
+   * @param graphs A stream of graphs.
+   * @throws TransformationException
+   * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
+   * {@link #setSchema(Schema)} have not yet been called.
+   */
+  public void transformTranscripts(Stream<Graph> graphs)
+    throws TransformationException, InvalidConfigurationException {
+    
+    List<Graph> transcripts = graphs.collect(Collectors.toList());
+    ignoreSetPercentComplete = true; // global progress
+    percentComplete = 0;
+    try {
+      int soFar = 0;
+      for (Graph transcript : transcripts) {
+        if (cancelling) break;
+        transform(transcript);
+        if (cancelling) break;
+        percentComplete = (int)((double)(soFar * 100) / (double)transcripts.size());
+      } // next transcript
+      percentComplete = 100;
     } finally {
       ignoreSetPercentComplete = false;
     }
