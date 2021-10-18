@@ -45,6 +45,7 @@ booleanExpression
 predicate
   : operand comparisonOperator operand                 # ComparisonPredicate
   | includesExpression                                 # IncludesPredicate
+  | includesAnyExpression                              # IncludesAnyPredicate
   | patternMatchExpression                             # PatterMatchPredicate
   | operand                                            # BarePredicate
   ;
@@ -52,6 +53,10 @@ predicate
 includesExpression
   : singletonOperand=operand negation=NOT? IN listOperand=listExpression
   | negation=NOT? listOperand=listExpression DOT INCLUDES OPEN_PAREN singletonOperand=operand CLOSE_PAREN
+  ; 
+
+includesAnyExpression
+  : negation=NOT? leftOperand=listExpression DOT INCLUDESANY OPEN_PAREN rightOperand=listExpression CLOSE_PAREN
   ; 
 
 patternMatchExpression
@@ -276,6 +281,7 @@ ALL                   : 'all' | 'list' ; /* 'list; for backward compatibility */
 LABELS                : 'labels' ;
 ANNOTATORS            : 'annotators' ;
 INCLUDES              : 'includes' ;
+INCLUDESANY           : 'includesAny' ;
 TEST                  : 'test' ;
 
 /* other stuff */
@@ -287,12 +293,12 @@ IDENTIFIER            : [a-zA-Z][a-zA-Z0-9_]* ;
 AND                   : ' AND ' | '&&' ;
 OR                    : ' OR '  | '||';
 EQ                    : '=' | '==' ;
-NE                    : '<>' ;
+NE                    : '<>' | '≠';
 MATCHES               : ' MATCHES ' ;
 LT                    : '<' ;
 GT                    : '>' ;
-LTE                   : '<=' ;
-GTE                   : '>=' ;
+LTE                   : '<=' | '≤';
+GTE                   : '>=' | '≥' ;
 IN                    : ' IN ' ;
 OPEN_PAREN            : '(' ;
 CLOSE_PAREN           : ')' ;

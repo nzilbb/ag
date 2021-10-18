@@ -1037,6 +1037,58 @@ public class TestAGQLListener {
                    "'something' NOT IN labels('corpus')", parse.toString());
    }
 
+   @Test public void includesAnyExpression() {
+      final StringBuffer parse = new StringBuffer();
+      final StringBuffer error = new StringBuffer();
+      AGQLListener listener = new AGQLBaseListener() {
+            // @Override public void exitEveryRule(ParserRuleContext ctx)
+            // {
+            //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+            // }
+            @Override public void exitIncludesAnyExpression(AGQLParser.IncludesAnyExpressionContext ctx) {
+               parse.append(ctx.leftOperand.getText()
+                            + (ctx.negation!=null?" EMPTY INTERSECTION ":" NONEMPTY INTERSECTION ")
+                            + ctx.rightOperand.getText());
+            }
+            @Override public void visitErrorNode(ErrorNode node) {
+               // System.out.println("ERROR: " + node.getText());
+               error.append(node.getText());
+            }
+         };
+
+      AGQLLexer lexer = new AGQLLexer(
+         CharStreams.fromString("labels('corpus').includesAny(['IA','CC'])"));
+      CommonTokenStream tokens = new CommonTokenStream(lexer);
+      AGQLParser parser = new AGQLParser(tokens);
+      AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("INCLUDESANY: No errors: " + error.toString(), error.length() == 0);
+      assertEquals("INCLUDESANY: Parse structure: " + parse,
+                   "labels('corpus') NONEMPTY INTERSECTION ['IA','CC']", parse.toString());
+
+      parse.setLength(0);
+      lexer = new AGQLLexer(
+         CharStreams.fromString("['IA','CC'].includesAny(labels('corpus'))"));
+      tokens = new CommonTokenStream(lexer);
+      parser = new AGQLParser(tokens);
+      tree = parser.booleanExpression();
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("INCLUDESANY: No errors: " + error.toString(), error.length() == 0);
+      assertEquals("INCLUDESANY: Parse structure: " + parse,
+                   "['IA','CC'] NONEMPTY INTERSECTION labels('corpus')", parse.toString());
+
+      parse.setLength(0);
+      lexer.setInputStream(
+         CharStreams.fromString("!labels('corpus').includesAny(['IA','CC'])"));
+      tokens = new CommonTokenStream(lexer);
+      parser = new AGQLParser(tokens);
+      tree = parser.booleanExpression();
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+      assertTrue("NEGATED INCLUDESANY: No errors: " + error.toString(), error.length() == 0);
+      assertEquals("NEGATED INCLUDESANY: Parse structure: " + parse,
+                   "labels('corpus') EMPTY INTERSECTION ['IA','CC']", parse.toString());
+   }
+
    @Test public void patternMatchExpression() {
       final StringBuffer parse = new StringBuffer();
       final StringBuffer error = new StringBuffer();
