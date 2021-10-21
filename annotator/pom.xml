@@ -15,15 +15,16 @@
   </description>
   <packaging>pom</packaging>
   <modules>
-    <module>cmudict</module>
-    <module>javascript</module>
-    <module>orthography</module>
-    <module>patterntagger</module>
-    <module>porterstemmer</module>
-    <module>jython</module>
-    <module>spanishphonology</module>
-    <module>labelmapper</module>
-    <module>stanfordpos</module>
-    <module>mor</module>
-  </modules>
+        <module>cmudict</module>
+        <module>javascript</module>
+        <module>orthography</module>
+        <module>patterntagger</module>
+        <module>porterstemmer</module>
+        <module>jython</module>
+        <module>spanishphonology</module>
+        <module>labelmapper</module>
+        <module>stanfordpos</module>
+        <module>mor</module>
+        <module>htk</module>
+    </modules>  
 </project>

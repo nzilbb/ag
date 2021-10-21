@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> HTK Aligner </title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <p> The HTK Aligner can use words with phonemic transcriptions, and the
+      corresponding audio, to force-align words and phones; i.e. determine the start and
+      end time of each speech sound within each word, and thus the start/end times of the
+      words. </p>
+
+    <form method="POST" action="setTaskParameters">
+      <div class="field" title="Input layer from which words come">
+        <label for="orthographyLayerId"> Orthography Layer </label>
+        <span><select id="orthographyLayerId" name="orthographyLayerId" required></select></span>
+      </div>
+      <div class="field" title="Layer for noise annotations">
+        <label for="pauseMarkers"> Pause Markers </label>
+        <span><input id="pauseMarkers" name="pauseMarkers" type="text"></span>
+      </div>
+      <div class="field" title="Input layer from which word pronunciations come">
+        <label for="pronunciationLayerId"> Pronunciation Layer </label>
+        <span><select id="pronunciationLayerId" name="pronunciationLayerId" required></select></span>
+      </div>
+      <div class="field" title="Layer for noise annotations">
+        <label for="noiseLayerId"> Noise Layer </label>
+        <span>
+          <select id="noiseLayerId" name="noiseLayerId">
+            <option value="">[none]</option>
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Layer for noise annotations">
+        <label for="noisePatterns"> Noise Patterns </label>
+        <span><input id="noisePatterns" name="noisePatterns" type="text"></span>
+      </div>
+      <div class="field" title="Percentage of overlap with other speech, above which the utterance is ignored.
+0 or blank means no utterances are ignored, no matter how much they overlap with other speech.">
+        <label for="overlapThreshold"> Overlap Threshold </label>
+        <span><input id="overlapThreshold" name="overlapThreshold"
+                     type="number" min="0" max="100">%</span>
+      </div>
+      <div class="field" title="Whether to use pre-trained P2FA models or not.">
+        <label for="useP2FA"> Use P2FA models </label>
+        <span><input id="useP2FA" name="useP2FA" type="checkbox"></span>
+      </div>
+      <div class="field" title="Downsample audio to 11,025Hz before alignment.">
+        <label for="sampleRate"> Downsample to 11,025Hz  </label>
+        <span><input id="sampleRate" name="sampleRate"
+                     value="11025" type="checkbox"></span>
+      </div>
+      <div class="field" title="Regular expression for matching the participant ID of the participant in the left audio channel. ">
+        <label for="leftPattern"> Participant on Left Channel </label>
+        <span><input id="leftPattern" name="leftPattern" type="text"></span>
+      </div>
+      <div class="field" title="Regular expression for matching the participant ID of the participant in the right audio channel. ">
+        <label for="rightPattern"> Participant on Right Channel </label>
+        <span><input id="rightPattern" name="rightPattern" type="text"></span>
+      </div>
+      <div class="field" title="Whether manual alignments should be overwritten or not.">
+        <label for="ignoreAlignmentStatuses"> Replace Manual Alignments </label>
+        <span><input id="ignoreAlignmentStatuses"
+                     name="ignoreAlignmentStatuses" type="checkbox"></span>
+      </div>
+      <div class="field" title="Output layer on which word alignments are saved">
+        <label for="wordAlignmentLayerId"> Word Alignment Layer </label>
+        <span>
+          <select id="wordAlignmentLayerId" name="wordAlignmentLayerId" required>
+            <!--option>[add new layer]</option-->         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Output layer on which phone alignments are saved">
+        <label for="phoneAlignmentLayerId"> Phone Alignment Layer </label>
+        <span>
+          <select id="phoneAlignmentLayerId" name="phoneAlignmentLayerId" required>
+            <!--option>[add new layer]</option-->         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Output layer on which phone acoustic scores are saved">
+        <label for="scoreLayerId"> Score Layer </label>
+        <span>
+          <select id="scoreLayerId" name="scoreLayerId">
+            <option value="">[none]</option>
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Output layer for a time stamp tagging each aligned utterance">
+        <label for="utteranceTagLayerId"> Utterance Tag Layer </label>
+        <span>
+          <select id="utteranceTagLayerId" name="utteranceTagLayerId">
+            <option value="">[none]</option>
+            <!--option>[add new layer]</option-->         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Output attribute for a time stamp tagging each aligned participant">
+        <label for="participantTagLayerId"> Participant Tag Attribute </label>
+        <span>
+          <select id="participantTagLayerId" name="participantTagLayerId">
+            <option value="">[none]</option>
+            <!--option>[add new layer]</option-->         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field" title="What should happen with working files after training/alignment is finished.">
+        <label for="cleanupOption"> Working files should </label>
+        <span>
+          <select id="cleanupOption" name="cleanupOption">
+            <option value="75">be deleted if alignment succeeds</option>
+            <option value="25">be deleted if alignment fails</option>
+            <option value="100">be deleted whether alignment succeeds or not</option>
+            <option value="0">not be deleted whether alignment succeeds or not</option>
+          </select>
+        </span>
+      </div>
+      <div class="controls"><input type="submit" value="Set Parameters"></div>
+    </form>
+    
+    <footer><div> HTK Aligner <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>

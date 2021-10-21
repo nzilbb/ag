@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> HTK Aligner </title>    
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+
+    <h1> HTK Aligner </h1>
+
+    <p> The HTK Aligner can use words with phonemic transcriptions, and the
+      corresponding audio, to force-align words and phones; i.e. determine the start and
+      end time of each speech sound within each word, and thus the start/end times of the
+      words. </p>
+
+    <p> In order to function, HTK must be installed, and you must specify the location
+      of HTK program files. If it is already installed, the path may already be set
+      below. </p>
+
+    <p> If you don't have HTK, you need to register at
+      <a href="http://htk.eng.cam.ac.uk/register.shtml">http://htk.eng.cam.ac.uk/register.shtml</a>
+      and then enter your user ID and password below. The annotator will then attempt to
+      download and install HTK itself.
+    </p>
+    
+    <p> If this automatic installaion fails, you will need to download and install HTK
+      manually, and enter its path below. </p>
+
+    <form method="POST" action="setConfig">
+      <div class="field"
+           title="This is the path to the HTK on the server. e.g. C:\\HTK.3.3 - Under some conditions this can be ommitted if the htk.eng.cam.ac.uk User ID/Password is supplied.">
+        <label for="file">Path to HTK tools</label>
+        <input id="htkPath" name="htkPath" type="text">
+      </div>
+      <div class="field"
+           title="If you have not already done so, register a User ID at http://htk.eng.cam.ac.uk/register.shtml">
+        <label for="file">htk.eng.cam.ac.uk User ID</label>
+        <input id="htkUserId" name="htkUserId" type="text">
+      </div>
+      <div class="field"
+           title="Password for your User ID registered at http://htk.eng.cam.ac.uk/register.shtml">
+        <label for="file">htk.eng.cam.ac.uk User Password</label>
+        <input id="file" name="htkPassword" type="password">
+      </div>
+      <div class="controls">
+        <input type="submit" value="Configure">
+      </div>
+    </form>
+
+    <footer><div> HTK Aligner <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>
