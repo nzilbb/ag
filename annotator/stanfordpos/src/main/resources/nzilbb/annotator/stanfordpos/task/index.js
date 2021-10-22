@@ -7,7 +7,6 @@ getVersion(version => {
 
 var model = "english-caseless-left3words-distsim.tagger"; // a good default
 var taskId = window.location.search.substring(1);
-console.log("taskId " + taskId);
 
 // first, get the layer schema
 var schema = null;
@@ -63,7 +62,6 @@ getSchema(s => {
 
     // what models are available
     getJSON("availableModels", modelOptions => {
-        console.log("availableModels");
         
         if (modelOptions.length > 0) {
             // if there's only one option, select it
@@ -88,7 +86,6 @@ getSchema(s => {
 
         // GET request to getTaskParameters retrieves the current task parameters, if any
         getText("getTaskParameters", text => {
-            console.log("getTaskParameters");
             try {
                 var parameters = new URLSearchParams("?"+text);
                 
