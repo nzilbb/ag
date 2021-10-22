@@ -714,7 +714,7 @@ public class TestCMUDictionaryTagger {
     */
    public static Graph graph() {
       Schema schema = new Schema(
-         "who", "turn", "utterance", "word",
+         "participant", "turn", "utterance", "word",
          new Layer("transcript_language", "Overall Language")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(false).setPeersOverlap(false).setSaturated(true),
