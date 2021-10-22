@@ -508,10 +508,10 @@ public class Validator extends Transform implements GraphTransformer {
       }.getResult();
       
     for (Layer layer : alignedLayersTopDown) {
-      // log("Layer: ", layer);
+      log("correctReversedAnchors - Layer: ", layer);
       for (Annotation annotation : graph.all(layer.getId())) {
         if (annotation.getChange() == Change.Operation.Destroy) continue;
-        // log("Annotation: ", logAnnotation(annotation));
+        log("Annotation: ", logAnnotation(annotation));
 
         // we will build a list of anchors in structure order, including this annotation's
         // anchors and also that anchors of descendants which are aligned and included
@@ -524,12 +524,15 @@ public class Validator extends Transform implements GraphTransformer {
         // all children on one child layer followed by all children on another child layer
 
         for (Layer childLayer : layer.getChildren().values()) {
-          // log("Child layer: ", childLayer);
+          log("Child layer: ", childLayer);
           LinkedHashSet<Anchor> anchors = new LinkedHashSet<Anchor>();
           if (annotation.getStart() != null) 
             anchors.add(annotation.getStart());
           for (Annotation child : annotation.getAnnotations(childLayer.getId())) {
             if (child.getChange() == Change.Operation.Destroy) continue;
+            if (child.getParentId() != null // check they're really still a child
+                && !child.getParentId().equals(annotation.getId())) continue;
+            log("child ", child);
             // add anchors of aligned descendants
             LayerTraversal<LinkedHashSet<Anchor>> traversal 
               = new LayerTraversal<LinkedHashSet<Anchor>>(anchors, child) {
@@ -570,7 +573,7 @@ public class Validator extends Transform implements GraphTransformer {
           ListIterator<Anchor> anchorIterator = anchorList.listIterator();
           while (anchorIterator.hasNext()) {
             Anchor anchor = anchorIterator.next();
-            // log("Checking: ", anchor, " against ", lastOffsetAnchors.peek());
+            log("Checking: ", anchor, " against ", lastOffsetAnchors.peek());
             if (anchor.getOffset() != null 
                 && anchor.getOffset() < lastOffsetAnchors.peek().getOffset()) { // out of order
               log("Anchors out of order: ", lastOffsetAnchors.peek(), " followed by ", anchor);
@@ -589,6 +592,11 @@ public class Validator extends Transform implements GraphTransformer {
                 Anchor other = anchorIterator.previous();
                 if (other.getOffset() != null) {
                   if (other.getOffset() < anchor.getOffset()) { // gone far enough back
+                    break;
+                  }
+                  if (layer.getId().equals(graph.getSchema().getTurnLayerId())
+                      && annotation.getStart() == other) {
+                    // turn starts trump their children
                     break;
                   }
                   int otherConfidence = Utility.getConfidence(other, defaultAnchorConfidence);
@@ -676,7 +684,7 @@ public class Validator extends Transform implements GraphTransformer {
                 }
               } else if (higherConfidenceFollowing) {
                 // (we already know that !higherConfidencePrior)
-                log("Resetting prior anchors");
+                log("higherConfidenceFollowing: Resetting prior anchors");
                 anchorsToReset = priorAnchors;
               } else { // neither higherConfidencePrior nor higherConfidenceFollowing
                 // so reset the shortest list
@@ -986,7 +994,7 @@ public class Validator extends Transform implements GraphTransformer {
     }
 
     Layer parentLayer = childLayer.getParent();
-    // log("validate hierarchy: ", parentLayer, "/", childLayer);
+    log("validate hierarchy: ", parentLayer, "/", childLayer);
     
     // ensure extra peers are deleted
     if (!childLayer.getPeers()) {
