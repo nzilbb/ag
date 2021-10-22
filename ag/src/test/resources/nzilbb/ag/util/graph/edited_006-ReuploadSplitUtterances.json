@@ -208,12 +208,14 @@
             "confidence": 10
         },
         "n_1266": {
-            "offset": 22.2,
-            "confidence": 100
+            "offset": 23.0,
+            "confidence": 100,
+            "comment": "Splits already aligned word"
         },
         "n_1270": {
-            "offset": 22.2,
-            "confidence": 10
+            "offset": 23.0,
+            "confidence": 10,
+            "comment": "Splits already aligned word"
         },
         "n_1280": {
             "offset": 30.0,

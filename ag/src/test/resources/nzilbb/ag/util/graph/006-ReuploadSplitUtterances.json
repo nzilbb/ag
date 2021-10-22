@@ -287,10 +287,6 @@
             "offset": 21.88,
             "confidence": 50
         },
-        "n_1229": {
-            "offset": 22.04,
-            "confidence": 50
-        },
         "n_1230": {
             "offset": 22.44,
             "confidence": 50
@@ -300,11 +296,11 @@
             "confidence": 50
         },
         "n_1232": {
-            "offset": 22.52,
+            "offset": 22.72,
             "confidence": 50
         },
         "n_1238": {
-            "offset": 22.53,
+            "offset": 22.73,
             "confidence": 50
         },
         "n_1239": {
@@ -900,14 +896,14 @@
                             "id": "ew_0_3102",
                             "label": "86-1-2",
                             "startId": "n_1220",
-                            "endId": "n_1229",
+                            "endId": "n_1230",
                             "confidence": 100,
                             "segments": [
                                 {
                                     "id": "es_1_31021",
                                     "label": "86-1-2-1",
                                     "startId": "n_1220",
-                                    "endId": "n_1229",
+                                    "endId": "n_1230",
                                     "confidence": 100
                                 }
                             ]
