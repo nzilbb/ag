@@ -125,11 +125,11 @@ public class Normalizer extends Transform implements GraphTransformer {
    */
   public Graph transform(Graph graph) throws TransformationException {
     Schema schema = graph.getSchema();
-    if (schema.getParticipantLayerId() == null) 
+    if (schema.getParticipantLayer() == null) 
       throw new TransformationException(this, "No participant layer specified.");
-    if (schema.getTurnLayerId() == null) 
+    if (schema.getTurnLayer() == null) 
       throw new TransformationException(this, "No turn layer specified.");
-    if (schema.getUtteranceLayerId() == null) 
+    if (schema.getUtteranceLayer() == null) 
       throw new TransformationException(this, "No utterance layer specified.");
 
     if (schema.getEpisodeLayerId() != null) {
