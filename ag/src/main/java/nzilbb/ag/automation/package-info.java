@@ -36,10 +36,10 @@
     <li>org/fancy/ext/index.html</li>
 </ul> </p>
 
-<p> Annotators may require access to the file system or a relational database in order
-  to function. In order to ensure the correct resources are made available, the class
-  that implements {@link Annotator} should be annotated with {@link UsesFileSystem} and/or
-  {@link UsesRelationalDatabase} as well. </p>
+<p> Annotators may require access to the file system, a relational database, or the graph
+  store in order to function. In order to ensure the correct resources are made available,
+  the class that implements {@link Annotator} should be annotated with {@link UsesFileSystem}, 
+  {@link UsesRelationalDatabase}, or {@link UsesGraphStore} as well. </p>
 
 <p> Annotators will most likely need to interact with the user
   <ul>

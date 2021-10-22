@@ -203,6 +203,25 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
   } // end of newConnection()
   
   /**
+   * The graph store, if the annotator is annotated with {@link UseseGraphStore}.
+   * @see #getStore()
+   * @see #setStore(GraphStore)
+   */
+  protected GraphStore store;
+  /**
+   * Getter for {@link #store}: The graph store, if the annotator is annotated
+   * with {@link UseseGraphStore}. 
+   * @return The graph store, if the annotator is annotated with {@link UseseGraphStore}.
+   */
+  public GraphStore getStore() { return store; }
+  /**
+   * Setter for {@link #store}: The graph store, if the annotator is annotated
+   * with {@link UseseGraphStore}. 
+   * @param newStore The graph store, if the annotator is annotated with {@link UseseGraphStore}.
+   */
+  public Annotator setStore(GraphStore newStore) { store = newStore; return this; }
+  
+  /**
    * Whether the annotator is currently annotating.
    * @see #getRunning()
    * @see #setRunning(boolen)
@@ -740,14 +759,15 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
   /**
    * Transforms all graphs (or fragments) from the given stream.
    * <p> This can be overridden for optimized cross-graph updates. The default
-   * implementation simply calls {@link GraphTransformer#transform(Graph)} serially for
-   * each graph. 
-   * @param graphs A stream of graphs.
+   * implementation simply calls {@link GraphTransformer#transform(Graph)} and then
+   * consumer.accept(Graph) serially for each graph. 
+   * @param graphs A stream of graphs, which may be full transcripts, or transcript fragments.
+   * @param consumer A consumer for receiving the graphs once they're transformed.
    * @throws TransformationException
    * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
    * {@link #setSchema(Schema)} have not yet been called.
    */
-  public void transformTranscripts(Stream<Graph> graphs)
+  public void transformGraphs(Stream<Graph> graphs, Consumer<Graph> consumer)
     throws TransformationException, InvalidConfigurationException {
     
     List<Graph> transcripts = graphs.collect(Collectors.toList());
@@ -758,6 +778,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
       for (Graph transcript : transcripts) {
         if (cancelling) break;
         transform(transcript);
+        consumer.accept(transcript);
         if (cancelling) break;
         percentComplete = (int)((double)(soFar * 100) / (double)transcripts.size());
       } // next transcript
