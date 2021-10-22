@@ -21,30 +21,48 @@
 //
 package nzilbb.annotator.htk;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
 import javax.script.*;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
+import nzilbb.ag.serialize.GraphDeserializer;
+import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.util.DefaultOffsetGenerator;
+import nzilbb.ag.util.Merger;
+import nzilbb.configure.ParameterSet;
+import nzilbb.encoding.CMU2DISC;
+import nzilbb.encoding.DISC2CMU;
+import nzilbb.encoding.PhonemeTranslator;
+import nzilbb.formatter.htk.mlf.MlfDeserializer;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
 
@@ -495,7 +513,6 @@ public class HTKAligner extends Annotator {
         "p2fa/model/monophones", "p2fa/readme.txt"
       };
       for (String file : aFiles) {
-        setStatus("Unpacking " + file);
         URL urlSource = getClass().getResource(file);
         File fDestination = getWorkingDirectory();
         String[] pathElements = file.split("/");
@@ -503,10 +520,13 @@ public class HTKAligner extends Annotator {
           if (!fDestination.exists()) fDestination.mkdir();
           fDestination = new File(fDestination, element);
         } // next path element
-	    
-        InputStream isSource = urlSource.openStream();
-        FileOutputStream osDestination = new FileOutputStream(fDestination);
-        IO.Pump(isSource, osDestination);
+
+        if (!fDestination.exists()) {
+          setStatus("Unpacking " + file);
+          InputStream isSource = urlSource.openStream();
+          FileOutputStream osDestination = new FileOutputStream(fDestination);
+          IO.Pump(isSource, osDestination);
+        }
       } // next script
       setPercentComplete(10);
 
@@ -755,6 +775,12 @@ public class HTKAligner extends Annotator {
         +" but is a child of " + phoneAlignmentLayer.getParentId());
     }
 
+    // P2FA requires 11,025Hz sample rate, and doesn't provide scores (or can it? TODO)
+    if (useP2FA) {
+      sampleRate = Integer.valueOf(11025);
+      scoreLayerId = null;
+    }
+
     if (scoreLayerId != null && scoreLayerId.length() > 0) {
       Layer scoreLayer = schema.getLayer(scoreLayerId);
       if (scoreLayer == null) {
@@ -788,6 +814,7 @@ public class HTKAligner extends Annotator {
           this, "Invalid participant tag layer: " + scoreLayerId);
       }
     } // scoreLayerId != null
+
   }
 
   /**
@@ -843,12 +870,16 @@ public class HTKAligner extends Annotator {
   public Graph transform(Graph graph) throws TransformationException {
     setRunning(true);
     try {
-      // do nothing
+      if (useP2FA) {
+        // tranformTranscripts but
+      }
     } finally {
       setRunning(false);
     }
     return graph;
   }
+
+  private HTK htk;
 
   /**
    * Force-aligns the given fragments.
@@ -859,22 +890,914 @@ public class HTKAligner extends Annotator {
    * {@link #setSchema(Schema)} have not yet been called.
    */
   @Override
-  public void transformTranscripts(Stream<Graph> graphs, Consumer<Graph> consumer)
+  public void transformGraphs(Stream<Graph> graphs, Consumer<Graph> consumer)
     throws TransformationException, InvalidConfigurationException {
-
-    // TODO Problem: how to detect simultaneous speech?
-    
-    List<Graph> transcripts = graphs.collect(Collectors.toList());
     setPercentComplete(0);
-    int soFar = 0;
-    for (Graph transcript : transcripts) {
-      if (isCancelling()) break;
-      transform(transcript);
-      consumer.accept(transcript);
-      if (isCancelling()) break;
-      setPercentComplete((int)((double)(soFar * 100) / (double)transcripts.size()));
-    } // next transcript
-    setPercentComplete(100);
+    setRunning(true);
+
+    try {
+      
+      PhonemeTranslator phonemesToHtk = new PhonemeTranslator(); // (default no translation)
+      PhonemeTranslator htkToPhonemes = phonemesToHtk;
+      boolean discDictionary = "D".equals(schema.getLayer(pronunciationLayerId).get("subtype"));
+      boolean discOutput = "D".equals(schema.getLayer(phoneAlignmentLayerId).get("subtype"));
+
+      List<Graph> fragments = null;
+      TransformationException failure = null;
+      try {
+        
+        if (!useP2FA) { // train & align
+          
+          // create initial file structure
+          
+          // create input files
+          
+          // if there are still some utterances
+          
+          // step 1
+          // step 2
+          // step 3 is record audio, which we've already done
+          // step 4
+          // step 5 is extract features from audio, which we've already done
+          // step 6
+          // step 7
+          // step 8
+          
+          // get word alignments
+          
+        } else { // useP2FA
+          
+          // create initial file structure
+          createSessionWorkingDir();
+          
+          // convert output to DISC?
+          if (discDictionary) {
+            setStatus("discDictionary");
+            phonemesToHtk = new DISC2CMU().setDefaultStress("1");
+            htkToPhonemes = new CMU2DISC();
+          } else {
+            if (discOutput) {
+              setStatus("discOutput");
+              htkToPhonemes = new CMU2DISC();
+            }
+          }
+          
+          // create input files
+          fragments = createInputFiles(graphs, phonemesToHtk);
+          
+          // force align
+          forceAlign();
+        }
+        
+        // check number of utterances
+        if (fragments.size() == 0) {
+          setStatus("No utterances could be aligned.");
+        } else {
+          // update the transcripts where word alignments were found
+          if (!isCancelling())
+          {
+            updateAlignments(
+              htkToPhonemes, sampleRate != null && sampleRate.intValue() == 11025,
+              fragments, consumer);
+            setStatus("Complete - words and phones from selected utterances are now aligned.");
+          }
+        }
+      } catch (TransformationException x) {
+        failure = x;
+      }
+      
+      // cleanup
+      boolean cleanup = false;
+      switch (cleanupOption.intValue()) {
+        case 100: // always
+          cleanup = true;
+          break;
+        case 75: // on success
+          cleanup = failure == null;
+          break;
+        case 25: // on failure
+          cleanup = failure != null;
+          break;
+      }
+      if (cleanup) {
+        IO.RecursivelyDelete(sessionWorkingDir);
+      }
+
+      // TODO result URL?
+
+      if (failure != null) throw failure;
+      
+      setPercentComplete(100);
+    } finally {
+      setRunning(false);
+    }
   } // end of transformTranscripts()
+
+  /** The working directory for this training session. */
+  protected String sessionName = "htk";
+  /** The working directory for this training session. */
+  protected File sessionWorkingDir;
+  /** The log for this training session. */
+  protected File logFile;
+  /** The grammar. */
+  protected File grammar;
+  /** Word MLF file. */
+  protected File wordsMlf;
+  /** Aligned words MLF file. */
+  protected File alignedWordsMlf;
+  /** SCP file. */
+  protected File scp;
+  /** Training SCP file. */
+  protected File trainingScp;
+  /** Dictionary */
+  protected Map<String,LinkedHashSet<String>> dictionary;
+  /** Dictionary file */
+  protected File dictionaryFile;
+  /** Dictionary MLF */
+  protected File dictionaryMlf;
+  /** Phoneme list */
+  protected Set<String> phonemeList;
+  /** Pause markers */
+  protected HashMap<String,String> htPauseMarkers;
+  /** Compiled noise patterns */
+  protected HashMap<String,Pattern> noisePatternsMap;
+  /** Left channel participant pattern */
+  protected Pattern leftPatternRegex;
+  /** Right channel participant pattern */
+  protected Pattern rightPatternRegex;
+  
+  /**
+   * Provides the working directory for this training session.
+   * @return The working directory for temporary files.
+   * @throws TransformationException if the directory couldn't be created.
+   */
+  protected File createSessionWorkingDir() throws TransformationException{
+    sessionWorkingDir = new File(
+      getWorkingDirectory(),
+      sessionName + "-"
+      + new SimpleDateFormat("yyyy-MM-dd-kk-mm-ss").format(new java.util.Date()));
+    if (!sessionWorkingDir.mkdirs()) {
+      throw new TransformationException(
+        this, "Failed to create working directory: " + sessionWorkingDir.getPath());
+    }
+    logFile = new File(sessionWorkingDir, "training.log");
+    getStatusObservers().add(status -> {
+        try {
+          PrintWriter out = new PrintWriter(new FileOutputStream(logFile, true));
+          out.println(status);
+          out.close();
+        } catch(IOException exception) {
+        }
+      });
+    try {
+      PrintWriter out = new PrintWriter(logFile);
+      out.println("HTKAligner log: " + sessionName);
+      out.close();
+    } catch(IOException exception) {
+    }
+    htk = new HTK(new File(htkPath), logFile);
+    return sessionWorkingDir;
+  } // end of getSessionWorkingDir()
+
+  /**
+   * Creates data files HTK needs for training.
+   * @param graphs Original utterances to align.
+   * @param phonemesToHtk Translates phoneme labels to HTK-compatible ones, if necessary.
+   * @return The utterances successfully processed.
+   * @throws TransformationException
+   */
+  public List<Graph> createInputFiles(Stream<Graph> graphs, PhonemeTranslator phonemesToHtk)
+    throws TransformationException {
+    try {
+      // start grammar...
+      
+      // -all_utterances.gram
+      // ( SENT-START ( 
+      // <utterance> | <utterance> | <utterance>...
+      // ) SENT-END )      
+      grammar = new File(sessionWorkingDir, sessionName + ".gram");
+      final BufferedWriter grammarOut = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(grammar), "UTF-8"));
+      grammarOut.write("( SENT-START ( ");
+      grammarOut.newLine();
+      htPauseMarkers = new HashMap<String,String>();
+      for (String sPauseMarker : pauseMarkers.split(" ")) {
+        htPauseMarkers.put(sPauseMarker, "SILENCE");
+      }
+      
+      StringTokenizer stNoisePatterns = new StringTokenizer(noisePatterns);
+      noisePatternsMap = new HashMap<String,Pattern>();
+      while (stNoisePatterns.hasMoreTokens()) {
+        String sPattern = stNoisePatterns.nextToken();
+        String sName = sPattern.replaceAll("[^a-zA-Z0-9]","").toLowerCase();
+        if (sName.length() == 0) sName = "noise";
+        try {
+          noisePatternsMap.put(sName, Pattern.compile(sPattern, Pattern.CASE_INSENSITIVE));
+          setStatus("Noise pattern: " + sName + " = " + sPattern);
+        } catch(Exception exception) {
+          setStatus("Ignoring noise pattern: " + sName + " = " + sPattern + " : " + exception);
+        }
+      } // next pattern
+      
+      leftPatternRegex = leftPattern == null || leftPattern.length() == 0?
+        null:Pattern.compile(leftPattern);
+      rightPatternRegex = rightPattern == null || rightPattern.length() == 0?
+        null:Pattern.compile(rightPattern);
+      
+      // start MLF...
+      wordsMlf = new File(sessionWorkingDir, sessionName + "_words.mlf");
+      final BufferedWriter mlfOut = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(wordsMlf), "UTF-8"));
+      mlfOut.write("#!MLF!#");
+      mlfOut.newLine();
+      
+      // start SCPs
+      scp = new File(sessionWorkingDir, sessionName + ".scp");
+      final BufferedWriter scpOut = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(scp), "UTF-8"));
+      trainingScp = new File(sessionWorkingDir, sessionName + "_train.scp");
+      final BufferedWriter trainingScpOut = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(trainingScp), "UTF-8"));
+      final String sPath = sessionWorkingDir.getPath() + File.separator;
+      
+      final DecimalFormat formatter = new DecimalFormat("0.0000");
+      
+      // start dictionary
+      dictionary = new TreeMap<String,LinkedHashSet<String>>();
+      
+      Vector<Graph> utterances = new Vector<Graph>();
+      
+      graphs.forEach(fragment -> {
+          try {
+            
+            // unaligned?
+            if (fragment.getStart().getOffset() == null) {
+              setStatus(
+                "Fragment has an undefined start time and will be ignored: \""+fragment.getId()+"\"");
+              return;
+            }
+            if (fragment.getEnd().getOffset() == null) {
+              setStatus(
+                "Fragment has an undefined end time and will be ignored: \""+fragment.getId()+"\"");
+              return;
+            }
+            
+            // simultaneous speech?
+            if (overlapThreshold != null) {
+              if (getStore() == null) {
+                setStatus("No access to graph store, so simultaneous speech cannot be detected.");
+              } else {
+                Annotation utterance = fragment.first(schema.getUtteranceLayerId());
+                double dAnnotationDuration = utterance.getDuration();
+                // get all other utterances that overlap with this one
+                String query = "graph.id == '"+esc(fragment.sourceGraph().getId())+"'"
+                  +" && layer.id == '"+esc(schema.getUtteranceLayerId())+"'"
+                  +" && start.offset <= " + utterance.getEnd().getOffset()
+                  +" && end.offset >= " + utterance.getStart().getOffset()
+                  +" && id <> '"+utterance.getId()+"'";
+                Annotation[] overlappingUtterances = getStore().getMatchingAnnotations(query);
+                // collect them all into a graph for comparing anchor offsets
+                Graph g = new Graph(); 
+                HashSet<String> anchorIds = new HashSet<String>();
+                for (Annotation other : overlappingUtterances) {
+                  g.addAnnotation(other);
+                  anchorIds.add(other.getStartId());
+                  anchorIds.add(other.getEndId());
+                }
+                Anchor[] anchors = getStore().getAnchors(
+                  fragment.sourceGraph().getId(),
+                  anchorIds.toArray(new String[anchorIds.size()]));
+                for (Anchor anchor : anchors) g.addAnchor(anchor);
+                
+                // look for an overlap that's greater than the threshold
+                for (Annotation other : overlappingUtterances) {
+                  double dOverlap = -other.distance(utterance);
+                  if (dOverlap / dAnnotationDuration > overlapThreshold / 100.0) {
+                    setStatus(
+                      "Fragment has " + formatter.format(dOverlap)
+                      + "s overlap with other speakers"+
+                      " ("+other.getLabel()+" "+other.getStart()+"-"+other.getEnd()+")"
+                      +" and will be ignored: " + "\"" + fragment + "\"");
+                    return;
+                  } // overlap over threshold
+                } // next overlapping utterance
+              } // graph store is set
+            } // overlapThreshold
+            
+            StringBuilder utteranceOrthography = new StringBuilder();
+            boolean bJustAddedNoise = false;
+            
+            Annotation[] words = fragment.all(schema.getWordLayerId());
+            // check for no words
+            if (words.length == 0) {
+              setStatus(
+                "Fragment has no words and will be ignored: "
+                + "\"" + fragment.getId() + "\"");
+              return;
+            }
+            
+            // check whether the whole transcript has audio
+            // (we don't ask the fragment directly for audio, because that would create a
+            //  new sample file, and we don't want it yet)
+            String audioUrl = fragment.sourceGraph().getMediaProvider().getMedia("", "audio/wav");
+            if (audioUrl == null) {
+              setStatus(
+                "Fragment has no media available and will be ignored: \""+fragment+"\"");
+              return;
+            } 
+            
+            // for each word
+            for (Annotation word : words) {
+              
+              // check for orth/pron
+              Annotation orthography = word.first(orthographyLayerId);
+              Annotation[] pronunciations = word.all(pronunciationLayerId);
+              if (pronunciations.length == 0) {
+                setStatus(
+                  "Fragment contains unknown word \"" + orthography.getLabel()
+                  + "\" and will be ignored: \"" + fragment.getId() + "\"");
+                return;
+              }
+              if (orthography != null
+                  && orthography.getLabel() != null
+                  && orthography.getLabel().length() > 0) {
+                
+                // add word (and neighboring noises/pause markers) to the utterance
+                bJustAddedNoise = addWordToUtterance(
+                  utteranceOrthography, bJustAddedNoise, orthography);
+                
+                // dictionary...
+                
+                // is the word already in the dictionary?
+                if (!dictionary.containsKey(orthography.getLabel())) {
+                  dictionary.put(orthography.getLabel(), new LinkedHashSet<String>());
+                }
+                
+                Set<String> prons = dictionary.get(orthography.getLabel());
+                // for each pron
+                for (Annotation pronunciation : pronunciations) {
+                  String sPhonology = pronunciation.getLabel();
+                  if (!prons.contains(sPhonology)) {
+                    prons.add(phonemesToHtk.apply(sPhonology));
+                  }
+                } // next pronunciation
+                
+              } // orth/pron are present
+            } // next word
+            
+            if (utteranceOrthography.toString().trim().length() == 0) {
+              // don't put blank utterances in grammar or MLF
+              setStatus(
+                "Fragment has no orthography and will be ignored: " + "\"" + fragment + "\"");
+              return;
+            }
+            
+            utterances.add(fragment);
+            
+            // write line to grammar                     
+            grammarOut.newLine();
+            if (utterances.size() > 0 ) grammarOut.write(" | ");
+            grammarOut.write(utteranceOrthography.toString());
+            
+            // write mlf
+            mlfOut.write("\"*/" + fragment.getId() + ".lab\"");
+            for (String token : utteranceOrthography.toString().split(" ")) {
+              mlfOut.newLine();
+              mlfOut.write(token);
+            } // next work token
+            mlfOut.newLine();
+            mlfOut.write(".");                  
+            mlfOut.newLine();
+            
+            // write line to SCPs
+            scpOut.write(sPath + fragment.getId() + ".wav " + fragment.getId() + ".mfc");
+            scpOut.newLine();
+            trainingScpOut.write("\"" + sPath + fragment.getId() + ".mfc\"");
+            trainingScpOut.newLine();
+            
+            // extract audio...                     
+            extractAudio(fragment, schema);
+          } catch (Exception x) {
+            setStatus("Error processing fragment : \"" + fragment + "\" : " + x);
+            // TODO?? setLastException(x);
+          }
+        }); // next utterance
+      
+      // finish grammar
+      grammarOut.newLine();
+      grammarOut.write(") SENT-END )");
+      grammarOut.newLine();
+      grammarOut.close();
+      
+      // finish mlf
+      mlfOut.close();
+      
+      // finish SCPs
+      scpOut.close();
+      trainingScpOut.close();
+      
+      // write dictionaries
+      dictionaryFile = new File(sessionWorkingDir, sessionName + ".dict");
+      dictionaryMlf = new File(sessionWorkingDir, sessionName + "_dict.mlf");
+      BufferedWriter out = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(dictionaryFile), "UTF-8"));
+      out.write("SENT-END\tsil");
+      out.newLine();
+      out.write("SENT-START\tsil");
+      out.newLine();
+      out.write("SILENCE\tsil");
+      out.newLine();
+      for (String sName : noisePatternsMap.keySet()) {
+        out.write(sName.toUpperCase() + "\t" + sName);
+        out.newLine();
+      }
+      
+      BufferedWriter outMlf = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(dictionaryMlf), "UTF-8"));
+      outMlf.write("#!MLF!#");
+      outMlf.newLine();
+      
+      // build a phoneme list as we go 
+      phonemeList = new TreeSet<String>();
+      
+      for (String sWord : dictionary.keySet()) {
+        if (isCancelling()) break;
+        Set<String> pronunciations = dictionary.get(sWord);
+        
+        // for each pronunciation
+        if (pronunciations.size() == 0) {
+          throw new Exception("The word '" + sWord + "' has no pronunciation defined");
+        }
+        for (String sPronunciation : pronunciations) {
+          if (isCancelling()) break;
+          
+          // format the pronunciation
+          String sEntry = sPronunciation;
+          // and that the phonemes are separated by spaces
+          StringTokenizer phonemes = new StringTokenizer(sEntry, " ");
+          while (phonemes.hasMoreTokens()) phonemeList.add(phonemes.nextToken());
+          
+          out.write(sWord + "\t" + sEntry + " sp");
+          out.newLine();
+          
+          outMlf.write("\"*/" + sWord + ".lab\"");
+          outMlf.newLine();
+          outMlf.write("sil");
+          outMlf.newLine();
+          StringTokenizer tokens = new StringTokenizer(sEntry, " ");
+          while (tokens.hasMoreTokens()) {
+            outMlf.write(tokens.nextToken());
+            outMlf.newLine();
+          } // next phoneme
+          outMlf.write("sp");
+          outMlf.newLine();
+          outMlf.write("sil");
+          outMlf.newLine();
+          outMlf.write(".");
+          outMlf.newLine();
+          
+        } // next pronunciation
+      } // next word
+      
+      out.close();
+      outMlf.close();
+      
+      return utterances;
+    } catch (Exception x) {
+      throw new TransformationException(this, x);
+    }
+  } // end of createInputFiles()
+   
+  /**
+   * Add the given word, and any neighbouring noise/pause markers, to the given utterance
+   * transcript buffer. Also prefixes digit-initial word with underscore.
+   * @param utteranceOrthography
+   * @param bJustAddedNoise
+   * @param orthography
+   * @param pauseMarkers
+   * @return true if a noise annotation was the last thing added, false otherwise.
+   */
+  public boolean addWordToUtterance(
+    StringBuilder utteranceOrthography, boolean bJustAddedNoise, Annotation orthography) {
+    
+    Annotation word = orthographyLayerId.equals(schema.getWordLayerId())?
+      orthography:orthography.getParent();
+    
+    // digit-initial word with underscore
+    if (Character.isDigit(orthography.getLabel().charAt(0))) {
+      // prefix it with underscore
+      orthography.setLabel("_" + orthography.getLabel());
+    }
+    
+    // accumulate utterance transcipt...
+    
+    if (!bJustAddedNoise) {
+      if (noiseLayerId != null && noiseLayerId.length() > 0) {
+        // look for noise annotations to prepend
+        LinkedHashSet<Annotation> vNoises = word.getStart().endOf(noiseLayerId);
+        vNoises.addAll(word.getStart().startOf(noiseLayerId));
+        for (Annotation anNoise : vNoises) {
+          for (String sName : noisePatternsMap.keySet()) {
+            if (noisePatternsMap.get(sName).matcher(anNoise.getLabel()).matches()) {
+              if (utteranceOrthography.length() > 0) utteranceOrthography.append(" ");
+              utteranceOrthography.append(sName.toUpperCase());
+              break;
+            } 
+          } // next pattern
+        } // next noise annotation
+      }
+    } // noiseLayerId configured
+    bJustAddedNoise = false;
+    
+    if (utteranceOrthography.length() > 0) utteranceOrthography.append(" ");
+    utteranceOrthography.append(orthography.getLabel());
+    
+    // look for pause markers
+    for (String sMarker : htPauseMarkers.keySet()) {
+      if (word.getLabel().endsWith(sMarker)) {
+        utteranceOrthography.append(" ");
+        utteranceOrthography.append(htPauseMarkers.get(sMarker));
+      }
+    } // next pause marker
+    
+    LinkedHashSet<Annotation> vNoises = word.getEnd().startOf(noiseLayerId);
+    for (Annotation anNoise : vNoises) {
+      // look for noise annotations to append
+      for (String sName : noisePatternsMap.keySet()) {
+        if (noisePatternsMap.get(sName).matcher(anNoise.getLabel()).matches()) {
+          utteranceOrthography.append(" ");
+          utteranceOrthography.append(sName.toUpperCase());
+          bJustAddedNoise = true;
+          break;
+        }
+      } // next pattern
+    } // next noise annotation
+    return bJustAddedNoise;
+  } // end of addWordToUtterance()
+  
+  /**
+   * Extracts audio features for the given utterance.
+   * @param fragment
+   * @param schema
+   * @throws Exception
+   */
+  public void extractAudio(Graph fragment, Schema schema) throws TransformationException {
+
+    try {
+      File fTarget = new File(sessionWorkingDir, fragment.getId() + ".mfc");
+      double dStartTime = fragment.getStart().getOffset();
+      if (dStartTime < 0) dStartTime = 0;
+      double dEndTime = fragment.getEnd().getOffset();
+      
+      String channel = "";
+      if (leftPatternRegex != null || rightPatternRegex != null) {
+        if (leftPatternRegex != null
+            && leftPatternRegex.matcher(
+              fragment.first(schema.getUtteranceLayerId()).getLabel()).matches()) {
+          channel = "left";
+        } else if (rightPatternRegex != null 
+                   && rightPatternRegex.matcher(
+                     fragment.first(schema.getUtteranceLayerId()).getLabel()).matches()) {
+          channel = "right";
+        }
+      }
+      
+      String fileUrl = fragment.getMediaProvider().getMedia(
+        "", "audio/wav" + (sampleRate == null?"":"; samplerate="+sampleRate));
+      File fTemp = new File(new URI(fileUrl));
+      File fWav = new File(
+        fTarget.getParent(), fragment.getId() + "." + IO.Extension(fTemp));
+      IO.Rename(fTemp, fWav);
+      
+      // convert WAV to MFCC
+      int r = 99;
+      File fConfig = null;
+      setStatus(
+        "Extracting features from \"" + fWav.getName() + "\" to \"" + fTarget.getName() + "\""
+        +(channel.length()==0?"":" - channel: " + channel));
+      if (useP2FA) {
+        fConfig = new File(getP2FAModelDirectory(), "config");
+      } else if (channel.length() != 0) {
+        // need to pass a config file for specifying the channel to use
+        fConfig = new File(sessionWorkingDir, "config"+channel);
+      }
+      if (fConfig != null) {
+        r = htk.HCopy(fConfig, "WAV", fWav, fTarget);
+      } else {
+        r = htk.HCopy("WAV", fWav, fTarget);
+      }
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HCopy returned: " + r + " - " + htk.getLastError());
+      }
+      //fWav.delete();
+    } catch (Exception x) {
+      throw new TransformationException(this, x);
+    }
+  } // end of extractAudio()
+  
+  /**
+   * Get the directory that the P2FA files are in.
+   * @return The directory that the P2FA files are in.
+   */
+  protected File getP2FADirectory() {
+    return new File(getWorkingDirectory(), "p2fa");
+  } // end of getP2FAModelDirectory()
+  
+  /**
+   * Get the directory that the P2FA pre-trained models are in.
+   * @return The directory that the P2FA pre-trained models are in.
+   */
+  protected File getP2FAModelDirectory() {
+    return new File(new File(getP2FADirectory(), "model"), "11025");
+  } // end of getP2FAModelDirectory()
+  
+  /**
+   * Use the P2FA forced alignment command.
+   * @throws TransformationException
+   */
+  public void forceAlign() throws TransformationException {
+    setStatus("Forced alignment");
+    try {
+      
+      setStatus("Calling HVite...");      
+      File macros = new File(getP2FAModelDirectory(), "macros");
+      File hmmdefs = new File(getP2FAModelDirectory(), "hmmdefs");
+      File phones = new File(new File(getP2FADirectory(),"model"), "monophones");
+      alignedWordsMlf = new File(sessionWorkingDir, sessionName + "_words_aligned.mlf");
+      int r = htk.HVite(
+        "S", "SILENCE", 0.0, 5.0,
+        macros, hmmdefs, alignedWordsMlf,
+        wordsMlf, 
+        trainingScp, 
+        dictionaryFile, 
+        phones);
+      if (r != 0) {
+        String sError = htk.getLastError();
+        // look for something like "Cannot find hmm [???-]PD[+???]"
+        Pattern pCannotFindHmm
+          = Pattern.compile("Cannot find hmm \\[\\?\\?\\?-\\](.+)\\[\\+\\?\\?\\?\\]");
+        Matcher mCannotFileHmm = pCannotFindHmm.matcher(sError);
+        if (mCannotFileHmm.find()) {
+          throw new TransformationException(
+            this, "ERROR: HVite found a phone with no model: " + mCannotFileHmm.group(1));
+        } else {
+          throw new TransformationException(
+            this, "HVite returned: " + r + " - " + htk.getLastError());
+        }
+      }
+      
+      setStatus("Finished word recognition.");
+    } catch (IOException x) {
+      throw new TransformationException(this, x);
+    } catch (InterruptedException x) {
+      throw new TransformationException(this, x);
+    }
+  } // end of forceAlign()
+
+  /**
+   * Reads the alignments from the files output by HTK, and merges the changes into the
+   * original fragments.
+   * @param htkToPhonemes Phoneme label converter to use.
+   * @param useP2FACorrection Whether to use the P2FA alignment correction.
+   * process is allocated to this step. 
+   * @param originalFragments The original utterances that should be updated
+   * @param consumer Where the aligned fragments are sent.
+   * @throws Exception
+   */
+  public void updateAlignments(
+    PhonemeTranslator htkToPhonemes, boolean useP2FACorrection,
+    List<Graph> originalFragments, Consumer<Graph> consumer)
+    throws TransformationException {
+    try {
+      
+      // scan the alignments, updating transcript words
+      setStatus("Update word and phoneme alignments");
+      
+      // need a list of noise tokens - i.e. uppcase versions of the noise 'phones'
+      HashSet<String> noiseIds = new HashSet<String>();
+      for (String sNoisePhone : noisePatternsMap.keySet()) {
+        noiseIds.add(sNoisePhone.toUpperCase());
+      }
+      
+      // label for tagging utterance/participant as aligned
+      String sTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(new java.util.Date());
+      LinkedHashSet<String> participantIds = new LinkedHashSet<String>();
+      
+      // TODO this should be in saveTranscript
+      // // get a list of word tag layers (so anchor sharing can be fixed up after saving)
+      // PreparedStatement sqlWordTagLayers = connection.prepareStatement(
+      //    "SELECT layer_id FROM layer WHERE alignment = 0 AND scope = 'W'");
+      // Vector<Integer> vWordTagLayers = new Vector<Integer>();
+      // ResultSet rsWordTagLayers = sqlWordTagLayers.executeQuery();
+      // while (rsWordTagLayers.next()) {
+      //    vWordTagLayers.add(rsWordTagLayers.getInt("layer_id"));
+      // }
+      // rsWordTagLayers.close();
+      // sqlWordTagLayers.close();
+      // // prepare tag fixup statement for later
+      // PreparedStatement sqlFixTagAnchors = connection.prepareStatement(
+      //    "UPDATE annotation_layer_? SET start_anchor_id = ?, end_anchor_id = ? WHERE word_annotation_id = ?");
+      
+      // read the graphs out of the file...
+      
+      // get/configure deserializer
+      ParameterSet configuration = new ParameterSet();
+      GraphDeserializer deserializer = new MlfDeserializer();
+      configuration = deserializer.configure(configuration, schema);
+      if (phoneAlignmentLayerId != null) {
+        configuration.get("phoneLayer").setValue(schema.getLayer(phoneAlignmentLayerId));
+      } else {
+        configuration.get("phoneLayer").setValue(null);
+      }
+      if (scoreLayerId != null) {
+        configuration.get("scoreLayer").setValue(schema.getLayer(scoreLayerId));
+      } else {
+        configuration.get("scoreLayer").setValue(null);
+      }
+      configuration.get("useP2FACorrection").setValue(Boolean.valueOf(useP2FACorrection));
+      configuration.get("noiseIdentifiersString").setValue(
+        noiseIds.stream().collect(Collectors.joining(" ")));
+      configuration.get("noiseLayer").setValue(null);
+      deserializer.configure(configuration, schema);
+
+      deserializer.setParameters( // default parameters
+        deserializer.load(
+          Utility.OneNamedStreamArray(new NamedStream(alignedWordsMlf)), schema));
+      
+      // deserialize the MLF
+      Graph[] alignedFragments = deserializer.deserialize();
+      for (String s : deserializer.getWarnings()) setStatus("Error: " + s);
+      
+      Vector<String> ids = new Vector<String>();
+      Vector<String> dependentLayerIds = new Vector<String>();
+      ids.add(schema.getTurnLayerId());
+      ids.add(schema.getUtteranceLayerId());
+      ids.add(schema.getWordLayerId());
+      if (utteranceTagLayerId != null) ids.add(utteranceTagLayerId);
+      if (phoneAlignmentLayerId != null) ids.add(phoneAlignmentLayerId);
+      if (scoreLayerId != null) ids.add(scoreLayerId);
+      // also include any aligned word layers, so that their anchors can be validated
+      // with the new alignments
+      DefaultOffsetGenerator defaultOffsetGenerator = new DefaultOffsetGenerator();
+      for (Layer childLayer : schema.getWordLayer().getChildren().values()) {
+        if (childLayer.getAlignment() != Constants.ALIGNMENT_NONE
+            && childLayer.getParentIncludes()
+            && !ids.contains(childLayer.getId())) {
+          ids.add(childLayer.getId());
+          dependentLayerIds.add(childLayer.getId());
+        }
+      } // next child layer
+      if (phoneAlignmentLayerId != null) {
+        // and segment children      
+        for (Layer childLayer : schema.getLayer(phoneAlignmentLayerId).getChildren().values()) {
+          if (childLayer.getAlignment() != Constants.ALIGNMENT_NONE
+              && childLayer.getSaturated() // TODO check this
+              && childLayer.getParentIncludes()
+              && !ids.contains(childLayer.getId())) {
+            ids.add(childLayer.getId());
+            dependentLayerIds.add(childLayer.getId());
+          }
+        } // next child layer
+      }
+      String[] layerIds = ids.toArray(new String[0]);
+      
+      // create a map of IDs to original fragments
+      HashMap<String,Graph> idToFragment = new HashMap<String,Graph>();
+      for (Graph f : originalFragments) idToFragment.put(f.getId(), f);
+      
+      // for each utterance alignment...
+      for (Graph alignedFragment : alignedFragments) {
+        
+        // anchors start from zero, which they don't in the database
+        alignedFragment.shiftAnchors((Double)alignedFragment.get("@startTime"));
+        
+        try {
+          
+          // get the original fragment
+          Graph fragment = idToFragment.get(alignedFragment.getId());
+          if (fragment == null) {
+            throw new TransformationException(
+              this, "Original fragment not found: " + alignedFragment.getId());
+          }
+          
+          // get ancestor annotations and add copies to the aligned fragment
+          Annotation participant = fragment.first(schema.getParticipantLayerId());
+          alignedFragment.getSchema().addLayer(
+            (Layer)schema.getParticipantLayer().clone());
+          alignedFragment.addAnnotation(
+            new Annotation()
+            .setLayerId(schema.getParticipantLayerId())
+            .setId(participant.getId())
+            .setLabel(participant.getLabel()));
+          Annotation turn = fragment.first(schema.getTurnLayerId());
+          alignedFragment.getSchema().addLayer(
+            (Layer)schema.getTurnLayer().clone());
+          Annotation editedTurn = alignedFragment.addAnnotation(
+            new Annotation()
+            .setLayerId(schema.getTurnLayerId())
+            .setId(turn.getId())
+            .setLabel(turn.getLabel())
+            .setParentId(turn.getParentId()));
+          participantIds.add(turn.getParentId());
+          
+          // set turn as parent of words
+          for (Annotation word : alignedFragment.all(schema.getWordLayerId())) {
+            word.setParent(editedTurn);
+          }
+          
+          Annotation utterance = fragment.first(schema.getUtteranceLayerId());
+          Annotation alignedUtterance = alignedFragment.first(schema.getUtteranceLayerId());
+          if (alignedUtterance != null && utterance != null) {
+            alignedUtterance.setLabel(utterance.getLabel());
+            alignedUtterance.setParent(editedTurn);
+          }
+          if (htkToPhonemes != null && phoneAlignmentLayerId != null) {
+            for (Annotation phone : alignedFragment.all(phoneAlignmentLayerId)) {
+              phone.setLabel(htkToPhonemes.apply(phone.getLabel()));
+            }
+          }
+          
+          // tag the utterance as aligned
+          if (utteranceTagLayerId != null) {
+            alignedFragment.getSchema().addLayer(
+              (Layer)schema.getLayer(utteranceTagLayerId).clone());
+            Annotation timestamp = new Annotation()
+              .setLayerId(utteranceTagLayerId)
+              .setLabel(sTimestamp)
+              .setStart(alignedFragment.getStart())
+              .setEnd(alignedFragment.getEnd())
+              .setParentId(editedTurn.getId());
+            timestamp.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+            alignedFragment.addAnnotation(timestamp);
+          }
+          
+          // merge the current database utterance with the incoming aligned utterance
+          Merger merger = new Merger(alignedFragment);
+          // but don't allow changes to system layers
+          merger.getNoChangeLayers().add(schema.getParticipantLayerId());
+          merger.getNoChangeLayers().add(schema.getTurnLayerId());
+          merger.getNoChangeLayers().add(schema.getUtteranceLayerId());
+          merger.getNoChangeLayers().add(schema.getWordLayerId());
+          fragment.trackChanges();
+          // merge changes
+          merger.transform(fragment);
+          
+          if (dependentLayerIds.size() > 0) { // if there are aligned child layers
+            // ensure their anchors are recomputed if they've got low-confidence alignments
+            defaultOffsetGenerator.transform(fragment);
+            
+            // now scan the dependent layers and fix up any child anchors that are out of bounds
+            // TODO fix merge/defaultOffsetGenerator so that this hack isn't necessary
+            for (String layerId : dependentLayerIds) {
+              for (Annotation a : fragment.all(layerId)) {
+                // was it originally connected to the parent?
+                if (!a.getStartId().equals(a.getParent().getStartId())
+                    && a.getOriginalStartId().equals(a.getParent().getOriginalStartId())) {
+                  a.setStart(a.getParent().getStart());
+                } else if (a.getStart().getOffset() < a.getParent().getStart().getOffset()) {
+                  // is the start now too early?
+                  a.setStart(a.getParent().getStart());
+                }
+                
+                // was it originally connected to the parent?
+                if (!a.getEndId().equals(a.getParent().getEndId())
+                    && a.getOriginalEndId().equals(a.getParent().getOriginalEndId())) {
+                  a.setEnd(a.getParent().getEnd());
+                } else if (a.getEnd().getOffset() > a.getParent().getEnd().getOffset()) {
+                  // is the end now too early?
+                  a.setEnd(a.getParent().getEnd());
+                }
+              } // next sub-word annotation
+            } // next dependent layer
+          }
+          
+          Set<Change> changes = fragment.getTracker().getChanges();
+          if (merger.getLog() != null) for (String l : merger.getLog()) setStatus(l);
+          if (consumer != null) consumer.accept(fragment);
+        } catch (Exception x) {
+          setStatus("Could not process " + alignedFragment.getId() + ": " + x);
+          StringWriter sw = new StringWriter();
+          PrintWriter pw = new PrintWriter(sw);
+          x.printStackTrace(pw);
+          setStatus(sw.toString());
+        }
+      } // next aligned fragment
+      
+      setStatus("Finished updating alignments.");
+    } catch (Exception x) {
+      throw new TransformationException(this, x);
+    }
+  } // end of updateAlignments()
+
+  /**
+   * Escapes quotes in the given string for inclusion in QL or SQL queries.
+   * @param s The string to escape.
+   * @return The given string, with quotes escapeed.
+   */
+  private String esc(String s) {
+    if (s == null) return "";
+    return s.replace("\\","\\\\").replace("'","\\'");
+  } // end of esc()
 
 } // end of class HTKAligner

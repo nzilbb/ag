@@ -14,6 +14,7 @@
   <name>nzilbb.annotator.htk</name>
 
   <properties>
+    <nzilbb.formatter.htk.mlf.version>1.3.0</nzilbb.formatter.htk.mlf.version>
     <package.path>nzilbb/annotator/htk/</package.path>
     <annotator.class>nzilbb.annotator.htk.HTKAligner</annotator.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,6 +23,11 @@
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>nzilbb</groupId>
+      <artifactId>nzilbb.formatter.htk.mlf</artifactId>
+      <version>[${nzilbb.formatter.htk.mlf.version},)</version>
+    </dependency>
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
@@ -55,6 +61,30 @@
           </archive>
           <outputDirectory>../../bin</outputDirectory>
         </configuration>
+      </plugin>
+      <!-- include nzilbb.formatter.htk.mlf in our jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>nzilbb</groupId>
+                  <artifactId>nzilbb.formatter.htk.mlf</artifactId>
+                  <version>${nzilbb.formatter.htk.mlf.version}</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       
       <plugin>

@@ -31,13 +31,18 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 import java.util.stream.Collectors;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
+import nzilbb.ag.GraphMediaProvider;
 import nzilbb.ag.Layer;
+import nzilbb.ag.MediaFile;
+import nzilbb.ag.PermissionException;
 import nzilbb.ag.Schema;
+import nzilbb.ag.StoreException;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
@@ -55,15 +60,14 @@ public class TestHTKAligner {
     
     // find the current directory
     File dir = dir();
-    
+
     // set the schema
     annotator.setSchema(graph().getSchema());
     
     // set the working directory
     annotator.setWorkingDirectory(dir);
     
-    // use derby for relational database
-    //TODO annotator.setRdbConnectionFactory(new DerbyConnectionFactory(dir));
+    // not setting the graph store, sorry
     
     // set the annotator configuration, which will install the lexicon the first time (only)
     annotator.setConfig(annotator.getConfig());
@@ -202,13 +206,77 @@ public class TestHTKAligner {
     }
   }
   
+  @Test public void P2FA() throws Exception {
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    //annotator.getStatusObservers().add(status->System.out.println(status));
+    annotator.setSchema(schema);    
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&pronunciationLayerId=phonemes"
+      +"&noiseLayerId="
+      +"&utteranceTagLayerId=utterance_htk" // nonexistent
+      +"&participantTagLayerId=participant_htk" // nonexistent
+      +"&wordAlignmentLayerId=word"
+      +"&phoneAlignmentLayerId=segment"
+      +"&useP2FA=on"
+      +"&scoreLayerId=score" // can't score with P2FA, so this should be ignored
+      +"&overlapThreshold="
+      +"&cleanupOption=100"
+      +"&noisePatterns=laugh.* unclear .*noise.*"
+      +"&leftPattern="
+      +"&rightPattern="
+      +"&pauseMarkers=-");
+    Layer layer = annotator.getSchema().getLayer("utterance_htk");
+    assertNotNull("utterance_htk layer created", layer);
+    layer = annotator.getSchema().getLayer("participant_htk");
+    assertNotNull("participant_htk layer created", layer);
+    assertNull("no score layer created because we're using P2FA",
+               annotator.getSchema().getLayer("score"));
+
+    final Vector<Graph> results = new Vector<Graph>();
+    annotator.transformGraphs(Arrays.stream(new Graph[] { g }), graph -> { results.add(graph); });
+    
+    assertEquals("One utterance " + results, 1, results.size());
+    Graph aligned = results.elementAt(0);
+    assertTrue("Original graph is edited", g == aligned);
+    
+    Annotation[] words = aligned.all("word");
+    assertEquals("One word " + Arrays.asList(words), 1, words.length);
+    Annotation word = words[0];
+    assertEquals("Word label " + word, "statute", word.getLabel());
+    
+    Annotation[] phones = word.all("segment");
+    assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
+    String[] labels = { "s", "t", "{", "J", "u", "t" };
+    Double[] starts = { 11.1, 11.25, 11.28, 11.44, 11.620000000000001, 11.7 };
+    for (int p = 0; p < phones.length; p++) {      
+      assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
+      assertEquals("Phone start confidence " + p,
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   phones[p].getStart().getConfidence().intValue());
+      assertEquals("Phone end confidence " + p,
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   phones[p].getEnd().getConfidence().intValue());
+      assertEquals("Phone start " + p, starts[p], phones[p].getStart().getOffset());
+      if (p > 0) {
+        assertEquals("Phone start shared with previous end " + p,
+                     phones[p-1].getEnd(), phones[p].getStart());
+      }
+    } // next phone    
+    assertEquals("Last phone end", Double.valueOf(11.76), phones[5].getEnd().getOffset());
+  }   
+
   /**
    * Returns a graph for annotating.
    * @return The graph for testing with.
    */
   public static Graph graph() {
     Schema schema = new Schema(
-      "who", "turn", "utterance", "word",
+      "participant", "turn", "utterance", "word",
       new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
       new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -225,15 +293,17 @@ public class TestHTKAligner {
       .setParentId("turn").setParentIncludes(true),
       new Layer("phonemes", "Phonemic transcription").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true)
-      .setParentId("word").setParentIncludes(true),
+      .setParentId("word").setParentIncludes(true), // ARPABET layer
       new Layer("segment", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(true)
       .setParentId("word").setParentIncludes(true));
+    schema.getLayer("segment").put("subtype", "D"); // DISC layer 
     // annotate a graph
     Graph g = new Graph()
       .setSchema(schema);
-    Anchor start = g.getOrCreateAnchorAt(1);
-    Anchor end = g.getOrCreateAnchorAt(100);
+    g.setId("BREY00538.TextGrid");
+    Anchor start = g.getOrCreateAnchorAt(10, Constants.CONFIDENCE_MANUAL);
+    Anchor end = g.getOrCreateAnchorAt(14, Constants.CONFIDENCE_MANUAL);
     g.addAnnotation(
       new Annotation().setLayerId("participant").setLabel("someone")
       .setStart(start).setEnd(end));
@@ -246,35 +316,45 @@ public class TestHTKAligner {
       .setStart(start).setEnd(end)
       .setParent(turn));
     
-    Annotation testing = g.addAnnotation(
-      new Annotation().setLayerId("word").setLabel("testing")
-      .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
+    Annotation statute = g.addAnnotation(
+      new Annotation().setLayerId("word").setLabel("statute")
+      .setStart(g.getOrCreateAnchorAt(11, Constants.CONFIDENCE_DEFAULT))
+      .setEnd(g.getOrCreateAnchorAt(13, Constants.CONFIDENCE_DEFAULT))
       .setParent(turn));
-    Annotation one = g.addAnnotation(
-      new Annotation().setLayerId("word").setLabel("one")
-      .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
-      .setParent(turn));
-    Annotation two = g.addAnnotation(
-      new Annotation().setLayerId("word").setLabel("two")
-      .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
-      .setParent(turn));
-    Annotation three = g.addAnnotation(
-      new Annotation().setLayerId("word").setLabel("three")
-      .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(45))
-      .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("T EH1 S T IH0 NG")
-                    .setParent(testing));
-    g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("W AH1 N")
-                    .setParent(one));
-    g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("HH W AH1 N")
-                    .setParent(one));
-    g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("T UW1")
-                    .setParent(two));
-    g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("TH R IY1")
-                    .setParent(three));
-    return g;
+    g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("S T AE1 CH UW0 T")
+                    .setParent(statute));
+
+    // access to test media
+    g.setMediaProvider(new GraphMediaProvider() {
+        public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
+          try {
+            MediaFile[] media = {
+              new MediaFile(new File(dir(), "BREY00538.wav"))
+            };
+            return media;
+          } catch (Exception x) {
+            throw new StoreException(x);
+          }
+        }
+        public String getMedia(String trackSuffix, String mimeType) 
+          throws StoreException, PermissionException {
+          try {
+            return getAvailableMedia()[0].getFile().toURL().toString();
+          } catch (Exception x) {
+            throw new StoreException(x);
+          }
+        }
+        public GraphMediaProvider providerForGraph(Graph graph) {
+          return this;
+        }
+      });
+
+    Graph fragment = g.getFragment(
+      10.0, 14.0, (String[])schema.getLayers().keySet().toArray(new String[0]));
+    fragment.setSchema(schema); // ensure subtype is available
+    return fragment;
   } // end of graph()
-  
+
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.annotator.htk.TestHTKAligner");
   }
