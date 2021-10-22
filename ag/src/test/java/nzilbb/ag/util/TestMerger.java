@@ -507,6 +507,91 @@ public class TestMerger {
     }
   }
 
+  @Test public void mergeNormalizeValidate()
+  {
+    try
+    {
+      File f = new File(getDir(), "complex-graph.json");
+      assertTrue(f.exists());
+      Graph graph = loadGraphFromJSON(f, defaultSchema());
+      f = new File(getDir(), "complex-graph-edited.json");
+      assertTrue(f.exists());
+      Graph edited = loadGraphFromJSON(f, defaultSchema());
+      
+      graph.setTracker(new ChangeTracker());
+
+      // what new.jsp does:
+      Merger m = new Merger(edited);
+      //m.setDebug(true);
+      //m.setValidator(null);
+      m.transform(graph);
+      
+      // destroy any unreferenced anchors
+      for (Anchor a : new Vector<Anchor>(graph.getAnchors().values()))
+      {
+        // we should just be able to check that the size of the collections is zero
+        // but there may be disconnect between tag layer anchor Id attributes and 
+        // the parents' anchors
+        boolean destroy = true;
+        for (Annotation an : a.getStartingAnnotations())
+        {
+          if (an.getChange() != Change.Operation.Destroy)
+          {
+            destroy = false;
+            break;
+          }
+        }
+        for (Annotation an : a.getEndingAnnotations())
+        {
+          if (an.getChange() != Change.Operation.Destroy)
+          {
+            destroy = false;
+            break;
+          }
+        }
+        if (destroy) a.destroy();
+      } // next anchor
+      
+      graph.commit();
+
+      f = new File(getDir(), "complex-graph-actual.json");
+      saveGraphToJSON(f, graph);
+
+//      DefaultOffsetGenerator def = new DefaultOffsetGenerator();//.setDebug(true);
+//      def.transform(graph);
+
+      // // what SqlGraphStore.saveTranscript does:
+      // new Normalizer()
+      //   .setMinimumTurnPauseLength(0.5)
+      //   .transform(graph);
+
+      // Validator v = new Validator();
+      // v.setDebug(true);
+      // v.transform(graph);
+
+    }
+    catch(TransformationException exception)
+    {
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      exception.printStackTrace(pw);
+      try { sw.close(); }
+      catch(IOException x) {}
+      pw.close();	
+      fail("merge() failed" + exception.toString() + "\n" + sw);
+    }
+    catch(Exception exception)
+    {
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      exception.printStackTrace(pw);
+      try { sw.close(); }
+      catch(IOException x) {}
+      pw.close();	
+      fail("loading failed" + exception.toString() + "\n" + sw);
+    }
+  }
+
   /**
    * "Basic" edit operations that (mostly) affect a single layer.
    * <ol>
