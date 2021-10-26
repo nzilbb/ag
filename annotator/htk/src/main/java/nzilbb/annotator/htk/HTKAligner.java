@@ -672,6 +672,30 @@ public class HTKAligner extends Annotator {
 
     beanPropertiesFromQueryString(parameters);
 
+    // convert empty strings into nulls
+    if (orthographyLayerId != null && orthographyLayerId.length() == 0)
+      orthographyLayerId = null;
+    if (pronunciationLayerId != null && pronunciationLayerId.length() == 0)
+      pronunciationLayerId = null;
+    if (noiseLayerId != null && noiseLayerId.length() == 0)
+      noiseLayerId = null;
+    if (utteranceTagLayerId != null && utteranceTagLayerId.length() == 0)
+      utteranceTagLayerId = null;
+    if (participantTagLayerId != null && participantTagLayerId.length() == 0)
+      participantTagLayerId = null;
+    if (wordAlignmentLayerId != null && wordAlignmentLayerId.length() == 0)
+      wordAlignmentLayerId = null;
+    if (phoneAlignmentLayerId != null && phoneAlignmentLayerId.length() == 0)
+      phoneAlignmentLayerId = null;
+    if (scoreLayerId != null && scoreLayerId.length() == 0)
+      scoreLayerId = null;
+    if (wordAlignmentLayerId != null && wordAlignmentLayerId.length() == 0)
+      wordAlignmentLayerId = null;
+    if (leftPattern != null && leftPattern.length() == 0)
+      leftPattern = null;
+    if (rightPattern != null && rightPattern.length() == 0)
+      rightPattern = null;
+
     // validation...
       
     // there must be at least one source layer
@@ -685,10 +709,10 @@ public class HTKAligner extends Annotator {
     if (schema.getLayer(pronunciationLayerId) == null)
       throw new InvalidConfigurationException(
         this, "Pronunciation layer not found: " + pronunciationLayerId);
-    if (noiseLayerId != null && noiseLayerId.length() > 0 && schema.getLayer(noiseLayerId) == null)
+    if (noiseLayerId != null && schema.getLayer(noiseLayerId) == null)
       throw new InvalidConfigurationException(this, "Noise layer not found: " + noiseLayerId);
 
-    if (utteranceTagLayerId != null && utteranceTagLayerId.length() > 0) {
+    if (utteranceTagLayerId != null) {
       Layer utteranceTagLayer = schema.getLayer(utteranceTagLayerId);
       if (utteranceTagLayer == null) {
         schema.addLayer(
@@ -711,7 +735,7 @@ public class HTKAligner extends Annotator {
           this, "Invalid utterance tag layer: " + utteranceTagLayerId);
       }
     } // utteranceTagLayerId != null
-    if (participantTagLayerId != null && participantTagLayerId.length() > 0) {
+    if (participantTagLayerId != null) {
       Layer participantTagLayer = schema.getLayer(participantTagLayerId);
       if (participantTagLayer == null) {
         schema.addLayer(
@@ -786,7 +810,7 @@ public class HTKAligner extends Annotator {
       scoreLayerId = null;
     }
 
-    if (scoreLayerId != null && scoreLayerId.length() > 0) {
+    if (scoreLayerId != null) {
       Layer scoreLayer = schema.getLayer(scoreLayerId);
       if (scoreLayer == null) {
         if (phoneAlignmentLayer.getParentId().equals(schema.getWordLayerId())) { // segment layer
@@ -1225,10 +1249,8 @@ public class HTKAligner extends Annotator {
         }
       } // next pattern
       
-      leftPatternRegex = leftPattern == null || leftPattern.length() == 0?
-        null:Pattern.compile(leftPattern);
-      rightPatternRegex = rightPattern == null || rightPattern.length() == 0?
-        null:Pattern.compile(rightPattern);
+      leftPatternRegex = leftPattern == null?null:Pattern.compile(leftPattern);
+      rightPatternRegex = rightPattern == null?null:Pattern.compile(rightPattern);
       
       // start MLF...
       wordsMlf = new File(sessionWorkingDir, sessionName + "_words.mlf");
@@ -1519,7 +1541,7 @@ public class HTKAligner extends Annotator {
     // accumulate utterance transcipt...
     
     if (!bJustAddedNoise) {
-      if (noiseLayerId != null && noiseLayerId.length() > 0) {
+      if (noiseLayerId != null) {
         // look for noise annotations to prepend
         LinkedHashSet<Annotation> vNoises = word.getStart().endOf(noiseLayerId);
         vNoises.addAll(word.getStart().startOf(noiseLayerId));
