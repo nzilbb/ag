@@ -1013,7 +1013,6 @@ public class HTKAligner extends Annotator {
           
           // convert output to DISC?
           if (discDictionary) {
-            setStatus("discDictionary");
             phonemesToHtk = new DISC2CMU().setDefaultStress("1");
             htkToPhonemes = new CMU2DISC();
           } else {
@@ -1285,12 +1284,14 @@ public class HTKAligner extends Annotator {
             // unaligned?
             if (fragment.getStart().getOffset() == null) {
               setStatus(
-                "Fragment has an undefined start time and will be ignored: \""+fragment.getId()+"\"");
+                "Fragment has an undefined start time and will be ignored: \""
+                +fragment.getId()+"\"");
               return;
             }
             if (fragment.getEnd().getOffset() == null) {
               setStatus(
-                "Fragment has an undefined end time and will be ignored: \""+fragment.getId()+"\"");
+                "Fragment has an undefined end time and will be ignored: \""
+                +fragment.getId()+"\"");
               return;
             }
             
@@ -1343,8 +1344,7 @@ public class HTKAligner extends Annotator {
             // check for no words
             if (words.length == 0) {
               setStatus(
-                "Fragment has no words and will be ignored: "
-                + "\"" + fragment.getId() + "\"");
+                "Fragment has no words and will be ignored: \"" + fragment.getId() + "\"");
               return;
             }
             
@@ -1353,8 +1353,7 @@ public class HTKAligner extends Annotator {
             //  new sample file, and we don't want it yet)
             String audioUrl = fragment.sourceGraph().getMediaProvider().getMedia("", "audio/wav");
             if (audioUrl == null) {
-              setStatus(
-                "Fragment has no media available and will be ignored: \""+fragment+"\"");
+              setStatus("Fragment has no media available and will be ignored: \""+fragment+"\"");
               return;
             } 
             
