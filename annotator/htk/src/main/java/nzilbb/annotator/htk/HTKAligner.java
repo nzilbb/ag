@@ -34,6 +34,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URL;
+import java.util.Date;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -458,7 +459,24 @@ public class HTKAligner extends Annotator {
    * training/alignment is finished. 
    */
   public HTKAligner setCleanupOption(Integer newCleanupOption) { cleanupOption = newCleanupOption; return this; }
-
+  
+  /**
+   * The training session ID.
+   * @see #getSessionName()
+   * @see #setSessionName(String)
+   */
+  protected String sessionName;
+  /**
+   * Getter for {@link #sessionName}: The training session ID.
+   * @return The training session ID.
+   */
+  public String getSessionName() { return sessionName; }
+  /**
+   * Setter for {@link #sessionName}: The training session ID.
+   * @param newSessionName The training session ID.
+   */
+  public HTKAligner setSessionName(String newSessionName) { sessionName = newSessionName; return this; }
+  
   /**
    * Default constructor.
    */
@@ -898,6 +916,7 @@ public class HTKAligner extends Annotator {
    */
   public Graph transform(Graph graph) throws TransformationException {
     setRunning(true);
+    reset();
     try {
       if (useP2FA) {
         // tranformTranscripts but
@@ -923,6 +942,7 @@ public class HTKAligner extends Annotator {
     throws TransformationException, InvalidConfigurationException {
     setPercentComplete(0);
     setRunning(true);
+    reset();
 
     try {
       
@@ -1086,8 +1106,6 @@ public class HTKAligner extends Annotator {
   // Bunch of files and resources needed by HTK:
 
   /** The working directory for this training session. */
-  protected String sessionName;
-  /** The working directory for this training session. */
   protected File sessionWorkingDir;
   /** The log for this training session. */
   protected File logFile;
@@ -1137,13 +1155,43 @@ public class HTKAligner extends Annotator {
   protected File statsFile;
   
   /**
+   * Reset any current state associated with past alignment sessions.
+   */
+  public void reset() {
+    sessionWorkingDir = null;
+    logFile = null;
+    grammar = null;
+    wordsMlf = null;
+    alignedWordsMlf = null;
+    alignedPhonesMlf = null;
+    scp = null;
+    trainingScp = null;
+    dictionary = null;
+    dictionaryFile = null;
+    dictionaryMlf = null;
+    phonemeList = null;
+    wdnet = null;
+    phonemeListFile = null;
+    phonemeListNoSpFile = null;
+    phonemesMlf = null;
+    phonemesWithSpMlf = null;
+    htPauseMarkers = null;
+    noisePatternsMap = null;
+    leftPatternRegex = null;
+    rightPatternRegex = null;
+    triphoneListFile = null;
+    triphonesMlf = null;
+    statsFile = null;
+  } // end of reset()
+
+  /**
    * Sets up the initial file structure - i.e. copies fixed file templates and creates
    * required hmm subdirectories.  
    * @throws IOException
    * @throws TransformationException
    */
   public void createInitialFileStructure() throws IOException, TransformationException {
-    setStatus("Creating initial file structure...");
+    setStatus("Creating initial file structure...");   
 	 
     // create the hmm folders
     DecimalFormat formatter = new DecimalFormat("hmm00");
@@ -1184,7 +1232,10 @@ public class HTKAligner extends Annotator {
    * @throws TransformationException if the directory couldn't be created.
    */
   protected File createSessionWorkingDir() throws TransformationException{
-    sessionName = "htk-" + hashCode();
+    if (sessionName == null) {
+      sessionName = "htk-" + hashCode();
+    }
+    setStatus("Session " + sessionName);
     sessionWorkingDir = new File(
       getWorkingDirectory(),
       sessionName + "-"
@@ -1193,15 +1244,20 @@ public class HTKAligner extends Annotator {
       throw new TransformationException(
         this, "Failed to create working directory: " + sessionWorkingDir.getPath());
     }
+    boolean addStatusObserverForLog = logFile == null; // might have already done this
     logFile = new File(sessionWorkingDir, "training.log");
-    getStatusObservers().add(status -> {
-        try {
-          PrintWriter out = new PrintWriter(new FileOutputStream(logFile, true));
-          out.println(status);
-          out.close();
-        } catch(IOException exception) {
-        }
-      });
+    if (addStatusObserverForLog) {
+      getStatusObservers().add(status -> {
+          if (logFile != null) {
+            try {
+              PrintWriter out = new PrintWriter(new FileOutputStream(logFile, true));
+              out.println(status);
+              out.close();
+            } catch(IOException exception) {
+            }
+          } // logFile still set
+        });
+    }
     try {
       PrintWriter out = new PrintWriter(logFile);
       out.println("HTKAligner log: " + sessionName);
@@ -1408,8 +1464,6 @@ public class HTKAligner extends Annotator {
             if (utterances.size() > 0 ) grammarOut.write(" | ");
             grammarOut.write(utteranceOrthography.toString());
 
-            utterances.add(fragment);            
-
             // write mlf
             mlfOut.write("\"*/" + fragment.getId() + ".lab\"");
             for (String token : utteranceOrthography.toString().split(" ")) {
@@ -1428,6 +1482,9 @@ public class HTKAligner extends Annotator {
             
             // extract audio...                     
             extractAudio(fragment, schema);
+
+            utterances.add(fragment);            
+            
           } catch (Exception x) {
             setStatus("Error processing fragment : \"" + fragment + "\" : " + x);
             // TODO?? setLastException(x);
@@ -1625,7 +1682,7 @@ public class HTKAligner extends Annotator {
       int r = 99;
       File fConfig = null;
       setStatus(
-        "Extracting features from \"" + fWav.getName() + "\" to \"" + fTarget.getName() + "\""
+        "Extracting features from \"" + fWav.getPath()/*TODO getName()*/ + "\" to \"" + fTarget.getName() + "\""
         +(channel.length()==0?"":" - channel: " + channel));
       if (useP2FA) {
         fConfig = new File(getP2FAModelDirectory(), "config");
@@ -2671,24 +2728,9 @@ public class HTKAligner extends Annotator {
       }
       
       // label for tagging utterance/participant as aligned
-      String sTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(new java.util.Date());
+      String sTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(new Date());
       LinkedHashSet<String> participantIds = new LinkedHashSet<String>();
-      
-      // TODO this should be in saveTranscript
-      // // get a list of word tag layers (so anchor sharing can be fixed up after saving)
-      // PreparedStatement sqlWordTagLayers = connection.prepareStatement(
-      //    "SELECT layer_id FROM layer WHERE alignment = 0 AND scope = 'W'");
-      // Vector<Integer> vWordTagLayers = new Vector<Integer>();
-      // ResultSet rsWordTagLayers = sqlWordTagLayers.executeQuery();
-      // while (rsWordTagLayers.next()) {
-      //    vWordTagLayers.add(rsWordTagLayers.getInt("layer_id"));
-      // }
-      // rsWordTagLayers.close();
-      // sqlWordTagLayers.close();
-      // // prepare tag fixup statement for later
-      // PreparedStatement sqlFixTagAnchors = connection.prepareStatement(
-      //    "UPDATE annotation_layer_? SET start_anchor_id = ?, end_anchor_id = ? WHERE word_annotation_id = ?");
-      
+
       // read the graphs out of the file...
       
       // get/configure deserializer

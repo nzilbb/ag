@@ -48,6 +48,7 @@ import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.sql.derby.DerbyConnectionFactory;
+import nzilbb.util.IO;
 
 public class TestHTKAligner {
 
@@ -72,9 +73,10 @@ public class TestHTKAligner {
     // set the annotator configuration, which will install the lexicon the first time (only)
     annotator.setConfig(annotator.getConfig());
     
+    //annotator.getStatusObservers().add(status->System.out.println(status));
     System.out.println("Installed.");
   }
-  
+
   public static File dir() throws Exception { 
     URL urlThisClass = TestHTKAligner.class.getResource(
       TestHTKAligner.class.getSimpleName() + ".class");
@@ -207,11 +209,11 @@ public class TestHTKAligner {
   }
   
   @Test public void P2FA() throws Exception {
+    annotator.setSessionName("P2FA");
     
     Graph g = graph();
     Schema schema = g.getSchema();
-    //annotator.getStatusObservers().add(status->System.out.println(status));
-    annotator.setSchema(schema);    
+    annotator.setSchema(schema);
     
     // layers are created as required
     annotator.setTaskParameters(
@@ -271,10 +273,10 @@ public class TestHTKAligner {
   }   
 
   @Test public void trainAndAlign() throws Exception {
+    annotator.setSessionName("trainAndAlign");
     
     Graph g = graph();
     Schema schema = g.getSchema();
-    //annotator.getStatusObservers().add(status->System.out.println(status));
     annotator.setSchema(schema);    
     
     // layers are created as required
@@ -330,7 +332,7 @@ public class TestHTKAligner {
    * Returns a graph for annotating.
    * @return The graph for testing with.
    */
-  public static Graph graph() {
+  public static Graph graph() throws Exception {
     Schema schema = new Schema(
       "participant", "turn", "utterance", "word",
       new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
@@ -381,13 +383,12 @@ public class TestHTKAligner {
                     .setParent(statute));
 
     // access to test media
+    final File tempWav = File.createTempFile("TestHTKAligner-", ".wav");
+    IO.Copy(new File(dir(), "BREY00538.wav"), tempWav);
     g.setMediaProvider(new GraphMediaProvider() {
         public MediaFile[] getAvailableMedia() throws StoreException, PermissionException {
           try {
-            MediaFile[] media = {
-              new MediaFile(new File(dir(), "BREY00538.wav"))
-            };
-            return media;
+            return new MediaFile[] { new MediaFile(tempWav) };
           } catch (Exception x) {
             throw new StoreException(x);
           }
