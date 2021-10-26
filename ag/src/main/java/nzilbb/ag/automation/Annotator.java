@@ -757,20 +757,20 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
   } // end of transformTranscripts()
   
   /**
-   * Transforms all graphs (or fragments) from the given stream.
+   * Transforms all fragments from the given stream.
    * <p> This can be overridden for optimized cross-graph updates. The default
    * implementation simply calls {@link GraphTransformer#transform(Graph)} and then
    * consumer.accept(Graph) serially for each graph. 
-   * @param graphs A stream of graphs, which may be full transcripts, or transcript fragments.
+   * @param fragments A stream of graphs which must be transcript fragments, e.g. utterances.
    * @param consumer A consumer for receiving the graphs once they're transformed.
    * @throws TransformationException
    * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
    * {@link #setSchema(Schema)} have not yet been called.
    */
-  public void transformGraphs(Stream<Graph> graphs, Consumer<Graph> consumer)
+  public void transformFragments(Stream<Graph> fragments, Consumer<Graph> consumer)
     throws TransformationException, InvalidConfigurationException {
     
-    List<Graph> transcripts = graphs.collect(Collectors.toList());
+    List<Graph> transcripts = fragments.collect(Collectors.toList());
     ignoreSetPercentComplete = true; // global progress
     percentComplete = 0;
     try {
@@ -786,6 +786,6 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
     } finally {
       ignoreSetPercentComplete = false;
     }
-  } // end of transformTranscripts()
+  } // end of transformFragments()
   
 } // end of class Annotator

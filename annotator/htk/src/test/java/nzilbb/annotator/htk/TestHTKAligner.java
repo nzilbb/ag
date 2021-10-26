@@ -244,7 +244,8 @@ public class TestHTKAligner {
                  "Transcript", annotator.getOtherUtteranceGrouping());
 
     final Vector<Graph> results = new Vector<Graph>();
-    annotator.transformGraphs(Arrays.stream(new Graph[] { g }), graph -> { results.add(graph); });
+    annotator.transformFragments(
+      Arrays.stream(new Graph[] { g }), graph -> { results.add(graph); });
     
     assertEquals("One utterance " + results, 1, results.size());
     Graph aligned = results.elementAt(0);
@@ -311,7 +312,8 @@ public class TestHTKAligner {
                  "Not Aligned", annotator.getOtherUtteranceGrouping());
 
     final Vector<Graph> results = new Vector<Graph>();
-    annotator.transformGraphs(Arrays.stream(new Graph[] { g }), graph -> { results.add(graph); });
+    annotator.transformFragments(
+      Arrays.stream(new Graph[] { g }), graph -> { results.add(graph); });
 
     assertEquals("One utterance " + results, 1, results.size());
     Graph aligned = results.elementAt(0);

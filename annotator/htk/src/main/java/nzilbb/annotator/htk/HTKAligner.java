@@ -980,6 +980,7 @@ public class HTKAligner extends Annotator {
     setRunning(true);
     reset();
     try {
+      // if we're given a graph to align we need to invoke transformGraphs 
       if (useP2FA) {
         // tranformTranscripts but
       }
@@ -992,7 +993,7 @@ public class HTKAligner extends Annotator {
   private HTK htk;
 
   /**
-   * Force-aligns the given fragments.
+   * Force-aligns the given utterance fragments.
    * @param graphs A stream of fragments.
    * @param consumer A consumer for receiving the graphs once they're transformed.
    * @throws TransformationException
@@ -1000,7 +1001,7 @@ public class HTKAligner extends Annotator {
    * {@link #setSchema(Schema)} have not yet been called.
    */
   @Override
-  public void transformGraphs(Stream<Graph> graphs, Consumer<Graph> consumer)
+  public void transformFragments(Stream<Graph> graphs, Consumer<Graph> consumer)
     throws TransformationException, InvalidConfigurationException {
     setPercentComplete(0);
     setRunning(true);
