@@ -168,6 +168,59 @@ public class HTKAligner extends Annotator {
   public HTKAligner setNoisePatterns(String newNoisePatterns) { noisePatterns = newNoisePatterns; return this; }
   
   /**
+   * How to group main-participant utterances for training, when a single transcript is
+   * selected for alignment. Possible value are:
+   * <dl>
+   *  <dt> Speaker </dt>    <dd> All utterances by main-participant in the whole graph store
+   *                             are collected together for training before alignment. </dd>
+   *  <dt> Transcript </dt> <dd> Only the utterances within the selected transcript are
+   *                             used for training. </dd>
+   * </dl>
+   * @see #getMainUtteranceGrouping()
+   * @see #setMainUtteranceGrouping(String)
+   */
+  protected String mainUtteranceGrouping = "Speaker";
+  /**
+   * Getter for {@link #mainUtteranceGrouping}: How to group main-participant utterances
+   * for training, when a single transcript is selected for alignment. 
+   * @return How to group main-participant utterances for training, when a single
+   * transcript is selected for alignment.
+   */
+  public String getMainUtteranceGrouping() { return mainUtteranceGrouping; }
+  /**
+   * Setter for {@link #mainUtteranceGrouping}: How to group main-participant utterances
+   * for training, when a single transcript is selected for alignment. 
+   * @param newMainUtteranceGrouping How to group main-participant utterances for
+   * training, when a single transcript is selected for alignment.
+   */
+  public HTKAligner setMainUtteranceGrouping(String newMainUtteranceGrouping) { mainUtteranceGrouping = newMainUtteranceGrouping; return this; }
+
+  /**
+   * How to group non-main-participant utterances for training, when a single transcript
+   *  is selected for alignment. Possible value are:
+   *  <dt> No Aligned </dt> <dd> Non-main-participant utterances are not aligned. </dd>
+   *  <dt> Transcript </dt> <dd> Only the utterances within the selected transcript are
+   *                             used for training. </dd>
+   * @see #getOtherUtteranceGrouping()
+   * @see #setOtherUtteranceGrouping(String)
+   */
+  protected String otherUtteranceGrouping = "Not Aligned";
+  /**
+   * Getter for {@link #otherUtteranceGrouping}: How to group non-main-participant
+   * utterances for training, when a single transcript is selected for alignment. 
+   * @return How to group non-main-participant utterances for training, when a single
+   * transcript is selected for alignment.
+   */
+  public String getOtherUtteranceGrouping() { return otherUtteranceGrouping; }
+  /**
+   * Setter for {@link #otherUtteranceGrouping}: How to group non-main-participant
+   * utterances for training, when a single transcript is selected for alignment. 
+   * @param newOtherUtteranceGrouping How to group non-main-participant utterances for
+   * training, when a single transcript is selected for alignment.
+   */
+  public HTKAligner setOtherUtteranceGrouping(String newOtherUtteranceGrouping) { otherUtteranceGrouping = newOtherUtteranceGrouping; return this; }
+  
+  /**
    * Whether manual alignments should be overwritten (true) or not (false).
    * @see #getIgnoreAlignmentStatuses()
    * @see #setIgnoreAlignmentStatuses(Boolean)
@@ -826,6 +879,11 @@ public class HTKAligner extends Annotator {
     if (useP2FA) {
       sampleRate = Integer.valueOf(11025);
       scoreLayerId = null;
+      mainUtteranceGrouping = "Transcript";
+      otherUtteranceGrouping = "Transcript";
+    } else {
+      if (mainUtteranceGrouping == null) mainUtteranceGrouping = "Speaker";
+      if (otherUtteranceGrouping == null) otherUtteranceGrouping = "Not Aligned";
     }
 
     if (scoreLayerId != null) {
@@ -875,6 +933,10 @@ public class HTKAligner extends Annotator {
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
     HashSet<String> requiredLayers = new HashSet<String>();
+    // utterance layer is used for chunking
+    if (schema.getUtteranceLayerId() != null) requiredLayers.add(schema.getUtteranceLayerId());
+    // word layer is used for detecting pause markers
+    if (schema.getWordLayerId() != null) requiredLayers.add(schema.getWordLayerId());
     if (orthographyLayerId != null) {
       requiredLayers.add(orthographyLayerId);
     } else {
@@ -2871,6 +2933,7 @@ public class HTKAligner extends Annotator {
           merger.getNoChangeLayers().add(schema.getTurnLayerId());
           merger.getNoChangeLayers().add(schema.getUtteranceLayerId());
           merger.getNoChangeLayers().add(schema.getWordLayerId());
+          merger.setIgnoreOffsetConfidence(ignoreAlignmentStatuses);
           fragment.trackChanges();
           // merge changes
           merger.transform(fragment);

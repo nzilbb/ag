@@ -238,6 +238,10 @@ public class TestHTKAligner {
     assertNotNull("participant_htk layer created", layer);
     assertNull("no score layer created because we're using P2FA",
                annotator.getSchema().getLayer("score"));
+    assertEquals("Main-Participant grouping",
+                 "Transcript", annotator.getMainUtteranceGrouping());
+    assertEquals("Other-Participant grouping",
+                 "Transcript", annotator.getOtherUtteranceGrouping());
 
     final Vector<Graph> results = new Vector<Graph>();
     annotator.transformGraphs(Arrays.stream(new Graph[] { g }), graph -> { results.add(graph); });
@@ -301,6 +305,10 @@ public class TestHTKAligner {
     assertNotNull("participant_htk layer created", layer);
     layer = annotator.getSchema().getLayer("score");
     assertNotNull("score layer created", layer);
+    assertEquals("Main-Participant grouping",
+                 "Speaker", annotator.getMainUtteranceGrouping());
+    assertEquals("Other-Participant grouping",
+                 "Not Aligned", annotator.getOtherUtteranceGrouping());
 
     final Vector<Graph> results = new Vector<Graph>();
     annotator.transformGraphs(Arrays.stream(new Graph[] { g }), graph -> { results.add(graph); });

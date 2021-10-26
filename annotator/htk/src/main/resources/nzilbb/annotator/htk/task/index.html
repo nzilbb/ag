@@ -18,7 +18,7 @@
         <label for="orthographyLayerId"> Orthography Layer </label>
         <span><select id="orthographyLayerId" name="orthographyLayerId" required></select></span>
       </div>
-      <div class="field" title="Layer for noise annotations">
+      <div class="field" title="Characters that mark pauses in speech in the transcript, separated by spaces">
         <label for="pauseMarkers"> Pause Markers </label>
         <span><input id="pauseMarkers" name="pauseMarkers" type="text"></span>
       </div>
@@ -31,6 +31,24 @@
         <span>
           <select id="noiseLayerId" name="noiseLayerId">
             <option value="">[none]</option>
+          </select>
+        </span>
+      </div>
+      <div class="field" title="How to group main-participant utterances for automatic training">
+        <label for="mainUtteranceGrouping"> Group  Main-Participant Utterances </label>
+        <span>
+          <select id="mainUtteranceGrouping" name="mainUtteranceGrouping">
+            <option value="Speaker"> by speaker </option>
+            <option value="Transcript"> by transcript </option>
+          </select>
+        </span>
+      </div>
+      <div class="field" title="How to group non-main-participant utterances for automatic training">
+        <label for="otherUtteranceGrouping"> Utterances of Other Participants </label>
+        <span>
+          <select id="otherUtteranceGrouping" name="otherUtteranceGrouping">
+            <option value="No Aligned"> are not aligned </option>
+            <option value="Transcript"> are grouped by transcript </option>
           </select>
         </span>
       </div>

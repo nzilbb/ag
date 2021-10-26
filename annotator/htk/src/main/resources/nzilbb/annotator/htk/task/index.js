@@ -142,9 +142,12 @@ getSchema(s => {
                 if (document.getElementById("useP2FA").checked) {
                     document.getElementById("sampleRate").disabled
                         = document.getElementById("sampleRate").checked
-                        // and can't split participants by channel
+                    // and can't split participants by channel
                         = document.getElementById("leftPattern").disabled
                         = document.getElementById("rightPattern").disabled
+                    // and no need for grouping of utterances
+                        = document.getElementById("mainUtteranceGrouping").disabled
+                        = document.getElementById("otherUtteranceGrouping").disabled
                         = true;
                 }
             }
@@ -202,4 +205,9 @@ document.getElementById("useP2FA").onchange = function(e) {
         = document.getElementById("useP2FA").checked;
     document.getElementById("sampleRate").checked
         = document.getElementById("sampleRate").disabled;
+    
+    // also with P2FA, there's no training, so no grouping by participant/tramscript
+    document.getElementById("mainUtteranceGrouping").disabled
+        = document.getElementById("otherUtteranceGrouping").disabled
+        = document.getElementById("useP2FA").checked;
 }
