@@ -21,11 +21,14 @@
 //
 package nzilbb.annotator.htk;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -61,6 +64,8 @@ import nzilbb.ag.util.Merger;
 import nzilbb.configure.ParameterSet;
 import nzilbb.encoding.CMU2DISC;
 import nzilbb.encoding.DISC2CMU;
+import nzilbb.encoding.DISC2HTK;
+import nzilbb.encoding.HTK2DISC;
 import nzilbb.encoding.PhonemeTranslator;
 import nzilbb.formatter.htk.mlf.MlfDeserializer;
 import nzilbb.util.Execution;
@@ -908,27 +913,75 @@ public class HTKAligner extends Annotator {
         
         if (!useP2FA) { // train & align
           
+          // convert output to DISC?
+          if (discDictionary) {           
+            phonemesToHtk = new DISC2HTK();
+            htkToPhonemes = new HTK2DISC();
+          }
+          
           // create initial file structure
+          createSessionWorkingDir();
+          createInitialFileStructure();
+          setPercentComplete(5);
           
           // create input files
+          fragments = createInputFiles(graphs, phonemesToHtk);
+          setPercentComplete(15);
           
           // if there are still some utterances
-          
-          // step 1
-          // step 2
-          // step 3 is record audio, which we've already done
-          // step 4
-          // step 5 is extract features from audio, which we've already done
-          // step 6
-          // step 7
-          // step 8
-          
-          // get word alignments
+          if (fragments.size() > 0) {
+
+            if (!isCancelling()) {
+              step1();
+              setPercentComplete(20);
+              
+              if (!isCancelling()) {
+                step2();
+                setPercentComplete(30);
+                
+                // step 3 is record audio, which we've already done
+                
+                if (!isCancelling()) {
+                  step4();
+                  setPercentComplete(40);
+                  
+                  // step 5 is extract features from audio, which we've already done
+
+                  if (!isCancelling()) {
+                    step6();
+                    setPercentComplete(50);
+
+                    if (!isCancelling()) {
+                      step7();
+                      setPercentComplete(60);
+
+                      if (!isCancelling()) {                        
+                        step8();
+                        setPercentComplete(70);
+
+                        if (!isCancelling()) {                          
+                          // at this point we can get the word alignments...
+                          recognizeWordAlignments(phonemeListFile, "hmm09");
+                          setPercentComplete(80);
+                          
+                          // ...so we don't actually need to continue with triphones.
+                          //step9();
+                          //step10(10);
+                          //recognizeWordAlignments(triphoneListFile, "hmm15");
+                        } // not cancelling
+                      } // not cancelling
+                    } // not cancelling
+                  } // not cancelling
+                } // not cancelling
+              } // not cancelling
+            } // not cancelling
+          } // there are valid fragments
           
         } else { // useP2FA
           
           // create initial file structure
           createSessionWorkingDir();
+          setPercentComplete(5);
           
           // convert output to DISC?
           if (discDictionary) {
@@ -944,11 +997,20 @@ public class HTKAligner extends Annotator {
           
           // create input files
           fragments = createInputFiles(graphs, phonemesToHtk);
+          setPercentComplete(30);
           
-          // force align
-          forceAlign();
-        }
-        
+          // if there are still some utterances
+          if (fragments.size() > 0) {
+            if (!isCancelling()) {
+              // force align
+              forceAlign();
+            } // not cancelling
+          } // there are valid fragments
+          
+        } // useP2FA
+
+        setPercentComplete(90);
+
         // check number of utterances
         if (fragments.size() == 0) {
           setStatus("No utterances could be aligned.");
@@ -962,6 +1024,8 @@ public class HTKAligner extends Annotator {
             setStatus("Complete - words and phones from selected utterances are now aligned.");
           }
         }
+      } catch (IOException x) {
+        throw new TransformationException(this, x);
       } catch (TransformationException x) {
         failure = x;
       }
@@ -993,6 +1057,8 @@ public class HTKAligner extends Annotator {
     }
   } // end of transformTranscripts()
 
+  // Bunch of files and resources needed by HTK:
+
   /** The working directory for this training session. */
   protected String sessionName = "htk";
   /** The working directory for this training session. */
@@ -1005,6 +1071,8 @@ public class HTKAligner extends Annotator {
   protected File wordsMlf;
   /** Aligned words MLF file. */
   protected File alignedWordsMlf;
+  /** Aligned phones MLF file. */
+  protected File alignedPhonesMlf;
   /** SCP file. */
   protected File scp;
   /** Training SCP file. */
@@ -1017,6 +1085,16 @@ public class HTKAligner extends Annotator {
   protected File dictionaryMlf;
   /** Phoneme list */
   protected Set<String> phonemeList;
+  /** WDNET file */
+  protected File wdnet;
+  /** Phoneme list */
+  protected File phonemeListFile;
+  /** Phoneme list without SP (short pause) */
+  protected File phonemeListNoSpFile;
+  /** Phoneme list without SP (short pause) */
+  protected File phonemesMlf;
+  /** Phoneme list with SP (short pause) MLF */
+  protected File phonemesWithSpMlf;
   /** Pause markers */
   protected HashMap<String,String> htPauseMarkers;
   /** Compiled noise patterns */
@@ -1025,7 +1103,55 @@ public class HTKAligner extends Annotator {
   protected Pattern leftPatternRegex;
   /** Right channel participant pattern */
   protected Pattern rightPatternRegex;
+  /** Triphone list file */
+  protected File triphoneListFile;
+  /** Triphone MLF */
+  protected File triphonesMlf;
+  /** Stats file */
+  protected File statsFile;
   
+  /**
+   * Sets up the initial file structure - i.e. copies fixed file templates and creates
+   * required hmm subdirectories.  
+   * @throws IOException
+   * @throws TransformationException
+   */
+  public void createInitialFileStructure() throws IOException, TransformationException {
+    setStatus("Creating initial file structure...");
+	 
+    // create the hmm folders
+    DecimalFormat formatter = new DecimalFormat("hmm00");
+    for (int i = 0; i <= 15; i++) {
+      File dirHmm = new File(sessionWorkingDir, formatter.format(i));
+      setStatus("Creating folder: " + dirHmm.getPath());
+      if (!dirHmm.mkdir()) {
+        throw new TransformationException(
+          this, "Failed to create working sub-directory: "+dirHmm.getPath());
+      }
+    } 
+    
+    // copy files standard files into our working directory
+    // should be:
+    //  mkphones0.led
+    //  config0
+    //  config
+    //  proto
+    //  sil.hed
+    //  mkphones1.led
+    //  mktri.led
+    
+    File[] aFiles = new File(getWorkingDirectory(), "scripts").listFiles();
+    for (File theFile : aFiles) {
+      if (theFile.isFile()) { // no directories
+        // copy the file
+        File destination = new File (sessionWorkingDir, theFile.getName());
+        IO.Copy(theFile, destination);
+      } // not a directory
+    } // next file
+
+    setStatus("Finished creating initial file structure.");
+  } // end of createInitialFileStructure()
+
   /**
    * Provides the working directory for this training session.
    * @return The working directory for temporary files.
@@ -1326,7 +1452,8 @@ public class HTKAligner extends Annotator {
         
         // for each pronunciation
         if (pronunciations.size() == 0) {
-          throw new Exception("The word '" + sWord + "' has no pronunciation defined");
+          throw new TransformationException(
+            this, "The word '" + sWord + "' has no pronunciation defined");
         }
         for (String sPronunciation : pronunciations) {
           if (isCancelling()) break;
@@ -1439,7 +1566,7 @@ public class HTKAligner extends Annotator {
    * Extracts audio features for the given utterance.
    * @param fragment
    * @param schema
-   * @throws Exception
+   * @throws TransformationException
    */
   public void extractAudio(Graph fragment, Schema schema) throws TransformationException {
 
@@ -1554,6 +1681,949 @@ public class HTKAligner extends Annotator {
       throw new TransformationException(this, x);
     }
   } // end of forceAlign()
+  
+  /**
+   * Step 1 - the Task Grammar. 
+   * <p> HTK provides a grammar definition language for specifying simple task grammars
+   * such as this. It consists of a set of variable definitions followed by a regular expression
+   * describing the words to recognise.
+   * <p> The HTK recogniser actually requires a word network to be defined using a low
+   * level notation called HTK Standard Lattice Format (SLF) in which each word instance
+   * and each word-to-word transition is listed explicitly. This word network can be
+   * created automatically from the grammar above using the HPARSE tool.
+   * @throws TransformationException
+   */
+  public void step1() throws TransformationException {
+    try {
+      setStatus("Step 1...");
+      wdnet = new File(sessionWorkingDir, sessionName + ".wdnet");
+      setStatus("Calling HParse");
+      int r = htk.HParse(grammar, wdnet);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HParse returned: " + r + " - " + htk.getLastError());
+      }
+      setStatus("Finished step 1.");
+    } catch (Exception x) {
+      throw new TransformationException(this, x);
+    }
+  } // end of step1()
+
+  /**
+   * Step 2 - the Dictionary. 
+   * <p> The first step in building a dictionary is to create a sorted list of the
+   * required words. The desired training word list (wlist) could then be extracted
+   * automatically from these. The dictionary itself can be built from a standard source
+   * using HDMAN. The general format of each dictionary entry is <br>
+   * <tt>WORD [outsym] p1 p2 p3 ....</tt> <br>
+   * which means that the word WORD is pronounced as the sequence of phones p1 p2 p3
+   * .... The string in square brackets specifies the string to output when that word is
+   * recognised. If it is omitted then the word itself is output. If it is included but
+   * empty, then nothing is output.
+   * @throws TransformationException
+   */
+  public void step2() throws TransformationException {
+    setStatus("Step 2...");
+    try {
+      // HDMan -m -n CarlaBaigent.mph -l dlog CarlaBaigent_.dict CarlaBaigent.dict
+      // produces a phoneme list, but we can do it here:
+      
+      phonemeListFile = new File(sessionWorkingDir, sessionName + ".mph");
+      phonemeListNoSpFile = new File(sessionWorkingDir, sessionName + "_no_sp.mph");
+      setStatus("Creating phoneme list...");
+      
+      BufferedWriter out = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(phonemeListFile), "UTF-8"));
+      out.write("sil");
+      out.newLine();
+      out.write("sp");
+      out.newLine();
+      for (String sName : noisePatternsMap.keySet()) {
+        out.write(sName);
+        out.newLine();
+      }
+      BufferedWriter outNoSp = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(phonemeListNoSpFile), "UTF-8"));
+      outNoSp.write("sil");
+      outNoSp.newLine();
+      for (String sName : noisePatternsMap.keySet()) {
+        outNoSp.write(sName);
+        outNoSp.newLine();
+      }
+      
+      for (String sPhoneme : phonemeList) {
+        if (isCancelling()) break;
+        out.write(sPhoneme);
+        out.newLine();
+        outNoSp.write(sPhoneme);
+        outNoSp.newLine();
+      } // next phoneme
+      out.close();
+      outNoSp.close();
+      
+      setStatus("Finished step 2.");
+    } catch (Exception x) {
+      throw new TransformationException(this, x);
+    }
+  } // end of step2()
+
+  /**
+   * Step 4 - Creating the Transcription Files. 
+   * To train a set of HMMs, every file of training data must have an associated phone
+   * level transcription. Since there is no hand labelled data to bootstrap a set of
+   * models, a flat-start scheme will be used instead. To do this, two sets of phone
+   * transcriptions will be needed. The set used initially will have no short-pause (sp)
+   * models between words. Then once reasonable phone models have been generated, an sp
+   * model will be inserted between words to take care of any pauses introduced by the speaker. 
+   * <p> The starting point for both sets of phone transcription is an orthographic
+   * transcription in HTK label format. This can be created fairly easily using a text
+   * editor or a scripting language.
+   * <p> The prompt labels need to be converted into path names, each word should be
+   * written on a single line and each utterance should be terminated by a single period
+   * on its own. The first line of the file just identifies the file as a Master Label
+   * File (MLF). This is a single file containing a complete set of transcriptions. HTK
+   * allows each individual transcription to be stored in its own file but it is more
+   * efficient to use an MLF.
+   * <p> Once the word level MLF has been created, phone level MLFs can be generated using
+   * the label editor HLED. 
+   * @throws TransformationException
+   */
+  public void step4() throws TransformationException {
+    setStatus("Step 4...");
+    // HLEd -l * -d CarlaBaigent.dict -i CarlaBaigent_phones.mlf mkphones0.led CarlaBaigent_words.mlf
+    try {
+      phonemesMlf = new File(sessionWorkingDir, sessionName + "_phones.mlf");
+      File mkphones0 = new File(sessionWorkingDir, "mkphones0.led");
+	 
+      setStatus("Calling HLEd...");
+      int r = htk.HLEd("d", dictionaryFile, phonemesMlf, mkphones0, wordsMlf);
+      if (r != 0) {
+        throw new TransformationException(this, "HLEd returned: " + r + " - " + htk.getLastError());
+      }
+      
+      setStatus("Finished step 4.");
+    } catch (InterruptedException x) {
+      throw new TransformationException(this, x);
+    } catch (IOException x) {
+      throw new TransformationException(this, x);
+    }
+  } // end of step4()
+
+  /**
+   * Step 6 - Creating Flat Start Monophones. 
+   * <p> The first step in HMM training is to define a prototype model. The parameters of
+   * this model are not important, its purpose is to define the model topology. For
+   * phone-based systems, a good topology to use is 3-state left-right with no skips.
+   * <p> The HTK tool HCOMPV will scan a set of data files, compute the global mean and
+   * variance and set all of the Gaussians in a given HMM to have the same mean and variance.
+   * <p> HCOMPV has a number of options specified for it. The -f option causes a variance
+   * floor macro (called vFloors) to be generated which is equal to 0.01 times the global
+   * variance. This is a vector of values which will be used to set a floor on the
+   * variances estimated in the subsequent steps. The -m option asks for means to be
+   * computed as well as variances. Given this new prototype model stored in the directory
+   * hmm0, a Master Macro File (MMF) called hmmdefs containing a copy for each of the
+   * required monophone HMMs is constructed by manually copying the prototype and
+   * relabeling it for each required monophone (including "sil"). The format of an MMF is
+   * similar to that of an MLF and it serves a similar purpose in that it avoids having a
+   * large number of individual HMM definition files. 
+   * <p> The flat start monophones stored in the directory hmm0 are re-estimated using the
+   * embedded re-estimation tool HEREST 
+   * <p> Each time HEREST is run it performs a single re-estimation. Each new HMM set is
+   * stored in a new directory. Execution of HEREST should be repeated twice more,
+   * changing the name of the input and output directories (set with the options -H and
+   * -M) each time, until the directory hmm3 contains the final set of initialised
+   * monophone HMMs.
+   * @throws TransformationException
+   */
+  public void step6() throws TransformationException {
+    setStatus("Step 6...");
+
+    try {
+      File config = new File(sessionWorkingDir, "config");
+      File hmm00 = new File(sessionWorkingDir, "hmm00");
+      File proto = new File(sessionWorkingDir, "proto");
+      
+      setStatus("Calling HCompV...");
+      int r = htk.HCompV(config, 0.01, trainingScp, hmm00, proto);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HCompV returned: " + r + " - " + htk.getLastError());
+      }
+      
+      if (isCancelling()) return;
+      
+      setStatus("Creating macros and hmmdefs");
+      
+      proto = new File(hmm00, "proto"); 
+      BufferedReader in = new BufferedReader(
+        new InputStreamReader(new FileInputStream(proto), "UTF-8"));
+      File vFloors = new File(hmm00, "vFloors");
+      BufferedReader inVFloors = new BufferedReader(
+        new InputStreamReader(new FileInputStream(vFloors), "UTF-8"));
+      
+      // macros is everything in the new proto up to the line that starts ~h
+      File macros = new File(hmm00, "macros");
+      BufferedWriter out = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(macros), "UTF-8"));
+      String sLine = in.readLine();
+      while (sLine != null && !sLine.startsWith("~h") && !isCancelling()) {
+        out.write(sLine);
+        out.newLine();
+        sLine = in.readLine();
+      }
+      // ...plus the contents of vFloors
+      sLine = inVFloors.readLine();
+      while (sLine != null && !isCancelling()) {
+        out.write(sLine);
+        out.newLine();
+        sLine = inVFloors.readLine();
+      }
+      out.close();
+      
+      // macros is the rest of proto, repeated for each monophone
+      String sHmm = "";
+      sLine = in.readLine();
+      while (sLine != null && !isCancelling()) {
+        sHmm += sLine + "\r\n";
+        sLine = in.readLine();
+      }
+      File hmmdefs = new File(hmm00, "hmmdefs");
+      out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(hmmdefs), "UTF-8"));
+      // for each monophone
+      out.write("~h \"sil\""); // including sil
+      out.newLine();
+      out.write(sHmm);
+      for (String sName : noisePatternsMap.keySet()) {
+        out.write("~h \""+sName+"\""); // including noise
+        out.newLine();
+        out.write(sHmm);
+      }
+      for (String sPhoneme : phonemeList) {
+        if (isCancelling()) break;
+        out.write("~h \"" + sPhoneme + "\"");
+        out.newLine();
+        out.write(sHmm);
+      } // next phoneme
+      out.close();
+      
+      if (isCancelling()) return;
+      
+      // Training...
+      setStatus("Calling HERest for hmm01...");
+      File hmm01 = new File(sessionWorkingDir, "hmm01");
+      r = htk.HERest(
+        config, phonemesMlf, 250, 150, 1000, trainingScp, macros, hmmdefs, hmm01,
+        phonemeListNoSpFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HERest returned: " + r + " - " + htk.getLastError());
+      }
+      
+      if (isCancelling()) return;
+      
+      setStatus("Calling HERest for hmm02...");
+      hmmdefs = new File(hmm01, "hmmdefs");
+      macros = new File(hmm01, "macros");
+      File hmm02 = new File(sessionWorkingDir, "hmm02");
+      r = htk.HERest(
+        config, phonemesMlf, 250, 150, 1000, trainingScp, macros, hmmdefs, hmm02,
+        phonemeListNoSpFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HERest returned: " + r + " - " + htk.getLastError());
+      }
+      
+      if (isCancelling()) return;
+      
+      setStatus("Calling HERest for hmm03...");
+      hmmdefs = new File(hmm02, "hmmdefs");
+      macros = new File(hmm02, "macros");
+      File hmm03 = new File(sessionWorkingDir, "hmm03");
+      r = htk.HERest(
+        config, phonemesMlf, 250, 150, 1000, trainingScp, macros, hmmdefs, hmm03,
+        phonemeListNoSpFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HERest returned: " + r + " - " + htk.getLastError());
+      }
+      
+      setStatus("Finished step 6.");
+    } catch (InterruptedException x) {
+      throw new TransformationException(this, x);
+    } catch (IOException x) {
+      throw new TransformationException(this, x);
+    }
+  } // end of step6()
+
+  /**
+   * Step 7 - Fixing the Silence Models.
+   * <p> The previous step has generated a 3 state left-to-right HMM for each phone and
+   * also a HMM for the silence model sil. The next step is to add extra transitions from
+   * states 2 to 4 and from states 4 to 2 in the silence model. The idea here is to make
+   * the model more robust by allowing individual states to absorb the various impulsive
+   * noises in the training data. The backward skip allows this to happen without
+   * committing the model to transit to the following word.
+   * <p> Also, at this point, a 1 state short pause sp model should be created. This
+   * should be a so-called tee-model which has a direct transition from entry to exit
+   * node. This sp has its emitting state tied to the centre state of the silence model. 
+   * <p>These silence models can be created in two stages:
+   * <ul>
+   *  <li> Use a text editor on the file hmm3/hmmdefs to copy the centre state of the sil
+   *       model to make a new sp model and store the resulting MMF hmmdefs, which
+   *       includes the new sp model, in the new directory hmm4. </li> 
+   *  <li> Run the HMM editor HHED to add the extra transitions required and tie the sp
+   *       state to the centre sil state </li> 
+   * </ul>
+   * HHED works in a similar way to HLED. It applies a set of commands in a script to
+   * modify a set of HMMs. 
+   * <p> Finally, another two passes of HEREST are applied using the phone transcriptions
+   * with sp models between words. This leaves the set of monophone HMMs created so far in
+   * the directory hmm7. 
+   * @throws TransformationException
+   */
+  public void step7() throws TransformationException {
+    setStatus("Step 7...");
+    try {
+      
+      File config = new File(sessionWorkingDir, "config");
+      File hmm03 = new File(sessionWorkingDir, "hmm03");
+      File hmm04 = new File(sessionWorkingDir, "hmm04");
+      File hmm05 = new File(sessionWorkingDir, "hmm05");
+      File hmm06 = new File(sessionWorkingDir, "hmm06");
+      File hmm07 = new File(sessionWorkingDir, "hmm07");
+      
+      setStatus("Copying macros...");
+      File macros = new File(hmm04, "macros");
+      IO.Copy(new File(hmm03, "macros"), macros);
+      
+      setStatus("Editing hmmdefs");
+      File hmmdefs = new File(hmm04, "hmmdefs");
+      addSpModelToHmmdefs(new File(hmm03, "hmmdefs"), hmmdefs);
+      
+      if (isCancelling()) return;
+      
+      setStatus("Calling HHEd...");
+      File silhed = new File(sessionWorkingDir, "sil.hed");
+      int r = htk.HHEd(macros, hmmdefs, hmm05, silhed, phonemeListFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HHEd returned: " + r + " - " + htk.getLastError());
+      }
+      
+      if (isCancelling()) return;
+      
+      setStatus("Calling HLEd...");
+      phonemesWithSpMlf = new File(sessionWorkingDir, sessionName + "_phones_with_sp.mlf");
+      File mkphones1 = new File(sessionWorkingDir, "mkphones1.led");
+      r = htk.HLEd("d", dictionaryFile, phonemesWithSpMlf, mkphones1, wordsMlf);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HLEd returned: " + r + " - " + htk.getLastError());
+      }
+      
+      if (isCancelling()) return;
+      
+      // Training...
+      setStatus("Calling HERest for hmm06...");
+      hmmdefs = new File(hmm05, "hmmdefs");
+      macros = new File(hmm05, "macros");
+      r = htk.HERest(
+        config, phonemesWithSpMlf, 250, 150, 1000, trainingScp, macros, hmmdefs, hmm06,
+        phonemeListFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HERest returned: " + r + " - " + htk.getLastError());
+      }
+      
+      if (isCancelling()) return;
+      
+      setStatus("Calling HERest for hmm07...");
+      hmmdefs = new File(hmm06, "hmmdefs");
+      macros = new File(hmm06, "macros");
+      r = htk.HERest(
+        config, phonemesWithSpMlf, 250, 150, 1000, trainingScp, macros, hmmdefs, hmm07,
+        phonemeListFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HERest returned: " + r + " - " + htk.getLastError());
+      }
+      
+      setStatus("Finished step 7.");
+      
+    } catch (InterruptedException x) {
+      throw new TransformationException(this, x);
+    } catch (IOException x) {
+      throw new TransformationException(this, x);
+    }
+  } // end of step7()
+  
+  /**
+   * Copies the hmmdefs file, adding in a sp model based on the sil model.
+   * @param fSource
+   * @param fDestination
+   * @throws IOException
+   */
+  public void addSpModelToHmmdefs(File fSource, File fDestination) throws IOException {
+    // fDestination is a copy of fSource, except:
+    // the sil definition is copied to a new sp definition
+    // but edited to become a 3-state matrix
+    // copying state 3 to be state 2
+    BufferedReader in = new BufferedReader(
+      new InputStreamReader(new FileInputStream(fSource), "UTF-8"));
+    BufferedWriter out = new BufferedWriter(
+      new OutputStreamWriter(new FileOutputStream(fDestination), "UTF-8"));
+
+    // copy across all matrices, looking for ~h "sil"
+    String sLine = in.readLine();
+    while (sLine != null && !isCancelling()) {
+      if (!sLine.equals("~h \"sil\"")) {
+        // just copy the line through
+        out.write(sLine);
+        out.newLine();
+      } else { // process the sil lines
+        // hit ~h "sil"
+        // start the short-pause matrix
+        String sSpMatrix = "~h \"sp\"\r\n";
+        boolean bIgnoringLines = false;
+	
+        // copy the line through
+        out.write(sLine);
+        out.newLine();
+        sLine = in.readLine();
+        
+        // until EOF or the end of the matrix
+        while (sLine != null && !sLine.equalsIgnoreCase("<ENDHMM>") && !isCancelling()) {
+          // copy the lines through
+          out.write(sLine);
+          out.newLine();
+          
+          // look for state
+          if (sLine.equalsIgnoreCase("<NUMSTATES> 5")) {
+            sSpMatrix += "<NUMSTATES> 3\r\n";
+          } else if (sLine.equalsIgnoreCase("<STATE> 2")) {
+            bIgnoringLines = true;
+          } else if (sLine.equalsIgnoreCase("<STATE> 3")) {
+            sSpMatrix += "<STATE> 2\r\n";
+          } else if (sLine.equalsIgnoreCase("<STATE> 4")) {
+            bIgnoringLines = true;
+          } else if (sLine.equalsIgnoreCase("<TRANSP> 5")) {
+            bIgnoringLines = true;
+            sSpMatrix += "<TRANSP> 3\r\n";
+            sSpMatrix += "  0.0 1.0 0.0\r\n";
+            sSpMatrix += "  0.0 0.6 0.4\r\n";
+            sSpMatrix += "  0.0 0.0 0.6\r\n";
+          } else if (bIgnoringLines && sLine.startsWith("<GCONST>")) {
+            bIgnoringLines = false;
+          } else if (!bIgnoringLines) {
+            // copy the line into the sp definition
+            sSpMatrix += sLine + "\r\n";
+          }
+
+          sLine = in.readLine();
+        } // next within sil
+        
+        if (sLine != null && sLine.length() > 0) {
+          // make sure we don't drop any lines in the copying
+          out.write(sLine);
+          out.newLine();
+        }
+
+        // write the new sp matrix
+        sSpMatrix += "<ENDHMM>";
+        out.write(sSpMatrix);
+        out.newLine();
+	       
+      } // process sil matrix
+      sLine = in.readLine();
+    } // next line
+	 
+    out.close();
+  } // end of addSpModelToHmmdefs()
+
+  /**
+   * Step 8 - Realigning the Training Data. 
+   * <p> As noted earlier, the dictionary contains multiple pronunciations for some words,
+   * particularly function words. The phone models created so far can be used to realign
+   * the training data and create new transcriptions. This can be done with a single
+   * invocation of the HTK recognition tool HVITE
+   * <p> This command uses the HMMs stored in hmm7 to transform the input word level
+   * transcription words.mlf to the new phone level transcription aligned.mlf using the
+   * pronunciations stored in the dictionary dict.The key difference between this
+   * operation and the original word-to-phone mapping performed by HLED in step 4 is that
+   * the recogniser considers all pronunciations for each word and outputs the
+   * pronunciation that best matches the acoustic data.
+   * <p> Once the new phone alignments have been created, another 2 passes of HEREST can
+   * be applied to reestimate the HMM set parameters again. Assuming that this is done,
+   * the final monophone HMM set will be stored in directory hmm9. 
+   * @throws TransformationException
+   */
+  public void step8() throws TransformationException {
+    setStatus("Step 8...");
+    try {
+	 
+      File config = new File(sessionWorkingDir, "config");
+      File hmm07 = new File(sessionWorkingDir, "hmm07");
+      File hmm08 = new File(sessionWorkingDir, "hmm08");
+      File hmm09 = new File(sessionWorkingDir, "hmm09");
+
+      setStatus("Calling HVite...");
+      File macros = new File(hmm07, "macros");
+      File hmmdefs = new File(hmm07, "hmmdefs");
+      alignedPhonesMlf = new File(sessionWorkingDir, sessionName + "_phones_aligned_raw.mlf");
+      int r = htk.HVite(
+        "SWT", "SILENCE", config, macros, hmmdefs, alignedPhonesMlf, 250.0, wordsMlf, trainingScp,
+        dictionaryFile, phonemeListFile);
+      if (r != 0) {
+        String sError = htk.getLastError();
+        // look for something like "Cannot find hmm [???-]PD[+???]"
+        Pattern pCannotFindHmm = Pattern.compile(
+          "Cannot find hmm \\[\\?\\?\\?-\\](.+)\\[\\+\\?\\?\\?\\]");
+        Matcher mCannotFileHmm = pCannotFindHmm.matcher(sError);
+        if (mCannotFileHmm.find()) {
+          throw new TransformationException(
+            this, "ERROR: HVite found a phone with no model: " + mCannotFileHmm.group(1));
+        } else {
+          throw new TransformationException(
+            this, "ERROR: HVite returned: " + r + " - " + htk.getLastError());
+        }
+      }
+    
+      // The forced-alignment process can fail on some utterances
+      // We have to scan the AlignedPhonemes MLF to look for missing
+      // utterances and add them in from Phonemes MLF
+      setStatus("Checking force-aligned phonetic transcript...");
+      checkAlignedPhonemesMlf();
+
+      if (isCancelling()) return;
+    
+      // Training...
+      setStatus("Calling HERest for hmm08...");
+      hmmdefs = new File(hmm07, "hmmdefs");
+      macros = new File(hmm07, "macros");
+      r = htk.HERest(
+        config, alignedPhonesMlf, 250, 150, 1000, trainingScp, macros, hmmdefs, hmm08,
+        phonemeListFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HERest returned: " + r + " - " + htk.getLastError());
+      }
+    
+      if (isCancelling()) return;
+
+      setStatus("Calling HERest for hmm09...");
+      hmmdefs = new File(hmm08, "hmmdefs");
+      macros = new File(hmm08, "macros");
+      r = htk.HERest(
+        config, alignedPhonesMlf, 250, 150, 1000, trainingScp, macros, hmmdefs, hmm09,
+        phonemeListFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HERest returned: " + r + " - " + htk.getLastError());
+      }
+
+      setStatus("Finished step 8.");
+      
+    } catch (InterruptedException x) {
+      throw new TransformationException(this, x);
+    } catch (IOException x) {
+      throw new TransformationException(this, x);
+    }      
+  } // end of step8()
+
+  /**
+   * Ensures that the Aligned Phoneme MLF has all the utterances.
+   */
+  public void checkAlignedPhonemesMlf() throws IOException {
+    BufferedReader phonemesIn = new BufferedReader(
+      new InputStreamReader(new FileInputStream(phonemesWithSpMlf), "UTF-8"));
+    BufferedReader alignedPhonemesIn = new BufferedReader(
+      new InputStreamReader(new FileInputStream(alignedPhonesMlf), "UTF-8"));
+    File processedAlignedMlf = new File(sessionWorkingDir, sessionName + "_phones_aligned.mlf");
+    BufferedWriter alignedPhonemesOut = new BufferedWriter(
+      new OutputStreamWriter(new FileOutputStream(processedAlignedMlf), "UTF-8"));
+
+    // skip the first line
+    String sLine = phonemesIn.readLine();
+    String sAlignedLine = alignedPhonemesIn.readLine();
+    alignedPhonemesOut.write(sAlignedLine);
+    alignedPhonemesOut.newLine();
+    
+    // read the files in parallel, looking for utterances
+    // in phonemesIn that aren't in alignedPhonemesIn...
+    
+    sLine = phonemesIn.readLine();
+    sAlignedLine = alignedPhonemesIn.readLine();
+    while (sLine != null) {
+      boolean bSkipAlignedLine = false;
+      // this line must be an utterance name
+      if (sLine.equals(sAlignedLine)) {
+        // the aligned file has the utterance so copy it through
+        while (!sAlignedLine.equals(".")) { // end of utterance
+          alignedPhonemesOut.write(sAlignedLine);
+          alignedPhonemesOut.newLine();
+          sAlignedLine = alignedPhonemesIn.readLine();
+        } // next line
+        alignedPhonemesOut.write(sAlignedLine);
+        alignedPhonemesOut.newLine();
+        
+        // skip past the utterance in the non-aligned file
+        while (!sLine.equals(".")) { // end of utterance
+          sLine = phonemesIn.readLine();
+        } // next line
+      } else { // this utterance is missing from the aligned file
+        setStatus(
+          "Force-alignment failed for " + sLine + " - copying utterance from "
+          + phonemesWithSpMlf.getName());
+        while (!sLine.equals(".")) { // end of utterance
+          alignedPhonemesOut.write(sLine);
+          alignedPhonemesOut.newLine();
+          sLine = phonemesIn.readLine();
+        } // next line
+        alignedPhonemesOut.write(sLine);
+        alignedPhonemesOut.newLine();
+        
+        bSkipAlignedLine = true;
+      }
+	    
+      sLine = phonemesIn.readLine();
+      if (!bSkipAlignedLine) {
+        sAlignedLine = alignedPhonemesIn.readLine();
+      }
+    } // next utterance
+    alignedPhonemesOut.close();
+    alignedPhonemesIn.close();
+    phonemesIn.close();
+
+    alignedPhonesMlf = processedAlignedMlf;
+  } // end of checkAlignedPhonemesMlf()
+
+  /**
+   * Step 9 - Making Triphones from Monophones.
+   * <p> Context-dependent triphones can be made by simply cloning monophones and then
+   * re-estimating using triphone transcriptions. The latter should be created first using
+   * HLED because a side-effect is to generate a list of all the triphones for which there
+   * is at least one example in the training data.
+   * <p> That is, executing <br>
+   * <tt> HLEd -n triphones1 -l '*' -i wintri.mlf mktri.led aligned.mlf </tt>
+   * <br> will convert the monophone transcriptions in aligned.mlf to an equivalent set of
+   * triphone transcriptions in wintri.mlf. At the same time, a list of triphones is
+   * written to the file triphones1. The edit script mktri.led contains the commands <br>
+   * <tt>WB sp <br>
+   *     WB sil <br>
+   *     TC</tt>
+   * <p> The two WB commands define sp and sil as word boundary symbols. These then block
+   * the addition of context in the TI command, seen in the following script, which
+   * converts all phones (except word boundary symbols) to triphones . For example, <br>
+   * <tt> sil th ih s sp m ae n sp ... </tt>
+   * <br> becomes
+   * <tt> sil th+ih th-ih+s ih-s sp m+ae m-ae+n ae-n sp ... </tt>
+   * <p> This style of triphone transcription is referred to as word internal. Note that
+   * some biphones will also be generated as contexts at word boundaries will sometimes
+   * only include two phones. 
+   * <p> The cloning of models can be done efficiently using the HMM editor HHED: <br>
+   * <tt>HHEd -B -H hmm9/macros -H hmm9/hmmdefs -M hmm10
+   *       mktri.hed monophones1 </tt><br>
+   * where the edit script mktri.hed contains a clone command CL followed by TI commands
+   * to tie all of the transition matrices in each triphone set, that is: <br>
+   * <tt> CL triphones1<br>
+   *      TI T_ah {(*-ah+*,ah+*,*-ah).transP} <br>
+   *      TI T_ax {(*-ax+*,ax+*,*-ax).transP} <br>
+   *      TI T_ey {(*-ey+*,ey+*,*-ey).transP} <br>
+   *      TI T_b {(*-b+*,b+*,*-b).transP} <br>
+   *      TI T_ay {(*-ay+*,ay+*,*-ay).transP} <br>
+   * ...</tt>
+   * <p> The file mktri.hed can be generated using the Perl script maketrihed included in
+   * the HTKTutorial directory. When running the HHED command you will get warnings about
+   * trying to tie transition matrices for the sil and sp models. Since neither model is
+   * context-dependent there aren't actually any matrices to tie. 
+   * <p> The clone command CL takes as its argument the name of the file containing the
+   * list of triphones (and biphones) generated above. For each model of the form a-b+c in
+   * this list, it looks for the monophone b and makes a copy of it. Each TI command takes
+   * as its argument the name of a macro and a list of HMM components. The latter uses a
+   * notation which attempts to mimic the hierarchical structure of the HMM parameter set
+   * in which the transition matrix transP can be regarded as a sub-component of each
+   * HMM. The list of items within brackets are patterns designed to match the set of
+   * triphones, right biphones and left biphones for each phone. 
+   * <p> Once the context-dependent models have been cloned, the new triphone set can be
+   * re-estimated using HEREST. This is done as previously except that the monophone model
+   * list is replaced by a triphone list and the triphone transcriptions are used in place
+   * of the monophone transcriptions.  
+   * <p> For the final pass of HEREST, the -s option should be used to generate a file of
+   * state occupation statistics called stats. In combination with the means and
+   * variances, these enable likelihoods to be calculated for clusters of states and are
+   * needed during the state-clustering process described below. Re-estimation should be
+   * again done twice, so that the resultant model sets will ultimately be saved in hmm12.  
+   * @throws TransformationException
+   */
+  public void step9() throws TransformationException {
+    setStatus("Step 9...");
+    try {
+
+      File config = new File(sessionWorkingDir, "config");
+      File hmm09 = new File(sessionWorkingDir, "hmm09");
+      File hmm10 = new File(sessionWorkingDir, "hmm10");
+      File hmm11 = new File(sessionWorkingDir, "hmm11");
+      File hmm12 = new File(sessionWorkingDir, "hmm12");
+
+      triphoneListFile = new File(sessionWorkingDir, sessionName + ".tph");
+      triphonesMlf = new File(sessionWorkingDir, sessionName + "_wintri.mlf");
+      File mktri = new File(sessionWorkingDir, "mktri.led");
+      File dictWintryMlf = new File(sessionWorkingDir, sessionName + "_dict_wintri.mlf");
+    
+      setStatus("Calling HLEd to generate wintri.mlf...");
+      // HLEd -n "Ada Aitcheson.tph" -l * -i "Ada Aitcheson_wintri.mlf" mktri.led "Ada Aitcheson_phones_aligned.mlf"
+      int r = htk.HLEd("n", triphoneListFile, triphonesMlf, mktri, alignedPhonesMlf);
+      if (r != 0) {
+        throw new TransformationException(this, "HLEd returned: " + r + " - " + htk.getLastError());
+      }
+
+      setStatus("Calling HLEd on dictionary MLF to generate complete triphone list in .tph...");
+      // This is a deviation from the tutorial.  I've found that if the 
+      // complete list of triphones isn't available now for HHed, it leads
+      // to errors later where the toolkit changes its mind between 
+      // alternative pronunciations of the same word.
+      // So here we generate a complete list, from the dictionary MLF file
+      // created in createDictionary() above
+      r = htk.HLEd("n", triphoneListFile, dictWintryMlf, mktri, dictionaryMlf);
+      if (r != 0) {
+        throw new TransformationException(this, "HLEd returned: " + r + " - " + htk.getLastError());
+      }
+
+      setStatus("Generating mktri.hed...");
+      File fMktriHed = generateMktriHed();
+
+      // HHEd -B -H "hmm09\macros" -H "hmm09\hmmdefs" -M "hmm10" "mktri.hed" "Ada Aitcheson.mph"
+      File macros = new File(hmm09, "macros");
+      File hmmdefs = new File(hmm09, "hmmdefs");
+      setStatus("Calling HHEd...");
+      r = htk.HHEd(macros, hmmdefs, hmm10, fMktriHed, phonemeListFile);
+      if (r != 0) {
+        throw new TransformationException(this, "HHEd returned: " + r + " - " + htk.getLastError());
+      }
+    
+      // HERest -C "config" -I "Ada Aitcheson_wintri.mlf" -t 250.0 150.0 1000.0 -S "Ada Aitcheson_train.scp" -H "hmm10\macros" -H "hmm10\hmmdefs" -M "hmm11" "Ada Aitcheson.tph"
+      setStatus("Calling HERest for hmm11...");
+      hmmdefs = new File(hmm10, "hmmdefs");
+      macros = new File(hmm10, "macros");
+      r = htk.HERest(
+        config, triphonesMlf, 250, 150, 1000, trainingScp, macros, hmmdefs, hmm11,
+        triphoneListFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HERest returned: " + r + " - " + htk.getLastError());
+      }
+
+      setStatus("Calling HERest for hmm12...");
+      statsFile = new File(sessionWorkingDir, sessionName + ".stats");
+      hmmdefs = new File(hmm11, "hmmdefs");
+      macros = new File(hmm11, "macros");
+      r = htk.HERest(
+        config, triphonesMlf, 250, 150, 1000, statsFile, trainingScp, macros, hmmdefs, hmm12,
+        triphoneListFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HERest returned: " + r + " - " + htk.getLastError());
+      }
+
+      setStatus("Finished step 9.");
+      
+    } catch (InterruptedException x) {
+      throw new TransformationException(this, x);
+    } catch (IOException x) {
+      throw new TransformationException(this, x);
+    }
+  }
+  
+  /**
+   * Generate mktri.hed file from .mph file
+   * @return The mktri.hed script file
+   */
+  public File generateMktriHed() throws TransformationException {
+    File fMph = phonemeListFile;
+    File fMktri = new File(sessionWorkingDir, "mktri.hed");
+    
+    try {
+      BufferedWriter out = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(fMktri), "UTF-8"));
+
+      out.write("CL \"" + triphoneListFile.getPath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
+      
+      BufferedReader in = new BufferedReader(
+        new InputStreamReader(new FileInputStream(fMph), "UTF-8"));
+      String sLine = in.readLine();
+      while(sLine != null) {
+        out.write(
+          "TI T_" + sLine + " {(*-" + sLine + "+*," + sLine + "+*,*-" + sLine + ").transP}\n");
+        sLine = in.readLine();
+      } // next chunk of data
+      in.close();
+      out.close();
+    } catch(Exception exception) {
+      throw new TransformationException(
+        this, "generateMktriHed() failed: " + exception, exception);
+    }
+    return fMktri;
+  } // end of generateMktriHed()
+
+  /**
+   * Step 10
+   * @throws TransformationException
+   */
+  public void step10() throws TransformationException {
+    setStatus("Step 10...");
+    try {
+
+      File config = new File(sessionWorkingDir, "config");
+      File hmm12 = new File(sessionWorkingDir, "hmm12");
+      File hmm13 = new File(sessionWorkingDir, "hmm13");
+      File hmm14 = new File(sessionWorkingDir, "hmm14");
+      File hmm15 = new File(sessionWorkingDir, "hmm15");
+      File fulllist = new File(sessionWorkingDir, "fulllist");
+      File mktrided = new File(sessionWorkingDir, "mktri.ded");
+      File flog = new File(sessionWorkingDir, "flog");
+      File tri = new File(sessionWorkingDir, sessionName + ".tri");
+    
+      setStatus("Generating full triphone list, running HDMan...");
+      int r = htk.HDMan(fulllist, mktrided, flog, tri, dictionaryFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HDMan returned: " + r + " - " + htk.getLastError());
+      }
+
+      setStatus("Generating tree.hed...");
+      File fTreeHed = generateTreeHed();
+
+      // HHEd.exe -H hmm12\macros -H hmm12\hmmdefs -M hmm13 tree.hed Ada Aitcheson.tph
+/*
+  setStatus("Calling HHEd...");
+  File macros = new File(hmm12, "macros");
+  File hmmdefs = new File(hmm12, "hmmdefs");
+  setStatus("Calling HHEd...");
+  r = htk.HHEd(macros, hmmdefs, hmm13, fTreeHed, triphoneListFile);
+  if (r != 0) {
+  throw new Exception("HHEd returned: " + r + " - " + htk.getLastError());
+  }
+*/
+      setStatus("Calling HERest for hmm14...");
+//	 hmmdefs = new File(hmm13, "hmmdefs");
+//	 macros = new File(hmm13, "macros");
+      File hmmdefs = new File(hmm12, "hmmdefs");
+      File macros = new File(hmm12, "macros");
+      r = htk.HERest(
+        config, triphonesMlf, 250, 150, 1000, trainingScp, macros, hmmdefs, hmm14,
+        triphoneListFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HERest returned: " + r + " - " + htk.getLastError());
+      }
+
+      setStatus("Callingo HERest for hmm15...");
+      hmmdefs = new File(hmm14, "hmmdefs");
+      macros = new File(hmm14, "macros");
+      r = htk.HERest(
+        config, triphonesMlf, 250, 150, 1000, trainingScp, macros, hmmdefs, hmm15,
+        triphoneListFile);
+      if (r != 0) {
+        throw new TransformationException(
+          this, "HERest returned: " + r + " - " + htk.getLastError());
+      }	 
+
+      setStatus("Finished step 10.");
+      
+    } catch (InterruptedException x) {
+      throw new TransformationException(this, x);
+    } catch (IOException x) {
+      throw new TransformationException(this, x);
+    }
+  }
+
+  /**
+   * Generate tree.hed file from template file
+   * @return The tree.hed script file
+   */
+  public File generateTreeHed() throws TransformationException {
+    File fTreeHedTemplate = new File(sessionWorkingDir, "tree.hed");
+    File fFullList = new File(sessionWorkingDir, "fulllist");
+    String sEscapedFullListName = fFullList.getPath().replaceAll("\\\\", "\\\\\\\\");
+    File fTreeHed = new File(sessionWorkingDir, sessionName + "_tree.hed");
+
+    try {
+      // prepend with stats file
+      BufferedWriter out = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(fTreeHed), "UTF-8"));
+      out.write("RO 100.0  \"" + statsFile.getPath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
+
+      // just copy the rest of the file
+      BufferedReader in = new BufferedReader(
+        new InputStreamReader(new FileInputStream(fTreeHedTemplate), "UTF-8"));
+      String sLine = in.readLine();
+      while(sLine != null) {
+        if (sLine.indexOf("fulllist") >= 0) {
+          // ensure that the AU "fulllist" filename gets a full path
+          out.write("AU \"" + sEscapedFullListName + "\"\n");
+        } else {
+          out.write(sLine + "\n");
+        }
+        sLine = in.readLine();
+      } // next chunk of data
+      in.close();
+      out.close();
+    } catch(Exception exception) {
+      throw new TransformationException(
+        this, "generateTreeHed() failed: " + exception, exception);
+    }	
+    return fTreeHed;
+  } // end of generateTreeHed()
+
+  /**
+   * Recognize Word Alignments.
+   * @throws TransformationException
+   */
+  public void recognizeWordAlignments(File fSegmentFile, String sHmm)
+    throws TransformationException {
+    // modified step 8 - only call HVite
+    setStatus("Word recognition");
+    try {
+    
+      File config = new File(sessionWorkingDir, "config");
+      File hmm = new File(sessionWorkingDir, sHmm); // hmm07 hmm09 hmm15
+    
+      setStatus("Calling HVite...");
+      File macros = new File(hmm, "macros");
+      File hmmdefs = new File(hmm, "hmmdefs");
+      alignedWordsMlf = new File(sessionWorkingDir, sessionName + "_words_aligned.mlf");
+    
+      int r = htk.HVite(
+        scoreLayerId != null?"N":"S", "SILENCE", config, macros, hmmdefs, alignedWordsMlf,
+        250.0, wordsMlf, trainingScp, dictionaryFile, fSegmentFile);
+//			   triphoneListFile);
+//			   phonemeListFile);
+      // after triphone HMM generation, supposed to be:
+      //HVite -H hmm15/macros -H hmm15/hmmdefs -S test.scp -l '*' -i recout.mlf -w wdnet -p 0.0 -s 5.0 dict tiedlist
+    
+      if (r != 0) {
+        String sError = htk.getLastError();
+        // look for something like "Cannot find hmm [???-]PD[+???]"
+        Pattern pCannotFindHmm = Pattern.compile(
+          "Cannot find hmm \\[\\?\\?\\?-\\](.+)\\[\\+\\?\\?\\?\\]");
+        Matcher mCannotFileHmm = pCannotFindHmm.matcher(sError);
+        if (mCannotFileHmm.find()) {
+          throw new TransformationException(
+            this, "ERROR: HVite found a phone with no model: " + mCannotFileHmm.group(1));
+        } else {
+          throw new TransformationException(
+            this, "HVite returned: " + r + " - " + htk.getLastError());
+        }
+      }
+
+      setStatus("Finished word recognition.");
+      
+    } catch (InterruptedException x) {
+      throw new TransformationException(this, x);
+    } catch (IOException x) {
+      throw new TransformationException(this, x);
+    }
+  } // end of recognizeWordAlignments()
 
   /**
    * Reads the alignments from the files output by HTK, and merges the changes into the
@@ -1563,7 +2633,6 @@ public class HTKAligner extends Annotator {
    * process is allocated to this step. 
    * @param originalFragments The original utterances that should be updated
    * @param consumer Where the aligned fragments are sent.
-   * @throws Exception
    */
   public void updateAlignments(
     PhonemeTranslator htkToPhonemes, boolean useP2FACorrection,
