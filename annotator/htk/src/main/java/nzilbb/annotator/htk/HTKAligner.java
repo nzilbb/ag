@@ -829,6 +829,9 @@ public class HTKAligner extends Annotator {
           this, "Invalid participant tag layer: " + participantTagLayerId);
       }
     } // participantTagLayerId != null
+
+    // TODO make it possible to output alignments on something that's not the word layer:
+    wordAlignmentLayerId = schema.getWordLayerId();
     
     Layer wordAlignmentLayer = schema.getLayer(wordAlignmentLayerId);
     if (wordAlignmentLayer == null) {

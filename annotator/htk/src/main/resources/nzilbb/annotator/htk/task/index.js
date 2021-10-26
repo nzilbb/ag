@@ -62,14 +62,14 @@ getSchema(s => {
               
     // populate output layer select options
 
-    const wordAlignmentLayerId = document.getElementById("wordAlignmentLayerId");
-    addLayerOptions(
-        wordAlignmentLayerId, schema,
-        // word layer, or aligned turn children (TODO)
-        layer => layer.id == schema.wordLayerId/*
-            || (layer.parentId == schema.turnLayerId && layer.alignment == 2)*/);
-    // default value:
-    wordAlignmentLayerId.value = schema.wordLayerId;
+    //TODO const wordAlignmentLayerId = document.getElementById("wordAlignmentLayerId");
+    // addLayerOptions(
+    //     wordAlignmentLayerId, schema,
+    //     // word layer, or aligned turn children (TODO)
+    //     layer => layer.id == schema.wordLayerId/*
+    //         || (layer.parentId == schema.turnLayerId && layer.alignment == 2)*/);
+    // // default value:
+    // wordAlignmentLayerId.value = schema.wordLayerId;
     
     const phoneAlignmentLayerId = document.getElementById("phoneAlignmentLayerId");
     addLayerOptions(
@@ -100,11 +100,11 @@ getSchema(s => {
         // but not word nor utterance
             && layer.id != schema.wordLayerId && layer.id != schema.utteranceLayerId);
     
-    const participantTagLayerId = document.getElementById("participantTagLayerId");
-    addLayerOptions(
-        participantTagLayerId, schema,
-        // participant attributes
-        layer => layer.parentId == schema.participantLayerId && layer.alignment == 0);
+    // TODO const participantTagLayerId = document.getElementById("participantTagLayerId");
+    // addLayerOptions(
+    //     participantTagLayerId, schema,
+    //     // participant attributes
+    //     layer => layer.parentId == schema.participantLayerId && layer.alignment == 0);
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getText("getTaskParameters", parameters => {
