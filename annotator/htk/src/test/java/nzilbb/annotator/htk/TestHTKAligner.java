@@ -270,6 +270,62 @@ public class TestHTKAligner {
     assertEquals("Last phone end", Double.valueOf(11.76), phones[5].getEnd().getOffset());
   }   
 
+  @Test public void trainAndAlign() throws Exception {
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    //annotator.getStatusObservers().add(status->System.out.println(status));
+    annotator.setSchema(schema);    
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&pronunciationLayerId=phonemes"
+      +"&noiseLayerId="
+      +"&utteranceTagLayerId=utterance_htk" // nonexistent
+      +"&participantTagLayerId=participant_htk" // nonexistent
+      +"&wordAlignmentLayerId=word"
+      +"&phoneAlignmentLayerId=segment"
+      +"&scoreLayerId=score"
+      +"&overlapThreshold="
+      +"&cleanupOption=100"
+      +"&noisePatterns=laugh.* unclear .*noise.*"
+      +"&leftPattern="
+      +"&rightPattern="
+      +"&pauseMarkers=-");
+    Layer layer = annotator.getSchema().getLayer("utterance_htk");
+    assertNotNull("utterance_htk layer created", layer);
+    layer = annotator.getSchema().getLayer("participant_htk");
+    assertNotNull("participant_htk layer created", layer);
+    layer = annotator.getSchema().getLayer("score");
+    assertNotNull("score layer created", layer);
+
+    final Vector<Graph> results = new Vector<Graph>();
+    annotator.transformGraphs(Arrays.stream(new Graph[] { g }), graph -> { results.add(graph); });
+
+    assertEquals("One utterance " + results, 1, results.size());
+    Graph aligned = results.elementAt(0);
+    assertTrue("Original graph is edited", g == aligned);
+    
+    Annotation[] words = aligned.all("word");
+    assertEquals("One word " + Arrays.asList(words), 1, words.length);
+    Annotation word = words[0];
+    assertEquals("Word label " + word, "statute", word.getLabel());
+
+    // don't bother testing offsets, as they'll be rubbish
+    Annotation[] phones = word.all("segment");
+    assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
+    String[] labels = { "s", "t", "{", "J", "u", "t" };
+    for (int p = 0; p < phones.length; p++) {      
+      assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
+      assertNotNull("Scored " + p, phones[p].first("score"));
+      if (p > 0) {
+        assertEquals("Phone start shared with previous end " + p,
+                     phones[p-1].getEnd(), phones[p].getStart());
+      }
+    } // next phone    
+  }   
+
   /**
    * Returns a graph for annotating.
    * @return The graph for testing with.

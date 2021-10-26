@@ -941,6 +941,10 @@ public class HTKAligner extends Annotator {
           if (discDictionary) {           
             phonemesToHtk = new DISC2HTK();
             htkToPhonemes = new HTK2DISC();
+          } else {
+            if (discOutput) {
+              htkToPhonemes = new CMU2DISC();
+            }
           }
           
           // create initial file structure
@@ -1014,7 +1018,6 @@ public class HTKAligner extends Annotator {
             htkToPhonemes = new CMU2DISC();
           } else {
             if (discOutput) {
-              setStatus("discOutput");
               htkToPhonemes = new CMU2DISC();
             }
           }
@@ -1084,7 +1087,7 @@ public class HTKAligner extends Annotator {
   // Bunch of files and resources needed by HTK:
 
   /** The working directory for this training session. */
-  protected String sessionName = "htk";
+  protected String sessionName;
   /** The working directory for this training session. */
   protected File sessionWorkingDir;
   /** The log for this training session. */
@@ -1182,6 +1185,7 @@ public class HTKAligner extends Annotator {
    * @throws TransformationException if the directory couldn't be created.
    */
   protected File createSessionWorkingDir() throws TransformationException{
+    sessionName = "htk-" + hashCode();
     sessionWorkingDir = new File(
       getWorkingDirectory(),
       sessionName + "-"
@@ -1400,13 +1404,13 @@ public class HTKAligner extends Annotator {
               return;
             }
             
-            utterances.add(fragment);
-            
             // write line to grammar                     
             grammarOut.newLine();
             if (utterances.size() > 0 ) grammarOut.write(" | ");
             grammarOut.write(utteranceOrthography.toString());
-            
+
+            utterances.add(fragment);            
+
             // write mlf
             mlfOut.write("\"*/" + fragment.getId() + ".lab\"");
             for (String token : utteranceOrthography.toString().split(" ")) {
@@ -1652,57 +1656,6 @@ public class HTKAligner extends Annotator {
   protected File getP2FADirectory() {
     return new File(getWorkingDirectory(), "p2fa");
   } // end of getP2FAModelDirectory()
-  
-  /**
-   * Get the directory that the P2FA pre-trained models are in.
-   * @return The directory that the P2FA pre-trained models are in.
-   */
-  protected File getP2FAModelDirectory() {
-    return new File(new File(getP2FADirectory(), "model"), "11025");
-  } // end of getP2FAModelDirectory()
-  
-  /**
-   * Use the P2FA forced alignment command.
-   * @throws TransformationException
-   */
-  public void forceAlign() throws TransformationException {
-    setStatus("Forced alignment");
-    try {
-      
-      setStatus("Calling HVite...");      
-      File macros = new File(getP2FAModelDirectory(), "macros");
-      File hmmdefs = new File(getP2FAModelDirectory(), "hmmdefs");
-      File phones = new File(new File(getP2FADirectory(),"model"), "monophones");
-      alignedWordsMlf = new File(sessionWorkingDir, sessionName + "_words_aligned.mlf");
-      int r = htk.HVite(
-        "S", "SILENCE", 0.0, 5.0,
-        macros, hmmdefs, alignedWordsMlf,
-        wordsMlf, 
-        trainingScp, 
-        dictionaryFile, 
-        phones);
-      if (r != 0) {
-        String sError = htk.getLastError();
-        // look for something like "Cannot find hmm [???-]PD[+???]"
-        Pattern pCannotFindHmm
-          = Pattern.compile("Cannot find hmm \\[\\?\\?\\?-\\](.+)\\[\\+\\?\\?\\?\\]");
-        Matcher mCannotFileHmm = pCannotFindHmm.matcher(sError);
-        if (mCannotFileHmm.find()) {
-          throw new TransformationException(
-            this, "ERROR: HVite found a phone with no model: " + mCannotFileHmm.group(1));
-        } else {
-          throw new TransformationException(
-            this, "HVite returned: " + r + " - " + htk.getLastError());
-        }
-      }
-      
-      setStatus("Finished word recognition.");
-    } catch (IOException x) {
-      throw new TransformationException(this, x);
-    } catch (InterruptedException x) {
-      throw new TransformationException(this, x);
-    }
-  } // end of forceAlign()
   
   /**
    * Step 1 - the Task Grammar. 
@@ -2647,6 +2600,53 @@ public class HTKAligner extends Annotator {
     }
   } // end of recognizeWordAlignments()
 
+  /**
+   * Get the directory that the P2FA pre-trained models are in.
+   * @return The directory that the P2FA pre-trained models are in.
+   */
+  protected File getP2FAModelDirectory() {
+    return new File(new File(getP2FADirectory(), "model"), "11025");
+  } // end of getP2FAModelDirectory()
+  
+  /**
+   * Use the P2FA forced alignment command.
+   * @throws TransformationException
+   */
+  public void forceAlign() throws TransformationException {
+    setStatus("Forced alignment");
+    try {
+      
+      setStatus("Calling HVite...");      
+      File macros = new File(getP2FAModelDirectory(), "macros");
+      File hmmdefs = new File(getP2FAModelDirectory(), "hmmdefs");
+      File phones = new File(new File(getP2FADirectory(),"model"), "monophones");
+      alignedWordsMlf = new File(sessionWorkingDir, sessionName + "_words_aligned.mlf");
+      int r = htk.HVite(
+        "S", "SILENCE", 0.0, 5.0, macros, hmmdefs, alignedWordsMlf, wordsMlf, trainingScp,
+        dictionaryFile, phones);
+      if (r != 0) {
+        String sError = htk.getLastError();
+        // look for something like "Cannot find hmm [???-]PD[+???]"
+        Pattern pCannotFindHmm
+          = Pattern.compile("Cannot find hmm \\[\\?\\?\\?-\\](.+)\\[\\+\\?\\?\\?\\]");
+        Matcher mCannotFileHmm = pCannotFindHmm.matcher(sError);
+        if (mCannotFileHmm.find()) {
+          throw new TransformationException(
+            this, "ERROR: HVite found a phone with no model: " + mCannotFileHmm.group(1));
+        } else {
+          throw new TransformationException(
+            this, "HVite returned: " + r + " - " + htk.getLastError());
+        }
+      }
+      
+      setStatus("Finished word recognition.");
+    } catch (IOException x) {
+      throw new TransformationException(this, x);
+    } catch (InterruptedException x) {
+      throw new TransformationException(this, x);
+    }
+  } // end of forceAlign()
+  
   /**
    * Reads the alignments from the files output by HTK, and merges the changes into the
    * original fragments.
