@@ -1690,6 +1690,112 @@ public class Graph extends Annotation {
       tracker.reset(); // ignore any prehistoric creates/deletes
     }
   } // end of trackChanges()
+
+  /**
+   * Applies tracked changes made in the given graph/fragment to this graph.
+   * <p> <em>NB:</em> It is assumed that the updated anchors/annotations and the destroyed
+   * annotations have the name IDs in both graphs. For new anchors/annotations, the IDs
+   * from the fragment are not used; this graph generates new IDs, and then the
+   * corresponding anchors/annotations in the fragment have their IDs changed to match
+   * those from this graph. This means that a side-effect of this method is that the given
+   * fragment may change. No anchors are marked for deletion.
+   * @param fragment The fragment (or graph) from which the changes come.
+   * @param includeLayers A set of layers specifying which annotations to apply changes
+   * to, or null for updating all annotations.
+   */
+  public void applyChangesFromFragment(Graph fragment, Set<String> includeLayers) {
+    // collect up changed objects
+    HashSet<Anchor> createdAnchors = new HashSet<Anchor>();
+    HashSet<Annotation> createdAnnotations = new HashSet<Annotation>();
+    HashSet<Anchor> updatedAnchors = new HashSet<Anchor>();
+    HashSet<Annotation> updatedAnnotations = new HashSet<Annotation>();
+    HashSet<Annotation> destroyedAnnotations = new HashSet<Annotation>();
+    // (we don't destroy any anchors)    
+    for (Change change : fragment.getTracker().getChanges()) {
+      if (change.getObject() instanceof Anchor) {
+        switch(change.getObject().getChange()) {
+          case Create:
+            createdAnchors.add((Anchor)change.getObject());
+            break;
+          case Update:
+            updatedAnchors.add((Anchor)change.getObject());
+            break;
+        }
+      } else if (change.getObject() instanceof Annotation) {
+        Annotation annotation = (Annotation)change.getObject();
+        if (includeLayers == null || includeLayers.contains(annotation.getLayerId())) {
+          switch(annotation.getChange()) {
+            case Create:
+              createdAnnotations.add(annotation);
+              break;
+            case Update:
+              updatedAnnotations.add(annotation);
+              break;
+            case Destroy:
+              destroyedAnnotations.add(annotation);
+              break;
+          }
+        } // include this layer
+      } // Annotation
+    } // next change
+
+    // anything that's created doesn't need to be updated
+    updatedAnchors.removeAll(createdAnchors);
+    updatedAnnotations.removeAll(createdAnnotations);
+
+    // annotations that are deleted don't need to be updated or created
+    updatedAnnotations.removeAll(destroyedAnnotations);
+    createdAnnotations.removeAll(destroyedAnnotations);
+    
+    // create new anchors
+    for (Anchor fragmentAnchor : createdAnchors) {
+      Anchor graphAnchor = (Anchor)fragmentAnchor.clone();
+      graphAnchor.setId(null); // need a new ID in the graph
+      graphAnchor.create();
+      graph.addAnchor(graphAnchor);
+      // set the changed object to match the new ID
+      // this will update all referencing annotations too
+      fragmentAnchor.setId(graphAnchor.getId());
+    } // next anchor
+    
+    // create new annotations
+    for (Annotation fragmentAnnotation : createdAnnotations) {
+      Annotation graphAnnotation = (Annotation)fragmentAnnotation.clone();
+      graphAnnotation.setId(null); // need a new ID in the graph
+      graphAnnotation.create();
+      graph.addAnnotation(graphAnnotation);
+      // set the changed object to match the new ID
+      // this will update all referencing annotations too
+      fragmentAnnotation.setId(graphAnnotation.getId());
+    } // next annotation
+
+    // update anchors
+    for (Anchor fragmentAnchor : updatedAnchors) {
+      Anchor graphAnchor = (Anchor)graph.getAnchor(fragmentAnchor.getId());
+      if (graphAnchor != null) {
+        graphAnchor.clonePropertiesFrom(fragmentAnchor, "id");
+      } // graph anchor found
+    } // next anchor
+
+    // update annotations
+    for (Annotation fragmentAnnotation : updatedAnnotations) {
+      Annotation graphAnnotation = (Annotation)graph.getAnnotation(fragmentAnnotation.getId());
+      if (graphAnnotation != null) {
+        graphAnnotation.clonePropertiesFrom(fragmentAnnotation, "id");
+      } // graph annotation found
+    } // next annotation
+
+    // no deletion of anchors
+
+    // delete annotations
+    for (Annotation fragmentAnnotation : destroyedAnnotations) {
+      Annotation graphAnnotation = (Annotation)graph.getAnnotation(fragmentAnnotation.getId());
+      if (graphAnnotation != null) {
+          graphAnnotation.destroy();
+      } // graph annotation found
+    } // next annotation
+    
+  } // end of applyChangesFromFragment()  
    
   // TrackedMap methods
 
