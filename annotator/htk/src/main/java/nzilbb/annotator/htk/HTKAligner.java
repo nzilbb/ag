@@ -34,9 +34,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URL;
-import java.util.Date;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -57,6 +59,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
+import nzilbb.ag.automation.UsesGraphStore;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
@@ -77,7 +80,7 @@ import nzilbb.util.IO;
  * @author Robert Fromont robert@fromont.net.nz
  */
 // Migration notes:
-@UsesFileSystem
+@UsesFileSystem @UsesGraphStore
 public class HTKAligner extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
   public String getMinimumApiVersion() { return "1.0.5"; }
@@ -564,7 +567,14 @@ public class HTKAligner extends Annotator {
    * @see #beanPropertiesToQueryString()
    */
   public String getConfig() {
-    if (htkPath == null) {
+    // load configuration, if any
+    File f = new File(getWorkingDirectory(), getAnnotatorId() + ".cfg");
+    if (f.exists()) {
+      try {
+        beanPropertiesFromQueryString(IO.InputStreamToString(new FileInputStream(f)));
+      } catch(IOException exception) {}
+    }
+    if (htkPath == null || htkPath.length() == 0) {
       // on linux based systems, HTK can install itself on to the path
       // so we try to find out where...
       File HVitePath = Execution.Which("HVite");
@@ -732,6 +742,12 @@ public class HTKAligner extends Annotator {
           throw new InvalidConfigurationException(this, "No path to HTK.");
         }
       } // bad htkPath
+
+      // persist configuration
+      PrintWriter writer = new PrintWriter(
+        new File(getWorkingDirectory(), getAnnotatorId() + ".cfg"), "UTF-8");
+      writer.print("htkPath="+URLEncoder.encode(htkPath, "UTF-8"));
+      writer.close();
       
       setPercentComplete(100);
     } catch (IOException ioX) {
@@ -1018,7 +1034,7 @@ public class HTKAligner extends Annotator {
    * Transforms the graph. In this case, the graph is simply summarized, by counting all
    * tokens of each word type, and printing out the result to stdout.
    * @param graph The graph to transform.
-   * @return The changes introduced by the tranformation.
+   * @return The changes introduced by the transformation.
    * @throws TransformationException If the transformation cannot be completed.
    */
   public Graph transform(Graph graph) throws TransformationException {
@@ -1080,7 +1096,8 @@ public class HTKAligner extends Annotator {
         // this may involve utterances from other graphs,
         // if mainUtteranceGrouping=Speaker and we have a graph store for looking up utterances
         
-        Vector<Vector<Graph>> speakers = new Vector<Vector<Graph>>();
+        LinkedHashMap<String, Vector<Graph>> speakers
+          = new LinkedHashMap<String, Vector<Graph>>();
         
         // first, we'll definitely be processing main participants
         for (Annotation mainParticipant : graph.all(mainParticipantLayerId)) {
@@ -1093,6 +1110,7 @@ public class HTKAligner extends Annotator {
               utterances.add(graph.getFragment(utterance, layerIds));
             } // next utterance
           } else { // we have a graph store
+            setStatus("Finding utterances of " + participant.getLabel() + " ...");
             String query = "layer.id == '"+esc(schema.getUtteranceLayerId())+"'"
               +" && first('"+esc(schema.getParticipantLayerId())+"').label"
               +" == '"+esc(participant.getLabel())+"'";
@@ -1100,6 +1118,7 @@ public class HTKAligner extends Annotator {
               query += " && graph.id == '"+esc(graph.getId())+"'";
             }
             Annotation[] allUtterances = getStore().getMatchingAnnotations(query, null, null);
+            setStatus("Loading utterances of " + participant.getLabel() + " ...");
             for (Annotation utterance : allUtterances) { // for each utterance annotation
               if (isCancelling()) break;
               utterances.add(
@@ -1107,7 +1126,7 @@ public class HTKAligner extends Annotator {
                   utterance.getGraph().getId(), utterance.getId(), layerIds));
             } // next utterance
           } // we have a graph store
-          speakers.add(utterances);
+          speakers.put(participant.getLabel(), utterances);
         } // next main participant
 
         // secondly, process non-main participants
@@ -1122,11 +1141,13 @@ public class HTKAligner extends Annotator {
                   utterances.add(graph.getFragment(utterance, layerIds));
                 } // next utterance
               } else { // we have a graph store
+                setStatus("Finding utterances of " + participant.getLabel() + " ...");
                 String query = "layer.id == '"+esc(schema.getUtteranceLayerId())+"'"
                   +" && first('"+esc(schema.getParticipantLayerId())+"').label"
                   +" == '"+esc(participant.getLabel())+"'"
                   +" && graph.id == '"+esc(graph.getId())+"'";
                 Annotation[] allUtterances = getStore().getMatchingAnnotations(query, null, null);
+                setStatus("Loading utterances of " + participant.getLabel() + " ...");
                 for (Annotation utterance : allUtterances) { // for each utterance annotation
                   if (isCancelling()) break;
                   utterances.add(
@@ -1134,7 +1155,7 @@ public class HTKAligner extends Annotator {
                       utterance.getGraph().getId(), utterance.getId(), layerIds));
                 } // next utterance
               } // we have a graph store
-              speakers.add(utterances);
+              speakers.put(participant.getLabel(), utterances);
             } // non-main participant  
           } // next participant
         } // not ignoring non-main-participants
@@ -1143,8 +1164,9 @@ public class HTKAligner extends Annotator {
           // process batches
           batchCount = speakers.size();
           completedBatches = 0;
-          for (Vector<Graph> batch : speakers) {
-            transformFragments(batch.stream(), alignedFragmentConsumer);
+          for (String speaker : speakers.keySet()) {
+            setStatus("Aligning " + speaker);
+            transformFragments(speakers.get(speaker).stream(), alignedFragmentConsumer);
             completedBatches++;
             if (isCancelling()) break;
           } // next batch
@@ -1422,6 +1444,8 @@ public class HTKAligner extends Annotator {
     statsFile = null;
     batchCount = 1;
     completedBatches = 0;
+    // load htkPath from config file
+    getConfig();
   } // end of reset()
 
   /**
@@ -1894,6 +1918,7 @@ public class HTKAligner extends Annotator {
 
     try {
       File fTarget = new File(sessionWorkingDir, fragment.getId() + ".mfc");
+
       double dStartTime = fragment.getStart().getOffset();
       if (dStartTime < 0) dStartTime = 0;
       double dEndTime = fragment.getEnd().getOffset();
@@ -1916,13 +1941,17 @@ public class HTKAligner extends Annotator {
       File fTemp = new File(new URI(fileUrl));
       File fWav = new File(
         fTarget.getParent(), fragment.getId() + "." + IO.Extension(fTemp));
-      IO.Rename(fTemp, fWav);
+      if (fragment.isFragment()) { // fragment media is generated on the fly, so can be moved
+        IO.Rename(fTemp, fWav);
+      } else { // whole graph media is used in-situ (this should happen, but just in case...)
+        fWav = fTemp;
+      }
       
       // convert WAV to MFCC
       int r = 99;
       File fConfig = null;
       setStatus(
-        "Extracting features from \"" + fWav.getPath()/*TODO getName()*/ + "\" to \"" + fTarget.getName() + "\""
+        "Extracting features from \"" + fWav.getName() + "\" to \"" + fTarget.getName() + "\""
         +(channel.length()==0?"":" - channel: " + channel));
       if (useP2FA) {
         fConfig = new File(getP2FAModelDirectory(), "config");
@@ -2959,7 +2988,7 @@ public class HTKAligner extends Annotator {
     try {
       
       // scan the alignments, updating transcript words
-      setStatus("Update word and phoneme alignments");
+      setStatus("Update word and phoneme alignments ("+originalFragments.size()+")");
       
       // need a list of noise tokens - i.e. uppcase versions of the noise 'phones'
       HashSet<String> noiseIds = new HashSet<String>();
@@ -3000,6 +3029,7 @@ public class HTKAligner extends Annotator {
       // deserialize the MLF
       Graph[] alignedFragments = deserializer.deserialize();
       for (String s : deserializer.getWarnings()) setStatus("Error: " + s);
+      setStatus("HTK aligned " + alignedFragments.length + " fragments");
       
       Vector<String> ids = new Vector<String>();
       Vector<String> dependentLayerIds = new Vector<String>();
@@ -3040,6 +3070,7 @@ public class HTKAligner extends Annotator {
       
       // for each utterance alignment...
       for (Graph alignedFragment : alignedFragments) {
+        if (isCancelling()) break;
         
         // anchors start from zero, which they don't in the database
         alignedFragment.shiftAnchors((Double)alignedFragment.get("@startTime"));
@@ -3103,7 +3134,9 @@ public class HTKAligner extends Annotator {
             timestamp.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
             alignedFragment.addAnnotation(timestamp);
           }
-          
+
+          if (isCancelling()) break;
+
           // merge the current database utterance with the incoming aligned utterance
           Merger merger = new Merger(alignedFragment);
           // but don't allow changes to system layers
@@ -3147,6 +3180,7 @@ public class HTKAligner extends Annotator {
           
           Set<Change> changes = fragment.getTracker().getChanges();
           if (merger.getLog() != null) for (String l : merger.getLog()) setStatus(l);
+          if (isCancelling()) break;
           if (consumer != null) consumer.accept(fragment);
         } catch (Exception x) {
           setStatus("Could not process " + alignedFragment.getId() + ": " + x);

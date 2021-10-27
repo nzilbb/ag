@@ -35,6 +35,7 @@ label:after {
 }
 .field input[type="number"] {
     width: 75px;
+    text-align: right;
 }
 
 footer {

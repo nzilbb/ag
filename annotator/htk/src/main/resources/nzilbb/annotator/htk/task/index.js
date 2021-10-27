@@ -124,12 +124,14 @@ getSchema(s => {
                     document.getElementById("cleanupOption").value = value;
                 });
             } else {
-                const parameters = new URLSearchParams(parameters);
+                parameters = new URLSearchParams(parameters);
                 
                 // set initial values of properties in the form above
                 // (this assumes bean property names match input id's in the form above)
                 for (const [key, value] of parameters) {
-                    document.getElementById(key).value = value;
+                    try {
+                        document.getElementById(key).value = value;
+                    } catch (x) {}
                 }
                 // set the checkboxes
                 document.getElementById("ignoreAlignmentStatuses").checked
