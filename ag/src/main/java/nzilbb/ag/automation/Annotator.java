@@ -78,7 +78,7 @@ import nzilbb.util.MonitorableTask;
  *       <ol>
  *         <li> {@link #setSchema(Schema)} is invoked to provide the current schema. </li>
  *         <li> {@link #setTaskParameters(String)} is invoked to provide the parameters. 
- *              (it's possibel that this will be invoked with null parameters to determine
+ *              (it's possible that this will be invoked with null parameters to determine
  *              whether the annotator has a default task configuration) </li>
  *         <li> {@link #getRequiredLayers()} is invoked to determine which layers are needed. </li>
  *         <li> {@link #getOutputLayers()} is invoked to determine which layer are annotated. </li> 
@@ -96,8 +96,8 @@ import nzilbb.util.MonitorableTask;
  *  <li> The module may be upgraded, in which case:
  *       <ol>
  *         <li> {@link #setSchema(Schema)} is invoked. </li>
- *         <li> {@link #getConfig()} is invoked, to determine the pre-upgrade conofiguration. </li>
- *         <li> the user is presentated with the <a href="package-summary.html#config">
+ *         <li> {@link #getConfig()} is invoked, to determine the pre-upgrade configuration. </li>
+ *         <li> the user is presented with the <a href="package-summary.html#config">
  *              config web-app</a>, if any, and </li> 
  *         <li> {@link #setConfig(String)} is invoked to allow any upgrade processing to
  *              occur, e.g. updating configuration, changes in data schema, etc. </li>
