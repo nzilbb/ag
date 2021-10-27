@@ -35,6 +35,7 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Annotation;
+import nzilbb.ag.Change;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
 import nzilbb.ag.GraphMediaProvider;
@@ -211,8 +212,8 @@ public class TestHTKAligner {
   @Test public void P2FA() throws Exception {
     annotator.setSessionName("P2FA");
     
-    Graph g = graph();
-    Schema schema = g.getSchema();
+    Graph f = fragment();
+    Schema schema = f.getSchema();
     annotator.setSchema(schema);
     
     // layers are created as required
@@ -245,11 +246,11 @@ public class TestHTKAligner {
 
     final Vector<Graph> results = new Vector<Graph>();
     annotator.transformFragments(
-      Arrays.stream(new Graph[] { g }), graph -> { results.add(graph); });
+      Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
     
     assertEquals("One utterance " + results, 1, results.size());
     Graph aligned = results.elementAt(0);
-    assertTrue("Original graph is edited", g == aligned);
+    assertTrue("Original graph is edited", f == aligned);
     
     Annotation[] words = aligned.all("word");
     assertEquals("One word " + Arrays.asList(words), 1, words.length);
@@ -280,8 +281,8 @@ public class TestHTKAligner {
   @Test public void trainAndAlign() throws Exception {
     annotator.setSessionName("trainAndAlign");
     
-    Graph g = graph();
-    Schema schema = g.getSchema();
+    Graph f = fragment();
+    Schema schema = f.getSchema();
     annotator.setSchema(schema);    
     
     // layers are created as required
@@ -313,11 +314,11 @@ public class TestHTKAligner {
 
     final Vector<Graph> results = new Vector<Graph>();
     annotator.transformFragments(
-      Arrays.stream(new Graph[] { g }), graph -> { results.add(graph); });
+      Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
 
     assertEquals("One utterance " + results, 1, results.size());
     Graph aligned = results.elementAt(0);
-    assertTrue("Original graph is edited", g == aligned);
+    assertTrue("Original graph is edited", f == aligned);
     
     Annotation[] words = aligned.all("word");
     assertEquals("One word " + Arrays.asList(words), 1, words.length);
@@ -338,6 +339,94 @@ public class TestHTKAligner {
     } // next phone    
   }   
 
+  @Test public void graphTransform() throws Exception {
+    annotator.setSessionName("graphTransform");
+    //annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&pronunciationLayerId=phonemes"
+      +"&noiseLayerId="
+      +"&utteranceTagLayerId=utterance_htk" // nonexistent
+      +"&participantTagLayerId=participant_htk" // nonexistent
+      +"&wordAlignmentLayerId=word"
+      +"&phoneAlignmentLayerId=segment"
+      +"&useP2FA=on"
+      +"&scoreLayerId=score" // can't score with P2FA, so this should be ignored
+      +"&overlapThreshold="
+      +"&cleanupOption=100"
+      +"&noisePatterns=laugh.* unclear .*noise.*"
+      +"&leftPattern="
+      +"&rightPattern="
+      +"&pauseMarkers=-");
+    Layer layer = annotator.getSchema().getLayer("utterance_htk");
+    assertNotNull("utterance_htk layer created", layer);
+    layer = annotator.getSchema().getLayer("participant_htk");
+    assertNotNull("participant_htk layer created", layer);
+    assertNull("no score layer created because we're using P2FA",
+               annotator.getSchema().getLayer("score"));
+    assertEquals("Main-Participant grouping",
+                 "Transcript", annotator.getMainUtteranceGrouping());
+    assertEquals("Other-Participant grouping",
+                 "Transcript", annotator.getOtherUtteranceGrouping());
+
+    g.trackChanges();
+    annotator.transform(g);
+        
+    Annotation[] words = g.all("word");
+    assertEquals("One word " + Arrays.asList(words), 1, words.length);
+    Annotation word = words[0];
+    assertEquals("Word label " + word, "statute", word.getLabel());
+    
+    Annotation[] phones = word.all("segment");
+    assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
+    String[] labels = { "s", "t", "{", "J", "u", "t" };
+    Double[] starts = { 11.1, 11.25, 11.28, 11.44, 11.620000000000001, 11.7 };
+    for (int p = 0; p < phones.length; p++) {      
+      assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
+      assertEquals("Phone is marked for addition " + p,
+                   Change.Operation.Create, phones[p].getChange());
+      assertEquals("Phone start confidence " + p,
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   phones[p].getStart().getConfidence().intValue());
+      assertEquals("Phone end confidence " + p,
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   phones[p].getEnd().getConfidence().intValue());
+      assertEquals("Phone start offset " + p,
+                   starts[p], phones[p].getStart().getOffset());
+      if (phones[p].getStart().isStartOn("word")) {
+        assertEquals("Phone/word start is an update " + p,
+                     Change.Operation.Update, phones[p].getStart().getChange());
+      } else {
+        assertEquals("Phone start is new " + p,
+                     Change.Operation.Create, phones[p].getStart().getChange());
+      }
+      if (p > 0) {
+        assertEquals("Phone start shared with previous end " + p,
+                     phones[p-1].getEnd(), phones[p].getStart());
+      }
+    } // next phone    
+    assertEquals("Last phone end", Double.valueOf(11.76), phones[5].getEnd().getOffset());
+  }   
+
+  /**
+   * Returns a fragment for annotating.
+   * @return The graph for testing with.
+   */
+  public static Graph fragment() throws Exception {
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    Graph f = g.getFragment(
+      10.0, 14.0, (String[])schema.getLayers().keySet().toArray(new String[0]));
+    f.setSchema(schema); // ensure subtype is available
+    return f;
+  }
+  
   /**
    * Returns a graph for annotating.
    * @return The graph for testing with.
@@ -416,10 +505,7 @@ public class TestHTKAligner {
         }
       });
 
-    Graph fragment = g.getFragment(
-      10.0, 14.0, (String[])schema.getLayers().keySet().toArray(new String[0]));
-    fragment.setSchema(schema); // ensure subtype is available
-    return fragment;
+    return g;
   } // end of graph()
 
   public static void main(String args[]) {

@@ -168,6 +168,23 @@ public class HTKAligner extends Annotator {
   public HTKAligner setNoisePatterns(String newNoisePatterns) { noisePatterns = newNoisePatterns; return this; }
   
   /**
+   * The layer ID for marking main participants.
+   * @see #getMainParticipantLayerId()
+   * @see #setMainParticipantLayerId(String)
+   */
+  protected String mainParticipantLayerId = "main_participant";
+  /**
+   * Getter for {@link #mainParticipantLayerId}: The layer ID for marking main participants.
+   * @return The layer ID for marking main participants.
+   */
+  public String getMainParticipantLayerId() { return mainParticipantLayerId; }
+  /**
+   * Setter for {@link #mainParticipantLayerId}: The layer ID for marking main participants.
+   * @param newMainParticipantLayerId The layer ID for marking main participants.
+   */
+  public HTKAligner setMainParticipantLayerId(String newMainParticipantLayerId) { mainParticipantLayerId = newMainParticipantLayerId; return this; }
+  
+  /**
    * How to group main-participant utterances for training, when a single transcript is
    * selected for alignment. Possible value are:
    * <dl>
@@ -936,21 +953,31 @@ public class HTKAligner extends Annotator {
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
     HashSet<String> requiredLayers = new HashSet<String>();
-    // utterance layer is used for chunking
-    if (schema.getUtteranceLayerId() != null) requiredLayers.add(schema.getUtteranceLayerId());
+    // layers used for chunking
+    if (schema.getParticipantLayerId() != null)
+      requiredLayers.add(schema.getParticipantLayerId());
+    if (schema.getLayer(mainParticipantLayerId) != null)
+      requiredLayers.add(mainParticipantLayerId);
+    if (schema.getUtteranceLayerId() != null)
+      requiredLayers.add(schema.getUtteranceLayerId());
+    
     // word layer is used for detecting pause markers
     if (schema.getWordLayerId() != null) requiredLayers.add(schema.getWordLayerId());
+    
     if (orthographyLayerId != null) {
       requiredLayers.add(orthographyLayerId);
     } else {
       throw new InvalidConfigurationException(this, "Orthography layer is not set.");
     }
+    
     if (pronunciationLayerId != null) {
       requiredLayers.add(pronunciationLayerId);
     } else {
       throw new InvalidConfigurationException(this, "Pronunciation layer is not set.");
     }
-    if (noiseLayerId != null) requiredLayers.add(noiseLayerId);
+    
+    if (noiseLayerId != null)
+      requiredLayers.add(noiseLayerId);
     return requiredLayers.toArray(new String[0]);
   }
 
@@ -971,6 +998,21 @@ public class HTKAligner extends Annotator {
     if (scoreLayerId != null) outputLayers.add(scoreLayerId);
     return outputLayers.toArray(new String[0]);
   }
+
+  // members for managing progress
+
+  int batchCount = 1;
+  int completedBatches = 0;
+  /**
+   * Sets the batch progress, and in turn, the overall progress.
+   * @param percent
+   */
+  void setBatchPercentComplete(int percent) {
+    setPercentComplete(
+      Math.max(((100*completedBatches) + percent)
+               / batchCount,
+               1)); // percente complete should be at least 1
+  } // end of setBatchPercentComplete()
    
   /**
    * Transforms the graph. In this case, the graph is simply summarized, by counting all
@@ -983,10 +1025,140 @@ public class HTKAligner extends Annotator {
     setRunning(true);
     reset();
     try {
-      // if we're given a graph to align we need to invoke transformGraphs 
-      if (useP2FA) {
-        // tranformTranscripts but
+      Consumer<Graph> alignedFragmentConsumer = fragment->{
+        // if the fragment comes from this graph
+        if (graph.getId().equals(fragment.sourceGraph().getId())) {
+          // apply the changes to the main graph
+          graph.applyChangesFromFragment(fragment, new HashSet<String>() {{
+            add(wordAlignmentLayerId);
+            add(phoneAlignmentLayerId);
+            add(utteranceTagLayerId);
+            add(participantTagLayerId);
+          }});
+        } // fragment is from this graph
+      };
+      if (getStore() != null) {
+        final Consumer<Graph> localUpdater = alignedFragmentConsumer;
+        alignedFragmentConsumer = fragment->{
+          if (fragment.getTracker().getChanges().size() > 0) { // save changes to database
+            // only save them to the store
+            // (if we update this graph as well, they'll be updated twice)
+            try {
+              getStore().saveTranscript(fragment);
+            } catch(Exception exception) {
+              throw new RuntimeException(exception);
+            }
+          } else {
+            setStatus(fragment.getId() + ": No changes.");
+          }
+        };
       }
+      
+      // however we group utterances, we'll want fragments with all layers
+      String[] layerIds = schema.getLayers().keySet().toArray(new String[0]);
+      if (useP2FA) {
+        
+        // if we're using P2FA pre-trained models, there's no training,
+        // so we just call transformFragments with all utterances
+        Vector<Graph> utterances = new Vector<Graph>();
+        for (Annotation utterance : graph.all(schema.getUtteranceLayerId())) {
+          Graph fragment = graph.getFragment(utterance, layerIds);
+          fragment.trackChanges();
+          utterances.add(fragment);
+        }
+        batchCount = 1;
+        completedBatches = 0;
+        if (!isCancelling()) {
+          transformFragments(utterances.stream(), alignedFragmentConsumer);
+        }
+        
+      } else { // train and align
+
+        // if we're given a graph to align we need to invoke transformGraphs for each
+        // participant's utterances, so that models are trained for each participant
+        
+        // this may involve utterances from other graphs,
+        // if mainUtteranceGrouping=Speaker and we have a graph store for looking up utterances
+        
+        Vector<Vector<Graph>> speakers = new Vector<Vector<Graph>>();
+        
+        // first, we'll definitely be processing main participants
+        for (Annotation mainParticipant : graph.all(mainParticipantLayerId)) {
+          if (isCancelling()) break;
+          Annotation participant = mainParticipant.first(schema.getParticipantLayerId());
+          Vector<Graph> utterances = new Vector<Graph>();
+          if (getStore() == null) { // no graph store
+            // just use annotations from the local graph
+            for (Annotation utterance : participant.all(schema.getUtteranceLayerId())) {
+              utterances.add(graph.getFragment(utterance, layerIds));
+            } // next utterance
+          } else { // we have a graph store
+            String query = "layer.id == '"+esc(schema.getUtteranceLayerId())+"'"
+              +" && first('"+esc(schema.getParticipantLayerId())+"').label"
+              +" == '"+esc(participant.getLabel())+"'";
+            if ("Transcript".equals(mainUtteranceGrouping)) { // only from this transcript
+              query += " && graph.id == '"+esc(graph.getId())+"'";
+            }
+            Annotation[] allUtterances = getStore().getMatchingAnnotations(query, null, null);
+            for (Annotation utterance : allUtterances) { // for each utterance annotation
+              if (isCancelling()) break;
+              utterances.add(
+                getStore().getFragment( // get the fragment corresponding to the utterance
+                  utterance.getGraph().getId(), utterance.getId(), layerIds));
+            } // next utterance
+          } // we have a graph store
+          speakers.add(utterances);
+        } // next main participant
+
+        // secondly, process non-main participants
+        if ("Transcript".equals(otherUtteranceGrouping)) { // not ignoring non-main-participants
+          for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
+            if (isCancelling()) break;
+            if (participant.first(mainParticipantLayerId) == null) { // non-main participant
+              Vector<Graph> utterances = new Vector<Graph>();
+              if (getStore() == null) { // no graph store
+                // just use annotations from the local graph
+                for (Annotation utterance : participant.all(schema.getUtteranceLayerId())) {
+                  utterances.add(graph.getFragment(utterance, layerIds));
+                } // next utterance
+              } else { // we have a graph store
+                String query = "layer.id == '"+esc(schema.getUtteranceLayerId())+"'"
+                  +" && first('"+esc(schema.getParticipantLayerId())+"').label"
+                  +" == '"+esc(participant.getLabel())+"'"
+                  +" && graph.id == '"+esc(graph.getId())+"'";
+                Annotation[] allUtterances = getStore().getMatchingAnnotations(query, null, null);
+                for (Annotation utterance : allUtterances) { // for each utterance annotation
+                  if (isCancelling()) break;
+                  utterances.add(
+                    getStore().getFragment( // get the fragment corresponding to the utterance
+                      utterance.getGraph().getId(), utterance.getId(), layerIds));
+                } // next utterance
+              } // we have a graph store
+              speakers.add(utterances);
+            } // non-main participant  
+          } // next participant
+        } // not ignoring non-main-participants
+
+        if (!isCancelling()) {
+          // process batches
+          batchCount = speakers.size();
+          completedBatches = 0;
+          for (Vector<Graph> batch : speakers) {
+            transformFragments(batch.stream(), alignedFragmentConsumer);
+            completedBatches++;
+            if (isCancelling()) break;
+          } // next batch
+        }
+                  
+      } // train & align
+    } catch (GraphNotFoundException x) {
+      throw new TransformationException(this, x);
+    } catch (PermissionException x) {
+      throw new TransformationException(this, x);
+    } catch (StoreException x) {
+      throw new TransformationException(this, x);
+    } catch (RuntimeException x) {
+      throw new TransformationException(this, x.getCause());
     } finally {
       setRunning(false);
     }
@@ -1006,7 +1178,7 @@ public class HTKAligner extends Annotator {
   @Override
   public void transformFragments(Stream<Graph> graphs, Consumer<Graph> consumer)
     throws TransformationException, InvalidConfigurationException {
-    setPercentComplete(0);
+    setBatchPercentComplete(0);
     setRunning(true);
     reset();
 
@@ -1036,47 +1208,47 @@ public class HTKAligner extends Annotator {
           // create initial file structure
           createSessionWorkingDir();
           createInitialFileStructure();
-          setPercentComplete(5);
+          setBatchPercentComplete(5);
           
           // create input files
           fragments = createInputFiles(graphs, phonemesToHtk);
-          setPercentComplete(15);
+          setBatchPercentComplete(15);
           
           // if there are still some utterances
           if (fragments.size() > 0) {
 
             if (!isCancelling()) {
               step1();
-              setPercentComplete(20);
+              setBatchPercentComplete(20);
               
               if (!isCancelling()) {
                 step2();
-                setPercentComplete(30);
+                setBatchPercentComplete(30);
                 
                 // step 3 is record audio, which we've already done
                 
                 if (!isCancelling()) {
                   step4();
-                  setPercentComplete(40);
+                  setBatchPercentComplete(40);
                   
                   // step 5 is extract features from audio, which we've already done
 
                   if (!isCancelling()) {
                     step6();
-                    setPercentComplete(50);
+                    setBatchPercentComplete(50);
 
                     if (!isCancelling()) {
                       step7();
-                      setPercentComplete(60);
+                      setBatchPercentComplete(60);
 
                       if (!isCancelling()) {                        
                         step8();
-                        setPercentComplete(70);
+                        setBatchPercentComplete(70);
 
                         if (!isCancelling()) {                          
                           // at this point we can get the word alignments...
                           recognizeWordAlignments(phonemeListFile, "hmm09");
-                          setPercentComplete(80);
+                          setBatchPercentComplete(80);
                           
                           // ...so we don't actually need to continue with triphones.
                           //step9();
@@ -1095,7 +1267,7 @@ public class HTKAligner extends Annotator {
           
           // create initial file structure
           createSessionWorkingDir();
-          setPercentComplete(5);
+          setBatchPercentComplete(5);
           
           // convert output to DISC?
           if (discDictionary) {
@@ -1109,7 +1281,7 @@ public class HTKAligner extends Annotator {
           
           // create input files
           fragments = createInputFiles(graphs, phonemesToHtk);
-          setPercentComplete(30);
+          setBatchPercentComplete(30);
           
           // if there are still some utterances
           if (fragments.size() > 0) {
@@ -1121,7 +1293,7 @@ public class HTKAligner extends Annotator {
           
         } // useP2FA
 
-        setPercentComplete(90);
+        setBatchPercentComplete(90);
 
         // check number of utterances
         if (fragments.size() == 0) {
@@ -1163,7 +1335,7 @@ public class HTKAligner extends Annotator {
 
       if (failure != null) throw failure;
       
-      setPercentComplete(100);
+      setBatchPercentComplete(100);
     } finally {
       setRunning(false);
     }
@@ -1248,6 +1420,8 @@ public class HTKAligner extends Annotator {
     triphoneListFile = null;
     triphonesMlf = null;
     statsFile = null;
+    batchCount = 1;
+    completedBatches = 0;
   } // end of reset()
 
   /**
