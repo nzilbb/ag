@@ -408,7 +408,8 @@ public class Validator extends Transform implements GraphTransformer {
         }
       }
       if (annotation.getLayer().getAlignment() != Constants.ALIGNMENT_NONE) {
-        if (annotation.getStart() != null) { // (could be graph fragment)
+        if (annotation.getStart() != null
+            && annotation.getEnd() != null) { // (could be graph fragment)
           if (annotation.getStart().getOffset() == null) {
             log("Annotation null start offset: ", annotation.getId());
             return true;
