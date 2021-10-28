@@ -734,6 +734,8 @@ public class HTKAligner extends Annotator {
                 htkPath = fHtkPath.getPath();
               } else {
                 setStatus("Sorry, could not build HTK from source code.");
+                throw new InvalidConfigurationException(
+                  this, "No path to HTK, and could not build it.");
               }
             }
           } finally { // no matter what, delete our working files
