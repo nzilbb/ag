@@ -1098,22 +1098,60 @@ public class HTKAligner extends Annotator {
         
         // this may involve utterances from other graphs,
         // if mainUtteranceGrouping=Speaker and we have a graph store for looking up utterances
-        
-        LinkedHashMap<String, Vector<Graph>> speakers
-          = new LinkedHashMap<String, Vector<Graph>>();
-        
-        // first, we'll definitely be processing main participants
-        for (Annotation mainParticipant : graph.all(mainParticipantLayerId)) {
-          if (isCancelling()) break;
-          Annotation participant = mainParticipant.first(schema.getParticipantLayerId());
-          Vector<Graph> utterances = new Vector<Graph>();
-          if (getStore() == null) { // no graph store
+
+        if (getStore() == null) { // no graph store
+          LinkedHashMap<String, Vector<Graph>> speakers
+            = new LinkedHashMap<String, Vector<Graph>>();
+          
+          // first, we'll definitely be processing main participants
+          for (Annotation mainParticipant : graph.all(mainParticipantLayerId)) {
+            if (isCancelling()) break;
+            Annotation participant = mainParticipant.first(schema.getParticipantLayerId());
+            Vector<Graph> utterances = new Vector<Graph>();
             // just use annotations from the local graph
             for (Annotation utterance : participant.all(schema.getUtteranceLayerId())) {
               utterances.add(graph.getFragment(utterance, layerIds));
             } // next utterance
-          } else { // we have a graph store
-            setStatus("Finding utterances of " + participant.getLabel() + " ...");
+            speakers.put(participant.getLabel(), utterances);
+          } // next main participant
+          
+          // secondly, process non-main participants
+          if ("Transcript".equals(otherUtteranceGrouping)) { // not ignoring non-main-participants
+            for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
+              if (isCancelling()) break;
+              if (participant.first(mainParticipantLayerId) == null) { // non-main participant
+                Vector<Graph> utterances = new Vector<Graph>();
+                // just use annotations from the local graph
+                for (Annotation utterance : participant.all(schema.getUtteranceLayerId())) {
+                  utterances.add(graph.getFragment(utterance, layerIds));
+                } // next utterance
+                speakers.put(participant.getLabel(), utterances);
+              } // non-main participant  
+            } // next participant
+          } // not ignoring non-main-participants
+          
+          if (!isCancelling()) {
+            // process batches
+            batchCount = speakers.size();
+            completedBatches = 0;
+            for (String speaker : speakers.keySet()) {
+              setStatus("Aligning " + speaker);
+              transformFragments(speakers.get(speaker).stream(), alignedFragmentConsumer);
+              setStatus(speaker + " aligned.");
+              completedBatches++;
+              if (isCancelling()) break;
+            } // next batch
+          } // not cancelling
+        } else { // graph store set
+          LinkedHashMap<String, Annotation[]> speakers
+            = new LinkedHashMap<String, Annotation[]>();
+          
+          // first, we'll definitely be processing main participants
+          for (Annotation mainParticipant : graph.all(mainParticipantLayerId)) {
+            if (isCancelling()) break;
+            Annotation participant = mainParticipant.first(schema.getParticipantLayerId());
+            Vector<Graph> utterances = new Vector<Graph>();
+            setStatus("Identifying utterances of " + participant.getLabel() + " ...");
             String query = "layer.id == '"+esc(schema.getUtteranceLayerId())+"'"
               +" && first('"+esc(schema.getParticipantLayerId())+"').label"
               +" == '"+esc(participant.getLabel())+"'";
@@ -1121,60 +1159,48 @@ public class HTKAligner extends Annotator {
               query += " && graph.id == '"+esc(graph.getId())+"'";
             }
             Annotation[] allUtterances = getStore().getMatchingAnnotations(query, null, null);
-            setStatus("Loading utterances of " + participant.getLabel() + " ...");
-            for (Annotation utterance : allUtterances) { // for each utterance annotation
-              if (isCancelling()) break;
-              utterances.add(
-                getStore().getFragment( // get the fragment corresponding to the utterance
-                  utterance.getGraph().getId(), utterance.getId(), layerIds));
-            } // next utterance
-          } // we have a graph store
-          speakers.put(participant.getLabel(), utterances);
-        } // next main participant
+            speakers.put(participant.getLabel(), allUtterances);
+          } // next main participant
 
-        // secondly, process non-main participants
-        if ("Transcript".equals(otherUtteranceGrouping)) { // not ignoring non-main-participants
-          for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
-            if (isCancelling()) break;
-            if (participant.first(mainParticipantLayerId) == null) { // non-main participant
-              Vector<Graph> utterances = new Vector<Graph>();
-              if (getStore() == null) { // no graph store
-                // just use annotations from the local graph
-                for (Annotation utterance : participant.all(schema.getUtteranceLayerId())) {
-                  utterances.add(graph.getFragment(utterance, layerIds));
-                } // next utterance
-              } else { // we have a graph store
-                setStatus("Finding utterances of " + participant.getLabel() + " ...");
+          // secondly, process non-main participants
+          if ("Transcript".equals(otherUtteranceGrouping)) { // not ignoring non-main-participants
+            for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
+              if (isCancelling()) break;
+              if (participant.first(mainParticipantLayerId) == null) { // non-main participant
+                Vector<Graph> utterances = new Vector<Graph>();
+                setStatus("Identifying utterances of " + participant.getLabel() + " ...");
                 String query = "layer.id == '"+esc(schema.getUtteranceLayerId())+"'"
                   +" && first('"+esc(schema.getParticipantLayerId())+"').label"
                   +" == '"+esc(participant.getLabel())+"'"
                   +" && graph.id == '"+esc(graph.getId())+"'";
                 Annotation[] allUtterances = getStore().getMatchingAnnotations(query, null, null);
-                setStatus("Loading utterances of " + participant.getLabel() + " ...");
-                for (Annotation utterance : allUtterances) { // for each utterance annotation
-                  if (isCancelling()) break;
-                  utterances.add(
-                    getStore().getFragment( // get the fragment corresponding to the utterance
-                      utterance.getGraph().getId(), utterance.getId(), layerIds));
-                } // next utterance
-              } // we have a graph store
-              speakers.put(participant.getLabel(), utterances);
-            } // non-main participant  
-          } // next participant
-        } // not ignoring non-main-participants
+                speakers.put(participant.getLabel(), allUtterances);
+              } // non-main participant  
+            } // next participant
+          } // not ignoring non-main-participants
 
-        if (!isCancelling()) {
-          // process batches
-          batchCount = speakers.size();
-          completedBatches = 0;
-          for (String speaker : speakers.keySet()) {
-            setStatus("Aligning " + speaker);
-            transformFragments(speakers.get(speaker).stream(), alignedFragmentConsumer);
-            completedBatches++;
-            if (isCancelling()) break;
-          } // next batch
-        }
-                  
+          if (!isCancelling()) {
+            // process batches
+            batchCount = speakers.size();
+            completedBatches = 0;
+            for (String speaker : speakers.keySet()) {
+              setStatus("Loading utterances of " + speaker + " ...");
+              Vector<Graph> utterances = new Vector<Graph>();
+              for (Annotation utterance : speakers.get(speaker)) { // each utterance annotation
+                if (isCancelling()) break;
+                utterances.add(
+                  getStore().getFragment( // get the fragment corresponding to the utterance
+                    utterance.getGraph().getId(), utterance.getId(), layerIds));
+              } // next utterance
+              setStatus("Aligning " + speaker);
+              transformFragments(utterances.stream(), alignedFragmentConsumer);
+              setStatus(speaker + " aligned.");
+              completedBatches++;
+              if (isCancelling()) break;
+            } // next batch
+          } // not cancelling
+        } // graph store set
+        
       } // train & align
     } catch (GraphNotFoundException x) {
       throw new TransformationException(this, x);
@@ -1445,8 +1471,6 @@ public class HTKAligner extends Annotator {
     triphoneListFile = null;
     triphonesMlf = null;
     statsFile = null;
-    batchCount = 1;
-    completedBatches = 0;
     // load htkPath from config file
     getConfig();
   } // end of reset()
