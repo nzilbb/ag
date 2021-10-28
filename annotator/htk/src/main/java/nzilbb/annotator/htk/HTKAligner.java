@@ -731,6 +731,7 @@ public class HTKAligner extends Annotator {
               fHtkPath = HVitePath.getParentFile();
               if (fHtkPath != null) {
                 setStatus("Build successful, htkPath: " + fHtkPath.getPath());
+                htkPath = fHtkPath.getPath();
               } else {
                 setStatus("Sorry, could not build HTK from source code.");
               }
