@@ -423,7 +423,6 @@ public class TestHTKAligner {
     Schema schema = g.getSchema();
     Graph f = g.getFragment(
       10.0, 14.0, (String[])schema.getLayers().keySet().toArray(new String[0]));
-    f.setSchema(schema); // ensure subtype is available
     return f;
   }
   
@@ -453,8 +452,8 @@ public class TestHTKAligner {
       .setParentId("word").setParentIncludes(true), // ARPABET layer
       new Layer("segment", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(true)
-      .setParentId("word").setParentIncludes(true));
-    schema.getLayer("segment").put("subtype", "D"); // DISC layer 
+      .setParentId("word").setParentIncludes(true)
+      .setType("ipa"));
     // annotate a graph
     Graph g = new Graph()
       .setSchema(schema);
