@@ -554,6 +554,32 @@ public class HTKAligner extends Annotator {
    * Default constructor.
    */
   public HTKAligner() {
+    setSchema( // This is the kind of schema we'd like (set here for testing purposes):
+      new Schema(
+        "who", "turn", "utterance", "word",
+        new Layer("transcript_language", "Overall Language")
+        .setAlignment(Constants.ALIGNMENT_NONE)
+        .setPeers(false).setPeersOverlap(false).setSaturated(true),
+        new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+        .setPeers(true).setPeersOverlap(true).setSaturated(true),
+        new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true).setPeersOverlap(false).setSaturated(false)
+        .setParentId("who").setParentIncludes(true),
+        new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true).setPeersOverlap(false).setSaturated(true)
+        .setParentId("turn").setParentIncludes(true),
+        new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true).setPeersOverlap(false).setSaturated(false)
+        .setParentId("turn").setParentIncludes(true),
+        new Layer("phonemes", "Phonemes").setAlignment(Constants.ALIGNMENT_NONE)
+        .setPeers(true).setPeersOverlap(true).setSaturated(true)
+        .setParentId("word").setParentIncludes(true)
+        .setType("ipa"),
+        new Layer("segment", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true).setPeersOverlap(false).setSaturated(true)
+        .setParentId("word").setParentIncludes(true)
+        .setType("ipa")));
+    
   } // end of constructor
    
   /**
@@ -1237,8 +1263,8 @@ public class HTKAligner extends Annotator {
       
       PhonemeTranslator phonemesToHtk = new PhonemeTranslator(); // (default no translation)
       PhonemeTranslator htkToPhonemes = phonemesToHtk;
-      boolean discDictionary = "D".equals(schema.getLayer(pronunciationLayerId).get("subtype"));
-      boolean discOutput = "D".equals(schema.getLayer(phoneAlignmentLayerId).get("subtype"));
+      boolean discDictionary = "ipa".equals(schema.getLayer(pronunciationLayerId).getType());
+      boolean discOutput = "ipa".equals(schema.getLayer(phoneAlignmentLayerId).getType());
 
       List<Graph> fragments = null;
       TransformationException failure = null;
