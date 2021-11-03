@@ -75,7 +75,9 @@ public class TestMlfDeserializer {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       //for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(5, deserializer.configure(configuration, schema).size());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+      assertEquals("words mapping", "word", 
+		   ((Layer)configuration.get("wordLayer").getValue()).getId());
       assertEquals("noise mapping", "noise", 
 		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
       assertEquals("phones mapping", "phone", 
@@ -236,7 +238,9 @@ public class TestMlfDeserializer {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       //for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(5, deserializer.configure(configuration, schema).size());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+      assertEquals("words mapping", "word", 
+		   ((Layer)configuration.get("wordLayer").getValue()).getId());
       assertEquals("noise mapping", "noise", 
 		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
       assertEquals("phones mapping", "phone", 
@@ -372,7 +376,9 @@ public class TestMlfDeserializer {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       //for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(5, deserializer.configure(configuration, schema).size());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+      assertEquals("words mapping", "word", 
+		   ((Layer)configuration.get("wordLayer").getValue()).getId());
       assertEquals("noise mapping", "noise", 
 		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
       assertEquals("phones mapping", "phone", 
@@ -568,7 +574,9 @@ public class TestMlfDeserializer {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       //for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(5, deserializer.configure(configuration, schema).size());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+      assertEquals("words mapping", "word", 
+		   ((Layer)configuration.get("wordLayer").getValue()).getId());
       assertEquals("noise mapping", "noise", 
 		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
       assertEquals("phones mapping", "phone", 
@@ -755,7 +763,9 @@ public class TestMlfDeserializer {
       // general configuration
       ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
       //for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-      assertEquals(5, deserializer.configure(configuration, schema).size());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+      assertEquals("words mapping", "word", 
+		   ((Layer)configuration.get("wordLayer").getValue()).getId());
       assertEquals("noise mapping", "noise", 
 		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
       assertEquals("phones mapping", "phone", 
@@ -866,6 +876,183 @@ public class TestMlfDeserializer {
                       Constants.CONFIDENCE_AUTOMATIC, (int)phones[i].getEnd().getConfidence());
          assertTrue("word includes phone " + i,
                     phones[i].getParent().includes(phones[i]));
+      }
+
+      g = graphs[1];
+      assertEquals("second fragment name",
+                   "AP511_MikeThorpe__7.131-13.887", g.getId());
+      assertEquals("second fragment source graph",
+                   "AP511_MikeThorpe.eaf", g.sourceGraph().getId());
+      assertEquals("second fragment startTime tag",
+                   Double.valueOf(7.131), (Double)g.get("@startTime"));
+   }
+
+   @Test public void phraseLayers()  throws Exception {
+      Schema schema = new Schema(
+         "participant", "turn", "utterance", "word",
+	 new Layer("noise", "Noise")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false),
+	 new Layer("participant", "Participant")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true).setPeersOverlap(true).setSaturated(true),
+         new Layer("turn", "Turn")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("participant"),
+         new Layer("utterance", "Utterance")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("turn"),
+         new Layer("htk_word", "Word Alignment")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn"),
+         new Layer("htk_phone", "Phone Alignment")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn"),
+         new Layer("word", "Word")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn"),
+         new Layer("phone", "Phone")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("word"),
+         new Layer("score", "Score")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("phone"));
+      
+      // access file
+      NamedStream[] streams = { new NamedStream(new File(getDir(), "test.mlf")) };
+      
+      // create deserializer
+      MlfDeserializer deserializer = new MlfDeserializer();
+      
+      // general configuration
+      ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+      //for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(6, deserializer.configure(configuration, schema).size());
+      assertEquals("words mapping", "word", 
+		   ((Layer)configuration.get("wordLayer").getValue()).getId());
+      assertEquals("noise mapping", "noise", 
+		   ((Layer)configuration.get("noiseLayer").getValue()).getId());
+      assertEquals("phones mapping", "phone", 
+		   ((Layer)configuration.get("phoneLayer").getValue()).getId());
+      assertEquals("score mapping", "score", 
+		   ((Layer)configuration.get("scoreLayer").getValue()).getId());
+      assertEquals("default useP2FACorrection setting", Boolean.FALSE, 
+		   configuration.get("useP2FACorrection").getValue());
+      assertEquals("no noise identifiers", "", 
+		   configuration.get("noiseIdentifiersString").getValue());
+
+      // for this test, we don't want scores nor noises
+      configuration.get("scoreLayer").setValue(null);
+      configuration.get("noiseLayer").setValue(null);
+
+      // change word/phone to phrase layers
+      configuration.get("wordLayer").setValue(schema.getLayer("htk_word"));
+      configuration.get("phoneLayer").setValue(schema.getLayer("htk_phone"));
+
+      deserializer.configure(configuration, schema);
+
+      // load the stream
+      ParameterSet defaultParamaters = deserializer.load(streams, schema);
+      // for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      assertEquals(0, defaultParamaters.size());
+      
+      // configure the deserialization
+      deserializer.setParameters(defaultParamaters);
+
+      // build the graph
+      Graph[] graphs = deserializer.deserialize();
+      assertEquals("multiple graphs: " + graphs.length, 2, graphs.length);
+
+      for (String warning : deserializer.getWarnings()) {
+	 System.out.println(warning);
+      }
+
+      Graph g = graphs[0];
+      assertEquals("first fragment name", "AP511_MikeThorpe__1.373-7.131", g.getId());
+      assertEquals("first fragment source graph", "AP511_MikeThorpe.eaf", g.sourceGraph().getId());
+      assertEquals("first fragment startTime tag",
+                   Double.valueOf(1.373), (Double)g.get("@startTime"));
+      assertNotNull("first fragment utterance layer", g.getLayer("utterance"));
+      assertNotNull("first fragment word layer", g.getLayer("htk_word"));
+      assertNotNull("first fragment phone layer", g.getLayer("htk_phone"));
+      assertNull("first fragment no score layer", g.getLayer("score"));
+      assertNull("first fragment no noise layer", g.getLayer("noise"));
+
+      // defining annotation
+      Annotation utterance = g.first("utterance");
+      assertNotNull("Utterance", utterance);
+      assertEquals("utterance has predictable label",
+                   "AP511_MikeThorpe__1.373-7.131", utterance.getLabel());
+      assertEquals("utterance start", Double.valueOf(0.0), utterance.getStart().getOffset());
+      assertEquals("utterance end", Double.valueOf(5.758), utterance.getEnd().getOffset());
+      
+      // labels and times
+      assertEquals("no words", 0, g.all("word").length);
+      assertEquals("no phones", 0, g.all("phone").length);
+      Annotation[] words = g.all("htk_word");
+      String[] correctWords = { "ah", "w~", "well", "i", "have", "a", "m~", "fairly", "vivid",
+         "recollection", "um", "of", "all", "of", "the", "major", "quakes", "and" }; 
+      Double[] wordStarts = { 0.07, 0.19, 0.57, 0.73, 0.83, 1.00, 2.01, 2.22, 2.57,
+         2.96, 3.80, 4.19, 4.35, 4.50, 4.58, 4.65, 4.95, 5.35}; 
+      Double[] wordEnds = { 0.19, 0.4, 0.73, 0.83, 1.0, 1.24, 2.22, 2.57, 2.96,
+         3.8, 4.19, 4.35, 4.5, 4.58, 4.65, 4.95, 5.35, 5.64,  }; 
+      assertEquals(
+         "correct number of words: " + Arrays.asList(words),
+         correctWords.length, words.length);
+
+      for (int i = 0; i < words.length; i++) {
+         assertEquals("label for word " + i,
+                      correctWords[i], words[i].getLabel());
+         assertEquals("confidence for word " + i,
+                      Constants.CONFIDENCE_AUTOMATIC, (int)words[i].getConfidence());
+         assertEquals("offset for word start " + i,
+                      wordStarts[i], words[i].getStart().getOffset());
+         assertEquals("confidence for word start " + i,
+                      Constants.CONFIDENCE_AUTOMATIC, (int)words[i].getStart().getConfidence());
+         assertEquals("offset for word end " + i,
+                      wordEnds[i], words[i].getEnd().getOffset());
+         assertEquals("confidence for word end " + i,
+                      Constants.CONFIDENCE_AUTOMATIC, (int)words[i].getEnd().getConfidence());
+      }
+
+      Annotation[] phones = g.all("htk_phone");
+      String[] correctPhones = {
+         "_#",
+         "_w", "_@",
+         "_w", "_E", "_l",
+         "_2",
+         "_h", "_{", "_v",
+         "_1",
+         "_m", "_@",
+         "_f", "_8", "_l", "_I",
+         "_v", "_I", "_v", "_I", "_d",
+         "_r", "_E", "_k", "_@", "_l", "_E", "_k", "_S", "_H",
+         "_@", "_m",
+         "_Q", "_v",
+         "_$", "_l",
+         "_Q", "_v",
+         "_D", "_i",
+         "_m", "_1", "__", "_@",
+         "_k", "_w", "_1", "_k", "_s",
+         "_{", "_n", "_d"}; 
+      for (int i = 0; i < phones.length; i++) {
+         assertEquals("label for phone " + i,
+                      correctPhones[i], phones[i].getLabel());
+         assertEquals("confidence for phone " + i,
+                      Constants.CONFIDENCE_AUTOMATIC, (int)phones[i].getConfidence());
+         assertEquals("confidence for phone start " + i,
+                      Constants.CONFIDENCE_AUTOMATIC, (int)phones[i].getStart().getConfidence());
+         assertEquals("confidence for phone end " + i,
+                      Constants.CONFIDENCE_AUTOMATIC, (int)phones[i].getEnd().getConfidence());
+         // in this case, the parent should be a turn, but there's no turn set in the fragment
+         // so we don't test anything about the parent
       }
 
       g = graphs[1];

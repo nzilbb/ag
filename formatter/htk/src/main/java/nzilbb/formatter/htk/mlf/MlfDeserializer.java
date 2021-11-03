@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -150,6 +150,23 @@ public class MlfDeserializer implements GraphDeserializer {
    * @param newSchema Layer schema.
    */
   public MlfDeserializer setSchema(Schema newSchema) { schema = newSchema; return this;}
+  
+  /**
+   * The layer for words. This is the schema word layer by default.
+   * @see #getWordLayer()
+   * @see #setWordLayer(Layer)
+   */
+  protected Layer wordLayer;
+  /**
+   * Getter for {@link #wordLayer}: The layer for words.
+   * @return The layer for words.
+   */
+  public Layer getWordLayer() { return wordLayer; }
+  /**
+   * Setter for {@link #wordLayer}: The layer for words.
+   * @param newWordLayer The layer for words.
+   */
+  public MlfDeserializer setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; return this; }
 
   /**
    * The layer for phones.
@@ -316,9 +333,11 @@ public class MlfDeserializer implements GraphDeserializer {
       }
     } // next parameters
 
-      // validate
+    // validate
     if (phoneLayer != null && scoreLayer != null) {
-      if (!scoreLayer.getParentId().equals(phoneLayer.getId())) {
+      if (!scoreLayer.getParentId().equals(phoneLayer.getId())
+          // but if the phone layer is a phrase layer, it's ok
+          && !phoneLayer.getParentId().equals(schema.getTurnLayerId())) {
         // score layer must be a phone layer child
         scoreLayer = null;
         if (configuration.containsKey("scoreLayer")) {
@@ -361,6 +380,18 @@ public class MlfDeserializer implements GraphDeserializer {
         }
       }
     }
+    LinkedHashMap<String,Layer> phraseLayers = new LinkedHashMap<String,Layer>();
+    for (Layer layer : getSchema().getTurnLayer().getChildren().values()) {
+      if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL && layer.getPeers()
+          && !layer.getId().equals(schema.getUtteranceLayerId())) {
+        // key by lowercase ID, so that matching is case-insensitive
+        phraseLayers.put(layer.getId().toLowerCase(), layer);
+        // can be a phone layer too!
+        wordPartitionLayers.put(layer.getId().toLowerCase(), layer);
+        // and phone tag layer
+        phoneTagLayers.put(layer.getId().toLowerCase(), layer);
+      }
+    } // next layer
      
     // create a list of layers we need and possible matching layer names
     LinkedHashMap<Parameter,List<String>> layerToPossibilities = new LinkedHashMap<Parameter,List<String>>();
@@ -375,6 +406,11 @@ public class MlfDeserializer implements GraphDeserializer {
       new Parameter("phoneLayer", Layer.class, "Phones layer", "Layer for aligned phones"), 
       Arrays.asList("phone","phones","segment", "segments"));
     layerToCandidates.put("phoneLayer", wordPartitionLayers);
+      
+    layerToPossibilities.put(
+      new Parameter("wordLayer", Layer.class, "Words layer", "Layer for aligned words"), 
+      Arrays.asList(schema.getWordLayerId(),"word","words"));
+    layerToCandidates.put("wordLayer", phraseLayers);
       
     layerToPossibilities.put(
       new Parameter("scoreLayer", Layer.class, "Score layer", "Layer for HTK confidence score"), 
@@ -445,9 +481,6 @@ public class MlfDeserializer implements GraphDeserializer {
   public ParameterSet load(NamedStream[] streams, Schema schema)
     throws IOException, SerializationException, SerializerNotConfiguredException {
     reset();
-    if (schema.getWordLayer() == null) {
-      throw new SerializationException("No word layer defined for schema");
-    }
     if (schema.getUtteranceLayer() == null) {
       throw new SerializationException("No utterance layer defined for schema");
     }
@@ -582,8 +615,10 @@ public class MlfDeserializer implements GraphDeserializer {
           fragment.getSchema().setTurnLayerId(schema.getTurnLayerId());
           fragment.addLayer((Layer)schema.getUtteranceLayer().clone());
           fragment.getSchema().setUtteranceLayerId(schema.getUtteranceLayerId());
-          fragment.addLayer((Layer)schema.getWordLayer().clone());
           fragment.getSchema().setWordLayerId(schema.getWordLayerId());
+          if (wordLayer != null) {
+            fragment.addLayer((Layer)wordLayer.clone());
+          }
           if (phoneLayer != null) {
             fragment.addLayer((Layer)phoneLayer.clone());
           }
@@ -651,7 +686,7 @@ public class MlfDeserializer implements GraphDeserializer {
                         
                 word = new Annotation()
                   .setLabel(sWord)
-                  .setLayerId(schema.getWordLayerId())
+                  .setLayerId(wordLayer.getId())
                   .setStart(fragment.getOrCreateAnchorAt(dStart, anchorConfidence))
                   .setEnd(fragment.getOrCreateAnchorAt(dEnd, anchorConfidence));
                 word.setConfidence(annotationConfidence);
@@ -665,8 +700,10 @@ public class MlfDeserializer implements GraphDeserializer {
                     .setLabel(sPhoneme)
                     .setLayerId(phoneLayer.getId())
                     .setStart(word.getStart())
-                    .setEnd(word.getEnd())
-                    .setParent(word);
+                    .setEnd(word.getEnd());
+                  if (wordLayer != null && wordLayer.getId().equals(schema.getWordLayerId())) {
+                    segment.setParent(word);
+                  }
                   segment.setConfidence(annotationConfidence);
                   fragment.addAnnotation(segment);
                            
@@ -714,8 +751,10 @@ public class MlfDeserializer implements GraphDeserializer {
                       .setLabel(sPhoneme)
                       .setLayerId(phoneLayer.getId())
                       .setStart(fragment.getOrCreateAnchorAt(dStart, anchorConfidence))
-                      .setEnd(fragment.getOrCreateAnchorAt(dEnd, anchorConfidence))
-                      .setParent(word);
+                      .setEnd(fragment.getOrCreateAnchorAt(dEnd, anchorConfidence));
+                    if (wordLayer != null && wordLayer.getId().equals(schema.getWordLayerId())) {
+                      segment.setParent(word);
+                    }
                     segment.setConfidence(annotationConfidence);
                               
                     // add it to the fragment
