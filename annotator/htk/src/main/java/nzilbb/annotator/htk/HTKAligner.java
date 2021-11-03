@@ -892,14 +892,11 @@ public class HTKAligner extends Annotator {
       }
     } // participantTagLayerId != null
 
-    // TODO make it possible to output alignments on something that's not the word layer:
-    wordAlignmentLayerId = schema.getWordLayerId();
-    
     Layer wordAlignmentLayer = schema.getLayer(wordAlignmentLayerId);
     if (wordAlignmentLayer == null) {
       wordAlignmentLayer = new Layer(wordAlignmentLayerId)
         .setAlignment(Constants.ALIGNMENT_INTERVAL)
-        .setPeers(true).setPeersOverlap(false)
+        .setPeers(true).setPeersOverlap(false).setSaturated(false)
         .setParentId(schema.getTurnLayerId());
       schema.addLayer(wordAlignmentLayer);
     } else if (wordAlignmentLayerId.equals(pronunciationLayerId)
@@ -918,7 +915,7 @@ public class HTKAligner extends Annotator {
     if (phoneAlignmentLayer == null) {
       phoneAlignmentLayer = new Layer(phoneAlignmentLayerId)
         .setAlignment(Constants.ALIGNMENT_INTERVAL)
-        .setPeers(true).setPeersOverlap(false)
+        .setPeers(true).setPeersOverlap(false).setSaturated(false)
         .setParentId(schema.getTurnLayerId());
       schema.addLayer(phoneAlignmentLayer);
     } else if (phoneAlignmentLayerId.equals(wordAlignmentLayerId)
@@ -931,14 +928,24 @@ public class HTKAligner extends Annotator {
                || phoneAlignmentLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
       throw new InvalidConfigurationException(
         this, "Invalid phone alignment layer: " + phoneAlignmentLayerId);
-    } else if (!phoneAlignmentLayer.getParentId().equals(schema.getWordLayerId())
-               && !phoneAlignmentLayer.getParentId().equals(schema.getTurnLayerId())) {
-      throw new InvalidConfigurationException(
-        this, "Phone alignment layer "+phoneAlignmentLayerId
-        +" must be a child of "+schema.getWordLayerId()
-        +" or " + schema.getTurnLayerId()
-        +" but is a child of " + phoneAlignmentLayer.getParentId());
-    }
+    } else { // phoneAlignmentLayer is set and not a system layer
+      // check it relates to wordAlignmentLayerId correctly
+      if (wordAlignmentLayerId.equals(schema.getWordLayerId())) {
+        if (!phoneAlignmentLayer.getParentId().equals(schema.getWordLayerId())) {
+          throw new InvalidConfigurationException(
+            this, "Phone alignment layer "+phoneAlignmentLayerId
+            +" must be a "+schema.getWordLayerId()
+            +" layer but is a " + phoneAlignmentLayer.getParentId() + " layer");
+        }
+      } else { // wordAlignmentLayerId is not the standard word layer
+        if (!phoneAlignmentLayer.getParentId().equals(schema.getTurnLayerId())) {
+          throw new InvalidConfigurationException(
+            this, "Phone alignment layer "+phoneAlignmentLayerId
+            +" must be a "+schema.getTurnLayerId()
+            +" layer but is a " + phoneAlignmentLayer.getParentId() + " layer");
+        }
+      } // wordAlignmentLayerId is not the standard word layer
+    } // phoneAlignmentLayer is set and not a system layer
 
     // P2FA requires 11,025Hz sample rate, and doesn't provide scores (or can it? TODO)
     if (useP2FA) {
@@ -959,14 +966,14 @@ public class HTKAligner extends Annotator {
           schema.addLayer(
             new Layer(scoreLayerId)
             .setAlignment(Constants.ALIGNMENT_NONE)
-            .setPeers(false)
+            .setPeers(false).setSaturated(true)
             .setParentId(phoneAlignmentLayer.getId()));
         } else {
           // 'phrase' layer - i.e. aligned child of turn
           schema.addLayer(
             new Layer(scoreLayerId)
             .setAlignment(Constants.ALIGNMENT_INTERVAL)
-            .setPeers(true)
+            .setPeers(true).setSaturated(false)
             .setParentId(schema.getTurnLayerId()));
         }
       } else if (scoreLayerId.equals(orthographyLayerId)
@@ -982,7 +989,24 @@ public class HTKAligner extends Annotator {
                  || scoreLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
         throw new InvalidConfigurationException(
           this, "Invalid participant tag layer: " + scoreLayerId);
-      }
+      } else { // scoreLayerId is set and not a system layer
+        // check scoreLayer relates correctly to phoneAlignmentLayer
+        if (phoneAlignmentLayer.getParentId().equals(schema.getWordLayerId())) {
+          if (!scoreLayer.getParentId().equals(phoneAlignmentLayerId)) {
+            throw new InvalidConfigurationException(
+              this, "Score layer "+scoreLayerId
+              +" must be a "+phoneAlignmentLayerId
+              +" layer but is a " + scoreLayer.getParentId() + " layer");
+          }
+        } else { // phoneAlignmentLayer is a turn child
+          if (!scoreLayer.getParentId().equals(schema.getTurnLayerId())) {
+            throw new InvalidConfigurationException(
+              this, "Score layer "+scoreLayerId
+              +" must be a phrase layer"
+              +" but is a " + scoreLayer.getParentId() + " layer");
+          }
+        }
+      } // scoreLayerId is set and not a system layer
     } // scoreLayerId != null
 
   }
@@ -3059,6 +3083,11 @@ public class HTKAligner extends Annotator {
       ParameterSet configuration = new ParameterSet();
       GraphDeserializer deserializer = new MlfDeserializer();
       configuration = deserializer.configure(configuration, schema);
+      if (wordAlignmentLayerId != null) {
+        configuration.get("wordLayer").setValue(schema.getLayer(wordAlignmentLayerId));
+      } else {
+        configuration.get("wordLayer").setValue(null);
+      }
       if (phoneAlignmentLayerId != null) {
         configuration.get("phoneLayer").setValue(schema.getLayer(phoneAlignmentLayerId));
       } else {
@@ -3090,30 +3119,35 @@ public class HTKAligner extends Annotator {
       ids.add(schema.getUtteranceLayerId());
       ids.add(schema.getWordLayerId());
       if (utteranceTagLayerId != null) ids.add(utteranceTagLayerId);
+      if (wordAlignmentLayerId != null && !schema.getWordLayerId().equals(wordAlignmentLayerId)) {
+        ids.add(wordAlignmentLayerId);
+      }
       if (phoneAlignmentLayerId != null) ids.add(phoneAlignmentLayerId);
       if (scoreLayerId != null) ids.add(scoreLayerId);
-      // also include any aligned word layers, so that their anchors can be validated
-      // with the new alignments
       DefaultOffsetGenerator defaultOffsetGenerator = new DefaultOffsetGenerator();
-      for (Layer childLayer : schema.getWordLayer().getChildren().values()) {
-        if (childLayer.getAlignment() != Constants.ALIGNMENT_NONE
-            && childLayer.getParentIncludes()
-            && !ids.contains(childLayer.getId())) {
-          ids.add(childLayer.getId());
-          dependentLayerIds.add(childLayer.getId());
-        }
-      } // next child layer
-      if (phoneAlignmentLayerId != null) {
-        // and segment children      
-        for (Layer childLayer : schema.getLayer(phoneAlignmentLayerId).getChildren().values()) {
+      if (schema.getWordLayerId().equals(wordAlignmentLayerId)) {
+        // also include any aligned word layers, so that their anchors can be validated
+        // with the new alignments
+        for (Layer childLayer : schema.getWordLayer().getChildren().values()) {
           if (childLayer.getAlignment() != Constants.ALIGNMENT_NONE
-              && childLayer.getSaturated() // TODO check this
               && childLayer.getParentIncludes()
               && !ids.contains(childLayer.getId())) {
             ids.add(childLayer.getId());
             dependentLayerIds.add(childLayer.getId());
           }
         } // next child layer
+        if (phoneAlignmentLayerId != null) {
+          // and segment children      
+          for (Layer childLayer : schema.getLayer(phoneAlignmentLayerId).getChildren().values()) {
+            if (childLayer.getAlignment() != Constants.ALIGNMENT_NONE
+                && childLayer.getSaturated() // TODO check this
+                && childLayer.getParentIncludes()
+                && !ids.contains(childLayer.getId())) {
+              ids.add(childLayer.getId());
+              dependentLayerIds.add(childLayer.getId());
+            }
+          } // next child layer
+        }
       }
       String[] layerIds = ids.toArray(new String[0]);
       
@@ -3158,8 +3192,19 @@ public class HTKAligner extends Annotator {
           participantIds.add(turn.getParentId());
           
           // set turn as parent of words
-          for (Annotation word : alignedFragment.all(schema.getWordLayerId())) {
-            word.setParent(editedTurn);
+          if (wordAlignmentLayerId != null) {
+            for (Annotation word : alignedFragment.all(wordAlignmentLayerId)) {
+              word.setParent(editedTurn);
+            }
+          }
+          
+          // set turn as parent of phones, if appropriate
+          if (phoneAlignmentLayerId != null
+              && schema.getLayer(phoneAlignmentLayerId).getParentId()
+              .equals(schema.getTurnLayerId())) {
+            for (Annotation phone : alignedFragment.all(phoneAlignmentLayerId)) {
+              phone.setParent(editedTurn);
+            }
           }
           
           Annotation utterance = fragment.first(schema.getUtteranceLayerId());

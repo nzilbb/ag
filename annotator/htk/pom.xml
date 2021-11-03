@@ -9,12 +9,12 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.htk</artifactId>
-  <version>5.20.0</version>
+  <version>6.0.0</version>
 
   <name>nzilbb.annotator.htk</name>
 
   <properties>
-    <nzilbb.formatter.htk.mlf.version>1.3.0</nzilbb.formatter.htk.mlf.version>
+    <nzilbb.formatter.htk.mlf.version>1.4.0</nzilbb.formatter.htk.mlf.version>
     <package.path>nzilbb/annotator/htk/</package.path>
     <annotator.class>nzilbb.annotator.htk.HTKAligner</annotator.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

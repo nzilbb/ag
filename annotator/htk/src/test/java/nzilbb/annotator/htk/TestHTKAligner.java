@@ -412,7 +412,103 @@ public class TestHTKAligner {
       }
     } // next phone    
     assertEquals("Last phone end", Double.valueOf(11.76), phones[5].getEnd().getOffset());
+    assertEquals("word/phone start shared", word.getStart(), phones[0].getStart());
+    assertEquals("word/phone end shared", word.getEnd(), phones[5].getEnd());
   }   
+
+  @Test public void alignToPhraseLayers() throws Exception {
+    annotator.setSessionName("alignToPhraseLayers");
+    
+    Graph f = fragment();
+    Schema schema = f.getSchema();
+    annotator.setSchema(schema);
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&pronunciationLayerId=phonemes"
+      +"&noiseLayerId="
+      +"&utteranceTagLayerId=htk_utterance" // nonexistent
+      +"&participantTagLayerId=htk_participant" // nonexistent
+      +"&wordAlignmentLayerId=htk_word" // nonexistent
+      +"&phoneAlignmentLayerId=htk_phone" // nonexistent
+      +"&useP2FA=on"
+      +"&scoreLayerId="
+      +"&overlapThreshold="
+      +"&cleanupOption=100"
+      +"&noisePatterns=laugh.* unclear .*noise.*"
+      +"&leftPattern="
+      +"&rightPattern="
+      +"&pauseMarkers=-");
+    Layer layer = annotator.getSchema().getLayer("htk_utterance");
+    assertNotNull("htk_utterance layer created", layer);
+    layer = annotator.getSchema().getLayer("htk_participant");
+    assertNotNull("htk_participant layer created", layer);
+    layer = annotator.getSchema().getLayer("htk_word");
+    assertNotNull("htk_word layer created", layer);
+    assertEquals("htk_word phrase layer",
+                 "turn", layer.getParentId());    
+    assertFalse("htk_word not saturated",
+                layer.getSaturated());    
+    layer = annotator.getSchema().getLayer("htk_phone");
+    assertNotNull("htk_phone layer created", layer);
+    assertEquals("htk_phone phrase layer",
+                 "turn", layer.getParentId());    
+    assertFalse("htk_phone not saturated",
+                layer.getSaturated());    
+
+    final Vector<Graph> results = new Vector<Graph>();
+    annotator.transformFragments(
+      Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
+    
+    assertEquals("One utterance " + results, 1, results.size());
+    Graph aligned = results.elementAt(0);
+    assertTrue("Original graph is edited", f == aligned);
+    
+    Annotation[] words = aligned.all("word");
+    assertEquals("One word " + Arrays.asList(words), 1, words.length);
+    Annotation word = words[0];
+    assertEquals("Word label " + word, "statute", word.getLabel());
+    assertEquals("Word start not changed",
+                 Double.valueOf(11.0), word.getStart().getOffset());
+    assertEquals("Word start confidence not changed",
+                 Constants.CONFIDENCE_DEFAULT, word.getStart().getConfidence().intValue());
+    assertEquals("Word end not changed",
+                 Double.valueOf(13.0), word.getEnd().getOffset());
+    assertEquals("Word end confidence not changed",
+                 Constants.CONFIDENCE_DEFAULT, word.getEnd().getConfidence().intValue());
+    
+    Annotation[] phones = word.all("segment");
+    assertEquals("No phones " + Arrays.asList(phones), 0, phones.length);
+
+    Annotation[] htk_words = aligned.all("htk_word");
+    assertEquals("One HTK word " + Arrays.asList(htk_words), 1, htk_words.length);
+    Annotation htk_word = htk_words[0];
+    assertEquals("HTK Word label " + htk_word, "statute", htk_word.getLabel());
+    
+    Annotation[] htk_phones = aligned.all("htk_phone");
+    assertEquals("Six HTK phones " + Arrays.asList(htk_phones), 6, htk_phones.length);
+    String[] labels = { "S", "T", "AE1", "CH", "UW0", "T" };
+    Double[] starts = { 11.1, 11.25, 11.28, 11.44, 11.620000000000001, 11.7 };
+    for (int p = 0; p < htk_phones.length; p++) {      
+      assertEquals("DISC phone label " + p, labels[p], htk_phones[p].getLabel());
+      assertEquals("Phone start confidence " + p,
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   htk_phones[p].getStart().getConfidence().intValue());
+      assertEquals("Phone end confidence " + p,
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   htk_phones[p].getEnd().getConfidence().intValue());
+      assertEquals("Phone start " + p, starts[p], htk_phones[p].getStart().getOffset());
+      if (p > 0) {
+        assertEquals("Phone start shared with previous end " + p,
+                     htk_phones[p-1].getEnd(), htk_phones[p].getStart());
+      }
+    } // next phone    
+    assertEquals("Last phone end", Double.valueOf(11.76), htk_phones[5].getEnd().getOffset());
+    assertEquals("word/phone start shared", htk_word.getStart(), htk_phones[0].getStart());
+    assertEquals("word/phone end shared", htk_word.getEnd(), htk_phones[5].getEnd());
+  }   
+
 
   /**
    * Returns a fragment for annotating.

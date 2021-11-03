@@ -13,7 +13,7 @@
       end time of each speech sound within each word, and thus the start/end times of the
       words. </p>
 
-    <form method="POST" action="setTaskParameters">
+    <form method="POST" action="setTaskParameters" id="form">
       <div class="field" title="Input layer from which words come">
         <label for="orthographyLayerId"> Orthography Layer </label>
         <span><select id="orthographyLayerId" name="orthographyLayerId" required></select></span>
@@ -84,19 +84,19 @@
         <span><input id="ignoreAlignmentStatuses"
                      name="ignoreAlignmentStatuses" type="checkbox"></span>
       </div>
-      <!--TODO div class="field" title="Output layer on which word alignments are saved">
+      <div class="field" title="Output layer on which word alignments are saved">
         <label for="wordAlignmentLayerId"> Word Alignment Layer </label>
         <span>
           <select id="wordAlignmentLayerId" name="wordAlignmentLayerId" required>
-            <!--option>[add new layer]</option-->         <!-- allow adding a new layer -->
-          <!--/select>
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
         </span>
-      </div-->
+      </div>
       <div class="field" title="Output layer on which phone alignments are saved">
         <label for="phoneAlignmentLayerId"> Phone Alignment Layer </label>
         <span>
           <select id="phoneAlignmentLayerId" name="phoneAlignmentLayerId" required>
-            <!--option>[add new layer]</option-->         <!-- allow adding a new layer -->
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
           </select>
         </span>
       </div>
@@ -114,7 +114,7 @@
         <span>
           <select id="utteranceTagLayerId" name="utteranceTagLayerId">
             <option value="">[none]</option>
-            <!--option>[add new layer]</option-->         <!-- allow adding a new layer -->
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
           </select>
         </span>
       </div>

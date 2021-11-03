@@ -6,6 +6,7 @@ getVersion(version => {
 });
 
 const taskId = window.location.search.substring(1);
+let existingPhoneLayerId = null;
 
 // first, get the layer schema
 let schema = null;
@@ -62,35 +63,42 @@ getSchema(s => {
               
     // populate output layer select options
 
-    //TODO const wordAlignmentLayerId = document.getElementById("wordAlignmentLayerId");
-    // addLayerOptions(
-    //     wordAlignmentLayerId, schema,
-    //     // word layer, or aligned turn children (TODO)
-    //     layer => layer.id == schema.wordLayerId/*
-    //         || (layer.parentId == schema.turnLayerId && layer.alignment == 2)*/);
-    // // default value:
-    // wordAlignmentLayerId.value = schema.wordLayerId;
+    const wordAlignmentLayerId = document.getElementById("wordAlignmentLayerId");
+    addLayerOptions(
+        wordAlignmentLayerId, schema,
+        // word layer, or aligned turn children
+        layer => layer.id == schema.wordLayerId
+            || (layer.parentId == schema.turnLayerId && layer.alignment == 2
+                && layer.id != schema.utteranceLayerId));
+    // default value:
+    wordAlignmentLayerId.value = schema.wordLayerId;
     
     const phoneAlignmentLayerId = document.getElementById("phoneAlignmentLayerId");
     addLayerOptions(
         phoneAlignmentLayerId, schema,
-        // segment layer or aligned turn children (TODO)
-        layer => layer.id == "segment" || layer.id == "phone"/*
-            || (layer.parentId == schema.turnLayerId && layer.alignment == 2)*/);
+        // segment layer or aligned turn children
+        layer => layer.id == "segment" || layer.id == "phone"
+            || (layer.parentId == schema.turnLayerId && layer.alignment == 2
+                && layer.id != schema.utteranceLayerId
+                && layer.id != schema.wordLayerId));
     // default value:
     if (schema.layers["segment"]) {
         phoneAlignmentLayerId.value = "segment";
+        existingPhoneLayerId = "segment";
     } else if (schema.layers["phone"]) {
         phoneAlignmentLayerId.value = "phone";
+        existingPhoneLayerId = "phone";
     }
     
     const scoreLayerId = document.getElementById("scoreLayerId");
     addLayerOptions(
-        phoneAlignmentLayerId, schema,
-        // segment children, or aligned turn children (TODO)
+        scoreLayerId, schema,
+        // segment children, or aligned turn children
         layer => layer.parentId == "segment"
-            || layer.parentId == "phone"/*
-            || (layer.parentId == schema.turnLayerId && layer.alignment == 2)*/);
+            || layer.parentId == "phone"
+            || (layer.parentId == schema.turnLayerId && layer.alignment == 2
+                && layer.id != schema.utteranceLayerId
+                && layer.id != schema.wordLayerId));
     
     const utteranceTagLayerId = document.getElementById("utteranceTagLayerId");
     addLayerOptions(
@@ -129,9 +137,20 @@ getSchema(s => {
                 // set initial values of properties in the form above
                 // (this assumes bean property names match input id's in the form above)
                 for (const [key, value] of parameters) {
+                    const element = document.getElementById(key)
                     try {
-                        document.getElementById(key).value = value;
+                        element.value = value;
                     } catch (x) {}
+                    if (element.value != value) { // layer that hasn't been created yet
+                        try {
+                            // add the layer to the list
+                            var layerOption = document.createElement("option");
+                            layerOption.appendChild(document.createTextNode(value));
+                            element.appendChild(layerOption);
+                            // select it
+                            element.selectedIndex = element.children.length - 1;
+                        } catch (x) {}
+                    }
                 }
                 // set the checkboxes
                 document.getElementById("ignoreAlignmentStatuses").checked
@@ -192,11 +211,15 @@ function changedLayer(select, defaultNewLayerName) {
 }
 
 // add event handlers
-//TODO document.getElementById("wordAlignmentLayerId").onchange = function(e) { changedLayer(this, taskId + "_word"); };
-//TODO document.getElementById("phoneAlignmentLayerId").onchange = function(e) { changedLayer(this, taskId + "_phone"); };
-//TODO document.getElementById("utteranceTagLayerId").onchange = function(e) { changedLayer(this, taskId + "_time"); };
+document.getElementById("wordAlignmentLayerId").onchange = function(e) {
+    changedLayer(this, taskId + "Word"); };
+document.getElementById("phoneAlignmentLayerId").onchange = function(e) {
+    changedLayer(this, taskId + "Phone"); };
+document.getElementById("utteranceTagLayerId").onchange = function(e) {
+    changedLayer(this, taskId + "Time"); };
 //TODO document.getElementById("participantTagLayerId").onchange = function(e) { changedLayer(this, "participant_" + taskId + "_time"); };
-document.getElementById("scoreLayerId").onchange = function(e) { changedLayer(this, "score"); };
+document.getElementById("scoreLayerId").onchange = function(e) {
+    changedLayer(this, taskId+"Score"); };
 
 document.getElementById("useP2FA").onchange = function(e) {
     // if P2FA models are used, 11025Hz must be used
@@ -212,4 +235,44 @@ document.getElementById("useP2FA").onchange = function(e) {
     document.getElementById("mainUtteranceGrouping").disabled
         = document.getElementById("otherUtteranceGrouping").disabled
         = document.getElementById("useP2FA").checked;
+}
+
+document.getElementById("form").onsubmit = function(e) {
+    const wordAlignmentLayerId = document.getElementById("wordAlignmentLayerId");
+    const phoneAlignmentLayerId = document.getElementById("phoneAlignmentLayerId");
+    const scoreLayerId = document.getElementById("scoreLayerId");
+    try {
+        // wordAlignmentLayerId and phoneAlignmentLayerId must be both system layers, or neither
+        if (existingPhoneLayerId
+            && (wordAlignmentLayerId.value == schema.wordLayerId)
+            != (phoneAlignmentLayerId.value == existingPhoneLayerId)) {
+            alert(`For Word/Phone Alignment Layers, either both ${schema.wordLayerId} and ${existingPhoneLayerId} must be selected, or neither.`);
+            wordAlignmentLayerId.focus();
+            return false;
+        }
+        // check relationship between score layer and phoneAlignmentLayerId
+        if (scoreLayerId.value) { // score layer is set
+            const scoreLayer = schema.layers[scoreLayerId.value];
+            const phoneAlignmentLayer = schema.layers[phoneAlignmentLayerId.value];
+            if (scoreLayer && phoneAlignmentLayer) { // layers exist
+                if (phoneAlignmentLayer.parentId == schema.wordLayerId) { // word child
+                    if (scoreLayer.parentId != phoneAlignmentLayer.id) {
+                        alert(`Score Layer must be a ${phoneAlignmentLayer.id} layer`);
+                        scoreLayerId.focus();
+                        return false;
+                    }
+                } else { // turn child
+                    if (scoreLayer.parentId != schema.turnLayerId) {
+                        alert("Score Layer must be a phrase layer");
+                        scoreLayerId.focus();
+                        return false;
+                    }
+                }
+            } // layers exist
+        } // score layer is set
+        return false;
+    } catch (x) {
+        alert(x);
+        return false;
+    }
 }
