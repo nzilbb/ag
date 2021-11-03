@@ -16,6 +16,7 @@ Modules that perform automatic annotation tasks on annotation graphs.
 2. In *myannotator/pom.xml*:
    - prefix the *artifactId* and *name* with "nzilbb.annotator."
    - change *version* to "0.1.0" - i.e. use semantic versioning.
+   - add a *description* tag describing what the annotator does.
    - remove the *url* tag (so it can be inherited from the master pom.xml)
    - add the following *properties*
    ```
@@ -50,6 +51,7 @@ Modules that perform automatic annotation tasks on annotation graphs.
               <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
             </manifestEntries>
           </archive>
+          <outputDirectory>../../bin</outputDirectory>
         </configuration>
       </plugin>
     </plugins>
