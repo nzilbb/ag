@@ -296,8 +296,9 @@ public class AnnotatorWebApp extends StandAloneWebApp {
 
       // give the annotator the resources it needs...
       
-      annotator.setSchema( // TODO make this configurable?
-         new Schema(
+      if (annotator.getSchema() == null) { // the annotator hasn't suggested an ideal schema
+        annotator.setSchema(
+          new Schema(
             "who", "turn", "utterance", "word",
             new Layer("transcript_language", "Overall Language")
             .setAlignment(Constants.ALIGNMENT_NONE)
@@ -316,6 +317,7 @@ public class AnnotatorWebApp extends StandAloneWebApp {
             new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
             .setPeers(true).setPeersOverlap(false).setSaturated(false)
             .setParentId("turn").setParentIncludes(true)));
+      } // set schema
       
       if (annotator.getClass().isAnnotationPresent(UsesFileSystem.class)) {
          File annotatorDir = new File(workingDir, annotator.getAnnotatorId());
