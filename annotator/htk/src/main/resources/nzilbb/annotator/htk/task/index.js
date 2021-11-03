@@ -270,7 +270,7 @@ document.getElementById("form").onsubmit = function(e) {
                 }
             } // layers exist
         } // score layer is set
-        return false;
+        return true;
     } catch (x) {
         alert(x);
         return false;

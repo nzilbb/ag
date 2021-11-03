@@ -852,7 +852,8 @@ public class HTKAligner extends Annotator {
           new Layer(utteranceTagLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
           .setPeers(true).setPeersOverlap(false)
-          .setParentId(schema.getTurnLayerId()));
+          .setParentId(schema.getTurnLayerId())
+          .setDescription("HTK alignment time."));
       } else if (utteranceTagLayerId.equals(orthographyLayerId)
                  || utteranceTagLayerId.equals(pronunciationLayerId)
                  || utteranceTagLayerId.equals(noiseLayerId)
@@ -875,7 +876,8 @@ public class HTKAligner extends Annotator {
           new Layer(participantTagLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
           .setPeers(true).setPeersOverlap(false)
-          .setParentId(schema.getTurnLayerId()));
+          .setParentId(schema.getTurnLayerId())
+          .setDescription("HTK participant alignment time."));
       } else if (participantTagLayerId.equals(orthographyLayerId)
                  || participantTagLayerId.equals(pronunciationLayerId)
                  || participantTagLayerId.equals(noiseLayerId)
@@ -897,7 +899,8 @@ public class HTKAligner extends Annotator {
       wordAlignmentLayer = new Layer(wordAlignmentLayerId)
         .setAlignment(Constants.ALIGNMENT_INTERVAL)
         .setPeers(true).setPeersOverlap(false).setSaturated(false)
-        .setParentId(schema.getTurnLayerId());
+        .setParentId(schema.getTurnLayerId())
+        .setDescription("HTK word alignments.");
       schema.addLayer(wordAlignmentLayer);
     } else if (wordAlignmentLayerId.equals(pronunciationLayerId)
                || wordAlignmentLayerId.equals(noiseLayerId)
@@ -916,7 +919,8 @@ public class HTKAligner extends Annotator {
       phoneAlignmentLayer = new Layer(phoneAlignmentLayerId)
         .setAlignment(Constants.ALIGNMENT_INTERVAL)
         .setPeers(true).setPeersOverlap(false).setSaturated(false)
-        .setParentId(schema.getTurnLayerId());
+        .setParentId(schema.getTurnLayerId())
+          .setDescription("HTK phone alignments.");
       schema.addLayer(phoneAlignmentLayer);
     } else if (phoneAlignmentLayerId.equals(wordAlignmentLayerId)
                || phoneAlignmentLayerId.equals(pronunciationLayerId)
@@ -967,14 +971,16 @@ public class HTKAligner extends Annotator {
             new Layer(scoreLayerId)
             .setAlignment(Constants.ALIGNMENT_NONE)
             .setPeers(false).setSaturated(true)
-            .setParentId(phoneAlignmentLayer.getId()));
+            .setParentId(phoneAlignmentLayer.getId())
+            .setDescription("HTK phone confidence scores."));
         } else {
           // 'phrase' layer - i.e. aligned child of turn
           schema.addLayer(
             new Layer(scoreLayerId)
             .setAlignment(Constants.ALIGNMENT_INTERVAL)
             .setPeers(true).setSaturated(false)
-            .setParentId(schema.getTurnLayerId()));
+            .setParentId(schema.getTurnLayerId())
+            .setDescription("HTK phone confidence scores."));
         }
       } else if (scoreLayerId.equals(orthographyLayerId)
                  || scoreLayerId.equals(pronunciationLayerId)
