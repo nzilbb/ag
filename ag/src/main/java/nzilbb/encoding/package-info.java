@@ -1,5 +1,5 @@
 /**
- * Handing for translation between different phoneme encodings.
+ * Handling for translation between different phoneme encodings.
  *
  * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * <p> Phonemic and phonetic transcriptions may be expressed using a number of systems,
