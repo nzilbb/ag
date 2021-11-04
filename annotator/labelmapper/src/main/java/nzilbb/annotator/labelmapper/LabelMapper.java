@@ -46,7 +46,10 @@ public class LabelMapper extends Annotator {
 
   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
   public String getMinimumApiVersion() { return "1.0.5"; }
-
+  
+  /** Layer ID for the layer to chunk labels and tokens. */
+  protected String scopeLayerId;
+  
   /**
    * Layer ID for the source of labels.
    * @see #getLabelLayerId()
@@ -63,7 +66,36 @@ public class LabelMapper extends Annotator {
    * @param newLabelLayerId Layer ID for the source of labels.
    */
   public LabelMapper setLabelLayerId(String newLabelLayerId) { labelLayerId = newLabelLayerId; return this; }
-
+  
+  /**
+   * Whether/how to split labels of annotations on the label layer. Valid values are:
+   * <dl>
+   *  <dt>""</dt>      <dd> Use all annotations in the scope, and do not split their labels. 
+   *                        (e.g. phone alignments to other phone alignments) </dd>
+   *  <dt>"char"</dt>  <dd> Use the first annotation in the scope, split its label into
+   *                        characters, and map each to labels on the token layer. 
+   *                        (e.g. DISC word transcriptions to phones) </dd> 
+   *  <dt>"space"</dt> <dd> Use the first annotation in the scope, split its label on
+   *                        spaces, and map each to labels on the token layer. 
+   *                        (e.g. ARPAbet word transcriptions to phones) </dd>  
+   * </dl>
+   * @see #getSplitLabels()
+   * @see #setSplitLabels(String)
+   */
+  protected String splitLabels = "";
+  /**
+   * Getter for {@link #splitLabels}: Whether/how to split labels of annotations on the
+   * label layer. 
+   * @return Whether/how to split labels of annotations on the label layer.
+   */
+  public String getSplitLabels() { return splitLabels; }
+  /**
+   * Setter for {@link #splitLabels}: Whether/how to split labels of annotations on the
+   * label layer. 
+   * @param newSplitLabels Whether/how to split labels of annotations on the label layer.
+   */
+  public LabelMapper setSplitLabels(String newSplitLabels) { splitLabels = newSplitLabels; return this; }
+  
   /**
    * Layer ID for the output layer.
    * @see #getMappingLayerId()
@@ -152,6 +184,12 @@ public class LabelMapper extends Annotator {
       throw new InvalidConfigurationException(this, "Invalid token layer: " + tokenLayerId);
     if (comparator == null || comparator.length() == 0)
       throw new InvalidConfigurationException(this, "Comparator not set.");
+    if (splitLabels == null)
+      throw new InvalidConfigurationException(this, "Split Labels setting not set.");
+    if (splitLabels.length() > 0 && !splitLabels.equals("char") && !splitLabels.equals("space"))
+      throw new InvalidConfigurationException(
+        this, "Invalid value for Split Labels: \"" + splitLabels
+        + "\" - must be \"\", \"char\", or \"space\"");
     if (mappingLayerId == null || mappingLayerId.length() == 0)
       throw new InvalidConfigurationException(this, "No mapping layer set.");
     // layers must all be distinct
@@ -263,84 +301,93 @@ public class LabelMapper extends Annotator {
       throw new InvalidConfigurationException(
         this, "Invalid output mapping layer: " + mappingLayerId);
     }
+
+    // create a comparator for the mapping
+    EditComparator<LabelElement> comparator = null;
+    if (getComparator().equals("DISCToDISC")) {
+      comparator = new DISC2DISCComparator<LabelElement>();
+    } else if (getComparator().equals("OrthographyToDISC")) {
+      comparator = new Orthography2DISCComparator<LabelElement>();
+    } else if (getComparator().equals("OrthographyToArpabet")) {
+      comparator = new Orthography2ARPAbetComparator<LabelElement>();
+    } else {
+      comparator = new Char2CharComparator<LabelElement>();
+    }
+    MinimumEditPath<LabelElement> mp = new MinimumEditPath<LabelElement>(comparator);
+
+    if (tokenLayer.getParentId().equals(schema.getWordLayerId())) {
+      scopeLayerId = schema.getWordLayerId();
+    } else {
+      scopeLayerId = schema.getUtteranceLayerId();
+    }
     
-    if (tokenLayer.getParentId().equals(labelLayer.getParentId())) { // map from same-scope layer TODO
-      throw new TransformationException(this, "Same-scope mapping is not yet implemented.");
-    } else { // map from parent-scope layer
-      // create a comparator for the mapping
-      EditComparator<LabelElement> comparator = null;
-      if (getComparator().equals("DISCToDISC")) {
-        comparator = new DISC2DISCComparator<LabelElement>();
-      } else if (getComparator().equals("OrthographyToDISC")) {
-        comparator = new Orthography2DISCComparator<LabelElement>();
-      } else if (getComparator().equals("OrthographyToArpabet")) {
-        comparator = new Orthography2ARPAbetComparator<LabelElement>();
-      } else {
-        comparator = new Char2CharComparator<LabelElement>();
-      }
-      MinimumEditPath<LabelElement> mp = new MinimumEditPath<LabelElement>(comparator);
-
-      // for each word
-      for (Annotation word : graph.list(schema.getWordLayerId())) { // TODO chunk layer
-        // create source element list
-        Annotation[] tokens = word.all(tokenLayerId);
-        if (tokens.length == 0) continue;
-        Vector<LabelElement> vTokens = new Vector<LabelElement>();
-        for (Annotation s : tokens) vTokens.add(new LabelElement(s));
-	    
-        // create destination element list
-        Annotation labels = word.first(labelLayerId);
-        if (labels == null) continue;
-        Vector<LabelElement> vLabels = new Vector<LabelElement>();
-        for (char c : labels.getLabel().toCharArray()) vLabels.add(new LabelElement(c));
-        
-        // setStatus("word: " + word.getLabel() + " - " + labels.getLabel());
-        
-        // find the minimum path between them
-        List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
-        
-        // create tags on the source layer from the path
-        Annotation lastTag = null;
-        String initialInserts = "";
-        for (EditStep<LabelElement> step : path) {
-          switch(step.getOperation()) {
-            case NONE:
-              lastTag = step.getTo().source.createTag(
-                mappingLayerId, step.getFrom().label);
-              if (initialInserts.length() > 0) { // prepend inserts we had already found
-                lastTag.setLabel(initialInserts + lastTag.getLabel());
-                initialInserts = "";
-              }
-              break;
-            case CHANGE:
-              lastTag = step.getTo().source.createTag(
-                mappingLayerId, step.getFrom().label);
-              if (initialInserts.length() > 0) { // prepend inserts we had already found
-                lastTag.setLabel(initialInserts + lastTag.getLabel());
-                initialInserts = "";
-              }
-              break;
-            case DELETE:
-              // append to the previous one
-              if (lastTag != null) {
-                lastTag.setLabel(lastTag.getLabel() + step.getFrom().label);
-              } else { // remember the label until we can prepend it to something
-                initialInserts += step.getFrom().label;
-              }
-              break;
-              // do nothing
-            case INSERT:
-              break;
-          }
-        } // next step
-        // for (Annotation s : tokens)
-        // {
-        //    setStatus(s.getLabel() + ":" + s.my(DestinationLayerId));
-        // }
-      } // next word
+    // for each scope annotator
+    for (Annotation scope : graph.list(scopeLayerId)) {
+      // create source element list
+      Annotation[] tokens = scope.all(tokenLayerId);
+      if (tokens.length == 0) continue;
+      Vector<LabelElement> vTokens = new Vector<LabelElement>();
+      for (Annotation s : tokens) vTokens.add(new LabelElement(s));
       
-    } // map from parent-scope layer      
-
+      // create destination element list
+      Vector<LabelElement> vLabels = new Vector<LabelElement>();
+      if (splitLabels.length() > 0) { // split the label of the first annotation
+        Annotation labels = scope.first(labelLayerId);
+        if (labels == null) continue;
+        if (splitLabels.equals("char")) { // split label into characters (e.g. DISC transcription)
+          for (char c : labels.getLabel().toCharArray()) vLabels.add(new LabelElement(c));
+        } else { // split label on spaces (e.g. ARPAbet transcription)
+          for (String p : labels.getLabel().split(" ")) vLabels.add(new LabelElement(p));
+        }
+      } else { // use full labels of all annotations
+        Annotation[] labels = scope.all(labelLayerId);
+        if (labels.length == 0) continue;
+        for (Annotation l : labels) vLabels.add(new LabelElement(l));
+      }
+      
+      // find the minimum path between them
+      List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
+      // collapse INSERT-then-DELETE into just CHANGE
+      path = mp.collapse(path);
+        
+      // create tags on the source layer from the path
+      Annotation lastTag = null;
+      String initialInserts = "";
+      for (EditStep<LabelElement> step : path) {
+        switch(step.getOperation()) {
+          case NONE:
+            lastTag = step.getTo().source.createTag(
+              mappingLayerId, step.getFrom().label);
+            lastTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+            if (initialInserts.length() > 0) { // prepend inserts we had already found
+              lastTag.setLabel(initialInserts + lastTag.getLabel());
+              initialInserts = "";
+            }
+            break;
+          case CHANGE:
+            lastTag = step.getTo().source.createTag(
+              mappingLayerId, step.getFrom().label);
+            lastTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+            if (initialInserts.length() > 0) { // prepend inserts we had already found
+              lastTag.setLabel(initialInserts + lastTag.getLabel());
+              initialInserts = "";
+            }
+            break;
+          case DELETE:
+            // append to the previous one
+            if (lastTag != null) {
+              lastTag.setLabel(lastTag.getLabel() + step.getFrom().label);
+            } else { // remember the label until we can prepend it to something
+              initialInserts += step.getFrom().label;
+            }
+            break;
+          case INSERT:
+            // do nothing
+            break;
+        }
+      } // next step
+    } // next scope annotation
+      
     setRunning(false);
     return graph;
   }   

@@ -41,6 +41,14 @@ getSchema(s => {
             for (const [key, value] of parameters) {
                 document.getElementById(key).value = value;
             }
+
+            // set splitLabels value
+            console.log(`splitLabels: "${parameters.splitLabels}"`);
+            try {
+                document.getElementById("splitLabels-"+parameters.splitLabels).checked = true;
+            } catch( x) {
+                console.log(`Invalid splitLabels value: "${parameters.splitLabels}"`);
+            }
             
             setComparatorExamples(document.getElementById("comparator"));
         } finally {

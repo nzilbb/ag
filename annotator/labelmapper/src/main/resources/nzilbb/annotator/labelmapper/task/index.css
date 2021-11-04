@@ -41,6 +41,12 @@ label {
 label:after {
     content: ':';
 }
+span > label {
+    display: block;
+}
+span > label:after {
+    content: '';
+}
 .field {
     display: flex;
     flex-direction: row;

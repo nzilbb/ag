@@ -53,6 +53,7 @@ import nzilbb.util.IO;
 
 public class TestLabelMapper {
 
+  /** LabelMapper does not support default parameters. */
   @Test public void defaultParameters() throws Exception {
     LabelMapper annotator = new LabelMapper();
     
@@ -67,6 +68,7 @@ public class TestLabelMapper {
     }
   }   
   
+  /** Valid parameters are accepted. */
   @Test public void setValidParameters() throws Exception {
     LabelMapper annotator = new LabelMapper();
     
@@ -77,6 +79,7 @@ public class TestLabelMapper {
     // layers are created as required
     annotator.setTaskParameters(
       "labelLayerId=orthography"
+      +"&splitLabels=char"
       +"&tokenLayerId=phone"
       +"&comparator=OrthographyToDISC"
       +"&mappingLayerId=disc"); // nonexistent
@@ -84,6 +87,7 @@ public class TestLabelMapper {
     assertNotNull("disc layer created", layer);
   }   
   
+  /** Invalid parameters are rejected. */
   @Test public void setInvalidTaskParameters() throws Exception {
     LabelMapper annotator = new LabelMapper();
     
@@ -94,6 +98,7 @@ public class TestLabelMapper {
     try {
       annotator.setTaskParameters(
         "labelLayerId=nonexistent"
+        +"&splitLabels=char"
         +"&tokenLayerId=phone"
         +"&comparator=OrthographyToDISC"
         +"&mappingLayerId=disc"); // nonexistent
@@ -103,6 +108,7 @@ public class TestLabelMapper {
     try {
       annotator.setTaskParameters(
         "labelLayerId=orthography"
+        +"&splitLabels=char"
         +"&tokenLayerId=nonexistent"
         +"&comparator=OrthographyToDISC"
         +"&mappingLayerId=disc"); // nonexistent
@@ -112,14 +118,103 @@ public class TestLabelMapper {
     try {
       annotator.setTaskParameters(
         "labelLayerId=orthography"
+        +"&splitLabels=char"
         +"&tokenLayerId=phone"
-        +"&comparator="
-        +"&mappingLayerId=disc"); // nonexistent
+        +"&comparator=" // no comparator
+        +"&mappingLayerId=disc");
+      fail("Should fail with no comparator");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "labelLayerId=orthography"
+        +"&splitLabels=invalid-value"
+        +"&tokenLayerId=phone"
+        +"&comparator=OrthographyToDISC"
+        +"&mappingLayerId=disc");
       fail("Should fail with no comparator");
     } catch (InvalidConfigurationException x) {
     }
   }
   
+  /** Test mapping of phoneme word labels to phones. */
+  @Test public void DISCToDISC() throws Exception {
+    LabelMapper annotator = new LabelMapper();
+    // annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "labelLayerId=phonemes"
+      +"&splitLabels=char"
+      +"&tokenLayerId=phone"
+      +"&comparator=DISCToDISC"
+      +"&mappingLayerId=disc"); // nonexistent
+    Layer layer = annotator.getSchema().getLayer("disc");
+    assertNotNull("disc layer created", layer);
+    assertEquals("disc layer correct type", Constants.TYPE_IPA, layer.getType());
+
+    g.trackChanges();
+    annotator.transform(g);
+    
+    Annotation[] phones = g.all("phone");
+    assertEquals("Right number of phones " + Arrays.asList(phones), 15, phones.length);
+    String[] phoneLabels = { "@", "d","I","f","@", "r","H", "t",  "f","2","@","f","2","t","@" };
+    String[] discLabels = {  "1", "d","I","f",null,"r@","n","t",  "f","2","r","f","2","L","@r" };
+    for (int p = 0; p < phones.length; p++) {
+      assertEquals("Phone label " + p, phoneLabels[p], phones[p].getLabel());
+      if (discLabels[p] != null) {
+        assertNotNull("Tagged " + p, phones[p].first("disc"));
+        assertEquals("Tag label " + p, discLabels[p], phones[p].first("disc").getLabel());
+        assertEquals("Tag confidence " + p,
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].first("disc").getConfidence().intValue());
+      } else {
+        assertNull("No tag " + p, phones[p].first("disc"));
+      }
+    }
+  }   
+
+  /** Test mapping of orthography to phones. */
+  @Test public void OrthographyToDISC() throws Exception {
+    LabelMapper annotator = new LabelMapper();
+    annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "labelLayerId=orthography"
+      +"&splitLabels=char"
+      +"&tokenLayerId=phone"
+      +"&comparator=OrthographyToDISC"
+      +"&mappingLayerId=letter"); // nonexistent
+    Layer layer = annotator.getSchema().getLayer("letter");
+    assertNotNull("letter layer created", layer);
+    assertEquals("letter layer correct type", Constants.TYPE_STRING, layer.getType());
+
+    g.trackChanges();
+    annotator.transform(g);
+    
+    Annotation[] phones = g.all("phone");
+    assertEquals("Right number of phones " + Arrays.asList(phones), 15, phones.length);
+    String[] phoneLabels = { "@", "d","I","f", "@","r","H", "t", "f","2", "@","f","2",  "t","@" };
+    String[] letterLabels = {"a", "d","i","ff","e","re","n","t", "f","ir","e","f","igh","t","er"};
+    for (int p = 0; p < phones.length; p++) {
+      assertEquals("Phone label " + p, phoneLabels[p], phones[p].getLabel());
+      assertNotNull("Tagged " + p, phones[p].first("letter"));
+      assertEquals("Tag label " + p, letterLabels[p], phones[p].first("letter").getLabel());
+      assertEquals("Tag confidence " + p,
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   phones[p].first("letter").getConfidence().intValue());
+    }
+  }   
+
   /**
    * Returns a graph for annotating.
    * @return The graph for testing with.
@@ -147,9 +242,14 @@ public class TestLabelMapper {
          new Layer("orthography", "Orthography").setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(false).setPeersOverlap(false).setSaturated(true)
          .setParentId("word").setParentIncludes(true),
+         new Layer("phonemes", "Phonemic transcription").setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("word").setParentIncludes(true)
+         .setType(Constants.TYPE_IPA),
          new Layer("phone", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true).setPeersOverlap(false).setSaturated(true)
-         .setParentId("word").setParentIncludes(true));
+         .setParentId("word").setParentIncludes(true)
+         .setType(Constants.TYPE_IPA));
       // annotate a graph
       Graph g = new Graph()
         .setSchema(schema);
@@ -166,36 +266,87 @@ public class TestLabelMapper {
          new Annotation().setLayerId("utterance").setLabel("someone")
          .setStart(start).setEnd(end)
          .setParent(turn));
-      
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("I")
-                           .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
-                           .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("sang")
-                      .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("and")
-                      .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("w~")
-                      .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(45))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("walked")
-                      .setStart(g.getOrCreateAnchorAt(45)).setEnd(g.getOrCreateAnchorAt(50))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("about")
-                      .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(60))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("my")
-                      .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(70))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("blogging-posting")
-                      .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(80))
-                      .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("word").setLabel("lazily")
-                      .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
-                      .setParent(turn));
 
-      // TODO add phones
+      // words
+      
+      Annotation a = new Annotation().setLayerId("word").setLabel("A")
+        .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20)).setParent(turn);
+      g.addAnnotation(a);
+      Annotation different = new Annotation().setLayerId("word").setLabel("different")
+        .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30)).setParent(turn);
+      g.addAnnotation(different);
+      Annotation firefighter = new Annotation().setLayerId("word").setLabel("firefighter!")
+        .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40)).setParent(turn);
+      g.addAnnotation(firefighter);
+
+      // orthography
+      
+      g.addAnnotation(new Annotation().setLayerId("orthography").setLabel("a")
+                      .setParent(a));
+      g.addAnnotation(new Annotation().setLayerId("orthography").setLabel("different")
+                      .setParent(different));
+      g.addAnnotation(new Annotation().setLayerId("orthography").setLabel("firefighter")
+                      .setParent(firefighter));
+
+      // phonemes
+      
+      g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("1")
+                      .setParent(a));
+      g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("dIfr@nt")
+                      .setParent(different));
+      g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("f2rf2L@r")
+                      .setParent(firefighter));
+
+      // phones
+      
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("@")
+                      .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
+                      .setParent(a));
+
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("d")
+                      .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(21))
+                      .setParent(different));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("I")
+                      .setStart(g.getOrCreateAnchorAt(21)).setEnd(g.getOrCreateAnchorAt(22))
+                      .setParent(different));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("f")
+                      .setStart(g.getOrCreateAnchorAt(22)).setEnd(g.getOrCreateAnchorAt(24))
+                      .setParent(different));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("@")
+                      .setStart(g.getOrCreateAnchorAt(24)).setEnd(g.getOrCreateAnchorAt(26))
+                      .setParent(different));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("r")
+                      .setStart(g.getOrCreateAnchorAt(26)).setEnd(g.getOrCreateAnchorAt(27))
+                      .setParent(different));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("H")
+                      .setStart(g.getOrCreateAnchorAt(28)).setEnd(g.getOrCreateAnchorAt(29))
+                      .setParent(different));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("t")
+                      .setStart(g.getOrCreateAnchorAt(29)).setEnd(g.getOrCreateAnchorAt(30))
+                      .setParent(different));
+
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("f")
+                      .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(31))
+                      .setParent(firefighter));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("2")
+                      .setStart(g.getOrCreateAnchorAt(31)).setEnd(g.getOrCreateAnchorAt(33))
+                      .setParent(firefighter));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("@")
+                      .setStart(g.getOrCreateAnchorAt(33)).setEnd(g.getOrCreateAnchorAt(35))
+                      .setParent(firefighter));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("f")
+                      .setStart(g.getOrCreateAnchorAt(35)).setEnd(g.getOrCreateAnchorAt(37))
+                      .setParent(firefighter));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("2")
+                      .setStart(g.getOrCreateAnchorAt(37)).setEnd(g.getOrCreateAnchorAt(38))
+                      .setParent(firefighter));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("t")
+                      .setStart(g.getOrCreateAnchorAt(38)).setEnd(g.getOrCreateAnchorAt(39))
+                      .setParent(firefighter));
+      g.addAnnotation(new Annotation().setLayerId("phone").setLabel("@")
+                      .setStart(g.getOrCreateAnchorAt(39)).setEnd(g.getOrCreateAnchorAt(40))
+                      .setParent(firefighter));
+      
       return g;
   } // end of graph()
 
