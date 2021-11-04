@@ -171,18 +171,18 @@
         <span>
           <label title="Use the first annotation in the scope, split its label into characters, and map each to labels on the token layer.
 (e.g. DISC word transcriptions to phones)">
-            <input type="radio" id="splitLabels-char" name="splitLabels" checked> Split First Label into Characters </label>
+            <input type="radio" id="splitLabels-char" name="splitLabels" value="char" checked> Split First Label into Characters </label>
           <!--TODO when there's a ARPAet2DISC comparator label title="Use the first annotation in the scope, split its label on spaces, and map each to labels on the token layer.
 (e.g. ARPAbet word transcriptions to phones)">
-            <input type="radio" id="splitLabels-space" name="splitLabels"> Split First Label on Spaces </label-->
+            <input type="radio" id="splitLabels-space" name="splitLabels" value="space"> Split First Label on Spaces </label-->
           <!-- TODO when phrase layers are supported label title="Use all annotations in the scope, and do not split their labels.
 (e.g. phone alignments to other phone alignments)">
-            <input type="radio" id="splitLabels-" name="splitLabels"> Don't Split Labels </label-->
+            <input type="radio" id="splitLabels-" name="splitLabels" value="char"> Don't Split Labels </label-->
         </span>
         <span id="exampleSplitLayers"></span>
       </div>
       <div class="field" title="Output layer mapping the Label layer to the Token layer">
-        <label for="mappingLayerId"> Mapping Layer </label>
+        <label for="mappingLayerId"> Output Mapping Layer </label>
         <span>
           <select id="mappingLayerId" name="mappingLayerId">
             <option disabled value="">[select layer]</option> <!-- force choice the first time -->

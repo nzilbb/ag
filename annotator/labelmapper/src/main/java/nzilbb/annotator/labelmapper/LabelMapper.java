@@ -320,9 +320,14 @@ public class LabelMapper extends Annotator {
     } else {
       scopeLayerId = schema.getUtteranceLayerId();
     }
+
+    // delete any existing annotations
+    for (Annotation a : graph.all(mappingLayerId)) a.destroy();
     
     // for each scope annotator
     for (Annotation scope : graph.list(scopeLayerId)) {
+      if (isCancelling()) break;
+      
       // create source element list
       Annotation[] tokens = scope.all(tokenLayerId);
       if (tokens.length == 0) continue;

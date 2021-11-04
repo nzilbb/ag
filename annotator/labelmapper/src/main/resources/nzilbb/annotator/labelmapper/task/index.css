@@ -43,6 +43,7 @@ label:after {
 }
 span > label {
     display: block;
+    white-space: nowrap;
 }
 span > label:after {
     content: '';

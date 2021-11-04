@@ -21,8 +21,11 @@ getSchema(s => {
     labelLayerId.selectedIndex = 0; // force selection
     addLayerOptions(
         mappingLayerId, schema,
-        // this is a function that takes a layer and returns true for the ones we want
-        layer => layer.id == schema.wordLayerId || layer.parentId == schema.wordLayerId);
+        // word layers
+        layer => layer.id == schema.wordLayerId || layer.parentId == schema.wordLayerId
+        // or segment layers
+            || (schema.layers[layer.parentId]
+                && schema.layers[layer.parentId].parentId == schema.wordLayerId));
     mappingLayerId.selectedIndex = 0; // force selection
     var tokenLayerId = document.getElementById("tokenLayerId");
     addLayerOptions(
@@ -39,16 +42,18 @@ getSchema(s => {
             // set initial values of properties in the form above
             // (this assumes bean property names match input id's in the form above)
             for (const [key, value] of parameters) {
-                document.getElementById(key).value = value;
+                try {
+                    document.getElementById(key).value = value;
+                } catch(x) {
+                }
             }
 
-            // set splitLabels value
-            console.log(`splitLabels: "${parameters.splitLabels}"`);
-            try {
-                document.getElementById("splitLabels-"+parameters.splitLabels).checked = true;
-            } catch( x) {
-                console.log(`Invalid splitLabels value: "${parameters.splitLabels}"`);
-            }
+            // // set splitLabels value
+            // try {
+            //     document.getElementById("splitLabels-"+parameters.splitLabels).checked = true;
+            // } catch( x) {
+            //     console.log(`Invalid splitLabels value: "${parameters.splitLabels}"`);
+            // }
             
             setComparatorExamples(document.getElementById("comparator"));
         } finally {

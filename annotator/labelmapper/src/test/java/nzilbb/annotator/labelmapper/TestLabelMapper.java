@@ -157,8 +157,14 @@ public class TestLabelMapper {
     assertNotNull("disc layer created", layer);
     assertEquals("disc layer correct type", Constants.TYPE_IPA, layer.getType());
 
+    // create a 'pre-existing' tag to ensure it's deleted or changed
+    layer.setPeers(true); // fool the API into allowing more than one tag
+    g.all("phone")[0].createTag("disc", "to-delete");
+    g.commit();
+
     g.trackChanges();
     annotator.transform(g);
+    g.commit(); // remove destroyed annotations
     
     Annotation[] phones = g.all("phone");
     assertEquals("Right number of phones " + Arrays.asList(phones), 15, phones.length);
@@ -166,16 +172,20 @@ public class TestLabelMapper {
     String[] discLabels = {  "1", "d","I","f",null,"r@","n","t",  "f","2","r","f","2","L","@r" };
     for (int p = 0; p < phones.length; p++) {
       assertEquals("Phone label " + p, phoneLabels[p], phones[p].getLabel());
+      Annotation[] tags = phones[p].all("disc");
       if (discLabels[p] != null) {
+        assertEquals("One tag " + p + " " + Arrays.asList(tags), 1, tags.length);
         assertNotNull("Tagged " + p, phones[p].first("disc"));
         assertEquals("Tag label " + p, discLabels[p], phones[p].first("disc").getLabel());
         assertEquals("Tag confidence " + p,
                      Constants.CONFIDENCE_AUTOMATIC,
                      phones[p].first("disc").getConfidence().intValue());
       } else {
-        assertNull("No tag " + p, phones[p].first("disc"));
+        assertEquals("No tag " + p, 0, tags.length);
       }
     }
+    assertEquals("Right number of tags " + Arrays.asList(g.all("disc")),
+                 14, g.all("disc").length);
   }   
 
   /** Test mapping of orthography to phones. */
@@ -345,7 +355,7 @@ public class TestLabelMapper {
                       .setParent(firefighter));
       g.addAnnotation(new Annotation().setLayerId("phone").setLabel("@")
                       .setStart(g.getOrCreateAnchorAt(39)).setEnd(g.getOrCreateAnchorAt(40))
-                      .setParent(firefighter));
+                       .setParent(firefighter));
       
       return g;
   } // end of graph()
