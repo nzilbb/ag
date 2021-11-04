@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.labelmapper</artifactId>
   <name>nzilbb.annotator.labelmapper</name>
-  <version>0.6.0</version>
+  <version>1.0.0</version>
   <description>Maps annotations on pairs of layers by finding the minimum edit path between them.</description>
 
   <properties>
