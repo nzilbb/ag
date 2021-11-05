@@ -24,13 +24,15 @@ package nzilbb.encoding.comparator;
 
 import nzilbb.editpath.EditComparator;
 import nzilbb.editpath.EditStep;
+import nzilbb.encoding.ARPAbet2DISC;
 
 /**
- * Comparator that maps an (English) orthography series to a ARPAbet-encoded series.
+ * Comparator that maps a ARPAbet-encoded series to an DISC-encoded series.
  */
-public class Orthography2ARPAbetComparator<E> implements EditComparator<E> {
-  // phone classes
-  String sameLetters = "bdfgklmnprstvwyz";
+public class ARPAbet2DISCComparator<E> implements EditComparator<E> {
+
+  ARPAbet2DISC asDISC = new ARPAbet2DISC();
+  DISC2DISCComparator disc2discComparator = new DISC2DISCComparator<String>();
   
   /**
    * Compares two sequence elements, and evaluates the distance between them.
@@ -54,66 +56,10 @@ public class Orthography2ARPAbetComparator<E> implements EditComparator<E> {
       step.setStepDistance(20);
       step.setOperation(EditStep.StepOperation.CHANGE);
     } else {
-      // One (lowercase) letter at a time
-      char cFrom = from.toString().toLowerCase().charAt(0);
-      // This is ARPABET, so the label could be 1, 2, or 3 characters
-      String sTo = to.toString().toUpperCase();
-      if (!(sTo.length() == 1
-            && sameLetters.indexOf(cFrom) >= 0
-            && cFrom == sTo.toLowerCase().charAt(0))) {
-        // no direct match between orthography and phonology
-        step.setOperation(EditStep.StepOperation.CHANGE);
-        int iDistance = 10;
-        if ( // definite correspondences
-          (cFrom == 'h' && sTo.equals("HH"))) {
-          iDistance = 0;
-        } else if ( // probable consonant correspondences
-          (cFrom == 's' && sTo.equals("SH"))
-          || (cFrom == 's' && sTo.equals("ZH"))
-          || (cFrom == 's' && sTo.equals("Z"))
-          || (cFrom == 't' && sTo.equals("TH"))
-          || (cFrom == 't' && sTo.equals("DH"))
-          || (cFrom == 'j' && sTo.equals("JH"))
-          || (cFrom == 'g' && sTo.equals("JH"))
-          || (cFrom == 'n' && sTo.equals("NG"))
-          || (cFrom == 't' && sTo.equals("DX"))
-          || (cFrom == 'n' && sTo.equals("NX"))
-          || (cFrom == 't' && sTo.equals("TQ"))
-          ) {
-          iDistance = 2;
-        } else if ( // probable vowel correspondences
-          (cFrom == 'a' && (sTo.startsWith("AA")
-                            || sTo.startsWith("AE")
-                            || sTo.startsWith("AH")
-                            || sTo.startsWith("AO")
-                            || sTo.startsWith("EY")))
-          || (cFrom == 'e' && (sTo.startsWith("EH")
-                               || sTo.startsWith("ER")
-                               || sTo.startsWith("IY")))
-          || (cFrom == 'i' && (sTo.startsWith("AY")
-                               || sTo.startsWith("ER")
-                               || sTo.startsWith("IH")
-                               || sTo.startsWith("IY")))
-          || (cFrom == 'o' && (sTo.startsWith("AA")
-                               || sTo.startsWith("AO")
-                               || sTo.startsWith("AW")
-                               || sTo.startsWith("OW")
-                               || sTo.startsWith("OY")
-                               || sTo.startsWith("UH")
-                               || sTo.startsWith("UW")))
-          || (cFrom == 'u' && (sTo.startsWith("AH")
-                               || sTo.startsWith("ER")
-                               || sTo.startsWith("UH")
-                               || sTo.startsWith("UW")))
-          ) {
-          iDistance = 2;
-        } else if ( // vowels
-          ("aeiou".indexOf(cFrom) >= 0 && "aeiou".indexOf(sTo.toLowerCase().charAt(0)) >= 0)
-          ) {
-          iDistance = 8;
-        }
-        step.setStepDistance(iDistance);
-      } // no direct match
+      EditStep<String> discStep = disc2discComparator.compare(
+        asDISC.apply(from.toString()), to.toString());
+      step.setStepDistance(discStep.getStepDistance());
+      step.setOperation(discStep.getOperation());
     } // labels set
     return step;
   }
@@ -140,4 +86,4 @@ public class Orthography2ARPAbetComparator<E> implements EditComparator<E> {
     return new EditStep<E>(null, to, 10, EditStep.StepOperation.INSERT);
   }
   
-} // Orthography2ARPAbetComparator
+} // ARPAbet2DISCComparator
