@@ -14,13 +14,6 @@
     <div id="settings-help">
       <p> The following settings are required: </p>
       
-      <details><summary> Scope Layer </summary>
-        <p> This layer defines the 'scope' of each mapping, i.e. which chunks are selected
-          before trying to map labels to tokens. If the label layer is a word layer and
-          the token layer is a segment layer, then most likely you should select word as
-          the scope. If the label layer is</p>
-      </details>
-      
       <details><summary> Label Layer </summary>
         <p> This layer defines where the resulting annotations' labels come from. If a
           label from this layer cannot be mapped to a token, the label will be appended to a
@@ -175,9 +168,9 @@
           <!--TODO when there's a ARPAet2DISC comparator label title="Use the first annotation in the scope, split its label on spaces, and map each to labels on the token layer.
 (e.g. ARPAbet word transcriptions to phones)">
             <input type="radio" id="splitLabels-space" name="splitLabels" value="space"> Split First Label on Spaces </label-->
-          <!-- TODO when phrase layers are supported label title="Use all annotations in the scope, and do not split their labels.
+          <label title="Use all annotations in the scope, and do not split their labels.
 (e.g. phone alignments to other phone alignments)">
-            <input type="radio" id="splitLabels-" name="splitLabels" value="char"> Don't Split Labels </label-->
+            <input type="radio" id="splitLabels-" name="splitLabels" value="char"> Don't Split Labels </label>
         </span>
         <span id="exampleSplitLayers"></span>
       </div>

@@ -21,9 +21,9 @@
 //
 package nzilbb.annotator.labelmapper;
 
-import java.util.List;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,8 +34,8 @@ import javax.json.JsonValue;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
-import nzilbb.encoding.comparator.*;
 import nzilbb.editpath.*;
+import nzilbb.encoding.comparator.*;
 
 /**
  * This annotator creates a mapping between pairs of layers, by finding the minimum edit
@@ -207,14 +207,24 @@ public class LabelMapper extends Annotator {
     Layer mappingLayer = schema.getLayer(mappingLayerId);
     if (mappingLayer == null) {
       String mappingParentId = tokenLayerId;
-      if (tokenLayer.getAlignment() == Constants.ALIGNMENT_NONE) {
-        // token layer it itself a tag, so we will tag its parent too
-        mappingParentId = tokenLayer.getParentId();
+      int alignment = Constants.ALIGNMENT_NONE;
+      if (tokenLayerId.equals(schema.getWordLayerId())
+          || tokenLayer.isAncestor(schema.getWordLayerId())) { 
+        if (tokenLayer.getAlignment() == Constants.ALIGNMENT_NONE) { // word tag
+          // mapping layer is a word layer
+          mappingParentId = schema.getWordLayerId();
+        }
+        alignment = Constants.ALIGNMENT_NONE; // tag layer
+        // (otherwise, most likely a segment layer)
+      } else if (tokenLayer.isAncestor(schema.getTurnLayerId())) { 
+        // mapping layer is a phrase layer
+        mappingParentId = schema.getTurnLayerId();
+        alignment = Constants.ALIGNMENT_INTERVAL; // another phrase layer
       }
       // tag layer
       schema.addLayer(
         new Layer(mappingLayerId)
-        .setAlignment(Constants.ALIGNMENT_NONE)
+        .setAlignment(alignment)
         .setPeers(false)
         .setParentId(mappingParentId)
         .setType(labelLayer.getType()));
@@ -303,19 +313,22 @@ public class LabelMapper extends Annotator {
     }
 
     // create a comparator for the mapping
-    EditComparator<LabelElement> comparator = null;
+    EditComparator<LabelElement> comparator = new DefaultEditComparator<LabelElement>();
     if (getComparator().equals("DISCToDISC")) {
       comparator = new DISC2DISCComparator<LabelElement>();
     } else if (getComparator().equals("OrthographyToDISC")) {
       comparator = new Orthography2DISCComparator<LabelElement>();
     } else if (getComparator().equals("OrthographyToArpabet")) {
       comparator = new Orthography2ARPAbetComparator<LabelElement>();
-    } else {
+    } else if (splitLabels.equals("char")) { // Char2Char only makes sense if splitting by char
       comparator = new Char2CharComparator<LabelElement>();
-    }
+    } 
     MinimumEditPath<LabelElement> mp = new MinimumEditPath<LabelElement>(comparator);
 
-    if (tokenLayer.getParentId().equals(schema.getWordLayerId())) {
+    if ((tokenLayerId.equals(schema.getWordLayerId())
+         || tokenLayer.isAncestor(schema.getWordLayerId()))
+        && (labelLayerId.equals(schema.getWordLayerId())
+            || labelLayer.isAncestor(schema.getWordLayerId()))) { 
       scopeLayerId = schema.getWordLayerId();
     } else {
       scopeLayerId = schema.getUtteranceLayerId();
@@ -324,13 +337,18 @@ public class LabelMapper extends Annotator {
     // delete any existing annotations
     for (Annotation a : graph.all(mappingLayerId)) a.destroy();
     
+    setStatus("for each " + scopeLayerId + " map " + labelLayerId + " → " + tokenLayerId);
+    boolean initialInsertsDelimiter = !splitLabels.equals("char");
     // for each scope annotator
     for (Annotation scope : graph.list(scopeLayerId)) {
       if (isCancelling()) break;
       
       // create source element list
       Annotation[] tokens = scope.all(tokenLayerId);
-      if (tokens.length == 0) continue;
+      if (tokens.length == 0) {
+        setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + tokenLayerId);
+        continue;
+      }
       Vector<LabelElement> vTokens = new Vector<LabelElement>();
       for (Annotation s : tokens) vTokens.add(new LabelElement(s));
       
@@ -338,7 +356,10 @@ public class LabelMapper extends Annotator {
       Vector<LabelElement> vLabels = new Vector<LabelElement>();
       if (splitLabels.length() > 0) { // split the label of the first annotation
         Annotation labels = scope.first(labelLayerId);
-        if (labels == null) continue;
+        if (labels == null) {
+          setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + labelLayerId);
+          continue;
+        }
         if (splitLabels.equals("char")) { // split label into characters (e.g. DISC transcription)
           for (char c : labels.getLabel().toCharArray()) vLabels.add(new LabelElement(c));
         } else { // split label on spaces (e.g. ARPAbet transcription)
@@ -346,7 +367,10 @@ public class LabelMapper extends Annotator {
         }
       } else { // use full labels of all annotations
         Annotation[] labels = scope.all(labelLayerId);
-        if (labels.length == 0) continue;
+        if (labels.length == 0) {
+          setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + labelLayerId);
+          continue;
+        }
         for (Annotation l : labels) vLabels.add(new LabelElement(l));
       }
       
@@ -354,6 +378,7 @@ public class LabelMapper extends Annotator {
       List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
       // collapse INSERT-then-DELETE into just CHANGE
       path = mp.collapse(path);
+      setStatus(scope.getLabel() + " ("+scope.getStart()+") edit path: " + path.size());
         
       // create tags on the source layer from the path
       Annotation lastTag = null;
@@ -384,6 +409,7 @@ public class LabelMapper extends Annotator {
               lastTag.setLabel(lastTag.getLabel() + step.getFrom().label);
             } else { // remember the label until we can prepend it to something
               initialInserts += step.getFrom().label;
+              if (initialInsertsDelimiter) initialInserts += " ";
             }
             break;
           case INSERT:

@@ -156,6 +156,8 @@ public class TestLabelMapper {
     Layer layer = annotator.getSchema().getLayer("disc");
     assertNotNull("disc layer created", layer);
     assertEquals("disc layer correct type", Constants.TYPE_IPA, layer.getType());
+    assertEquals("disc layer correct parent", "phone", layer.getParentId());
+    assertEquals("disc layer alignment", Constants.ALIGNMENT_NONE, layer.getAlignment());
 
     // create a 'pre-existing' tag to ensure it's deleted or changed
     layer.setPeers(true); // fool the API into allowing more than one tag
@@ -191,7 +193,7 @@ public class TestLabelMapper {
   /** Test mapping of orthography to phones. */
   @Test public void OrthographyToDISC() throws Exception {
     LabelMapper annotator = new LabelMapper();
-    annotator.getStatusObservers().add(status->System.out.println(status));
+    //annotator.getStatusObservers().add(status->System.out.println(status));
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -207,6 +209,8 @@ public class TestLabelMapper {
     Layer layer = annotator.getSchema().getLayer("letter");
     assertNotNull("letter layer created", layer);
     assertEquals("letter layer correct type", Constants.TYPE_STRING, layer.getType());
+    assertEquals("letter layer correct parent", "phone", layer.getParentId());
+    assertEquals("letter layer alignment", Constants.ALIGNMENT_NONE, layer.getAlignment());
 
     g.trackChanges();
     annotator.transform(g);
@@ -223,6 +227,87 @@ public class TestLabelMapper {
                    Constants.CONFIDENCE_AUTOMATIC,
                    phones[p].first("letter").getConfidence().intValue());
     }
+  }   
+
+  /** Test mapping of alternative alignments for comparison, where tokens are on a word layer. */
+  @Test public void alternativeAlignmentMappingToWord() throws Exception {
+    LabelMapper annotator = new LabelMapper();
+    //annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "labelLayerId=htkWord"
+      +"&splitLabels="
+      +"&tokenLayerId=orthography"
+      +"&comparator=CharacterToCharacter"
+      +"&mappingLayerId=comparison"); // nonexistent
+    Layer layer = annotator.getSchema().getLayer("comparison");
+    assertNotNull("comparison layer created", layer);
+    assertEquals("comparison layer correct type", Constants.TYPE_STRING, layer.getType());
+    assertEquals("comparison layer correct parent", "word", layer.getParentId());
+    assertEquals("comparison layer alignment", Constants.ALIGNMENT_NONE, layer.getAlignment());
+
+    g.trackChanges();
+    annotator.transform(g);
+    g.commit(); // remove destroyed annotations
+    
+    Annotation[] orthography = g.all("orthography");
+    System.out.println(""+Arrays.asList(g.all("comparison")));
+    assertEquals("Right number of words " + Arrays.asList(orthography), 3, orthography.length);
+    for (int o = 0; o < orthography.length; o++) {
+      Annotation comparison = orthography[o].first("comparison");
+      assertNotNull("Word mapped " + o, comparison);
+      assertEquals("Word labels match " + o, orthography[o].getLabel(), comparison.getLabel());
+      assertTrue("Comparison is a tag " + o, comparison.tags(orthography[o]));
+      assertEquals("Comparison has word parent " + o,
+                   orthography[o].getParent(), comparison.getParent());
+    }
+    assertEquals("Right number of tags " + Arrays.asList(g.all("comparison")),
+                 3, g.all("comparison").length);
+  }   
+
+  /** Test mapping of alternative alignments for comparison, tokens are on phrase layer. */
+  @Test public void alternativeAlignmentMappingToPhrase() throws Exception {
+    LabelMapper annotator = new LabelMapper();
+    //annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "labelLayerId=orthography"
+      +"&splitLabels="
+      +"&tokenLayerId=htkWord"
+      +"&comparator=CharacterToCharacter"
+      +"&mappingLayerId=comparison"); // nonexistent
+    Layer layer = annotator.getSchema().getLayer("comparison");
+    assertNotNull("comparison layer created", layer);
+    assertEquals("comparison layer correct type", Constants.TYPE_STRING, layer.getType());
+    assertEquals("comparison layer correct parent", "turn", layer.getParentId());
+    assertEquals("comparison layer alignment", Constants.ALIGNMENT_INTERVAL, layer.getAlignment());
+
+    g.trackChanges();
+    annotator.transform(g);
+    g.commit(); // remove destroyed annotations
+    
+    Annotation[] htkWord = g.all("htkWord");
+    assertEquals("Right number of words " + Arrays.asList(htkWord), 3, htkWord.length);
+    for (int w = 0; w < htkWord.length; w++) {
+      Annotation comparison = htkWord[w].first("comparison");
+      assertNotNull("Word mapped " + w, comparison);
+      assertEquals("Word labels match " + w, htkWord[w].getLabel(), comparison.getLabel());
+      assertTrue("Comparison is a tag " + w, comparison.tags(htkWord[w]));
+      assertEquals("Comparison has turn parent " + w,
+                   htkWord[w].getParent(), comparison.getParent());
+    }
+    assertEquals("Right number of tags " + Arrays.asList(g.all("comparison")),
+                 3, g.all("comparison").length);
   }   
 
   /**
@@ -244,6 +329,14 @@ public class TestLabelMapper {
          .setPeers(true).setPeersOverlap(false).setSaturated(true)
          .setParentId("turn").setParentIncludes(true),
          new Layer("lang", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn").setParentIncludes(true),
+         new Layer("htkWord", "Alternative Word Alignments")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn").setParentIncludes(true),
+         new Layer("htkPhone", "Alternative Phone Alignments")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true).setPeersOverlap(false).setSaturated(false)
          .setParentId("turn").setParentIncludes(true),
          new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -355,7 +448,66 @@ public class TestLabelMapper {
                       .setParent(firefighter));
       g.addAnnotation(new Annotation().setLayerId("phone").setLabel("@")
                       .setStart(g.getOrCreateAnchorAt(39)).setEnd(g.getOrCreateAnchorAt(40))
-                       .setParent(firefighter));
+                      .setParent(firefighter));
+      
+      // alternative alignments
+      
+      g.addAnnotation(new Annotation().setLayerId("htkWord").setLabel("a")
+                      .setStart(g.getOrCreateAnchorAt(11.5)).setEnd(g.getOrCreateAnchorAt(21.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("@")
+                      .setStart(g.getOrCreateAnchorAt(11.5)).setEnd(g.getOrCreateAnchorAt(21.5))
+                      .setParent(turn));
+
+      g.addAnnotation(new Annotation().setLayerId("htkWord").setLabel("different")
+                      .setStart(g.getOrCreateAnchorAt(21.5)).setEnd(g.getOrCreateAnchorAt(31.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("d")
+                      .setStart(g.getOrCreateAnchorAt(21.5)).setEnd(g.getOrCreateAnchorAt(22.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("I")
+                      .setStart(g.getOrCreateAnchorAt(22.5)).setEnd(g.getOrCreateAnchorAt(23.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("f")
+                      .setStart(g.getOrCreateAnchorAt(23.5)).setEnd(g.getOrCreateAnchorAt(25.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("@")
+                      .setStart(g.getOrCreateAnchorAt(25.5)).setEnd(g.getOrCreateAnchorAt(27.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("r")
+                      .setStart(g.getOrCreateAnchorAt(27.5)).setEnd(g.getOrCreateAnchorAt(28.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("H")
+                      .setStart(g.getOrCreateAnchorAt(29.5)).setEnd(g.getOrCreateAnchorAt(30.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("t")
+                      .setStart(g.getOrCreateAnchorAt(30.5)).setEnd(g.getOrCreateAnchorAt(31.5))
+                      .setParent(turn));
+
+      g.addAnnotation(new Annotation().setLayerId("htkWord").setLabel("firefighter")
+                      .setStart(g.getOrCreateAnchorAt(31.5)).setEnd(g.getOrCreateAnchorAt(41.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("f")
+                      .setStart(g.getOrCreateAnchorAt(31.5)).setEnd(g.getOrCreateAnchorAt(32.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("2")
+                      .setStart(g.getOrCreateAnchorAt(32.5)).setEnd(g.getOrCreateAnchorAt(34.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("@")
+                      .setStart(g.getOrCreateAnchorAt(34.5)).setEnd(g.getOrCreateAnchorAt(36.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("f")
+                      .setStart(g.getOrCreateAnchorAt(36.5)).setEnd(g.getOrCreateAnchorAt(38.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("2")
+                      .setStart(g.getOrCreateAnchorAt(38.5)).setEnd(g.getOrCreateAnchorAt(39.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("t")
+                      .setStart(g.getOrCreateAnchorAt(39.5)).setEnd(g.getOrCreateAnchorAt(40.5))
+                      .setParent(turn));
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("@")
+                      .setStart(g.getOrCreateAnchorAt(40.5)).setEnd(g.getOrCreateAnchorAt(41.5))
+                      .setParent(turn));
       
       return g;
   } // end of graph()

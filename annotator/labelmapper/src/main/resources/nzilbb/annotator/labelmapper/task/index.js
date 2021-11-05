@@ -15,8 +15,11 @@ getSchema(s => {
     var labelLayerId = document.getElementById("labelLayerId");
     addLayerOptions(
         labelLayerId, schema,
-        // this is a function that takes a layer and returns true for the ones we want
-        layer => layer.id == schema.wordLayerId || layer.parentId == schema.wordLayerId);
+        // word layers
+        layer => layer.id == schema.wordLayerId || layer.parentId == schema.wordLayerId
+        // or phrase layers
+            || (layer.alignment == 2 && layer.parentId == schema.turnLayerId
+                && layer.id != schema.utteranceLayerId));
     var mappingLayerId = document.getElementById("mappingLayerId");
     labelLayerId.selectedIndex = 0; // force selection
     addLayerOptions(
@@ -25,13 +28,19 @@ getSchema(s => {
         layer => layer.id == schema.wordLayerId || layer.parentId == schema.wordLayerId
         // or segment layers
             || (schema.layers[layer.parentId]
-                && schema.layers[layer.parentId].parentId == schema.wordLayerId));
+                && schema.layers[layer.parentId].parentId == schema.wordLayerId)
+        // or phrase layers
+            || (layer.alignment == 2 && layer.parentId == schema.turnLayerId
+                && layer.id != schema.utteranceLayerId));
     mappingLayerId.selectedIndex = 0; // force selection
     var tokenLayerId = document.getElementById("tokenLayerId");
     addLayerOptions(
         tokenLayerId, schema,
-        // this is a function that takes a layer and returns true for the ones we want
-        layer => layer.id == schema.wordLayerId || layer.parentId == schema.wordLayerId);
+        // word layers
+        layer => layer.id == schema.wordLayerId || layer.parentId == schema.wordLayerId
+        // or phrase layers
+            || (layer.alignment == 2 && layer.parentId == schema.turnLayerId
+                && layer.id != schema.utteranceLayerId));
     tokenLayerId.selectedIndex = 0; // force selection
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
@@ -64,6 +73,19 @@ getSchema(s => {
 });
 
 function changedLabelLayer(select) {
+    const labelLayer = schema.layers[select.value];
+    if (labelLayer) {
+        if (labelLayer.parentId == schema.turnLayerId) { // phrase layer
+            // they probably don't want to split labels
+            document.getElementById("splitLabels-").checked = true;
+        } else if (labelLayer.parentId == schema.wordLayerId
+                   && labelLayer.alignment == 0) { // word tag layer
+            // they probably want to split labels
+            // TODO if type == IPA: char, otherwise: space
+            document.getElementById("splitLabels-char").checked = true;
+        }            
+    }
+            
     defaultComparator();
     // TODO filter possible token layers
 }
