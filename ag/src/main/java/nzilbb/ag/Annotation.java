@@ -874,7 +874,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
    * @return The related annotation (or the first one if there are many), or null if none
    * could be found on the given layer. 
    */
-  public Annotation first(final String layerId) {
+  public Annotation first(final String layerId) { // TODO first simply look for a start.startOf(laterId) annotation?
     // is it our own layer?
     if (layerId.equals(getLayerId())) {
       // for now, return ourself - this is true of "transcript", and is probably generally true
@@ -1021,7 +1021,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
    * @param layerId The layer of the desired annotations.
    * @return The related annotations, or an empty array if none could be found on the given layer.
    */
-  public Annotation[] all(final String layerId) {
+  public Annotation[] all(final String layerId) { // TODO first simply look for a chain from start to end?
     // is it our own layer?
     if (layerId.equals(getLayerId())) {
       // for now, return ourself - this is true of "transcript", and is probably generally true
@@ -1318,7 +1318,8 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
       // special case: if the two annotations have the same anchors,
       // even if there are unset offsets
       // we know that this includes the midpoint of the other
-      if (getStartId().equals(other.getStartId())
+      if (getStartId() != null && getEndId() != null
+          && getStartId().equals(other.getStartId())
           && getEndId().equals(other.getEndId())) {
         return true;
       } else {
