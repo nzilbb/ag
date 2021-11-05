@@ -118,6 +118,7 @@ public class Coalescer implements GraphTransformer {
       for (int i = peers.length - 2; i >= 0; i--) {
         Annotation preceding = peers[i];
         Annotation following = peers[i + 1];
+        if (preceding.getEnd() == null || following.getStart() == null) continue;
         boolean mergeAnnotations = false;
         if (preceding.getEnd().equals(following.getStart())) {
           // linked peers
@@ -138,6 +139,9 @@ public class Coalescer implements GraphTransformer {
               mergeAnnotations = true;
             }
           }
+        }
+        if (following.getEnd() == null) { // presumably a fragment
+          mergeAnnotations = false;
         }
         if (mergeAnnotations) {
           mergeAnnotations(preceding, following);
