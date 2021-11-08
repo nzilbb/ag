@@ -229,6 +229,49 @@ public class TestLabelMapper {
     }
   }   
 
+  /** Test mapping of orthography to phones. */
+  @Test public void ARPAbetToDISC() throws Exception {
+    LabelMapper annotator = new LabelMapper();
+    //annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "labelLayerId=cmudict"
+      +"&splitLabels=space"
+      +"&tokenLayerId=phone"
+      +"&comparator=ArpabetToDISC"
+      +"&mappingLayerId=arpabet"); // nonexistent
+    Layer layer = annotator.getSchema().getLayer("arpabet");
+    assertNotNull("arpabet layer created", layer);
+    assertEquals("arpabet layer correct type", Constants.TYPE_STRING, layer.getType());
+    assertEquals("arpabet layer correct parent", "phone", layer.getParentId());
+    assertEquals("arpabet layer alignment", Constants.ALIGNMENT_NONE, layer.getAlignment());
+
+    g.trackChanges();
+    annotator.transform(g);
+    
+    Annotation[] phones = g.all("phone");
+    assertEquals("Right number of phones " + Arrays.asList(phones), 15, phones.length);
+    String[] phoneLabels = {"@",   "d","I",  "f","@", "r",    "H","t", "f","2",  "@","f","2",  "t","@" };
+    String[] arpabetLabels={"EY1", "D","IH1","F",null,"R AH0","N","T", "F","AY1","R","F","AY2","T","ER0"};
+    for (int p = 0; p < phones.length; p++) {
+      assertEquals("Phone label " + p, phoneLabels[p], phones[p].getLabel());
+      if (arpabetLabels[p] != null) {
+        assertNotNull("Tagged " + p, phones[p].first("arpabet"));
+        assertEquals("Tag label " + p, arpabetLabels[p], phones[p].first("arpabet").getLabel());
+        assertEquals("Tag confidence " + p,
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].first("arpabet").getConfidence().intValue());
+      } else {
+        assertNull("Not tagged " + p, phones[p].first("arpabet"));
+      }
+    }
+  }   
+
   /** Test mapping of alternative alignments for comparison, where tokens are on a word layer. */
   @Test public void alternativeAlignmentMappingToWord() throws Exception {
     LabelMapper annotator = new LabelMapper();
@@ -256,7 +299,6 @@ public class TestLabelMapper {
     g.commit(); // remove destroyed annotations
     
     Annotation[] orthography = g.all("orthography");
-    System.out.println(""+Arrays.asList(g.all("comparison")));
     assertEquals("Right number of words " + Arrays.asList(orthography), 3, orthography.length);
     for (int o = 0; o < orthography.length; o++) {
       Annotation comparison = orthography[o].first("comparison");
@@ -349,6 +391,9 @@ public class TestLabelMapper {
          .setPeers(false).setPeersOverlap(false).setSaturated(true)
          .setParentId("word").setParentIncludes(true)
          .setType(Constants.TYPE_IPA),
+         new Layer("cmudict", "CMU ARPAbet pronunciation").setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("word").setParentIncludes(true),
          new Layer("phone", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true).setPeersOverlap(false).setSaturated(true)
          .setParentId("word").setParentIncludes(true)
@@ -391,13 +436,22 @@ public class TestLabelMapper {
       g.addAnnotation(new Annotation().setLayerId("orthography").setLabel("firefighter")
                       .setParent(firefighter));
 
-      // phonemes
+      // phonemes (DISC)
       
       g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("1")
                       .setParent(a));
       g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("dIfr@nt")
                       .setParent(different));
       g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("f2rf2L@r")
+                      .setParent(firefighter));
+
+      // phonemes (ARPAbet)
+      
+      g.addAnnotation(new Annotation().setLayerId("cmudict").setLabel("EY1")
+                      .setParent(a));
+      g.addAnnotation(new Annotation().setLayerId("cmudict").setLabel("D IH1 F R AH0 N T")
+                      .setParent(different));
+      g.addAnnotation(new Annotation().setLayerId("cmudict").setLabel("F AY1 R F AY2 T ER0")
                       .setParent(firefighter));
 
       // phones

@@ -36,15 +36,24 @@
         <details><summary> Orthography → DISC </summary>
           - the label layer is assumed to be word orthography, and the token layer is
           assumed to be a DISC phonological layer.</details>
-        <details><summary> Orthography → Arpabet </summary>
+        <details><summary> Orthography → ARPAbet </summary>
           - the label layer is assumed to be word orthography, and the token layer is
-          assumed to be a layer containing Arpabet-based pronunciations.</details>
+          assumed to be a layer containing ARPAbet-based pronunciations (e.g. those that
+          are used in the CMU Pronouncing Dictionary).</details>
         <details><summary> DISC → DISC </summary>
           - both are assumed to be DISC phonological layers; priority is given to
           linking identical consonants, then identical vowels, then allophones of the
           same phoneme (e.g. plosive and flapped /t/), then phonemes of the same type
           (e.g. diphthongs with diphthongs, monophthongs with monophthongs, plosives
           with plosives, etc.), then vowels together.</details>
+        <details><summary> DISC → ARPAbet </summary>
+          - the label layer is assumed to be a DISC phonological layer and the token
+          layer is assumed to be a layer containing ARPAbet-based pronunciations (e.g. those that
+          are used in the CMU Pronouncing Dictionary).</details>
+        <details><summary> ARPAbet → DISC </summary>
+          - the label layer is assumed to be a layer containing ARPAbet-based
+          pronunciations (e.g. those that are used in the CMU Pronouncing Dictionary) and
+          the token layers is assumed to be a DISC phonological layer.</details> 
       </details>
       
       <details><summary> Token Layer </summary>
@@ -80,7 +89,7 @@
           </table>
         </details>
         
-        <!--details><summary> Phonemic encoding </summary>        
+        <details><summary> Phonemic encoding </summary>        
           <table>
             <tr>
               <th>Label Layer</th>
@@ -92,7 +101,7 @@
               <td>D</td><td>IH1</td><td>F</td><td>ER0</td><td>R</td><td>AH0</td><td>N</td><td>T</td>
             </tr><tr>
               <th>Comparator</th>
-              <td><i>Arpabet → DISC</i></td>
+              <td><i>ARPAbet → DISC</i></td>
               <td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td>
             </tr><tr>
               <th>Token Layer</th>
@@ -100,7 +109,7 @@
               <td>d</td><td>ɪ</td><td>f</td><td>ə</td><td>ɹ</td><td>n̩</td><td>n</td><td>t</td>
             </tr>
           </table>
-        </details-->
+        </details>
         <details><summary> Map non-rhotic phones to their equivalent rhotic transcription </summary>    
           <table>
             <tr>
@@ -164,13 +173,13 @@
         <span>
           <label title="Use the first annotation in the scope, split its label into characters, and map each to labels on the token layer.
 (e.g. DISC word transcriptions to phones)">
-            <input type="radio" id="splitLabels-char" name="splitLabels" value="char" checked> Split First Label into Characters </label>
-          <!--TODO when there's a ARPAet2DISC comparator label title="Use the first annotation in the scope, split its label on spaces, and map each to labels on the token layer.
+            <input type="radio" id="splitLabels-char" name="splitLabels" value="char" checked> Split Label into Individual Characters </label>
+          <label title="Use the first annotation in the scope, split its label on spaces, and map each to labels on the token layer.
 (e.g. ARPAbet word transcriptions to phones)">
-            <input type="radio" id="splitLabels-space" name="splitLabels" value="space"> Split First Label on Spaces </label-->
+            <input type="radio" id="splitLabels-space" name="splitLabels" value="space"> Split Label on Spaces </label>
           <label title="Use all annotations in the scope, and do not split their labels.
 (e.g. phone alignments to other phone alignments)">
-            <input type="radio" id="splitLabels-" name="splitLabels" value="char"> Don't Split Labels </label>
+            <input type="radio" id="splitLabels-" name="splitLabels" value="char"> There are multiple annotations. </label>
         </span>
         <span id="exampleSplitLayers"></span>
       </div>
@@ -190,8 +199,10 @@
           <select id="comparator" name="comparator">
             <option value="CharacterToCharacter"> Orthography → Orthography </option>
             <option value="OrthographyToDISC"> Orthography → DISC </option>
-            <option value="OrthographyToArpabet"> Orthography → Arpabet </option>
+            <option value="OrthographyToArpabet"> Orthography → ARPAbet </option>
             <option value="DISCToDISC"> DISC → DISC </option>
+            <option value="DISCToArpabet"> DISC → ARPAbet </option>
+            <option value="ArpabetToDISC"> ARPAbet → DISC </option>
           </select>
         </span>
         <span id="exampleMapping">↓</span>

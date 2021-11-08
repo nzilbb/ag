@@ -101,10 +101,19 @@ function defaultComparator() {
     if (labelLayer && tokenLayer) {
         if (labelLayer.type == "ipa" && tokenLayer.type == "ipa") {
             defaultComparator = "DISCToDISC";
+            document.getElementById("splitLabels-char").checked = true;
         } else if (labelLayer.type == "string" && tokenLayer.type == "ipa") {
-            defaultComparator = "OrthographyToDISC";
-        } else if (labelLayer.type == "string" && tokenLayer.type == "ipa") {
-            defaultComparator = "OrthographyToDISC";
+            if (labelLayer.id.toLowerCase().includes("arpabet")
+                || labelLayer.id.toLowerCase().includes("cmu")) { // may be an ARPAbet layer
+                defaultComparator = "ArpabetToDISC";
+                document.getElementById("splitLabels-space").checked = true;
+            } else {
+                defaultComparator = "OrthographyToDISC";
+                document.getElementById("splitLabels-space").checked = false;
+            }
+        } else if (labelLayer.type == "ipa" && tokenLayer.type == "string") {
+            defaultComparator = "DISCToArpabet";
+            document.getElementById("splitLabels-char").checked = true;
         }
     }
     document.getElementById("comparator").value = defaultComparator;
@@ -138,23 +147,33 @@ function changedMappingLayer(select) {
 function setComparatorExamples(select) {
     // CharacterToCharacter by default
     var exampleLabel = "transcription"; // orthography
-    var exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ? ?"; // orthography
+    var exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
     var exampleToken   = "t r a n s c r i p t i o n"; // orthography
     switch (select.value) {
     case "OrthographyToDISC":
         exampleLabel = "transcription"; // orthography
-        exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // orthography
+        exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
+        exampleToken   = "t r { n s k r I p S V n"; // DISC
+        break;
+    case "ArpabetToDISC":
+        exampleLabel = "T R AE2 N S K R IH1 P SH AH0 N"; // arpabet
+        exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
         exampleToken   = "t r { n s k r I p S V n"; // DISC
         break;
     case "OrthographyToArpabet":
         exampleLabel = "transcription"; // orthography
-        exampleMapping = "? ?  ?  ? ? ? ?  ?  ? ?   ?  ?"; // orthography
+        exampleMapping = "? ?  ?  ? ? ? ?  ?  ? ?   ?  ?"; // mapping
         exampleToken   = "T R AE2 N S K R IH1 P SH AH0 N"; // ARPAbet
         break;
     case "DISCToDISC":
         exampleLabel = "tr{nskrIpSVn"; // DISC
-        exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // orthography
+        exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
         exampleToken   = "t r { n s k r I p S V n"; // DISC
+        break;
+    case "DISCToArpabet":
+        exampleLabel = "tr{nskrIpSVn"; // DISC
+        exampleMapping = "? ?  ?  ? ? ? ?  ?  ? ?   ?  ?"; // mapping
+        exampleToken   = "T R AE2 N S K R IH1 P SH AH0 N"; // ARPAbet
         break;
     }
     document.getElementById("exampleLabelLabel").innerHTML = exampleLabel;

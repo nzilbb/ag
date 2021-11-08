@@ -314,15 +314,20 @@ public class LabelMapper extends Annotator {
 
     // create a comparator for the mapping
     EditComparator<LabelElement> comparator = new DefaultEditComparator<LabelElement>();
-    if (getComparator().equals("DISCToDISC")) {
+    if (getComparator().equalsIgnoreCase("DISCToDISC")) {
       comparator = new DISC2DISCComparator<LabelElement>();
-    } else if (getComparator().equals("OrthographyToDISC")) {
+    } else if (getComparator().equalsIgnoreCase("OrthographyToDISC")) {
       comparator = new Orthography2DISCComparator<LabelElement>();
-    } else if (getComparator().equals("OrthographyToArpabet")) {
+    } else if (getComparator().equalsIgnoreCase("OrthographyToArpabet")) {
       comparator = new Orthography2ARPAbetComparator<LabelElement>();
-    } else if (splitLabels.equals("char")) { // Char2Char only makes sense if splitting by char
+    } else if (getComparator().equalsIgnoreCase("DISCToArpabet")) {
+      comparator = new DISC2ARPAbetComparator<LabelElement>();
+    } else if (getComparator().equalsIgnoreCase("ArpabetToDISC")) {
+      comparator = new ARPAbet2DISCComparator<LabelElement>();
+    } else if (splitLabels.equalsIgnoreCase("char")) {
+      // Char2Char only makes sense if splitting by char
       comparator = new Char2CharComparator<LabelElement>();
-    } 
+    }
     MinimumEditPath<LabelElement> mp = new MinimumEditPath<LabelElement>(comparator);
 
     if ((tokenLayerId.equals(schema.getWordLayerId())
@@ -337,8 +342,8 @@ public class LabelMapper extends Annotator {
     // delete any existing annotations
     for (Annotation a : graph.all(mappingLayerId)) a.destroy();
     
+    boolean concatDelimiter = !splitLabels.equals("char");
     setStatus("for each " + scopeLayerId + " map " + labelLayerId + " → " + tokenLayerId);
-    boolean initialInsertsDelimiter = !splitLabels.equals("char");
     // for each scope annotator
     for (Annotation scope : graph.list(scopeLayerId)) {
       if (isCancelling()) break;
@@ -406,10 +411,14 @@ public class LabelMapper extends Annotator {
           case DELETE:
             // append to the previous one
             if (lastTag != null) {
-              lastTag.setLabel(lastTag.getLabel() + step.getFrom().label);
+              if (concatDelimiter) {                
+                lastTag.setLabel(lastTag.getLabel() + " " + step.getFrom().label);
+              } else {
+                lastTag.setLabel(lastTag.getLabel() + step.getFrom().label);
+              }
             } else { // remember the label until we can prepend it to something
               initialInserts += step.getFrom().label;
-              if (initialInsertsDelimiter) initialInserts += " ";
+              if (concatDelimiter) initialInserts += " ";
             }
             break;
           case INSERT:
