@@ -394,6 +394,29 @@ public class TestComparators {
     assertEquals(pathToString(path), "T", path.get(i).getFrom());
     assertEquals(pathToString(path), "t", path.get(i++).getTo());
     
+    from = "D IH1 F R AH0 N T";
+    to = "dIf@rHt";
+    path = mp.minimumEditPath(arpabetToVector(from), stringToVector(to));
+    //System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 8, path.size());
+    i = 0;
+    assertEquals(pathToString(path), "D", path.get(i).getFrom());
+    assertEquals(pathToString(path), "d", path.get(i++).getTo());
+    assertEquals(pathToString(path), "IH1", path.get(i).getFrom());
+    assertEquals(pathToString(path), "I", path.get(i++).getTo());
+    assertEquals(pathToString(path), "F", path.get(i).getFrom());
+    assertEquals(pathToString(path), "f", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "@", path.get(i++).getTo());
+    assertEquals(pathToString(path), "R", path.get(i).getFrom());
+    assertEquals(pathToString(path), "r", path.get(i++).getTo());
+    assertEquals(pathToString(path), "AH0", path.get(i).getFrom());
+    assertNull(pathToString(path), path.get(i++).getTo());
+    assertEquals(pathToString(path), "N", path.get(i).getFrom());
+    assertEquals(pathToString(path), "H", path.get(i++).getTo());
+    assertEquals(pathToString(path), "T", path.get(i).getFrom());
+    assertEquals(pathToString(path), "t", path.get(i++).getTo());
+    
     from = "F AY1 R F AY2 T ER0";
     to = "f2@f2t@";
     path = mp.minimumEditPath(arpabetToVector(from), stringToVector(to));
