@@ -506,7 +506,9 @@ public class LabelMapper extends Annotator {
     }
     MinimumEditPath<LabelElement> mp = new MinimumEditPath<LabelElement>(comparator);
     EditComparator<LabelElement> subMappingComparator = null;
-    if (getSubComparator() != null) {
+    boolean subMapping 
+      = subMappingLayerId != null && subTokenLayerId != null && getSubComparator() != null;
+    if (subMapping) {
       if (getSubComparator().equalsIgnoreCase("DISCToDISC")) {
         subMappingComparator = new DISC2DISCComparator<LabelElement>();
       } else if (getSubComparator().equalsIgnoreCase("OrthographyToDISC")) {
@@ -586,71 +588,32 @@ public class LabelMapper extends Annotator {
             lastTag = step.getTo().source.createTag(
               mappingLayerId, step.getFrom().label);
             lastTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-            if (initialInserts.length() > 0) { // prepend inserts we had already found
+            if (!subMapping
+                && initialInserts.length() > 0) { // prepend inserts we had already found
               lastTag.setLabel(initialInserts + lastTag.getLabel());
               initialInserts = "";
             }
 
-            if (subMappingLayerId != null && subTokenLayerId != null) { // sub mapping
-              Annotation mainLabel = step.getFrom().source;
-              Annotation mainToken = step.getTo().source;
-              
-              // get the sub-label annotations
-              Vector<LabelElement> vSubLabels = new Vector<LabelElement>();
-              for (Annotation l : mainLabel.all(subLabelLayerId)) {
-                vSubLabels.add(new LabelElement(l));
-              }
-              if (vSubLabels.size() == 0) {
-                setStatus(
-                  mainLabel.getLabel() + " ("+mainLabel.getStart()+") no " + subLabelLayerId);
-              } else {
-                // get the sub-token annotations
-                Vector<LabelElement> vSubTokens = new Vector<LabelElement>();
-                for (Annotation t : mainToken.all(subTokenLayerId)) {
-                  vSubTokens.add(new LabelElement(t));
-                }
-                if (vSubTokens.size() == 0) {
-                  setStatus(
-                    mainToken.getLabel() + " ("+mainToken.getStart()+") no " + subTokenLayerId);
-                } else { // both have sub annotations
-                  // find the minimum edit path between then
-                  List<EditStep<LabelElement>> subPath
-                    = subMp.minimumEditPath(vSubLabels, vSubTokens);
-                  // collapse INSERT-then-DELETE into just CHANGE
-                  subPath = subMp.collapse(subPath);
-                  setStatus(
-                    mainLabel.getLabel()+" ("+mainLabel.getStart()+") edit path: "+subPath.size());
-
-                  // map them together
-                  for (EditStep<LabelElement> subStep : subPath) {
-                    switch(subStep.getOperation()) {
-                      case NONE:
-                      case CHANGE:
-                        Annotation subTag = subStep.getTo().source.createTag(
-                          subMappingLayerId, subStep.getFrom().label);
-                        subTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                        break;
-                      case DELETE: break; // do nothing
-                      case INSERT: break; // do nothing
-                    }
-                  } // next sub-step
-                } // there are sub tokens
-              } // there are sub labels
+            if (subMapping) {
+              // TODO save in relational database
+              subMapping(step.getFrom().source, step.getTo().source, subMp);             
             } // sub-mapping
             
             break;
           case DELETE:
-            // append to the previous one
-            if (lastTag != null) {
-              if (concatDelimiter) {                
-                lastTag.setLabel(lastTag.getLabel() + " " + step.getFrom().label);
-              } else {
-                lastTag.setLabel(lastTag.getLabel() + step.getFrom().label);
+            if (!subMapping) {
+              // append to the previous one
+              if (lastTag != null) {
+                if (concatDelimiter) {                
+                  lastTag.setLabel(lastTag.getLabel() + " " + step.getFrom().label);
+                } else {
+                  lastTag.setLabel(lastTag.getLabel() + step.getFrom().label);
+                }
+              } else { // remember the label until we can prepend it to something
+                initialInserts += step.getFrom().label;
+                if (concatDelimiter) initialInserts += " ";
               }
-            } else { // remember the label until we can prepend it to something
-              initialInserts += step.getFrom().label;
-              if (concatDelimiter) initialInserts += " ";
-            }
+            } // no sub-mapping
             break;
           case INSERT:
             // do nothing
@@ -662,5 +625,59 @@ public class LabelMapper extends Annotator {
     setRunning(false);
     return graph;
   }   
-   
+  
+  /**
+   * Map the sub-labels of the given label annotation to the sub-tokens of the given token
+   * annotation. 
+   * @param mainLabel The annotation used to identify which sub-labels to select for mapping.
+   * @param mainToken The annotation used to identify which sub-tokens to select for mapping.
+   * @param mp The minimum edit path processor for the sub-mapping.
+   */
+  protected void subMapping(
+    Annotation mainLabel, Annotation mainToken, MinimumEditPath<LabelElement> mp) {
+    // get the sub-label annotations
+    Vector<LabelElement> vLabels = new Vector<LabelElement>();
+    for (Annotation l : mainLabel.all(subLabelLayerId)) {
+      vLabels.add(new LabelElement(l));
+    }
+    if (vLabels.size() == 0) {
+      setStatus(
+        mainLabel.getLabel() + " ("+mainLabel.getStart()+") no " + subLabelLayerId);
+    } else {
+      // get the sub-token annotations
+      Vector<LabelElement> vTokens = new Vector<LabelElement>();
+      for (Annotation t : mainToken.all(subTokenLayerId)) {
+        vTokens.add(new LabelElement(t));
+      }
+      if (vTokens.size() == 0) {
+        setStatus(
+          mainToken.getLabel() + " ("+mainToken.getStart()+") no " + subTokenLayerId);
+      } else { // both have sub annotations
+        // find the minimum edit path between then
+        List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
+        // collapse INSERT-then-DELETE into just CHANGE
+        path = mp.collapse(path);
+        setStatus(
+          mainLabel.getLabel()+" ("+mainLabel.getStart()+") edit path: "+path.size());
+        
+        // map them together
+        for (EditStep<LabelElement> step : path) {
+          switch(step.getOperation()) {
+            case NONE:
+            case CHANGE:
+              if (subMappingLayerId != null) {
+                step.getTo().source.createTag(
+                  subMappingLayerId, step.getFrom().label)
+                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+              }
+              // TODO save in relational database
+              break;
+            case DELETE: break; // do nothing
+            case INSERT: break; // do nothing
+          }
+        } // next sub-step
+      } // there are sub tokens
+    } // there are sub labels
+  } // end of subMapping()
+
 } // end of class LabelMapper
