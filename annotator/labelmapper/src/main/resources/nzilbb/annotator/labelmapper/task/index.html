@@ -23,6 +23,9 @@
       <details><summary> Mapping Layer </summary>
         <p> This is the output layer; an annotation is create on this layer for each Token
           using corresponding labels from the Label Layer. </p>
+        <p> If no <i>Phone Sub-mapping</i> is specified (see below), any Label Layer
+          labels that cannot be directly mapped to a Token will be appended to a nearby
+          Mapping Layer label; i.e. appended to the last one where possible. </p>
       </details>
       
       <details><summary> Comparator </summary>      
