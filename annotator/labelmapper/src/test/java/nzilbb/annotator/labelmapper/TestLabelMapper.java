@@ -87,6 +87,37 @@ public class TestLabelMapper {
     assertNotNull("disc layer created", layer);
   }   
   
+  /** Valid sub-mapping parameters are accepted. */
+  @Test public void setValidSubMappingParameters() throws Exception {
+    LabelMapper annotator = new LabelMapper();
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "labelLayerId=orthography"
+      +"&splitLabels="
+      +"&tokenLayerId=htkWord"
+      +"&comparator=CharacterToCharacter"
+      +"&mappingLayerId=wordComparison"
+      +"&subLabelLayerId=phone"
+      +"&subTokenLayerId=htkPhone"
+      +"&subMappingLayerId=phoneComparison"
+      +"&subComparator=DISCToDISC");
+    Layer layer = annotator.getSchema().getLayer("wordComparison");
+    assertNotNull("wordComparison layer created", layer);
+    assertEquals("wordComparison parent", "turn", layer.getParentId());
+    assertEquals("wordComparison type", Constants.TYPE_STRING, layer.getType());
+    assertEquals("wordComparison alignment", Constants.ALIGNMENT_INTERVAL, layer.getAlignment());
+    layer = annotator.getSchema().getLayer("phoneComparison");
+    assertNotNull("phoneComparison layer created", layer);
+    assertEquals("phoneComparison parent", "turn", layer.getParentId());
+    assertEquals("phoneComparison type", Constants.TYPE_IPA, layer.getType());
+    assertEquals("phoneComparison alignment", Constants.ALIGNMENT_INTERVAL, layer.getAlignment());
+  }   
+  
   /** Invalid parameters are rejected. */
   @Test public void setInvalidTaskParameters() throws Exception {
     LabelMapper annotator = new LabelMapper();
@@ -134,6 +165,65 @@ public class TestLabelMapper {
         +"&mappingLayerId=disc");
       fail("Should fail with no comparator");
     } catch (InvalidConfigurationException x) {
+    }
+
+    // sub-mapping settings
+    try {
+      annotator.setTaskParameters(
+        "labelLayerId=orthography"
+        +"&splitLabels="
+        +"&tokenLayerId=htkWord"
+        +"&comparator=CharacterToCharacter"
+        +"&mappingLayerId=wordComparison"
+        +"&subLabelLayerId=non-existent"
+        +"&subTokenLayerId=htkPhone"
+        +"&subMappingLayerId=phoneComparison"
+        +"&subComparator=DISCToDISC");
+      fail("Should fail with nonexistent subLabelLayerId");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "labelLayerId=orthography"
+        +"&splitLabels="
+        +"&tokenLayerId=htkWord"
+        +"&comparator=CharacterToCharacter"
+        +"&mappingLayerId=wordComparison"
+        +"&subLabelLayerId=phone"
+        +"&subTokenLayerId=non-existent"
+        +"&subMappingLayerId=phoneComparison"
+        +"&subComparator=DISCToDISC");
+      fail("Should fail with nonexistent subTokenLayerId");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "labelLayerId=htkWord" // labelLayer is phrase, but subLabelLayer is not
+        +"&splitLabels="
+        +"&tokenLayerId=orthography"
+        +"&comparator=CharacterToCharacter"
+        +"&mappingLayerId=wordComparison"
+        +"&subLabelLayerId=phone"
+        +"&subTokenLayerId=htkPhone"
+        +"&subMappingLayerId=phoneComparison"
+        +"&subComparator=DISCToDISC");
+      fail("Should fail with phrase label layer and non-phrase sub-mapping label layer");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "labelLayerId=orthography"
+        +"&splitLabels="
+        +"&tokenLayerId=htkWord"
+        +"&comparator=CharacterToCharacter"
+        +"&mappingLayerId=wordComparison"
+        +"&subLabelLayerId=phone"
+        +"&subTokenLayerId=htkPhone"
+        +"&subMappingLayerId=phoneComparison"
+        +"&subComparator=");
+      fail("Should fail with no sub-mapping comparator");
+    } catch (InvalidConfigurationException x) {
+      System.out.println(x.getMessage());
     }
   }
   
@@ -322,17 +412,27 @@ public class TestLabelMapper {
     annotator.setSchema(schema);
     
     // layers are created as required
+    // layers are created as required
     annotator.setTaskParameters(
       "labelLayerId=orthography"
       +"&splitLabels="
       +"&tokenLayerId=htkWord"
       +"&comparator=CharacterToCharacter"
-      +"&mappingLayerId=comparison"); // nonexistent
-    Layer layer = annotator.getSchema().getLayer("comparison");
-    assertNotNull("comparison layer created", layer);
-    assertEquals("comparison layer correct type", Constants.TYPE_STRING, layer.getType());
-    assertEquals("comparison layer correct parent", "turn", layer.getParentId());
-    assertEquals("comparison layer alignment", Constants.ALIGNMENT_INTERVAL, layer.getAlignment());
+      +"&mappingLayerId=wordComparison"
+      +"&subLabelLayerId=phone"
+      +"&subTokenLayerId=htkPhone"
+      +"&subMappingLayerId=phoneComparison"
+      +"&subComparator=DISCToArpabet");
+    Layer layer = annotator.getSchema().getLayer("wordComparison");
+    assertNotNull("wordComparison layer created", layer);
+    assertEquals("wordComparison parent", "turn", layer.getParentId());
+    assertEquals("wordComparison type", Constants.TYPE_STRING, layer.getType());
+    assertEquals("wordComparison alignment", Constants.ALIGNMENT_INTERVAL, layer.getAlignment());
+    layer = annotator.getSchema().getLayer("phoneComparison");
+    assertNotNull("phoneComparison layer created", layer);
+    assertEquals("phoneComparison parent", "turn", layer.getParentId());
+    assertEquals("phoneComparison type", Constants.TYPE_IPA, layer.getType());
+    assertEquals("phoneComparison alignment", Constants.ALIGNMENT_INTERVAL, layer.getAlignment());
 
     g.trackChanges();
     annotator.transform(g);
@@ -341,15 +441,38 @@ public class TestLabelMapper {
     Annotation[] htkWord = g.all("htkWord");
     assertEquals("Right number of words " + Arrays.asList(htkWord), 3, htkWord.length);
     for (int w = 0; w < htkWord.length; w++) {
-      Annotation comparison = htkWord[w].first("comparison");
-      assertNotNull("Word mapped " + w, comparison);
-      assertEquals("Word labels match " + w, htkWord[w].getLabel(), comparison.getLabel());
-      assertTrue("Comparison is a tag " + w, comparison.tags(htkWord[w]));
+      Annotation wordComparison = htkWord[w].first("wordComparison");
+      assertNotNull("Word mapped " + w, wordComparison);
+      assertEquals("Word labels match " + w,
+                   htkWord[w].getLabel().toLowerCase(),
+                   wordComparison.getLabel());
+      assertTrue("Comparison is a tag " + w, wordComparison.tags(htkWord[w]));
       assertEquals("Comparison has turn parent " + w,
-                   htkWord[w].getParent(), comparison.getParent());
+                   htkWord[w].getParent(), wordComparison.getParent());
     }
-    assertEquals("Right number of tags " + Arrays.asList(g.all("comparison")),
-                 3, g.all("comparison").length);
+    assertEquals("Right number of tags " + Arrays.asList(g.all("wordComparison")),
+                 3, g.all("wordComparison").length);
+    
+    Annotation[] htkPhone = g.all("htkPhone");
+    String[] expectedPhone = {
+      "@", "d","I","f","r",null,"H","t", "f","2","@","f","2","t","@"};
+    assertEquals("Right number of phones " + Arrays.asList(htkPhone), 15, htkPhone.length);
+    for (int p = 0; p < htkPhone.length; p++) {
+      Annotation phoneComparison = htkPhone[p].first("phoneComparison");
+      if (expectedPhone[p] != null) {
+        assertNotNull("Phone mapped " + p, phoneComparison);
+        assertEquals("Phone labels match " + p,
+                     expectedPhone[p],
+                     phoneComparison.getLabel());
+        assertTrue("Comparison is a tag " + p, phoneComparison.tags(htkPhone[p]));
+        assertEquals("Comparison has turn parent " + p,
+                     htkPhone[p].getParent(), phoneComparison.getParent());
+      } else { // not expecting a mapping
+        assertNull("Phone not mapped " + p, phoneComparison);
+      }
+    }
+    assertEquals("Right number of tags " + Arrays.asList(g.all("phoneComparison")),
+                 14, g.all("phoneComparison").length); // one was not mapped
   }   
 
   /**
@@ -506,60 +629,60 @@ public class TestLabelMapper {
       
       // alternative alignments
       
-      g.addAnnotation(new Annotation().setLayerId("htkWord").setLabel("a")
+      g.addAnnotation(new Annotation().setLayerId("htkWord").setLabel("A")
                       .setStart(g.getOrCreateAnchorAt(11.5)).setEnd(g.getOrCreateAnchorAt(21.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("@")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("EY1")
                       .setStart(g.getOrCreateAnchorAt(11.5)).setEnd(g.getOrCreateAnchorAt(21.5))
                       .setParent(turn));
 
-      g.addAnnotation(new Annotation().setLayerId("htkWord").setLabel("different")
+      g.addAnnotation(new Annotation().setLayerId("htkWord").setLabel("DIFFERENT")
                       .setStart(g.getOrCreateAnchorAt(21.5)).setEnd(g.getOrCreateAnchorAt(31.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("d")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("D")
                       .setStart(g.getOrCreateAnchorAt(21.5)).setEnd(g.getOrCreateAnchorAt(22.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("I")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("IH1")
                       .setStart(g.getOrCreateAnchorAt(22.5)).setEnd(g.getOrCreateAnchorAt(23.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("f")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("F")
                       .setStart(g.getOrCreateAnchorAt(23.5)).setEnd(g.getOrCreateAnchorAt(25.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("@")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("R")
                       .setStart(g.getOrCreateAnchorAt(25.5)).setEnd(g.getOrCreateAnchorAt(27.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("r")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("AH0")
                       .setStart(g.getOrCreateAnchorAt(27.5)).setEnd(g.getOrCreateAnchorAt(28.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("H")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("N")
                       .setStart(g.getOrCreateAnchorAt(29.5)).setEnd(g.getOrCreateAnchorAt(30.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("t")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("T")
                       .setStart(g.getOrCreateAnchorAt(30.5)).setEnd(g.getOrCreateAnchorAt(31.5))
                       .setParent(turn));
 
-      g.addAnnotation(new Annotation().setLayerId("htkWord").setLabel("firefighter")
+      g.addAnnotation(new Annotation().setLayerId("htkWord").setLabel("FIREFIGHTER")
                       .setStart(g.getOrCreateAnchorAt(31.5)).setEnd(g.getOrCreateAnchorAt(41.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("f")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("F")
                       .setStart(g.getOrCreateAnchorAt(31.5)).setEnd(g.getOrCreateAnchorAt(32.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("2")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("AY1")
                       .setStart(g.getOrCreateAnchorAt(32.5)).setEnd(g.getOrCreateAnchorAt(34.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("@")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("R")
                       .setStart(g.getOrCreateAnchorAt(34.5)).setEnd(g.getOrCreateAnchorAt(36.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("f")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("F")
                       .setStart(g.getOrCreateAnchorAt(36.5)).setEnd(g.getOrCreateAnchorAt(38.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("2")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("AY2")
                       .setStart(g.getOrCreateAnchorAt(38.5)).setEnd(g.getOrCreateAnchorAt(39.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("t")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("T")
                       .setStart(g.getOrCreateAnchorAt(39.5)).setEnd(g.getOrCreateAnchorAt(40.5))
                       .setParent(turn));
-      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("@")
+      g.addAnnotation(new Annotation().setLayerId("htkPhone").setLabel("ER0")
                       .setStart(g.getOrCreateAnchorAt(40.5)).setEnd(g.getOrCreateAnchorAt(41.5))
                       .setParent(turn));
       

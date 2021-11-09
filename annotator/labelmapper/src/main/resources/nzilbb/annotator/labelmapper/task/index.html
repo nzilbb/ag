@@ -61,6 +61,25 @@
           will have one tag added, with one or more labels from the <em>Label Layer</em>,
           unless no correspondence can be found, in which case the token is not tagged. </p>
       </details>
+
+      <details><summary> Phone Sub-mapping </summary>
+        <p> The Sub-mapping option is available if:
+          <ul>
+            <li> The <b>Split labels</b> is set to <i>There are multiple annotations</i>, and</li>
+            <li> The <b>Comparator</b> is set to <i>Orthography → Orthography</i> </li>
+          </ul>
+          i.e. you are mapping word tokens on one layer to word tokens on another layer. </p>
+
+        <p> In this case, you also have the option of mapping phone tokens on one layer
+          to phone tokens on another layer - i.e. you can compare two sets of word/phone
+          annotations. </p>
+
+        <p> The words on the <b>Label Layer</b> are assumed to be divided into phones
+          that are on the <b>Sub-mapping Label Layer</b>, and
+          the words on the <b>Token Layer</b> are assumed to be divided into phones that
+          are on the <b>Sub-mapping Token Layer</b>, a nd the </p>
+        
+      </details>
     </div>
     
     <div id="examples">
@@ -98,15 +117,15 @@
             </tr><tr>
               <th>Mapping Layer</th>
               <td><i>Layer</i></td>
-              <td>D</td><td>IH1</td><td>F</td><td>ER0</td><td>R</td><td>AH0</td><td>N</td><td>T</td>
+              <td>D</td><td>IH1</td><td>F</td><td></td><td><i>ER0</i> R</td><td>AH0</td><td>N</td><td>T</td>
             </tr><tr>
               <th>Comparator</th>
               <td><i>ARPAbet → DISC</i></td>
-              <td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td>
+              <td>↓</td><td>↓</td><td>↓</td><td></td><td>↓</td><td>↓</td><td>↓</td><td>↓</td>
             </tr><tr>
               <th>Token Layer</th>
               <td><i>segments</i></td>
-              <td>d</td><td>ɪ</td><td>f</td><td>ə</td><td>ɹ</td><td>n̩</td><td>n</td><td>t</td>
+              <td>d</td><td>I</td><td>f</td><td></td><td>r</td><td>@</td><td>n</td><td>t</td>
             </tr>
           </table>
         </details>
@@ -153,6 +172,61 @@
             </tr>
           </table>  
         </details>
+
+        <details><summary> Compare two independend word/phone alignments </summary>    
+          <table>
+            <tr class="label">
+              <th>Label Layer</th>
+              <td><i>CMUDictWord</i></td>
+              <td colspan="8" class="word">different</td>
+              <td colspan="7" class="word">firefighter</td>
+            </tr><tr>
+              <th>Split Labels</th>
+              <td><i>There are multiple annotations</i></td>
+              <td colspan="8" class="word">different</td>
+              <td colspan="7" class="word">firefighter</td>
+            </tr><tr class="mapping">
+              <th>Mapping Layer</th>
+              <td><b>output</b></td>
+              <td colspan="8" class="word">different</td>
+              <td colspan="7" class="word">firefighter</td>
+            </tr><tr>
+              <th>Comparator</th>
+              <td><i>Orthography → Orthography</i></td>
+              <td colspan="8">↓</td><td colspan="7">↓</td>
+            </tr><tr class="token">
+              <th>Token Layer</th>
+              <td><i>orthography</i></td>
+              <td colspan="8" class="word">different</td>
+              <td colspan="7" class="word">firefighter</td>
+            </tr>
+            <tr>
+              <th>Phone Sub-mapping</th>
+              <td colspan="15">checked</td>
+            </tr>
+            <tr class="label">
+              <th>Sub-mapping Label Layer</th>
+              <td><i>P2FA</i></td>
+              <td>D</td><td>IH1</td><td>F</td><td>ER0</td><td>R</td><td>AH0</td><td>N</td><td>T</td>
+              <td>F</td><td>AY1</td><td>R</td><td>F</td><td>AY2</td><td>T</td><td>ER0</td>
+            </tr><tr class="mapping">
+              <th>Sub-mapping Mapping Layer</th>
+              <td><b>sub-output</b></td>
+              <td>D</td><td>IH1</td><td>F</td><td></td><td><i>ER0</i> R</td><td>AH0</td><td>N</td><td>T</td>
+              <td>F</td><td>AY1</td><td>R</td><td>F</td><td>AY2</td><td>T</td><td>ER0</td>
+            </tr><tr>
+              <th>Comparator</th>
+              <td><i>ARPAbet → DISC</i></td>
+              <td>↓</td><td>↓</td><td>↓</td><td></td><td>↓</td><td>↓</td><td>↓</td><td>↓</td>
+              <td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td><td>↓</td>
+            </tr><tr class="token">
+              <th>Sub-mapping Token Layer</th>
+              <td><i>segments</i></td>
+              <td>d</td><td>I</td><td>f</td><td></td><td>r</td><td>@</td><td>n</td><td>t</td>
+              <td>f</td><td>2</td><td>@</td><td>f</td><td>2</td><td>t</td><td>@</td></td>
+            </tr>
+          </table>  
+        </details>
       </details>
     </div>
     
@@ -171,6 +245,7 @@
       <div class="field">
         <label> Split labels </label>
         <span>
+          <!-- A set of radio buttons so that each option can have its own explanatory title -->
           <label title="Use the first annotation in the scope, split its label into characters, and map each to labels on the token layer.
 (e.g. DISC word transcriptions to phones)">
             <input type="radio" id="splitLabels-char" name="splitLabels" value="char" checked> Split Label into Individual Characters </label>
@@ -179,7 +254,7 @@
             <input type="radio" id="splitLabels-space" name="splitLabels" value="space"> Split Label on Spaces </label>
           <label title="Use all annotations in the scope, and do not split their labels.
 (e.g. phone alignments to other phone alignments)">
-            <input type="radio" id="splitLabels-" name="splitLabels" value="char"> There are multiple annotations. </label>
+            <input type="radio" id="splitLabels-" name="splitLabels" value="char"> There are multiple annotations </label>
         </span>
         <span id="exampleSplitLayers"></span>
       </div>
@@ -216,6 +291,51 @@
         </span>
         <span id="exampleTokenLabel"></span>
       </div>
+
+      <div title="Label Layer and Token Layer above identify words, which are subdivided into phones on the Sub-mapping Label Layer and Sub-mapping Token Layer below.">
+        <label><input type="checkbox" id="submapping"> Phone Sub-mapping </label>
+      </div>
+      <div class="field" title="Input layer from which the sub-mapping annotations' labels come from">
+        <label for="subLabelLayerId"> Sub-mapping Label Layer </label>
+        <span>
+          <select id="subLabelLayerId" name="subLabelLayerId" required>
+            <option disabled value="">[select layer]</option> <!-- force choice the first time -->
+          </select>
+        </span>
+        <span id="exampleSubLabelLabel"></span>
+      </div>
+      <div class="field" title="Output layer mapping the sub-mapping Label layer to the sub-mapping Token layer">
+        <label for="subMappingLayerId"> Output Mapping Layer </label>
+        <span>
+          <select id="subMappingLayerId" name="subMappingLayerId">
+            <option disabled value="">[select layer]</option> <!-- force choice the first time -->
+            <option>[add new layer]</option>                  <!-- allow adding a new layer -->
+          </select>
+        </span>
+        <span id="exampleSubMappingLabel">?</span>
+      </div>
+      <div class="field" title="How the sub-mapping Label layer and the sub-mapping Token layer labels relate to each other">
+        <label for="subComparator"> Sub-mapping Comparator </label>
+        <span>
+          <select id="subComparator" name="subComparator">
+            <option value="DISCToDISC"> DISC → DISC </option>
+            <option value="DISCToArpabet"> DISC → ARPAbet </option>
+            <option value="ArpabetToDISC"> ARPAbet → DISC </option>
+            <!-- TODO option value="ArpabetToArpabet"> ARPAbet → Arpabet </option-->
+          </select>
+        </span>
+        <span id="exampleSubMapping"></span>
+      </div>
+      <div class="field" title="Which tokens will be tagged for the sub-mapping">
+        <label for="subTokenLayerId"> Sub-mapping Token Layer </label>
+        <span>
+          <select id="subTokenLayerId" name="subTokenLayerId">
+            <option disabled value="">[select layer]</option> <!-- force choice the first time -->
+          </select>
+        </span>
+        <span id="exampleSubTokenLabel"></span>
+      </div>
+      
       <div class="controls"><input type="submit" value="Set Parameters"></div>
     </form>
     

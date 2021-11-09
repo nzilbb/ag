@@ -77,6 +77,17 @@ progress {
     width: 100%;
 }
 
+.word {
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+    border-right: 1px solid black;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+}
+.label > td + td { color: green; }
+.token > td + td { color: blue; }
+.mapping > td + td { font-weight: bold; }
+
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
     .field { flex-direction: column; }
