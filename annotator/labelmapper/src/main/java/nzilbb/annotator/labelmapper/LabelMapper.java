@@ -21,6 +21,16 @@
 //
 package nzilbb.annotator.labelmapper;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,14 +44,22 @@ import javax.json.JsonValue;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.editpath.*;
 import nzilbb.encoding.comparator.*;
+import nzilbb.sql.ConnectionFactory;
 
 /**
  * This annotator creates a mapping between pairs of layers, by finding the minimum edit
  * path between them. 
+ * <p> It supports a 'sub-mapping' for alignment comparisons, where a pair of word layers
+ * are mapped together, and then a pair of phone layers are mapped together. 
+ * <p> For sub-mappings, the edit paths from the 'label' to 'token' layers are stored in
+ * the relational database, with labels, edit distances, and offsets, which can then be
+ * accessed in order to compare alignments.
  * @author Robert Fromont robert@fromont.net.nz
  */
+@UsesRelationalDatabase
 public class LabelMapper extends Annotator {
 
   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
@@ -265,6 +283,108 @@ public class LabelMapper extends Annotator {
    */
   public LabelMapper setSubComparator(String newSubComparator) { subComparator = newSubComparator; return this; }
   
+  /**
+   * {@link UsesRelationalDatabase} method that sets the information required for
+   * connecting to the relational database. 
+   * <p> This override ensures that the database schema has been created
+   * @param db Connection factory for getting new database connections.
+   * @throws SQLException If the annotator can't connect to the given database.
+   */
+  @Override
+  public void setRdbConnectionFactory(ConnectionFactory db) throws SQLException {
+    super.setRdbConnectionFactory(db);
+    
+    // get DB connection
+    Connection rdb = newConnection();
+    
+    try {
+      
+      // check the schema has been created
+      try { // either of prepareStatement or executeQuery may fail if the table doesn't exist
+        PreparedStatement sql = rdb.prepareStatement(
+          sqlx.apply("SELECT * FROM "+getAnnotatorId()+"_mapping LIMIT 1"));
+        try {
+          ResultSet rsCheck = sql.executeQuery();
+          rsCheck.close();
+        } finally {
+          sql.close();
+        }
+      } catch(SQLException exception) {
+        
+        PreparedStatement sql = rdb.prepareStatement(
+          sqlx.apply(
+            "CREATE TABLE "+getAnnotatorId()+"_mapping ("
+            +" transcript VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+            +" COMMENT 'Transcript ID',"
+            +" scope VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+            +" COMMENT 'Utterance/Word ID',"
+            +" step INTEGER NOT NULL"
+            +" COMMENT 'The edit step index in the sequence',"
+            +" fromLayer VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+            +" COMMENT 'Layer of the source annotations',"
+            +" fromParentId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" COMMENT 'ID of the parent of source annotation, if this is a sub-mapping',"
+            +" fromParentLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" COMMENT 'Label of the parent of source annotation, if this is a sub-mapping',"
+            +" fromId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" COMMENT 'ID of the source annotation',"
+            +" fromLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" COMMENT 'Label of the source annotation',"
+            +" fromStart DOUBLE"
+            +" COMMENT 'Start offset of the source annotation',"
+            +" fromEnd DOUBLE"
+            +" COMMENT 'End offset of the source annotation',"
+            +" toLayer VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+            +" COMMENT 'Layer of the target annotations',"
+            +" toParentId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" COMMENT 'ID of the parent of target annotation, if this is a sub-mapping',"
+            +" toParentLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" COMMENT 'Label of the parent of target annotation, if this is a sub-mapping',"
+            +" toId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" COMMENT 'ID of the target annotation',"
+            +" toLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" COMMENT 'Label of the target annotation',"
+            +" toStart DOUBLE"
+            +" COMMENT 'Start offset of the target annotation',"
+            +" toEnd DOUBLE"
+            +" COMMENT 'End offset of the target annotation',"
+            +" operation CHAR(1) NOT NULL"
+            +" COMMENT 'The edit operation: + for insert, - for delete, ! for change, = for no change',"
+            +" distance INTEGER NOT NULL"
+            +" COMMENT 'Distance (cost) for this edit step',"
+            +" PRIMARY KEY (transcript,scope,fromLayer,toLayer,step)"
+            +") ENGINE=MyISAM"));
+        sql.executeUpdate();
+        sql.close();
+      }
+    } finally {
+      try { rdb.close(); } catch(SQLException x) {}
+    }      
+  }
+  
+  /**
+   * Runs any processing required to uninstall the annotator.
+   * <p> In this case, the table created in rdbConnectionFactory() is DROPped.
+   */
+  @Override
+  public void uninstall() {
+    try {
+      Connection rdb = newConnection();      
+      try {
+        
+        // check the schema has been created
+        PreparedStatement sql = rdb.prepareStatement(
+          sqlx.apply("DROP TABLE "+getAnnotatorId()+"_mapping"));
+        sql.executeUpdate();
+        sql.close();
+        
+      } finally {
+        try { rdb.close(); } catch(SQLException x) {}
+      }      
+    } catch (SQLException x) {
+    }
+  }
+   
   /**
    * Sets the configuration for a given annotation task.
    * @param parameters The configuration of the annotator; a value of <tt> null </tt>
@@ -509,120 +629,240 @@ public class LabelMapper extends Annotator {
     EditComparator<LabelElement> subMappingComparator = null;
     boolean subMapping 
       = subMappingLayerId != null && subTokenLayerId != null && getSubComparator() != null;
-    if (subMapping) {
-      if (getSubComparator().equalsIgnoreCase("DISCToDISC")) {
-        subMappingComparator = new DISC2DISCComparator<LabelElement>();
-      } else if (getSubComparator().equalsIgnoreCase("OrthographyToDISC")) {
-        subMappingComparator = new Orthography2DISCComparator<LabelElement>();
-      } else if (getSubComparator().equalsIgnoreCase("OrthographyToArpabet")) {
-        subMappingComparator = new Orthography2ARPAbetComparator<LabelElement>();
-      } else if (getSubComparator().equalsIgnoreCase("DISCToArpabet")) {
-        subMappingComparator = new DISC2ARPAbetComparator<LabelElement>();
-      } else if (getSubComparator().equalsIgnoreCase("ArpabetToDISC")) {
-        subMappingComparator = new ARPAbet2DISCComparator<LabelElement>();
-      }
-    } // subComparator is set
-    MinimumEditPath<LabelElement> subMp = new MinimumEditPath<LabelElement>(subMappingComparator);
 
-    if ((tokenLayerId.equals(schema.getWordLayerId())
-         || tokenLayer.isAncestor(schema.getWordLayerId()))
-        && (labelLayerId.equals(schema.getWordLayerId())
-            || labelLayer.isAncestor(schema.getWordLayerId()))) { 
-      scopeLayerId = schema.getWordLayerId();
-    } else {
-      scopeLayerId = schema.getUtteranceLayerId();
-    }
-
-    // delete any existing annotations
-    for (Annotation a : graph.all(mappingLayerId)) a.destroy();
-    
-    boolean concatDelimiter = !splitLabels.equals("char");
-    setStatus("for each " + scopeLayerId + " map " + labelLayerId + " → " + tokenLayerId);
-    // for each scope annotator
-    for (Annotation scope : graph.list(scopeLayerId)) {
-      if (isCancelling()) break;
+    try {
       
-      // create source element list
-      Annotation[] tokens = scope.all(tokenLayerId);
-      if (tokens.length == 0) {
-        setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + tokenLayerId);
-        continue;
-      }
-      Vector<LabelElement> vTokens = new Vector<LabelElement>();
-      for (Annotation s : tokens) vTokens.add(new LabelElement(s));
+      // get DB connection if we're sub-mapping
+      Connection rdb = subMapping?newConnection():null;
+      PreparedStatement insertEditStep = null;
       
-      // create destination element list
-      Vector<LabelElement> vLabels = new Vector<LabelElement>();
-      if (splitLabels.length() > 0) { // split the label of the first annotation
-        Annotation labels = scope.first(labelLayerId);
-        if (labels == null) {
-          setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + labelLayerId);
-          continue;
-        }
-        if (splitLabels.equals("char")) { // split label into characters (e.g. DISC transcription)
-          for (char c : labels.getLabel().toCharArray()) vLabels.add(new LabelElement(c));
-        } else { // split label on spaces (e.g. ARPAbet transcription)
-          for (String p : labels.getLabel().split(" ")) vLabels.add(new LabelElement(p));
-        }
-      } else { // use full labels of all annotations
-        Annotation[] labels = scope.all(labelLayerId);
-        if (labels.length == 0) {
-          setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + labelLayerId);
-          continue;
-        }
-        for (Annotation l : labels) vLabels.add(new LabelElement(l));
-      }
-      
-      // find the minimum edit path between them
-      List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
-      // collapse INSERT-then-DELETE into just CHANGE
-      path = mp.collapse(path);
-      setStatus(scope.getLabel() + " ("+scope.getStart()+") edit path: " + path.size());
+      try {
         
-      // create tags on the source layer from the path
-      Annotation lastTag = null;
-      String initialInserts = "";
-      for (EditStep<LabelElement> step : path) {
-        switch(step.getOperation()) {
-          case NONE:
-          case CHANGE:
-            lastTag = step.getTo().source.createTag(
-              mappingLayerId, step.getFrom().label);
-            lastTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-            if (!subMapping
-                && initialInserts.length() > 0) { // prepend inserts we had already found
-              lastTag.setLabel(initialInserts + lastTag.getLabel());
-              initialInserts = "";
-            }
-
-            if (subMapping) {
-              // TODO save in relational database
-              subMapping(step.getFrom().source, step.getTo().source, subMp);             
-            } // sub-mapping
-            
-            break;
-          case DELETE:
-            if (!subMapping) {
-              // append to the previous one
-              if (lastTag != null) {
-                if (concatDelimiter) {                
-                  lastTag.setLabel(lastTag.getLabel() + " " + step.getFrom().label);
-                } else {
-                  lastTag.setLabel(lastTag.getLabel() + step.getFrom().label);
-                }
-              } else { // remember the label until we can prepend it to something
-                initialInserts += step.getFrom().label;
-                if (concatDelimiter) initialInserts += " ";
-              }
-            } // no sub-mapping
-            break;
-          case INSERT:
-            // do nothing
-            break;
+        if (subMapping) {
+          
+          // define comparator for sub-mapping
+          if (getSubComparator().equalsIgnoreCase("DISCToDISC")) {
+            subMappingComparator = new DISC2DISCComparator<LabelElement>();
+          } else if (getSubComparator().equalsIgnoreCase("OrthographyToDISC")) {
+            subMappingComparator = new Orthography2DISCComparator<LabelElement>();
+          } else if (getSubComparator().equalsIgnoreCase("OrthographyToArpabet")) {
+            subMappingComparator = new Orthography2ARPAbetComparator<LabelElement>();
+          } else if (getSubComparator().equalsIgnoreCase("DISCToArpabet")) {
+            subMappingComparator = new DISC2ARPAbetComparator<LabelElement>();
+          } else if (getSubComparator().equalsIgnoreCase("ArpabetToDISC")) {
+            subMappingComparator = new ARPAbet2DISCComparator<LabelElement>();
+          }
+          
+          // delete prior edit steps in relational database
+          PreparedStatement deleteEditSteps = rdb.prepareStatement(
+            "DELETE FROM "+getAnnotatorId()+"_mapping"
+            +" WHERE transcript = ? AND fromLayer = ? AND toLayer = ?");
+          deleteEditSteps.setString(1, graph.getId());
+          // main mapping
+          deleteEditSteps.setString(2, labelLayerId);
+          deleteEditSteps.setString(3, tokenLayerId);
+          deleteEditSteps.executeUpdate();
+          // sub mapping
+          deleteEditSteps.setString(2, subLabelLayerId);
+          deleteEditSteps.setString(3, subTokenLayerId);
+          deleteEditSteps.executeUpdate();
+          
+          // prepare edit-step insertion statement
+          insertEditStep = rdb.prepareStatement(
+            "INSERT INTO "+getAnnotatorId()+"_mapping"
+            +" (transcript, scope, step,"
+            +" fromLayer, fromParentId, fromParentLabel, fromId, fromLabel, fromStart, fromEnd,"
+            +" toLayer, toParentId, toParentlabel, toId, toLabel, toStart, toEnd,"
+            +" operation, distance) VALUES "
+            +" (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+          insertEditStep.setString(1, graph.getId());
+        } // subComparator is set
+        MinimumEditPath<LabelElement> subMp
+          = new MinimumEditPath<LabelElement>(subMappingComparator);
+        
+        if ((tokenLayerId.equals(schema.getWordLayerId())
+             || tokenLayer.isAncestor(schema.getWordLayerId()))
+            && (labelLayerId.equals(schema.getWordLayerId())
+                || labelLayer.isAncestor(schema.getWordLayerId()))) { 
+          scopeLayerId = schema.getWordLayerId();
+        } else {
+          scopeLayerId = schema.getUtteranceLayerId();
         }
-      } // next step
-    } // next scope annotation
-      
+        
+        // delete any existing annotations
+        for (Annotation a : graph.all(mappingLayerId)) a.destroy();
+        if (subMappingLayerId != null) {
+          for (Annotation a : graph.all(subMappingLayerId)) a.destroy();
+        }
+        
+        boolean concatDelimiter = !splitLabels.equals("char");
+        setStatus("for each " + scopeLayerId + " map " + labelLayerId + " → " + tokenLayerId);
+        // for each scope annotator
+        for (Annotation scope : graph.list(scopeLayerId)) {
+          if (isCancelling()) break;
+          
+          // create source element list
+          Annotation[] tokens = scope.all(tokenLayerId);
+          if (tokens.length == 0) {
+            setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + tokenLayerId);
+            continue;
+          }
+          Vector<LabelElement> vTokens = new Vector<LabelElement>();
+          for (Annotation s : tokens) vTokens.add(new LabelElement(s));
+          
+          // create destination element list
+          Vector<LabelElement> vLabels = new Vector<LabelElement>();
+          if (splitLabels.length() > 0) { // split the label of the first annotation
+            Annotation labels = scope.first(labelLayerId);
+            if (labels == null) {
+              setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + labelLayerId);
+              continue;
+            }
+            if (splitLabels.equals("char")) { // split label into chars (e.g. DISC transcription)
+              for (char c : labels.getLabel().toCharArray()) vLabels.add(new LabelElement(c));
+            } else { // split label on spaces (e.g. ARPAbet transcription)
+              for (String p : labels.getLabel().split(" ")) vLabels.add(new LabelElement(p));
+            }
+          } else { // use full labels of all annotations
+            Annotation[] labels = scope.all(labelLayerId);
+            if (labels.length == 0) {
+              setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + labelLayerId);
+              continue;
+            }
+            for (Annotation l : labels) vLabels.add(new LabelElement(l));
+          }
+          
+          // find the minimum edit path between them
+          List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
+          // collapse INSERT-then-DELETE into just CHANGE
+          path = mp.collapse(path);
+          setStatus(scope.getLabel() + " ("+scope.getStart()+") edit path: " + path.size());
+          
+          // create tags on the source layer from the path
+          Annotation lastTag = null;
+          String initialInserts = "";
+          int s = 0;
+          int subS = 0;
+          for (EditStep<LabelElement> step : path) {
+            switch(step.getOperation()) {
+              case NONE:
+              case CHANGE: {
+                lastTag = step.getTo().source.createTag(
+                  mappingLayerId, step.getFrom().label);
+                lastTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                if (!subMapping
+                    && initialInserts.length() > 0) { // prepend inserts we had already found
+                  lastTag.setLabel(initialInserts + lastTag.getLabel());
+                  initialInserts = "";
+                }
+                if (subMapping) { // subMapping
+                  Annotation from = step.getFrom().source;
+                  Annotation to = step.getTo().source;
+                  
+                  // save in relational database
+                  insertEditStep.setString(2, scope.getId()); // scope
+                  insertEditStep.setInt(3, ++s); // step
+                  insertEditStep.setString(4, from.getLayerId()); // fromLayer
+                  insertEditStep.setNull(5, Types.VARCHAR); // fromParentId
+                  insertEditStep.setNull(6, Types.VARCHAR); // fromParentLabel
+                  insertEditStep.setString(7, from.getId()); // fromId
+                  insertEditStep.setString(8, from.getLabel()); // fromLabel
+                  insertEditStep.setDouble(9, from.getStart().getOffset()); // fromStart
+                  insertEditStep.setDouble(10, from.getEnd().getOffset()); // fromEnd
+                  insertEditStep.setString(11, to.getLayerId()); // toLayer
+                  insertEditStep.setNull(12, Types.VARCHAR); // toParentId
+                  insertEditStep.setNull(13, Types.VARCHAR); // toParentLabel
+                  insertEditStep.setString(14, to.getId()); // toId
+                  insertEditStep.setString(15, to.getLabel()); // toLabel
+                  insertEditStep.setDouble(16, to.getStart().getOffset()); // toStart
+                  insertEditStep.setDouble(17, to.getEnd().getOffset()); // toEnd
+                  insertEditStep.setString(18, operation(step.getOperation())); // operation
+                  insertEditStep.setInt(19, step.getStepDistance()); // distance
+                  insertEditStep.executeUpdate();
+                  
+                  // map children
+                  subS = subMapping(
+                    step.getFrom().source, step.getTo().source, subMp, insertEditStep, subS);
+                } // sub-mapping
+                
+                break;
+              }
+              case DELETE: {
+                if (!subMapping) {
+                  // append to the previous one
+                  if (lastTag != null) {
+                    if (concatDelimiter) {                
+                      lastTag.setLabel(lastTag.getLabel() + " " + step.getFrom().label);
+                    } else {
+                      lastTag.setLabel(lastTag.getLabel() + step.getFrom().label);
+                    }
+                  } else { // remember the label until we can prepend it to something
+                    initialInserts += step.getFrom().label;
+                    if (concatDelimiter) initialInserts += " ";
+                  }
+                } else { // sub-mapping
+                  Annotation from = step.getFrom().source;
+                  // save in relational database
+                  // (scope was already set)
+                  insertEditStep.setInt(3, ++s); // step
+                  insertEditStep.setString(4, from.getLayerId()); // fromLayer
+                  insertEditStep.setNull(5, Types.VARCHAR); // fromParentId
+                  insertEditStep.setNull(6, Types.VARCHAR); // fromParentLabel
+                  insertEditStep.setString(7, from.getId()); // fromId
+                  insertEditStep.setString(8, from.getLabel()); // fromLabel
+                  insertEditStep.setDouble(9, from.getStart().getOffset()); // fromStart
+                  insertEditStep.setDouble(10, from.getEnd().getOffset()); // fromEnd
+                  insertEditStep.setString(11, tokenLayerId); // toLayer
+                  insertEditStep.setNull(12, Types.VARCHAR); // toParentId
+                  insertEditStep.setNull(13, Types.VARCHAR); // toParentLabel
+                  insertEditStep.setNull(14, Types.VARCHAR); // toId
+                  insertEditStep.setNull(15, Types.VARCHAR); // toLabel
+                  insertEditStep.setNull(16, Types.DOUBLE); // toStart
+                  insertEditStep.setNull(17, Types.DOUBLE); // toEnd
+                  insertEditStep.setString(18, operation(step.getOperation())); // operation
+                  insertEditStep.setInt(19, step.getStepDistance()); // distance
+                  insertEditStep.executeUpdate();
+                }
+                break;
+              }
+              case INSERT: {
+                if (subMapping) {
+                  Annotation to = step.getTo().source;
+                  // save in relational database
+                  // (scope was already set)
+                  insertEditStep.setInt(3, ++s); // step
+                  insertEditStep.setString(4, labelLayerId); // fromLayer
+                  insertEditStep.setNull(5, Types.VARCHAR); // fromParentId
+                  insertEditStep.setNull(6, Types.VARCHAR); // fromParentLabel
+                  insertEditStep.setNull(7, Types.VARCHAR); // fromId
+                  insertEditStep.setNull(8, Types.VARCHAR); // fromLabel
+                  insertEditStep.setNull(9, Types.DOUBLE); // fromStart
+                  insertEditStep.setNull(10, Types.DOUBLE); // fromEnd
+                  insertEditStep.setString(11, to.getLayerId()); // toLayer
+                  insertEditStep.setNull(12, Types.VARCHAR); // toParentId
+                  insertEditStep.setNull(13, Types.VARCHAR); // toParentLabel
+                  insertEditStep.setString(14, to.getId()); // toId
+                  insertEditStep.setString(15, to.getLabel()); // toLabel
+                  insertEditStep.setDouble(16, to.getStart().getOffset()); // toStart
+                  insertEditStep.setDouble(17, to.getEnd().getOffset()); // toEnd
+                  insertEditStep.setString(18, operation(step.getOperation())); // operation
+                  insertEditStep.setInt(19, step.getStepDistance()); // distance
+                  insertEditStep.executeUpdate();
+                }
+                break;
+              }
+            }
+          } // next step
+        } // next scope annotation
+      } finally {
+        if (rdb != null) {
+          try { rdb.close(); } catch(SQLException x) {}
+        }
+      }
+    } catch (SQLException x) {
+      throw new TransformationException(this, x);
+    }
+    
     setRunning(false);
     return graph;
   }   
@@ -633,9 +873,14 @@ public class LabelMapper extends Annotator {
    * @param mainLabel The annotation used to identify which sub-labels to select for mapping.
    * @param mainToken The annotation used to identify which sub-tokens to select for mapping.
    * @param mp The minimum edit path processor for the sub-mapping.
+   * @param insertEditStep Prepared statement for recording edit steps in the relational database.
+   * @param s The last index used when inserting steps into the relational database.
+   * @return The last index used when inserting steps into the relational database.
+   * @throws SQLException
    */
-  protected void subMapping(
-    Annotation mainLabel, Annotation mainToken, MinimumEditPath<LabelElement> mp) {
+  protected int subMapping(
+    Annotation mainLabel, Annotation mainToken, MinimumEditPath<LabelElement> mp,
+    PreparedStatement insertEditStep, int s) throws SQLException {
     // get the sub-label annotations
     Vector<LabelElement> vLabels = new Vector<LabelElement>();
     for (Annotation l : mainLabel.all(subLabelLayerId)) {
@@ -665,20 +910,178 @@ public class LabelMapper extends Annotator {
         for (EditStep<LabelElement> step : path) {
           switch(step.getOperation()) {
             case NONE:
-            case CHANGE:
+            case CHANGE: {
+              Annotation from = step.getFrom().source;
+              String fromParent = from.getId();
+              if (from.getLayer().getParentId().equals(schema.getWordLayerId())) {
+                fromParent = from.getParentId();
+              }
+              Annotation to = step.getTo().source;
+              String toParent = to.getId();
+              if (to.getLayer().getParentId().equals(schema.getWordLayerId())) {
+                toParent = to.getParentId();
+              }
               if (subMappingLayerId != null) {
-                step.getTo().source.createTag(
+                to.createTag(
                   subMappingLayerId, step.getFrom().label)
                   .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
               }
-              // TODO save in relational database
+              // save in relational database
+              // (scope was already set)
+              insertEditStep.setInt(3, ++s); // step
+              insertEditStep.setString(4, from.getLayerId()); // fromLayer
+              insertEditStep.setString(5, fromParent); // fromParentId
+              insertEditStep.setString(6, mainLabel.getLabel()); // fromParentLabel
+              insertEditStep.setString(7, from.getId()); // fromId
+              insertEditStep.setString(8, from.getLabel()); // fromLabel
+              insertEditStep.setDouble(9, from.getStart().getOffset()); // fromStart
+              insertEditStep.setDouble(10, from.getEnd().getOffset()); // fromEnd
+              insertEditStep.setString(11, to.getLayerId()); // toLayer
+              insertEditStep.setString(12, toParent); // toParentId
+              insertEditStep.setString(13, mainToken.getLabel()); // toParentLabel
+              insertEditStep.setString(14, to.getId()); // toId
+              insertEditStep.setString(15, to.getLabel()); // toLabel
+              insertEditStep.setDouble(16, to.getStart().getOffset()); // toStart
+              insertEditStep.setDouble(17, to.getEnd().getOffset()); // toEnd
+              insertEditStep.setString(18, operation(step.getOperation())); // operation
+              insertEditStep.setInt(19, step.getStepDistance()); // distance
+              insertEditStep.executeUpdate();
               break;
-            case DELETE: break; // do nothing
-            case INSERT: break; // do nothing
+            }
+            case DELETE: {
+              Annotation from = step.getFrom().source;
+              String fromParent = from.getId();
+              if (from.getLayer().getParentId().equals(schema.getWordLayerId())) {
+                fromParent = from.getParentId();
+              }
+              // save in relational database
+              // (scope was already set)
+              insertEditStep.setInt(3, ++s); // step
+              insertEditStep.setString(4, from.getLayerId()); // fromLayer
+              insertEditStep.setString(5, fromParent); // fromParentId
+              insertEditStep.setString(6, mainLabel.getLabel()); // fromParentLabel
+              insertEditStep.setString(7, from.getId()); // fromId
+              insertEditStep.setString(8, from.getLabel()); // fromLabel
+              insertEditStep.setDouble(9, from.getStart().getOffset()); // fromStart
+              insertEditStep.setDouble(10, from.getEnd().getOffset()); // fromEnd
+              insertEditStep.setString(11, subTokenLayerId); // toLayer
+              insertEditStep.setNull(12, Types.VARCHAR); // toParentId
+              insertEditStep.setString(13, mainToken.getLabel()); // toParentLabel
+              insertEditStep.setNull(14, Types.VARCHAR); // toId
+              insertEditStep.setNull(15, Types.VARCHAR); // toLabel
+              insertEditStep.setNull(16, Types.DOUBLE); // toStart
+              insertEditStep.setNull(17, Types.DOUBLE); // toEnd
+              insertEditStep.setString(18, operation(step.getOperation())); // operation
+              insertEditStep.setInt(19, step.getStepDistance()); // distance
+              insertEditStep.executeUpdate();
+              break;
+            }
+            case INSERT: {
+              Annotation to = step.getTo().source;
+              String toParent = to.getId();
+              if (to.getLayer().getParentId().equals(schema.getWordLayerId())) {
+                toParent = to.getParentId();
+              }
+              // save in relational database
+              // (scope was already set)
+              insertEditStep.setInt(3, ++s); // step
+              insertEditStep.setString(4, subLabelLayerId); // fromLayer
+              insertEditStep.setNull(5, Types.VARCHAR); // fromParentId
+              insertEditStep.setString(6, mainLabel.getLabel()); // fromParentLabel
+              insertEditStep.setNull(7, Types.VARCHAR); // fromId
+              insertEditStep.setNull(8, Types.VARCHAR); // fromLabel
+              insertEditStep.setNull(9, Types.DOUBLE); // fromStart
+              insertEditStep.setNull(10, Types.DOUBLE); // fromEnd
+              insertEditStep.setString(11, to.getLayerId()); // toLayer
+              insertEditStep.setString(12, toParent); // toParentId
+              insertEditStep.setString(13, mainToken.getLabel()); // toParentLabel
+              insertEditStep.setString(14, to.getId()); // toId
+              insertEditStep.setString(15, to.getLabel()); // toLabel
+              insertEditStep.setDouble(16, to.getStart().getOffset()); // toStart
+              insertEditStep.setDouble(17, to.getEnd().getOffset()); // toEnd
+              insertEditStep.setString(18, operation(step.getOperation())); // operation
+              insertEditStep.setInt(19, step.getStepDistance()); // distance
+              insertEditStep.executeUpdate();
+              break;
+            }
           }
         } // next sub-step
       } // there are sub tokens
     } // there are sub labels
+    return s;
   } // end of subMapping()
+  
+  /**
+   * Converts an EditStep#StepOperation into a character code for saving in the relational 
+   * database.  
+   * @param operation
+   * @return Code representing the operation.
+   */
+  protected String operation(EditStep.StepOperation operation) {
+    switch(operation) {
+      case DELETE: return "-";
+      case CHANGE: return "!";
+      case INSERT: return "+";
+      default: return " ";
+    }
+  } // end of operation()
+  
+  /**
+   * Provides access to the mapping between the given two layers, as a CSV stream.
+   * @param fromLayer
+   * @param toLayer
+   * @return A stream of CSV records.
+   */
+  public InputStream mappingToCsv(String fromLayer, String toLayer)
+    throws IOException, SQLException {
+    
+    File csv = File.createTempFile("LabelMapper_", "_mapping.csv");
+    csv.deleteOnExit();
+    PrintWriter out = new PrintWriter(csv, "UTF-8");
+    try {
+      Connection rdb = newConnection();
+      PreparedStatement sql = rdb.prepareStatement(
+        sqlx.apply(
+          "SELECT transcript, scope, step,"
+          +" fromLayer, fromParentId, fromParentLabel, fromId, fromLabel, fromStart, fromEnd,"
+          +" toLayer, toParentId, toParentLabel, toId, toLabel, toStart, toEnd,"
+          +" operation, distance"
+          +" FROM "+getAnnotatorId()+"_mapping"
+          +" WHERE fromLayer = ? AND toLayer = ?"
+          +" ORDER BY transcript, scope, step"));
+      sql.setString(1, fromLayer);
+      sql.setString(2, toLayer);
+
+      try {
+
+        out.println("transcript,scope,step,"
+                    +"fromLayer,fromParentId,fromParentLabel,fromId,fromLabel,fromStart,fromEnd,"
+                    +"toLayer,toParentId,toParentLabel,toId,toLabel,toStart,toEnd,"
+                    +"operation,distance");
+        ResultSet rs = sql.executeQuery();
+        try {
+          while (rs.next()) {
+            for (int i = 1; i <= 19; i++) {
+              if (i > 1) out.print(",");
+              String value = rs.getString(i);
+              if (value != null) {
+                out.print(value);
+              }
+            } // next field
+            out.println();
+          }
+        } finally {
+          rs.close();
+        }
+      } finally {
+        sql.close();
+        rdb.close();
+      }
+    } finally {
+      out.close();
+    }
+    return new FileInputStream(csv);
+  } // end of mappingToCsv()
+
 
 } // end of class LabelMapper

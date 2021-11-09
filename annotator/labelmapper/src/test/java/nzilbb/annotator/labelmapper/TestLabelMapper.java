@@ -25,7 +25,10 @@ package nzilbb.annotator.labelmapper;
 import org.junit.*;
 import static org.junit.Assert.*;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -48,14 +51,41 @@ import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
+import nzilbb.editpath.*;
 import nzilbb.sql.derby.DerbyConnectionFactory;
 import nzilbb.util.IO;
 
 public class TestLabelMapper {
 
+   public static LabelMapper newAnnotator() throws Exception {
+
+     LabelMapper annotator = new LabelMapper();
+     
+     // find the current directory
+     File dir = dir();
+     
+     // set the schema
+     annotator.setSchema(graph().getSchema());
+     
+     // use derby for relational database
+     annotator.setRdbConnectionFactory(new DerbyConnectionFactory(dir));
+     
+     // set the annotator configuration, which will install the lexicon the first time (only)
+     annotator.setConfig(annotator.getConfig());
+
+     return annotator;
+   }
+	 
+   public static File dir() throws Exception { 
+      URL urlThisClass = TestLabelMapper.class.getResource(
+         TestLabelMapper.class.getSimpleName() + ".class");
+      File fThisClass = new File(urlThisClass.toURI());
+      return fThisClass.getParentFile();
+   }
+  
   /** LabelMapper does not support default parameters. */
   @Test public void defaultParameters() throws Exception {
-    LabelMapper annotator = new LabelMapper();
+    LabelMapper annotator = newAnnotator();
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -70,7 +100,7 @@ public class TestLabelMapper {
   
   /** Valid parameters are accepted. */
   @Test public void setValidParameters() throws Exception {
-    LabelMapper annotator = new LabelMapper();
+    LabelMapper annotator = newAnnotator();
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -89,7 +119,7 @@ public class TestLabelMapper {
   
   /** Valid sub-mapping parameters are accepted. */
   @Test public void setValidSubMappingParameters() throws Exception {
-    LabelMapper annotator = new LabelMapper();
+    LabelMapper annotator = newAnnotator();
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -120,7 +150,7 @@ public class TestLabelMapper {
   
   /** Invalid parameters are rejected. */
   @Test public void setInvalidTaskParameters() throws Exception {
-    LabelMapper annotator = new LabelMapper();
+    LabelMapper annotator = newAnnotator();
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -223,13 +253,12 @@ public class TestLabelMapper {
         +"&subComparator=");
       fail("Should fail with no sub-mapping comparator");
     } catch (InvalidConfigurationException x) {
-      System.out.println(x.getMessage());
     }
   }
   
   /** Test mapping of phoneme word labels to phones. */
   @Test public void DISCToDISC() throws Exception {
-    LabelMapper annotator = new LabelMapper();
+    LabelMapper annotator = newAnnotator();
     // annotator.getStatusObservers().add(status->System.out.println(status));
     
     Graph g = graph();
@@ -282,7 +311,7 @@ public class TestLabelMapper {
 
   /** Test mapping of orthography to phones. */
   @Test public void OrthographyToDISC() throws Exception {
-    LabelMapper annotator = new LabelMapper();
+    LabelMapper annotator = newAnnotator();
     //annotator.getStatusObservers().add(status->System.out.println(status));
     
     Graph g = graph();
@@ -321,7 +350,7 @@ public class TestLabelMapper {
 
   /** Test mapping of orthography to phones. */
   @Test public void ARPAbetToDISC() throws Exception {
-    LabelMapper annotator = new LabelMapper();
+    LabelMapper annotator = newAnnotator();
     //annotator.getStatusObservers().add(status->System.out.println(status));
     
     Graph g = graph();
@@ -364,7 +393,7 @@ public class TestLabelMapper {
 
   /** Test mapping of alternative alignments for comparison, where tokens are on a word layer. */
   @Test public void alternativeAlignmentMappingToWord() throws Exception {
-    LabelMapper annotator = new LabelMapper();
+    LabelMapper annotator = newAnnotator();
     //annotator.getStatusObservers().add(status->System.out.println(status));
     
     Graph g = graph();
@@ -440,7 +469,7 @@ public class TestLabelMapper {
 
   /** Test mapping of alternative alignments for comparison, tokens are on phrase layer. */
   @Test public void alternativeAlignmentMappingToPhrase() throws Exception {
-    LabelMapper annotator = new LabelMapper();
+    LabelMapper annotator = newAnnotator();
     //annotator.getStatusObservers().add(status->System.out.println(status));
     
     Graph g = graph();
@@ -508,6 +537,31 @@ public class TestLabelMapper {
     }
     assertEquals("Right number of tags " + Arrays.asList(g.all("phoneComparison")),
                  14, g.all("phoneComparison").length); // one was not mapped
+
+    // check relational database content
+    File dir = dir();
+
+    // word mapping    
+    InputStream stream = annotator.mappingToCsv("orthography", "htkWord");
+    File csv = new File(dir(), "orthography-htkWord.csv");
+    IO.SaveInputStreamToFile(stream, csv);
+    String differences = diff(new File(dir, "expected_orthography-htkWord.csv"), csv);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      csv.delete();
+    }
+    
+    // phone mapping
+    stream = annotator.mappingToCsv("phone", "htkPhone");
+    csv = new File(dir(), "phone-htkPhone.csv");
+    IO.SaveInputStreamToFile(stream, csv);
+    differences = diff(new File(dir, "expected_phone-htkPhone.csv"), csv);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      csv.delete();
+    }
   }   
 
   /**
@@ -559,6 +613,8 @@ public class TestLabelMapper {
       // annotate a graph
       Graph g = new Graph()
         .setSchema(schema);
+      g.setId("TestLabelMapper");
+      
       Anchor start = g.getOrCreateAnchorAt(1);
       Anchor end = g.getOrCreateAnchorAt(100);
       g.addAnnotation(
@@ -724,6 +780,59 @@ public class TestLabelMapper {
       return g;
   } // end of graph()
 
+  /**
+   * Diffs two files.
+   * @param expected
+   * @param actual
+   * @return null if the files are the same, and a String describing differences if not.
+   */
+  public String diff(File expected, File actual) {
+    StringBuffer d = new StringBuffer();
+    
+    try {
+      // compare with what we expected
+      Vector<String> actualLines = new Vector<String>();
+      BufferedReader reader = new BufferedReader(new FileReader(actual));
+      String line = reader.readLine();
+      while (line != null) {
+        actualLines.add(line);
+        line = reader.readLine();
+      }
+      Vector<String> expectedLines = new Vector<String>();
+      reader = new BufferedReader(new FileReader(expected));
+      line = reader.readLine();
+      while (line != null) {
+        expectedLines.add(line);
+        line = reader.readLine();
+      }
+      MinimumEditPath<String> comparator = new MinimumEditPath<String>();
+      List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
+      for (EditStep<String> step : path) {
+        switch (step.getOperation()) {
+          case CHANGE:
+            d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
+                     + step.getFrom() 
+                     + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Found:\n" + step.getTo());
+            break;
+          case DELETE:
+            d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Deleted:\n" 
+                     + step.getFrom()
+                     + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Missing");
+            break;
+          case INSERT:
+            d.append("\n"+expected.getPath()+":"+(step.getFromIndex()+1)+": Missing" 
+                     + "\n"+actual.getPath()+":"+(step.getToIndex()+1)+": Inserted:\n" 
+                     + step.getTo());
+            break;
+        }
+      } // next step
+    } catch(Exception exception) {
+      d.append("\n" + exception);
+    }
+    if (d.length() > 0) return d.toString();
+    return null;
+  } // end of diff()
+  
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.annotator.labelmapper.TestLabelMapper");
   }
