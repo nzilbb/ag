@@ -377,12 +377,25 @@ public class TestLabelMapper {
       +"&splitLabels="
       +"&tokenLayerId=orthography"
       +"&comparator=CharacterToCharacter"
-      +"&mappingLayerId=comparison"); // nonexistent
-    Layer layer = annotator.getSchema().getLayer("comparison");
-    assertNotNull("comparison layer created", layer);
-    assertEquals("comparison layer correct type", Constants.TYPE_STRING, layer.getType());
-    assertEquals("comparison layer correct parent", "word", layer.getParentId());
-    assertEquals("comparison layer alignment", Constants.ALIGNMENT_NONE, layer.getAlignment());
+      +"&mappingLayerId=wordComparison"
+      +"&subLabelLayerId=htkPhone"
+      +"&subTokenLayerId=phone"
+      +"&subMappingLayerId=phoneComparison"
+      +"&subComparator=ArpabetToDISC");
+    
+    Layer layer = annotator.getSchema().getLayer("wordComparison");
+    assertNotNull("word comparison layer created", layer);
+    assertEquals("word comparison layer correct type", Constants.TYPE_STRING, layer.getType());
+    assertEquals("word comparison layer correct parent", "word", layer.getParentId());
+    assertEquals("word comparison layer alignment",
+                 Constants.ALIGNMENT_NONE, layer.getAlignment());
+    
+    layer = annotator.getSchema().getLayer("phoneComparison");
+    assertNotNull("phone comparison layer created", layer);
+    assertEquals("phone comparison layer correct type", Constants.TYPE_STRING, layer.getType());
+    assertEquals("phone comparison layer correct parent", "phone", layer.getParentId());
+    assertEquals("phone comparison layer alignment",
+                 Constants.ALIGNMENT_NONE, layer.getAlignment());
 
     g.trackChanges();
     annotator.transform(g);
@@ -391,15 +404,38 @@ public class TestLabelMapper {
     Annotation[] orthography = g.all("orthography");
     assertEquals("Right number of words " + Arrays.asList(orthography), 3, orthography.length);
     for (int o = 0; o < orthography.length; o++) {
-      Annotation comparison = orthography[o].first("comparison");
-      assertNotNull("Word mapped " + o, comparison);
-      assertEquals("Word labels match " + o, orthography[o].getLabel(), comparison.getLabel());
-      assertTrue("Comparison is a tag " + o, comparison.tags(orthography[o]));
+      Annotation wordComparison = orthography[o].first("wordComparison");
+      assertNotNull("Word mapped " + o, wordComparison);
+      assertEquals("Word labels match " + o,
+                   orthography[o].getLabel(),
+                   wordComparison.getLabel().toLowerCase());
+      assertTrue("Comparison is a tag " + o, wordComparison.tags(orthography[o]));
       assertEquals("Comparison has word parent " + o,
-                   orthography[o].getParent(), comparison.getParent());
+                   orthography[o].getParent(), wordComparison.getParent());
     }
-    assertEquals("Right number of tags " + Arrays.asList(g.all("comparison")),
-                 3, g.all("comparison").length);
+    assertEquals("Right number of tags " + Arrays.asList(g.all("wordComparison")),
+                 3, g.all("wordComparison").length);
+    
+    Annotation[] phone = g.all("phone");
+    String[] expectedPhone = {
+      "EY1", "D","IH1","F",null,"R","N","T", "F","AY1","R","F","AY2","T","ER0"};
+    assertEquals("Right number of phones " + Arrays.asList(phone), 15, phone.length);
+    for (int p = 0; p < phone.length; p++) {
+      Annotation phoneComparison = phone[p].first("phoneComparison");
+      if (expectedPhone[p] != null) {
+        assertNotNull("Phone mapped " + p, phoneComparison);
+        assertEquals("Phone labels match " + p,
+                     expectedPhone[p],
+                     phoneComparison.getLabel());
+        assertTrue("Comparison is a tag " + p, phoneComparison.tags(phone[p]));
+        assertEquals("Comparison has phone parent " + p,
+                     phone[p], phoneComparison.getParent());
+      } else { // not expecting a mapping
+        assertNull("Phone not mapped " + p, phoneComparison);
+      }
+    }
+    assertEquals("Right number of tags " + Arrays.asList(g.all("phoneComparison")),
+                 14, g.all("phoneComparison").length); // one was not mapped
   }   
 
   /** Test mapping of alternative alignments for comparison, tokens are on phrase layer. */
@@ -411,7 +447,6 @@ public class TestLabelMapper {
     Schema schema = g.getSchema();
     annotator.setSchema(schema);
     
-    // layers are created as required
     // layers are created as required
     annotator.setTaskParameters(
       "labelLayerId=orthography"

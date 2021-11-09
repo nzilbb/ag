@@ -329,15 +329,16 @@ public class LabelMapper extends Annotator {
       if (subTokenLayer == null) 
         throw new InvalidConfigurationException(
           this, "Invalid sub-mapping token layer: " + subTokenLayerId);
-      if (tokenLayer.getParentId().equals(schema.getWordLayerId())) { // phone layer
-        if (!subTokenLayer.getParentId().equals(tokenLayerId)) {
+      if (tokenLayer.getParentId().equals(schema.getWordLayerId())
+          || tokenLayer.getId().equals(schema.getWordLayerId())) { // word layer
+        if (!subTokenLayer.getParentId().equals(schema.getWordLayerId())) {
           throw new InvalidConfigurationException(
-            this, "Sub-mapping token layer must be a word layer");
+            this, "Sub-mapping token layer "+subTokenLayerId+" must be a word layer");
         }
       } else { // phrase layer
         if (!subTokenLayer.getParentId().equals(schema.getTurnLayerId())) {
           throw new InvalidConfigurationException(
-            this, "Sub-mapping token layer must be a phrase layer");
+            this, "Sub-mapping token layer "+subTokenLayerId+" must be a phrase layer");
         }
       }
       if (splitLabels != null && splitLabels.length() > 0) {
