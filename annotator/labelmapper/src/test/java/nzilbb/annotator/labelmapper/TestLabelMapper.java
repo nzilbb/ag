@@ -108,9 +108,9 @@ public class TestLabelMapper {
     
     // layers are created as required
     annotator.setTaskParameters(
-      "labelLayerId=orthography"
+      "sourceLayerId=orthography"
       +"&splitLabels=char"
-      +"&tokenLayerId=phone"
+      +"&targetLayerId=phone"
       +"&comparator=OrthographyToDISC"
       +"&mappingLayerId=disc"); // nonexistent
     Layer layer = annotator.getSchema().getLayer("disc");
@@ -127,13 +127,13 @@ public class TestLabelMapper {
     
     // layers are created as required
     annotator.setTaskParameters(
-      "labelLayerId=orthography"
+      "sourceLayerId=orthography"
       +"&splitLabels="
-      +"&tokenLayerId=htkWord"
+      +"&targetLayerId=htkWord"
       +"&comparator=CharacterToCharacter"
       +"&mappingLayerId=wordComparison"
-      +"&subLabelLayerId=phone"
-      +"&subTokenLayerId=htkPhone"
+      +"&subSourceLayerId=phone"
+      +"&subTargetLayerId=htkPhone"
       +"&subMappingLayerId=phoneComparison"
       +"&subComparator=DISCToDISC");
     Layer layer = annotator.getSchema().getLayer("wordComparison");
@@ -158,29 +158,29 @@ public class TestLabelMapper {
     
     try {
       annotator.setTaskParameters(
-        "labelLayerId=nonexistent"
+        "sourceLayerId=nonexistent"
         +"&splitLabels=char"
-        +"&tokenLayerId=phone"
+        +"&targetLayerId=phone"
         +"&comparator=OrthographyToDISC"
         +"&mappingLayerId=disc"); // nonexistent
-      fail("Should fail with nonexistent labelLayerId");
+      fail("Should fail with nonexistent sourceLayerId");
     } catch (InvalidConfigurationException x) {
     }
     try {
       annotator.setTaskParameters(
-        "labelLayerId=orthography"
+        "sourceLayerId=orthography"
         +"&splitLabels=char"
-        +"&tokenLayerId=nonexistent"
+        +"&targetLayerId=nonexistent"
         +"&comparator=OrthographyToDISC"
         +"&mappingLayerId=disc"); // nonexistent
-      fail("Should fail with nonexistent tokenLayerId");
+      fail("Should fail with nonexistent targetLayerId");
     } catch (InvalidConfigurationException x) {
     }
     try {
       annotator.setTaskParameters(
-        "labelLayerId=orthography"
+        "sourceLayerId=orthography"
         +"&splitLabels=char"
-        +"&tokenLayerId=phone"
+        +"&targetLayerId=phone"
         +"&comparator=" // no comparator
         +"&mappingLayerId=disc");
       fail("Should fail with no comparator");
@@ -188,9 +188,9 @@ public class TestLabelMapper {
     }
     try {
       annotator.setTaskParameters(
-        "labelLayerId=orthography"
+        "sourceLayerId=orthography"
         +"&splitLabels=invalid-value"
-        +"&tokenLayerId=phone"
+        +"&targetLayerId=phone"
         +"&comparator=OrthographyToDISC"
         +"&mappingLayerId=disc");
       fail("Should fail with no comparator");
@@ -200,41 +200,41 @@ public class TestLabelMapper {
     // sub-mapping settings
     try {
       annotator.setTaskParameters(
-        "labelLayerId=orthography"
+        "sourceLayerId=orthography"
         +"&splitLabels="
-        +"&tokenLayerId=htkWord"
+        +"&targetLayerId=htkWord"
         +"&comparator=CharacterToCharacter"
         +"&mappingLayerId=wordComparison"
-        +"&subLabelLayerId=non-existent"
-        +"&subTokenLayerId=htkPhone"
+        +"&subSourceLayerId=non-existent"
+        +"&subTargetLayerId=htkPhone"
         +"&subMappingLayerId=phoneComparison"
         +"&subComparator=DISCToDISC");
-      fail("Should fail with nonexistent subLabelLayerId");
+      fail("Should fail with nonexistent subSourceLayerId");
     } catch (InvalidConfigurationException x) {
     }
     try {
       annotator.setTaskParameters(
-        "labelLayerId=orthography"
+        "sourceLayerId=orthography"
         +"&splitLabels="
-        +"&tokenLayerId=htkWord"
+        +"&targetLayerId=htkWord"
         +"&comparator=CharacterToCharacter"
         +"&mappingLayerId=wordComparison"
-        +"&subLabelLayerId=phone"
-        +"&subTokenLayerId=non-existent"
+        +"&subSourceLayerId=phone"
+        +"&subTargetLayerId=non-existent"
         +"&subMappingLayerId=phoneComparison"
         +"&subComparator=DISCToDISC");
-      fail("Should fail with nonexistent subTokenLayerId");
+      fail("Should fail with nonexistent subTargetLayerId");
     } catch (InvalidConfigurationException x) {
     }
     try {
       annotator.setTaskParameters(
-        "labelLayerId=htkWord" // labelLayer is phrase, but subLabelLayer is not
+        "sourceLayerId=htkWord" // sourceLayer is phrase, but subSourceLayer is not
         +"&splitLabels="
-        +"&tokenLayerId=orthography"
+        +"&targetLayerId=orthography"
         +"&comparator=CharacterToCharacter"
         +"&mappingLayerId=wordComparison"
-        +"&subLabelLayerId=phone"
-        +"&subTokenLayerId=htkPhone"
+        +"&subSourceLayerId=phone"
+        +"&subTargetLayerId=htkPhone"
         +"&subMappingLayerId=phoneComparison"
         +"&subComparator=DISCToDISC");
       fail("Should fail with phrase label layer and non-phrase sub-mapping label layer");
@@ -242,13 +242,13 @@ public class TestLabelMapper {
     }
     try {
       annotator.setTaskParameters(
-        "labelLayerId=orthography"
+        "sourceLayerId=orthography"
         +"&splitLabels="
-        +"&tokenLayerId=htkWord"
+        +"&targetLayerId=htkWord"
         +"&comparator=CharacterToCharacter"
         +"&mappingLayerId=wordComparison"
-        +"&subLabelLayerId=phone"
-        +"&subTokenLayerId=htkPhone"
+        +"&subSourceLayerId=phone"
+        +"&subTargetLayerId=htkPhone"
         +"&subMappingLayerId=phoneComparison"
         +"&subComparator=");
       fail("Should fail with no sub-mapping comparator");
@@ -267,9 +267,9 @@ public class TestLabelMapper {
     
     // layers are created as required
     annotator.setTaskParameters(
-      "labelLayerId=phonemes"
+      "sourceLayerId=phonemes"
       +"&splitLabels=char"
-      +"&tokenLayerId=phone"
+      +"&targetLayerId=phone"
       +"&comparator=DISCToDISC"
       +"&mappingLayerId=disc"); // nonexistent
     Layer layer = annotator.getSchema().getLayer("disc");
@@ -320,9 +320,9 @@ public class TestLabelMapper {
     
     // layers are created as required
     annotator.setTaskParameters(
-      "labelLayerId=orthography"
+      "sourceLayerId=orthography"
       +"&splitLabels=char"
-      +"&tokenLayerId=phone"
+      +"&targetLayerId=phone"
       +"&comparator=OrthographyToDISC"
       +"&mappingLayerId=letter"); // nonexistent
     Layer layer = annotator.getSchema().getLayer("letter");
@@ -359,9 +359,9 @@ public class TestLabelMapper {
     
     // layers are created as required
     annotator.setTaskParameters(
-      "labelLayerId=cmudict"
+      "sourceLayerId=cmudict"
       +"&splitLabels=space"
-      +"&tokenLayerId=phone"
+      +"&targetLayerId=phone"
       +"&comparator=ArpabetToDISC"
       +"&mappingLayerId=arpabet"); // nonexistent
     Layer layer = annotator.getSchema().getLayer("arpabet");
@@ -402,13 +402,13 @@ public class TestLabelMapper {
     
     // layers are created as required
     annotator.setTaskParameters(
-      "labelLayerId=htkWord"
+      "sourceLayerId=htkWord"
       +"&splitLabels="
-      +"&tokenLayerId=orthography"
+      +"&targetLayerId=orthography"
       +"&comparator=CharacterToCharacter"
       +"&mappingLayerId=wordComparison"
-      +"&subLabelLayerId=htkPhone"
-      +"&subTokenLayerId=phone"
+      +"&subSourceLayerId=htkPhone"
+      +"&subTargetLayerId=phone"
       +"&subMappingLayerId=phoneComparison"
       +"&subComparator=ArpabetToDISC");
     
@@ -478,13 +478,13 @@ public class TestLabelMapper {
     
     // layers are created as required
     annotator.setTaskParameters(
-      "labelLayerId=orthography"
+      "sourceLayerId=orthography"
       +"&splitLabels="
-      +"&tokenLayerId=htkWord"
+      +"&targetLayerId=htkWord"
       +"&comparator=CharacterToCharacter"
       +"&mappingLayerId=wordComparison"
-      +"&subLabelLayerId=phone"
-      +"&subTokenLayerId=htkPhone"
+      +"&subSourceLayerId=phone"
+      +"&subTargetLayerId=htkPhone"
       +"&subMappingLayerId=phoneComparison"
       +"&subComparator=DISCToArpabet");
     Layer layer = annotator.getSchema().getLayer("wordComparison");

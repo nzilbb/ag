@@ -84,8 +84,8 @@ progress {
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
 }
-.label > td + td { color: green; }
-.token > td + td { color: blue; }
+.source > td + td { color: green; }
+.target > td + td { color: blue; }
 .mapping > td + td { font-weight: bold; }
 
 /* Layout on narrower screens */

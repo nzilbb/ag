@@ -70,20 +70,20 @@ public class LabelMapper extends Annotator {
   
   /**
    * Layer ID for the source of labels.
-   * @see #getLabelLayerId()
-   * @see #setLabelLayerId(String)
+   * @see #getSourceLayerId()
+   * @see #setSourceLayerId(String)
    */
-  protected String labelLayerId;
+  protected String sourceLayerId;
   /**
-   * Getter for {@link #labelLayerId}: Layer ID for the source of labels.
+   * Getter for {@link #sourceLayerId}: Layer ID for the source of labels.
    * @return Layer ID for the source of labels.
    */
-  public String getLabelLayerId() { return labelLayerId; }
+  public String getSourceLayerId() { return sourceLayerId; }
   /**
-   * Setter for {@link #labelLayerId}: Layer ID for the source of labels.
-   * @param newLabelLayerId Layer ID for the source of labels.
+   * Setter for {@link #sourceLayerId}: Layer ID for the source of labels.
+   * @param newSourceLayerId Layer ID for the source of labels.
    */
-  public LabelMapper setLabelLayerId(String newLabelLayerId) { labelLayerId = newLabelLayerId; return this; }
+  public LabelMapper setSourceLayerId(String newSourceLayerId) { sourceLayerId = newSourceLayerId; return this; }
   
   /**
    * Whether/how to split labels of annotations on the label layer. Valid values are:
@@ -133,20 +133,20 @@ public class LabelMapper extends Annotator {
 
   /**
    * Layer ID of tokens to tag.
-   * @see #getTokenLayerId()
-   * @see #setTokenLayerId(String)
+   * @see #getTargetLayerId()
+   * @see #setTargetLayerId(String)
    */
-  protected String tokenLayerId;
+  protected String targetLayerId;
   /**
-   * Getter for {@link #tokenLayerId}: Layer ID of tokens to tag.
+   * Getter for {@link #targetLayerId}: Layer ID of tokens to tag.
    * @return Layer ID of tokens to tag.
    */
-  public String getTokenLayerId() { return tokenLayerId; }
+  public String getTargetLayerId() { return targetLayerId; }
   /**
-   * Setter for {@link #tokenLayerId}: Layer ID of tokens to tag.
-   * @param newTokenLayerId Layer ID of tokens to tag.
+   * Setter for {@link #targetLayerId}: Layer ID of tokens to tag.
+   * @param newTargetLayerId Layer ID of tokens to tag.
    */
-  public LabelMapper setTokenLayerId(String newTokenLayerId) { tokenLayerId = newTokenLayerId; return this; }
+  public LabelMapper setTargetLayerId(String newTargetLayerId) { targetLayerId = newTargetLayerId; return this; }
 
   /**
    * How to compare the label and token layers. Valid options are "CharacterToCharacter",
@@ -173,66 +173,66 @@ public class LabelMapper extends Annotator {
   
   /**
    * Label layer for sub-mapping.
-   * <p> A sub-mapping is available when {@link #labelLayerId} and {@link #tokenLayerId}
+   * <p> A sub-mapping is available when {@link #sourceLayerId} and {@link #targetLayerId}
    * are two word token layers, {@link #comparator} is set to "CharacterToCharacter", and 
    * {@link #splitLabels} is set to "". In this case, a secondary mapping can be done
-   * between phones of a word token on {@link #labelLayerId} and phones of the
-   * corresponding word on {@link #tokenLayerId}.
+   * between phones of a word token on {@link #sourceLayerId} and phones of the
+   * corresponding word on {@link #targetLayerId}.
    * <ul>
-   *  <li> Words on {@link #labelLayerId} have phones on {@link #subLabelLayerId}. </li>
-   *  <li> Words on {@link #tokenLayerId} have phones on {@link #subTokenLayerId}. </li>
+   *  <li> Words on {@link #sourceLayerId} have phones on {@link #subSourceLayerId}. </li>
+   *  <li> Words on {@link #targetLayerId} have phones on {@link #subTargetLayerId}. </li>
    * </ul>
-   * @see #getSubLabelLayerId()
-   * @see #setSubLabelLayerId(String)
+   * @see #getSubSourceLayerId()
+   * @see #setSubSourceLayerId(String)
    */
-  protected String subLabelLayerId;
+  protected String subSourceLayerId;
   /**
-   * Getter for {@link #subLabelLayerId}: Label layer for sub-mapping.
+   * Getter for {@link #subSourceLayerId}: Label layer for sub-mapping.
    * @return Label layer for sub-mapping.
    */
-  public String getSubLabelLayerId() { return subLabelLayerId; }
+  public String getSubSourceLayerId() { return subSourceLayerId; }
   /**
-   * Setter for {@link #subLabelLayerId}: Label layer for sub-mapping.
-   * @param newSubLabelLayerId Label layer for sub-mapping.
+   * Setter for {@link #subSourceLayerId}: Label layer for sub-mapping.
+   * @param newSubSourceLayerId Label layer for sub-mapping.
    */
-  public LabelMapper setSubLabelLayerId(String newSubLabelLayerId) { subLabelLayerId = newSubLabelLayerId; return this; }
+  public LabelMapper setSubSourceLayerId(String newSubSourceLayerId) { subSourceLayerId = newSubSourceLayerId; return this; }
   
   /**
    * Token layer for sub-mapping.
-   * <p> A sub-mapping is available when {@link #labelLayerId} and {@link #tokenLayerId}
+   * <p> A sub-mapping is available when {@link #sourceLayerId} and {@link #targetLayerId}
    * are two word token layers, {@link #comparator} is set to "CharacterToCharacter", and 
    * {@link #splitLabels} is set to "". In this case, a secondary mapping can be done
-   * between phones of a word token on {@link #labelLayerId} and phones of the
-   * corresponding word on {@link #tokenLayerId}.
+   * between phones of a word token on {@link #sourceLayerId} and phones of the
+   * corresponding word on {@link #targetLayerId}.
    * <ul>
-   *  <li> Words on {@link #labelLayerId} have phones on {@link #subLabelLayerId}. </li>
-   *  <li> Words on {@link #tokenLayerId} have phones on {@link #subTokenLayerId}. </li>
+   *  <li> Words on {@link #sourceLayerId} have phones on {@link #subSourceLayerId}. </li>
+   *  <li> Words on {@link #targetLayerId} have phones on {@link #subTargetLayerId}. </li>
    * </ul>
-   * @see #getSubTokenLayerId()
-   * @see #setSubTokenLayerId(String)
+   * @see #getSubTargetLayerId()
+   * @see #setSubTargetLayerId(String)
    */
-  protected String subTokenLayerId;
+  protected String subTargetLayerId;
   /**
-   * Getter for {@link #subTokenLayerId}: Token layer for sub-mapping.
+   * Getter for {@link #subTargetLayerId}: Token layer for sub-mapping.
    * @return Token layer for sub-mapping.
    */
-  public String getSubTokenLayerId() { return subTokenLayerId; }
+  public String getSubTargetLayerId() { return subTargetLayerId; }
   /**
-   * Setter for {@link #subTokenLayerId}: Token layer for sub-mapping.
-   * @param newSubTokenLayerId Token layer for sub-mapping.
+   * Setter for {@link #subTargetLayerId}: Token layer for sub-mapping.
+   * @param newSubTargetLayerId Token layer for sub-mapping.
    */
-  public LabelMapper setSubTokenLayerId(String newSubTokenLayerId) { subTokenLayerId = newSubTokenLayerId; return this; }
+  public LabelMapper setSubTargetLayerId(String newSubTargetLayerId) { subTargetLayerId = newSubTargetLayerId; return this; }
   
   /**
    * Output mapping layer for sub-mapping.
-   * <p> A sub-mapping is available when {@link #labelLayerId} and {@link #tokenLayerId}
+   * <p> A sub-mapping is available when {@link #sourceLayerId} and {@link #targetLayerId}
    * are two word token layers, {@link #comparator} is set to "CharacterToCharacter", and 
    * {@link #splitLabels} is set to "". In this case, a secondary mapping can be done
-   * between phones of a word token on {@link #labelLayerId} and phones of the
-   * corresponding word on {@link #tokenLayerId}.
+   * between phones of a word token on {@link #sourceLayerId} and phones of the
+   * corresponding word on {@link #targetLayerId}.
    * <ul>
-   *  <li> Words on {@link #labelLayerId} have phones on {@link #subLabelLayerId}. </li>
-   *  <li> Words on {@link #tokenLayerId} have phones on {@link #subTokenLayerId}. </li>
+   *  <li> Words on {@link #sourceLayerId} have phones on {@link #subSourceLayerId}. </li>
+   *  <li> Words on {@link #targetLayerId} have phones on {@link #subTargetLayerId}. </li>
    * </ul>
    * @see #getSubMappingLayerId()
    * @see #setSubMappingLayerId(String)
@@ -251,14 +251,14 @@ public class LabelMapper extends Annotator {
   
   /**
    * How to compare the label and token layers in the sub-mapping. 
-   * <p> A sub-mapping is available when {@link #labelLayerId} and {@link #tokenLayerId}
+   * <p> A sub-mapping is available when {@link #sourceLayerId} and {@link #targetLayerId}
    * are two word token layers, {@link #comparator} is set to "CharacterToCharacter", and 
    * {@link #splitLabels} is set to "". In this case, a secondary mapping can be done
-   * between phones of a word token on {@link #labelLayerId} and phones of the
-   * corresponding word on {@link #tokenLayerId}.
+   * between phones of a word token on {@link #sourceLayerId} and phones of the
+   * corresponding word on {@link #targetLayerId}.
    * <ul>
-   *  <li> Words on {@link #labelLayerId} have phones on {@link #subLabelLayerId}. </li>
-   *  <li> Words on {@link #tokenLayerId} have phones on {@link #subTokenLayerId}. </li>
+   *  <li> Words on {@link #sourceLayerId} have phones on {@link #subSourceLayerId}. </li>
+   *  <li> Words on {@link #targetLayerId} have phones on {@link #subTargetLayerId}. </li>
    * </ul>
    * Valid options are "CharacterToCharacter", "OrthographyToDISC",
    * "OrthographyToArpabet", or "DISCToDISC".
@@ -404,16 +404,16 @@ public class LabelMapper extends Annotator {
     beanPropertiesFromQueryString(parameters);
 
     // validate parameters
-    if (labelLayerId == null || labelLayerId.length() == 0)
+    if (sourceLayerId == null || sourceLayerId.length() == 0)
       throw new InvalidConfigurationException(this, "No label layer set.");
-    Layer labelLayer = schema.getLayer(labelLayerId);
-    if (labelLayer == null) 
-      throw new InvalidConfigurationException(this, "Invalid label layer: " + labelLayerId);
-    if (tokenLayerId == null || tokenLayerId.length() == 0)
+    Layer sourceLayer = schema.getLayer(sourceLayerId);
+    if (sourceLayer == null) 
+      throw new InvalidConfigurationException(this, "Invalid label layer: " + sourceLayerId);
+    if (targetLayerId == null || targetLayerId.length() == 0)
       throw new InvalidConfigurationException(this, "No token layer set.");
-    Layer tokenLayer = schema.getLayer(tokenLayerId);
-    if (tokenLayer == null) 
-      throw new InvalidConfigurationException(this, "Invalid token layer: " + tokenLayerId);
+    Layer targetLayer = schema.getLayer(targetLayerId);
+    if (targetLayer == null) 
+      throw new InvalidConfigurationException(this, "Invalid token layer: " + targetLayerId);
     if (comparator == null || comparator.length() == 0)
       throw new InvalidConfigurationException(this, "Comparator not set.");
     if (splitLabels == null)
@@ -426,44 +426,44 @@ public class LabelMapper extends Annotator {
       throw new InvalidConfigurationException(this, "No mapping layer set.");
     // layers must all be distinct
     HashSet<String> layerSet = new HashSet<String>();
-    layerSet.add(labelLayerId);
-    layerSet.add(tokenLayerId);
+    layerSet.add(sourceLayerId);
+    layerSet.add(targetLayerId);
     layerSet.add(mappingLayerId);
     if (layerSet.size() != 3) {
       throw new InvalidConfigurationException(
-        this, "Label ("+labelLayerId+"), mapping ("+mappingLayerId
-        +"), and token ("+tokenLayerId+") layers must all be distinct.");
+        this, "Label ("+sourceLayerId+"), mapping ("+mappingLayerId
+        +"), and token ("+targetLayerId+") layers must all be distinct.");
     }
 
-    if (subLabelLayerId != null && subLabelLayerId.length() == 0) subLabelLayerId = null;
-    if (subTokenLayerId != null && subTokenLayerId.length() == 0) subTokenLayerId = null;
+    if (subSourceLayerId != null && subSourceLayerId.length() == 0) subSourceLayerId = null;
+    if (subTargetLayerId != null && subTargetLayerId.length() == 0) subTargetLayerId = null;
     if (subMappingLayerId != null && subMappingLayerId.length() == 0) subMappingLayerId = null;
     if (subComparator != null && subComparator.length() == 0) subComparator = null;
-    if (subLabelLayerId != null && subTokenLayerId != null) {
+    if (subSourceLayerId != null && subTargetLayerId != null) {
       // sub-mapping is enabled, so validate relationships
-      Layer subLabelLayer = schema.getLayer(subLabelLayerId);
-      if (subLabelLayer == null) 
+      Layer subSourceLayer = schema.getLayer(subSourceLayerId);
+      if (subSourceLayer == null) 
         throw new InvalidConfigurationException(
-          this, "Invalid sub-mapping label layer: " + subLabelLayerId);
-      Layer subTokenLayer = schema.getLayer(subTokenLayerId);
-      if (subTokenLayer == null) 
+          this, "Invalid sub-mapping label layer: " + subSourceLayerId);
+      Layer subTargetLayer = schema.getLayer(subTargetLayerId);
+      if (subTargetLayer == null) 
         throw new InvalidConfigurationException(
-          this, "Invalid sub-mapping token layer: " + subTokenLayerId);
-      if (tokenLayer.getParentId().equals(schema.getWordLayerId())
-          || tokenLayer.getId().equals(schema.getWordLayerId())) { // word layer
-        if (!subTokenLayer.getParentId().equals(schema.getWordLayerId())) {
+          this, "Invalid sub-mapping token layer: " + subTargetLayerId);
+      if (targetLayer.getParentId().equals(schema.getWordLayerId())
+          || targetLayer.getId().equals(schema.getWordLayerId())) { // word layer
+        if (!subTargetLayer.getParentId().equals(schema.getWordLayerId())) {
           throw new InvalidConfigurationException(
-            this, "Sub-mapping token layer "+subTokenLayerId+" must be a word layer");
+            this, "Sub-mapping token layer "+subTargetLayerId+" must be a word layer");
         }
       } else { // phrase layer
-        if (!subTokenLayer.getParentId().equals(schema.getTurnLayerId())) {
+        if (!subTargetLayer.getParentId().equals(schema.getTurnLayerId())) {
           throw new InvalidConfigurationException(
-            this, "Sub-mapping token layer "+subTokenLayerId+" must be a phrase layer");
+            this, "Sub-mapping token layer "+subTargetLayerId+" must be a phrase layer");
         }
       }
       if (splitLabels != null && splitLabels.length() > 0) {
         throw new InvalidConfigurationException(
-          this, "Sub-mapping is only valid when not splitting "+labelLayerId+" labels");
+          this, "Sub-mapping is only valid when not splitting "+sourceLayerId+" labels");
       }
       if (subComparator == null)
         throw new InvalidConfigurationException(this, "Sub-mapping comparator not set.");
@@ -472,17 +472,17 @@ public class LabelMapper extends Annotator {
     // does the mapping layer need to be added to the schema?
     Layer mappingLayer = schema.getLayer(mappingLayerId);
     if (mappingLayer == null) {
-      String mappingParentId = tokenLayerId;
+      String mappingParentId = targetLayerId;
       int alignment = Constants.ALIGNMENT_NONE;
-      if (tokenLayerId.equals(schema.getWordLayerId())
-          || tokenLayer.isAncestor(schema.getWordLayerId())) { 
-        if (tokenLayer.getAlignment() == Constants.ALIGNMENT_NONE) { // word tag
+      if (targetLayerId.equals(schema.getWordLayerId())
+          || targetLayer.isAncestor(schema.getWordLayerId())) { 
+        if (targetLayer.getAlignment() == Constants.ALIGNMENT_NONE) { // word tag
           // mapping layer is a word layer
           mappingParentId = schema.getWordLayerId();
         }
         alignment = Constants.ALIGNMENT_NONE; // tag layer
         // (otherwise, most likely a segment layer)
-      } else if (tokenLayer.isAncestor(schema.getTurnLayerId())) { 
+      } else if (targetLayer.isAncestor(schema.getTurnLayerId())) { 
         // mapping layer is a phrase layer
         mappingParentId = schema.getTurnLayerId();
         alignment = Constants.ALIGNMENT_INTERVAL; // another phrase layer
@@ -493,26 +493,26 @@ public class LabelMapper extends Annotator {
         .setAlignment(alignment)
         .setPeers(false)
         .setParentId(mappingParentId)
-        .setType(labelLayer.getType()));
+        .setType(sourceLayer.getType()));
     }
     
     if (subMappingLayerId != null) {
       // sub-mapping tag layer
       Layer subMappingLayer = schema.getLayer(subMappingLayerId);
       if (subMappingLayer == null) {
-        String subMappingParentId = subTokenLayerId;
+        String subMappingParentId = subTargetLayerId;
         int alignment = Constants.ALIGNMENT_NONE;
-        Layer subTokenLayer = schema.getLayer(subTokenLayerId);
-        Layer subLabelLayer = schema.getLayer(subLabelLayerId);
-        if (subTokenLayerId.equals(schema.getWordLayerId())
-            || subTokenLayer.isAncestor(schema.getWordLayerId())) { 
-          if (subTokenLayer.getAlignment() == Constants.ALIGNMENT_NONE) { // word tag
+        Layer subTargetLayer = schema.getLayer(subTargetLayerId);
+        Layer subSourceLayer = schema.getLayer(subSourceLayerId);
+        if (subTargetLayerId.equals(schema.getWordLayerId())
+            || subTargetLayer.isAncestor(schema.getWordLayerId())) { 
+          if (subTargetLayer.getAlignment() == Constants.ALIGNMENT_NONE) { // word tag
             // subMapping layer is a word layer
             subMappingParentId = schema.getWordLayerId();
           }
           alignment = Constants.ALIGNMENT_NONE; // tag layer
           // (otherwise, most likely a segment layer)
-        } else if (subTokenLayer.isAncestor(schema.getTurnLayerId())) { 
+        } else if (subTargetLayer.isAncestor(schema.getTurnLayerId())) { 
           // subMapping layer is a phrase layer
           subMappingParentId = schema.getTurnLayerId();
           alignment = Constants.ALIGNMENT_INTERVAL; // another phrase layer
@@ -523,7 +523,7 @@ public class LabelMapper extends Annotator {
           .setAlignment(alignment)
           .setPeers(false)
           .setParentId(subMappingParentId)
-          .setType(subLabelLayer.getType()));
+          .setType(subSourceLayer.getType()));
       }
     }
   }
@@ -538,13 +538,13 @@ public class LabelMapper extends Annotator {
   public String[] getRequiredLayers() throws InvalidConfigurationException {
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
-    if (labelLayerId == null)
+    if (sourceLayerId == null)
       throw new InvalidConfigurationException(this, "No label layer set.");
-    if (tokenLayerId == null)
+    if (targetLayerId == null)
       throw new InvalidConfigurationException(this, "No token layer set.");
     HashSet<String> requiredLayers = new HashSet<String>();
-    requiredLayers.add(labelLayerId);
-    requiredLayers.add(tokenLayerId);
+    requiredLayers.add(sourceLayerId);
+    requiredLayers.add(targetLayerId);
     return requiredLayers.toArray(new String[0]);
   }
 
@@ -593,15 +593,15 @@ public class LabelMapper extends Annotator {
    */
   public Graph transform(Graph graph) throws TransformationException {
     setRunning(true);      
-    Layer labelLayer = graph.getSchema().getLayer(labelLayerId);
-    if (labelLayer == null) {
+    Layer sourceLayer = graph.getSchema().getLayer(sourceLayerId);
+    if (sourceLayer == null) {
       throw new InvalidConfigurationException(
-        this, "Invalid label layer: " + labelLayer);
+        this, "Invalid label layer: " + sourceLayer);
     }
-    Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
-    if (tokenLayer == null) {
+    Layer targetLayer = graph.getSchema().getLayer(targetLayerId);
+    if (targetLayer == null) {
       throw new InvalidConfigurationException(
-        this, "Invalid token layer: " + tokenLayer);
+        this, "Invalid token layer: " + targetLayer);
     }
     Layer mappingLayer = graph.getSchema().getLayer(mappingLayerId);
     if (mappingLayer == null) {
@@ -628,7 +628,7 @@ public class LabelMapper extends Annotator {
     MinimumEditPath<LabelElement> mp = new MinimumEditPath<LabelElement>(comparator);
     EditComparator<LabelElement> subMappingComparator = null;
     boolean subMapping 
-      = subMappingLayerId != null && subTokenLayerId != null && getSubComparator() != null;
+      = subMappingLayerId != null && subTargetLayerId != null && getSubComparator() != null;
 
     try {
       
@@ -659,12 +659,12 @@ public class LabelMapper extends Annotator {
             +" WHERE transcript = ? AND fromLayer = ? AND toLayer = ?");
           deleteEditSteps.setString(1, graph.getId());
           // main mapping
-          deleteEditSteps.setString(2, labelLayerId);
-          deleteEditSteps.setString(3, tokenLayerId);
+          deleteEditSteps.setString(2, sourceLayerId);
+          deleteEditSteps.setString(3, targetLayerId);
           deleteEditSteps.executeUpdate();
           // sub mapping
-          deleteEditSteps.setString(2, subLabelLayerId);
-          deleteEditSteps.setString(3, subTokenLayerId);
+          deleteEditSteps.setString(2, subSourceLayerId);
+          deleteEditSteps.setString(3, subTargetLayerId);
           deleteEditSteps.executeUpdate();
           
           // prepare edit-step insertion statement
@@ -680,10 +680,10 @@ public class LabelMapper extends Annotator {
         MinimumEditPath<LabelElement> subMp
           = new MinimumEditPath<LabelElement>(subMappingComparator);
         
-        if ((tokenLayerId.equals(schema.getWordLayerId())
-             || tokenLayer.isAncestor(schema.getWordLayerId()))
-            && (labelLayerId.equals(schema.getWordLayerId())
-                || labelLayer.isAncestor(schema.getWordLayerId()))) { 
+        if ((targetLayerId.equals(schema.getWordLayerId())
+             || targetLayer.isAncestor(schema.getWordLayerId()))
+            && (sourceLayerId.equals(schema.getWordLayerId())
+                || sourceLayer.isAncestor(schema.getWordLayerId()))) { 
           scopeLayerId = schema.getWordLayerId();
         } else {
           scopeLayerId = schema.getUtteranceLayerId();
@@ -696,15 +696,15 @@ public class LabelMapper extends Annotator {
         }
         
         boolean concatDelimiter = !splitLabels.equals("char");
-        setStatus("for each " + scopeLayerId + " map " + labelLayerId + " → " + tokenLayerId);
+        setStatus("for each " + scopeLayerId + " map " + sourceLayerId + " → " + targetLayerId);
         // for each scope annotator
         for (Annotation scope : graph.list(scopeLayerId)) {
           if (isCancelling()) break;
           
           // create source element list
-          Annotation[] tokens = scope.all(tokenLayerId);
+          Annotation[] tokens = scope.all(targetLayerId);
           if (tokens.length == 0) {
-            setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + tokenLayerId);
+            setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + targetLayerId);
             continue;
           }
           Vector<LabelElement> vTokens = new Vector<LabelElement>();
@@ -713,9 +713,9 @@ public class LabelMapper extends Annotator {
           // create destination element list
           Vector<LabelElement> vLabels = new Vector<LabelElement>();
           if (splitLabels.length() > 0) { // split the label of the first annotation
-            Annotation labels = scope.first(labelLayerId);
+            Annotation labels = scope.first(sourceLayerId);
             if (labels == null) {
-              setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + labelLayerId);
+              setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + sourceLayerId);
               continue;
             }
             if (splitLabels.equals("char")) { // split label into chars (e.g. DISC transcription)
@@ -724,9 +724,9 @@ public class LabelMapper extends Annotator {
               for (String p : labels.getLabel().split(" ")) vLabels.add(new LabelElement(p));
             }
           } else { // use full labels of all annotations
-            Annotation[] labels = scope.all(labelLayerId);
+            Annotation[] labels = scope.all(sourceLayerId);
             if (labels.length == 0) {
-              setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + labelLayerId);
+              setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + sourceLayerId);
               continue;
             }
             for (Annotation l : labels) vLabels.add(new LabelElement(l));
@@ -812,7 +812,7 @@ public class LabelMapper extends Annotator {
                   insertEditStep.setString(8, from.getLabel()); // fromLabel
                   insertEditStep.setDouble(9, from.getStart().getOffset()); // fromStart
                   insertEditStep.setDouble(10, from.getEnd().getOffset()); // fromEnd
-                  insertEditStep.setString(11, tokenLayerId); // toLayer
+                  insertEditStep.setString(11, targetLayerId); // toLayer
                   insertEditStep.setNull(12, Types.VARCHAR); // toParentId
                   insertEditStep.setNull(13, Types.VARCHAR); // toParentLabel
                   insertEditStep.setNull(14, Types.VARCHAR); // toId
@@ -831,7 +831,7 @@ public class LabelMapper extends Annotator {
                   // save in relational database
                   // (scope was already set)
                   insertEditStep.setInt(3, ++s); // step
-                  insertEditStep.setString(4, labelLayerId); // fromLayer
+                  insertEditStep.setString(4, sourceLayerId); // fromLayer
                   insertEditStep.setNull(5, Types.VARCHAR); // fromParentId
                   insertEditStep.setNull(6, Types.VARCHAR); // fromParentLabel
                   insertEditStep.setNull(7, Types.VARCHAR); // fromId
@@ -883,21 +883,21 @@ public class LabelMapper extends Annotator {
     PreparedStatement insertEditStep, int s) throws SQLException {
     // get the sub-label annotations
     Vector<LabelElement> vLabels = new Vector<LabelElement>();
-    for (Annotation l : mainLabel.all(subLabelLayerId)) {
+    for (Annotation l : mainLabel.all(subSourceLayerId)) {
       vLabels.add(new LabelElement(l));
     }
     if (vLabels.size() == 0) {
       setStatus(
-        mainLabel.getLabel() + " ("+mainLabel.getStart()+") no " + subLabelLayerId);
+        mainLabel.getLabel() + " ("+mainLabel.getStart()+") no " + subSourceLayerId);
     } else {
       // get the sub-token annotations
       Vector<LabelElement> vTokens = new Vector<LabelElement>();
-      for (Annotation t : mainToken.all(subTokenLayerId)) {
+      for (Annotation t : mainToken.all(subTargetLayerId)) {
         vTokens.add(new LabelElement(t));
       }
       if (vTokens.size() == 0) {
         setStatus(
-          mainToken.getLabel() + " ("+mainToken.getStart()+") no " + subTokenLayerId);
+          mainToken.getLabel() + " ("+mainToken.getStart()+") no " + subTargetLayerId);
       } else { // both have sub annotations
         // find the minimum edit path between then
         List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
@@ -964,7 +964,7 @@ public class LabelMapper extends Annotator {
               insertEditStep.setString(8, from.getLabel()); // fromLabel
               insertEditStep.setDouble(9, from.getStart().getOffset()); // fromStart
               insertEditStep.setDouble(10, from.getEnd().getOffset()); // fromEnd
-              insertEditStep.setString(11, subTokenLayerId); // toLayer
+              insertEditStep.setString(11, subTargetLayerId); // toLayer
               insertEditStep.setNull(12, Types.VARCHAR); // toParentId
               insertEditStep.setString(13, mainToken.getLabel()); // toParentLabel
               insertEditStep.setNull(14, Types.VARCHAR); // toId
@@ -985,7 +985,7 @@ public class LabelMapper extends Annotator {
               // save in relational database
               // (scope was already set)
               insertEditStep.setInt(3, ++s); // step
-              insertEditStep.setString(4, subLabelLayerId); // fromLayer
+              insertEditStep.setString(4, subSourceLayerId); // fromLayer
               insertEditStep.setNull(5, Types.VARCHAR); // fromParentId
               insertEditStep.setString(6, mainLabel.getLabel()); // fromParentLabel
               insertEditStep.setNull(7, Types.VARCHAR); // fromId

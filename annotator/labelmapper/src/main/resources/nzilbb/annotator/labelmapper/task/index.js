@@ -7,10 +7,10 @@ getVersion(version => {
 });
 
 // original sub-mapping settings
-var subLabelLayerId = null;
+var subSourceLayerId = null;
 var subComparator = null;
 var subMappingLayerId = null;
-var subTokenLayerId = null;
+var subTargetLayerId = null;
 
 // first, get the layer schema
 var schema = null;
@@ -18,16 +18,16 @@ getSchema(s => {
     schema = s;
     
     // populate layer input select options...          
-    var labelLayerId = document.getElementById("labelLayerId");
+    var sourceLayerId = document.getElementById("sourceLayerId");
     addLayerOptions(
-        labelLayerId, schema,
+        sourceLayerId, schema,
         // word layers
         layer => layer.id == schema.wordLayerId || layer.parentId == schema.wordLayerId
         // or phrase layers
             || (layer.alignment == 2 && layer.parentId == schema.turnLayerId
                 && layer.id != schema.utteranceLayerId));
     var mappingLayerId = document.getElementById("mappingLayerId");
-    labelLayerId.selectedIndex = 0; // force selection
+    sourceLayerId.selectedIndex = 0; // force selection
     addLayerOptions(
         mappingLayerId, schema,
         // word layers
@@ -39,15 +39,15 @@ getSchema(s => {
             || (layer.alignment == 2 && layer.parentId == schema.turnLayerId
                 && layer.id != schema.utteranceLayerId));
     mappingLayerId.selectedIndex = 0; // force selection
-    var tokenLayerId = document.getElementById("tokenLayerId");
+    var targetLayerId = document.getElementById("targetLayerId");
     addLayerOptions(
-        tokenLayerId, schema,
+        targetLayerId, schema,
         // word layers
         layer => layer.id == schema.wordLayerId || layer.parentId == schema.wordLayerId
         // or phrase layers
             || (layer.alignment == 2 && layer.parentId == schema.turnLayerId
                 && layer.id != schema.utteranceLayerId));
-    tokenLayerId.selectedIndex = 0; // force selection
+    targetLayerId.selectedIndex = 0; // force selection
 
     document.getElementById("subMappingLayerId").selectedIndex = 0; // force selection
 
@@ -65,12 +65,12 @@ getSchema(s => {
                 }
             }
 
-            subLabelLayerId = parameters.get("subLabelLayerId");
+            subSourceLayerId = parameters.get("subSourceLayerId");
             subComparator = parameters.get("subComparator");
-            subTokenLayerId = parameters.get("subTokenLayerId");
+            subTargetLayerId = parameters.get("subTargetLayerId");
             // check submapping if all of these are set
             document.getElementById("submapping").checked
-                = subLabelLayerId && subComparator && subTokenLayerId;
+                = subSourceLayerId && subComparator && subTargetLayerId;
             subMappingLayerId = parameters.get("subMappingLayerId");
 
             // set splitLabels value
@@ -90,14 +90,14 @@ getSchema(s => {
     });
 });
 
-function changedLabelLayer(select) {
-    const labelLayer = schema.layers[select.value];
-    if (labelLayer) {
-        if (labelLayer.parentId == schema.turnLayerId) { // phrase layer
+function changedSourceLayer(select) {
+    const sourceLayer = schema.layers[select.value];
+    if (sourceLayer) {
+        if (sourceLayer.parentId == schema.turnLayerId) { // phrase layer
             // they probably don't want to split labels
             document.getElementById("splitLabels-").checked = true;
-        } else if (labelLayer.parentId == schema.wordLayerId
-                   && labelLayer.alignment == 0) { // word tag layer
+        } else if (sourceLayer.parentId == schema.wordLayerId
+                   && sourceLayer.alignment == 0) { // word tag layer
             // they probably want to split labels
             // TODO if type == IPA: char, otherwise: space
             document.getElementById("splitLabels-char").checked = true;
@@ -108,81 +108,81 @@ function changedLabelLayer(select) {
     // TODO filter possible token layers
 
     // set possible sub-mapping label layers
-    document.getElementById("subLabelLayerId").innerHTML
+    document.getElementById("subSourceLayerId").innerHTML
         = "<option disabled value=''>[select layer]</option>"; // remove existing options
-    if (labelLayer.parentId == schema.turnLayerId
-        && labelLayer.id != schema.wordLayerId) { // phrase layer
+    if (sourceLayer.parentId == schema.turnLayerId
+        && sourceLayer.id != schema.wordLayerId) { // phrase layer
         // sub labels can only be from phrase layers
         addLayerOptions(
-            document.getElementById("subLabelLayerId"), schema,
+            document.getElementById("subSourceLayerId"), schema,
             layer => layer.alignment == 2 && layer.parentId == schema.turnLayerId
                 && layer.id != schema.wordLayerId && layer.id != schema.utteranceLayerId
-                && layer.id != labelLayer.id);
+                && layer.id != sourceLayer.id);
     } else { // presumably a word or segment layer
         // sub labels can only be word layers
         addLayerOptions(
-            document.getElementById("subLabelLayerId"), schema,
+            document.getElementById("subSourceLayerId"), schema,
             layer => layer.alignment == 2 && layer.parentId == schema.wordLayerId
-                && layer.id != labelLayer.id);        
+                && layer.id != sourceLayer.id);        
     }
-    document.getElementById("subLabelLayerId").value = subLabelLayerId;
+    document.getElementById("subSourceLayerId").value = subSourceLayerId;
 }
-function changedTokenLayer(select) {
+function changedTargetLayer(select) {
     defaultComparator();
     
-    const tokenLayer = schema.layers[select.value];
+    const targetLayer = schema.layers[select.value];
     // set possible sub-mapping token/mapping layers
-    document.getElementById("subTokenLayerId").innerHTML
+    document.getElementById("subTargetLayerId").innerHTML
         = "<option disabled value=''>[select layer]</option>"; // remove existing options
-    if (tokenLayer.parentId == schema.turnLayerId
-        && tokenLayer.id != schema.wordLayerId) { // phrase layer
+    if (targetLayer.parentId == schema.turnLayerId
+        && targetLayer.id != schema.wordLayerId) { // phrase layer
         // sub tokens can only be from phrase layers
         addLayerOptions(
-            document.getElementById("subTokenLayerId"), schema,
+            document.getElementById("subTargetLayerId"), schema,
             layer => layer.alignment == 2 && layer.parentId == schema.turnLayerId
                 && layer.id != schema.wordLayerId && layer.id != schema.utteranceLayerId
-                && layer.id != tokenLayer.id);        
+                && layer.id != targetLayer.id);        
         // sub mappings can only be to phrase layers
         addLayerOptions(
             document.getElementById("subMappingLayerId"), schema,
             layer => layer.alignment == 2 && layer.parentId == schema.turnLayerId
                 && layer.id != schema.wordLayerId && layer.id != schema.utteranceLayerId
-                && layer.id != tokenLayer.id);        
+                && layer.id != targetLayer.id);        
     } else { // presumably a segment layer
         // sub tokens can only be word layers
         addLayerOptions(
-            document.getElementById("subTokenLayerId"), schema,
+            document.getElementById("subTargetLayerId"), schema,
             layer => layer.alignment == 2 && layer.parentId == schema.wordLayerId
-                && layer.id != tokenLayer.id);        
+                && layer.id != targetLayer.id);        
         // sub mappings can only be word layers
         addLayerOptions(
             document.getElementById("subMappingLayerId"), schema,
             layer => layer.alignment == 2 && layer.parentId == schema.wordLayerId
-                && layer.id != tokenLayer.id);        
+                && layer.id != targetLayer.id);        
     }
-    document.getElementById("subTokenLayerId").value = subTokenLayerId;
+    document.getElementById("subTargetLayerId").value = subTargetLayerId;
     document.getElementById("subMappingLayerId").value = subMappingLayerId;
 }
 function defaultComparator() {
-    var labelLayerId = document.getElementById("labelLayerId");
-    var tokenLayerId = document.getElementById("tokenLayerId");
-    var labelLayer = schema.layers[labelLayerId.value];
-    var tokenLayer = schema.layers[tokenLayerId.value];
+    var sourceLayerId = document.getElementById("sourceLayerId");
+    var targetLayerId = document.getElementById("targetLayerId");
+    var sourceLayer = schema.layers[sourceLayerId.value];
+    var targetLayer = schema.layers[targetLayerId.value];
     var defaultComparator = "OrthographyToArpabet";
-    if (labelLayer && tokenLayer) {
-        if (labelLayer.type == "ipa" && tokenLayer.type == "ipa") {
+    if (sourceLayer && targetLayer) {
+        if (sourceLayer.type == "ipa" && targetLayer.type == "ipa") {
             defaultComparator = "DISCToDISC";
             document.getElementById("splitLabels-char").checked = true;
-        } else if (labelLayer.type == "string" && tokenLayer.type == "ipa") {
-            if (labelLayer.id.toLowerCase().includes("arpabet")
-                || labelLayer.id.toLowerCase().includes("cmu")) { // may be an ARPAbet layer
+        } else if (sourceLayer.type == "string" && targetLayer.type == "ipa") {
+            if (sourceLayer.id.toLowerCase().includes("arpabet")
+                || sourceLayer.id.toLowerCase().includes("cmu")) { // may be an ARPAbet layer
                 defaultComparator = "ArpabetToDISC";
                 document.getElementById("splitLabels-space").checked = true;
             } else {
                 defaultComparator = "OrthographyToDISC";
                 document.getElementById("splitLabels-space").checked = false;
             }
-        } else if (labelLayer.type == "ipa" && tokenLayer.type == "string") {
+        } else if (sourceLayer.type == "ipa" && targetLayer.type == "string") {
             defaultComparator = "DISCToArpabet";
             document.getElementById("splitLabels-char").checked = true;
         }
@@ -222,71 +222,71 @@ function setComparatorExamples() {
     var submapping = !document.getElementById("submapping").disabled
         && document.getElementById("submapping").checked;
     // CharacterToCharacter by default
-    var exampleLabel = "transcription"; // orthography
+    var exampleSource = "transcription"; // orthography
     var exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
-    var exampleToken   = "t r a n s c r i p t i o n"; // orthography
-    var exampleSubLabel = "";
+    var exampleTarget   = "t r a n s c r i p t i o n"; // orthography
+    var exampleSubSource = "";
     var exampleSubMapping = "";
-    var exampleSubToken   = "";
+    var exampleSubTarget   = "";
     if (!submapping) { // simple mapping of one layer to the other
         switch (comparator.value) {
         case "OrthographyToDISC":
-            exampleLabel = "transcription"; // orthography
+            exampleSource = "transcription"; // orthography
             exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
-            exampleToken   = "t r { n s k r I p S V n"; // DISC
+            exampleTarget   = "t r { n s k r I p S V n"; // DISC
             break;
         case "ArpabetToDISC":
-            exampleLabel = "T R AE2 N S K R IH1 P SH AH0 N"; // arpabet
+            exampleSource = "T R AE2 N S K R IH1 P SH AH0 N"; // arpabet
             exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
-            exampleToken   = "t r { n s k r I p S V n"; // DISC
+            exampleTarget   = "t r { n s k r I p S V n"; // DISC
             break;
         case "OrthographyToArpabet":
-            exampleLabel = "transcription"; // orthography
+            exampleSource = "transcription"; // orthography
             exampleMapping = "? ?  ?  ? ? ? ?  ?  ? ?   ?  ?"; // mapping
-            exampleToken   = "T R AE2 N S K R IH1 P SH AH0 N"; // ARPAbet
+            exampleTarget   = "T R AE2 N S K R IH1 P SH AH0 N"; // ARPAbet
             break;
         case "DISCToDISC":
-            exampleLabel = "tr{nskrIpSVn"; // DISC
+            exampleSource = "tr{nskrIpSVn"; // DISC
             exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
-            exampleToken   = "t r { n s k r I p S V n"; // DISC
+            exampleTarget   = "t r { n s k r I p S V n"; // DISC
             break;
         case "DISCToArpabet":
-            exampleLabel = "tr{nskrIpSVn"; // DISC
+            exampleSource = "tr{nskrIpSVn"; // DISC
             exampleMapping = "? ?  ?  ? ? ? ?  ?  ? ?   ?  ?"; // mapping
-            exampleToken   = "T R AE2 N S K R IH1 P SH AH0 N"; // ARPAbet
+            exampleTarget   = "T R AE2 N S K R IH1 P SH AH0 N"; // ARPAbet
             break;
         }
     } else { // sub-mapping - two pairs of layers
         comparator = document.getElementById("subComparator");
-        exampleLabel   = "word            tokens"; // orthography
+        exampleSource   = "word            tokens"; // orthography
         exampleMapping = "?                ?";
-        exampleToken   = "word            tokens";
+        exampleTarget   = "word            tokens";
         switch (comparator.value) {
         case "ArpabetToDISC":
-            exampleSubLabel   = "W ER1 D      T OW1 K AH0 N Z"; // arpabet
+            exampleSubSource   = "W ER1 D      T OW1 K AH0 N Z"; // arpabet
             exampleSubMapping = "?  ?  ?      ?  ?  ?  ?  ? ?"; // mapping
-            exampleSubToken   = "w  3  d      t  5  k  @  n z"; // DISC
+            exampleSubTarget   = "w  3  d      t  5  k  @  n z"; // DISC
             break;
         case "DISCToDISC":
-            exampleSubLabel   = "w  3  d      t  5  k  @  n z"; // DISC
+            exampleSubSource   = "w  3  d      t  5  k  @  n z"; // DISC
             exampleSubMapping = "?  ?  ?      ?  ?  ?  ?  ? ?"; // mapping
-            exampleSubToken   = "w  3  d      t  5  k  @  n z"; // DISC
+            exampleSubTarget   = "w  3  d      t  5  k  @  n z"; // DISC
             break;
         case "DISCToArpabet":
-            exampleSubLabel   = "w  3  d      t  5  k  @  n z"; // DISC
+            exampleSubSource   = "w  3  d      t  5  k  @  n z"; // DISC
             exampleSubMapping = "?  ?  ?      ?  ?  ?  ?  ? ?"; // mapping
-            exampleSubToken   = "W ER1 D      T OW1 K AH0 N Z"; // arpabet
+            exampleSubTarget   = "W ER1 D      T OW1 K AH0 N Z"; // arpabet
             break;
         }
     }
-    document.getElementById("exampleLabelLabel").innerHTML = exampleLabel;
+    document.getElementById("exampleSourceLabel").innerHTML = exampleSource;
     document.getElementById("exampleMappingLabel").innerHTML = exampleMapping;
     document.getElementById("exampleMapping").innerHTML = exampleMapping.replace(/\?/g,"↓");
-    document.getElementById("exampleTokenLabel").innerHTML = exampleToken;
-    document.getElementById("exampleSubLabelLabel").innerHTML = exampleSubLabel;
+    document.getElementById("exampleTargetLabel").innerHTML = exampleTarget;
+    document.getElementById("exampleSubSourceLabel").innerHTML = exampleSubSource;
     document.getElementById("exampleSubMappingLabel").innerHTML = exampleSubMapping;
     document.getElementById("exampleSubMapping").innerHTML = exampleSubMapping.replace(/\?/g,"↓");
-    document.getElementById("exampleSubTokenLabel").innerHTML = exampleSubToken;
+    document.getElementById("exampleSubTargetLabel").innerHTML = exampleSubTarget;
 }
 
 function disenableSubMapping() { // disables or enables sub-mapping layers
@@ -295,23 +295,23 @@ function disenableSubMapping() { // disables or enables sub-mapping layers
     submapping.disabled = !document.getElementById("splitLabels-").checked
         || document.getElementById("comparator").value != "CharacterToCharacter";
     // layers can only be specified if submapping is selected
-    document.getElementById("subLabelLayerId").disabled
+    document.getElementById("subSourceLayerId").disabled
         = document.getElementById("subComparator").disabled
         = document.getElementById("subMappingLayerId").disabled
-        = document.getElementById("subTokenLayerId").disabled
+        = document.getElementById("subTargetLayerId").disabled
         = submapping.disabled || !submapping.checked;
     setComparatorExamples();
 }
 
 // add event handlers
-document.getElementById("labelLayerId").onchange = function(e) {
-    changedLabelLayer(this); };
+document.getElementById("sourceLayerId").onchange = function(e) {
+    changedSourceLayer(this); };
 document.getElementById("mappingLayerId").onchange = function(e) {
     changedMappingLayer(this, window.location.search.substring(1)); };
 document.getElementById("subMappingLayerId").onchange = function(e) {
     changedMappingLayer(this, window.location.search.substring(1) + "Phone"); };
-document.getElementById("tokenLayerId").onchange = function(e) {
-    changedTokenLayer(this); };
+document.getElementById("targetLayerId").onchange = function(e) {
+    changedTargetLayer(this); };
 document.getElementById("comparator").onchange = function(e) {
     setComparatorExamples();
     disenableSubMapping();
