@@ -130,10 +130,7 @@ public class CMUDictionaryTagger extends Annotator
    /**
     * {@link UsesRelationalDatabase} method that sets the information required for
     * connecting to the relational database. 
-    * @param sqlTranslator SQL statement translator.
-    * @param url URL for relational database, e.g. <q>jdbc:mysql://localhost/labbcat</q>
-    * @param user Username for connecting to the database, if any.
-    * @param password Password for connecting to the database, if any.
+    * @param db Connection factory for getting new database connections.
     * @throws SQLException If the annotator can't connect to the given database.
     */
    @Override
