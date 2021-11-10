@@ -29,11 +29,14 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -320,39 +323,41 @@ public class LabelMapper extends Annotator {
             +" COMMENT 'Utterance/Word ID',"
             +" step INTEGER NOT NULL"
             +" COMMENT 'The edit step index in the sequence',"
-            +" fromLayer VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+            +" sourceLayer VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
             +" COMMENT 'Layer of the source annotations',"
-            +" fromParentId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" sourceParentId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
             +" COMMENT 'ID of the parent of source annotation, if this is a sub-mapping',"
-            +" fromParentLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" sourceParentLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
             +" COMMENT 'Label of the parent of source annotation, if this is a sub-mapping',"
-            +" fromId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" sourceId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
             +" COMMENT 'ID of the source annotation',"
-            +" fromLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" sourceLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
             +" COMMENT 'Label of the source annotation',"
-            +" fromStart DOUBLE"
+            +" sourceStart DOUBLE"
             +" COMMENT 'Start offset of the source annotation',"
-            +" fromEnd DOUBLE"
+            +" sourceEnd DOUBLE"
             +" COMMENT 'End offset of the source annotation',"
-            +" toLayer VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+            +" targetLayer VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
             +" COMMENT 'Layer of the target annotations',"
-            +" toParentId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" targetParentId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
             +" COMMENT 'ID of the parent of target annotation, if this is a sub-mapping',"
-            +" toParentLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" targetParentLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
             +" COMMENT 'Label of the parent of target annotation, if this is a sub-mapping',"
-            +" toId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" targetId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
             +" COMMENT 'ID of the target annotation',"
-            +" toLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+            +" targetLabel VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
             +" COMMENT 'Label of the target annotation',"
-            +" toStart DOUBLE"
+            +" targetStart DOUBLE"
             +" COMMENT 'Start offset of the target annotation',"
-            +" toEnd DOUBLE"
+            +" targetEnd DOUBLE"
             +" COMMENT 'End offset of the target annotation',"
             +" operation CHAR(1) NOT NULL"
             +" COMMENT 'The edit operation: + for insert, - for delete, ! for change, = for no change',"
             +" distance INTEGER NOT NULL"
             +" COMMENT 'Distance (cost) for this edit step',"
-            +" PRIMARY KEY (transcript,scope,fromLayer,toLayer,step)"
+            +" overlapRate DOUBLE"
+            +" COMMENT 'As per Paulo and Oliveira (2004), 0 means no overlap at all, 1 means they complete overlap',"
+            +" PRIMARY KEY (transcript,scope,sourceLayer,targetLayer,step)"
             +") ENGINE=MyISAM"));
         sql.executeUpdate();
         sql.close();
@@ -656,7 +661,7 @@ public class LabelMapper extends Annotator {
           // delete prior edit steps in relational database
           PreparedStatement deleteEditSteps = rdb.prepareStatement(
             "DELETE FROM "+getAnnotatorId()+"_mapping"
-            +" WHERE transcript = ? AND fromLayer = ? AND toLayer = ?");
+            +" WHERE transcript = ? AND sourceLayer = ? AND targetLayer = ?");
           deleteEditSteps.setString(1, graph.getId());
           // main mapping
           deleteEditSteps.setString(2, sourceLayerId);
@@ -671,10 +676,12 @@ public class LabelMapper extends Annotator {
           insertEditStep = rdb.prepareStatement(
             "INSERT INTO "+getAnnotatorId()+"_mapping"
             +" (transcript, scope, step,"
-            +" fromLayer, fromParentId, fromParentLabel, fromId, fromLabel, fromStart, fromEnd,"
-            +" toLayer, toParentId, toParentlabel, toId, toLabel, toStart, toEnd,"
-            +" operation, distance) VALUES "
-            +" (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            +" sourceLayer, sourceParentId, sourceParentLabel, sourceId, sourceLabel,"
+            +" sourceStart, sourceEnd,"
+            +" targetLayer, targetParentId, targetParentlabel, targetId, targetLabel,"
+            +" targetStart, targetEnd,"
+            +" operation, distance, overlapRate) VALUES "
+            +" (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
           insertEditStep.setString(1, graph.getId());
         } // subComparator is set
         MinimumEditPath<LabelElement> subMp
@@ -762,22 +769,23 @@ public class LabelMapper extends Annotator {
                   // save in relational database
                   insertEditStep.setString(2, scope.getId()); // scope
                   insertEditStep.setInt(3, ++s); // step
-                  insertEditStep.setString(4, from.getLayerId()); // fromLayer
-                  insertEditStep.setNull(5, Types.VARCHAR); // fromParentId
-                  insertEditStep.setNull(6, Types.VARCHAR); // fromParentLabel
-                  insertEditStep.setString(7, from.getId()); // fromId
-                  insertEditStep.setString(8, from.getLabel()); // fromLabel
-                  insertEditStep.setDouble(9, from.getStart().getOffset()); // fromStart
-                  insertEditStep.setDouble(10, from.getEnd().getOffset()); // fromEnd
-                  insertEditStep.setString(11, to.getLayerId()); // toLayer
-                  insertEditStep.setNull(12, Types.VARCHAR); // toParentId
-                  insertEditStep.setNull(13, Types.VARCHAR); // toParentLabel
-                  insertEditStep.setString(14, to.getId()); // toId
-                  insertEditStep.setString(15, to.getLabel()); // toLabel
-                  insertEditStep.setDouble(16, to.getStart().getOffset()); // toStart
-                  insertEditStep.setDouble(17, to.getEnd().getOffset()); // toEnd
+                  insertEditStep.setString(4, from.getLayerId()); // sourceLayer
+                  insertEditStep.setNull(5, Types.VARCHAR); // sourceParentId
+                  insertEditStep.setNull(6, Types.VARCHAR); // sourceParentLabel
+                  insertEditStep.setString(7, from.getId()); // sourceId
+                  insertEditStep.setString(8, from.getLabel()); // sourceLabel
+                  insertEditStep.setDouble(9, from.getStart().getOffset()); // sourceStart
+                  insertEditStep.setDouble(10, from.getEnd().getOffset()); // sourceEnd
+                  insertEditStep.setString(11, to.getLayerId()); // targetLayer
+                  insertEditStep.setNull(12, Types.VARCHAR); // targetParentId
+                  insertEditStep.setNull(13, Types.VARCHAR); // targetParentLabel
+                  insertEditStep.setString(14, to.getId()); // targetId
+                  insertEditStep.setString(15, to.getLabel()); // targetLabel
+                  insertEditStep.setDouble(16, to.getStart().getOffset()); // targetStart
+                  insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
                   insertEditStep.setString(18, operation(step.getOperation())); // operation
                   insertEditStep.setInt(19, step.getStepDistance()); // distance
+                  insertEditStep.setDouble(20, OverlapRate(from, to)); // overlapRate
                   insertEditStep.executeUpdate();
                   
                   // map children
@@ -805,22 +813,23 @@ public class LabelMapper extends Annotator {
                   // save in relational database
                   // (scope was already set)
                   insertEditStep.setInt(3, ++s); // step
-                  insertEditStep.setString(4, from.getLayerId()); // fromLayer
-                  insertEditStep.setNull(5, Types.VARCHAR); // fromParentId
-                  insertEditStep.setNull(6, Types.VARCHAR); // fromParentLabel
-                  insertEditStep.setString(7, from.getId()); // fromId
-                  insertEditStep.setString(8, from.getLabel()); // fromLabel
-                  insertEditStep.setDouble(9, from.getStart().getOffset()); // fromStart
-                  insertEditStep.setDouble(10, from.getEnd().getOffset()); // fromEnd
-                  insertEditStep.setString(11, targetLayerId); // toLayer
-                  insertEditStep.setNull(12, Types.VARCHAR); // toParentId
-                  insertEditStep.setNull(13, Types.VARCHAR); // toParentLabel
-                  insertEditStep.setNull(14, Types.VARCHAR); // toId
-                  insertEditStep.setNull(15, Types.VARCHAR); // toLabel
-                  insertEditStep.setNull(16, Types.DOUBLE); // toStart
-                  insertEditStep.setNull(17, Types.DOUBLE); // toEnd
+                  insertEditStep.setString(4, from.getLayerId()); // sourceLayer
+                  insertEditStep.setNull(5, Types.VARCHAR); // sourceParentId
+                  insertEditStep.setNull(6, Types.VARCHAR); // sourceParentLabel
+                  insertEditStep.setString(7, from.getId()); // sourceId
+                  insertEditStep.setString(8, from.getLabel()); // sourceLabel
+                  insertEditStep.setDouble(9, from.getStart().getOffset()); // sourceStart
+                  insertEditStep.setDouble(10, from.getEnd().getOffset()); // sourceEnd
+                  insertEditStep.setString(11, targetLayerId); // targetLayer
+                  insertEditStep.setNull(12, Types.VARCHAR); // targetParentId
+                  insertEditStep.setNull(13, Types.VARCHAR); // targetParentLabel
+                  insertEditStep.setNull(14, Types.VARCHAR); // targetId
+                  insertEditStep.setNull(15, Types.VARCHAR); // targetLabel
+                  insertEditStep.setNull(16, Types.DOUBLE); // targetStart
+                  insertEditStep.setNull(17, Types.DOUBLE); // targetEnd
                   insertEditStep.setString(18, operation(step.getOperation())); // operation
                   insertEditStep.setInt(19, step.getStepDistance()); // distance
+                  insertEditStep.setNull(20, Types.DOUBLE); // overlapRate
                   insertEditStep.executeUpdate();
                 }
                 break;
@@ -831,22 +840,23 @@ public class LabelMapper extends Annotator {
                   // save in relational database
                   // (scope was already set)
                   insertEditStep.setInt(3, ++s); // step
-                  insertEditStep.setString(4, sourceLayerId); // fromLayer
-                  insertEditStep.setNull(5, Types.VARCHAR); // fromParentId
-                  insertEditStep.setNull(6, Types.VARCHAR); // fromParentLabel
-                  insertEditStep.setNull(7, Types.VARCHAR); // fromId
-                  insertEditStep.setNull(8, Types.VARCHAR); // fromLabel
-                  insertEditStep.setNull(9, Types.DOUBLE); // fromStart
-                  insertEditStep.setNull(10, Types.DOUBLE); // fromEnd
-                  insertEditStep.setString(11, to.getLayerId()); // toLayer
-                  insertEditStep.setNull(12, Types.VARCHAR); // toParentId
-                  insertEditStep.setNull(13, Types.VARCHAR); // toParentLabel
-                  insertEditStep.setString(14, to.getId()); // toId
-                  insertEditStep.setString(15, to.getLabel()); // toLabel
-                  insertEditStep.setDouble(16, to.getStart().getOffset()); // toStart
-                  insertEditStep.setDouble(17, to.getEnd().getOffset()); // toEnd
+                  insertEditStep.setString(4, sourceLayerId); // sourceLayer
+                  insertEditStep.setNull(5, Types.VARCHAR); // sourceParentId
+                  insertEditStep.setNull(6, Types.VARCHAR); // sourceParentLabel
+                  insertEditStep.setNull(7, Types.VARCHAR); // sourceId
+                  insertEditStep.setNull(8, Types.VARCHAR); // sourceLabel
+                  insertEditStep.setNull(9, Types.DOUBLE); // sourceStart
+                  insertEditStep.setNull(10, Types.DOUBLE); // sourceEnd
+                  insertEditStep.setString(11, to.getLayerId()); // targetLayer
+                  insertEditStep.setNull(12, Types.VARCHAR); // targetParentId
+                  insertEditStep.setNull(13, Types.VARCHAR); // targetParentLabel
+                  insertEditStep.setString(14, to.getId()); // targetId
+                  insertEditStep.setString(15, to.getLabel()); // targetLabel
+                  insertEditStep.setDouble(16, to.getStart().getOffset()); // targetStart
+                  insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
                   insertEditStep.setString(18, operation(step.getOperation())); // operation
                   insertEditStep.setInt(19, step.getStepDistance()); // distance
+                  insertEditStep.setNull(20, Types.DOUBLE); // overlapRate
                   insertEditStep.executeUpdate();
                 }
                 break;
@@ -929,22 +939,23 @@ public class LabelMapper extends Annotator {
               // save in relational database
               // (scope was already set)
               insertEditStep.setInt(3, ++s); // step
-              insertEditStep.setString(4, from.getLayerId()); // fromLayer
-              insertEditStep.setString(5, fromParent); // fromParentId
-              insertEditStep.setString(6, mainLabel.getLabel()); // fromParentLabel
-              insertEditStep.setString(7, from.getId()); // fromId
-              insertEditStep.setString(8, from.getLabel()); // fromLabel
-              insertEditStep.setDouble(9, from.getStart().getOffset()); // fromStart
-              insertEditStep.setDouble(10, from.getEnd().getOffset()); // fromEnd
-              insertEditStep.setString(11, to.getLayerId()); // toLayer
-              insertEditStep.setString(12, toParent); // toParentId
-              insertEditStep.setString(13, mainToken.getLabel()); // toParentLabel
-              insertEditStep.setString(14, to.getId()); // toId
-              insertEditStep.setString(15, to.getLabel()); // toLabel
-              insertEditStep.setDouble(16, to.getStart().getOffset()); // toStart
-              insertEditStep.setDouble(17, to.getEnd().getOffset()); // toEnd
+              insertEditStep.setString(4, from.getLayerId()); // sourceLayer
+              insertEditStep.setString(5, fromParent); // sourceParentId
+              insertEditStep.setString(6, mainLabel.getLabel()); // sourceParentLabel
+              insertEditStep.setString(7, from.getId()); // sourceId
+              insertEditStep.setString(8, from.getLabel()); // sourceLabel
+              insertEditStep.setDouble(9, from.getStart().getOffset()); // sourceStart
+              insertEditStep.setDouble(10, from.getEnd().getOffset()); // sourceEnd
+              insertEditStep.setString(11, to.getLayerId()); // targetLayer
+              insertEditStep.setString(12, toParent); // targetParentId
+              insertEditStep.setString(13, mainToken.getLabel()); // targetParentLabel
+              insertEditStep.setString(14, to.getId()); // targetId
+              insertEditStep.setString(15, to.getLabel()); // targetLabel
+              insertEditStep.setDouble(16, to.getStart().getOffset()); // targetStart
+              insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
               insertEditStep.setString(18, operation(step.getOperation())); // operation
               insertEditStep.setInt(19, step.getStepDistance()); // distance
+              insertEditStep.setDouble(20, OverlapRate(from, to)); // overlapRate
               insertEditStep.executeUpdate();
               break;
             }
@@ -957,22 +968,23 @@ public class LabelMapper extends Annotator {
               // save in relational database
               // (scope was already set)
               insertEditStep.setInt(3, ++s); // step
-              insertEditStep.setString(4, from.getLayerId()); // fromLayer
-              insertEditStep.setString(5, fromParent); // fromParentId
-              insertEditStep.setString(6, mainLabel.getLabel()); // fromParentLabel
-              insertEditStep.setString(7, from.getId()); // fromId
-              insertEditStep.setString(8, from.getLabel()); // fromLabel
-              insertEditStep.setDouble(9, from.getStart().getOffset()); // fromStart
-              insertEditStep.setDouble(10, from.getEnd().getOffset()); // fromEnd
-              insertEditStep.setString(11, subTargetLayerId); // toLayer
-              insertEditStep.setNull(12, Types.VARCHAR); // toParentId
-              insertEditStep.setString(13, mainToken.getLabel()); // toParentLabel
-              insertEditStep.setNull(14, Types.VARCHAR); // toId
-              insertEditStep.setNull(15, Types.VARCHAR); // toLabel
-              insertEditStep.setNull(16, Types.DOUBLE); // toStart
-              insertEditStep.setNull(17, Types.DOUBLE); // toEnd
+              insertEditStep.setString(4, from.getLayerId()); // sourceLayer
+              insertEditStep.setString(5, fromParent); // sourceParentId
+              insertEditStep.setString(6, mainLabel.getLabel()); // sourceParentLabel
+              insertEditStep.setString(7, from.getId()); // sourceId
+              insertEditStep.setString(8, from.getLabel()); // sourceLabel
+              insertEditStep.setDouble(9, from.getStart().getOffset()); // sourceStart
+              insertEditStep.setDouble(10, from.getEnd().getOffset()); // sourceEnd
+              insertEditStep.setString(11, subTargetLayerId); // targetLayer
+              insertEditStep.setNull(12, Types.VARCHAR); // targetParentId
+              insertEditStep.setString(13, mainToken.getLabel()); // targetParentLabel
+              insertEditStep.setNull(14, Types.VARCHAR); // targetId
+              insertEditStep.setNull(15, Types.VARCHAR); // targetLabel
+              insertEditStep.setNull(16, Types.DOUBLE); // targetStart
+              insertEditStep.setNull(17, Types.DOUBLE); // targetEnd
               insertEditStep.setString(18, operation(step.getOperation())); // operation
               insertEditStep.setInt(19, step.getStepDistance()); // distance
+              insertEditStep.setNull(20, Types.DOUBLE); // overlapRate
               insertEditStep.executeUpdate();
               break;
             }
@@ -985,22 +997,23 @@ public class LabelMapper extends Annotator {
               // save in relational database
               // (scope was already set)
               insertEditStep.setInt(3, ++s); // step
-              insertEditStep.setString(4, subSourceLayerId); // fromLayer
-              insertEditStep.setNull(5, Types.VARCHAR); // fromParentId
-              insertEditStep.setString(6, mainLabel.getLabel()); // fromParentLabel
-              insertEditStep.setNull(7, Types.VARCHAR); // fromId
-              insertEditStep.setNull(8, Types.VARCHAR); // fromLabel
-              insertEditStep.setNull(9, Types.DOUBLE); // fromStart
-              insertEditStep.setNull(10, Types.DOUBLE); // fromEnd
-              insertEditStep.setString(11, to.getLayerId()); // toLayer
-              insertEditStep.setString(12, toParent); // toParentId
-              insertEditStep.setString(13, mainToken.getLabel()); // toParentLabel
-              insertEditStep.setString(14, to.getId()); // toId
-              insertEditStep.setString(15, to.getLabel()); // toLabel
-              insertEditStep.setDouble(16, to.getStart().getOffset()); // toStart
-              insertEditStep.setDouble(17, to.getEnd().getOffset()); // toEnd
+              insertEditStep.setString(4, subSourceLayerId); // sourceLayer
+              insertEditStep.setNull(5, Types.VARCHAR); // sourceParentId
+              insertEditStep.setString(6, mainLabel.getLabel()); // sourceParentLabel
+              insertEditStep.setNull(7, Types.VARCHAR); // sourceId
+              insertEditStep.setNull(8, Types.VARCHAR); // sourceLabel
+              insertEditStep.setNull(9, Types.DOUBLE); // sourceStart
+              insertEditStep.setNull(10, Types.DOUBLE); // sourceEnd
+              insertEditStep.setString(11, to.getLayerId()); // targetLayer
+              insertEditStep.setString(12, toParent); // targetParentId
+              insertEditStep.setString(13, mainToken.getLabel()); // targetParentLabel
+              insertEditStep.setString(14, to.getId()); // targetId
+              insertEditStep.setString(15, to.getLabel()); // targetLabel
+              insertEditStep.setDouble(16, to.getStart().getOffset()); // targetStart
+              insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
               insertEditStep.setString(18, operation(step.getOperation())); // operation
               insertEditStep.setInt(19, step.getStepDistance()); // distance
+              insertEditStep.setNull(20, Types.DOUBLE); // overlapRate
               insertEditStep.executeUpdate();
               break;
             }
@@ -1027,12 +1040,88 @@ public class LabelMapper extends Annotator {
   } // end of operation()
   
   /**
+   * Calculates the Overlap Rate of two annotations.
+   * <p> <a href="http://dx.doi.org/10.1007/978-3-540-30228-5_4">Paulo and Oliveira (2004)</a> 
+   * devised Overlap Rate (OvR) to compare alignments, which measures how much two
+   * intervals overlap, independent of their absolute durations. OvR is calculated as
+   * follows: <br>
+   * OvR = CommonDur / DurMax = CommonDur / (Dur1 + Dur2 - CommonDur)
+   * @param i1 Annotation representing one of the intervals.
+   * @param i2 Annotation representing the other interval.
+   * @return A value between 0 and 1. A value of 0 means that the two intervals do not
+   * overlap at all, with 1 meaning they completely overlap. 
+   */
+  public static double OverlapRate(Annotation i1, Annotation i2) {
+    // if either annotation has a null start or end, return 0.0
+    if (!i1.getAnchored() || !i2.getAnchored()) return 0.0;
+    
+    // get offsets
+    double start1 = i1.getStart().getOffset();
+    double end1 = i1.getEnd().getOffset();
+    double dur1 = end1 - start1;
+    double start2 = i2.getStart().getOffset();
+    double end2 = i2.getEnd().getOffset();
+    double dur2 = end2 - start2;
+    double latestStart = Math.max(start1, start2);
+    double earliestEnd = Math.min(end1, end2);
+    double commonDur = latestStart < earliestEnd? // if they overlap
+      // the common duration is the difference between the latest start and the earliest end
+      earliestEnd - latestStart
+      // otherwise, there's no common duration
+      : 0.0;
+    return commonDur / (dur1 + dur2 - commonDur);
+  } // end of overlapRate()
+
+  /**
+   * Lists tracked mappings. 
+   * @return A list of strings formatted sourceLayerId→targetLayerId, representing
+   * tracker mappings that can be accessed via {@link #mappingToCsv(String)}.
+   * @throws SQLException
+   * @see #mappingToCsv(String)
+   */
+  public List<String> listMappings() throws SQLException {
+    Vector<String> mappings = new Vector<String>();
+    Connection rdb = newConnection();
+    PreparedStatement sql = rdb.prepareStatement(
+      sqlx.apply(
+        "SELECT DISTINCT sourceLayer, targetLayer"
+        +" FROM "+getAnnotatorId()+"_mapping"
+        +" ORDER BY sourceLayer, targetLayer"));
+    ResultSet rs = sql.executeQuery();
+    try {
+      while (rs.next()) {
+        mappings.add(rs.getString(1) + "→" + rs.getString(2));
+      }
+    } finally {
+      rs.close();
+      sql.close();
+      rdb.close();
+    }
+    return mappings;
+  } // end of listMappings()
+  
+  /**
    * Provides access to the mapping between the given two layers, as a CSV stream.
-   * @param fromLayer
-   * @param toLayer
+   * @param mappingId A string of the form sourceLayerId→targetLayerId that identifies a
+   * tracked mapping between layers.
+   * @return A stream of CSV records.
+   * @see #listMappings()
+   * @see #mappingToCsv(String,String)
+   */
+  public InputStream mappingToCsv(String mappingId)
+    throws IOException, SQLException {
+    int arrowPos = mappingId.indexOf("→");
+    if (arrowPos < 0) throw new SQLException("Invalid mapping ID: " + mappingId);
+    return mappingToCsv(mappingId.substring(0, arrowPos), mappingId.substring(arrowPos + 1));
+  }
+  
+  /**
+   * Provides access to the mapping between the given two layers, as a CSV stream.
+   * @param sourceLayerId The source layer ID.
+   * @param targetLayerId The target layer ID.
    * @return A stream of CSV records.
    */
-  public InputStream mappingToCsv(String fromLayer, String toLayer)
+  public InputStream mappingToCsv(String sourceLayerId, String targetLayerId)
     throws IOException, SQLException {
     
     File csv = File.createTempFile("LabelMapper_", "_mapping.csv");
@@ -1043,25 +1132,30 @@ public class LabelMapper extends Annotator {
       PreparedStatement sql = rdb.prepareStatement(
         sqlx.apply(
           "SELECT transcript, scope, step,"
-          +" fromLayer, fromParentId, fromParentLabel, fromId, fromLabel, fromStart, fromEnd,"
-          +" toLayer, toParentId, toParentLabel, toId, toLabel, toStart, toEnd,"
-          +" operation, distance"
+          +" sourceLayer, sourceParentId, sourceParentLabel, sourceId, sourceLabel,"
+          +" sourceStart, sourceEnd,"
+          +" targetLayer, targetParentId, targetParentLabel, targetId, targetLabel,"
+          +" targetStart, targetEnd,"
+          +" operation, distance, overlapRate"
           +" FROM "+getAnnotatorId()+"_mapping"
-          +" WHERE fromLayer = ? AND toLayer = ?"
+          +" WHERE sourceLayer = ? AND targetLayer = ?"
           +" ORDER BY transcript, scope, step"));
-      sql.setString(1, fromLayer);
-      sql.setString(2, toLayer);
+      sql.setString(1, sourceLayerId);
+      sql.setString(2, targetLayerId);
 
       try {
 
-        out.println("transcript,scope,step,"
-                    +"fromLayer,fromParentId,fromParentLabel,fromId,fromLabel,fromStart,fromEnd,"
-                    +"toLayer,toParentId,toParentLabel,toId,toLabel,toStart,toEnd,"
-                    +"operation,distance");
+        out.println(
+          "transcript,scope,step,"
+          +"sourceLayer,sourceParentId,sourceParentLabel,sourceId,sourceLabel,"
+          +"sourceStart,sourceEnd,"
+          +"targetLayer,targetParentId,targetParentLabel,targetId,targetLabel,"
+          +"targetStart,targetEnd,"
+          +"operation,distance,overlapRate");
         ResultSet rs = sql.executeQuery();
         try {
           while (rs.next()) {
-            for (int i = 1; i <= 19; i++) {
+            for (int i = 1; i <= 20; i++) {
               if (i > 1) out.print(",");
               String value = rs.getString(i);
               if (value != null) {
@@ -1077,11 +1171,95 @@ public class LabelMapper extends Annotator {
         sql.close();
         rdb.close();
       }
+    } catch (SQLException x) {
+      throw x;
     } finally {
       out.close();
     }
     return new FileInputStream(csv);
   } // end of mappingToCsv()
 
-
+  /**
+   * Provides summary information about the given mapping.
+   * @param mappingId A string of the form sourceLayerId→targetLayerId that identifies a
+   * tracked mapping between layers.
+   * @return A map containing summary statistics.
+   * @throws SQLException
+   */
+  public Map<String,Double> summarizeMapping(String mappingId) throws SQLException {
+    int arrowPos = mappingId.indexOf("→");
+    if (arrowPos < 0) throw new SQLException("Invalid mapping ID: " + mappingId);
+    return summarizeMapping(mappingId.substring(0, arrowPos), mappingId.substring(arrowPos + 1));
+  } // end of summarizeMapping()
+  
+  /**
+   * Provides summary information about the mapping between the given layers.
+   * @param sourceLayerId The source layer ID.
+   * @param targetLayerId The target layer ID.
+   * @return A map containing summary statistics.
+   * @throws SQLException
+   */
+  public Map<String,Double> summarizeMapping(String sourceLayerId, String targetLayerId)
+    throws SQLException {
+    TreeMap<String,Double> summary = new TreeMap<String,Double>();
+    
+    Connection rdb = newConnection();
+    PreparedStatement sql = rdb.prepareStatement(
+      sqlx.apply(
+        "SELECT COUNT(DISTINCT scope) AS `utteranceCount`, COUNT(*) AS `stepCount`,"
+        +" AVG(overlapRate) AS `meanOverlapRate`"
+        +" FROM "+getAnnotatorId()+"_mapping"
+        +" WHERE sourceLayer = ? AND targetLayer = ?"));
+    sql.setString(1, sourceLayerId);
+    sql.setString(2, targetLayerId);
+    ResultSet rs = sql.executeQuery();
+    try {
+      if (rs.next()) {
+        ResultSetMetaData metaData = rs.getMetaData();
+        for (int c = 1; c <= metaData.getColumnCount(); c++) {
+          summary.put(metaData.getColumnName(c), rs.getDouble(c));
+        } // next column
+        
+        rs.close();
+        sql.close();        
+        sql = rdb.prepareStatement(
+          sqlx.apply(
+            "SELECT COUNT(DISTINCT sourceId) AS `sourceCount`"
+            +" FROM "+getAnnotatorId()+"_mapping"
+            +" WHERE sourceLayer = ? AND targetLayer = ?"));
+        sql.setString(1, sourceLayerId);
+        sql.setString(2, targetLayerId);
+        rs = sql.executeQuery();
+        if (rs.next()) {
+          metaData = rs.getMetaData();
+          for (int c = 1; c <= metaData.getColumnCount(); c++) {
+            summary.put(metaData.getColumnName(c), rs.getDouble(c));
+          } // next column
+        }
+        
+        rs.close();
+        sql.close();        
+        sql = rdb.prepareStatement(
+          sqlx.apply(
+            "SELECT COUNT(DISTINCT targetId) AS `targetCount`"
+            +" FROM "+getAnnotatorId()+"_mapping"
+            +" WHERE sourceLayer = ? AND targetLayer = ?"));
+        sql.setString(1, sourceLayerId);
+        sql.setString(2, targetLayerId);
+        rs = sql.executeQuery();
+        if (rs.next()) {
+          metaData = rs.getMetaData();
+          for (int c = 1; c <= metaData.getColumnCount(); c++) {
+            summary.put(metaData.getColumnName(c), rs.getDouble(c));
+          } // next column
+        }
+      }
+    } finally {
+      rs.close();
+      sql.close();
+      rdb.close();
+    }
+    return summary;
+  } // end of summarizeMapping()
+  
 } // end of class LabelMapper

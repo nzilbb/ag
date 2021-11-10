@@ -33,6 +33,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import java.util.stream.Collectors;
@@ -82,7 +83,74 @@ public class TestLabelMapper {
       File fThisClass = new File(urlThisClass.toURI());
       return fThisClass.getParentFile();
    }
-  
+
+  /** Test overlap rate calculation. */
+  @Test public void overlapRate() throws Exception {
+    // annotations have to be in a graph to be linked to their anchors...
+    Graph g = new Graph();
+    Annotation a1to2 = g.addAnnotation(
+      new Annotation().setLayerId("test")
+      .setStart(g.getOrCreateAnchorAt(1.0))
+      .setEnd(g.getOrCreateAnchorAt(2.0)));
+    Annotation a15to25 = g.addAnnotation(
+      new Annotation().setLayerId("test")
+      .setStart(g.getOrCreateAnchorAt(1.5))
+      .setEnd(g.getOrCreateAnchorAt(2.5)));
+    Annotation a125to175 = g.addAnnotation(
+      new Annotation().setLayerId("test")
+      .setStart(g.getOrCreateAnchorAt(1.25))
+      .setEnd(g.getOrCreateAnchorAt(1.75)));
+    Annotation instantaneous = g.addAnnotation(
+      new Annotation().setLayerId("test")
+      .setStart(g.getOrCreateAnchorAt(1.5))
+      .setEnd(g.getOrCreateAnchorAt(1.5)));
+    Annotation a2to3 = g.addAnnotation(
+      new Annotation().setLayerId("test")
+      .setStart(g.getOrCreateAnchorAt(2.0))
+      .setEnd(g.getOrCreateAnchorAt(3.0)));
+    Annotation a3to4 = g.addAnnotation(
+      new Annotation().setLayerId("test")
+      .setStart(g.getOrCreateAnchorAt(3.0))
+      .setEnd(g.getOrCreateAnchorAt(4.0)));
+    Anchor nullOffset = g.addAnchor(new Anchor());
+    Annotation nullStart = g.addAnnotation(
+      new Annotation().setLayerId("test")
+      .setStart(nullOffset)
+      .setEnd(g.getOrCreateAnchorAt(1.5)));
+    Annotation nullEnd = g.addAnnotation(
+      new Annotation().setLayerId("test")
+      .setStart(g.getOrCreateAnchorAt(1.5))
+      .setEnd(nullOffset));
+    assertEquals("First completely before the second",
+                 0.0, LabelMapper.OverlapRate(a1to2, a3to4), 0.0);
+    assertEquals("First completely after the second",
+                 0.0, LabelMapper.OverlapRate(a3to4, a1to2), 0.0);
+    assertEquals("First immediately before the second",
+                 0.0, LabelMapper.OverlapRate(a1to2, a2to3), 0.0);
+    assertEquals("First immediately after the second",
+                 0.0, LabelMapper.OverlapRate(a2to3, a1to2), 0.0);
+    assertEquals("First completely overlaps second",
+                 1.0, LabelMapper.OverlapRate(a1to2, a1to2), 0.0);
+    assertEquals("First embedded in the second",
+                 0.5, LabelMapper.OverlapRate(a125to175, a1to2), 0.0);
+    assertEquals("Second embedded in the first",
+                 0.5, LabelMapper.OverlapRate(a1to2, a125to175), 0.0);
+    assertEquals("Half overlap",
+                 0.5/1.5, LabelMapper.OverlapRate(a15to25, a1to2), 0.0);
+    assertEquals("First is instantaneous",
+                 0.0, LabelMapper.OverlapRate(instantaneous, a1to2), 0.0);
+    assertEquals("Second is instantaneous",
+                 0.0, LabelMapper.OverlapRate(a1to2, instantaneous), 0.0);
+    assertEquals("First has null start",
+                 0.0, LabelMapper.OverlapRate(nullStart, a1to2), 0.0);
+    assertEquals("First has null end",
+                 0.0, LabelMapper.OverlapRate(nullEnd, a1to2), 0.0);
+    assertEquals("Second has null start",
+                 0.0, LabelMapper.OverlapRate(a1to2, nullStart), 0.0);
+    assertEquals("Second has null end",
+                 0.0, LabelMapper.OverlapRate(a1to2, nullEnd), 0.0);
+  }   
+
   /** LabelMapper does not support default parameters. */
   @Test public void defaultParameters() throws Exception {
     LabelMapper annotator = newAnnotator();
@@ -562,6 +630,18 @@ public class TestLabelMapper {
     } else {
       csv.delete();
     }
+
+    Map<String,Double> summary = annotator.summarizeMapping("phone", "htkPhone");
+    assertEquals("Summary: utteranceCount",
+                 Double.valueOf(1), summary.get("utteranceCount"));
+    assertEquals("Summary: stepCount",
+                 Double.valueOf(16), summary.get("stepCount"));
+    assertEquals("Summary: sourceCount",
+                 Double.valueOf(15), summary.get("sourceCount"));
+    assertEquals("Summary: targetCount",
+                 Double.valueOf(15), summary.get("targetCount"));
+    assertEquals("Summary: meanOverlapRate",
+                 Double.valueOf(0.12932564330079857), summary.get("meanOverlapRate"));
   }   
 
   /**

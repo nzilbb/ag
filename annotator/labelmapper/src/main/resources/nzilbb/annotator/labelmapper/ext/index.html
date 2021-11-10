@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> Label Mapper </title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <p> This annotator creates a mapping between the labels of a pair of layers, by finding the
+      minimum edit path between them. If any <i>sub-mappings</i> have been configured - where two
+      pairs of layers are mapped, two word layers and two corresponding phone layers -
+      these mappings are tracked in detail so that alignments and label assignments can be
+      compared. </p>
+    <p> This page provides access to tracked sub-mapping information, including raw
+      mapping data and summary information including mean <i>Overlap Rate</i>. </p>
+    <details><summary> <i>Overlap Rate</i> is a value between 0 and 1. A value of 0 means that the
+        two intervals do not overlap at all, with 1 meaning they completely
+        overlap. </summary>
+      
+      <p><a href="http://dx.doi.org/10.1007/978-3-540-30228-5_4" target="PauloOliveira2004">
+          Paulo and Oliveira (2004) </a>
+        devised Overlap Rate (OvR) to compare alignments, which measures how
+        much two intervals overlap, independent of their absolute durations. OvR is
+        calculated as follows: </p>
+
+      <div class="formula">
+        OνR =
+        <span class="division">
+          <span class="numerator"> CommonDur <span class="for-copy-paste">/</span> </span>
+          <span class="denominator"> DurMax </span>
+        </span>
+        = 
+        <span class="division">
+          <span class="numerator"> CommonDur <span class="for-copy-paste">/</span> </span>
+          <span class="denominator"><span class="for-copy-paste">(</span>DurRef + DurAuto - CommonDur<span class="for-copy-paste">)</span></span>
+        </span>
+      </span>
+      
+      <p> The result is a value between 0 and 1. A value of 0 means that the two intervals
+        do not overlap at all, with 1 meaning they completely overlap (i.e., the
+        alignments exactly agree). Overlap Rate has several advantages over comparing
+        start/end offsets directly: </p>
+      <ol>
+        <li> It provides a single result, with no need to specify different thresholds for
+          offset accuracy. </li>
+        <li> It gives a measure of how time-spans (rather than time-points) align, and
+          these time-spans correspond directly to what is usually the primary unit of
+          interest: phones. </li>
+        <li> It ensures that a small absolute discrepancy in alignment is more serious for
+          short intervals than for longer ones. </li>
+      </ol>
+    </details>
+
+    <h3> Tracked Mappings </h3>
+    <table>
+      <thead>
+        <th title="Link to raw edit path data as CSV"> Mapping </th>
+        <th title="Number of utterances mapped"> Utterances </th>
+        <th title="Total number of edit steps, 
+including insertions (where there's no source annotation) 
+and deletions (where there's no target annotation)"> Edit Steps </th>
+        <th title="Number of source annotations"> Sources </th>
+        <th title="Number of target annotations"> Targets </th>
+        <th title="As per Paulo and Oliveira (2004),
+0 means no overlap at all, 1 means they complete overlap"> OvR </th>
+      </thead>
+      <tbody id="mappings"></tbody>
+    </table>
+    
+    <footer><div> Label Mapper <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>
