@@ -35,11 +35,13 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.util.CloneableBean;
 import nzilbb.util.IO;
@@ -350,6 +352,21 @@ public class RequestRouter
             list.add(e.toString());
          }
          return new ByteArrayInputStream(list.build().toString().getBytes());
+      } else if (result instanceof Map) {
+         JsonObjectBuilder object = Json.createObjectBuilder();
+         Map map = (Map)result;
+         for (Object k : map.keySet()) {
+           if (map.get(k) instanceof Double) {
+             object.add(k.toString(), (Double)map.get(k));
+           } else if (map.get(k) instanceof Integer) {
+             object.add(k.toString(), (Integer)map.get(k));
+           } else if (map.get(k) instanceof Boolean) {
+             object.add(k.toString(), (Boolean)map.get(k));
+           } else {             
+             object.add(k.toString(), map.get(k) == null?null:map.get(k).toString());
+           }
+         }
+         return new ByteArrayInputStream(object.build().toString().getBytes());
       } else {
          return new ByteArrayInputStream(result.toString().getBytes());
       }
