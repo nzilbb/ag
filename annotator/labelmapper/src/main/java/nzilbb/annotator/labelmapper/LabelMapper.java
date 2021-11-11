@@ -47,6 +47,7 @@ import javax.json.JsonValue;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.UsesGraphStore;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.editpath.*;
 import nzilbb.encoding.comparator.*;
@@ -62,7 +63,7 @@ import nzilbb.sql.ConnectionFactory;
  * accessed in order to compare alignments.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@UsesRelationalDatabase
+@UsesRelationalDatabase @UsesGraphStore
 public class LabelMapper extends Annotator {
 
   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
@@ -1127,6 +1128,13 @@ public class LabelMapper extends Annotator {
     File csv = File.createTempFile("LabelMapper_", "_mapping.csv");
     csv.deleteOnExit();
     PrintWriter out = new PrintWriter(csv, "UTF-8");
+    String transcriptUrl = null;
+    try {
+      if (getStore() != null && getStore().getId() != null
+          && getStore().getId().startsWith("http")) { // we have a URL
+        transcriptUrl = getStore().getId() + "/transcript?id=";
+      }
+    } catch(Exception exception) {}
     try {
       Connection rdb = newConnection();
       PreparedStatement sql = rdb.prepareStatement(
@@ -1146,7 +1154,7 @@ public class LabelMapper extends Annotator {
       try {
 
         out.println(
-          "transcript,scope,step,"
+          "transcript,scope,"+(transcriptUrl!=null?"URL,":"")+"step,"
           +"sourceLayer,sourceParentId,sourceParentLabel,sourceId,sourceLabel,"
           +"sourceStart,sourceEnd,"
           +"targetLayer,targetParentId,targetParentLabel,targetId,targetLabel,"
@@ -1160,6 +1168,14 @@ public class LabelMapper extends Annotator {
               String value = rs.getString(i);
               if (value != null) {
                 out.print(value);
+              }
+              if (i == 2 && transcriptUrl != null) { // scope
+                // insert URL
+                out.print(",");
+                out.print(transcriptUrl);
+                out.print(rs.getString(1));
+                out.print("#");
+                out.print(rs.getString(2));
               }
             } // next field
             out.println();

@@ -32,10 +32,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.Vector;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Annotation;
@@ -43,46 +46,29 @@ import nzilbb.ag.Change;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
 import nzilbb.ag.GraphMediaProvider;
+import nzilbb.ag.GraphNotFoundException;
+import nzilbb.ag.GraphStore;
 import nzilbb.ag.Layer;
 import nzilbb.ag.MediaFile;
+import nzilbb.ag.MediaTrackDefinition;
 import nzilbb.ag.PermissionException;
 import nzilbb.ag.Schema;
+import nzilbb.ag.StoreException;
 import nzilbb.ag.StoreException;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
+import nzilbb.ag.automation.util.AnnotatorDescriptor;
+import nzilbb.ag.serialize.GraphDeserializer;
+import nzilbb.ag.serialize.GraphSerializer;
+import nzilbb.ag.serialize.SerializationDescriptor;
 import nzilbb.editpath.*;
 import nzilbb.sql.derby.DerbyConnectionFactory;
 import nzilbb.util.IO;
+import nzilbb.util.MonitorableSeries;
 
 public class TestLabelMapper {
-
-   public static LabelMapper newAnnotator() throws Exception {
-
-     LabelMapper annotator = new LabelMapper();
-     
-     // find the current directory
-     File dir = dir();
-     
-     // set the schema
-     annotator.setSchema(graph().getSchema());
-     
-     // use derby for relational database
-     annotator.setRdbConnectionFactory(new DerbyConnectionFactory(dir));
-     
-     // set the annotator configuration, which will install the lexicon the first time (only)
-     annotator.setConfig(annotator.getConfig());
-
-     return annotator;
-   }
-	 
-   public static File dir() throws Exception { 
-      URL urlThisClass = TestLabelMapper.class.getResource(
-         TestLabelMapper.class.getSimpleName() + ".class");
-      File fThisClass = new File(urlThisClass.toURI());
-      return fThisClass.getParentFile();
-   }
 
   /** Test overlap rate calculation. */
   @Test public void overlapRate() throws Exception {
@@ -912,6 +898,229 @@ public class TestLabelMapper {
     if (d.length() > 0) return d.toString();
     return null;
   } // end of diff()
+
+  /** Creat a new LabelMapper annotator. */
+  public static LabelMapper newAnnotator() throws Exception {
+
+    LabelMapper annotator = new LabelMapper();
+     
+    // find the current directory
+    File dir = dir();
+     
+    // set the schema
+    annotator.setSchema(graph().getSchema());
+
+    // set a dummy graph store
+    annotator.setStore(new GraphStore() {
+        public String getId() throws StoreException, PermissionException {
+          return "http://TestLabelMapper";
+        }
+        public String[] getLayerIds() throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public Layer[] getLayers() throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public Schema getSchema() throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public Layer getLayer(String id) throws StoreException, PermissionException {
+          throw new StoreException();
+        }           
+        public String[] getCorpusIds() throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public String[] getParticipantIds() throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public Annotation getParticipant(String id, String[] layerIds)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public int countMatchingParticipantIds(String expression)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public String[] getMatchingParticipantIds(
+          String expression, Integer pageLength, Integer pageNumber)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public String[] getTranscriptIds() throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public String[] getTranscriptIdsInCorpus(String id)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public String[] getTranscriptIdsWithParticipant(String id)
+          throws StoreException, PermissionException  {
+          throw new StoreException();
+        }
+        public int countMatchingTranscriptIds(String expression)
+          throws StoreException, PermissionException  {
+          throw new StoreException();
+        }
+        public String[] getMatchingTranscriptIds(
+          String expression, Integer pageLength, Integer pageNumber, String order)
+          throws StoreException, PermissionException  {
+          throw new StoreException();
+        }
+        public int countMatchingAnnotations(String expression)
+          throws StoreException, PermissionException  {
+          throw new StoreException();
+        }
+        public Annotation[] getMatchingAnnotations(
+          String expression, Integer pageLength, Integer pageNumber)
+          throws StoreException, PermissionException  {
+          throw new StoreException();
+        }
+        public long countAnnotations(String id, String layerId)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public Annotation[] getAnnotations(
+          String id, String layerId, Integer pageLength, Integer pageNumber)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public void getMatchAnnotations(
+          Iterator<String> matchIds, String[] layerIds, int targetOffset,
+          int annotationsPerLayer, Consumer<Annotation[]> consumer)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public Anchor[] getAnchors(String id, String[] anchorIds)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public Graph getTranscript(String id)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public Graph getTranscript(String id, String[] layerIds)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public Graph getFragment(String transcriptId, String annotationId)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public Graph getFragment(String transcriptId, String annotationId, String[] layerIds)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public Graph getFragment(
+          String transcriptId, double start, double end, String[] layerIds)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public MonitorableSeries<Graph> getFragmentSeries(String seriesId, String[] layerIds)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public MediaTrackDefinition[] getMediaTracks()
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public MediaFile[] getAvailableMedia(String id)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public String getMedia(String id, String trackSuffix, String mimeType)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public String getMedia(
+          String id, String trackSuffix, String mimeType, Double startOffset, Double endOffset)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public MediaFile[] getEpisodeDocuments(String id)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public SerializationDescriptor[] getSerializerDescriptors()
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public SerializationDescriptor[] getDeserializerDescriptors()
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public GraphDeserializer deserializerForMimeType(String mimeType)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public GraphDeserializer deserializerForFilesSuffix(String suffix)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public GraphSerializer serializerForMimeType(String mimeType)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public GraphSerializer serializerForFilesSuffix(String suffix)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public AnnotatorDescriptor[] getTranscriberDescriptors() { return null; }
+        public boolean saveTranscript(Graph transcript)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public String createAnnotation(
+          String id, String fromId, String toId, String layerId, String label,
+          Integer confidence, String parentId)
+          throws StoreException, PermissionException, GraphNotFoundException    {
+          throw new StoreException();
+        }
+        public void destroyAnnotation(String id, String annotationId)
+          throws StoreException, PermissionException, GraphNotFoundException    {
+          throw new StoreException();
+        }
+        public boolean saveParticipant(Annotation participant)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public void saveMedia(String id, String trackSuffix, String mediaUrl)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public void saveSource(String id, String url)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public void saveEpisodeDocument(String id, String url)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public void deleteTranscript(String id)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+        public void deleteParticipant(String id)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+   
+      });     
+    // use derby for relational database
+    annotator.setRdbConnectionFactory(new DerbyConnectionFactory(dir));
+     
+    // set the annotator configuration, which will install the lexicon the first time (only)
+    annotator.setConfig(annotator.getConfig());
+
+    return annotator;
+  }
+
+  /** The current directory */
+  private static File dir() throws Exception { 
+    URL urlThisClass = TestLabelMapper.class.getResource(
+      TestLabelMapper.class.getSimpleName() + ".class");
+    File fThisClass = new File(urlThisClass.toURI());
+    return fThisClass.getParentFile();
+  }
   
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.annotator.labelmapper.TestLabelMapper");

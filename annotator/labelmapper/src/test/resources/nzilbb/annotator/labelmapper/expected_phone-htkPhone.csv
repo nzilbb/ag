@@ -1,17 +1,17 @@
-transcript,scope,step,sourceLayer,sourceParentId,sourceParentLabel,sourceId,sourceLabel,sourceStart,sourceEnd,targetLayer,targetParentId,targetParentLabel,targetId,targetLabel,targetStart,targetEnd,operation,distance,overlapRate
-TestLabelMapper,5,1,phone,8,a,m,@,10.0,20.0,htkPhone,1h,A,1h,EY1,11.5,21.5,!,8,0.7391304347826086
-TestLabelMapper,5,2,phone,a,different,o,d,20.0,21.0,htkPhone,1l,DIFFERENT,1l,D,21.5,22.5, ,0,0.0
-TestLabelMapper,5,3,phone,a,different,q,I,21.0,22.0,htkPhone,1n,DIFFERENT,1n,IH1,22.5,23.5, ,1,0.0
-TestLabelMapper,5,4,phone,a,different,s,f,22.0,24.0,htkPhone,1p,DIFFERENT,1p,F,23.5,25.5, ,0,0.14285714285714285
-TestLabelMapper,5,5,phone,a,different,u,@,24.0,26.0,htkPhone,,DIFFERENT,,,,,-,10,
-TestLabelMapper,5,6,phone,a,different,w,r,26.0,27.0,htkPhone,1r,DIFFERENT,1r,R,25.5,27.5, ,0,0.5
-TestLabelMapper,5,7,phone,,different,,,,,htkPhone,1t,DIFFERENT,1t,AH0,27.5,28.5,+,10,
-TestLabelMapper,5,8,phone,a,different,z,H,28.0,29.0,htkPhone,1w,DIFFERENT,1w,N,29.5,30.5,!,2,0.0
-TestLabelMapper,5,9,phone,a,different,10,t,29.0,30.0,htkPhone,1x,DIFFERENT,1x,T,30.5,31.5, ,0,0.0
-TestLabelMapper,5,10,phone,c,firefighter,12,f,30.0,31.0,htkPhone,21,FIREFIGHTER,21,F,31.5,32.5, ,0,0.0
-TestLabelMapper,5,11,phone,c,firefighter,14,2,31.0,33.0,htkPhone,23,FIREFIGHTER,23,AY1,32.5,34.5, ,1,0.14285714285714285
-TestLabelMapper,5,12,phone,c,firefighter,16,@,33.0,35.0,htkPhone,25,FIREFIGHTER,25,R,34.5,36.5,!,20,0.14285714285714285
-TestLabelMapper,5,13,phone,c,firefighter,18,f,35.0,37.0,htkPhone,27,FIREFIGHTER,27,F,36.5,38.5, ,0,0.14285714285714285
-TestLabelMapper,5,14,phone,c,firefighter,1a,2,37.0,38.0,htkPhone,29,FIREFIGHTER,29,AY2,38.5,39.5, ,1,0.0
-TestLabelMapper,5,15,phone,c,firefighter,1c,t,38.0,39.0,htkPhone,2b,FIREFIGHTER,2b,T,39.5,40.5, ,0,0.0
-TestLabelMapper,5,16,phone,c,firefighter,1d,@,39.0,40.0,htkPhone,2c,FIREFIGHTER,2c,ER0,40.5,41.5,!,8,0.0
+transcript,scope,URL,step,sourceLayer,sourceParentId,sourceParentLabel,sourceId,sourceLabel,sourceStart,sourceEnd,targetLayer,targetParentId,targetParentLabel,targetId,targetLabel,targetStart,targetEnd,operation,distance,overlapRate
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,1,phone,8,a,m,@,10.0,20.0,htkPhone,1h,A,1h,EY1,11.5,21.5,!,8,0.7391304347826086
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,2,phone,a,different,o,d,20.0,21.0,htkPhone,1l,DIFFERENT,1l,D,21.5,22.5, ,0,0.0
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,3,phone,a,different,q,I,21.0,22.0,htkPhone,1n,DIFFERENT,1n,IH1,22.5,23.5, ,1,0.0
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,4,phone,a,different,s,f,22.0,24.0,htkPhone,1p,DIFFERENT,1p,F,23.5,25.5, ,0,0.14285714285714285
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,5,phone,a,different,u,@,24.0,26.0,htkPhone,,DIFFERENT,,,,,-,10,
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,6,phone,a,different,w,r,26.0,27.0,htkPhone,1r,DIFFERENT,1r,R,25.5,27.5, ,0,0.5
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,7,phone,,different,,,,,htkPhone,1t,DIFFERENT,1t,AH0,27.5,28.5,+,10,
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,8,phone,a,different,z,H,28.0,29.0,htkPhone,1w,DIFFERENT,1w,N,29.5,30.5,!,2,0.0
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,9,phone,a,different,10,t,29.0,30.0,htkPhone,1x,DIFFERENT,1x,T,30.5,31.5, ,0,0.0
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,10,phone,c,firefighter,12,f,30.0,31.0,htkPhone,21,FIREFIGHTER,21,F,31.5,32.5, ,0,0.0
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,11,phone,c,firefighter,14,2,31.0,33.0,htkPhone,23,FIREFIGHTER,23,AY1,32.5,34.5, ,1,0.14285714285714285
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,12,phone,c,firefighter,16,@,33.0,35.0,htkPhone,25,FIREFIGHTER,25,R,34.5,36.5,!,20,0.14285714285714285
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,13,phone,c,firefighter,18,f,35.0,37.0,htkPhone,27,FIREFIGHTER,27,F,36.5,38.5, ,0,0.14285714285714285
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,14,phone,c,firefighter,1a,2,37.0,38.0,htkPhone,29,FIREFIGHTER,29,AY2,38.5,39.5, ,1,0.0
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,15,phone,c,firefighter,1c,t,38.0,39.0,htkPhone,2b,FIREFIGHTER,2b,T,39.5,40.5, ,0,0.0
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,16,phone,c,firefighter,1d,@,39.0,40.0,htkPhone,2c,FIREFIGHTER,2c,ER0,40.5,41.5,!,8,0.0
