@@ -23,9 +23,10 @@ package nzilbb.annotator.labelmapper;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -52,6 +53,8 @@ import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.editpath.*;
 import nzilbb.encoding.comparator.*;
 import nzilbb.sql.ConnectionFactory;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 
 /**
  * This annotator creates a mapping between pairs of layers, by finding the minimum edit
@@ -1127,7 +1130,8 @@ public class LabelMapper extends Annotator {
     
     File csv = File.createTempFile("LabelMapper_", "_mapping.csv");
     csv.deleteOnExit();
-    PrintWriter out = new PrintWriter(csv, "UTF-8");
+    CSVPrinter out = new CSVPrinter(
+      new OutputStreamWriter(new FileOutputStream(csv), "UTF-8"), CSVFormat.EXCEL);
     String transcriptUrl = null;
     try {
       if (getStore() != null && getStore().getId() != null
@@ -1153,29 +1157,37 @@ public class LabelMapper extends Annotator {
 
       try {
 
-        out.println(
-          "transcript,scope,"+(transcriptUrl!=null?"URL,":"")+"step,"
-          +"sourceLayer,sourceParentId,sourceParentLabel,sourceId,sourceLabel,"
-          +"sourceStart,sourceEnd,"
-          +"targetLayer,targetParentId,targetParentLabel,targetId,targetLabel,"
-          +"targetStart,targetEnd,"
-          +"operation,distance,overlapRate");
+        out.print("transcript");
+        out.print("scope");
+        if(transcriptUrl != null) out.print("URL");
+        out.print("step");
+        out.print("sourceLayer");
+        out.print("sourceParentId");
+        out.print("sourceParentLabel");
+        out.print("sourceId");
+        out.print("sourceLabel");
+        out.print("sourceStart");
+        out.print("sourceEnd");
+        out.print("targetLayer");
+        out.print("targetParentId");
+        out.print("targetParentLabel");
+        out.print("targetId");
+        out.print("targetLabel");
+        out.print("targetStart");
+        out.print("targetEnd");
+        out.print("operation");
+        out.print("distance");
+        out.print("overlapRate");
+        out.println();
+        
         ResultSet rs = sql.executeQuery();
         try {
           while (rs.next()) {
             for (int i = 1; i <= 20; i++) {
-              if (i > 1) out.print(",");
-              String value = rs.getString(i);
-              if (value != null) {
-                out.print(value);
-              }
+              out.print(rs.getString(i));
               if (i == 2 && transcriptUrl != null) { // scope
                 // insert URL
-                out.print(",");
-                out.print(transcriptUrl);
-                out.print(rs.getString(1));
-                out.print("#");
-                out.print(rs.getString(2));
+                out.print(transcriptUrl + rs.getString(1) + "#" + rs.getString(2));
               }
             } // next field
             out.println();
