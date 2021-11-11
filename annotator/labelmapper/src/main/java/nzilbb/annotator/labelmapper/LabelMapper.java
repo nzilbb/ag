@@ -1208,6 +1208,90 @@ public class LabelMapper extends Annotator {
   } // end of mappingToCsv()
 
   /**
+   * Provides access to the mapping between the given two layers, summarized by utterance,
+   * as a CSV stream. 
+   * @param mappingId A string of the form sourceLayerId→targetLayerId that identifies a
+   * tracked mapping between layers.
+   * @return A stream of CSV records.
+   */
+  public InputStream utteranceSummaryToCsv(String mappingId)
+    throws IOException, SQLException {
+    int arrowPos = mappingId.indexOf("→");
+    if (arrowPos < 0) throw new SQLException("Invalid mapping ID: " + mappingId);
+    return utteranceSummaryToCsv(
+      mappingId.substring(0, arrowPos), mappingId.substring(arrowPos + 1));
+  }
+  
+  /**
+   * Provides access to the mapping between the given two layers, summarized by utterance,
+   * as a CSV stream. 
+   * @param sourceLayerId The source layer ID.
+   * @param targetLayerId The target layer ID.
+   * @return A stream of CSV records.
+   */
+  public InputStream utteranceSummaryToCsv(String sourceLayerId, String targetLayerId)
+    throws IOException, SQLException {
+    
+    File csv = File.createTempFile("LabelMapper_", "_utterances.csv");
+    csv.deleteOnExit();
+    CSVPrinter out = new CSVPrinter(
+      new OutputStreamWriter(new FileOutputStream(csv), "UTF-8"), CSVFormat.EXCEL);
+    String transcriptUrl = null;
+    try {
+      if (getStore() != null && getStore().getId() != null
+          && getStore().getId().startsWith("http")) { // we have a URL
+        transcriptUrl = getStore().getId() + "/transcript?id=";
+      }
+    } catch(Exception exception) {}
+    try {
+      Connection rdb = newConnection();
+      PreparedStatement sql = rdb.prepareStatement(
+        sqlx.apply(
+          "SELECT transcript, scope, COUNT(*) AS `stepCount`,"
+          +" AVG(overlapRate) AS `meanOverlapRate`"
+          +" FROM "+getAnnotatorId()+"_mapping"
+          +" WHERE sourceLayer = ? AND targetLayer = ?"
+          +" GROUP BY transcript, scope"));
+      sql.setString(1, sourceLayerId);
+      sql.setString(2, targetLayerId);
+
+      try {
+
+        out.print("transcript");
+        out.print("scope");
+        if(transcriptUrl != null) out.print("URL");
+        out.print("stepCount");
+        out.print("meanOverlapRate");
+        out.println();
+        
+        ResultSet rs = sql.executeQuery();
+        try {
+          while (rs.next()) {
+            for (int i = 1; i <= 4; i++) {
+              out.print(rs.getString(i));
+              if (i == 2 && transcriptUrl != null) { // scope
+                // insert URL
+                out.print(transcriptUrl + rs.getString(1) + "#" + rs.getString(2));
+              }
+            } // next field
+            out.println();
+          }
+        } finally {
+          rs.close();
+        }
+      } finally {
+        sql.close();
+        rdb.close();
+      }
+    } catch (SQLException x) {
+      throw x;
+    } finally {
+      out.close();
+    }
+    return new FileInputStream(csv);
+  } // end of utteranceSummaryToCsv()
+
+  /**
    * Provides summary information about the given mapping.
    * @param mappingId A string of the form sourceLayerId→targetLayerId that identifies a
    * tracked mapping between layers.

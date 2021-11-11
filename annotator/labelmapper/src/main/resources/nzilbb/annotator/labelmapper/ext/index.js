@@ -24,7 +24,10 @@ getJSON("listMappings", mappings => {
             mappingsDiv.appendChild(tr);
             // get summary info
             getJSON(resourceForFunction("summarizeMapping", mapping), summary => {
-                addSummaryStatistic(summary.utteranceCount, tr);
+                addSummaryStatistic(summary.utteranceCount, tr,
+                                    resourceForFunction("utteranceSummaryToCsv", mapping),
+                                    "utterances-"+mapping+".csv",
+                                    "Summary by utterance as CSV");
                 addSummaryStatistic(summary.stepCount, tr);
                 addSummaryStatistic(summary.sourceCount, tr);
                 addSummaryStatistic(summary.targetCount, tr);
@@ -37,8 +40,18 @@ getJSON("listMappings", mappings => {
     }
 });
 
-function addSummaryStatistic(statistic, tr) {
+function addSummaryStatistic(statistic, tr, linkHref, linkName, linkTitle) {
     let td = document.createElement("td");
-    td.appendChild(document.createTextNode(statistic));
+    if (!linkHref) {
+        td.appendChild(document.createTextNode(statistic));
+    } else {
+        const a = document.createElement("a");
+        a.appendChild(document.createTextNode(statistic));
+        a.href = linkHref;
+        a.download = linkName;
+        a.type = "text/csv";
+        a.title = linkTitle;
+        td.appendChild(a);
+    }
     tr.appendChild(td);
 }

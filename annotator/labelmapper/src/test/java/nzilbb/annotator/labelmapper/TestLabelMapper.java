@@ -617,6 +617,17 @@ public class TestLabelMapper {
       csv.delete();
     }
 
+    // utterance summary
+    stream = annotator.utteranceSummaryToCsv("phone", "htkPhone");
+    csv = new File(dir(), "phone-htkPhone-utterances.csv");
+    IO.SaveInputStreamToFile(stream, csv);
+    differences = diff(new File(dir, "expected_phone-htkPhone-utterances.csv"), csv);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      csv.delete();
+    }
+
     Map<String,Double> summary = annotator.summarizeMapping("phone", "htkPhone");
     assertEquals("Summary: utteranceCount",
                  Double.valueOf(1), summary.get("utteranceCount"));
