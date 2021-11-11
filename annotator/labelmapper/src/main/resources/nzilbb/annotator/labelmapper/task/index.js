@@ -6,6 +6,8 @@ getVersion(version => {
     document.getElementById("version").innerHTML = version;
 });
 
+const taskId = window.location.search.substring(1);
+
 // original sub-mapping settings
 var subSourceLayerId = null;
 var subComparator = null;
@@ -64,10 +66,18 @@ getSchema(s => {
                 } catch(x) {
                 }
             }
+            // fill out sub layer options
+            changedSourceLayer(sourceLayerId);
+            changedTargetLayer(targetLayerId);
 
             subSourceLayerId = parameters.get("subSourceLayerId");
             subComparator = parameters.get("subComparator");
             subTargetLayerId = parameters.get("subTargetLayerId");
+
+            // set values that couldn't be set properly before because there were no options set
+            document.getElementById("subSourceLayerId").value = subSourceLayerId;
+            document.getElementById("subTargetLayerId").value = subTargetLayerId;
+            
             // check submapping if all of these are set
             document.getElementById("submapping").checked
                 = subSourceLayerId && subComparator && subTargetLayerId;
@@ -77,9 +87,18 @@ getSchema(s => {
             try {
                 document.getElementById("splitLabels-"+parameters.get("splitLabels")).checked = true;
             } catch( x) {
-                console.log(`Invalid splitLabels value: "${parameters.splitLabels}"`);
+                console.log("Invalid splitLabels value: \""+parameters.get("splitLabels")+"\"");
             }
 
+            // if there's no utterance tag layer defined
+            if (mappingLayerId.selectedIndex == 0
+                // but there's a layer named after the task
+                && schema.layers[taskId]) {
+                
+                // select that layer by default
+                mappingLayerId.value = taskId;
+            }
+            
             // setup initial UI
             setComparatorExamples(document.getElementById("comparator"));
             disenableSubMapping();
@@ -170,7 +189,11 @@ function defaultComparator() {
     var targetLayer = schema.layers[targetLayerId.value];
     var defaultComparator = "OrthographyToArpabet";
     if (sourceLayer && targetLayer) {
-        if (sourceLayer.type == "ipa" && targetLayer.type == "ipa") {
+        if (sourceLayer.parentId == schema.turnLayerId
+            || targetLayer.parentId == schema.turnLayerId) {
+            defaultComparator = "CharacterToCharacter";
+            document.getElementById("splitLabels-").checked = true;
+        } else if (sourceLayer.type == "ipa" && targetLayer.type == "ipa") {
             defaultComparator = "DISCToDISC";
             document.getElementById("splitLabels-char").checked = true;
         } else if (sourceLayer.type == "string" && targetLayer.type == "ipa") {

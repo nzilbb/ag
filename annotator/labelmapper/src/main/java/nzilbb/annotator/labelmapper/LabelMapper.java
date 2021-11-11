@@ -323,11 +323,11 @@ public class LabelMapper extends Annotator {
             "CREATE TABLE "+getAnnotatorId()+"_mapping ("
             +" transcript VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
             +" COMMENT 'Transcript ID',"
-            +" scope VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+            +" scope VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
             +" COMMENT 'Utterance/Word ID',"
             +" step INTEGER NOT NULL"
             +" COMMENT 'The edit step index in the sequence',"
-            +" sourceLayer VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+            +" sourceLayer VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
             +" COMMENT 'Layer of the source annotations',"
             +" sourceParentId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
             +" COMMENT 'ID of the parent of source annotation, if this is a sub-mapping',"
@@ -341,7 +341,7 @@ public class LabelMapper extends Annotator {
             +" COMMENT 'Start offset of the source annotation',"
             +" sourceEnd DOUBLE"
             +" COMMENT 'End offset of the source annotation',"
-            +" targetLayer VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+            +" targetLayer VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
             +" COMMENT 'Layer of the target annotations',"
             +" targetParentId VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
             +" COMMENT 'ID of the parent of target annotation, if this is a sub-mapping',"
@@ -568,7 +568,10 @@ public class LabelMapper extends Annotator {
   public String[] getOutputLayers() throws InvalidConfigurationException {
     if (mappingLayerId == null)
       throw new InvalidConfigurationException(this, "Mapping layer not set.");
-    return new String[] { mappingLayerId };
+    HashSet<String> outputLayers = new HashSet<String>();
+    outputLayers.add(mappingLayerId);
+    if (subMappingLayerId != null) outputLayers.add(subMappingLayerId);
+    return outputLayers.toArray(new String[0]);
   }
 
   class LabelElement {
@@ -1136,7 +1139,9 @@ public class LabelMapper extends Annotator {
     try {
       if (getStore() != null && getStore().getId() != null
           && getStore().getId().startsWith("http")) { // we have a URL
-        transcriptUrl = getStore().getId() + "/transcript?id=";
+        transcriptUrl = getStore().getId()
+          + (getStore().getId().endsWith("/")?"":"/")
+          + "transcript?id=";
       }
     } catch(Exception exception) {}
     try {
@@ -1240,7 +1245,9 @@ public class LabelMapper extends Annotator {
     try {
       if (getStore() != null && getStore().getId() != null
           && getStore().getId().startsWith("http")) { // we have a URL
-        transcriptUrl = getStore().getId() + "/transcript?id=";
+        transcriptUrl = getStore().getId()
+          + (getStore().getId().endsWith("/")?"":"/")
+          + "transcript?id=";
       }
     } catch(Exception exception) {}
     try {

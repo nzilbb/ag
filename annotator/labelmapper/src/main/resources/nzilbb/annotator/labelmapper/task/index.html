@@ -15,9 +15,7 @@
       <p> The following settings are required: </p>
       
       <details><summary> Source Layer </summary>
-        <p> This layer defines where the resulting annotations' labels come from. If a
-          label from this layer cannot be mapped to a target, the label will be appended to a
-          neighbouring token. </p>
+        <p> This layer defines where the resulting annotations' labels come from. </p>
       </details>
       
       <details><summary> Mapping Layer </summary>
@@ -80,7 +78,7 @@
         <p> The words on the <b>Source Layer</b> are assumed to be divided into phones
           that are on the <b>Sub-mapping Source Layer</b>, and
           the words on the <b>Target Layer</b> are assumed to be divided into phones that
-          are on the <b>Sub-mapping Target Layer</b>, a nd the </p>
+          are on the <b>Sub-mapping Target Layer</b>. </p>
 
         <p> These mappings are tracked in detail, to facilitate comparison of alignment
           and labelling. Mapping information can be accessed via the 'extensions' page of
@@ -230,7 +228,7 @@
               <th>Sub-mapping Target Layer</th>
               <td><i>segments</i></td>
               <td>d</td><td>I</td><td>f</td><td></td><td>r</td><td>@</td><td>n</td><td>t</td>
-              <td>f</td><td>2</td><td>@</td><td>f</td><td>2</td><td>t</td><td>@</td></td>
+              <td>f</td><td>2</td><td>@</td><td>f</td><td>2</td><td>t</td><td>@</td>
             </tr>
           </table>  
         </details>
@@ -261,7 +259,7 @@
             <input type="radio" id="splitLabels-space" name="splitLabels" value="space"> Split Label on Spaces </label>
           <label title="Use all annotations in the scope, and do not split their labels.
 (e.g. phone alignments to other phone alignments)">
-            <input type="radio" id="splitLabels-" name="splitLabels" value="char"> There are multiple annotations </label>
+            <input type="radio" id="splitLabels-" name="splitLabels" value=""> There are multiple annotations </label>
         </span>
         <span id="exampleSplitLayers"></span>
       </div>
