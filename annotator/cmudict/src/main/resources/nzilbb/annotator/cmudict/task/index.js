@@ -62,6 +62,8 @@ getSchema(s => {
             // set the checkbox
             document.getElementById("firstVariantOnly").checked
                 = parameters.get("firstVariantOnly");
+            // show correct encoding example
+            changedEncoding(document.getElementById("encoding"));
         } finally {
             finishedLoading();
         }
@@ -100,3 +102,8 @@ function changedEncoding(select) {
     }
     document.getElementById("encoding-example").innerHTML = example;
 }
+
+document.getElementById("pronunciationLayerId").onchange = function(e) {
+    changedLayer(this); };
+document.getElementById("encoding").onchange = function(e) {
+    changedEncoding(this); };

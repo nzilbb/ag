@@ -37,8 +37,7 @@
       <div class="field" title="Output layer on which pronunciation annotations are added">
         <label for="pronunciationLayerId"> Pronunciation Layer </label>
         <span>
-          <select id="pronunciationLayerId" name="pronunciationLayerId" required
-                  onChange="changedLayer(this);">
+          <select id="pronunciationLayerId" name="pronunciationLayerId" required>
             <option disabled>[select layer]</option> <!-- force choice the first time -->
             <option>[add new layer]</option>         <!-- allow adding a new layer -->
           </select>
@@ -47,7 +46,7 @@
       <div class="field" title="Which encoding to annotate the token with">
         <label for="encoding"> Encoding </label>
         <span>
-          <select id="encoding" name="encoding" onChange="changedEncoding(this)">
+          <select id="encoding" name="encoding">
             <option value="CMU">CMU ARPAbet</option>
             <option value="DISC">CELEX DISC</option>
             <!-- TODO addd IPA as an option -->
