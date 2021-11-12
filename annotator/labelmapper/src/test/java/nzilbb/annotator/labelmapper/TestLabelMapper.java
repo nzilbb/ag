@@ -200,6 +200,24 @@ public class TestLabelMapper {
     assertEquals("phoneComparison parent", "turn", layer.getParentId());
     assertEquals("phoneComparison type", Constants.TYPE_IPA, layer.getType());
     assertEquals("phoneComparison alignment", Constants.ALIGNMENT_INTERVAL, layer.getAlignment());
+
+    // test that mapping layers are optional with sub-mapping
+    
+    annotator = newAnnotator();
+    
+    g = graph();
+    schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "sourceLayerId=orthography"
+      +"&splitLabels="
+      +"&targetLayerId=htkWord"
+      +"&comparator=CharacterToCharacter"
+      +"&subSourceLayerId=phone"
+      +"&subTargetLayerId=htkPhone"
+      +"&subComparator=DISCToDISC");
   }   
   
   /** Invalid parameters are rejected. */
@@ -535,8 +553,8 @@ public class TestLabelMapper {
       "sourceLayerId=orthography"
       +"&splitLabels="
       +"&targetLayerId=htkWord"
-      +"&comparator=CharacterToCharacter"
       +"&mappingLayerId=wordComparison"
+      +"&comparator=CharacterToCharacter"
       +"&subSourceLayerId=phone"
       +"&subTargetLayerId=htkPhone"
       +"&subMappingLayerId=phoneComparison"

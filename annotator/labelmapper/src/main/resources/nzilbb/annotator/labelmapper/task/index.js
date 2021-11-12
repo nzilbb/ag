@@ -11,7 +11,8 @@ const taskId = window.location.search.substring(1);
 // original sub-mapping settings
 var subSourceLayerId = null;
 var subComparator = null;
-var subMappingLayerId = null;
+// sub-mapping layer isn't required becase sub-mappings are tracked in the RDB
+// var subMappingLayerId = null;
 var subTargetLayerId = null;
 
 // first, get the layer schema
@@ -51,7 +52,8 @@ getSchema(s => {
                 && layer.id != schema.utteranceLayerId));
     targetLayerId.selectedIndex = 0; // force selection
 
-    document.getElementById("subMappingLayerId").selectedIndex = 0; // force selection
+    // sub-mapping layer isn't required becase sub-mappings are tracked in the RDB
+    // document.getElementById("subMappingLayerId").selectedIndex = 0; // force selection
 
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getText("getTaskParameters", text => {
@@ -81,7 +83,8 @@ getSchema(s => {
             // check submapping if all of these are set
             document.getElementById("submapping").checked
                 = subSourceLayerId && subComparator && subTargetLayerId;
-            subMappingLayerId = parameters.get("subMappingLayerId");
+            // sub-mapping layer isn't required becase sub-mappings are tracked in the RDB
+            // subMappingLayerId = parameters.get("subMappingLayerId");
 
             // set splitLabels value
             try {
@@ -121,66 +124,72 @@ function changedSourceLayer(select) {
             // TODO if type == IPA: char, otherwise: space
             document.getElementById("splitLabels-char").checked = true;
         }            
-    }
             
-    defaultComparator();
-    // TODO filter possible token layers
-
-    // set possible sub-mapping label layers
-    document.getElementById("subSourceLayerId").innerHTML
-        = "<option disabled value=''>[select layer]</option>"; // remove existing options
-    if (sourceLayer.parentId == schema.turnLayerId
-        && sourceLayer.id != schema.wordLayerId) { // phrase layer
-        // sub labels can only be from phrase layers
-        addLayerOptions(
-            document.getElementById("subSourceLayerId"), schema,
-            layer => layer.alignment == 2 && layer.parentId == schema.turnLayerId
-                && layer.id != schema.wordLayerId && layer.id != schema.utteranceLayerId
-                && layer.id != sourceLayer.id);
-    } else { // presumably a word or segment layer
-        // sub labels can only be word layers
-        addLayerOptions(
-            document.getElementById("subSourceLayerId"), schema,
-            layer => layer.alignment == 2 && layer.parentId == schema.wordLayerId
-                && layer.id != sourceLayer.id);        
+        defaultComparator();
+        // TODO filter possible token layers
+        
+        // set possible sub-mapping label layers
+        document.getElementById("subSourceLayerId").innerHTML
+            = "<option disabled value=''>[select layer]</option>"; // remove existing options
+        if (sourceLayer.parentId == schema.turnLayerId
+            && sourceLayer.id != schema.wordLayerId) { // phrase layer
+            // sub labels can only be from phrase layers
+            addLayerOptions(
+                document.getElementById("subSourceLayerId"), schema,
+                layer => layer.alignment == 2 && layer.parentId == schema.turnLayerId
+                    && layer.id != schema.wordLayerId && layer.id != schema.utteranceLayerId
+                    && layer.id != sourceLayer.id);
+        } else { // presumably a word or segment layer
+            // sub labels can only be word layers
+            addLayerOptions(
+                document.getElementById("subSourceLayerId"), schema,
+                layer => layer.alignment == 2 && layer.parentId == schema.wordLayerId
+                    && layer.id != sourceLayer.id);        
+        }
+        document.getElementById("subSourceLayerId").value = subSourceLayerId;
     }
-    document.getElementById("subSourceLayerId").value = subSourceLayerId;
+    
 }
 function changedTargetLayer(select) {
     defaultComparator();
     
     const targetLayer = schema.layers[select.value];
-    // set possible sub-mapping token/mapping layers
-    document.getElementById("subTargetLayerId").innerHTML
-        = "<option disabled value=''>[select layer]</option>"; // remove existing options
-    if (targetLayer.parentId == schema.turnLayerId
-        && targetLayer.id != schema.wordLayerId) { // phrase layer
-        // sub tokens can only be from phrase layers
-        addLayerOptions(
-            document.getElementById("subTargetLayerId"), schema,
-            layer => layer.alignment == 2 && layer.parentId == schema.turnLayerId
-                && layer.id != schema.wordLayerId && layer.id != schema.utteranceLayerId
-                && layer.id != targetLayer.id);        
-        // sub mappings can only be to phrase layers
-        addLayerOptions(
-            document.getElementById("subMappingLayerId"), schema,
-            layer => layer.alignment == 2 && layer.parentId == schema.turnLayerId
-                && layer.id != schema.wordLayerId && layer.id != schema.utteranceLayerId
-                && layer.id != targetLayer.id);        
-    } else { // presumably a segment layer
-        // sub tokens can only be word layers
-        addLayerOptions(
-            document.getElementById("subTargetLayerId"), schema,
-            layer => layer.alignment == 2 && layer.parentId == schema.wordLayerId
-                && layer.id != targetLayer.id);        
-        // sub mappings can only be word layers
-        addLayerOptions(
-            document.getElementById("subMappingLayerId"), schema,
-            layer => layer.alignment == 2 && layer.parentId == schema.wordLayerId
-                && layer.id != targetLayer.id);        
-    }
-    document.getElementById("subTargetLayerId").value = subTargetLayerId;
-    document.getElementById("subMappingLayerId").value = subMappingLayerId;
+    if (targetLayer) {
+        // set possible sub-mapping token/mapping layers
+        document.getElementById("subTargetLayerId").innerHTML
+            = "<option disabled value=''>[select layer]</option>"; // remove existing options
+        if (targetLayer.parentId == schema.turnLayerId
+            && targetLayer.id != schema.wordLayerId) { // phrase layer
+            // sub tokens can only be from phrase layers
+            addLayerOptions(
+                document.getElementById("subTargetLayerId"), schema,
+                layer => layer.alignment == 2 && layer.parentId == schema.turnLayerId
+                    && layer.id != schema.wordLayerId && layer.id != schema.utteranceLayerId
+                    && layer.id != targetLayer.id);
+            // sub-mapping layer isn't required becase sub-mappings are tracked in the RDB
+            // // sub mappings can only be to phrase layers
+            // addLayerOptions(
+            //     document.getElementById("subMappingLayerId"), schema,
+            //     layer => layer.alignment == 2 && layer.parentId == schema.turnLayerId
+            //         && layer.id != schema.wordLayerId && layer.id != schema.utteranceLayerId
+            //         && layer.id != targetLayer.id);        
+        } else { // presumably a segment layer
+            // sub tokens can only be word layers
+            addLayerOptions(
+                document.getElementById("subTargetLayerId"), schema,
+                layer => layer.alignment == 2 && layer.parentId == schema.wordLayerId
+                    && layer.id != targetLayer.id);
+            // sub-mapping layer isn't required becase sub-mappings are tracked in the RDB
+            // // sub mappings can only be word layers
+            // addLayerOptions(
+            //     document.getElementById("subMappingLayerId"), schema,
+            //     layer => layer.alignment == 2 && layer.parentId == schema.wordLayerId
+            //         && layer.id != targetLayer.id);        
+        }
+        document.getElementById("subTargetLayerId").value = subTargetLayerId;
+        // sub-mapping layer isn't required becase sub-mappings are tracked in the RDB
+        // document.getElementById("subMappingLayerId").value = subMappingLayerId;
+    } // targetLayer exists
 }
 function defaultComparator() {
     var sourceLayerId = document.getElementById("sourceLayerId");
@@ -307,7 +316,8 @@ function setComparatorExamples() {
     document.getElementById("exampleMapping").innerHTML = exampleMapping.replace(/\?/g,"↓");
     document.getElementById("exampleTargetLabel").innerHTML = exampleTarget;
     document.getElementById("exampleSubSourceLabel").innerHTML = exampleSubSource;
-    document.getElementById("exampleSubMappingLabel").innerHTML = exampleSubMapping;
+    // sub-mapping layer isn't required becase sub-mappings are tracked in the RDB
+    // document.getElementById("exampleSubMappingLabel").innerHTML = exampleSubMapping;
     document.getElementById("exampleSubMapping").innerHTML = exampleSubMapping.replace(/\?/g,"↓");
     document.getElementById("exampleSubTargetLabel").innerHTML = exampleSubTarget;
 }
@@ -320,9 +330,13 @@ function disenableSubMapping() { // disables or enables sub-mapping layers
     // layers can only be specified if submapping is selected
     document.getElementById("subSourceLayerId").disabled
         = document.getElementById("subComparator").disabled
-        = document.getElementById("subMappingLayerId").disabled
+    // sub-mapping layer isn't required becase sub-mappings are tracked in the RDB
+    // = document.getElementById("subMappingLayerId").disabled
         = document.getElementById("subTargetLayerId").disabled
         = submapping.disabled || !submapping.checked;
+    // hide mapping layer setting iff sub-mapping is selected 
+    document.getElementById("mappingLayer").style.display 
+        = (!submapping.disabled && submapping.checked)?"none":"";
     setComparatorExamples();
 }
 
@@ -331,8 +345,9 @@ document.getElementById("sourceLayerId").onchange = function(e) {
     changedSourceLayer(this); };
 document.getElementById("mappingLayerId").onchange = function(e) {
     changedMappingLayer(this, window.location.search.substring(1)); };
-document.getElementById("subMappingLayerId").onchange = function(e) {
-    changedMappingLayer(this, window.location.search.substring(1) + "Phone"); };
+// sub-mapping layer isn't required becase sub-mappings are tracked in the RDB
+// document.getElementById("subMappingLayerId").onchange = function(e) {
+//    changedMappingLayer(this, window.location.search.substring(1) + "Phone"); };
 document.getElementById("targetLayerId").onchange = function(e) {
     changedTargetLayer(this); };
 document.getElementById("comparator").onchange = function(e) {

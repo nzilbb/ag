@@ -431,8 +431,15 @@ public class LabelMapper extends Annotator {
       throw new InvalidConfigurationException(
         this, "Invalid value for Split Labels: \"" + splitLabels
         + "\" - must be \"\", \"char\", or \"space\"");
-    if (mappingLayerId == null || mappingLayerId.length() == 0)
+    if (mappingLayerId != null && mappingLayerId.length() == 0) mappingLayerId = null;
+    if (subSourceLayerId != null && subSourceLayerId.length() == 0) subSourceLayerId = null;
+    if (subTargetLayerId != null && subTargetLayerId.length() == 0) subTargetLayerId = null;
+    if (subMappingLayerId != null && subMappingLayerId.length() == 0) subMappingLayerId = null;
+    if (subComparator != null && subComparator.length() == 0) subComparator = null;
+    if (mappingLayerId == null // mapping layer must be set
+        && (subSourceLayerId == null || subTargetLayerId == null)) { // unless it's a sub-mapping
       throw new InvalidConfigurationException(this, "No mapping layer set.");
+    }
     // layers must all be distinct
     HashSet<String> layerSet = new HashSet<String>();
     layerSet.add(sourceLayerId);
@@ -444,10 +451,6 @@ public class LabelMapper extends Annotator {
         +"), and token ("+targetLayerId+") layers must all be distinct.");
     }
 
-    if (subSourceLayerId != null && subSourceLayerId.length() == 0) subSourceLayerId = null;
-    if (subTargetLayerId != null && subTargetLayerId.length() == 0) subTargetLayerId = null;
-    if (subMappingLayerId != null && subMappingLayerId.length() == 0) subMappingLayerId = null;
-    if (subComparator != null && subComparator.length() == 0) subComparator = null;
     if (subSourceLayerId != null && subTargetLayerId != null) {
       // sub-mapping is enabled, so validate relationships
       Layer subSourceLayer = schema.getLayer(subSourceLayerId);

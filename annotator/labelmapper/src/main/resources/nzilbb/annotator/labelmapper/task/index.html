@@ -263,11 +263,12 @@
         </span>
         <span id="exampleSplitLayers"></span>
       </div>
-      <div class="field" title="Output layer mapping the Source layer to the Target layer">
+      <div id="mappingLayer" class="field"
+           title="Output layer mapping the Source layer to the Target layer">
         <label for="mappingLayerId"> Output Mapping Layer </label>
         <span>
           <select id="mappingLayerId" name="mappingLayerId">
-            <option disabled value="">[select layer]</option> <!-- force choice the first time -->
+            <option value="">[none]</option>
             <option>[add new layer]</option>                  <!-- allow adding a new layer -->
           </select>
         </span>
@@ -309,16 +310,16 @@
         </span>
         <span id="exampleSubSourceLabel"></span>
       </div>
-      <div class="field" title="Output layer mapping the sub-mapping Source layer to the sub-mapping Target layer">
+      <!--div class="field" title="Output layer mapping the sub-mapping Source layer to the sub-mapping Target layer">
         <label for="subMappingLayerId"> Output Mapping Layer </label>
         <span>
           <select id="subMappingLayerId" name="subMappingLayerId">
-            <option disabled value="">[select layer]</option> <!-- force choice the first time -->
-            <option>[add new layer]</option>                  <!-- allow adding a new layer -->
+            <option value="">[none]</option>
+            <option>[add new layer]</option>
           </select>
         </span>
         <span id="exampleSubMappingLabel">?</span>
-      </div>
+      </div-->
       <div class="field" title="How the sub-mapping Source layer and the sub-mapping Target layer labels relate to each other">
         <label for="subComparator"> Sub-mapping Comparator </label>
         <span>
