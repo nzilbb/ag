@@ -102,6 +102,8 @@ public class TestHTKAligner {
     
     Graph g = graph();
     Schema schema = g.getSchema();
+    // set phonemes layer to type=ipa so we can test the type is copied
+    schema.getLayer("phonemes").setType(Constants.TYPE_IPA);
     annotator.setSchema(schema);
     
     annotator.setTaskParameters(
@@ -144,8 +146,12 @@ public class TestHTKAligner {
     // assertNotNull("word_alignment layer created", layer);
     layer = annotator.getSchema().getLayer("phone");
     assertNotNull("phone layer created", layer);
+    assertEquals("phone layer type", Constants.TYPE_IPA, layer.getType());
+    assertTrue("phone layer peers", layer.getPeers());
     layer = annotator.getSchema().getLayer("score");
     assertNotNull("score layer created", layer);
+    assertEquals("score layer type", Constants.TYPE_NUMBER, layer.getType());
+    assertTrue("score layer peers", layer.getPeers());
   }   
   
   @Test public void setInvalidTaskParameters() throws Exception {
@@ -452,6 +458,7 @@ public class TestHTKAligner {
                 layer.getSaturated());    
     layer = annotator.getSchema().getLayer("htk_phone");
     assertNotNull("htk_phone layer created", layer);
+    assertEquals("phone layer type", Constants.TYPE_STRING, layer.getType());
     assertEquals("htk_phone phrase layer",
                  "turn", layer.getParentId());    
     assertFalse("htk_phone not saturated",

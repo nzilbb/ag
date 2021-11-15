@@ -40,7 +40,8 @@ getSchema(s => {
         pronunciationLayerId.value = "phonology";
     } else {
         // pick the first phonology-type layer
-        for (let layer in schema.layers) {
+        for (let l in schema.layers) {
+            const layer = schema.layers[l];
             if (layer.parentId == schema.wordLayerId
                 && layer.alignment == 0
                 && layer.type == "ipa"
@@ -175,7 +176,9 @@ getSchema(s => {
             // if there's no utterance tag layer defined
             if (utteranceTagLayerId.selectedIndex == 0
                 // but there's a layer named after the task
-                && schema.layers[taskId]) {
+                && schema.layers[taskId]
+                // and it's not being otherwise used
+                && wordAlignmentLayerId.value != taskId && phoneAlignmentLayerId != null) {
                 
                 // select that layer by default
                 utteranceTagLayerId.value = taskId;

@@ -713,10 +713,12 @@ public class MlfDeserializer implements GraphDeserializer {
                       Annotation score = new Annotation()
                         .setLabel(sScore)
                         .setLayerId(scoreLayer.getId())
-                        .setParent(segment)
                         .setStart(segment.getStart())
                         .setEnd(segment.getEnd());
                       score.setConfidence(annotationConfidence);
+                      if (scoreLayer.getParentId().equals(phoneLayer.getId())) {
+                        score.setParent(segment);
+                      }
                       fragment.addAnnotation(score);
                     } // score layer set
                   } // score
@@ -766,9 +768,11 @@ public class MlfDeserializer implements GraphDeserializer {
                         Annotation score = new Annotation()
                           .setLabel(sScore)
                           .setLayerId(scoreLayer.getId())
-                          .setParent(segment)
                           .setStart(segment.getStart())
                           .setEnd(segment.getEnd());
+                        if (scoreLayer.getParentId().equals(phoneLayer.getId())) {
+                          score.setParent(segment);
+                        }
                         score.setConfidence(annotationConfidence);
                         fragment.addAnnotation(score);
                       } // scoreLayer set

@@ -920,7 +920,8 @@ public class HTKAligner extends Annotator {
         .setAlignment(Constants.ALIGNMENT_INTERVAL)
         .setPeers(true).setPeersOverlap(false).setSaturated(false)
         .setParentId(schema.getTurnLayerId())
-          .setDescription("HTK phone alignments.");
+        .setDescription("HTK phone alignments.")
+        .setType(schema.getLayer(pronunciationLayerId).getType());
       schema.addLayer(phoneAlignmentLayer);
     } else if (phoneAlignmentLayerId.equals(wordAlignmentLayerId)
                || phoneAlignmentLayerId.equals(pronunciationLayerId)
@@ -972,6 +973,7 @@ public class HTKAligner extends Annotator {
             .setAlignment(Constants.ALIGNMENT_NONE)
             .setPeers(false).setSaturated(true)
             .setParentId(phoneAlignmentLayer.getId())
+            .setType(Constants.TYPE_NUMBER)
             .setDescription("HTK phone confidence scores."));
         } else {
           // 'phrase' layer - i.e. aligned child of turn
@@ -980,6 +982,7 @@ public class HTKAligner extends Annotator {
             .setAlignment(Constants.ALIGNMENT_INTERVAL)
             .setPeers(true).setSaturated(false)
             .setParentId(schema.getTurnLayerId())
+            .setType(Constants.TYPE_NUMBER)
             .setDescription("HTK phone confidence scores."));
         }
       } else if (scoreLayerId.equals(orthographyLayerId)
@@ -3087,7 +3090,7 @@ public class HTKAligner extends Annotator {
       
       // get/configure deserializer
       ParameterSet configuration = new ParameterSet();
-      GraphDeserializer deserializer = new MlfDeserializer();
+      MlfDeserializer deserializer = new MlfDeserializer();
       configuration = deserializer.configure(configuration, schema);
       if (wordAlignmentLayerId != null) {
         configuration.get("wordLayer").setValue(schema.getLayer(wordAlignmentLayerId));
@@ -3103,7 +3106,7 @@ public class HTKAligner extends Annotator {
         configuration.get("scoreLayer").setValue(schema.getLayer(scoreLayerId));
       } else {
         configuration.get("scoreLayer").setValue(null);
-      }
+      }      
       configuration.get("useP2FACorrection").setValue(Boolean.valueOf(useP2FACorrection));
       configuration.get("noiseIdentifiersString").setValue(
         noiseIds.stream().collect(Collectors.joining(" ")));
@@ -3210,6 +3213,15 @@ public class HTKAligner extends Annotator {
               .equals(schema.getTurnLayerId())) {
             for (Annotation phone : alignedFragment.all(phoneAlignmentLayerId)) {
               phone.setParent(editedTurn);
+            }
+          }
+          
+          // set turn as parent of scores, if appropriate
+          if (scoreLayerId != null
+              && schema.getLayer(scoreLayerId).getParentId()
+              .equals(schema.getTurnLayerId())) {
+            for (Annotation score : alignedFragment.all(scoreLayerId)) {
+              score.setParent(editedTurn);
             }
           }
           
