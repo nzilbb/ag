@@ -295,6 +295,7 @@ public class LayerHierarchyTraversal<R>
       // or any layer whose parent is not in the graph 
       // (this ensures all layers are included, even for partial graphs)
       Stream<Layer> topLevelLayersStream = schema.getLayers().values().stream()
+         .filter(layer -> layer != null && layer.getId() != null)
          .filter(layer -> !layer.getId().equals("transcript"))
          .filter(layer -> layer.getParentId() != null)
          .filter(layer -> layer.getParentId().equals("transcript")
