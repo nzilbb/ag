@@ -170,6 +170,8 @@ getSchema(s => {
                     // and no need for grouping of utterances
                         = document.getElementById("mainUtteranceGrouping").disabled
                         = document.getElementById("otherUtteranceGrouping").disabled
+                    // and no scores available
+                        = document.getElementById("scoreLayerId").disabled
                         = true;
                 }
             }
@@ -230,11 +232,12 @@ document.getElementById("useP2FA").onchange = function(e) {
     // and can't split participants by channel
         = document.getElementById("leftPattern").disabled
         = document.getElementById("rightPattern").disabled
+        = document.getElementById("scoreLayerId").disabled
         = document.getElementById("useP2FA").checked;
     document.getElementById("sampleRate").checked
         = document.getElementById("sampleRate").disabled;
     
-    // also with P2FA, there's no training, so no grouping by participant/tramscript
+    // also with P2FA, there's no training, so no grouping by participant/transcript
     document.getElementById("mainUtteranceGrouping").disabled
         = document.getElementById("otherUtteranceGrouping").disabled
         = document.getElementById("useP2FA").checked;
