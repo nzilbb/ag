@@ -99,7 +99,7 @@ public class DefaultEditComparator<T> implements EditComparator<T> {
   /**
    * Setter for {@link #comparator}: A comparator to use to determin equality, or null to
    * use java.util.Object.equals(Object). 
-   * @param newComparator A comparator to use to determin equality, or null to use
+   * @param newComparator A comparator to use to determine equality, or null to use
    * java.util.Object.equals(Object). 
    */
   public DefaultEditComparator<T> setComparator(Comparator<T> newComparator) { comparator = newComparator; if (comparator == null) comparator = objectEqualsComparator; return this; }
