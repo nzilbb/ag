@@ -359,6 +359,8 @@ public class LabelMapper extends Annotator {
             +" COMMENT 'The edit operation: + for insert, - for delete, ! for change, = for no change',"
             +" distance INTEGER NOT NULL"
             +" COMMENT 'Distance (cost) for this edit step',"
+            +" hierarchy VARCHAR(6)"
+            +" COMMENT 'This mappings position in the sub-mapping hierarchy: parent, child, or none',"
             +" overlapRate DOUBLE"
             +" COMMENT 'As per Paulo and Oliveira (2004), 0 means no overlap at all, 1 means they complete overlap',"
             +" PRIMARY KEY (transcript,scope,sourceLayer,targetLayer,step)"
@@ -691,8 +693,8 @@ public class LabelMapper extends Annotator {
             +" sourceStart, sourceEnd,"
             +" targetLayer, targetParentId, targetParentlabel, targetId, targetLabel,"
             +" targetStart, targetEnd,"
-            +" operation, distance, overlapRate) VALUES "
-            +" (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            +" operation, distance, hierarchy, overlapRate) VALUES "
+            +" (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
           insertEditStep.setString(1, graph.getId());
         } // subComparator is set
         MinimumEditPath<LabelElement> subMp
@@ -779,7 +781,10 @@ public class LabelMapper extends Annotator {
                 }
                 if (subMapping) { // subMapping
                   Annotation from = step.getFrom().source;
+                  Annotation[] subFrom = from.all(subSourceLayerId);
                   Annotation to = step.getTo().source;
+                  Annotation[] subTo = to.all(subTargetLayerId);
+                  String hierarchy = subFrom.length * subTo.length > 0?"parent":"none";
                   
                   // save in relational database
                   insertEditStep.setString(2, scope.getId()); // scope
@@ -800,12 +805,14 @@ public class LabelMapper extends Annotator {
                   insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
                   insertEditStep.setString(18, operation(step.getOperation())); // operation
                   insertEditStep.setInt(19, step.getStepDistance()); // distance
-                  insertEditStep.setDouble(20, OverlapRate(from, to)); // overlapRate
+                  insertEditStep.setString(20, hierarchy); // hierarchy
+                  insertEditStep.setDouble(21, OverlapRate(from, to)); // overlapRate
                   insertEditStep.executeUpdate();
                   
                   // map children
-                  subS = subMapping(
-                    step.getFrom().source, step.getTo().source, subMp, insertEditStep, subS);
+                  if (subFrom.length > 0 && subTo.length > 0) {
+                    subS = subMapping(from, subFrom, to, subTo, subMp, insertEditStep, subS);
+                  }
                 } // sub-mapping
                 
                 break;
@@ -844,7 +851,8 @@ public class LabelMapper extends Annotator {
                   insertEditStep.setNull(17, Types.DOUBLE); // targetEnd
                   insertEditStep.setString(18, operation(step.getOperation())); // operation
                   insertEditStep.setInt(19, step.getStepDistance()); // distance
-                  insertEditStep.setNull(20, Types.DOUBLE); // overlapRate
+                  insertEditStep.setNull(20, Types.VARCHAR); // hierarchy
+                  insertEditStep.setNull(21, Types.DOUBLE); // overlapRate
                   insertEditStep.executeUpdate();
                 }
                 break;
@@ -871,7 +879,8 @@ public class LabelMapper extends Annotator {
                   insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
                   insertEditStep.setString(18, operation(step.getOperation())); // operation
                   insertEditStep.setInt(19, step.getStepDistance()); // distance
-                  insertEditStep.setNull(20, Types.DOUBLE); // overlapRate
+                  insertEditStep.setNull(20, Types.VARCHAR); // hierarchy
+                  insertEditStep.setNull(21, Types.DOUBLE); // overlapRate
                   insertEditStep.executeUpdate();
                 }
                 break;
@@ -893,10 +902,12 @@ public class LabelMapper extends Annotator {
   }   
   
   /**
-   * Map the sub-labels of the given label annotation to the sub-tokens of the given token
-   * annotation. 
-   * @param mainSource The annotation used to identify which sub-labels to select for mapping.
-   * @param mainTarget The annotation used to identify which sub-tokens to select for mapping.
+   * Map the sub-source annotations of the given source annotation to the sub-target
+   * annotations of the given target annotation. 
+   * @param mainSource The annotation used to identify which sub-sources to select for mapping.
+   * @param subSources The sub-source annotations.
+   * @param mainTarget The annotation used to identify which sub-targets to select for mapping.
+   * @param subTargets The sub-target annotations.
    * @param mp The minimum edit path processor for the sub-mapping.
    * @param insertEditStep Prepared statement for recording edit steps in the relational database.
    * @param s The last index used when inserting steps into the relational database.
@@ -904,11 +915,12 @@ public class LabelMapper extends Annotator {
    * @throws SQLException
    */
   protected int subMapping(
-    Annotation mainSource, Annotation mainTarget, MinimumEditPath<LabelElement> mp,
-    PreparedStatement insertEditStep, int s) throws SQLException {
+    Annotation mainSource, Annotation[] subSources, Annotation mainTarget, Annotation[] subTargets,
+    MinimumEditPath<LabelElement> mp, PreparedStatement insertEditStep, int s)
+    throws SQLException {
     // get the sub-label annotations
     Vector<LabelElement> vLabels = new Vector<LabelElement>();
-    for (Annotation l : mainSource.all(subSourceLayerId)) {
+    for (Annotation l : subSources) {
       vLabels.add(new LabelElement(l));
     }
     if (vLabels.size() == 0) {
@@ -917,7 +929,7 @@ public class LabelMapper extends Annotator {
     } else {
       // get the sub-token annotations
       Vector<LabelElement> vTokens = new Vector<LabelElement>();
-      for (Annotation t : mainTarget.all(subTargetLayerId)) {
+      for (Annotation t : subTargets) {
         vTokens.add(new LabelElement(t));
       }
       if (vTokens.size() == 0) {
@@ -970,7 +982,8 @@ public class LabelMapper extends Annotator {
               insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
               insertEditStep.setString(18, operation(step.getOperation())); // operation
               insertEditStep.setInt(19, step.getStepDistance()); // distance
-              insertEditStep.setDouble(20, OverlapRate(from, to)); // overlapRate
+              insertEditStep.setString(20, "child"); // hierarchy
+              insertEditStep.setDouble(21, OverlapRate(from, to)); // overlapRate
               insertEditStep.executeUpdate();
               break;
             }
@@ -999,7 +1012,8 @@ public class LabelMapper extends Annotator {
               insertEditStep.setNull(17, Types.DOUBLE); // targetEnd
               insertEditStep.setString(18, operation(step.getOperation())); // operation
               insertEditStep.setInt(19, step.getStepDistance()); // distance
-              insertEditStep.setNull(20, Types.DOUBLE); // overlapRate
+              insertEditStep.setString(20, "child"); // hierarchy
+              insertEditStep.setNull(21, Types.DOUBLE); // overlapRate
               insertEditStep.executeUpdate();
               break;
             }
@@ -1028,7 +1042,8 @@ public class LabelMapper extends Annotator {
               insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
               insertEditStep.setString(18, operation(step.getOperation())); // operation
               insertEditStep.setInt(19, step.getStepDistance()); // distance
-              insertEditStep.setNull(20, Types.DOUBLE); // overlapRate
+              insertEditStep.setString(20, "child"); // hierarchy
+              insertEditStep.setNull(21, Types.DOUBLE); // overlapRate
               insertEditStep.executeUpdate();
               break;
             }
@@ -1161,7 +1176,7 @@ public class LabelMapper extends Annotator {
           +" sourceStart, sourceEnd,"
           +" targetLayer, targetParentId, targetParentLabel, targetId, targetLabel,"
           +" targetStart, targetEnd,"
-          +" operation, distance, overlapRate"
+          +" operation, distance, hierarchy, overlapRate"
           +" FROM "+getAnnotatorId()+"_mapping"
           +" WHERE sourceLayer = ? AND targetLayer = ?"
           +" ORDER BY transcript, scope, step"));
@@ -1190,13 +1205,14 @@ public class LabelMapper extends Annotator {
         out.print("targetEnd");
         out.print("operation");
         out.print("distance");
+        out.print("hierarchy");
         out.print("overlapRate");
         out.println();
         
         ResultSet rs = sql.executeQuery();
         try {
           while (rs.next()) {
-            for (int i = 1; i <= 20; i++) {
+            for (int i = 1; i <= 21; i++) {
               out.print(rs.getString(i));
               if (i == 2 && transcriptUrl != null) { // scope
                 // insert URL
