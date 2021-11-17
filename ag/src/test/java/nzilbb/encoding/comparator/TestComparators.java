@@ -24,9 +24,11 @@ package nzilbb.encoding.comparator;
 	      
 import org.junit.*;
 import static org.junit.Assert.*;
-import java.util.Vector;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Vector;
 import nzilbb.editpath.*;
 
 /** Test encoding-based edit-path comparators */
@@ -454,6 +456,37 @@ public class TestComparators {
     assertEquals(pathToString(path), "V", path.get(i++).getTo());
     assertEquals(pathToString(path), "F", path.get(i).getFrom());
     assertEquals(pathToString(path), "f", path.get(i++).getTo());
+  }
+  
+  @Test public void Orthography2OrthographyMapping() {
+    Orthography2OrthographyComparator comparator = new Orthography2OrthographyComparator();
+    MinimumEditPath<String> mp = new MinimumEditPath<String>(comparator);
+    String[] from = {"the", "THE", "quick", "quick!", "!", "?", "brown", "fox" };
+    String[] to = {"THE", "the", "quick?", "quick", ".", ".", "BROWN", "Fox" };
+    List<EditStep<String>> path = mp.minimumEditPath(Arrays.asList(from), Arrays.asList(to));
+    System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 10, path.size());
+    int i = 0;
+    assertEquals(pathToString(path), "the", path.get(i).getFrom());
+    assertEquals(pathToString(path), "THE", path.get(i++).getTo());
+    assertEquals(pathToString(path), "THE", path.get(i).getFrom());
+    assertEquals(pathToString(path), "the", path.get(i++).getTo());
+    assertEquals(pathToString(path), "quick", path.get(i).getFrom());
+    assertEquals(pathToString(path), "quick?", path.get(i++).getTo());
+    assertEquals(pathToString(path), "quick!", path.get(i).getFrom());
+    assertEquals(pathToString(path), "quick", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), ".", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), ".", path.get(i++).getTo());
+    assertEquals(pathToString(path), "!", path.get(i).getFrom());
+    assertNull(pathToString(path), path.get(i++).getTo());
+    assertEquals(pathToString(path), "?", path.get(i).getFrom());
+    assertNull(pathToString(path), path.get(i++).getTo());
+    assertEquals(pathToString(path), "brown", path.get(i).getFrom());
+    assertEquals(pathToString(path), "BROWN", path.get(i++).getTo());
+    assertEquals(pathToString(path), "fox", path.get(i).getFrom());
+    assertEquals(pathToString(path), "Fox", path.get(i++).getTo());    
   }
   
   /**
