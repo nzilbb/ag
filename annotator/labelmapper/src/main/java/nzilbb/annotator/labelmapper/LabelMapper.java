@@ -441,14 +441,19 @@ public class LabelMapper extends Annotator {
       throw new InvalidConfigurationException(this, "No mapping layer set.");
     }
     // layers must all be distinct
-    HashSet<String> layerSet = new HashSet<String>();
-    layerSet.add(sourceLayerId);
-    layerSet.add(targetLayerId);
-    layerSet.add(mappingLayerId);
-    if (layerSet.size() != 3) {
+    if (sourceLayerId.equals(targetLayerId)) {
       throw new InvalidConfigurationException(
-        this, "Label ("+sourceLayerId+"), mapping ("+mappingLayerId
-        +"), and token ("+targetLayerId+") layers must all be distinct.");
+        this, "Source and target layers cannot be the same: " + sourceLayerId);
+    }
+    if (mappingLayerId != null) {
+      if (mappingLayerId.equals(targetLayerId)) {
+        throw new InvalidConfigurationException(
+          this, "Mapping and target layers cannot be the same: " + mappingLayerId);
+      }
+      if (mappingLayerId.equals(sourceLayerId)) {
+        throw new InvalidConfigurationException(
+          this, "Mapping and source layers cannot be the same: " + mappingLayerId);
+      }
     }
 
     if (subSourceLayerId != null && subTargetLayerId != null) {
@@ -482,30 +487,32 @@ public class LabelMapper extends Annotator {
     }
     
     // does the mapping layer need to be added to the schema?
-    Layer mappingLayer = schema.getLayer(mappingLayerId);
-    if (mappingLayer == null) {
-      String mappingParentId = targetLayerId;
-      int alignment = Constants.ALIGNMENT_NONE;
-      if (targetLayerId.equals(schema.getWordLayerId())
-          || targetLayer.isAncestor(schema.getWordLayerId())) { 
-        if (targetLayer.getAlignment() == Constants.ALIGNMENT_NONE) { // word tag
-          // mapping layer is a word layer
-          mappingParentId = schema.getWordLayerId();
+    if (mappingLayerId != null) {
+      Layer mappingLayer = schema.getLayer(mappingLayerId);
+      if (mappingLayer == null) {
+        String mappingParentId = targetLayerId;
+        int alignment = Constants.ALIGNMENT_NONE;
+        if (targetLayerId.equals(schema.getWordLayerId())
+            || targetLayer.isAncestor(schema.getWordLayerId())) { 
+          if (targetLayer.getAlignment() == Constants.ALIGNMENT_NONE) { // word tag
+            // mapping layer is a word layer
+            mappingParentId = schema.getWordLayerId();
+          }
+          alignment = Constants.ALIGNMENT_NONE; // tag layer
+          // (otherwise, most likely a segment layer)
+        } else if (targetLayer.isAncestor(schema.getTurnLayerId())) { 
+          // mapping layer is a phrase layer
+          mappingParentId = schema.getTurnLayerId();
+          alignment = Constants.ALIGNMENT_INTERVAL; // another phrase layer
         }
-        alignment = Constants.ALIGNMENT_NONE; // tag layer
-        // (otherwise, most likely a segment layer)
-      } else if (targetLayer.isAncestor(schema.getTurnLayerId())) { 
-        // mapping layer is a phrase layer
-        mappingParentId = schema.getTurnLayerId();
-        alignment = Constants.ALIGNMENT_INTERVAL; // another phrase layer
+        // tag layer
+        schema.addLayer(
+          new Layer(mappingLayerId)
+          .setAlignment(alignment)
+          .setPeers(false)
+          .setParentId(mappingParentId)
+          .setType(sourceLayer.getType()));
       }
-      // tag layer
-      schema.addLayer(
-        new Layer(mappingLayerId)
-        .setAlignment(alignment)
-        .setPeers(false)
-        .setParentId(mappingParentId)
-        .setType(sourceLayer.getType()));
     }
     
     if (subMappingLayerId != null) {
@@ -569,10 +576,8 @@ public class LabelMapper extends Annotator {
    * {@link #setSchema(Schema)} have not yet been called.
    */
   public String[] getOutputLayers() throws InvalidConfigurationException {
-    if (mappingLayerId == null)
-      throw new InvalidConfigurationException(this, "Mapping layer not set.");
     HashSet<String> outputLayers = new HashSet<String>();
-    outputLayers.add(mappingLayerId);
+    if (mappingLayerId != null) outputLayers.add(mappingLayerId);
     if (subMappingLayerId != null) outputLayers.add(subMappingLayerId);
     return outputLayers.toArray(new String[0]);
   }
@@ -618,11 +623,7 @@ public class LabelMapper extends Annotator {
       throw new InvalidConfigurationException(
         this, "Invalid token layer: " + targetLayer);
     }
-    Layer mappingLayer = graph.getSchema().getLayer(mappingLayerId);
-    if (mappingLayer == null) {
-      throw new InvalidConfigurationException(
-        this, "Invalid output mapping layer: " + mappingLayerId);
-    }
+    Layer mappingLayer = mappingLayerId==null?null:graph.getSchema().getLayer(mappingLayerId);
 
     // create a comparator for the mapping
     EditComparator<LabelElement> comparator = new DefaultEditComparator<LabelElement>();
@@ -643,7 +644,7 @@ public class LabelMapper extends Annotator {
     MinimumEditPath<LabelElement> mp = new MinimumEditPath<LabelElement>(comparator);
     EditComparator<LabelElement> subMappingComparator = null;
     boolean subMapping 
-      = subMappingLayerId != null && subTargetLayerId != null && getSubComparator() != null;
+      = subSourceLayerId != null && subTargetLayerId != null && getSubComparator() != null;
 
     try {
       
@@ -707,7 +708,9 @@ public class LabelMapper extends Annotator {
         }
         
         // delete any existing annotations
-        for (Annotation a : graph.all(mappingLayerId)) a.destroy();
+        if (mappingLayerId != null) {
+          for (Annotation a : graph.all(mappingLayerId)) a.destroy();
+        }
         if (subMappingLayerId != null) {
           for (Annotation a : graph.all(subMappingLayerId)) a.destroy();
         }
@@ -764,13 +767,15 @@ public class LabelMapper extends Annotator {
             switch(step.getOperation()) {
               case NONE:
               case CHANGE: {
-                lastTag = step.getTo().source.createTag(
-                  mappingLayerId, step.getFrom().label);
-                lastTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                if (!subMapping
-                    && initialInserts.length() > 0) { // prepend inserts we had already found
-                  lastTag.setLabel(initialInserts + lastTag.getLabel());
-                  initialInserts = "";
+                if (mappingLayerId != null) {
+                  lastTag = step.getTo().source.createTag(
+                    mappingLayerId, step.getFrom().label);
+                  lastTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                  if (!subMapping
+                      && initialInserts.length() > 0) { // prepend inserts we had already found
+                    lastTag.setLabel(initialInserts + lastTag.getLabel());
+                    initialInserts = "";
+                  }
                 }
                 if (subMapping) { // subMapping
                   Annotation from = step.getFrom().source;
@@ -890,8 +895,8 @@ public class LabelMapper extends Annotator {
   /**
    * Map the sub-labels of the given label annotation to the sub-tokens of the given token
    * annotation. 
-   * @param mainLabel The annotation used to identify which sub-labels to select for mapping.
-   * @param mainToken The annotation used to identify which sub-tokens to select for mapping.
+   * @param mainSource The annotation used to identify which sub-labels to select for mapping.
+   * @param mainTarget The annotation used to identify which sub-tokens to select for mapping.
    * @param mp The minimum edit path processor for the sub-mapping.
    * @param insertEditStep Prepared statement for recording edit steps in the relational database.
    * @param s The last index used when inserting steps into the relational database.
@@ -899,32 +904,32 @@ public class LabelMapper extends Annotator {
    * @throws SQLException
    */
   protected int subMapping(
-    Annotation mainLabel, Annotation mainToken, MinimumEditPath<LabelElement> mp,
+    Annotation mainSource, Annotation mainTarget, MinimumEditPath<LabelElement> mp,
     PreparedStatement insertEditStep, int s) throws SQLException {
     // get the sub-label annotations
     Vector<LabelElement> vLabels = new Vector<LabelElement>();
-    for (Annotation l : mainLabel.all(subSourceLayerId)) {
+    for (Annotation l : mainSource.all(subSourceLayerId)) {
       vLabels.add(new LabelElement(l));
     }
     if (vLabels.size() == 0) {
       setStatus(
-        mainLabel.getLabel() + " ("+mainLabel.getStart()+") no " + subSourceLayerId);
+        mainSource.getLabel() + " ("+mainSource.getStart()+") no " + subSourceLayerId);
     } else {
       // get the sub-token annotations
       Vector<LabelElement> vTokens = new Vector<LabelElement>();
-      for (Annotation t : mainToken.all(subTargetLayerId)) {
+      for (Annotation t : mainTarget.all(subTargetLayerId)) {
         vTokens.add(new LabelElement(t));
       }
       if (vTokens.size() == 0) {
         setStatus(
-          mainToken.getLabel() + " ("+mainToken.getStart()+") no " + subTargetLayerId);
+          mainTarget.getLabel() + " ("+mainTarget.getStart()+") no " + subTargetLayerId);
       } else { // both have sub annotations
         // find the minimum edit path between then
         List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
         // collapse INSERT-then-DELETE into just CHANGE
         path = mp.collapse(path);
         setStatus(
-          mainLabel.getLabel()+" ("+mainLabel.getStart()+") edit path: "+path.size());
+          mainSource.getLabel()+" ("+mainSource.getStart()+") edit path: "+path.size());
         
         // map them together
         for (EditStep<LabelElement> step : path) {
@@ -951,14 +956,14 @@ public class LabelMapper extends Annotator {
               insertEditStep.setInt(3, ++s); // step
               insertEditStep.setString(4, from.getLayerId()); // sourceLayer
               insertEditStep.setString(5, fromParent); // sourceParentId
-              insertEditStep.setString(6, mainLabel.getLabel()); // sourceParentLabel
+              insertEditStep.setString(6, mainSource.getLabel()); // sourceParentLabel
               insertEditStep.setString(7, from.getId()); // sourceId
               insertEditStep.setString(8, from.getLabel()); // sourceLabel
               insertEditStep.setDouble(9, from.getStart().getOffset()); // sourceStart
               insertEditStep.setDouble(10, from.getEnd().getOffset()); // sourceEnd
               insertEditStep.setString(11, to.getLayerId()); // targetLayer
               insertEditStep.setString(12, toParent); // targetParentId
-              insertEditStep.setString(13, mainToken.getLabel()); // targetParentLabel
+              insertEditStep.setString(13, mainTarget.getLabel()); // targetParentLabel
               insertEditStep.setString(14, to.getId()); // targetId
               insertEditStep.setString(15, to.getLabel()); // targetLabel
               insertEditStep.setDouble(16, to.getStart().getOffset()); // targetStart
@@ -980,14 +985,14 @@ public class LabelMapper extends Annotator {
               insertEditStep.setInt(3, ++s); // step
               insertEditStep.setString(4, from.getLayerId()); // sourceLayer
               insertEditStep.setString(5, fromParent); // sourceParentId
-              insertEditStep.setString(6, mainLabel.getLabel()); // sourceParentLabel
+              insertEditStep.setString(6, mainSource.getLabel()); // sourceParentLabel
               insertEditStep.setString(7, from.getId()); // sourceId
               insertEditStep.setString(8, from.getLabel()); // sourceLabel
               insertEditStep.setDouble(9, from.getStart().getOffset()); // sourceStart
               insertEditStep.setDouble(10, from.getEnd().getOffset()); // sourceEnd
               insertEditStep.setString(11, subTargetLayerId); // targetLayer
               insertEditStep.setNull(12, Types.VARCHAR); // targetParentId
-              insertEditStep.setString(13, mainToken.getLabel()); // targetParentLabel
+              insertEditStep.setString(13, mainTarget.getLabel()); // targetParentLabel
               insertEditStep.setNull(14, Types.VARCHAR); // targetId
               insertEditStep.setNull(15, Types.VARCHAR); // targetLabel
               insertEditStep.setNull(16, Types.DOUBLE); // targetStart
@@ -1009,14 +1014,14 @@ public class LabelMapper extends Annotator {
               insertEditStep.setInt(3, ++s); // step
               insertEditStep.setString(4, subSourceLayerId); // sourceLayer
               insertEditStep.setNull(5, Types.VARCHAR); // sourceParentId
-              insertEditStep.setString(6, mainLabel.getLabel()); // sourceParentLabel
+              insertEditStep.setString(6, mainSource.getLabel()); // sourceParentLabel
               insertEditStep.setNull(7, Types.VARCHAR); // sourceId
               insertEditStep.setNull(8, Types.VARCHAR); // sourceLabel
               insertEditStep.setNull(9, Types.DOUBLE); // sourceStart
               insertEditStep.setNull(10, Types.DOUBLE); // sourceEnd
               insertEditStep.setString(11, to.getLayerId()); // targetLayer
               insertEditStep.setString(12, toParent); // targetParentId
-              insertEditStep.setString(13, mainToken.getLabel()); // targetParentLabel
+              insertEditStep.setString(13, mainTarget.getLabel()); // targetParentLabel
               insertEditStep.setString(14, to.getId()); // targetId
               insertEditStep.setString(15, to.getLabel()); // targetLabel
               insertEditStep.setDouble(16, to.getStart().getOffset()); // targetStart
@@ -1383,5 +1388,39 @@ public class LabelMapper extends Annotator {
     }
     return summary;
   } // end of summarizeMapping()
+
+  /**
+   * Deletes given mapping.
+   * @param mappingId A string of the form sourceLayerId→targetLayerId that identifies a
+   * tracked mapping between layers.
+   * @throws SQLException
+   */
+  public void deleteMapping(String mappingId) throws SQLException {
+    int arrowPos = mappingId.indexOf("→");
+    if (arrowPos < 0) throw new SQLException("Invalid mapping ID: " + mappingId);
+    deleteMapping(mappingId.substring(0, arrowPos), mappingId.substring(arrowPos + 1));
+  } // end of summarizeMapping()
   
+  
+  /**
+   * Deletes mapping data between the given layers.
+   * @param sourceLayerId The source layer ID.
+   * @param targetLayerId The target layer ID.
+   * @throws SQLException
+   */
+  public void deleteMapping(String sourceLayerId, String targetLayerId)
+    throws SQLException {
+    Connection rdb = newConnection();
+    PreparedStatement sql = rdb.prepareStatement(
+      sqlx.apply(
+        "DELETE FROM "+getAnnotatorId()+"_mapping WHERE sourceLayer = ? AND targetLayer = ?"));
+    try {
+      sql.setString(1, sourceLayerId);
+      sql.setString(2, targetLayerId);
+      sql.executeUpdate();
+    } finally {
+      sql.close();
+      rdb.close();
+    }
+  }
 } // end of class LabelMapper

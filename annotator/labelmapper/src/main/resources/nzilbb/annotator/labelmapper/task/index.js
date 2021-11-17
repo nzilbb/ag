@@ -96,7 +96,9 @@ getSchema(s => {
             // if there's no utterance tag layer defined
             if (mappingLayerId.selectedIndex == 0
                 // but there's a layer named after the task
-                && schema.layers[taskId]) {
+                && schema.layers[taskId]
+                // and there was no initial task configuration
+                && !text) {
                 
                 // select that layer by default
                 mappingLayerId.value = taskId;
