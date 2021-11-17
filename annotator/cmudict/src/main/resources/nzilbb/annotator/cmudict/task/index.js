@@ -5,6 +5,8 @@ getVersion(version => {
     document.getElementById("version").innerHTML = version;
 });
 
+const taskId = window.location.search.substring(1);
+
 // first, get the layer schema
 var schema = null;
 getSchema(s => {
@@ -62,6 +64,14 @@ getSchema(s => {
             // set the checkbox
             document.getElementById("firstVariantOnly").checked
                 = parameters.get("firstVariantOnly");
+            // if there's no utterance tag layer defined
+            if (pronunciationLayerId.selectedIndex == 0
+                // but there's a layer named after the task
+                && schema.layers[taskId]) {
+                
+                // select that layer by default
+                pronunciationLayerId.value = taskId;
+            }
             // show correct encoding example
             changedEncoding(document.getElementById("encoding"));
         } finally {
