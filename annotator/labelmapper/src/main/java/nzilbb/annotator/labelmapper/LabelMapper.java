@@ -33,6 +33,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -628,7 +629,7 @@ public class LabelMapper extends Annotator {
     Layer mappingLayer = mappingLayerId==null?null:graph.getSchema().getLayer(mappingLayerId);
 
     // create a comparator for the mapping
-    EditComparator<LabelElement> comparator = new DefaultEditComparator<LabelElement>();
+    EditComparator<LabelElement> comparator = new Orthography2OrthographyComparator<LabelElement>();
     if (getComparator().equalsIgnoreCase("DISCToDISC")) {
       comparator = new DISC2DISCComparator<LabelElement>();
     } else if (getComparator().equalsIgnoreCase("OrthographyToDISC")) {
