@@ -13,39 +13,49 @@ function listMappings() {
     // list the existing mappings
     getJSON("listMappings", mappings => {
         try {
-            for (let mapping of mappings) {
-                const a = document.createElement("a");
-                a.appendChild(document.createTextNode(mapping));
-                a.href = resourceForFunction("mappingToCsv", mapping);
-                a.download = mapping + ".csv";
-                a.type = "text/csv";
-                a.title = "Download raw edit path data as CSV";
+            if (mappings.length == 0) {
                 const td = document.createElement("td");
-                td.appendChild(a);
+                td.colSpan = 8;
+                td.appendChild(document.createTextNode("There are no mappings yet"));
                 const tr = document.createElement("tr");
                 tr.appendChild(td);
                 mappingsDiv.appendChild(tr);
-                // get summary info
-                const mappingId = mapping;
-                getJSON(resourceForFunction("summarizeMapping", mappingId), summary => {
-                    addSummaryStatistic(summary.utteranceCount, tr,
-                                        resourceForFunction("utteranceSummaryToCsv", mappingId),
-                                        "utterances-"+mappingId+".csv",
-                                        "Summary by utterance as CSV");
-                    addSummaryStatistic(summary.stepCount, tr);
-                    addSummaryStatistic(summary.sourceCount, tr);
-                    addSummaryStatistic(summary.targetCount, tr);
-                    addSummaryStatistic(summary.meanOverlapRate.toFixed(3), tr);
-                    // add delete button
-                    let td = document.createElement("td");
-                    const button = document.createElement("button");
-                    button.appendChild(document.createTextNode("❌"));
-                    button.title = `Delete ${mappingId}`;
-                    button.onclick = ()=>{deleteMapping(mappingId);};
-                    td.appendChild(button);
+            } else {
+                for (let mapping of mappings) {
+                    const a = document.createElement("a");
+                    a.appendChild(document.createTextNode(mapping));
+                    a.href = resourceForFunction("mappingToCsv", mapping);
+                    a.download = mapping + ".csv";
+                    a.type = "text/csv";
+                    a.title = "Download raw edit path data as CSV";
+                    const td = document.createElement("td");
+                    td.appendChild(a);
+                    const tr = document.createElement("tr");
                     tr.appendChild(td);
-                });
-            } // next mapping
+                    mappingsDiv.appendChild(tr);
+                    // get summary info
+                    const mappingId = mapping;
+                    getJSON(resourceForFunction("summarizeMapping", mappingId), summary => {
+                        addSummaryStatistic(
+                            summary.utteranceCount, tr,
+                            resourceForFunction("utteranceSummaryToCsv", mappingId),
+                            "utterances-"+mappingId+".csv",
+                            "Summary by utterance as CSV");
+                        addSummaryStatistic(summary.stepCount, tr);
+                        addSummaryStatistic(summary.sourceCount, tr);
+                        addSummaryStatistic(summary.targetCount, tr);
+                        addSummaryStatistic(summary.meanOverlapRate.toFixed(3), tr);
+                        // add delete button
+                        let td = document.createElement("td");
+                        const button = document.createElement("button");
+                        button.appendChild(document.createTextNode("❌"));
+                        button.title = `Delete ${mappingId}`;
+                        button.onclick = ()=>{deleteMapping(mappingId);};
+                        td.appendChild(button);
+                        tr.appendChild(td);
+                    });
+                } // next mapping
+            } // there are mappings
         } finally {
             // hide spinner
             finishedLoading();
