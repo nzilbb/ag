@@ -3264,6 +3264,9 @@ public class HTKAligner extends Annotator {
           fragment.trackChanges();
           // merge changes
           merger.transform(fragment);
+          // ensure the utterance boundaries are unchanged (e.g. even by rounding)
+          utterance.getStart().rollback();
+          utterance.getEnd().rollback();
           
           if (dependentLayerIds.size() > 0) { // if there are aligned child layers
             // ensure their anchors are recomputed if they've got low-confidence alignments
