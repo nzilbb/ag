@@ -731,7 +731,7 @@ public class LabelMapper extends Annotator {
             continue;
           }
           Vector<LabelElement> vTokens = new Vector<LabelElement>();
-          for (Annotation s : tokens) vTokens.add(new LabelElement(s));
+          for (Annotation src : tokens) vTokens.add(new LabelElement(src));
           
           // create destination element list
           Vector<LabelElement> vLabels = new Vector<LabelElement>();
