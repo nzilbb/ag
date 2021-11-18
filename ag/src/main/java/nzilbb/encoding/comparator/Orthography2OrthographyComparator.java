@@ -51,7 +51,6 @@ public class Orthography2OrthographyComparator<E> implements EditComparator<E> {
       step.setStepDistance(20);
       step.setOperation(EditStep.StepOperation.CHANGE);
     } else if (!from.equals(to)) {
-      step.setOperation(EditStep.StepOperation.CHANGE);
       String fromOrth = from.toString();
       String fromOrthLower = fromOrth.toLowerCase();
       String fromOrthLettersOnly = fromOrthLower.replaceAll("\\P{IsLetter}","");
@@ -67,6 +66,7 @@ public class Orthography2OrthographyComparator<E> implements EditComparator<E> {
         iDistance = 1;
       }
       step.setStepDistance(iDistance);
+      if (iDistance != 0) step.setOperation(EditStep.StepOperation.CHANGE);
     }
     return step;
   }
