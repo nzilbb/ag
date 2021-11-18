@@ -338,10 +338,10 @@ public class Merger
             LinkedHashSet<Layer> layerLineage = new LinkedHashSet<Layer>();
             layerLineage.add(layer);
             layerLineage.addAll(layer.getAncestors());
-            boolean graphTagLayer = !layer.getId().equals("transcript");
+            boolean graphTagLayer = !layer.getId().equals("transcript"); // TODO schema.root.id
             for (Layer l : layerLineage) {
               if (l.getAlignment() != Constants.ALIGNMENT_NONE
-                  && !l.getId().equals("transcript")) {
+                  && !l.getId().equals("transcript")) { // TODO schema.root.id
                 graphTagLayer = false;
                 break;
               }
@@ -362,6 +362,7 @@ public class Merger
                   // or an unaligned update of aligned annotations
                   // alternatively, if the annotation has a mixture of trustworthyness,
                   // weight will be higher
+                  // TODO for word layer, instead of comparing anchor offsets, penalize cases where the words' utterances don't overlap. That way, offset differences don't matter much within the utterance
                   double dImportance = Math.min(
                     (double)(getConfidence(a1.getStart()) + getConfidence(a1.getEnd())),
                     (double)(getConfidence(a2.getStart()) + getConfidence(a2.getEnd())))
@@ -500,13 +501,21 @@ public class Merger
     setErrors(new Vector<String>());
     schema = graph.getSchema();
     if (graph == editedGraph) return graph;
-    if (editedGraph == null) throw new TransformationException(this, "Edited graph is no set.", new NullPointerException());
+    if (editedGraph == null) {
+      throw new TransformationException(
+        this, "Edited graph is no set.", new NullPointerException());
+    }
 
     ChangeTracker originalTracker = graph.getTracker();
     if (originalTracker == null) {
        // we must have a change tracker, because we might want to roll back changes
        graph.trackChanges();
     }
+    // the bounds of the graph/fragment cannot change
+    Anchor originalGraphStart = graph.getStart();
+    Double originalStartOffset = originalGraphStart.getOffset();
+    Anchor originalGraphEnd = graph.getEnd();
+    Double originalEndOffset = originalGraphEnd.getOffset();
 
     // ensure that all annotations have an anchor
     dummyAnchors = new HashSet<Anchor>();
@@ -549,7 +558,7 @@ public class Merger
     while (iLayersTopDown.hasNext()) {
       Layer layer = iLayersTopDown.next();
       if (editedGraph.getLayer(layer.getId()) == null
-          || layer.getId().equals("transcript")) {
+          || layer.getId().equals("transcript")) { // TODO schema.root.id
         iLayersTopDown.remove();
       }
     } // next layer
@@ -620,6 +629,10 @@ public class Merger
         log("Skipping ", layer);
       }
     } // next layer
+
+    // TODO link utterances to words, and if a word's old utterance bounds are incompatible with the new bounds, unset word child offsets
+    // TODO i.e. if the segment alignments were really bad, and then the utterance boundaries are refined,
+    // TODO the new utterance boundaries take precedence over the old segment boundaries
 
     // phase 4. - compute anchor deltas horizontally
     log("phase 4: anchor deltas");
@@ -709,6 +722,16 @@ public class Merger
         editedGraph.getLayer(layerId).remove("@noChange");
     }
 
+    // ensure the graph bounds haven't changed
+    if (originalStartOffset != null
+        && !originalStartOffset.equals(originalGraphStart.getOffset())) {
+      originalGraphStart.setOffset(originalStartOffset);
+    }
+    if (originalEndOffset != null
+        && !originalEndOffset.equals(originalGraphEnd.getOffset())) {
+      originalGraphEnd.setOffset(originalEndOffset);
+    }
+
     // remove tracker if we added it
     if (originalTracker == null) {
        graph.setTracker(null);
@@ -796,7 +819,7 @@ public class Merger
 
       // if it's a graph tag layer, sort annotations by label
       // this ensures, e.g., that mapping the "who" layer lines the speakers up by name
-      if (layer.getParentId().equals("transcript")
+      if (layer.getParentId().equals("transcript") // TODO schema.root.id
           && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
         AnnotationComparatorByOrdinal byLabel = new AnnotationComparatorByOrdinal() {
             public int compare(Annotation o1, Annotation o2) {
