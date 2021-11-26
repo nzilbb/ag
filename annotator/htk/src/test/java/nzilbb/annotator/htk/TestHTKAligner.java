@@ -514,8 +514,7 @@ public class TestHTKAligner {
     assertEquals("Last phone end", Double.valueOf(11.76), htk_phones[5].getEnd().getOffset());
     assertEquals("word/phone start shared", htk_word.getStart(), htk_phones[0].getStart());
     assertEquals("word/phone end shared", htk_word.getEnd(), htk_phones[5].getEnd());
-  }   
-
+  }
 
   /**
    * Returns a fragment for annotating.
