@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html><head><title>MFA</title></head>
+  <body>
+    <h1>MFA</h1>
+    
+    <p> The MFA annotator integrates with the
+      <a href="https://montrealcorpustools.github.io/Montreal-Forced-Aligner/">
+        Montreal Forced Aligner</a>, which can use words with phonemic transcriptions, and
+      the corresponding audio, to force-align words and phones; i.e. determine the start
+      and end time of each speech sound within each word, and thus the start/end times
+      of the words. </p>
+
+    <p> The annotator can work in two modes: </p>
+    <ol>
+      <li> <b>Train and Align</b> - acoustic models are trained on the data you want to
+        align, which can be in any language as long as you have a pronunciation
+        dictionary for it. </li>
+      <li> <b>Pre-trained Models/Dictionaries</b> - pre-trained models and pronunciation
+        dictionaries are supplied by the Montreal Forced Aligner and used for forced
+        alignment. A list of languages for which dictionaries are available is here:
+        <a href="https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/models/dictionary.html#pretrained-dictionaries">
+          https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/models/dictionary.html#pretrained-dictionaries</a>
+      </li>
+    </ol>
+    
+    <p> The Montreal Forced Aligner third-party tool developed by Michael McAuliffe and others
+      for time aligning orthographic and phonological forms from a pronunciation
+      dictionary to orthographically transcribed audio files. It is based on the
+      <a href="http://kaldi-asr.org/"> Kaldi ASR toolkit</a>.
+    </p>
+
+    <p> This annotator cannot install the Montreal Forced Aligner. You must manually
+      install it following the installation instructions:
+      <a href="https://montreal-forced-aligner.readthedocs.io/en/latest/installation.html">
+        https://montreal-forced-aligner.readthedocs.io/en/latest/installation.html</a>
+    </p>
+    
+  </body>
+</html>
