@@ -21,11 +21,13 @@
 //
 package nzilbb.util;
 
-import java.util.Vector;
-import java.util.LinkedHashMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Vector;
+import java.util.function.Consumer;
 
 /**
  * Manages the execution of an external program, ensuring that streams are processed, etc.
@@ -133,7 +135,7 @@ public class Execution implements Runnable {
    * @see #getInput()
    * @see #setInput(StringBuffer)
    */
-  protected StringBuffer input;
+  protected StringBuffer input = new StringBuffer();
   /**
    * Getter for {@link #input}: Text from stdout
    * @return Text from stdout
@@ -150,7 +152,7 @@ public class Execution implements Runnable {
    * @see #getError()
    * @see #setError(StringBuffer)
    */
-  protected StringBuffer error;
+  protected StringBuffer error = new StringBuffer();
   /**
    * Getter for {@link #error}: Text from stderr
    * @return Text from stderr
@@ -201,18 +203,45 @@ public class Execution implements Runnable {
    */
   public Execution setVerbose(boolean newVerbose) { verbose = newVerbose; return this; }
   
+  /**
+   * Listeners for strings coming from stdout.
+   * @see #getStdoutObservers()
+   */
+  protected List<Consumer<String>> stdoutObservers = new Vector<Consumer<String>>();
+  /**
+   * Getter for {@link #stdoutObservers}: Listeners for strings coming from stdout.
+   * @return Listeners for strings coming from stdout.
+   */
+  public List<Consumer<String>> getStdoutObservers() { return stdoutObservers; }
+  
+  /**
+   * Listeners for strings coming from stderr.
+   * @see #getStderrObservers()
+   * @see #setStderrObservers(List<Consumer<String>>)
+   */
+  protected List<Consumer<String>> stderrObservers = new Vector<Consumer<String>>();
+  /**
+   * Getter for {@link #stderrObservers}: Listeners for strings coming from stderr.
+   * @return Listeners for strings coming from stderr.
+   */
+  public List<Consumer<String>> getStderrObservers() { return stderrObservers; }
+  
   // Methods:
    
   /**
    * Default constructor.
    */
   public Execution() {
+    stdoutObservers.add(s->input.append(s));
+    stderrObservers.add(s->error.append(s));
   } // end of constructor
 
   /**
    * Constructor from attributes.
    */
   public Execution(File exe, Vector<String> arguments) {
+    stdoutObservers.add(s->input.append(s));
+    stderrObservers.add(s->error.append(s));
     setExe(exe);
     setArguments(arguments);
   } // end of constructor
@@ -273,7 +302,7 @@ public class Execution implements Runnable {
       for (String variable : environmentVariables.keySet()) {
         envp.add(variable + "=" + environmentVariables.get(variable)); 
         if (verbose) {
-          System.out.println("Execution: variable=" + environmentVariables.get(variable));
+          System.out.println("Execution: "+variable+"=" + environmentVariables.get(variable));
         }
       }
 
@@ -349,7 +378,12 @@ public class Execution implements Runnable {
             // write to the log file
             bytesRead = inStream.read(buffer);
             if (verbose) System.out.println("Execution: stdout read " + bytesRead + " bytes");
-            input.append(new String(buffer, 0, bytesRead));
+            String s = new String(buffer, 0, bytesRead);
+            for (Consumer<String> observer : stdoutObservers) {
+              try {
+                observer.accept(s);
+              } catch (Throwable t) {}
+            }
             // data ready?
             bytesRead = inStream.available();
             if (verbose) System.out.println("Execution: stdin bytes ready: " + bytesRead);
@@ -368,9 +402,12 @@ public class Execution implements Runnable {
             iMSSleep = 1;	    
             bytesRead = errStream.read(buffer);
             if (verbose) System.out.println("Execution: stderr read " + bytesRead + " bytes");
-            error.append(new String(buffer, 0, bytesRead));
-            System.err.println(
-              "Execution: " + exe.getName() + ": " + new String(buffer, 0, bytesRead));
+            String s = new String(buffer, 0, bytesRead);
+            for (Consumer<String> observer : stderrObservers) {
+              try {
+                observer.accept(s);
+              } catch (Throwable t) {}
+            }
             // data ready?
             bytesRead = errStream.available();
             if (verbose) System.out.println("Execution: stderr bytes ready: " + bytesRead);
