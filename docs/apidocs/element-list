@@ -4,6 +4,7 @@ nzilbb.ag.automation.example
 nzilbb.ag.automation.example.minimal
 nzilbb.ag.automation.example.theworks
 nzilbb.ag.automation.util
+nzilbb.ag.cli
 nzilbb.ag.ql
 nzilbb.ag.serialize
 nzilbb.ag.serialize.json
@@ -12,6 +13,7 @@ nzilbb.ag.util
 nzilbb.configure
 nzilbb.editpath
 nzilbb.encoding
+nzilbb.encoding.comparator
 nzilbb.media
 nzilbb.media.ffmpeg
 nzilbb.media.wav
