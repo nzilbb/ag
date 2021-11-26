@@ -210,14 +210,14 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
   protected GraphStore store;
   /**
    * Getter for {@link #store}: The graph store, if the annotator is annotated
-   * with {@link UseseGraphStore}. 
-   * @return The graph store, if the annotator is annotated with {@link UseseGraphStore}.
+   * with {@link UsesGraphStore}. 
+   * @return The graph store, if the annotator is annotated with {@link UsesGraphStore}.
    */
   public GraphStore getStore() { return store; }
   /**
    * Setter for {@link #store}: The graph store, if the annotator is annotated
-   * with {@link UseseGraphStore}. 
-   * @param newStore The graph store, if the annotator is annotated with {@link UseseGraphStore}.
+   * with {@link UsesGraphStore}. 
+   * @param newStore The graph store, if the annotator is annotated with {@link UsesGraphStore}.
    */
   public Annotator setStore(GraphStore newStore) { store = newStore; return this; }
   
