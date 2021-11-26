@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> MFA </title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <p> The MFA Annotator integrates with the
+      <a href="https://montrealcorpustools.github.io/Montreal-Forced-Aligner/">
+        Montreal Forced Aligner</a>, which can use words with phonemic transcriptions, and
+      the corresponding audio, to force-align words and phones; i.e. determine the start
+      and end time of each speech sound within each word, and thus the start/end times
+      of the words. </p>
+
+    <form method="POST" action="setTaskParameters" id="form">
+      <div class="field" title="Input layer from which words come">
+        <label for="orthographyLayerId"> Orthography Layer </label>
+        <span><select id="orthographyLayerId" name="orthographyLayerId" required></select></span>
+      </div>
+      <div class="field" title="Input layer from which word pronunciations come. If you don't select this layer, you must specify a Dictionary Name">
+        <label for="pronunciationLayerId"> Pronunciation Layer </label>
+        <span><select id="pronunciationLayerId" name="pronunciationLayerId">
+            <option value="">[none]</option>
+        </select></span>
+      </div>
+      <div class="field" title="If you wish to use pre-trained models and one of the available language dictionaries, instead of specifying a Pronunciation Layer, enter the name here. e.g. english">
+        <label for="dictionaryName"> Dictionary Name </label>
+        <span><select id="dictionaryName" name="dictionaryName">
+            <option value="">[none]</option>
+        </select></span>
+      </div>
+      <div class="field" title="Whether manual alignments should be overwritten or not.">
+        <label for="ignoreAlignmentStatuses"> Replace Manual Alignments </label>
+        <span><input id="ignoreAlignmentStatuses"
+                     name="ignoreAlignmentStatuses" type="checkbox"></span>
+      </div>
+      <div class="field" title="Output layer on which word alignments are saved">
+        <label for="wordAlignmentLayerId"> Word Alignment Layer </label>
+        <span>
+          <select id="wordAlignmentLayerId" name="wordAlignmentLayerId" required>
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Output layer on which phone alignments are saved">
+        <label for="phoneAlignmentLayerId"> Phone Alignment Layer </label>
+        <span>
+          <select id="phoneAlignmentLayerId" name="phoneAlignmentLayerId" required>
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Output layer for a time stamp tagging each aligned utterance">
+        <label for="utteranceTagLayerId"> Utterance Tag Layer </label>
+        <span>
+          <select id="utteranceTagLayerId" name="utteranceTagLayerId">
+            <option value="">[none]</option>
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <!--TODO div class="field" title="Output attribute for a time stamp tagging each aligned participant">
+        <label for="participantTagLayerId"> Participant Tag Attribute </label>
+        <span>
+          <select id="participantTagLayerId" name="participantTagLayerId">
+            <option value="">[none]</option>
+            <!--option>[add new layer]</option-->         <!-- allow adding a new layer -->
+          <!--/select>
+        </span>
+      </div-->
+      <div class="controls"><input type="submit" value="Set Parameters"></div>
+    </form>
+    
+    <footer><div> MFA Annotator <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>

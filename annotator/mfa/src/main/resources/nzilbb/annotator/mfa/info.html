@@ -17,23 +17,51 @@
         dictionary for it. </li>
       <li> <b>Pre-trained Models/Dictionaries</b> - pre-trained models and pronunciation
         dictionaries are supplied by the Montreal Forced Aligner and used for forced
-        alignment. A list of languages for which dictionaries are available is here:
+        alignment. A list of languages for which dictionaries are available is
         <a href="https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/models/dictionary.html#pretrained-dictionaries">
-          https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/models/dictionary.html#pretrained-dictionaries</a>
+          here</a>.
       </li>
     </ol>
     
-    <p> The Montreal Forced Aligner third-party tool developed by Michael McAuliffe and others
-      for time aligning orthographic and phonological forms from a pronunciation
-      dictionary to orthographically transcribed audio files. It is based on the
-      <a href="http://kaldi-asr.org/"> Kaldi ASR toolkit</a>.
+    <p> The Montreal Forced Aligner is a third-party tool developed by Michael McAuliffe
+      and others for time aligning orthographic and phonological forms from a pronunciation
+      dictionary to orthographically transcribed audio files. It is
+      <a href="https://github.com/MontrealCorpusTools/Montreal-Forced-Aligner/blob/main/LICENSE">
+        open source software</a> based on the
+      <a href="http://kaldi-asr.org/">Kaldi ASR toolkit</a>.
     </p>
 
+    <h2> Install the Montreal Forced Aligner first </h2>
+    
     <p> This annotator cannot install the Montreal Forced Aligner. You must manually
-      install it following the installation instructions:
+      install it in a location that is accessible to you annotation server user. </p>
+
+    <p> Up-to-date installation instructions for the Montreal Forced Aligner are available
+      here: <br>
       <a href="https://montreal-forced-aligner.readthedocs.io/en/latest/installation.html">
         https://montreal-forced-aligner.readthedocs.io/en/latest/installation.html</a>
     </p>
     
+    <h3> Linux </h3>
+    
+    <p> To install the Montreal Forced Aligner on Linux systems for all users, so that
+      your web server can access it if required: </p>
+    <ol>
+      <li> Download Miniconda: <br>
+        <tt>wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.10.3-Linux-x86_64.sh</tt></li>
+      <li> Start the installer: <br>
+        <tt>sudo bash Miniconda3-py38_4.10.3-Linux-x86_64.sh</tt></li>
+      <li> When asked the location to install Miniconda, use: <br>
+        <tt>/opt/conda</tt></li>
+      <li> When asked whether the installer should initialize Miniconda, this is
+        unnecessary so you can respond <tt>no</tt></li>
+      <li> Change ownership of the conda files): <br>
+        <tt>sudo chown -R $USERNAME:$USERNAME /opt/conda</tt></li>
+      <li> Make conda accessible to all users (so you web server can access MFA): <br>
+        <tt>chmod -R go-w /opt/conda</tt><br>
+        <tt>chmod -R go+rX /opt/conda</tt></li>
+      <li> Install the Montreal Forced Aligner <br>
+        <tt>/opt/conda/bin/conda create -n aligner -c conda-forge montreal-forced-aligner</tt></li>
+    </ol>
   </body>
 </html>

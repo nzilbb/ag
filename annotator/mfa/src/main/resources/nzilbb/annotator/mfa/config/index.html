@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> MFA </title>    
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+
+    <h1>MFA</h1>
+    
+    <p> The MFA Annotator integrates with the
+      <a href="https://montrealcorpustools.github.io/Montreal-Forced-Aligner/">
+        Montreal Forced Aligner</a>, which can use words with phonemic transcriptions, and
+      the corresponding audio, to force-align words and phones; i.e. determine the start
+      and end time of each speech sound within each word, and thus the start/end times
+      of the words. </p>
+    
+    <details>
+      <summary><b>In order to function, the Montreal Forced Aligner must first be installed.</b></summary>
+      
+      <p> This annotator cannot install the Montreal Forced Aligner. You must manually
+        install it in a location that is accessible to you annotation server user. </p>
+      
+      <p> Up-to-date installation instructions for the Montreal Forced Aligner are available
+        here: <br>
+        <a href="https://montreal-forced-aligner.readthedocs.io/en/latest/installation.html">
+          https://montreal-forced-aligner.readthedocs.io/en/latest/installation.html</a>
+      </p>
+      
+      <h3> Linux </h3>
+      
+      <p> To install the Montreal Forced Aligner on Linux systems for all users, so that
+        your web server can access it if required: </p>
+      <ol>
+        <li> Download Miniconda: <br>
+          <tt>wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.10.3-Linux-x86_64.sh</tt></li>
+        <li> Start the installer: <br>
+          <tt>sudo bash Miniconda3-py38_4.10.3-Linux-x86_64.sh</tt></li>
+        <li> When asked the location to install Miniconda, use: <br>
+          <tt>/opt/conda</tt></li>
+        <li> When asked whether the installer should initialize Miniconda, this is
+          unnecessary so you can respond <tt>no</tt></li>
+        <li> Change ownership of the conda files): <br>
+          <tt>sudo chown -R $USERNAME:$USERNAME /opt/conda</tt></li>
+        <li> Make conda accessible to all users (so you web server can access MFA): <br>
+          <tt>chmod -R go-w /opt/conda</tt><br>
+          <tt>chmod -R go+rX /opt/conda</tt></li>
+        <li> Install the Montreal Forced Aligner <br>
+          <tt>/opt/conda/bin/conda create -n aligner -c conda-forge montreal-forced-aligner</tt></li>
+      </ol>
+    </details>
+
+    <form method="POST" id="setConfig" action="setConfig">
+      <div class="field" id="condaPathField"
+           title="This is the path to where Miniconda or Anaconda is installed on the server, e.g. /opt/conda">
+        <label for="condaPath">Miniconda/Anaconda path</label>
+        <input id="condaPath" name="condaPath" type="text">
+      </div>
+      <div class="field" id="mfaEnvironmentField"
+           title="Name of the Conda environment in which MFA was installed">
+        <label for="mfaEnvironment">MFA Environment Name</label>
+        <input id="mfaEnvironment" name="mfaEnvironment" type="text" value="aligner">
+      </div>
+      <div class="field"
+           title="This is the path to the Montreal Forced Aligner command line on the server. e.g. /opt/conda/envs/aligner/bin">
+        <label for="mfaPath">Path to MFA</label>
+        <input id="mfaPath" name="mfaPath" type="text">
+      </div>
+      <div class="controls">
+        <input type="submit" value="Configure">
+      </div>
+    </form>
+
+    <footer><div> MFA annotator <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>

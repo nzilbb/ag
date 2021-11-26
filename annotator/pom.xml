@@ -26,5 +26,6 @@
     <module>stanfordpos</module>
     <module>mor</module>
     <module>htk</module>
+    <module>mfa</module>
   </modules>  
 </project>

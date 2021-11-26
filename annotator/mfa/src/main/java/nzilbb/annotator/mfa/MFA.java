@@ -39,6 +39,7 @@ import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
@@ -325,9 +326,11 @@ public class MFA extends Annotator {
    * @return A valid path to MFA, or null if it could not be inferred.
    */
   public String inferMfaPath(String condaPath, String mfaEnvironment) {
-    File bin = new File(condaPath);
+    File conda = new File(condaPath);    
+    File bin = new File(conda, "bin");
+    if (!bin.exists()) bin = conda; // we were given the bin directory to start with?    
     if (!bin.exists()) return null;
-    if (bin.getName().equals("conda")) bin = bin.getParentFile();
+    if (bin.getName().equals("conda")) bin = bin.getParentFile(); // we were given conda command
     File mfaPath = new File(new File(new File(bin.getParentFile(),"envs"),mfaEnvironment),"bin");
     if (!mfaPath.exists()) return null;
     // ensure mfa is actually there
@@ -336,6 +339,28 @@ public class MFA extends Annotator {
     setMfaPath(mfaPath.getPath());
     return mfaPath.getPath();
   } // end of inferMfaPath()
+  
+  /**
+   * Lists valid values for {@link #dictionaryName}.
+   * <p> Currently this is the intersection of the lists returned by
+   * <tt>mfa model download acoustic</tt> and <tt>mfa model download dictionary</tt>
+   * @return A list of valid values for {@link #dictionaryName}.
+   */
+  public Collection<String> validDictionaryNames() throws TransformationException {
+    String dictionariesRaw = mfa("model", "download", "dictionary");
+    String acousticModelsRaw = mfa("model", "download", "acoustic");
+    String[] dictionaryLines = dictionariesRaw.split("\n");
+    String[] acousticModelLines = acousticModelsRaw.split("\n");
+    Set<String> dictionaries = Arrays.stream(dictionaryLines)
+      .map(s->s.trim().replaceAll("^-","").trim())
+      .filter(s->s.length() > 0)
+      .collect(Collectors.toSet());
+    dictionaries.retainAll(Arrays.stream(acousticModelLines)
+                           .map(s->s.trim().replaceAll("^-","").trim())
+                           .filter(s->s.length() > 0)
+                           .collect(Collectors.toSet()));
+    return dictionaries;
+  } // end of validDictionaryNames()
    
   /**
    * Provides the overall configuration of the annotator. 
@@ -363,8 +388,9 @@ public class MFA extends Annotator {
     }
     if (mfaPath != null) {
       return "mfaPath="+mfaPath;
+    } else { 
+      return "condaPath=/opt/conda/bin"; // TODO defaults for Windows/OSX
     }
-    return null;
   }
   
   /**
@@ -778,7 +804,7 @@ public class MFA extends Annotator {
       }
       
       // cleanup
-      //TODO IO.RecursivelyDelete(sessionWorkingDir);
+      IO.RecursivelyDelete(sessionWorkingDir);
       
       if (failure != null) throw failure;
       
@@ -845,7 +871,7 @@ public class MFA extends Annotator {
         this, "Failed to create working directory: " + sessionWorkingDir.getPath());
     }
     boolean addStatusObserverForLog = logFile == null; // might have already done this
-    logFile = new File(sessionWorkingDir, "training.log");
+    logFile = new File(getWorkingDirectory(), sessionWorkingDir.getName() + ".log");
     if (addStatusObserverForLog) {
       getStatusObservers().add(status -> {
           if (logFile != null) {
@@ -1037,7 +1063,7 @@ public class MFA extends Annotator {
     // MFA reports progress during training, but there are up to five phases that go from
     // 0% to 100%. We detect these percentages and use them to increment the annotator progress,
     // but each phase represents 10% of overall progress.
-    initialPercentComplete = getPercentComplete();
+    initialPercentComplete = getPercentComplete()==null?0:getPercentComplete();
     lastPhaseProgress = 0;
     phase = 0;
     
