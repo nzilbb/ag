@@ -52,7 +52,7 @@ import nzilbb.sql.derby.DerbyConnectionFactory;
 import nzilbb.util.IO;
 
 public class TestMFA {
-  static final String condaPath = "/opt/anaconda/bin";
+  static final String condaPath = "/opt/conda/bin";
   static final String mfaEnvironment = "aligner";
 
   static MFA annotator = new MFA();
@@ -90,6 +90,12 @@ public class TestMFA {
     File fThisClass = new File(urlThisClass.toURI());
     return fThisClass.getParentFile();
   }
+
+  /** Ensure validDictionaryNames method works. */
+  @Test public void validDictionaryNames() throws Exception {
+    assertTrue("validDictionaryNames contains english",
+               annotator.validDictionaryNames().contains("english"));
+  }   
 
   /** Ensure default (null) task parameters return an error. */
   @Test public void defaultParameters() throws Exception {
@@ -406,7 +412,7 @@ public class TestMFA {
   /** Test train/align modality. */
   @Test public void trainAndAlign() throws Exception {
     annotator.setSessionName("trainAndAlign");
-    annotator.getStatusObservers().add(status->System.out.println(status));
+    //annotator.getStatusObservers().add(status->System.out.println(status));
     
     Graph f = fragment();
     Schema schema = f.getSchema();
