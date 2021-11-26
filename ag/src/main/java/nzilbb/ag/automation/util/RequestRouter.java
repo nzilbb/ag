@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -346,9 +347,9 @@ public class RequestRouter
          return null;
       } else if (result instanceof CloneableBean) {
          return new ByteArrayInputStream(((CloneableBean)result).toJson().toString().getBytes());
-      } else if (result instanceof List) {
+      } else if (result instanceof Collection) {
          JsonArrayBuilder list = Json.createArrayBuilder();
-         for (Object e : (List)result) {
+         for (Object e : (Collection)result) {
             list.add(e.toString());
          }
          return new ByteArrayInputStream(list.build().toString().getBytes());
