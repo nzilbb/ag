@@ -76,10 +76,9 @@ import nzilbb.util.Execution;
 import nzilbb.util.IO;
 
 /**
- * Annotator that used HTK to force-align given graphs.
+ * Annotator that uses HTK to force-align given graphs.
  * @author Robert Fromont robert@fromont.net.nz
  */
-// Migration notes:
 @UsesFileSystem @UsesGraphStore
 public class HTKAligner extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
@@ -822,8 +821,6 @@ public class HTKAligner extends Annotator {
       phoneAlignmentLayerId = null;
     if (scoreLayerId != null && scoreLayerId.length() == 0)
       scoreLayerId = null;
-    if (wordAlignmentLayerId != null && wordAlignmentLayerId.length() == 0)
-      wordAlignmentLayerId = null;
     if (leftPattern != null && leftPattern.length() == 0)
       leftPattern = null;
     if (rightPattern != null && rightPattern.length() == 0)
