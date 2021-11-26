@@ -993,17 +993,25 @@ public class MFA extends Annotator {
               return;
             }
             
+            // save .lab file and .wav file in subdirectory named after the speaker
+            File speakerDir = new File(corpusDir, "unknown");
+            Annotation participant = fragment.first(schema.getParticipantLayerId());
+            if (participant != null && participant.getLabel().length() > 0) {
+              speakerDir = new File(corpusDir, participant.getLabel());
+            }
+            if (!speakerDir.exists()) speakerDir.mkdir();
+            
             // write transcript file
             BufferedWriter transcript = new BufferedWriter(
               new OutputStreamWriter(
-                new FileOutputStream(new File(corpusDir, fragment.getId() + ".txt")), "UTF-8"));
+                new FileOutputStream(new File(speakerDir, fragment.getId() + ".lab")), "UTF-8"));
             transcript.write(utteranceOrthography.toString());
             transcript.close();
             
             // extract audio...
             String fileUrl = fragment.getMediaProvider().getMedia("", "audio/wav");
             File fTemp = new File(new URI(fileUrl));
-            File fWav = new File(corpusDir, fragment.getId() + ".wav");
+            File fWav = new File(speakerDir, fragment.getId() + ".wav");
             if (fragment.isFragment()) { // fragment media is generated on the fly, so can be moved
               IO.Rename(fTemp, fWav);
             } else { // whole graph media is used in-situ (this should happen, but just in case...)
@@ -1167,8 +1175,22 @@ public class MFA extends Annotator {
       HashMap<String,Graph> idToFragment = new HashMap<String,Graph>();
       for (Graph f : originalFragments) idToFragment.put(IO.WithoutExtension(f.getId()), f);
 
+      // output files are in subdirectories of alignedDir
+      Vector<File> outputFiles = new Vector<File>();
+      for (File d : alignedDir.listFiles()) {
+        if (d.isFile()) { // probably unaligned.txt
+          outputFiles.add(d);
+        } else if (d.isDirectory()) {
+          for (File f : d.listFiles()) {
+            if (f.isFile()) { // presumably a TextGrid
+              outputFiles.add(f);
+            }
+          } // next subdir file
+        } // subdir
+      } // next corpusDir fild
+      
       // list all TextGrids in output directory
-      for (File f : alignedDir.listFiles()) {
+      for (File f : outputFiles) {
         if (isCancelling()) break;
 
         if (f.getName().endsWith(".TextGrid")) { // aligned utterance
