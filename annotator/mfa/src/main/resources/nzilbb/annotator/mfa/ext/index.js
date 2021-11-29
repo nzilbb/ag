@@ -29,7 +29,7 @@ function listLogs() {
                     logsDiv.appendChild(tr);
                     var td = document.createElement("td");
                     var a = document.createElement("a");
-                    a.href = l;
+                    a.href = resourceForFunction("downloadLog",l);
                     a.download = l;
                     a.title = "Download " + l; // TODO i18n
                     a.appendChild(document.createTextNode(l));
