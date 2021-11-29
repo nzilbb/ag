@@ -127,26 +127,39 @@ public class MFA extends Annotator {
   public MFA setIgnoreAlignmentStatuses(Boolean newIgnoreAlignmentStatuses) { ignoreAlignmentStatuses = newIgnoreAlignmentStatuses; return this; }
   
   /**
-   * The name of the dictionary, MFA should use pretrained models and download a
-   * dictionary. null for train-and-align. 
+   * The name of the available dictionary to use. null for train-and-align. 
    * @see #getDictionaryName()
    * @see #setDictionaryName(String)
    */
   protected String dictionaryName;
   /**
-   * Getter for {@link #dictionaryName}: The name of the dictionary, MFA should use
-   * pretrained models and download a dictionary. null for train-and-align.  
-   * @return The name of the dictionary, MFA should use pretrained models and download a
-   * dictionary. null for train-and-align. 
+   * Getter for {@link #dictionaryName}: The name of the available dictionary to use.  
+   * @return The name of the available dictionary to use. null for train-and-align. 
    */
   public String getDictionaryName() { return dictionaryName; }
   /**
-   * Setter for {@link #dictionaryName}: The name of the dictionary, MFA should use
-   * pretrained models and download a dictionary. null for train-and-align. 
-   * @param newDictionaryName The name of the dictionary, MFA should use pretrained models
-   * and download a dictionary. null for train-and-align. 
+   * Setter for {@link #dictionaryName}: The name of the available dictionary to use. 
+   * @param newDictionaryName The name of the available dictionary to use. null for
+   * train-and-align.  
    */
   public MFA setDictionaryName(String newDictionaryName) { dictionaryName = newDictionaryName; return this; }
+  
+  /**
+   * The name of the pretrained acoustive models to use.
+   * @see #getModelsName()
+   * @see #setModelsName(String)
+   */
+  protected String modelsName;
+  /**
+   * Getter for {@link #modelsName}: The name of the pretrained acoustive models to use.
+   * @return The name of the pretrained acoustive models to use.
+   */
+  public String getModelsName() { return modelsName; }
+  /**
+   * Setter for {@link #modelsName}: The name of the pretrained acoustive models to use.
+   * @param newModelsName The name of the pretrained acoustive models to use.
+   */
+  public MFA setModelsName(String newModelsName) { modelsName = newModelsName; return this; }
   
   /**
    * Layer ID of the primary transcription token layer.
@@ -342,25 +355,35 @@ public class MFA extends Annotator {
   
   /**
    * Lists valid values for {@link #dictionaryName}.
-   * <p> Currently this is the intersection of the lists returned by
-   * <tt>mfa model download acoustic</tt> and <tt>mfa model download dictionary</tt>
+   * <p> This is the list returned by <tt>mfa model download dictionary</tt>
    * @return A list of valid values for {@link #dictionaryName}.
    */
   public Collection<String> validDictionaryNames() throws TransformationException {
     String dictionariesRaw = mfa("model", "download", "dictionary");
-    String acousticModelsRaw = mfa("model", "download", "acoustic");
     String[] dictionaryLines = dictionariesRaw.split("\n");
-    String[] acousticModelLines = acousticModelsRaw.split("\n");
     Set<String> dictionaries = Arrays.stream(dictionaryLines)
       .map(s->s.trim().replaceAll("^-","").trim())
-      .filter(s->s.length() > 0)
+      .filter(s->s.length() > 0) // no blank lines
+      .filter(s->s.indexOf(":") < 0) // not the list header
       .collect(Collectors.toSet());
-    dictionaries.retainAll(Arrays.stream(acousticModelLines)
-                           .map(s->s.trim().replaceAll("^-","").trim())
-                           .filter(s->s.length() > 0)
-                           .collect(Collectors.toSet()));
     return dictionaries;
   } // end of validDictionaryNames()
+   
+  /**
+   * Lists valid values for {@link #modelsName}.
+   * <p> This is the list returned by <tt>mfa model download acoustic</tt>
+   * @return A list of valid values for {@link #modelsName}.
+   */
+  public Collection<String> validAcousticModels() throws TransformationException {
+    String acousticModelsRaw = mfa("model", "download", "acoustic");
+    String[] acousticModelLines = acousticModelsRaw.split("\n");
+    Set<String> acousticModels = Arrays.stream(acousticModelLines)
+      .map(s->s.trim().replaceAll("^-","").trim())
+      .filter(s->s.length() > 0) // no blank lines
+      .filter(s->s.indexOf(":") < 0) // not the list header
+      .collect(Collectors.toSet());
+    return acousticModels;
+  } // end of validAcousticModels()
    
   /**
    * Provides the overall configuration of the annotator. 
@@ -465,6 +488,8 @@ public class MFA extends Annotator {
     // convert empty strings into nulls
     if (dictionaryName != null && dictionaryName.length() == 0)
       dictionaryName = null;
+    if (modelsName != null && modelsName.length() == 0)
+      modelsName = null;
     if (orthographyLayerId != null && orthographyLayerId.length() == 0)
       orthographyLayerId = null;
     if (pronunciationLayerId != null && pronunciationLayerId.length() == 0)
@@ -491,6 +516,12 @@ public class MFA extends Annotator {
     if (pronunciationLayerId == null && dictionaryName == null)
       throw new InvalidConfigurationException(
         this, "Either a pronunciation layer or a dictionary name must be specified.");
+    if (dictionaryName != null && modelsName == null)
+      throw new InvalidConfigurationException(
+        this, "If a dictionary name is specified, pretrained acoustic models must also be specified.");
+    if (dictionaryName == null && modelsName != null)
+      throw new InvalidConfigurationException(
+        this, "If pretrained acoustic models are specified, a dictionary name must also be specified.");
     if (pronunciationLayerId != null && schema.getLayer(pronunciationLayerId) == null)
       throw new InvalidConfigurationException(
         this, "Pronunciation layer not found: " + pronunciationLayerId);
@@ -770,8 +801,11 @@ public class MFA extends Annotator {
             if (dictionaryName == null) { // train & align          
               //mfa("validate", corpusDir.getPath(), dictionaryFile.getPath());
               setPercentComplete(30); // (up to 5 phases of 10% each arrives at 80%)
-              mfa("train", "--clean", corpusDir.getPath(), dictionaryFile.getPath(),
+              mfa("train", "--clean", "--temp_directory", tempDir.getPath(),
+                  corpusDir.getPath(), dictionaryFile.getPath(),
                   alignedDir.getPath());
+              // log contents of ${tempDir}/corpus/train_acoustic_model.log
+              copyLog(new File(new File(tempDir, "corpus"), "train_acoustic_model.log"));
             } else { // pretrained
               mfa("model","download","acoustic", dictionaryName);
               setPercentComplete(25);
@@ -779,8 +813,11 @@ public class MFA extends Annotator {
                 mfa("model","download","dictionary", dictionaryName);
                 setPercentComplete(30);
                 if (!isCancelling()) {
-                  mfa("align", "--clean", corpusDir.getPath(), dictionaryName, dictionaryName,
+                  mfa("align", "--clean", "--temp_directory", tempDir.getPath(),
+                      corpusDir.getPath(), dictionaryName, modelsName,
                       alignedDir.getPath());
+                  // log contents of ${tempDir}/corpus/align.log
+                  copyLog(new File(new File(tempDir, "corpus"), "align.log"));
                 } // not cancelling
               } // not cancelling
             } // pretrained
@@ -820,6 +857,8 @@ public class MFA extends Annotator {
   protected File sessionWorkingDir;
   /** The log for this training session. */
   protected File logFile;
+  /** The temporary working files directory. */
+  protected File tempDir;
   /** The corpus directory. */
   protected File corpusDir;
   /** Dictionary */
@@ -844,6 +883,7 @@ public class MFA extends Annotator {
   public void reset() {
     sessionWorkingDir = null;
     logFile = null;
+    tempDir = null;
     corpusDir = null;
     alignedDir = null;
     dictionary = null;
@@ -903,7 +943,9 @@ public class MFA extends Annotator {
   public List<Graph> createInputFiles(Stream<Graph> graphs, PhonemeTranslator phonemesToHtk)
     throws TransformationException {
     try {
-      // corpus directory
+      // directories
+      tempDir = new File(sessionWorkingDir, "temp");
+      tempDir.mkdir();
       corpusDir = new File(sessionWorkingDir, "corpus");
       corpusDir.mkdir();
       alignedDir = new File(sessionWorkingDir, "aligned");
@@ -933,7 +975,7 @@ public class MFA extends Annotator {
             }
             
             StringBuilder utteranceOrthography = new StringBuilder();
-            boolean bJustAddedNoise = false;
+            boolean bJustAddedNoise = false; // TODO add noises and transcribe as "spn" in dict
             
             Annotation[] words = fragment.all(schema.getWordLayerId());
             // check for no words
@@ -1077,7 +1119,7 @@ public class MFA extends Annotator {
     
     Execution exe = new Execution()
       .env("PATH", System.getenv("PATH")+System.getProperty("path.separator")+mfaPath)
-      .setExe(new File(mfaPath, "mfa"));
+      .setExe(new File(mfaPath, "mfa")); // TODO -j <num_jobs>
     for (String arg : args) exe.arg(arg);
     exe.getStdoutObservers().add(s->setStatus(s));
     exe.getStderrObservers().add(s-> {
@@ -1103,7 +1145,7 @@ public class MFA extends Annotator {
         this, "Error running mfa "+Arrays.stream(args).collect(Collectors.joining(" "))
         + " : " + stdout);
     }
-    if (errorPattern.matcher(exe.stderr()).matches()) {
+    if (errorPattern.matcher(exe.stderr()).matches()) { // TODO check exit code - non-zero=error
       throw new TransformationException(
         this, "Error running mfa "+Arrays.stream(args).collect(Collectors.joining(" "))
         + " : " + exe.stderr());
@@ -1111,6 +1153,22 @@ public class MFA extends Annotator {
     setStatus("complete: mfa " + Arrays.stream(args).collect(Collectors.joining(" ")));
     return stdout;
   } // end of mfa()
+  
+  /**
+   * Copies the contents of the given log file into the session log.
+   * @param log
+   */
+  public void copyLog(File log) {
+    if (log != null && log.exists() && logFile != null) {
+      setStatus("=== Logging contents of " + log.getName() + " ===");
+      try {
+        IO.Pump(new FileInputStream(log), new FileOutputStream(logFile, true));
+        setStatus("=== Contents of " + log.getName() + " logged ===");
+      } catch(Exception exception) {
+        setStatus("=== Could not log contents of " + log.getName() + ": " + exception + " ===");
+      }
+    }
+  } // end of copyLog()
   
   /**
    * Reads the alignments from the files output by HTK, and merges the changes into the

@@ -18,6 +18,16 @@ getJSON("validDictionaryNames", names => {
     } // next name
 });
 
+// populate list of pretrained models names
+getJSON("validAcousticModels", names => {
+    const modelsName = document.getElementById("modelsName");
+    for (name of names) {
+        var layerOption = document.createElement("option");
+        layerOption.appendChild(document.createTextNode(name));
+        modelsName.appendChild(layerOption);
+    } // next name
+});
+
 // get the layer schema
 let schema = null;
 getSchema(s => {
@@ -204,6 +214,19 @@ document.getElementById("form").onsubmit = function(e) {
             && !document.getElementById("dictionaryName").value) {
             alert("You must select a Pronunciation Layer, or enter a Dictionary Name.");
             document.getElementById("pronunciationLayerId").focus();
+            return false;
+        }
+        // if a dictionary is selected, models must also be selected
+        if (document.getElementById("dictionaryName").value
+           && !document.getElementById("modelsName").value) {
+            alert("If you have selected a Dictionary Name, you must also select Pretrained Acoustic Models.");
+            document.getElementById("modelsName").focus();
+            return false;
+        }
+        if (!document.getElementById("dictionaryName").value
+           && document.getElementById("modelsName").value) {
+            alert("If you have selected Pretrained Acoustic Models, you must also select a Dictionary Name.");
+            document.getElementById("dictionaryName").focus();
             return false;
         }
         return true;

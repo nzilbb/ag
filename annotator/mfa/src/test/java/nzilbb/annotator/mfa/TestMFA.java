@@ -28,6 +28,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -93,8 +94,24 @@ public class TestMFA {
 
   /** Ensure validDictionaryNames method works. */
   @Test public void validDictionaryNames() throws Exception {
+    Collection<String> names = annotator.validDictionaryNames();
     assertTrue("validDictionaryNames contains english",
-               annotator.validDictionaryNames().contains("english"));
+               names.contains("english"));
+    assertTrue("validDictionaryNames contains german_prosodylab",
+               names.contains("german_prosodylab"));
+    assertFalse("validDictionaryNames contains no blank entries",
+               names.contains(""));
+  }   
+
+  /** Ensure validDictionaryNames method works. */
+  @Test public void validAcousticModels() throws Exception {
+    Collection<String> names = annotator.validAcousticModels();
+    assertTrue("validAcousticModels contains spanish",
+               names.contains("english"));
+    assertTrue("validAcousticModels contains spanish",
+               names.contains("english"));
+    assertFalse("validAcousticModels contains no blank entries",
+               names.contains(""));
   }   
 
   /** Ensure default (null) task parameters return an error. */
@@ -125,6 +142,7 @@ public class TestMFA {
       "orthographyLayerId=word"
       +"&pronunciationLayerId=phonemes" // pronunciationLayerId set
       +"&dictionaryName="               // no dictionaryName
+      +"&modelsName="                   // no modelsName
       +"&utteranceTagLayerId=mfa"
       +"&participantTagLayerId="
       +"&wordAlignmentLayerId=word"
@@ -134,6 +152,7 @@ public class TestMFA {
       "orthographyLayerId=word"
       +"&pronunciationLayerId="  // no pronunciationLayerId
       +"&dictionaryName=english" // dictionaryName set
+      +"&modelsName=english"     // modelsName set
       +"&utteranceTagLayerId=mfa"
       +"&participantTagLayerId="
       +"&wordAlignmentLayerId=word"
@@ -188,7 +207,34 @@ public class TestMFA {
       annotator.setTaskParameters(
         "orthographyLayerId=word"
         +"&pronunciationLayerId=" // no pronunciationLayerId
-        +"&dictionaryName=" // no dictionaryName
+        +"&dictionaryName="       // no dictionaryName
+        +"&modelsName="           // no modelsName
+        +"&utteranceTagLayerId=mfa"
+        +"&participantTagLayerId="
+        +"&wordAlignmentLayerId=word"
+        +"&phoneAlignmentLayerId=segment");
+      fail("Should fail with neither pronunciationLayerId nor dictionaryName");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "orthographyLayerId=word"
+        +"&pronunciationLayerId="  // no pronunciationLayerId
+        +"&dictionaryName=english" // dictionaryName
+        +"&modelsName="            // but no modelsName
+        +"&utteranceTagLayerId=mfa"
+        +"&participantTagLayerId="
+        +"&wordAlignmentLayerId=word"
+        +"&phoneAlignmentLayerId=segment");
+      fail("Should fail with neither pronunciationLayerId nor dictionaryName");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "orthographyLayerId=word"
+        +"&pronunciationLayerId="  // no pronunciationLayerId
+        +"&modelsName=english"     // modelsName
+        +"&dictionaryName="        // but not dictionaryName
         +"&utteranceTagLayerId=mfa"
         +"&participantTagLayerId="
         +"&wordAlignmentLayerId=word"
@@ -212,6 +258,7 @@ public class TestMFA {
     annotator.setTaskParameters(
       "orthographyLayerId=word"
       +"&dictionaryName=english"
+      +"&modelsName=english"
       +"&utteranceTagLayerId=utterance_mfa" // nonexistent
       +"&participantTagLayerId=participant_mfa" // nonexistent
       +"&wordAlignmentLayerId=word"
@@ -269,6 +316,7 @@ public class TestMFA {
     annotator.setTaskParameters(
       "orthographyLayerId=word"
       +"&dictionaryName=english"
+      +"&modelsName=english"
       +"&utteranceTagLayerId=utterance_mfa" // nonexistent
       +"&participantTagLayerId=participant_mfa" // nonexistent
       +"&wordAlignmentLayerId=word"
@@ -334,6 +382,7 @@ public class TestMFA {
     annotator.setTaskParameters(
       "orthographyLayerId=word"
       +"&dictionaryName=english"
+      +"&modelsName=english"
       +"&utteranceTagLayerId=mfa_utterance" // nonexistent
       +"&participantTagLayerId=mfa_participant" // nonexistent
       +"&wordAlignmentLayerId=mfa_word" // nonexistent
