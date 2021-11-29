@@ -361,7 +361,7 @@ public class MFA extends Annotator {
    * @return A list of valid values for {@link #dictionaryName}.
    */
   public Collection<String> validDictionaryNames() throws TransformationException {
-    String dictionariesRaw = mfa("model", "download", "dictionary");
+    String dictionariesRaw = mfa(true, "model", "download", "dictionary");
     String[] dictionaryLines = dictionariesRaw.split("\n");
     Set<String> dictionaries = Arrays.stream(dictionaryLines)
       .map(s->s.trim().replaceAll("^-","").trim())
@@ -377,7 +377,7 @@ public class MFA extends Annotator {
    * @return A list of valid values for {@link #modelsName}.
    */
   public Collection<String> validAcousticModels() throws TransformationException {
-    String acousticModelsRaw = mfa("model", "download", "acoustic");
+    String acousticModelsRaw = mfa(true, "model", "download", "acoustic");
     String[] acousticModelLines = acousticModelsRaw.split("\n");
     Set<String> acousticModels = Arrays.stream(acousticModelLines)
       .map(s->s.trim().replaceAll("^-","").trim())
@@ -420,6 +420,24 @@ public class MFA extends Annotator {
     }
     return false;
   } // end of deleteLog()
+  
+  /**
+   * Provides access to a log file.
+   * @param log
+   * @return The given log file, or null if it doesn't exist or isn't a log file.
+   */
+  public InputStream downloadLog(String log) {
+    if (log.endsWith(".log")) {
+      File logFile = new File(getWorkingDirectory(), log);
+      if (logFile.exists()) {
+        try {
+          return new FileInputStream(logFile);
+        } catch(Exception exception) {
+        }
+      }
+    }
+    return null;
+  } // end of downloadLog()
    
   /**
    * Provides the overall configuration of the annotator. 
@@ -476,6 +494,9 @@ public class MFA extends Annotator {
       }
       File mfa = new File(mfaPath, "mfa");
       // TODO windows? if (conda != null && !conda.exists()) conda = new File(condaPath, "conda.exe");
+      if (!mfa.exists()) {
+        throw new InvalidConfigurationException(this, "MFA CLI not found: " + mfa.getPath());
+      }
       // try running mfa
       Execution exe = new Execution()
         .env("PATH", System.getenv("PATH")+System.getProperty("path.separator")+mfaPath)
@@ -837,19 +858,19 @@ public class MFA extends Annotator {
             if (dictionaryName == null) { // train & align          
               //mfa("validate", corpusDir.getPath(), dictionaryFile.getPath());
               setPercentComplete(30); // (up to 5 phases of 10% each arrives at 80%)
-              mfa("train", "--clean", "--temp_directory", tempDir.getPath(),
+              mfa(false, "train", "--clean", "--temp_directory", tempDir.getPath(),
                   corpusDir.getPath(), dictionaryFile.getPath(),
                   alignedDir.getPath());
               // log contents of ${tempDir}/corpus/train_acoustic_model.log
               copyLog(new File(new File(tempDir, "corpus"), "train_acoustic_model.log"));
             } else { // pretrained
-              mfa("model","download","acoustic", dictionaryName);
+              mfa(false, "model","download","acoustic", dictionaryName);
               setPercentComplete(25);
               if (!isCancelling()) {
-                mfa("model","download","dictionary", dictionaryName);
+                mfa(false, "model","download","dictionary", dictionaryName);
                 setPercentComplete(30);
                 if (!isCancelling()) {
-                  mfa("align", "--clean", "--temp_directory", tempDir.getPath(),
+                  mfa(false, "align", "--clean", "--temp_directory", tempDir.getPath(),
                       corpusDir.getPath(), dictionaryName, modelsName,
                       alignedDir.getPath());
                   // log contents of ${tempDir}/corpus/align.log
@@ -903,7 +924,7 @@ public class MFA extends Annotator {
   protected File dictionaryFile;
   /** Directory for MFA output file */
   protected File alignedDir;
-  Pattern errorPattern = Pattern.compile(".*[Ee][Rr][Rr][Oo][Rr].*");
+  Pattern errorPattern = Pattern.compile(".*error.*", Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
   // MFA reports progress during training, but there are up to five phases that go from 0% to 100%
   // We detect these percentages and use them to increment the annotator progress,
   // but each phase represents 10% of overall progress.
@@ -992,10 +1013,11 @@ public class MFA extends Annotator {
       dictionary = new TreeMap<String,LinkedHashSet<String>>();
       
       Vector<Graph> utterances = new Vector<Graph>();
+      final TreeSet<String> participants = new TreeSet<String>();
       
       graphs.forEach(fragment -> {
           try {
-            
+
             // unaligned?
             if (fragment.getStart().getOffset() == null) {
               setStatus(
@@ -1076,6 +1098,7 @@ public class MFA extends Annotator {
             Annotation participant = fragment.first(schema.getParticipantLayerId());
             if (participant != null && participant.getLabel().length() > 0) {
               speakerDir = new File(corpusDir, participant.getLabel());
+              participants.add(participant.getLabel());
             }
             if (!speakerDir.exists()) speakerDir.mkdir();
             
@@ -1103,6 +1126,12 @@ public class MFA extends Annotator {
             // TODO?? setLastException(x);
           }
         }); // next utterance
+
+      if (participants.size() > 0) {
+        // now that we know some participant IDs, we can give the session a descriptive name
+        String firstParticipant = participants.iterator().next();
+        renameSession(firstParticipant + (participants.size() == 1?"":"-et-al"));
+      }
 
       if (pronunciationLayerId != null) {
         // write dictionary
@@ -1138,12 +1167,34 @@ public class MFA extends Annotator {
   } // end of createInputFiles()
   
   /**
+   * Changes the name of the current session, updating all relevant file members.
+   * @param newName
+   */
+  protected void renameSession(String newName) {
+    File newSessionWorkingDirectory = new File(
+      getWorkingDirectory(),
+      newName
+      +"-"+new SimpleDateFormat("yyyy-MM-dd-kk-mm-ss").format(new java.util.Date()));
+    if (sessionWorkingDir.renameTo(newSessionWorkingDirectory)) {
+      sessionWorkingDir = newSessionWorkingDirectory;
+      sessionName = newName;
+      logFile = new File(getWorkingDirectory(), sessionWorkingDir.getName() + ".log");
+      tempDir = new File(sessionWorkingDir, "temp");
+      corpusDir = new File(sessionWorkingDir, "corpus");
+      alignedDir = new File(sessionWorkingDir, "aligned");
+      setStatus("Session name now: " + sessionName);
+    } // rename successful
+  } // end of renameSession()
+  
+  /**
    * Execute an mfa command
+   * @param ignoreErrors Whether to ignore errors (true), or throw an exception when
+   * stderr or stdout include the word "error" (false).
    * @param args The command line arguments.
    * @return The output of the command.
    * @throws TransformationException If execution fails.
    */
-  public String mfa(String... args) throws TransformationException {
+  public String mfa(boolean ignoreErrors, String... args) throws TransformationException {
     setStatus("mfa " + Arrays.stream(args).collect(Collectors.joining(" ")));
 
     // MFA reports progress during training, but there are up to five phases that go from
@@ -1155,6 +1206,7 @@ public class MFA extends Annotator {
     
     Execution exe = new Execution()
       .env("PATH", System.getenv("PATH")+System.getProperty("path.separator")+mfaPath)
+      .env("HOME", mfaPath)
       .setExe(new File(mfaPath, "mfa")); // TODO -j <num_jobs>
     for (String arg : args) exe.arg(arg);
     exe.getStdoutObservers().add(s->setStatus(s));
@@ -1175,16 +1227,17 @@ public class MFA extends Annotator {
       });
     exe.run();
     String stdout = exe.stdout().toString();
-    // if (exe.stderr().length() > 0) setStatus(exe.stderr().toString());
-    if (errorPattern.matcher(stdout).matches()) {
-      throw new TransformationException(
-        this, "Error running mfa "+Arrays.stream(args).collect(Collectors.joining(" "))
-        + " : " + stdout);
-    }
-    if (errorPattern.matcher(exe.stderr()).matches()) { // TODO check exit code - non-zero=error
-      throw new TransformationException(
-        this, "Error running mfa "+Arrays.stream(args).collect(Collectors.joining(" "))
-        + " : " + exe.stderr());
+    if (!ignoreErrors) {
+      if (errorPattern.matcher(stdout).matches()) {
+        throw new TransformationException(
+          this, "Error running mfa "+Arrays.stream(args).collect(Collectors.joining(" "))
+          + " : " + stdout);
+      }
+      if (errorPattern.matcher(exe.stderr()).matches()) { // TODO check exit code - non-zero=error
+        throw new TransformationException(
+          this, "Error running mfa "+Arrays.stream(args).collect(Collectors.joining(" "))
+          + " : " + exe.stderr());
+      }
     }
     setStatus("complete: mfa " + Arrays.stream(args).collect(Collectors.joining(" ")));
     return stdout;
