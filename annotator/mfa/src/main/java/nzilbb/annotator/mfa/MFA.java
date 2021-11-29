@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -40,6 +41,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
@@ -384,6 +386,40 @@ public class MFA extends Annotator {
       .collect(Collectors.toSet());
     return acousticModels;
   } // end of validAcousticModels()
+  
+  /**
+   * Lists log files from previous alignments.
+   * @return A list of log file names, newest first.
+   */
+  public Collection<String> listLogs() {
+    try {
+      File[] logs = getWorkingDirectory().listFiles(new FilenameFilter() {
+          public boolean accept(File dir, String name) {
+            return name.endsWith(".log");
+          }});
+      Arrays.sort(logs, new Comparator<File>() {
+          public int compare(File f1, File f2) {
+            return (int)(f2.lastModified() - f1.lastModified());
+          }
+        });
+      return Arrays.stream(logs).map(f->f.getName()).collect(Collectors.toList());
+    } catch (Throwable t) {
+      t.printStackTrace(System.out);
+      return null;
+    }
+  } // end of listLogs()
+  
+  /**
+   * Delete named log file.
+   * @param log
+   * @return True if the log file was deleted, false otherwise.
+   */
+  public boolean deleteLog(String log) {
+    if (log.endsWith(".log")) {
+      return new File(getWorkingDirectory(), log).delete();
+    }
+    return false;
+  } // end of deleteLog()
    
   /**
    * Provides the overall configuration of the annotator. 
