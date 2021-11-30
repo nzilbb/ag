@@ -350,7 +350,24 @@ public class RequestRouter
       } else if (result instanceof Collection) {
          JsonArrayBuilder list = Json.createArrayBuilder();
          for (Object e : (Collection)result) {
-            list.add(e.toString());
+           if (e instanceof Map) {
+             JsonObjectBuilder object = Json.createObjectBuilder();
+             Map map = (Map)e;
+             for (Object k : map.keySet()) {
+               if (map.get(k) instanceof Double) {
+                 object.add(k.toString(), (Double)map.get(k));
+               } else if (map.get(k) instanceof Integer) {
+                 object.add(k.toString(), (Integer)map.get(k));
+               } else if (map.get(k) instanceof Boolean) {
+                 object.add(k.toString(), (Boolean)map.get(k));
+               } else {             
+                 object.add(k.toString(), map.get(k) == null?null:map.get(k).toString());
+               }
+             }
+             list.add(object);
+           } else {
+             list.add(e.toString());
+           }
          }
          return new ByteArrayInputStream(list.build().toString().getBytes());
       } else if (result instanceof Map) {
