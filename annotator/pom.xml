@@ -27,5 +27,6 @@
     <module>mor</module>
     <module>htk</module>
     <module>mfa</module>
+    <module>phonemetranscoder</module>
   </modules>  
 </project>
