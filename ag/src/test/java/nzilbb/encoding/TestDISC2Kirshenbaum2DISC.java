@@ -131,6 +131,11 @@ public class TestDISC2Kirshenbaum2DISC {
       // without syllable marking, it goes wrong
       assertEquals("Sweatshops without syllable marking - known failure",
                    "swEJQps", kirshenbaum2disc.apply("swEtSA.ps"));
+      
+      assertEquals("transcription",
+                   "tr&nskrIpS@n", disc2kirshenbaum.apply("tr{nskrIpS@n"));
+      assertEquals("transcription",
+                   "tr{nskrIpS@n", kirshenbaum2disc.apply("tr&nskrIpS@n"));
    }
    
    public static void main(String args[]) {

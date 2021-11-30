@@ -25,10 +25,10 @@ import java.util.HashMap;
 
 /**
  * Translates CELEX-DISC-encoded transcriptions like
- * <tt>J1n_</tt>
+ * <tt>tr{nskrIpS@n</tt>
  * to <a href="http://en.wikipedia.org/wiki/Kirshenbaum">Kirshenbaum</a>-encoded 
  * phonemic transcriptions like
- * <tt>tSeIndZ</tt>.
+ * <tt>tr&amp;nskrIpS@n</tt>.
  * @see Kirshenbaum2DISC
  * @author Robert Fromont robert@fromont.net.nz
  */

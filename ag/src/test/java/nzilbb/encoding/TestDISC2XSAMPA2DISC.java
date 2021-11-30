@@ -137,6 +137,12 @@ public class TestDISC2XSAMPA2DISC {
       // without syllable marking, it goes wrong
       assertEquals("Sweatshops without syllable marking - known failure",
                    "swEJQps", xsampa2disc.apply("swEtSQps"));
+      assertEquals("strange",
+                   "str\\eIndZ", disc2xsampa.apply("str1n_"));
+      assertEquals("transcription",
+                   "str1n_", xsampa2disc.apply("str\\eIndZ"));
+
+      
    }
    
    public static void main(String args[]) {

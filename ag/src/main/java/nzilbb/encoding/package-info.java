@@ -24,16 +24,16 @@
  *
  * <p>The following table presents some common encodings and equivalences or near-equivalences
  * between phonemes.
- * <a class="sdfootnoteanc" href="#sdfootnote209sym" name="sdfootnote209anc"><sup>209</sup></a></p>
+ * <a class="sdfootnoteanc" href="#sdfootnote209sym" name="sdfootnote209anc"><sup>1</sup></a></p>
  * <style type="text/css"> #equiv td:not(:first-child) { text-align: center; } </style>
  * <table id="equiv" border="1" style="border-collapse: collapse;">
  *  <thead><tr>
  *    <th> Example </th>
  *    <th> IPA </th>
  *    <th> SAM-PA </th>
- *    <th> DISC<a class="sdfootnoteanc" href="#sdfootnote210sym" name="sdfootnote210anc"><sup>210</sup></a> </th>
- *    <th> CPA<a class="sdfootnoteanc" href="#sdfootnote211sym" name="sdfootnote211anc"><sup>211</sup></a> </th>
- *    <th> Kirshenbaum<a class="sdfootnoteanc" href="#sdfootnote212sym" name="sdfootnote212anc"><sup>212</sup></a> </th>
+ *    <th> DISC<a class="sdfootnoteanc" href="#sdfootnote210sym" name="sdfootnote210anc"><sup>2</sup></a> </th>
+ *    <th> CPA<a class="sdfootnoteanc" href="#sdfootnote211sym" name="sdfootnote211anc"><sup>3</sup></a> </th>
+ *    <th> Kirshenbaum<a class="sdfootnoteanc" href="#sdfootnote212sym" name="sdfootnote212anc"><sup>4</sup></a> </th>
  *    <th> ARPAbet </th>
  *    <th> CMU Dict </th>
  *  </tr></thead><tbody>
@@ -49,18 +49,18 @@
  *   <tr><td> lot     </td><td> ɒ </td><td> <b>Q</b> </td><td> Q </td><td> Q </td><td> <b>A.</b> </td> <td rowspan="2"> AO </td> <td rowspan="2"> AO </td></tr>
  *   <tr><td> thought </td><td> ɔː </td><td> <b>O:</b> </td><td> <b>$</b> </td><td> O: </td><td> O: </td></tr>
  *   <tr><td> goose   </td><td> uː </td><td> u: </td><td> u </td><td> u: </td><td> u: </td><td> UW </td><td> UW </td></tr>
- *   <tr><td> nurse   </td><td> ɜː </td><td> 3ː </td> <td sdnum="11274;" sdval="3"> <b>3</b> </td><td> <b>@:</b> </td><td> <b>V&rdquo;</b> </td><td> ER </td><td> ER </td></tr>
- *   <tr><td> face    </td><td> eɪ </td><td> eI </td> <td sdnum="11274;" sdval="1"> <b>1</b> </td><td> <b>e/</b> </td><td> eI </td><td> EY </td><td> EY </td></tr>
- *   <tr><td> price   </td><td> aɪ </td><td> aI </td> <td sdnum="11274;" sdval="2"> <b>2</b> </td><td> <b>a/</b> </td><td> aI </td><td> AY </td><td> AY </td></tr>
- *   <tr><td> choice  </td><td> ɔɪ </td><td> <b>OI</b> </td> <td sdnum="11274;" sdval="4"> <b>4</b> </td><td> <b>o/</b> </td><td> OI </td><td> OY </td><td> OY </td></tr>
- *   <tr><td> goat    </td><td> ǝʊ </td><td> <b>@U</b> </td> <td sdnum="11274;" sdval="5"> <b>5</b> </td><td> <b>O/</b> </td><td> @U </td><td> OW </td><td> OW </td></tr>
- *   <tr><td> mouth   </td><td> aʊ </td><td> aU </td> <td sdnum="11274;" sdval="6"> <b>6</b> </td><td> <b>A/</b> </td><td> aU </td><td> AW </td><td> AW </td></tr>
- *   <tr><td> near    </td><td> ɪǝ </td><td> <b>I@</b> </td> <td sdnum="11274;" sdval="7"> <b>7</b> </td><td> <b>I/</b> </td><td> I@ </td><td> <i>IY R</i> </td><td> <i>IY R</i> </td></tr>
- *   <tr><td> square  </td><td> ɛǝ </td><td> <b>E@</b> </td> <td sdnum="11274;" sdval="8"> <b>8</b> </td><td> <b>E/</b> </td><td> E@ </td><td> <i>EH R</i> </td><td> <i>EH R</i> </td></tr>
- *   <tr><td> cure    </td><td> ʊǝ </td><td> <b>U@</b> </td> <td sdnum="11274;" sdval="9"> <b>9</b> </td><td> <b>U/</b> </td><td> U@ </td><td> <i>UH R</i> </td><td> <i>UH R</i> </td></tr>
+ *   <tr><td> nurse   </td><td> ɜː </td><td> 3ː </td> <td> <b>3</b> </td><td> <b>@:</b> </td><td> <b>V&rdquo;</b> </td><td> ER </td><td> ER </td></tr>
+ *   <tr><td> face    </td><td> eɪ </td><td> eI </td> <td> <b>1</b> </td><td> <b>e/</b> </td><td> eI </td><td> EY </td><td> EY </td></tr>
+ *   <tr><td> price   </td><td> aɪ </td><td> aI </td> <td> <b>2</b> </td><td> <b>a/</b> </td><td> aI </td><td> AY </td><td> AY </td></tr>
+ *   <tr><td> choice  </td><td> ɔɪ </td><td> <b>OI</b> </td> <td> <b>4</b> </td><td> <b>o/</b> </td><td> OI </td><td> OY </td><td> OY </td></tr>
+ *   <tr><td> goat    </td><td> ǝʊ </td><td> <b>@U</b> </td> <td> <b>5</b> </td><td> <b>O/</b> </td><td> @U </td><td> OW </td><td> OW </td></tr>
+ *   <tr><td> mouth   </td><td> aʊ </td><td> aU </td> <td> <b>6</b> </td><td> <b>A/</b> </td><td> aU </td><td> AW </td><td> AW </td></tr>
+ *   <tr><td> near    </td><td> ɪǝ </td><td> <b>I@</b> </td> <td> <b>7</b> </td><td> <b>I/</b> </td><td> I@ </td><td> <i>IY R</i> </td><td> <i>IY R</i> </td></tr>
+ *   <tr><td> square  </td><td> ɛǝ </td><td> <b>E@</b> </td> <td> <b>8</b> </td><td> <b>E/</b> </td><td> E@ </td><td> <i>EH R</i> </td><td> <i>EH R</i> </td></tr>
+ *   <tr><td> cure    </td><td> ʊǝ </td><td> <b>U@</b> </td> <td> <b>9</b> </td><td> <b>U/</b> </td><td> U@ </td><td> <i>UH R</i> </td><td> <i>UH R</i> </td></tr>
  *   <tr><td> t<b>i</b>mbre </td><td> &aelig; </td><td> <b>{~</b> </td><td> <b>c</b> </td><td> <b>^/~</b> </td><td> <b>&amp;</b>~ </td><td> &nbsp; </td><td> &nbsp; </td></tr>
  *   <tr><td> d&eacute;t<b>en</b>te </td><td> ɑ̃ː </td><td> <b>A~:</b> </td><td> <b>q</b> </td><td> <b>A~:</b> </td><td> A~: </td><td> &nbsp; </td><td> &nbsp; </td></tr>
- *   <tr><td> l<b>in</b>gerie </td><td> &aelig;̃ː </td><td> <b>{~:</b> </td> <td sdnum="11274;" sdval="0"> <b>0</b> </td><td> <b>^/~:</b> </td><td> <b>&amp;</b>~: </td><td> &nbsp; </td><td> &nbsp; </td></tr>
+ *   <tr><td> l<b>in</b>gerie </td><td> &aelig;̃ː </td><td> <b>{~:</b> </td> <td> <b>0</b> </td><td> <b>^/~:</b> </td><td> <b>&amp;</b>~: </td><td> &nbsp; </td><td> &nbsp; </td></tr>
  *   <tr><td> bouill<b>on</b> </td><td> ɒ̃ː </td><td> <b>O~:</b> </td><td> <b>~</b> </td><td> <b>O~:</b> </td><td> A.~: </td><td> &nbsp; </td><td> &nbsp; </td></tr>
  *   <tr><th colspan="8"> Consonants </th></tr>
  *   <tr><td> <b>p</b>at      </td><td> p </td><td> p </td><td> p </td><td> p </td><td> p </td><td> P </td><td> P </td></tr>
@@ -100,7 +100,7 @@
  *
  * <div id="sdfootnote209">
  *  <p class="sdfootnote">
- *   <sup><a class="sdfootnotesym" href="#sdfootnote209anc" name="sdfootnote209sym">209</a></sup> 
+ *   <sup><a class="sdfootnotesym" href="#sdfootnote209anc" name="sdfootnote209sym">1</a></sup> 
  *   In the table, some phoneme
  *   representations are highlighted with a <b>bold</b> typeface; this highlighting is
  *   intended to indicate representations that are unpredictable in some way, either because
@@ -113,21 +113,21 @@
  * 
  * <div id="sdfootnote210">
  *  <p class="sdfootnote">
- *   <sup><a class="sdfootnotesym" href="#sdfootnote210anc" name="sdfootnote210sym">210</a></sup>
+ *   <sup><a class="sdfootnotesym" href="#sdfootnote210anc" name="sdfootnote210sym">2</a></sup>
  *   SAM-PA and DISC phonemes taken from CELEX English Guide (1995) 
  *   &sect; 2.4.1 pp. 31-32, Tables 3 &amp; 4.</p> 
  * </div>
  * 
  * <div id="sdfootnote211">
  *  <p class="sdfootnote">
- *   <sup><a class="sdfootnotesym" href="#sdfootnote211anc" name="sdfootnote211sym">211</a></sup> 
+ *   <sup><a class="sdfootnotesym" href="#sdfootnote211anc" name="sdfootnote211sym">3</a></sup> 
  *   The Computer Phonetic Alphabet (CPA) was developed for seven European languages, based on
  *   the IPA - Kugler-Kruse (1987)</p> 
  * </div>
  * 
  * <div id="sdfootnote212">
  *  <p class="sdfootnote">
- *   <sup><a class="sdfootnotesym" href="#sdfootnote212anc" name="sdfootnote212sym">212</a></sup>
+ *   <sup><a class="sdfootnotesym" href="#sdfootnote212anc" name="sdfootnote212sym">4</a></sup>
  *   <a href="http://en.wikipedia.org/wiki/Kirshenbaum">http://en.wikipedia.org/wiki/Kirshenbaum</a></p>
  * </div>
  * 

@@ -25,9 +25,9 @@ import java.util.HashMap;
 
 /**
  * Translates CELEX-DISC-encoded transcriptions like
- * <tt>J1n_</tt>
+ * <tt>str1n_</tt>
  * to SAMPA-encoded phonemic transcriptions like
- * <tt>tSeIndZ</tt>.
+ * <tt>streIndZ</tt>.
  *
  * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * @see SAMPA2DISC

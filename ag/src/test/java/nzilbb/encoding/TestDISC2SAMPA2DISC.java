@@ -136,6 +136,11 @@ public class TestDISC2SAMPA2DISC {
       // without syllable marking, it goes wrong
       assertEquals("Sweatshops without syllable marking - known failure",
                    "swEJQps", sampa2disc.apply("swEtSQps"));
+      
+      assertEquals("strange",
+                   "streIndZ", disc2sampa.apply("str1n_"));
+      assertEquals("transcription",
+                   "str1n_", sampa2disc.apply("streIndZ"));
    }
    
    public static void main(String args[]) {
