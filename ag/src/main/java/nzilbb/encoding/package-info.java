@@ -91,7 +91,7 @@
  *   <tr><td> baco<b>n</b>    </td><td> ŋ̩ </td><td> <b>N,</b> </td><td> <b>C</b> </td><td> N, </td><td> <b>N-</b> </td><td> &nbsp; </td><td> &nbsp; </td></tr>
  *   <tr><td> idealis<b>m</b> </td><td> m̩ </td><td> <b>m,</b> </td><td> <b>F</b> </td><td> m, </td><td> <b>m-</b> </td><td> &nbsp; </td><td> &nbsp; </td></tr>
  *   <tr><td> burde<b>n</b>   </td><td> n̩ </td><td> <b>n,</b> </td><td> <b>H</b> </td><td> n, </td><td> <b>n-</b> </td><td> &nbsp; </td><td> &nbsp; </td></tr>
- *   <tr><td> dang<b>l</b>e   </td><td> l </td><td> <b>l,</b> </td><td> <b>P</b> </td><td> l, </td><td> <b>l-</b> </td><td> &nbsp; </td><td> &nbsp; </td></tr>
+ *   <tr><td> dang<b>l</b>e   </td><td> l̩ </td><td> <b>l,</b> </td><td> <b>P</b> </td><td> l, </td><td> <b>l-</b> </td><td> &nbsp; </td><td> &nbsp; </td></tr>
  *   <tr><td> ca<b>r</b> alarm </td><td> * </td><td> <b>r*</b> </td><td> <b>R</b> </td><td> r* </td><td> &nbsp; </td><td> &nbsp; </td><td> &nbsp; </td></tr>
  *   <tr><td> uh<b>-</b>oh    </td><td> ʔ </td><td> <b>?</b> </td><td> &nbsp; </td><td> &nbsp; </td><td> ? </td><td> Q </td><td> &nbsp; </td> </tr>
  *   <tr><td> fathe<b>r</b>   </td><td> ɚ </td><td> &nbsp; </td><td> &nbsp; </td><td> &nbsp; </td><td> &nbsp; </td><td> AXR </td><td> &nbsp; </td></tr>

@@ -103,6 +103,196 @@ public class TestComparators {
     assertEquals(pathToString(path), "i", path.get(i++).getTo());
   }
   
+  @Test public void IPAToIPAMapping() {
+    IPA2IPAComparator comparator = new IPA2IPAComparator();
+    MinimumEditPath<String> mp = new MinimumEditPath<String>(comparator);
+    String from = "d ɪ f ə ɹ n̩ t"; // Two different representations of schwa: ə and ǝ
+    String to = "d ɪ f ɹ ǝ n t";
+    List<EditStep<String>> path = mp.minimumEditPath(arpabetToVector(from), arpabetToVector(to));
+    //System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 8, path.size());
+    int i = 0;
+    assertEquals(pathToString(path), "d", path.get(i).getFrom());
+    assertEquals(pathToString(path), "d", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ɪ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɪ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "f", path.get(i).getFrom());
+    assertEquals(pathToString(path), "f", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ə", path.get(i).getFrom());
+    assertNull(pathToString(path), path.get(i++).getTo()); 
+    assertEquals(pathToString(path), "ɹ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɹ", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "ǝ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "n̩", path.get(i).getFrom());
+    assertEquals(pathToString(path), "n", path.get(i++).getTo());
+    assertEquals(pathToString(path), "t", path.get(i).getFrom());
+    assertEquals(pathToString(path), "t", path.get(i++).getTo());
+    
+    from = "f aɪ ǝ f aɪ t ǝ";
+    to = "f aɪ ɹ f aɪ ɾ ǝ ɹ";
+    path = mp.minimumEditPath(arpabetToVector(from), arpabetToVector(to));
+//      System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 9, path.size());
+    i = 0;
+    assertEquals(pathToString(path), "f", path.get(i).getFrom());
+    assertEquals(pathToString(path), "f", path.get(i++).getTo());
+    assertEquals(pathToString(path), "aɪ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "aɪ", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɹ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ǝ", path.get(i).getFrom());
+    assertNull(pathToString(path), path.get(i++).getTo());
+    assertEquals(pathToString(path), "f", path.get(i).getFrom());
+    assertEquals(pathToString(path), "f", path.get(i++).getTo());
+    assertEquals(pathToString(path), "aɪ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "aɪ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "t", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɾ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ǝ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ǝ", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɹ", path.get(i++).getTo());
+    
+    from = "w ɜ d ɪ";
+    to = "w ɜː ɹ ɾ i";
+    path = mp.minimumEditPath(arpabetToVector(from), arpabetToVector(to));
+//      System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 5, path.size());
+    i = 0;
+    assertEquals(pathToString(path), "w", path.get(i).getFrom());
+    assertEquals(pathToString(path), "w", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ɜ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɜː", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɹ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "d", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɾ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ɪ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "i", path.get(i++).getTo());
+  }
+  
+  @Test public void DISCToIPAMapping() {
+    DISC2IPAComparator comparator = new DISC2IPAComparator();
+    MinimumEditPath<String> mp = new MinimumEditPath<String>(comparator);
+    String from = "dIf@rHt";
+    String to = "d ɪ f ɹ ǝ n t";
+    List<EditStep<String>> path = mp.minimumEditPath(stringToVector(from), arpabetToVector(to));
+    //System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 8, path.size());
+    int i = 0;
+    assertEquals(pathToString(path), "d", path.get(i).getFrom());
+    assertEquals(pathToString(path), "d", path.get(i++).getTo());
+    assertEquals(pathToString(path), "I", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɪ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "f", path.get(i).getFrom());
+    assertEquals(pathToString(path), "f", path.get(i++).getTo());
+    assertEquals(pathToString(path), "@", path.get(i).getFrom());
+    assertNull(pathToString(path), path.get(i++).getTo()); 
+    assertEquals(pathToString(path), "r", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɹ", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "ǝ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "H", path.get(i).getFrom());
+    assertEquals(pathToString(path), "n", path.get(i++).getTo());
+    assertEquals(pathToString(path), "t", path.get(i).getFrom());
+    assertEquals(pathToString(path), "t", path.get(i++).getTo());
+    
+    from = "f2@f2t@";
+    to = "f aɪ ɹ f aɪ ɾ ǝ ɹ";
+    path = mp.minimumEditPath(stringToVector(from), arpabetToVector(to));
+//      System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 9, path.size());
+    i = 0;
+    assertEquals(pathToString(path), "f", path.get(i).getFrom());
+    assertEquals(pathToString(path), "f", path.get(i++).getTo());
+    assertEquals(pathToString(path), "2", path.get(i).getFrom());
+    assertEquals(pathToString(path), "aɪ", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɹ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "@", path.get(i).getFrom());
+    assertNull(pathToString(path), path.get(i++).getTo());
+    assertEquals(pathToString(path), "f", path.get(i).getFrom());
+    assertEquals(pathToString(path), "f", path.get(i++).getTo());
+    assertEquals(pathToString(path), "2", path.get(i).getFrom());
+    assertEquals(pathToString(path), "aɪ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "t", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɾ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "@", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ǝ", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɹ", path.get(i++).getTo());
+    
+    from = "w3dI";
+    to = "w ɜː ɹ ɾ i";
+    path = mp.minimumEditPath(stringToVector(from), arpabetToVector(to));
+//      System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 5, path.size());
+    i = 0;
+    assertEquals(pathToString(path), "w", path.get(i).getFrom());
+    assertEquals(pathToString(path), "w", path.get(i++).getTo());
+    assertEquals(pathToString(path), "3", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɜː", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɹ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "d", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ɾ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "I", path.get(i).getFrom());
+    assertEquals(pathToString(path), "i", path.get(i++).getTo());
+  }
+  
+  @Test public void IPAToDISCMapping() {
+    IPA2DISCComparator comparator = new IPA2DISCComparator();
+    MinimumEditPath<String> mp = new MinimumEditPath<String>(comparator);
+    String from = "d ɪ f ə ɹ n̩ t"; // Two different representations of schwa: ə and ǝ
+    String to = "dIfr@nt";
+    List<EditStep<String>> path = mp.minimumEditPath(arpabetToVector(from), stringToVector(to));
+    //System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 8, path.size());
+    int i = 0;
+    assertEquals(pathToString(path), "d", path.get(i).getFrom());
+    assertEquals(pathToString(path), "d", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ɪ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "I", path.get(i++).getTo());
+    assertEquals(pathToString(path), "f", path.get(i).getFrom());
+    assertEquals(pathToString(path), "f", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ə", path.get(i).getFrom());
+    assertNull(pathToString(path), path.get(i++).getTo()); 
+    assertEquals(pathToString(path), "ɹ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "r", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "@", path.get(i++).getTo());
+    assertEquals(pathToString(path), "n̩", path.get(i).getFrom());
+    assertEquals(pathToString(path), "n", path.get(i++).getTo());
+    assertEquals(pathToString(path), "t", path.get(i).getFrom());
+    assertEquals(pathToString(path), "t", path.get(i++).getTo());
+    
+    from = "f aɪ ǝ f aɪ t ǝ";
+    to = "f2rf2L@r";
+    path = mp.minimumEditPath(arpabetToVector(from), stringToVector(to));
+//      System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 9, path.size());
+    i = 0;
+    assertEquals(pathToString(path), "f", path.get(i).getFrom());
+    assertEquals(pathToString(path), "f", path.get(i++).getTo());
+    assertEquals(pathToString(path), "aɪ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "2", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "r", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ǝ", path.get(i).getFrom());
+    assertNull(pathToString(path), path.get(i++).getTo());
+    assertEquals(pathToString(path), "f", path.get(i).getFrom());
+    assertEquals(pathToString(path), "f", path.get(i++).getTo());
+    assertEquals(pathToString(path), "aɪ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "2", path.get(i++).getTo());
+    assertEquals(pathToString(path), "t", path.get(i).getFrom());
+    assertEquals(pathToString(path), "L", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ǝ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "@", path.get(i++).getTo());
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "r", path.get(i++).getTo());
+  }
+  
   @Test public void OrthographyToDISCMapping() {
     Orthography2DISCComparator comparator = new Orthography2DISCComparator();
     MinimumEditPath<String> mp = new MinimumEditPath<String>(comparator);

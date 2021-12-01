@@ -119,7 +119,7 @@ public class DISC2IPA extends PhonemeTranslator {
          // glottal stop
          map.put('?', "ʔ");
          // flap
-         map.put('L', "œy");
+         map.put('L', "ɾ");
          
          // consonants
          map.put('N', "ŋ");
@@ -140,7 +140,7 @@ public class DISC2IPA extends PhonemeTranslator {
          map.put('Q', "ɒ");
          map.put('O', "ɔ");
          map.put('U', "ʊ");
-         map.put('@', "ə");
+         map.put('@', "ǝ");
       }
    } // end of constructor
    
