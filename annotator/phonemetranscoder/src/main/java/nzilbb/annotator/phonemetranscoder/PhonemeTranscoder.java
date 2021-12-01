@@ -260,6 +260,7 @@ public class PhonemeTranscoder extends Annotator {
         this, "Phrase language layer not found: " + phraseLanguageLayerId);
     if (translation == null || translation.length() == 0) 
       throw new InvalidConfigurationException(this, "No translation was specified.");
+    if (language != null && language.length() == 0) language = null;
     
     if ("custom".equals(translation)) {
       if (json.containsKey("custom")) {
@@ -426,7 +427,7 @@ public class PhonemeTranscoder extends Annotator {
         }
       }
       boolean thereArePhraseTags = false;
-      if (phraseLanguageLayerId != null) {
+      if (phraseLanguageLayerId != null && language != null) {
         if (graph.first(phraseLanguageLayerId) != null) {
           thereArePhraseTags = true;
         }
