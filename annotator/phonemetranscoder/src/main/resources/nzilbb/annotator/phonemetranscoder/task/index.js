@@ -99,7 +99,7 @@ getSchema(s => {
                     } // next mapping
                 }
             }
-            showCustomForm();
+            changeTranslation();
         } finally {
             // hide spinner
             finishedLoading();
