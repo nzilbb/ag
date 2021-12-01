@@ -835,6 +835,7 @@ public class LabelMapper extends Annotator {
                   Annotation from = step.getFrom().source;
                   // save in relational database
                   // (scope was already set)
+                  insertEditStep.setString(2, scope.getId()); // scope
                   insertEditStep.setInt(3, ++s); // step
                   insertEditStep.setString(4, from.getLayerId()); // sourceLayer
                   insertEditStep.setNull(5, Types.VARCHAR); // sourceParentId
@@ -863,6 +864,7 @@ public class LabelMapper extends Annotator {
                   Annotation to = step.getTo().source;
                   // save in relational database
                   // (scope was already set)
+                  insertEditStep.setString(2, scope.getId()); // scope
                   insertEditStep.setInt(3, ++s); // step
                   insertEditStep.setString(4, sourceLayerId); // sourceLayer
                   insertEditStep.setNull(5, Types.VARCHAR); // sourceParentId
