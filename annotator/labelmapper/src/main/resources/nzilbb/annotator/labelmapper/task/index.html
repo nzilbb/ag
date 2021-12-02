@@ -55,6 +55,19 @@
           - the source layer is assumed to be a layer containing ARPAbet-based
           pronunciations (e.g. those that are used in the CMU Pronouncing Dictionary) and
           the target layer is assumed to be a DISC phonological layer.</details> 
+        <details><summary> IPA → IPA </summary>
+          - both are assumed to be IPA phonological layers; priority is given to
+          linking identical consonants, then identical vowels, then allophones of the
+          same phoneme (e.g. plosive and flapped /t/), then phonemes of the same type
+          (e.g. diphthongs with diphthongs, monophthongs with monophthongs, plosives
+          with plosives, etc.), then vowels together.</details>
+        <details><summary> DISC → IPA </summary>
+          - the source layer is assumed to be a DISC phonological layer and the target
+          layer is assumed to be a layer containing IPA-based pronunciations.</details>
+        <details><summary> IPA → DISC </summary>
+          - the source layer is assumed to be a layer containing IPA-based
+          pronunciations and the target layer is assumed to be a DISC phonological
+          layer.</details> 
       </details>
       
       <details><summary> Target Layer </summary>
@@ -284,6 +297,9 @@
             <option value="DISCToDISC"> DISC → DISC </option>
             <option value="DISCToArpabet"> DISC → ARPAbet </option>
             <option value="ArpabetToDISC"> ARPAbet → DISC </option>
+            <option value="IPAToIPA"> IPA → IPA </option>
+            <option value="DISCToIPA"> DISC → IPA </option>
+            <option value="IPAToDISC"> IPA → DISC </option>
           </select>
         </span>
         <span id="exampleMapping">↓</span>
@@ -327,6 +343,9 @@
             <option value="DISCToDISC"> DISC → DISC </option>
             <option value="DISCToArpabet"> DISC → ARPAbet </option>
             <option value="ArpabetToDISC"> ARPAbet → DISC </option>
+            <option value="IPAToIPA"> IPA → IPA </option>
+            <option value="DISCToIPA"> DISC → IPA </option>
+            <option value="IPAToDISC"> IPA → DISC </option>
             <!-- TODO option value="ArpabetToArpabet"> ARPAbet → Arpabet </option-->
           </select>
         </span>

@@ -584,7 +584,7 @@ public class LabelMapper extends Annotator {
     if (subMappingLayerId != null) outputLayers.add(subMappingLayerId);
     return outputLayers.toArray(new String[0]);
   }
-
+  
   class LabelElement {
     Annotation source;
     String label;
@@ -640,6 +640,12 @@ public class LabelMapper extends Annotator {
       comparator = new DISC2ARPAbetComparator<LabelElement>();
     } else if (getComparator().equalsIgnoreCase("ArpabetToDISC")) {
       comparator = new ARPAbet2DISCComparator<LabelElement>();
+    } else if (getComparator().equalsIgnoreCase("IPAToIPA")) {
+      comparator = new IPA2IPAComparator<LabelElement>();
+    } else if (getComparator().equalsIgnoreCase("IPAToDISC")) {
+      comparator = new IPA2DISCComparator<LabelElement>();
+    } else if (getComparator().equalsIgnoreCase("DISCToIPA")) {
+      comparator = new DISC2IPAComparator<LabelElement>();
     } else if (splitLabels.equalsIgnoreCase("char")) {
       // Char2Char only makes sense if splitting by char
       comparator = new Char2CharComparator<LabelElement>();
@@ -670,6 +676,12 @@ public class LabelMapper extends Annotator {
             subMappingComparator = new DISC2ARPAbetComparator<LabelElement>();
           } else if (getSubComparator().equalsIgnoreCase("ArpabetToDISC")) {
             subMappingComparator = new ARPAbet2DISCComparator<LabelElement>();
+          } else if (getComparator().equalsIgnoreCase("IPAToIPA")) {
+            subMappingComparator = new IPA2IPAComparator<LabelElement>();
+          } else if (getComparator().equalsIgnoreCase("IPAToDISC")) {
+            subMappingComparator = new IPA2DISCComparator<LabelElement>();
+          } else if (getComparator().equalsIgnoreCase("DISCToIPA")) {
+            subMappingComparator = new DISC2IPAComparator<LabelElement>();
           }
           
           // delete prior edit steps in relational database

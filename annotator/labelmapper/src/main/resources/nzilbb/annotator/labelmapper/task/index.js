@@ -265,51 +265,81 @@ function setComparatorExamples() {
     if (!submapping) { // simple mapping of one layer to the other
         switch (comparator.value) {
         case "OrthographyToDISC":
-            exampleSource = "transcription"; // orthography
+            exampleSource  = "transcription"; // orthography
             exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
-            exampleTarget   = "t r { n s k r I p S V n"; // DISC
-            break;
-        case "ArpabetToDISC":
-            exampleSource = "T R AE2 N S K R IH1 P SH AH0 N"; // arpabet
-            exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
-            exampleTarget   = "t r { n s k r I p S V n"; // DISC
+            exampleTarget  = "t r { n s k r I p S V n"; // DISC
             break;
         case "OrthographyToArpabet":
-            exampleSource = "transcription"; // orthography
+            exampleSource  = "transcription"; // orthography
             exampleMapping = "? ?  ?  ? ? ? ?  ?  ? ?   ?  ?"; // mapping
-            exampleTarget   = "T R AE2 N S K R IH1 P SH AH0 N"; // ARPAbet
+            exampleTarget  = "T R AE2 N S K R IH1 P SH AH0 N"; // ARPAbet
             break;
         case "DISCToDISC":
-            exampleSource = "tr{nskrIpSVn"; // DISC
+            exampleSource  = "tr{nskrIpSVn"; // DISC
             exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
-            exampleTarget   = "t r { n s k r I p S V n"; // DISC
+            exampleTarget  = "t r { n s k r I p S V n"; // DISC
             break;
         case "DISCToArpabet":
-            exampleSource = "tr{nskrIpSVn"; // DISC
+            exampleSource  = "tr{nskrIpSVn"; // DISC
             exampleMapping = "? ?  ?  ? ? ? ?  ?  ? ?   ?  ?"; // mapping
-            exampleTarget   = "T R AE2 N S K R IH1 P SH AH0 N"; // ARPAbet
+            exampleTarget  = "T R AE2 N S K R IH1 P SH AH0 N"; // ARPAbet
+            break;
+        case "ArpabetToDISC":
+            exampleSource  = "T R AE2 N S K R IH1 P SH AH0 N"; // arpabet
+            exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
+            exampleTarget  = "t r { n s k r I p S V n"; // DISC
+            break;
+        case "IPAToIPA":
+            exampleSource  = "t ɹ æ n s k ɹ ɪ p ʃ ə n"; // IPA
+            exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
+            exampleTarget  = "t ɹ æ n s k ɹ ɪ p ʃ ə n"; // IPA
+            break;
+        case "DISCToIPA":
+            exampleSource  = "tr{nskrIpSVn"; // DISC
+            exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
+            exampleTarget  = "t ɹ æ n s k ɹ ɪ p ʃ ə n"; // IPA
+            break;
+        case "IPAToDISC":
+            exampleSource  = "t ɹ æ n s k ɹ ɪ p ʃ ə n"; // IPA
+            exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
+            exampleTarget  = "t r { n s k r I p S V n"; // DISC
             break;
         }
     } else { // sub-mapping - two pairs of layers
         comparator = document.getElementById("subComparator");
-        exampleSource   = "word            tokens"; // orthography
+        exampleSource  = "word            tokens"; // orthography
         exampleMapping = "?                ?";
-        exampleTarget   = "word            tokens";
+        exampleTarget  = "word            tokens";
         switch (comparator.value) {
-        case "ArpabetToDISC":
-            exampleSubSource   = "W ER1 D      T OW1 K AH0 N Z"; // arpabet
-            exampleSubMapping = "?  ?  ?      ?  ?  ?  ?  ? ?"; // mapping
-            exampleSubTarget   = "w  3  d      t  5  k  @  n z"; // DISC
-            break;
         case "DISCToDISC":
-            exampleSubSource   = "w  3  d      t  5  k  @  n z"; // DISC
+            exampleSubSource  = "w  3  d      t  5  k  @  n z"; // DISC
             exampleSubMapping = "?  ?  ?      ?  ?  ?  ?  ? ?"; // mapping
-            exampleSubTarget   = "w  3  d      t  5  k  @  n z"; // DISC
+            exampleSubTarget  = "w  3  d      t  5  k  @  n z"; // DISC
+            break;
+        case "ArpabetToDISC":
+            exampleSubSource  = "W ER1 D      T OW1 K AH0 N Z"; // arpabet
+            exampleSubMapping = "?  ?  ?      ?  ?  ?  ?  ? ?"; // mapping
+            exampleSubTarget  = "w  3  d      t  5  k  @  n z"; // DISC
             break;
         case "DISCToArpabet":
-            exampleSubSource   = "w  3  d      t  5  k  @  n z"; // DISC
+            exampleSubSource  = "w  3  d      t  5  k  @  n z"; // DISC
             exampleSubMapping = "?  ?  ?      ?  ?  ?  ?  ? ?"; // mapping
-            exampleSubTarget   = "W ER1 D      T OW1 K AH0 N Z"; // arpabet
+            exampleSubTarget  = "W ER1 D      T OW1 K AH0 N Z"; // arpabet
+            break;
+        case "IPAToIPA":
+            exampleSubSource  = "w  ɜː  d      t  əʊ  k  ǝ  n z"; // IPA
+            exampleSubMapping = "?  ?   ?      ?  ?   ?  ?  ? ?"; // mapping
+            exampleSubTarget  = "w  ɜː  d      t  əʊ  k  ǝ  n z"; // IPA
+            break;
+        case "IPAToDISC":
+            exampleSubSource  = "w ɜː d      t əʊ k ǝ n z"; // IPA
+            exampleSubMapping = "?  ? ?      ? ? ? ? ? ?"; // mapping
+            exampleSubTarget  = "w  3 d      t 5 k @ n z"; // DISC
+            break;
+        case "DISCToIPA":
+            exampleSubSource  = "w 3 d      t  5 k @ n z"; // DISC
+            exampleSubMapping = "? ?  ?      ?  ? ? ? ? ?"; // mapping
+            exampleSubTarget  = "w ɜː d      t əʊ k ǝ n z"; // IPA
             break;
         }
     }
