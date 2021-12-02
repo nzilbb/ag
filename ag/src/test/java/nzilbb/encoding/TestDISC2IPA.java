@@ -45,7 +45,7 @@ public class TestDISC2IPA {
 	 "V", /* <-> */"ʌ", // STRUT       - hut/but
 	 "$", /* <-> */"ɔː", // THOUGHT     - ought/fall
 	 "6", /* <-> */"aʊ", // MOUTH       - cow/how
-	 "@", /* <-> */"ə", // schwa       - discuss
+	 "@", /* <-> */"ǝ", // schwa       - discuss
 	 "2", /* <-> */"aɪ", // PRICE       - hide/my
 	 "b", /* <-> */"b",
 	 "B", /* <-> */"au",
@@ -121,7 +121,7 @@ public class TestDISC2IPA {
       for (int i = 0; i < aCodebook.length; i += 2)
       {
 	 // check  mapping
-	 assertEquals("DISC " + aCodebook[i], translator.apply(aCodebook[i]), aCodebook[i+1]);
+        assertEquals("DISC " + aCodebook[i], aCodebook[i+1], translator.apply(aCodebook[i]));
          
 	 // accumulate the whole set into strings
 	 sDISC.append(aCodebook[i]);

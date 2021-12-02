@@ -268,7 +268,7 @@ public class TestComparators {
     assertEquals(pathToString(path), "t", path.get(i++).getTo());
     
     from = "f aɪ ǝ f aɪ t ǝ";
-    to = "f2rf2L@r";
+    to = "f2rf2d@r";
     path = mp.minimumEditPath(arpabetToVector(from), stringToVector(to));
 //      System.out.println(pathToString(path));
     assertEquals(pathToString(path), 9, path.size());
@@ -286,7 +286,7 @@ public class TestComparators {
     assertEquals(pathToString(path), "aɪ", path.get(i).getFrom());
     assertEquals(pathToString(path), "2", path.get(i++).getTo());
     assertEquals(pathToString(path), "t", path.get(i).getFrom());
-    assertEquals(pathToString(path), "L", path.get(i++).getTo());
+    assertEquals(pathToString(path), "d", path.get(i++).getTo());
     assertEquals(pathToString(path), "ǝ", path.get(i).getFrom());
     assertEquals(pathToString(path), "@", path.get(i++).getTo());
     assertNull(pathToString(path), path.get(i).getFrom());

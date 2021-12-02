@@ -33,21 +33,60 @@ import nzilbb.editpath.EditStep;
  */
 public class IPA2IPAComparator<E> implements EditComparator<E> {
   // phone classes
-  Set<String> vowels = new HashSet<String>(Arrays.asList("c","ŋ̩","ɛ","m̩","n̩","i","iː","ɪ","l̩","ɑ̃","ɑ̃ː","ɒ","u","ʊ","ʌ","æ̃","æ̃ː","eɪ","ɜː","ɜ","ɔɪ","ǝʊ","aʊ","ɪǝ","ɛǝ","ʊǝ","ɒ̃ː","ɒ̃","ɑː","ɑ","æ","ɔ","ɔː","ǝ","ə","ai","au","ɔy","yː","y"));
-  Set<String> diphthongs = new HashSet<String>(Arrays.asList("ɔɪ","ǝʊ","aʊ","ɪǝ","ɛǝ","ʊǝ","ai","au","ɔy"));
-  Set<String> monophthongs = new HashSet<String>(Arrays.asList("c","ŋ̩","ɛ","m̩","n̩","iː","ɪ","l̩","ɑ̃ː","ɒ","u","ʊ","ʌ","æ̃ː","ɒ̃ː","ɑː","æ","ɔː","ǝ","ə","yː"));
-  Set<String> consonants = new HashSet<String>(Arrays.asList("b","ʙ","ŋ̩","d","ð","f","m̩","g","h","n̩","j","ʧ","t͜ʃ","k","l","ɾ","m","n","ŋ","p","pf","l̩","ɹ","ɾ","r","ʀ","s","ʃ","t","t͜s","θ","v","w","x","z","ʒ","ʤ","d͜ʒ","ʔ", "ɸ", "β", "ɣ", "ʂ", "ʐ", "ç", "ʝ", "ɣ", "ʁ", "ħ", "ʕ", "ɦ","ʈ","ɖ","c","ɟ","q","ɢ","ɳ","ɲ","ɴ","ⱱ","ɽ","ɬ","ɮ","ʋ","ɻ","ɰ","ɭ","ʎ","ʟ"));
-  Set<String> plosives = new HashSet<String>(Arrays.asList("b","d","g","k","p","t","ʔ","ʈ","ɖ","c","ɟ","q","ɢ"));
-  Set<String> fricatives = new HashSet<String>(Arrays.asList("ð","f","h","s","ʃ","θ","v","x","z","ʒ","ɸ", "β", "ɣ", "ʂ", "ʐ", "ç", "ʝ", "ɣ", "ʁ", "ħ", "ʕ", "ɦ","ɬ","ɮ"));
-  Set<String> affricates = new HashSet<String>(Arrays.asList("ʧ","t͜ʃ","ʤ","d͜ʒ","pf","t͜s"));
-  Set<String> nasals = new HashSet<String>(Arrays.asList("m","n","ŋ","ɳ","ɲ","ɴ"));
-  Set<String> liquids = new HashSet<String>(Arrays.asList("l","Y","ɹ","r","w","x","ɽ","ɻ","ɰ","ɭ"));
+  Set<String> vowels;
+  Set<String> diphthongs = new HashSet<String>(
+    Arrays.asList("ɔɪ","ǝʊ","aʊ","ɪǝ","ɛǝ","ʊǝ","ai","au","ɔy","œy"));
+  Set<String> monophthongs = new HashSet<String>(
+    Arrays.asList("c","ŋ̩","ɛ","m̩","n̩","i","iː","ɪ","l̩","ɑ̃ː","ɒ","u","ʊ","ʌ","æ̃ː","ɒ̃ː","ɑː","æ",
+                  "ɔː","ǝ","ə","yː","œ","ɛ","œː","ɛː","ɨ","ʉ","ɯ","ʏ","ø","ɵ","ɘ","ɞ","ɶ","ɐ"));
+  Set<String> consonants;
+  Set<String> plosives = new HashSet<String>(
+    Arrays.asList("p","b","t","d","ʈ","ɖ","c","ɟ","k","g","q","ɢ","ʔ"));
+  Set<String> nasals = new HashSet<String>(
+    Arrays.asList("m","ɱ","n","ɳ","ɲ","ŋ","ɴ"));
+  Set<String> trills = new HashSet<String>(
+    Arrays.asList("ʙ","r","ʀ"));
+  Set<String> tapFlap = new HashSet<String>(
+    Arrays.asList("ⱱ","ɾ","ɽ"));
+  Set<String> fricatives = new HashSet<String>(
+    Arrays.asList("ɸ","β","f","v","θ","ð","s","z","ʃ","ʒ","ʂ","ʐ","ç","ʝ","x","ɣ","χ","ʁ",
+                  "ħ","ʕ","h","ɦ","ɬ","ɮ"));
+  Set<String> approximants = new HashSet<String>(
+    Arrays.asList("ʋ","	ɹ","ɻ","j","ɰ","l","ɭ","ʎ","ʟ"));
+  Set<String> clicks = new HashSet<String>(
+    Arrays.asList("ʘ","ǀ","ǃ","ǂ","ǁ"));
+  Set<String> voicedImplosives = new HashSet<String>(
+    Arrays.asList("ɓ","ɗ","ʄ","ɠ","ʛ"));
+  Set<String> ejectives = new HashSet<String>(
+    Arrays.asList("pʼ","tʼ","kʼ", "sʼ"));
+  Set<String> affricates = new HashSet<String>(
+    Arrays.asList("ʧ","t͜ʃ","ʤ","d͜ʒ","pf","t͜s",
+                  "t͡s","t͡ʃ","t͡ɕ","ʈ͡ʂ","d͡z","d͡ʒ","d͡ʑ","ɖ͡ʐ "));
   Set<String> typesOfR = new HashSet<String>(Arrays.asList("ɹ","r","ɾ","ɽ"));
   Set<String> flapTD = new HashSet<String>(Arrays.asList("t","d","ɾ"));
   Set<String> vocalisedNG = new HashSet<String>(Arrays.asList("ŋ","ŋ̩"));
   Set<String> vocalisedM = new HashSet<String>(Arrays.asList("m","m̩"));
   Set<String> vocalisedN = new HashSet<String>(Arrays.asList("n","n̩"));
   Set<String> vocalisedL = new HashSet<String>(Arrays.asList("l","l̩"));
+  
+  /** Constructor */
+  public IPA2IPAComparator() {
+    vowels = new HashSet<String>();
+    vowels.addAll(monophthongs);
+    vowels.addAll(diphthongs);
+    consonants = new HashSet<String>();
+    consonants.addAll(plosives);
+    consonants.addAll(nasals);
+    consonants.addAll(trills);
+    consonants.addAll(tapFlap);
+    consonants.addAll(fricatives);
+    consonants.addAll(approximants);
+    consonants.addAll(clicks);
+    consonants.addAll(voicedImplosives);
+    consonants.addAll(ejectives);
+    consonants.addAll(affricates);
+    consonants.addAll(Arrays.asList("ŋ̩","m̩","n̩","l̩"));
+  }
   
   /**
    * Compares two sequence elements, and evaluates the distance between them.
@@ -75,7 +114,8 @@ public class IPA2IPAComparator<E> implements EditComparator<E> {
       int iDistance = 40;
       String sFrom = from.toString();
       String sTo = to.toString();
-      if (sFrom.replaceAll("ː","").equals(sTo.replaceAll("ː",""))) { // the same except for length
+      if (sFrom.replaceAll("ː","").equals(sTo.replaceAll("ː","")) // the same except for length
+          || sFrom.replaceAll("[͜͡]","").equals(sTo.replaceAll("[͜͡]",""))) { // same without tie
         iDistance = 2;
       } else if ( // allophones
         (flapTD.contains(sFrom) && flapTD.contains(sTo))
@@ -89,11 +129,16 @@ public class IPA2IPAComparator<E> implements EditComparator<E> {
       } else if ( // same narrow type
         (diphthongs.contains(sFrom) && diphthongs.contains(sTo))
         || (monophthongs.contains(sFrom) && monophthongs.contains(sTo))
-        || (liquids.contains(sFrom) && liquids.contains(sTo))
-        || (nasals.contains(sFrom) && nasals.contains(sTo))
-        || (affricates.contains(sFrom) && affricates.contains(sTo))
-        || (fricatives.contains(sFrom) && fricatives.contains(sTo))
         || (plosives.contains(sFrom) && plosives.contains(sTo))
+        || (nasals.contains(sFrom) && nasals.contains(sTo))
+        || (trills.contains(sFrom) && trills.contains(sTo))
+        || (tapFlap.contains(sFrom) && tapFlap.contains(sTo))
+        || (fricatives.contains(sFrom) && fricatives.contains(sTo))
+        || (approximants.contains(sFrom) && approximants.contains(sTo))
+        || (clicks.contains(sFrom) && clicks.contains(sTo))
+        || (voicedImplosives.contains(sFrom) && voicedImplosives.contains(sTo))
+        || (ejectives.contains(sFrom) && ejectives.contains(sTo))
+        || (affricates.contains(sFrom) && affricates.contains(sTo))
         ) {
         iDistance = 8;
       } else if ( // same broad type
