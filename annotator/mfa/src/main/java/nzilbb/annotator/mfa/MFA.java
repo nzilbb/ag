@@ -147,7 +147,7 @@ public class MFA extends Annotator {
   public MFA setDictionaryName(String newDictionaryName) { dictionaryName = newDictionaryName; return this; }
   
   /**
-   * The name of the pretrained acoustive models to use.
+   * The name of the pretrained acoustic models to use.
    * @see #getModelsName()
    * @see #setModelsName(String)
    */
@@ -864,7 +864,7 @@ public class MFA extends Annotator {
               // log contents of ${tempDir}/corpus/train_acoustic_model.log
               copyLog(new File(new File(tempDir, "corpus"), "train_acoustic_model.log"));
             } else { // pretrained
-              mfa(false, "model","download","acoustic", dictionaryName);
+              mfa(false, "model","download","acoustic", modelsName);
               setPercentComplete(25);
               if (!isCancelling()) {
                 mfa(false, "model","download","dictionary", dictionaryName);
@@ -956,7 +956,10 @@ public class MFA extends Annotator {
    */
   protected File createSessionWorkingDir() throws TransformationException{
     if (sessionName == null) {
-      sessionName = "mfa-" + hashCode();
+      String prefix = "mfa";
+      if (utteranceTagLayerId != null) prefix = utteranceTagLayerId;
+      else if (phoneAlignmentLayerId != null) prefix = phoneAlignmentLayerId;
+      sessionName = prefix + "-" + hashCode();
     }
     setStatus("Session " + sessionName);
     sessionWorkingDir = new File(
@@ -1174,9 +1177,12 @@ public class MFA extends Annotator {
    * @param newName
    */
   protected void renameSession(String newName) {
+    String prefix = "mfa";
+    if (utteranceTagLayerId != null) prefix = utteranceTagLayerId;
+    else if (phoneAlignmentLayerId != null) prefix = phoneAlignmentLayerId;
     File newSessionWorkingDirectory = new File(
       getWorkingDirectory(),
-      newName
+      prefix + "-" + newName
       +"-"+new SimpleDateFormat("yyyy-MM-dd-kk-mm-ss").format(new java.util.Date()));
     if (sessionWorkingDir.renameTo(newSessionWorkingDirectory)) {
       sessionWorkingDir = newSessionWorkingDirectory;
@@ -1212,7 +1218,7 @@ public class MFA extends Annotator {
       .env("HOME", mfaPath)
       .setExe(new File(mfaPath, "mfa")); // TODO -j <num_jobs>
     for (String arg : args) exe.arg(arg);
-    exe.getStdoutObservers().add(s->setStatus(s));
+    exe.getStdoutObservers().add(s->setStatus(s.replaceAll("[[0-9]+m","")));
     exe.getStderrObservers().add(s-> {
         // is it a progress bar?
         Matcher progressMatcher = progressPattern.matcher(s);
