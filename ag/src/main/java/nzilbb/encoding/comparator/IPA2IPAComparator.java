@@ -29,7 +29,7 @@ import nzilbb.editpath.EditComparator;
 import nzilbb.editpath.EditStep;
 
 /**
- * Comparator that maps one DISC-encoded series to another.
+ * Comparator that maps one IPA-encoded series to another.
  */
 public class IPA2IPAComparator<E> implements EditComparator<E> {
   // phone classes
