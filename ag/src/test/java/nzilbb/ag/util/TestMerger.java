@@ -720,6 +720,8 @@ public class TestMerger {
       try
       {
         Graph originalGraph = loadGraphFromJSON(fOriginal, schema);
+        // ensure fragments know they are fragments
+        if (sDir.equals("frag")) originalGraph.setGraph(new Graph());
         originalGraph.trackChanges();
         File fEdited = new File(subdir, "edited_" + fragmentName + ".json");
         Graph editedGraph = loadGraphFromJSON(fEdited, schema);
