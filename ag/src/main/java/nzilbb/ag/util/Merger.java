@@ -511,11 +511,20 @@ public class Merger
        // we must have a change tracker, because we might want to roll back changes
        graph.trackChanges();
     }
-    // the bounds of the graph/fragment cannot change
-    Anchor originalGraphStart = graph.getStart();
-    Double originalStartOffset = originalGraphStart.getOffset();
-    Anchor originalGraphEnd = graph.getEnd();
-    Double originalEndOffset = originalGraphEnd.getOffset();
+    // the bounds of the fragment cannot change
+    Anchor originalGraphStart = null;
+    Double originalStartOffset = null;
+    Anchor originalGraphEnd = null;
+    Double originalEndOffset = null;
+    if (graph.isFragment()) {
+      SortedSet<Anchor> anchors = graph.getAnchorsOrderedByStructure();
+      if (anchors.size() > 0) {
+        originalGraphStart = anchors.first();
+        originalStartOffset = originalGraphStart.getOffset();
+        originalGraphEnd = anchors.last();
+        originalEndOffset = originalGraphEnd.getOffset();
+      }
+    }
 
     // ensure that all annotations have an anchor
     dummyAnchors = new HashSet<Anchor>();
