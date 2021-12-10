@@ -300,6 +300,25 @@ public class MFA extends Annotator {
   public MFA setSessionName(String newSessionName) { sessionName = newSessionName; return this; }
   
   /**
+   * Whether to use the --multilingual_ipa command line switch or not.
+   * @see #getMultilingualIPA()
+   * @see #setMultilingualIPA(boolean)
+   */
+  protected boolean multilingualIPA = false;
+  /**
+   * Getter for {@link #multilingualIPA}: Whether to use the --multilingual_ipa command
+   * line switch or not. 
+   * @return Whether to use the --multilingual_ipa command line switch or not.
+   */
+  public boolean getMultilingualIPA() { return multilingualIPA; }
+  /**
+   * Setter for {@link #multilingualIPA}: Whether to use the --multilingual_ipa command
+   * line switch or not. 
+   * @param newMultilingualIPA Whether to use the --multilingual_ipa command line switch or not.
+   */
+  public MFA setMultilingualIPA(boolean newMultilingualIPA) { multilingualIPA = newMultilingualIPA; return this; }
+  
+  /**
    * Default constructor.
    */
   public MFA() {
@@ -328,7 +347,6 @@ public class MFA extends Annotator {
         .setPeers(true).setPeersOverlap(false).setSaturated(true)
         .setParentId("word").setParentIncludes(true)
         .setType("ipa")));
-    
   } // end of constructor
   
   /**
@@ -483,31 +501,7 @@ public class MFA extends Annotator {
 
       beanPropertiesFromQueryString(config);
 
-      if (mfaPath == null || mfaPath.length() == 0) {
-        File whichMfa = Execution.Which("mfa");
-        if (whichMfa != null) {
-          mfaPath = whichMfa.getParentFile().getPath();
-        }
-      }
-      if (mfaPath == null || mfaPath.length() == 0) {
-        throw new InvalidConfigurationException(this, "Path to MFA is not set.");
-      }
-      File mfa = new File(mfaPath, "mfa");
-      // TODO windows? if (conda != null && !conda.exists()) conda = new File(condaPath, "conda.exe");
-      if (!mfa.exists()) {
-        throw new InvalidConfigurationException(this, "MFA CLI not found: " + mfa.getPath());
-      }
-      // try running mfa
-      Execution exe = new Execution()
-        .env("PATH", System.getenv("PATH")+System.getProperty("path.separator")+mfaPath)
-        .setExe(mfa).arg("version");
-      exe.run();
-      if (exe.stderr().length() > 0) {
-        throw new InvalidConfigurationException(
-          this, "MFA could not run: " + exe.stderr().trim());
-      } else { // conda ran without error
-        setStatus("MFA version: " + exe.stdout().trim());
-      } // conda ran without error
+      setStatus("MFA version: " + mfaVersion());
       
       // persist configuration
       PrintWriter writer = new PrintWriter(
@@ -524,6 +518,41 @@ public class MFA extends Annotator {
       setRunning(false);
     }
   }
+  
+  /**
+   * Returns the version of the Montreal Forced Aligner that's installed.
+   * @return The currently-installed MFA version.
+   * @throws InvalidConfigurationException If "mfa version" could not be executed.
+   */
+  public String mfaVersion() throws InvalidConfigurationException {
+    if (mfaPath == null || mfaPath.length() == 0) {
+      File whichMfa = Execution.Which("mfa");
+      if (whichMfa != null) {
+        mfaPath = whichMfa.getParentFile().getPath();
+      }
+    }
+    if (mfaPath == null || mfaPath.length() == 0) {
+      throw new InvalidConfigurationException(this, "Path to MFA is not set.");
+    }
+    
+    File mfa = new File(mfaPath, "mfa");
+    // TODO windows? if (conda != null && !conda.exists()) conda = new File(condaPath, "conda.exe");
+    if (!mfa.exists()) {
+      throw new InvalidConfigurationException(this, "MFA CLI not found: " + mfa.getPath());
+    }
+    Execution exe = new Execution()
+      .env("PATH", System.getenv("PATH")+System.getProperty("path.separator")+mfaPath)
+      .env("HOME", System.getProperty("java.io.tmpdir"))
+      .env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
+      .setExe(mfa).arg("version");
+    exe.run();
+    if (exe.stderr().length() > 0) {
+      throw new InvalidConfigurationException(
+        this, "MFA could not run: " + exe.stderr().trim());
+    } else { // conda ran without error
+      return exe.stdout().trim();
+    } // conda ran without error
+  } // end of mfaVersion()
    
   /**
    * Sets the configuration for a given annotation task.
@@ -831,18 +860,20 @@ public class MFA extends Annotator {
         createSessionWorkingDir();
         setPercentComplete(5);
         
-        if (dictionaryName == null) { // train & align          
-          // convert output to DISC?
-          if (discDictionary) {           
-            phonemesToMfa = new DISC2HTK();
-            mfaToPhonemes = new HTK2DISC();
-          } else {
-            if (discOutput) {
-              mfaToPhonemes = new CMU2DISC();
+        if (dictionaryName == null) { // train & align
+          if (!multilingualIPA) { // (pass through IPA labels as-is)
+            // convert output to DISC?
+            if (discDictionary) {           
+              phonemesToMfa = new DISC2HTK();
+              mfaToPhonemes = new HTK2DISC();
+            } else {
+              if (discOutput) {
+                mfaToPhonemes = new CMU2DISC();
+              }
             }
           }
         } else { // pretrained
-          if (discOutput) { // pretrained models used ARPAbet
+          if (discOutput && dictionaryName.indexOf("_ipa") < 0) { // pretrained models use ARPAbet
             mfaToPhonemes = new CMU2DISC();
           }
         }
@@ -858,9 +889,15 @@ public class MFA extends Annotator {
             if (dictionaryName == null) { // train & align          
               //mfa("validate", corpusDir.getPath(), dictionaryFile.getPath());
               setPercentComplete(30); // (up to 5 phases of 10% each arrives at 80%)
-              mfa(false, "train", "--clean", 
-                  corpusDir.getPath(), dictionaryFile.getPath(),
-                  alignedDir.getPath());
+              if (multilingualIPA) { // --multilingual_ipa
+                mfa(false, "train", "--clean", "--multilingual_ipa",
+                    corpusDir.getPath(), dictionaryFile.getPath(),
+                    alignedDir.getPath());
+              } else {
+                mfa(false, "train", "--clean", 
+                    corpusDir.getPath(), dictionaryFile.getPath(),
+                    alignedDir.getPath());
+              }
               // log contents of ${tempDir}/corpus/train_acoustic_model.log
               copyLog(new File(new File(tempDir, "corpus"), "train_acoustic_model.log"));
             } else { // pretrained
@@ -1212,13 +1249,9 @@ public class MFA extends Annotator {
     
     Execution exe = new Execution()
       .env("PATH", System.getenv("PATH")+System.getProperty("path.separator")+mfaPath)
-      .env("HOME", mfaPath)
+      .env("HOME", System.getProperty("java.io.tmpdir"))
+      .env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
       .setExe(new File(mfaPath, "mfa")); // TODO -j <num_jobs>
-    if (tempDir != null) {
-      exe.env("MFA_ROOT_DIR", tempDir.getPath());
-    } else {
-      exe.env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"));
-    }
     for (String arg : args) exe.arg(arg);
     exe.getStdoutObservers().add(s->setStatus(s.replaceAll("[[0-9]+m","")));
     exe.getStderrObservers().add(s-> {
@@ -1365,7 +1398,7 @@ public class MFA extends Annotator {
           deserializer.setParameters(parameters);
           Graph[] graphs = deserializer.deserialize();
           Graph alignedFragment = graphs[0];
-          
+
           // anchors start from zero, which they don't in the database
           String[] fragmentParts = Graph.ParseFragmentId(alignedFragment.getId());
           double startTime = Double.parseDouble(fragmentParts[1]);
