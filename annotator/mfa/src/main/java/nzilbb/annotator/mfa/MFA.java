@@ -858,7 +858,7 @@ public class MFA extends Annotator {
             if (dictionaryName == null) { // train & align          
               //mfa("validate", corpusDir.getPath(), dictionaryFile.getPath());
               setPercentComplete(30); // (up to 5 phases of 10% each arrives at 80%)
-              mfa(false, "train", "--clean", "--temp_directory", tempDir.getPath(),
+              mfa(false, "train", "--clean", 
                   corpusDir.getPath(), dictionaryFile.getPath(),
                   alignedDir.getPath());
               // log contents of ${tempDir}/corpus/train_acoustic_model.log
@@ -870,7 +870,7 @@ public class MFA extends Annotator {
                 mfa(false, "model","download","dictionary", dictionaryName);
                 setPercentComplete(30);
                 if (!isCancelling()) {
-                  mfa(false, "align", "--clean", "--temp_directory", tempDir.getPath(),
+                  mfa(false, "align", "--clean", 
                       corpusDir.getPath(), dictionaryName, modelsName,
                       alignedDir.getPath());
                   // log contents of ${tempDir}/corpus/align.log
@@ -1214,6 +1214,11 @@ public class MFA extends Annotator {
       .env("PATH", System.getenv("PATH")+System.getProperty("path.separator")+mfaPath)
       .env("HOME", mfaPath)
       .setExe(new File(mfaPath, "mfa")); // TODO -j <num_jobs>
+    if (tempDir != null) {
+      exe.env("MFA_ROOT_DIR", tempDir.getPath());
+    } else {
+      exe.env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"));
+    }
     for (String arg : args) exe.arg(arg);
     exe.getStdoutObservers().add(s->setStatus(s.replaceAll("[[0-9]+m","")));
     exe.getStderrObservers().add(s-> {
