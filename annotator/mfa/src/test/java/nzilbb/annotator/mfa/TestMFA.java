@@ -284,23 +284,23 @@ public class TestMFA {
     Annotation[] phones = word.all("segment");
     assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
     String[] labels = { "s", "t", "{", "J", "u", "t" };
-    Double[] starts = { 11.08, 11.24, 11.33, 11.54, 11.61, 11.69 };
     for (int p = 0; p < phones.length; p++) {      
       assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
-      assertEquals("Phone start confidence " + p,
-                   Constants.CONFIDENCE_AUTOMATIC,
-                   phones[p].getStart().getConfidence().intValue());
-      assertEquals("Phone end confidence " + p,
-                   Constants.CONFIDENCE_AUTOMATIC,
-                   phones[p].getEnd().getConfidence().intValue());
-      assertEquals("Phone start " + p, starts[p], phones[p].getStart().getOffset());
+      if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
+        assertEquals("Phone start confidence " + p + " " + phones[p].getStartId(),
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getStart().getConfidence().intValue());
+      }
+      if (p < phones.length - 1) { // last phone might coincide with end and be CONFIDENCE_MANUAL
+        assertEquals("Phone end confidence " + p + " " + phones[p].getEndId(),
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getEnd().getConfidence().intValue());
+      }
       if (p > 0) {
         assertEquals("Phone start shared with previous end " + p,
                      phones[p-1].getEnd(), phones[p].getStart());
       }
     } // next phone    
-    assertEquals("Last phone end",
-                 Double.valueOf(11.870000000000001), phones[5].getEnd().getOffset());
   }   
   
   /** Test alignment of full graph works. */
@@ -337,23 +337,21 @@ public class TestMFA {
     Annotation[] phones = word.all("segment");
     assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
     String[] labels = { "s", "t", "{", "J", "u", "t" };
-    Double[] starts = { 11.08, 11.24, 11.33, 11.54, 11.61, 11.69 };
     for (int p = 0; p < phones.length; p++) {      
       assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
       assertEquals("Phone is marked for addition " + p,
                    Change.Operation.Create, phones[p].getChange());
-      assertEquals("Phone start confidence " + p,
-                   Constants.CONFIDENCE_AUTOMATIC,
-                   phones[p].getStart().getConfidence().intValue());
-      assertEquals("Phone end confidence " + p,
-                   Constants.CONFIDENCE_AUTOMATIC,
-                   phones[p].getEnd().getConfidence().intValue());
-      assertEquals("Phone start offset " + p,
-                   starts[p], phones[p].getStart().getOffset());
-      if (phones[p].getStart().isStartOn("word")) {
-        assertEquals("Phone/word start is an update " + p,
-                     Change.Operation.Update, phones[p].getStart().getChange());
-      } else {
+      if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
+        assertEquals("Phone start confidence " + p,
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getStart().getConfidence().intValue());
+      }
+      if (p < phones.length - 1) { // last phone might coincide with end and be CONFIDENCE_MANUAL
+        assertEquals("Phone end confidence " + p,
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getEnd().getConfidence().intValue());
+      }
+      if (!phones[p].getStart().isStartOn("word")) {
         assertEquals("Phone start is new " + p,
                      Change.Operation.Create, phones[p].getStart().getChange());
       }
@@ -362,8 +360,6 @@ public class TestMFA {
                      phones[p-1].getEnd(), phones[p].getStart());
       }
     } // next phone    
-    assertEquals("Last phone end",
-                 Double.valueOf(11.870000000000001), phones[5].getEnd().getOffset());
     assertEquals("word/phone start shared", word.getStart(), phones[0].getStart());
     assertEquals("word/phone end shared", word.getEnd(), phones[5].getEnd());
   }   
@@ -437,23 +433,23 @@ public class TestMFA {
     Annotation[] mfa_phones = aligned.all("mfa_phone");
     assertEquals("Six MFA phones " + Arrays.asList(mfa_phones), 6, mfa_phones.length);
     String[] labels = { "S", "T", "AE1", "CH", "UW0", "T" };
-    Double[] starts = { 11.08, 11.24, 11.33, 11.54, 11.61, 11.69 };
     for (int p = 0; p < mfa_phones.length; p++) {      
       assertEquals("DISC phone label " + p, labels[p], mfa_phones[p].getLabel());
-      assertEquals("Phone start confidence " + p,
-                   Constants.CONFIDENCE_AUTOMATIC,
-                   mfa_phones[p].getStart().getConfidence().intValue());
-      assertEquals("Phone end confidence " + p,
-                   Constants.CONFIDENCE_AUTOMATIC,
-                   mfa_phones[p].getEnd().getConfidence().intValue());
-      assertEquals("Phone start " + p, starts[p], mfa_phones[p].getStart().getOffset());
+      if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
+        assertEquals("Phone start confidence " + p,
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     mfa_phones[p].getStart().getConfidence().intValue());
+      }
+      if (p < phones.length - 1) { // last phone might coincide with end and be CONFIDENCE_MANUAL
+        assertEquals("Phone end confidence " + p,
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     mfa_phones[p].getEnd().getConfidence().intValue());
+      }
       if (p > 0) {
         assertEquals("Phone start shared with previous end " + p,
                      mfa_phones[p-1].getEnd(), mfa_phones[p].getStart());
       }
     } // next phone    
-    assertEquals("Last phone end",
-                 Double.valueOf(11.870000000000001), mfa_phones[5].getEnd().getOffset());
     assertEquals("word/phone start shared", mfa_word.getStart(), mfa_phones[0].getStart());
     assertEquals("word/phone end shared", mfa_word.getEnd(), mfa_phones[5].getEnd());
   }
@@ -499,6 +495,16 @@ public class TestMFA {
     String[] labels = { "s", "t", "{", "J", "u", "t" };
     for (int p = 0; p < phones.length; p++) {      
       assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
+      if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
+        assertEquals("Phone start confidence " + p,
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getStart().getConfidence().intValue());
+      }
+      if (p < phones.length - 1) { // last phone might coincide with end and be CONFIDENCE_MANUAL
+        assertEquals("Phone end confidence " + p,
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getEnd().getConfidence().intValue());
+      }
       if (p > 0) {
         assertEquals("Phone start shared with previous end " + p,
                      phones[p-1].getEnd(), phones[p].getStart());
