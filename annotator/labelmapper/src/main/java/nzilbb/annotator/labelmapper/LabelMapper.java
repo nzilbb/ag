@@ -662,7 +662,7 @@ public class LabelMapper extends Annotator {
       PreparedStatement insertEditStep = null;
       
       try {
-        
+
         if (subMapping) {
           
           // define comparator for sub-mapping
@@ -676,11 +676,11 @@ public class LabelMapper extends Annotator {
             subMappingComparator = new DISC2ARPAbetComparator<LabelElement>();
           } else if (getSubComparator().equalsIgnoreCase("ArpabetToDISC")) {
             subMappingComparator = new ARPAbet2DISCComparator<LabelElement>();
-          } else if (getComparator().equalsIgnoreCase("IPAToIPA")) {
+          } else if (getSubComparator().equalsIgnoreCase("IPAToIPA")) {
             subMappingComparator = new IPA2IPAComparator<LabelElement>();
-          } else if (getComparator().equalsIgnoreCase("IPAToDISC")) {
+          } else if (getSubComparator().equalsIgnoreCase("IPAToDISC")) {
             subMappingComparator = new IPA2DISCComparator<LabelElement>();
-          } else if (getComparator().equalsIgnoreCase("DISCToIPA")) {
+          } else if (getSubComparator().equalsIgnoreCase("DISCToIPA")) {
             subMappingComparator = new DISC2IPAComparator<LabelElement>();
           }
           
