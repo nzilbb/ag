@@ -4,6 +4,14 @@ startLoading();
 getVersion(version => {
     document.getElementById("version").innerHTML = version;
 });
+getText("mfaVersion", version => {
+    if (version) {
+        document.getElementById("mfaVersion").innerHTML = version;
+    } else {
+        document.getElementById("mfaVersion").innerHTML = "Could not determine MFA version";
+        document.getElementById("mfaVersion").className = "error";
+    }
+});
 
 const taskId = window.location.search.substring(1);
 let existingPhoneLayerId = null;
@@ -144,8 +152,11 @@ getSchema(s => {
                 // set the checkboxes
                 document.getElementById("ignoreAlignmentStatuses").checked
                     = parameters.get("ignoreAlignmentStatuses");
+                document.getElementById("multilingualIPA").checked
+                    = parameters.get("multilingualIPA");
                 // either pronunciationLayerId or dictionaryName
                 document.getElementById("pronunciationLayerId").disabled
+                    = document.getElementById("multilingualIPA").disabled
                     = document.getElementById("dictionaryName").value != ""; 
             }
             // if there's no utterance tag layer defined
@@ -239,5 +250,6 @@ document.getElementById("form").onsubmit = function(e) {
 document.getElementById("dictionaryName").onchange = function(e) {
     // either pronunciationLayerId or dictionaryName
     document.getElementById("pronunciationLayerId").disabled
+        = document.getElementById("multilingualIPA").disabled
         = document.getElementById("dictionaryName").value != ""; 
 }
