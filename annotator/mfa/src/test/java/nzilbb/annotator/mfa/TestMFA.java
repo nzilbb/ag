@@ -114,6 +114,12 @@ public class TestMFA {
                names.contains(""));
   }   
 
+  /** Ensure mfaVersion method works. */
+  @Test public void mfaVersion() throws Exception {
+    String version = annotator.mfaVersion();
+    assertTrue("MFA version is 2...: " + version, version.startsWith("2"));
+  }   
+
   /** Ensure default (null) task parameters return an error. */
   @Test public void defaultParameters() throws Exception {
     
@@ -244,8 +250,8 @@ public class TestMFA {
     }
   }
 
-  /** Test alignment of fragment with pre-trained models, updating word token alignments and
-   *  creating children. */
+  /** Test alignment of fragment with pre-trained models/dictionary (english/english),
+   * updating word token alignments and creating children. */
   @Test public void pretrainedModels() throws Exception {
     annotator.setSessionName("pretrainedModels");
     //annotator.getStatusObservers().add(status->System.out.println(status));
@@ -284,6 +290,65 @@ public class TestMFA {
     Annotation[] phones = word.all("segment");
     assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
     String[] labels = { "s", "t", "{", "J", "u", "t" };
+    for (int p = 0; p < phones.length; p++) {      
+      assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
+      if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
+        assertEquals("Phone start confidence " + p + " " + phones[p].getStartId(),
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getStart().getConfidence().intValue());
+      }
+      if (p < phones.length - 1) { // last phone might coincide with end and be CONFIDENCE_MANUAL
+        assertEquals("Phone end confidence " + p + " " + phones[p].getEndId(),
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getEnd().getConfidence().intValue());
+      }
+      if (p > 0) {
+        assertEquals("Phone start shared with previous end " + p,
+                     phones[p-1].getEnd(), phones[p].getStart());
+      }
+    } // next phone    
+  }   
+  
+  /** Test alignment of fragment with pre-trained IPA models/dictionary
+   * (english_ipa/english_uk_ipa), updating word token alignments and creating children. */
+  @Test public void pretrainedIPAModels() throws Exception {
+    annotator.setSessionName("pretrainedModels");
+    //annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    Graph f = fragment();
+    Schema schema = f.getSchema();
+    annotator.setSchema(schema);
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&dictionaryName=english_uk_ipa"
+      +"&modelsName=english_ipa"
+      +"&utteranceTagLayerId=utterance_mfa" // nonexistent
+      +"&participantTagLayerId=participant_mfa" // nonexistent
+      +"&wordAlignmentLayerId=word"
+      +"&phoneAlignmentLayerId=segment");
+    Layer layer = annotator.getSchema().getLayer("utterance_mfa");
+    assertNotNull("utterance_mfa layer created", layer);
+    layer = annotator.getSchema().getLayer("participant_mfa");
+    assertNotNull("participant_mfa layer created", layer);
+    
+    final Vector<Graph> results = new Vector<Graph>();
+    annotator.transformFragments(
+      Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
+    
+    assertEquals("One utterance " + results, 1, results.size());
+    Graph aligned = results.elementAt(0);
+    assertTrue("Original graph is edited", f == aligned);
+    
+    Annotation[] words = aligned.all("word");
+    assertEquals("One word " + Arrays.asList(words), 1, words.length);
+    Annotation word = words[0];
+    assertEquals("Word label " + word, "statute", word.getLabel());
+    
+    Annotation[] phones = word.all("segment");
+    assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
+    String[] labels = { "s", "t", "æ", "tʃ", "uː", "t" };
     for (int p = 0; p < phones.length; p++) {      
       assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
       if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
