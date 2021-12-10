@@ -1101,9 +1101,6 @@ public class MFA extends Annotator {
             Annotation participant = fragment.first(schema.getParticipantLayerId());
             if (participant != null && participant.getLabel().length() > 0) {
               speakerDir = new File(corpusDir, participant.getLabel());
-              // Kaldi (and thus MFA) likes files to be prefixed with the speaker ID
-              // (we'll remove the prefix before saving)
-              fragment.setId(participant.getLabel() + "---" + fragment.getId());
               participants.add(participant.getLabel());
             }
             if (!speakerDir.exists()) speakerDir.mkdir();
@@ -1461,10 +1458,11 @@ public class MFA extends Annotator {
             fragment.trackChanges();
             // merge changes
             merger.transform(fragment);
+
             // ensure the utterance boundaries are unchanged (e.g. even by rounding)
             utterance.getStart().rollback();
             utterance.getEnd().rollback();
-            
+
             if (dependentLayerIds.size() > 0) { // if there are aligned child layers
               // ensure their anchors are recomputed if they've got low-confidence alignments
               defaultOffsetGenerator.transform(fragment);
@@ -1497,8 +1495,6 @@ public class MFA extends Annotator {
             Set<Change> changes = fragment.getTracker().getChanges();
             if (merger.getLog() != null) for (String l : merger.getLog()) setStatus(l);
             if (isCancelling()) break;
-            // remove speaker ID prefix we added earlier
-            fragment.setId(fragment.getId().replaceAll("^.*---",""));
             if (consumer != null) consumer.accept(fragment);
           } catch (Exception x) {
             setStatus("Could not process " + alignedFragment.getId() + ": " + x);
