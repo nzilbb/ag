@@ -35,13 +35,15 @@ public class IPA2IPAComparator<E> implements EditComparator<E> {
   // phone classes
   Set<String> vowels;
   Set<String> diphthongs = new HashSet<String>(
-    Arrays.asList("ɔɪ","ǝʊ","aʊ","ɪǝ","ɛǝ","ʊǝ","ai","au","ɔy","œy"));
+    Arrays.asList("ɔɪ","ǝʊ","əʊ","eɪ","oʊ","aʊ","ɪǝ","ɪə","ɛǝ","ɛə","ʊǝ","ʊə","ai","aɪ","au","ɔy",
+                  "œy"));
   Set<String> monophthongs = new HashSet<String>(
-    Arrays.asList("c","ŋ̩","ɛ","m̩","n̩","i","iː","ɪ","l̩","ɑ̃ː","ɒ","u","ʊ","ʌ","æ̃ː","ɒ̃ː","ɑː","æ",
-                  "ɔː","ǝ","ə","yː","œ","ɛ","œː","ɛː","ɨ","ʉ","ɯ","ʏ","ø","ɵ","ɘ","ɞ","ɶ","ɐ"));
+    Arrays.asList("c","ŋ̩","ɛ","m̩","n̩","i","iː","ɪ","l̩","ɑ̃ː","ɒ","u","uː","ʊ","ʌ","æ̃ː","ɒ̃ː","ɑ",
+                  "ɑː","æ","ɔː","ɔ","ǝ","ə","y","yː","œ","ɜː","ɜ","ɛ","œː","ɛː","ɨ","ʉ","ɯ","ʏ","ø",
+                  "ɵ","ɘ","ɞ","ɶ","ɐ"));
   Set<String> consonants;
   Set<String> plosives = new HashSet<String>(
-    Arrays.asList("p","b","t","d","ʈ","ɖ","c","ɟ","k","g","q","ɢ","ʔ"));
+    Arrays.asList("p","b","t","d","ʈ","ɖ","c","ɟ","k","g","ɡ","q","ɢ","ʔ"));
   Set<String> nasals = new HashSet<String>(
     Arrays.asList("m","ɱ","n","ɳ","ɲ","ŋ","ɴ"));
   Set<String> trills = new HashSet<String>(

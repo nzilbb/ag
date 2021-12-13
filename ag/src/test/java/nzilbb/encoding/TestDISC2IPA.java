@@ -45,7 +45,7 @@ public class TestDISC2IPA {
 	 "V", /* <-> */"ʌ", // STRUT       - hut/but
 	 "$", /* <-> */"ɔː", // THOUGHT     - ought/fall
 	 "6", /* <-> */"aʊ", // MOUTH       - cow/how
-	 "@", /* <-> */"ǝ", // schwa       - discuss
+	 "@", /* <-> */"ə", // schwa       - discuss
 	 "2", /* <-> */"aɪ", // PRICE       - hide/my
 	 "b", /* <-> */"b",
 	 "B", /* <-> */"au",
@@ -56,7 +56,7 @@ public class TestDISC2IPA {
 	 "3", /* <-> */"ɜː", // NURSE       - hurt/her
 	 "1", /* <-> */"eɪ", // FACE        - ate/say
 	 "f", /* <-> */"f", 
-	 "g", /* <-> */"g",
+	 "g", /* <-> */"ɡ",
 	 "h", /* <-> */"h",
 	 "I", /* <-> */"ɪ", // KIT         - it/big
 	 "i", /* <-> */"iː", // FLEECE      - eat/bee

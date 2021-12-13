@@ -85,6 +85,7 @@ public class DISC2IPA extends PhonemeTranslator {
          
          //to be strictly correct
          map.put('r', "ɹ");
+         map.put('g', "ɡ"); // this is LATIN SMALL LETTER SCRIPT G which is always straight-backed
          
          map.put('u', "uː");
          map.put('i', "iː");
@@ -140,7 +141,7 @@ public class DISC2IPA extends PhonemeTranslator {
          map.put('Q', "ɒ");
          map.put('O', "ɔ");
          map.put('U', "ʊ");
-         map.put('@', "ǝ");
+         map.put('@', "ə");
       }
    } // end of constructor
    
