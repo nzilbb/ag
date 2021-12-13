@@ -359,18 +359,39 @@ public class MFA extends Annotator {
    * @return A valid path to MFA, or null if it could not be inferred.
    */
   public String inferMfaPath(String condaPath, String mfaEnvironment) {
-    File conda = new File(condaPath);    
-    File bin = new File(conda, "bin");
-    if (!bin.exists()) bin = conda; // we were given the bin directory to start with?    
-    if (!bin.exists()) return null;
-    if (bin.getName().equals("conda")) bin = bin.getParentFile(); // we were given conda command
-    File mfaPath = new File(new File(new File(bin.getParentFile(),"envs"),mfaEnvironment),"bin");
-    if (!mfaPath.exists()) return null;
-    // ensure mfa is actually there
-    File mfa = new File(mfaPath, "mfa");
-    if (!mfa.exists()) return null;
-    setMfaPath(mfaPath.getPath());
-    return mfaPath.getPath();
+    File conda = new File(condaPath);
+    File envs = null;
+    do { // search this and ancestor directories for "envs" subdirectory
+      envs = new File(conda, "envs");
+      if (!envs.exists()) { // not here
+        envs = null;
+        // try parent directory
+        conda = conda.getParentFile();
+      }
+    } while (envs == null && conda != null);
+
+    if (envs.exists()) {
+      File aligner = new File(envs, mfaEnvironment);
+      if (aligner.exists()) {
+        File mfaPath = new File(aligner, "bin");
+        if (!mfaPath.exists()) {
+          mfaPath = new File(aligner, "Scripts");
+        }
+
+        if (mfaPath.exists()) {
+          // ensure mfa is actually there
+          File mfa = new File(mfaPath, "mfa");
+          if (!mfa.exists()) mfa = new File(mfaPath, "mfa.exe");
+
+          if (mfa.exists()) {
+            setMfaPath(mfaPath.getPath());
+            return mfaPath.getPath();
+          }
+        }
+      }
+    }
+      
+    return null;
   } // end of inferMfaPath()
   
   /**
@@ -483,8 +504,12 @@ public class MFA extends Annotator {
     }
     if (mfaPath != null) {
       return "mfaPath="+mfaPath;
-    } else { 
-      return "condaPath=/opt/conda/bin"; // TODO defaults for Windows/OSX
+    } else {
+      if (System.getProperty("os.name").startsWith("Windows")) {
+        return "condaPath=C:\\ProgramData\\Miniconda3";
+      } else { // linux
+        return "condaPath=/opt/conda/bin"; // TODO defaults for Windows/OSX
+      }
     }
   }
   
@@ -496,6 +521,17 @@ public class MFA extends Annotator {
    */ 
   public void setConfig(String config) throws InvalidConfigurationException {
     setRunning(true);
+    // logFile = new File(getWorkingDirectory(), "config.log");
+    // getStatusObservers().add(status -> {
+    //     if (logFile != null) {
+    //       try {
+    //         PrintWriter out = new PrintWriter(new FileOutputStream(logFile, true));
+    //         out.println(status);
+    //         out.close();
+    //       } catch(IOException exception) {
+    //       }
+    //     } // logFile still set
+    //   });
     try {
       setStatus(""); // clear any residual status from the last run...
 
@@ -536,23 +572,41 @@ public class MFA extends Annotator {
     }
     
     File mfa = new File(mfaPath, "mfa");
-    // TODO windows? if (conda != null && !conda.exists()) conda = new File(condaPath, "conda.exe");
+    if (!mfa.exists()) mfa = new File(mfaPath, "mfa.exe");
     if (!mfa.exists()) {
       throw new InvalidConfigurationException(this, "MFA CLI not found: " + mfa.getPath());
     }
     Execution exe = new Execution()
-      .env("PATH", System.getenv("PATH")+System.getProperty("path.separator")+mfaPath)
+      .env("PATH", System.getenv("PATH")+pathVariableSuffix())
       .env("HOME", System.getProperty("java.io.tmpdir"))
       .env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
       .setExe(mfa).arg("version");
     exe.run();
-    if (exe.stderr().length() > 0) {
+    if (exe.stderr().length() > 0) { 
+      setStatus("MFA could not run: " + exe.stderr().trim());
       throw new InvalidConfigurationException(
         this, "MFA could not run: " + exe.stderr().trim());
     } else { // conda ran without error
       return exe.stdout().trim();
     } // conda ran without error
   } // end of mfaVersion()
+  
+  /**
+   * Returns what should be added to the PATH environment variable in order for the mfa
+   * command to work. This depends on {@link #mfaPath} and the operating system. 
+   * @return A string to append to the PATH environment variable, including the path separator.
+   */
+  public String pathVariableSuffix() {
+    String suffix = System.getProperty("path.separator")+mfaPath;
+    if (System.getProperty("os.name").startsWith("Windows")) {
+      // on windows, we also need ..\Library\bin
+      File mfaBin = new File(mfaPath);
+      File library = new File(mfaBin.getParentFile(), "Library");
+      File libraryBin = new File(library, "bin");
+      suffix += System.getProperty("path.separator")+libraryBin.getPath();
+    }
+    return suffix;
+  } // end of pathVariableSuffix()
    
   /**
    * Sets the configuration for a given annotation task.
@@ -1246,12 +1300,15 @@ public class MFA extends Annotator {
     initialPercentComplete = getPercentComplete()==null?0:getPercentComplete();
     lastPhaseProgress = 0;
     phase = 0;
+
+    File mfa = new File(mfaPath, "mfa");
+    if (!mfa.exists()) mfa = new File(mfaPath, "mfa.exe");
     
     Execution exe = new Execution()
-      .env("PATH", System.getenv("PATH")+System.getProperty("path.separator")+mfaPath)
+      .env("PATH", System.getenv("PATH")+pathVariableSuffix())
       .env("HOME", System.getProperty("java.io.tmpdir"))
       .env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
-      .setExe(new File(mfaPath, "mfa")); // TODO -j <num_jobs>
+      .setExe(mfa); // TODO -j <num_jobs>
     for (String arg : args) exe.arg(arg);
     exe.getStdoutObservers().add(s->setStatus(s.replaceAll("[[0-9]+m","")));
     exe.getStderrObservers().add(s-> {
@@ -1406,6 +1463,15 @@ public class MFA extends Annotator {
           // all anchors are automatically generated
           alignedFragment.getAnchors().values().stream().forEach(
             anchor -> anchor.setConfidence(Constants.CONFIDENCE_AUTOMATIC));
+
+          // remove "spn" phones (for out of dictionary words)
+          for (Annotation phone : alignedFragment.all(phoneAlignmentLayerId)) {
+            if (phone.getLabel().equals("spn")) {
+              setStatus("Removing spn");
+              phone.destroy();
+            }
+          } // next phone
+          alignedFragment.commit();
           
           try {
             
@@ -1484,6 +1550,7 @@ public class MFA extends Annotator {
             if (isCancelling()) break;
             
             // merge the current database utterance with the incoming aligned utterance
+            alignedFragment.commit();
             Merger merger = new Merger(alignedFragment);
             // don't use DefaultOffsetGenerator, so that we don't change any anchors unnecessarily
             merger.getValidator().setDefaultOffsetThreshold(null);
