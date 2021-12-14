@@ -522,16 +522,16 @@ public class MFA extends Annotator {
   public void setConfig(String config) throws InvalidConfigurationException {
     setRunning(true);
     logFile = new File(getWorkingDirectory(), "config.log");
-    getStatusObservers().add(status -> {
-        if (logFile != null) {
-          try {
-            PrintWriter out = new PrintWriter(new FileOutputStream(logFile, true));
-            out.println(status);
-            out.close();
-          } catch(IOException exception) {
-          }
-        } // logFile still set
-      });
+    // getStatusObservers().add(status -> {
+    //     if (logFile != null) {
+    //       try {
+    //         PrintWriter out = new PrintWriter(new FileOutputStream(logFile, true));
+    //         out.println(status);
+    //         out.close();
+    //       } catch(IOException exception) {
+    //       }
+    //     } // logFile still set
+    //   });
     try {
       setStatus(""); // clear any residual status from the last run...
 
@@ -595,7 +595,9 @@ public class MFA extends Annotator {
         .arg("-p").arg(envPath.getPath())
         .arg("--cwd").arg(envPath.getPath())
         .arg("mfa").arg("version");
-    } else {
+      // inherit current environment
+      exe.getEnvironmentVariables().putAll(System.getenv());
+    } else { // non-Windows systems call mfa directlyr (conda rung doesn't work)
       if (!mfa.exists()) {
         throw new InvalidConfigurationException(this, "MFA CLI not found: " + mfa.getPath());
       }
@@ -604,8 +606,6 @@ public class MFA extends Annotator {
         .env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
         .setExe(mfa).arg("version");
     }
-    // inherit current environment
-    exe.getEnvironmentVariables().putAll(System.getenv());
     exe.run();
     if (exe.stderr().length() > 0) { 
       setStatus("MFA could not run: " + exe.stderr().trim());
@@ -1337,21 +1337,21 @@ public class MFA extends Annotator {
 
     Execution exe = new Execution();
     if (System.getProperty("os.name").startsWith("Windows")) {
-      exe.env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
+      exe.env("MFA_ROOT_DIR", sessionWorkingDir.getPath())
         .setWorkingDirectory(envPath)
-        .setExe("cmd").arg("/C").arg(conda.getPath())// .setExe(conda)        
+        .setExe("cmd").arg("/C").arg(conda.getPath()) // or: .setExe(conda)        
         .arg("run")
         .arg("--no-capture-output")
         .arg("-p").arg(envPath.getPath())
         .arg("mfa");
-    } else {
+      // inherit current environment
+      exe.getEnvironmentVariables().putAll(System.getenv());
+    } else { // non-Windows systems call mfa directlyr (conda rung doesn't work)
       exe.env("PATH", System.getenv("PATH")+pathVariableSuffix())
-        .env("HOME", System.getProperty("java.io.tmpdir"))
-        .env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
+        .env("HOME", sessionWorkingDir.getPath())
+        .env("MFA_ROOT_DIR", sessionWorkingDir.getPath())
         .setExe(mfa); // TODO -j <num_jobs>
     }
-    // inherit current environment
-    exe.getEnvironmentVariables().putAll(System.getenv());
 
     for (String arg : args) exe.arg(arg);
     exe.getStdoutObservers().add(s->setStatus(s.replaceAll("[[0-9]+m","")));
