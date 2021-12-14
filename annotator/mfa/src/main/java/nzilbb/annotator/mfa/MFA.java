@@ -571,25 +571,39 @@ public class MFA extends Annotator {
       throw new InvalidConfigurationException(this, "Path to MFA is not set.");
     }
 
+    File mfa = new File(mfaPath, "mfa");
+    if (!mfa.exists()) mfa = new File(mfaPath, "mfa.exe");
     File envPath = new File(mfaPath).getParentFile();
     File condaPath = envPath.getParentFile().getParentFile();
     File condaBin = new File(condaPath, "bin");
     if (!condaBin.exists()) condaBin = new File(condaPath, "condabin");
     File conda = new File(condaBin, "conda");
     if (!conda.exists()) conda = new File(condaBin, "conda.bat");
-    setStatus("Conda: " + conda.getPath() + " " + conda.exists());
-    if (!conda.exists()) {
-      throw new InvalidConfigurationException(this, "Conda CLI not found: " + conda.getPath());
-    }
 
-    Execution exe = new Execution()
-      .env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
-      .setWorkingDirectory(envPath)
-      .setExe(conda)
-      .arg("run")
-      .arg("-p").arg(envPath.getPath())
-      .arg("--cwd").arg(envPath.getPath())
-      .arg("mfa").arg("version");
+    Execution exe = new Execution();
+    if (System.getProperty("os.name").startsWith("Windows")) {
+      if (!conda.exists()) {
+        throw new InvalidConfigurationException(this, "Conda CLI not found: " + conda.getPath());
+      }
+      exe.env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
+        .setWorkingDirectory(envPath)
+        // .setExe(conda)
+        .setExe("cmd").arg("/C")
+        .arg(conda.getPath())
+        .arg("run")
+        .arg("--no-capture-output")
+        .arg("-p").arg(envPath.getPath())
+        .arg("--cwd").arg(envPath.getPath())
+        .arg("mfa").arg("version");
+    } else {
+      if (!mfa.exists()) {
+        throw new InvalidConfigurationException(this, "MFA CLI not found: " + mfa.getPath());
+      }
+      exe.env("PATH", System.getenv("PATH")+pathVariableSuffix())
+        .env("HOME", System.getProperty("java.io.tmpdir"))
+        .env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
+        .setExe(mfa).arg("version");
+    }
     // inherit current environment
     exe.getEnvironmentVariables().putAll(System.getenv());
     exe.run();
@@ -1312,6 +1326,8 @@ public class MFA extends Annotator {
     lastPhaseProgress = 0;
     phase = 0;
 
+    File mfa = new File(mfaPath, "mfa");
+    if (!mfa.exists()) mfa = new File(mfaPath, "mfa.exe");
     File envPath = new File(mfaPath).getParentFile();
     File condaPath = envPath.getParentFile().getParentFile();
     File condaBin = new File(condaPath, "bin");
@@ -1319,13 +1335,21 @@ public class MFA extends Annotator {
     File conda = new File(condaBin, "conda");
     if (!conda.exists()) conda = new File(condaBin, "conda.bat");
 
-    Execution exe = new Execution()
-      .env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
-      .setWorkingDirectory(envPath)
-      .setExe(conda)
-      .arg("run")
-      .arg("-p").arg(envPath.getPath())
-      .arg("mfa");
+    Execution exe = new Execution();
+    if (System.getProperty("os.name").startsWith("Windows")) {
+      exe.env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
+        .setWorkingDirectory(envPath)
+        .setExe("cmd").arg("/C").arg(conda.getPath())// .setExe(conda)        
+        .arg("run")
+        .arg("--no-capture-output")
+        .arg("-p").arg(envPath.getPath())
+        .arg("mfa");
+    } else {
+      exe.env("PATH", System.getenv("PATH")+pathVariableSuffix())
+        .env("HOME", System.getProperty("java.io.tmpdir"))
+        .env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
+        .setExe(mfa); // TODO -j <num_jobs>
+    }
     // inherit current environment
     exe.getEnvironmentVariables().putAll(System.getenv());
 
