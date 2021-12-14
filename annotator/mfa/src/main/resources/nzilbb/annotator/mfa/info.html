@@ -63,5 +63,20 @@
       <li> Install the Montreal Forced Aligner <br>
         <tt>/opt/conda/bin/conda create -n aligner -c conda-forge montreal-forced-aligner</tt></li>
     </ol>
+    
+    <h3> Windows </h3>
+    
+    <p> To install the Montreal Forced Aligner on Windows systems for all users, so that
+      your web server can access it if required: </p>
+    <ol>
+      <li> Download the Miniconda installer.</li>
+      <li> Start the installer by double-clicking it.</li>
+      <li> When asked, select the <q>Install for all users</q> option. This will install
+        conda somewhere like <br>
+        <tt>C:\ProgramData\Miniconda3</tt></li>
+      <li> When asked, tick the <q>add to PATH</q> option.</li>
+      <li> Install the Montreal Forced Aligner by specifying a path to the environment <br>
+        <tt>conda create -c conda-forge -p C:\ProgramData\Miniconda3\envs\aligner montreal-forced-aligner</tt></li>
+    </ol>
   </body>
 </html>
