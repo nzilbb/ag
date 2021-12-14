@@ -106,11 +106,11 @@ public class TestMFA {
   /** Ensure validDictionaryNames method works. */
   @Test public void validAcousticModels() throws Exception {
     Collection<String> names = annotator.validAcousticModels();
-    assertTrue("validAcousticModels contains spanish",
+    assertTrue("validAcousticModels contains english " + names,
                names.contains("english"));
-    assertTrue("validAcousticModels contains spanish",
+    assertTrue("validAcousticModels contains spanish " + names,
                names.contains("english"));
-    assertFalse("validAcousticModels contains no blank entries",
+    assertFalse("validAcousticModels contains no blank entries " + names,
                names.contains(""));
   }   
 
