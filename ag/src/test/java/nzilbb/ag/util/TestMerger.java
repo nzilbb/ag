@@ -507,7 +507,7 @@ public class TestMerger {
     }
   }
 
-  @Test public void mergeNormalizeValidate()
+    /*@Test*/ public void mergeNormalizeValidate()
   {
     try
     {
