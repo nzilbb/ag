@@ -347,6 +347,17 @@ public class MFA extends Annotator {
         .setPeers(true).setPeersOverlap(false).setSaturated(true)
         .setParentId("word").setParentIncludes(true)
         .setType("ipa")));
+
+    // cancel kills any current processes
+    getCancellationObservers().add(cancelling -> {
+        if (cancelling && exe != null) {
+          try {
+            exe.getProcess().destroy();
+          } catch(Throwable t) {
+            setStatus("Could not destroy process: " + t);
+          }
+        }
+      });
   } // end of constructor
   
   /**
@@ -1307,6 +1318,8 @@ public class MFA extends Annotator {
       setStatus("Session name now: " + sessionName);
     } // rename successful
   } // end of renameSession()
+
+  private Execution exe = null;
   
   /**
    * Execute an mfa command
@@ -1336,7 +1349,7 @@ public class MFA extends Annotator {
     if (!conda.exists()) conda = new File(condaBin, "conda.bat");
     File dir = sessionWorkingDir != null?sessionWorkingDir:getWorkingDirectory();
 
-    Execution exe = new Execution();
+    exe = new Execution();
     if (System.getProperty("os.name").startsWith("Windows")) {
       exe.env("MFA_ROOT_DIR", dir.getPath())
         .setWorkingDirectory(envPath)
