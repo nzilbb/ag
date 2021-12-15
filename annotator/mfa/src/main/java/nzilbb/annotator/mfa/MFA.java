@@ -1334,10 +1334,11 @@ public class MFA extends Annotator {
     if (!condaBin.exists()) condaBin = new File(condaPath, "condabin");
     File conda = new File(condaBin, "conda");
     if (!conda.exists()) conda = new File(condaBin, "conda.bat");
+    File dir = sessionWorkingDir != null?sessionWorkingDir:getWorkingDirectory();
 
     Execution exe = new Execution();
     if (System.getProperty("os.name").startsWith("Windows")) {
-      exe.env("MFA_ROOT_DIR", sessionWorkingDir.getPath())
+      exe.env("MFA_ROOT_DIR", dir.getPath())
         .setWorkingDirectory(envPath)
         .setExe("cmd").arg("/C").arg(conda.getPath()) // or: .setExe(conda)        
         .arg("run")
@@ -1348,8 +1349,8 @@ public class MFA extends Annotator {
       exe.getEnvironmentVariables().putAll(System.getenv());
     } else { // non-Windows systems call mfa directlyr (conda rung doesn't work)
       exe.env("PATH", System.getenv("PATH")+pathVariableSuffix())
-        .env("HOME", sessionWorkingDir.getPath())
-        .env("MFA_ROOT_DIR", sessionWorkingDir.getPath())
+        .env("HOME", dir.getPath())
+        .env("MFA_ROOT_DIR", dir.getPath())
         .setExe(mfa); // TODO -j <num_jobs>
     }
 
