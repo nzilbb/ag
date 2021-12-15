@@ -49,6 +49,23 @@ public class CMU2DISC extends PhonemeTranslator {
   private static HashMap<String,Character> map;
   
   /**
+   * Translate zero-stress vowels as schwa. Default is true.
+   * @see #getZeroStressToSchwa()
+   * @see #setZeroStressToSchwa(boolean)
+   */
+  protected boolean zeroStressToSchwa = true;
+  /**
+   * Getter for {@link #zeroStressToSchwa}: Translate zero-stress vowels as schwa. Default is true.
+   * @return Translate zero-stress vowels as schwa. Default is true.
+   */
+  public boolean getZeroStressToSchwa() { return zeroStressToSchwa; }
+  /**
+   * Setter for {@link #zeroStressToSchwa}: Translate zero-stress vowels as schwa. Default is true.
+   * @param newZeroStressToSchwa Translate zero-stress vowels as schwa. Default is true.
+   */
+  public CMU2DISC setZeroStressToSchwa(boolean newZeroStressToSchwa) { zeroStressToSchwa = newZeroStressToSchwa; return this; }  
+  
+  /**
    * Default constructor.
    */
   public CMU2DISC() {
@@ -119,11 +136,13 @@ public class CMU2DISC extends PhonemeTranslator {
     // for each phone
     String[] phonemes = source
       .toUpperCase() // all uppercase
-      .replaceAll("[12]","") // ignore stress marking
+      .replaceAll("["+(zeroStressToSchwa?"":"0")+"12]","") // ignore stress marking
       .split(" ");
     for (String phoneme : phonemes) {
       if (map.containsKey(phoneme)) {
         DISC.append(map.get(phoneme));
+      } else if (phoneme.endsWith("0")) {
+        DISC.append('@');
       }
       // unknown phones are dropped
     } // next phoneme

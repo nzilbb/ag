@@ -94,6 +94,16 @@ public class TestCMU2DISC {
     assertEquals(sDISC.toString(), translator.apply(sCMU.toString()));
   }
 
+  /** Check ARPAbet stress=0 vowels are convert to schwa in DISC */
+  @Test public void schwa() throws Exception {
+    CMU2DISC translator = new CMU2DISC();
+    assertEquals("Default zeroStressToSchwa=true",
+                 "m3d@", translator.apply("M ER1 D ER0"));
+    translator.setZeroStressToSchwa(false);
+    assertEquals("zeroStressToSchwa=false",
+                 "m3d3", translator.apply("M ER1 D ER0"));
+  }  
+   
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.encoding.TestCMU2DISC");
   }
