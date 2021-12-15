@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -28,74 +28,73 @@ import static org.junit.Assert.*;
 import nzilbb.encoding.CMU2DISC;
 
 public class TestCMU2DISC {
-   
-   @Test public void translation() throws Exception {
-      // CMU is a little one-to-one to DISC      
-      String[] aCodebook = {
-	 "#", /* <-> */"AA", // BATH        - odd/father
-	 "{", /* <-> */"AE", // TRAP        - at/fast
-	 "V", /* <-> */"AH", // STRUT       - hut/but
-	 "$", /* <-> */"AO", // THOUGHT     - ought/fall
-	 "6", /* <-> */"AW", // MOUTH       - cow/how
-	 "2", /* <-> */"AY", // PRICE       - hide/my
-	 "b", /* <-> */"B",
-	 "J", /* <-> */"CH",
-	 "d", /* <-> */"D",
-	 "D", /* <-> */"DH",
-	 "E", /* <-> */"EH", // DRESS       - Ed/red
-	 "3", /* <-> */"ER", // NURSE       - hurt/her
-	 "1", /* <-> */"EY", // FACE        - ate/say
-	 "f", /* <-> */"F", 
-	 "g", /* <-> */"G",
-	 "h", /* <-> */"HH",
-	 "I", /* <-> */"IH", // KIT         - it/big
-	 "i", /* <-> */"IY", // FLEECE      - eat/bee
-	 "_", /* <-> */"JH",
-	 "k", /* <-> */"K",
-	 "l", /* <-> */"L",
-	 "m", /* <-> */"M",
-	 "n", /* <-> */"N",
-	 "N", /* <-> */"NG",
-	 "5", /* <-> */"OW", // GOAT        - oat/show
-	 "4", /* <-> */"OY", // CHOICE      - toy/boy
-	 "p", /* <-> */"P",
-	 "r", /* <-> */"R",
-	 "s", /* <-> */"S",
-	 "S", /* <-> */"SH",
-	 "t", /* <-> */"T",
-	 "T", /* <-> */"TH",
-	 "U", /* <-> */"UH", // FOOT        - hood/should
-	 "u", /* <-> */"UW", // GOOSE       - two/you
-	 "v", /* <-> */"V",
-	 "w", /* <-> */"W",
-	 "j", /* <-> */"Y",
-	 "z", /* <-> */"Z",
-	 "Z", /* <-> */"ZH"
-      };
 
-      CMU2DISC translator = new CMU2DISC();
-      assertEquals("Encoding name", "CMU", translator.getSourceEncoding());
-      assertEquals("Encoding name", "DISC", translator.getDestinationEncoding());
+  /** Test that general code-book translations work. */
+  @Test public void translation() throws Exception {
+    // CMU is a little one-to-one to DISC      
+    String[] aCodebook = {
+      "#", /* <-> */"AA", // BATH        - odd/father
+      "{", /* <-> */"AE", // TRAP        - at/fast
+      "V", /* <-> */"AH", // STRUT       - hut/but
+      "$", /* <-> */"AO", // THOUGHT     - ought/fall
+      "6", /* <-> */"AW", // MOUTH       - cow/how
+      "2", /* <-> */"AY", // PRICE       - hide/my
+      "b", /* <-> */"B",
+      "J", /* <-> */"CH",
+      "d", /* <-> */"D",
+      "D", /* <-> */"DH",
+      "E", /* <-> */"EH", // DRESS       - Ed/red
+      "3", /* <-> */"ER", // NURSE       - hurt/her
+      "1", /* <-> */"EY", // FACE        - ate/say
+      "f", /* <-> */"F", 
+      "g", /* <-> */"G",
+      "h", /* <-> */"HH",
+      "I", /* <-> */"IH", // KIT         - it/big
+      "i", /* <-> */"IY", // FLEECE      - eat/bee
+      "_", /* <-> */"JH",
+      "k", /* <-> */"K",
+      "l", /* <-> */"L",
+      "m", /* <-> */"M",
+      "n", /* <-> */"N",
+      "N", /* <-> */"NG",
+      "5", /* <-> */"OW", // GOAT        - oat/show
+      "4", /* <-> */"OY", // CHOICE      - toy/boy
+      "p", /* <-> */"P",
+      "r", /* <-> */"R",
+      "s", /* <-> */"S",
+      "S", /* <-> */"SH",
+      "t", /* <-> */"T",
+      "T", /* <-> */"TH",
+      "U", /* <-> */"UH", // FOOT        - hood/should
+      "u", /* <-> */"UW", // GOOSE       - two/you
+      "v", /* <-> */"V",
+      "w", /* <-> */"W",
+      "j", /* <-> */"Y",
+      "z", /* <-> */"Z",
+      "Z", /* <-> */"ZH"
+    };
 
-      StringBuffer sDISC = new StringBuffer(aCodebook.length/2);
-      StringBuffer sCMU = new StringBuffer(3*aCodebook.length/2);
-      // for each pair of elements into the array
-      for (int i = 0; i < aCodebook.length; i += 2)
-      {
-	 // check  mapping
-	 assertEquals("CMU " + aCodebook[i+1], translator.apply(aCodebook[i+1]), aCodebook[i]);
+    CMU2DISC translator = new CMU2DISC();
+    assertEquals("Encoding name", "CMU", translator.getSourceEncoding());
+    assertEquals("Encoding name", "DISC", translator.getDestinationEncoding());
+
+    StringBuffer sDISC = new StringBuffer(aCodebook.length/2);
+    StringBuffer sCMU = new StringBuffer(3*aCodebook.length/2);
+    // for each pair of elements into the array
+    for (int i = 0; i < aCodebook.length; i += 2) {
+      // check  mapping
+      assertEquals("CMU " + aCodebook[i+1], translator.apply(aCodebook[i+1]), aCodebook[i]);
          
-	 // accumulate the whole set into strings
-	 sDISC.append(aCodebook[i]);
-	 if (sCMU.length() > 0) sCMU.append(" ");
-	 sCMU.append(aCodebook[i+1]);
-      } // next pair
+      // accumulate the whole set into strings
+      sDISC.append(aCodebook[i]);
+      if (sCMU.length() > 0) sCMU.append(" ");
+      sCMU.append(aCodebook[i+1]);
+    } // next pair
       
-      assertEquals(translator.apply(sCMU.toString()), sDISC.toString());
+    assertEquals(sDISC.toString(), translator.apply(sCMU.toString()));
+  }
 
-   }
-   
-   public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.encoding.TestCMU2DISC");
-   }
+  public static void main(String args[]) {
+    org.junit.runner.JUnitCore.main("nzilbb.encoding.TestCMU2DISC");
+  }
 }
