@@ -195,7 +195,7 @@ public class AnchorComparatorWithStructure
 		  
 		  if (a1Annotation.getAncestors().contains(a2Annotation))
 		  { // a2 is an ancestor
-		     if (a2Annotation.getStart().equals(a2))
+		     if (a2Annotation.getStart() != null && a2Annotation.getStart().equals(a2))
 		     { // a2 is ancestor's start anchor, so a1 is after a2
 			return 6;
 		     }
@@ -207,7 +207,7 @@ public class AnchorComparatorWithStructure
 
 		  if (a2Annotation.getAncestors().contains(a1Annotation))
 		  { // a1 is an ancestor
-		     if (a1Annotation.getStart().equals(a1))
+		     if (a1Annotation.getStart() != null && a1Annotation.getStart().equals(a1))
 		     { // a1 is ancestor's start anchor, so a1 is before a2
 			return -7;
 		     }
