@@ -303,7 +303,9 @@ public class TestEAFSerialization {
     assertEquals("famly", pronounce[0].first("word").getLabel());
     assertEquals("@grid", pronounce[1].getLabel());
     assertEquals("agreed", pronounce[1].first("word").getLabel());
-    assertEquals(2, pronounce.length);
+    assertEquals("Q~", pronounce[2].getLabel());
+    assertEquals("en", pronounce[2].first("word").getLabel());
+    assertEquals(3, pronounce.length);
 
     // lexical
     Annotation[] lexical = g.all("lexical");

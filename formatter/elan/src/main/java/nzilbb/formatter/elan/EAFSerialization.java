@@ -1480,7 +1480,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
             // [CS:lang]word word[CS:lang]
             SpanningConventionTransformer phraseLanguageTransformer
               = new SpanningConventionTransformer(
-                getWordLayer().getId(), "\\[CS:(.+)\\](.*)", "(.+)\\[CS:(.+)\\](\\p{Punct}*)",
+                getWordLayer().getId(), "\\[CS:([^\\]]+)\\](.*)", "(.+)\\[CS:([^\\]]+)\\](\\p{Punct}*)",
                 false, "$2", "$1$3", 
                 phraseLanguageLayer==null?null:phraseLanguageLayer.getId(), "$1", null,
                 false, false);
@@ -1489,7 +1489,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
 		  
             // word[CS:lang]
             ConventionTransformer wordLanguageTransformer = new ConventionTransformer(
-              getWordLayer().getId(), "(.+)\\[CS:(.+)\\](\\p{Punct}*)", "$1$3", 
+              getWordLayer().getId(), "(.+)\\[CS:([^\\]]+)\\](\\p{Punct}*)", "$1$3", 
               phraseLanguageLayer==null?null:phraseLanguageLayer.getId(), "$2");
             wordLanguageTransformer.transform(graph);
             
@@ -1920,7 +1920,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     if (date != null) {
       annotationDocument.setAttribute("DATE", date.getLabel());
     } else {
-      annotationDocument.setAttribute("DATE", "");
+      annotationDocument.setAttribute("DATE", ""); // TODO invalid!!
     }
     annotationDocument.setAttribute("FORMAT", "2.7");
     annotationDocument.setAttribute("VERSION", "2.7");
@@ -2288,7 +2288,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
         sLinguisticTypeRef = "subinterval-lt";
       }
     }
-
+      
     // should we look for the participant layer?
     boolean ancestorOfParticipant = layer.getAncestors().contains(participantLayer);
       
@@ -2365,7 +2365,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
           annotationDocument.appendChild(tier);
           tier.setAttribute("LINGUISTIC_TYPE_REF", sLinguisticTypeRef);
           String sId = layer.getId() + " - " + (vTiers.size() + 1) + " - " + participantName;
-          tier.setAttribute("TIER_ID", sId);
+          tier.setAttribute("TIER_ID", sId); // TODO uniquify TIER_ID
           tier.setAttribute("PARTICIPANT", participantName);
           if (language != null) tier.setAttribute("LANG_REF", language);
           if (anDominating != null) {
