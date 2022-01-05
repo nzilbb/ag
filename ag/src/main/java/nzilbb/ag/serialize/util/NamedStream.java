@@ -21,11 +21,12 @@
 //
 package nzilbb.ag.serialize.util;
 
-import java.io.InputStream;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import nzilbb.util.IO;
 
 /**
@@ -128,7 +129,8 @@ public class NamedStream
   public NamedStream(File file)
     throws java.io.FileNotFoundException
   {
-    setStream(new FileInputStream(file));
+    setStream(new BufferedInputStream( // so that markSupported() is true
+                new FileInputStream(file)));
     setName(file.getName());
   } // end of constructor
 
