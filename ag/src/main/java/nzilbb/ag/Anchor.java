@@ -503,7 +503,7 @@ public class Anchor
     * Returns the minimum possible offset for this anchor.  If the offset is set,
     * the minimum possible offset is the same as {@link #getOffset()}. Otherwise
     * the annotation graph is traversed to find the anchor with highest preceding offset.
-    * <p> If the graph is traversed, the resultinf offset is cached in an attribute called 
+    * <p> If the graph is traversed, the resulting offset is cached in an attribute called 
     * <q>"@offsetMin"</q>.
     * @return The minimum possible offset for this anchor, or null if the it can't be determined
     * from the anchor or its graph.
