@@ -343,7 +343,8 @@ public class Validator extends Transform implements GraphTransformer {
                   +" ("+startsHere.getLayerId()+")"
                   +" \""+startsHere.getLabel()+"\""
                   +" would be backwards after validation: "
-                  + startsHere.getStart() + " - " + startsHere.getEnd());
+                  + "["+startsHere.getStartId()+"]"+startsHere.getStart()
+                  + " - ["+startsHere.getEndId()+"]" + startsHere.getEnd());
               } // backwards
             } // next annotation that starts here
           } // annotations start here
@@ -360,7 +361,8 @@ public class Validator extends Transform implements GraphTransformer {
                   +" ("+endsHere.getLayerId()+")"
                   +" \""+endsHere.getLabel()+"\""
                   +" would be backwards after validation: "
-                  + endsHere.getStart() + " - " + endsHere.getEnd());
+                  + "["+endsHere.getStartId()+"]"+endsHere.getStart()
+                  + " - ["+endsHere.getEndId()+"]" + endsHere.getEnd());
               } // backwards
             } // next annotation that ends here
           } // annotations end here
@@ -1320,7 +1322,9 @@ public class Validator extends Transform implements GraphTransformer {
               if (parent.getStart().getOffset() > child.getStart().getOffset()) {
                 // TODO check whether the parent is/would be an instant after this?
                 if (Utility.getConfidence(parent.getStart(), defaultAnchorConfidence)
-                    <= Utility.getConfidence(child.getStart(), defaultAnchorConfidence)) {
+                    <= Utility.getConfidence(child.getStart(), defaultAnchorConfidence)
+                    && Utility.getConfidence(child.getStart(), defaultAnchorConfidence)
+                    > Constants.CONFIDENCE_AUTOMATIC) {
                   // widen parent
                   String sOriginal = logAnnotation(parent);
                   // widen parent
@@ -1335,7 +1339,9 @@ public class Validator extends Transform implements GraphTransformer {
                     // don't change other children if it's a sequential layer
                     !childLayer.getPeersOverlap()?child.getLayerId():null);
                   log("Widened ", sOriginal, " -> ", parent,
-                      " to ", child.getStart().getOffset(), " to include child ", child);
+                      " to ", child.getStart().getOffset(),
+                      " (", Utility.getConfidence(child.getStart(), defaultAnchorConfidence),")",
+                      " to include child ", child);
                 } else {
                   // narrow child
                   String sOriginal = logAnnotation(child);
@@ -1362,7 +1368,9 @@ public class Validator extends Transform implements GraphTransformer {
               // check end anchors
               if (parent.getEnd().getOffset() < child.getEnd().getOffset()) {
                 if (Utility.getConfidence(parent.getEnd(), defaultAnchorConfidence)
-                    <= Utility.getConfidence(child.getEnd(), defaultAnchorConfidence)) {
+                    <= Utility.getConfidence(child.getEnd(), defaultAnchorConfidence)
+                    && Utility.getConfidence(child.getEnd(), defaultAnchorConfidence)
+                    > Constants.CONFIDENCE_AUTOMATIC) {
                   // widen parent
                   String sOriginal = logAnnotation(parent);
                   
@@ -1378,7 +1386,9 @@ public class Validator extends Transform implements GraphTransformer {
                     !childLayer.getPeersOverlap()?child.getLayerId():null);
                   
                   log("Widened ", sOriginal, " -> ", child,
-                      " to ", child.getEnd().getOffset(), " to include child ", child);
+                      " to ", child.getEnd().getOffset(),
+                      " (", Utility.getConfidence(child.getEnd(), defaultAnchorConfidence), ")",
+                      " to include child ", child);
                 } else {
                   // narrow child
                   String sOriginal = logAnnotation(child);
@@ -2068,7 +2078,7 @@ public class Validator extends Transform implements GraphTransformer {
         }
       }	 
       log.add(s.toString());
-      System.out.println(s.toString());
+      System.err.println(s.toString());
     }
   } // end of log()
 
