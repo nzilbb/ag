@@ -284,22 +284,22 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
           if (word.getChange() == Change.Operation.Destroy) continue;
           if (word.getStart() == null) continue; // ?!
           if (// the start is inside the next utterance...
-            (word.getStart().getOffset() != null 
+            (word.getStart().getOffsetMin() != null 
              && nextUtterance != null
-             && word.getStart().getOffset() >= nextUtterance.getStart().getOffset())
+             && word.getStart().getOffsetMin() >= nextUtterance.getStart().getOffset())
             || // ...or the start offset is null and the end is inside the next utterance
             (word.getStart().getOffset() == null
-             && word.getEnd().getOffset() != null
+             && word.getEnd().getOffsetMax() != null
              && nextUtterance != null
-             && word.getEnd().getOffset() > nextUtterance.getStart().getOffset())) {
+             && word.getEnd().getOffsetMax() > nextUtterance.getStart().getOffset())) {
             // check it's not an empty utterance
             do {
               // next utterance
               currentUtterance = nextUtterance;
               nextUtterance = utterances.hasNext()?utterances.next():null;
-            } while (word.getStart().getOffset() != null 
+            } while (word.getStart().getOffsetMin() != null 
                      && nextUtterance != null
-                     && word.getStart().getOffset() >= nextUtterance.getStart().getOffset());
+                     && word.getStart().getOffsetMin() >= nextUtterance.getStart().getOffset());
             currentUtterance.put("@words", new Vector<Annotation>());
           } // next utterance
           log("utt ", currentUtterance, " word ", word);
@@ -698,7 +698,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
         } 
       }	 
       log.add(s.toString());
-      System.out.println(s.toString());
+      System.err.println(s.toString());
     }
   } // end of log()
 
@@ -707,13 +707,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
   public static void main(String argv[]) {
     DefaultOffsetGenerator cli = new DefaultOffsetGenerator();
     if (cli.processArguments(argv)) {
-      try {
-        cli.start();
-      } finally {
-        if (cli.getDebug()) {
-          for (String message : cli.log) System.err.println(message); 
-        }
-      }
+      cli.start();
     }
   }
 
