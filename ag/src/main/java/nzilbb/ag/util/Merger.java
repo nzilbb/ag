@@ -21,26 +21,38 @@
 //
 package nzilbb.ag.util;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Vector;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.List;
-import java.util.LinkedList;
-
-import nzilbb.editpath.*;
+import java.util.Vector;
 import nzilbb.ag.*;
+import nzilbb.ag.cli.Transform;
+import nzilbb.ag.serialize.SerializationException;
+import nzilbb.ag.serialize.SerializationParametersMissingException;
+import nzilbb.ag.serialize.SerializerNotConfiguredException;
+import nzilbb.ag.serialize.json.JSONSerialization;
+import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
+import nzilbb.editpath.*;
+import nzilbb.util.ProgramDescription;
+import nzilbb.util.Switch;
 
 /**
- * Merges an editer version of a graph into the original version of that graph.
+ * Merges an edited version of a graph into the original version of that graph.
  * <p>The merger assumes that {@link #editedGraph} and the <var>graph</var> passed to
  * {@link #transform(Graph)} really are versions of the same graph. {@link #editedGraph} needn't
  * contain all the layers that <var>graph</var> does, but it must have a valid layer hierarchy;
@@ -51,9 +63,8 @@ import nzilbb.ag.*;
  * <p>TODO handle graphs with null offset anchors.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class Merger
-  implements GraphTransformer
-{
+@ProgramDescription(value="Merges changes from one JSON-encoded annotation graph into another")
+public class Merger extends Transform implements GraphTransformer {
   // Attributes:
    
   /**
@@ -94,6 +105,7 @@ public class Merger
    * @see #getLog()
    * @see #log(Object...)
    */
+  @Switch("Whether a log of messages should be printed")
   public Merger setDebug(boolean newDebug) { debug = newDebug; return this; }
 
   /**
@@ -498,6 +510,7 @@ public class Merger
    */
   public Graph transform(Graph graph) throws TransformationException {
     if (debug) setLog(new Vector<String>());
+    
     setErrors(new Vector<String>());
     schema = graph.getSchema();
     if (graph == editedGraph) return graph;
@@ -703,9 +716,17 @@ public class Merger
     if (validator != null) {
       log("phase 6: validate");
       validator.setDebug(getDebug());
-      validator.transform(graph);
+      try {
+        validator.transform(graph);
+      } catch (TransformationException x) {
+        // record details before passing exception up the stack...
+        log("validation failed: " + x);
+        errors.addAll(validator.getErrors());
+        throw x;
+      }
       if (log != null) log.addAll(validator.getLog());
       errors.addAll(validator.getErrors());
+      log("phase 6 finished");
     } else {
       log("phase 6: no validator");
     }
@@ -2931,8 +2952,51 @@ public class Merger
         }
       }	 
       log.add(s.toString());
-      System.out.println(s.toString());
+      System.err.println(s.toString());
     }
   } // end of log()
 
+  /**
+   * JSON file from command line.
+   */
+  protected File edited;
+  /**
+   * Getter for {@link #edited}: JSON file from command line.
+   * @return JSON file from command line.
+   */
+  public File getEdited() { return edited; }
+  /**
+   * Setter for {@link #edited}: JSON file from command line.
+   * @param editedGraphJSONFile The edited version of the graph.
+   */
+  @Switch(value="File name of JSON file containing edited graph", compulsory=true)
+  public Merger setEdited(File editedGraphJSONFile)
+    throws FileNotFoundException, IOException, SerializationException,
+    SerializerNotConfiguredException, SerializationParametersMissingException {
+    edited = editedGraphJSONFile;
+    JSONSerialization s = new JSONSerialization();
+    s.configure(s.configure(new ParameterSet(), null), null);
+    ParameterSet parameters = s.load(
+      nzilbb.ag.serialize.util.Utility.OneNamedStreamArray(
+        new NamedStream(editedGraphJSONFile)), null);
+    s.setParameters(parameters); // run with default values
+    Graph[] graphs = s.deserialize();
+    setEditedGraph(graphs[0]);
+    return this;
+  }
+
+  /** Command line interface entrypoint: reads JSON-encoded transcripts from stdin,
+   * generates default anchor offsets, and writes them to stdout. */
+  public static void main(String argv[]) {
+    Merger cli = new Merger();
+    if (cli.processArguments(argv)) {
+      try {
+        cli.start();
+      } finally {
+        if (cli.getDebug()) {
+          for (String message : cli.log) System.err.println(message); 
+        }
+      }
+    }
+  }
 } // end of class Merger
