@@ -29,6 +29,7 @@ import nzilbb.ag.Graph;
 import nzilbb.ag.GraphTransformer;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
+import nzilbb.ag.TransformationException;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.json.JSONSerialization;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -124,33 +125,38 @@ public class Transform extends CommandLineProgram {
         // track changes so that destroyed annotations are tracked
         graph.trackChanges();
 
-        // transform
-        graph = transformer.transform(graph);
-
-        // ensure any annotations marked for destruction are not output
-        graph.commit();
-        
-        // serialize as JSON
-        s.configure(s.configure(new ParameterSet(), graph.getSchema()), graph.getSchema());
-        if (verbose) System.err.println(
-          graph.getId() + ": Serializing to JSON...");
-        s.serialize(Utility.OneGraphSpliterator(graph), null,
-                    // send stream to stdout (there will be only one):
-                    stream -> {
-                      try {
-                        IO.Pump(stream.getStream(), System.out, false);
-                      } catch(Exception exception) {
-                        System.err.println(
-                          "Could not write stream " + stream.getName()
-                          + ": " + exception.toString());
-                      }
-                    },
-                    // warnings/errors to stderr:
-                    warning -> System.err.println(warning),
-                    exception -> {
-                      System.err.println(exception.getMessage());
-                      exception.printStackTrace(System.err);
-                    });
+        try {
+          // transform
+          graph = transformer.transform(graph);
+          
+          // ensure any annotations marked for destruction are not output
+          graph.commit();
+          
+          // serialize as JSON
+          s.configure(s.configure(new ParameterSet(), graph.getSchema()), graph.getSchema());
+          if (verbose) System.err.println(
+            graph.getId() + ": Serializing to JSON...");
+          s.serialize(Utility.OneGraphSpliterator(graph), null,
+                      // send stream to stdout (there will be only one):
+                      stream -> {
+                        try {
+                          IO.Pump(stream.getStream(), System.out, false);
+                        } catch(Exception exception) {
+                          System.err.println(
+                            "Could not write stream " + stream.getName()
+                            + ": " + exception.toString());
+                        }
+                      },
+                      // warnings/errors to stderr:
+                      warning -> System.err.println(warning),
+                      exception -> {
+                        System.err.println(exception.getMessage());
+                        exception.printStackTrace(System.err);
+                      });
+        } catch(TransformationException x) {
+          System.err.println(graph.getId() + " : transformation failed: " + x.getMessage());
+          x.printStackTrace(System.err);
+        }
       } // next graph
       
       // finish JSON array

@@ -159,7 +159,9 @@ public class Deserialize extends CommandLineProgram {
             if (defaultOffsets) {
               if (verbose) System.err.println(
                 graph.getId() + ": Generating default anchor offsets...");
-              new DefaultOffsetGenerator().transform(graph);
+              new DefaultOffsetGenerator()
+                .setDebug(verbose)
+                .transform(graph);
             }
             
             // serialize as JSON
