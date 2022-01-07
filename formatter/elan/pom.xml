@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.elan</artifactId>
   <name>nzilbb.formatter.elan</name>
-  <version>1.7.2</version>
+  <version>1.7.3</version>
 
   <properties>
     <package.path>nzilbb/formatter/elan/</package.path>

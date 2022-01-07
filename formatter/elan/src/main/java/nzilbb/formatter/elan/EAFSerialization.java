@@ -29,11 +29,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.Spliterator;
 import java.util.TreeSet;
@@ -1477,7 +1479,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
             commentTransformer.transform(graph);
             graph.commit();
 		  
-            // [CS:lang]word word[CS:lang]
+            // [CS:lang]word word[CS:lang] - i.e. phrase tag
             SpanningConventionTransformer phraseLanguageTransformer
               = new SpanningConventionTransformer(
                 getWordLayer().getId(), "\\[CS:([^\\]]+)\\](.*)", "(.+)\\[CS:([^\\]]+)\\](\\p{Punct}*)",
@@ -1485,13 +1487,67 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                 phraseLanguageLayer==null?null:phraseLanguageLayer.getId(), "$1", null,
                 false, false);
             phraseLanguageTransformer.transform(graph);
-            graph.commit();
 		  
-            // word[CS:lang]
+            // word[CS:lang] - i.e. word tag
             ConventionTransformer wordLanguageTransformer = new ConventionTransformer(
               getWordLayer().getId(), "(.+)\\[CS:([^\\]]+)\\](\\p{Punct}*)", "$1$3", 
               phraseLanguageLayer==null?null:phraseLanguageLayer.getId(), "$2");
             wordLanguageTransformer.transform(graph);
+
+            if (phraseLanguageLayer != null) {
+              // as there are two phases for language tagging (phrase, then single word)
+              // we make sure that the language ordinals are in order according to the words
+              // they annotate (offsets are mostly not set so can't be used for ordering)
+              // (if annotations are out of order, this can cause later validation problems)
+              
+              // for each language tag parent (i.e. each turn)...
+              final String phraseLanguageParentId = phraseLanguageLayer.getParentId();
+              final String wordLayerId = getWordLayer().getId();
+              for (Annotation parent : graph.all(phraseLanguageParentId)) {
+
+                // sort language annotations by the ordinal of the linked word
+                TreeSet<Annotation> langInWordOrdinalOrder = new TreeSet<Annotation>(
+                  new Comparator<Annotation>() {
+                    public int compare(Annotation lang1, Annotation lang2) {
+                      Set<Annotation> words1 = lang1.getStart().startOf(wordLayerId);
+                      Set<Annotation> words2 = lang2.getStart().startOf(wordLayerId);
+                      if (words1.size() > 0 && words2.size() > 0) { // both connected to words
+                        Annotation word1 = words1.iterator().next();
+                        Annotation word2 = words2.iterator().next();
+                        if (word1.getOrdinal() < word2.getOrdinal()) {
+                          return -1;
+                        } else if (word1.getOrdinal() > word2.getOrdinal()) {
+                          return 1;
+                        }
+                      } else { // at least one is not connected to a word
+                        if (lang1.getStart().startOf(phraseLanguageParentId).size() > 0) {
+                          // lang1 at start of parent
+                          return -2;
+                        }
+                        if (lang2.getStart().startOf(phraseLanguageParentId).size() > 0) {
+                          // lang2 at start of parent
+                          return 2;
+                        }
+                      }
+                      return lang1.compareTo(lang2);
+                    }
+                  });
+                
+                // create a list sorted by word annotation
+                for (Annotation l : parent.all(phraseLanguageLayer.getId())) {
+                  langInWordOrdinalOrder.add(l);
+                }
+
+                // now set the ordinal, by re-adding all children
+                int ord = 1;
+                parent.getAnnotations(phraseLanguageLayer.getId()).clear();
+                for (Annotation l : langInWordOrdinalOrder) {
+                  l.setOrdinal(ord++);
+                  parent.getAnnotations(phraseLanguageLayer.getId()).add(l);
+                }
+              } // next language parent
+            } // phraseLanguageLayer set
+            graph.commit();
             
             if (phraseLanguageLayer != null) {
               // join contiguous phrase language tags with the same label
@@ -2275,6 +2331,22 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     Layer dominatingLayer = layer.getParent();
     String sLinguisticTypeRef = "default-lt";
     String sAnnotationTag = "ALIGNABLE_ANNOTATION";
+    // if (layer.getParentId() != null
+    //     && !layer.getParentId().equals(graph.getSchema().getRoot().getId())) { // not top level
+    //   if (!layer.getPeers()
+    //       && layer.getSaturated()
+    //       && layer.getAlignment() == Constants.ALIGNMENT_NONE
+    //       && dominatingLayer.getId().equals(wordLayer.getId())) { // word tag layer
+    //     sLinguisticTypeRef = "tag-lt";
+    //   } else if (layer.getPeers()) {
+    //     if (layer.getSaturated()) {
+    //       sLinguisticTypeRef = "partition-lt";
+    //     } else {
+    //       sLinguisticTypeRef = "subinterval-lt";
+    //     }
+    //   }
+    //   sAnnotationTag = "REF_ANNOTATION";
+    // } // not top level
     if (!layer.getPeers()
         && layer.getSaturated()
         && layer.getAlignment() == Constants.ALIGNMENT_NONE
