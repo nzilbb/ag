@@ -648,16 +648,24 @@ public class PatternTagger extends Annotator {
             } else {
                Annotation labelSource = token.first(sCopyLayerId);
                if (labelSource != null) {
-                  tagLabel = labelSource.getLabel();			   
-               } // not the source layer
-            }
+                 tagLabel = labelSource.getLabel();			   
+               } else {
+                 tagLabel = null;
+               }
+            } // not the source layer
          } else if (tagLabel.indexOf('$') >= 0) { // uses captured groups
             tagLabel = matcher.replaceAll(tagLabel);
          }
          if (existingTag != null)  { // existing tag to update
-            existingTag.setLabel(tagLabel);
+           if (tagLabel != null) {
+             existingTag.setLabel(tagLabel);
+           } else { // no label
+             existingTag.destroy();
+           }
          } else { // not tagged yet
+           if (tagLabel != null) {
             existingTag = token.createTag(destinationLayerId, tagLabel);
+           }
          }
          existingTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
          return existingTag;
