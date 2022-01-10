@@ -35,6 +35,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.HttpURLConnection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -661,112 +662,142 @@ public class HTKAligner extends Annotator {
       File fHtkPath = htkPath == null?null:new File(htkPath);
       File HVite = fHtkPath == null?null:new File(htkPath, "HVite");
       if (HVite != null && !HVite.exists()) HVite = new File(htkPath, "HVite.exe");
-      if (HVite == null || !HVite.exists()) {
-        boolean canCompileSource = Execution.Which("make") != null;
-        if (canCompileSource && htkUserId != null && htkPassword != null) {
-          // don't have HTK path but maybe we can download/build/install it
-          
-          // TODO download for Windows too
-          // https://htk.eng.cam.ac.uk/ftp/software/htk-3.3-windows-binary.zip
-          // TODO build for Mac too
-          
-          // create a temp directory for working
-          File htkSourceDirectory = File.createTempFile("htk_", "_src");
-          htkSourceDirectory.delete();
-          htkSourceDirectory.mkdir();
-          
-          // wget --user=... --password=... http://htk.eng.cam.ac.uk/ftp/software/HTK-3.4.1.tar.gz
-          setStatus("Attempting to download HTK source code...");
-          Execution cmd = new Execution()
-            .setExe("wget")
-            .arg("--user=" + htkUserId)
-            .arg("--password=" + htkPassword)
-            .arg("http://htk.eng.cam.ac.uk/ftp/software/HTK-3.4.1.tar.gz")
-            .setWorkingDirectory(htkSourceDirectory);
-          cmd.run();
-          if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
-          setStatus(cmd.getInput().toString());
-          
-          setPercentComplete(20);
-          if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
-          
-          // tar -xzf HTK-3.4.1.tar.gz
-          setStatus("Extracting HTK source code...");
-          cmd = new Execution()
-            .setExe("tar")
-            .arg("-xzf")
-            .arg("HTK-3.4.1.tar.gz")
-            .setWorkingDirectory(htkSourceDirectory);
-          cmd.run();
-          if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
-          setStatus(cmd.getInput().toString());
-          
-          setPercentComplete(30);
-          if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
-          
-          // cd htk
-          File htkSrc = new File(htkSourceDirectory, "htk");
-          setStatus("HTK source code directory: " + htkSourceDirectory.getPath());
-          try {
+      if (HVite == null || !HVite.exists()) { // don't have HTK exes
+
+        if (htkUserId != null && htkPassword != null) { // have user/password
+          if (java.lang.System.getProperty("os.name").startsWith("Windows")) { // Windows
             
-            // ./configure --without-x --disable-hslab --disable-hlmtools
-            setStatus("Creating build configuration...");
-            cmd = new Execution()
-              .setExe(new File(htkSrc, "configure"))
-              .arg("--without-x")
-              .arg("--disable-hslab")
-              .arg("--disable-hlmtools")
-              .setWorkingDirectory(htkSrc);
-            cmd.run();
-            if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
-            setStatus(cmd.getInput().toString());
+            // download exes...
+            URL url = new URL("https://htk.eng.cam.ac.uk/ftp/software/htk-3.3-windows-binary.zip");
+            setStatus("Attempting to download HTK from: " + url);
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            String authorization = "Basic " + java.util.Base64.getEncoder()
+              .encodeToString((htkUserId+":"+htkPassword).getBytes());
+            connection.setRequestProperty("Authorization", authorization);
+            InputStream input = connection.getInputStream();
+            File zip = new File(getWorkingDirectory(), url.getPath().replaceAll(".*/",""));
+            IO.Pump(input, new FileOutputStream(zip));
             
-            setPercentComplete(40);
-            if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
-            
-            // make all
-            setStatus("Building HTK...");
-            cmd = new Execution()
-              .setExe("make")
-              .arg("all")
-              .setWorkingDirectory(htkSrc);
-            cmd.run();
-            if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
-            setStatus(cmd.getInput().toString());
-            
-            setPercentComplete(50);
-            if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
-            
-            // make install
-            setStatus("Installing HTK...");
-            cmd = new Execution()
-              .setExe("make")
-              .arg("install")
-              .setWorkingDirectory(htkSrc);
-            cmd.run();
-            if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
-            setStatus(cmd.getInput().toString());
-            
-            setPercentComplete(60);
-            if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
-            
-            File HVitePath = Execution.Which("HVite");
-            if (HVitePath != null) {
-              setStatus("HVite: " + HVitePath.getPath());
-              fHtkPath = HVitePath.getParentFile();
-              if (fHtkPath != null) {
-                setStatus("Build successful, htkPath: " + fHtkPath.getPath());
-                htkPath = fHtkPath.getPath();
-              } else {
-                setStatus("Sorry, could not build HTK from source code.");
-                throw new InvalidConfigurationException(
-                  this, "No path to HTK, and could not build it.");
+            setStatus("Unzipping: " + zip.getName());
+            IO.Unzip(zip, getWorkingDirectory());
+
+            fHtkPath = new File(getWorkingDirectory(), "htk");
+            HVite = new File(fHtkPath, "HVite.exe");
+            if (HVite.exists()) {
+              htkPath = fHtkPath.getPath();
+              setStatus("Download successful, htkPath: " + htkPath);
+              System.out.println("Download successful, htkPath: " + htkPath);
+            } else {
+              setStatus("Sorry, could not download HTK.");
+              throw new InvalidConfigurationException(
+                this, "No path to HTK, and could not download it.");
+            }            
+          } else { // not windows
+            boolean canCompileSource = Execution.Which("make") != null;
+            if (canCompileSource) {
+              // don't have HTK path but maybe we can download/build/install it
+              
+              // TODO build for Mac too
+              
+              // create a temp directory for working
+              File htkSourceDirectory = File.createTempFile("htk_", "_src");
+              htkSourceDirectory.delete();
+              htkSourceDirectory.mkdir();
+              
+              // wget --user=... --password=... http://htk.eng.cam.ac.uk/ftp/software/HTK-3.4.1.tar.gz
+              setStatus("Attempting to download HTK source code...");
+              Execution cmd = new Execution()
+                .setExe("wget")
+                .arg("--user=" + htkUserId)
+                .arg("--password=" + htkPassword)
+                .arg("http://htk.eng.cam.ac.uk/ftp/software/HTK-3.4.1.tar.gz")
+                .setWorkingDirectory(htkSourceDirectory);
+              cmd.run();
+              if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
+              setStatus(cmd.getInput().toString());
+              
+              setPercentComplete(20);
+              if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
+              
+              // tar -xzf HTK-3.4.1.tar.gz
+              setStatus("Extracting HTK source code...");
+              cmd = new Execution()
+                .setExe("tar")
+                .arg("-xzf")
+                .arg("HTK-3.4.1.tar.gz")
+                .setWorkingDirectory(htkSourceDirectory);
+              cmd.run();
+              if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
+              setStatus(cmd.getInput().toString());
+              
+              setPercentComplete(30);
+              if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
+              
+              // cd htk
+              File htkSrc = new File(htkSourceDirectory, "htk");
+              setStatus("HTK source code directory: " + htkSourceDirectory.getPath());
+              try {
+                
+                // ./configure --without-x --disable-hslab --disable-hlmtools
+                setStatus("Creating build configuration...");
+                cmd = new Execution()
+                  .setExe(new File(htkSrc, "configure"))
+                  .arg("--without-x")
+                  .arg("--disable-hslab")
+                  .arg("--disable-hlmtools")
+                  .setWorkingDirectory(htkSrc);
+                cmd.run();
+                if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
+                setStatus(cmd.getInput().toString());
+                
+                setPercentComplete(40);
+                if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
+                
+                // make all
+                setStatus("Building HTK...");
+                cmd = new Execution()
+                  .setExe("make")
+                  .arg("all")
+                  .setWorkingDirectory(htkSrc);
+                cmd.run();
+                if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
+                setStatus(cmd.getInput().toString());
+                
+                setPercentComplete(50);
+                if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
+                
+                // make install
+                setStatus("Installing HTK...");
+                cmd = new Execution()
+                  .setExe("make")
+                  .arg("install")
+                  .setWorkingDirectory(htkSrc);
+                cmd.run();
+                if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
+                setStatus(cmd.getInput().toString());
+                
+                setPercentComplete(60);
+                if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
+                
+                File HVitePath = Execution.Which("HVite");
+                if (HVitePath != null) {
+                  setStatus("HVite: " + HVitePath.getPath());
+                  fHtkPath = HVitePath.getParentFile();
+                  if (fHtkPath != null) {
+                    setStatus("Build successful, htkPath: " + fHtkPath.getPath());
+                    htkPath = fHtkPath.getPath();
+                  } else {
+                    setStatus("Sorry, could not build HTK from source code.");
+                    throw new InvalidConfigurationException(
+                      this, "No path to HTK, and could not build it.");
+                  }
+                }
+              } finally { // no matter what, delete our working files
+                IO.RecursivelyDelete(htkSourceDirectory);
               }
-            }
-          } finally { // no matter what, delete our working files
-            IO.RecursivelyDelete(htkSourceDirectory);
-          }
-        } else { // can't build
+            } // canCompileSource
+          } // not Windows
+        } else { // don't have user/password
           throw new InvalidConfigurationException(this, "No path to HTK.");
         }
       } // bad htkPath
