@@ -26,22 +26,26 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.net.HttpURLConnection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -1623,7 +1627,7 @@ public class HTKAligner extends Annotator {
         this, "Failed to create working directory: " + sessionWorkingDir.getPath());
     }
     boolean addStatusObserverForLog = logFile == null; // might have already done this
-    logFile = new File(sessionWorkingDir, "training.log");
+    logFile = new File(getWorkingDirectory(), sessionWorkingDir.getName() + ".log");
     if (addStatusObserverForLog) {
       getStatusObservers().add(status -> {
           if (logFile != null) {
@@ -3344,6 +3348,58 @@ public class HTKAligner extends Annotator {
     }
   } // end of updateAlignments()
 
+  /**
+   * Lists log files from previous alignments.
+   * @return A list of log file names, newest first.
+   */
+  public Collection<String> listLogs() {
+    try {
+      File[] logs = getWorkingDirectory().listFiles(new FilenameFilter() {
+          public boolean accept(File dir, String name) {
+            return name.endsWith(".log");
+          }});
+      Arrays.sort(logs, new Comparator<File>() {
+          public int compare(File f1, File f2) {
+            return (int)(f2.lastModified() - f1.lastModified());
+          }
+        });
+      return Arrays.stream(logs).map(f->f.getName()).collect(Collectors.toList());
+    } catch (Throwable t) {
+      t.printStackTrace(System.out);
+      return null;
+    }
+  } // end of listLogs()
+  
+  /**
+   * Delete named log file.
+   * @param log
+   * @return True if the log file was deleted, false otherwise.
+   */
+  public boolean deleteLog(String log) {
+    if (log.endsWith(".log")) {
+      return new File(getWorkingDirectory(), log).delete();
+    }
+    return false;
+  } // end of deleteLog()
+  
+  /**
+   * Provides access to a log file.
+   * @param log
+   * @return The given log file, or null if it doesn't exist or isn't a log file.
+   */
+  public InputStream downloadLog(String log) {
+    if (log.endsWith(".log")) {
+      File logFile = new File(getWorkingDirectory(), log);
+      if (logFile.exists()) {
+        try {
+          return new FileInputStream(logFile);
+        } catch(Exception exception) {
+        }
+      }
+    }
+    return null;
+  } // end of downloadLog()
+   
   /**
    * Escapes quotes in the given string for inclusion in QL or SQL queries.
    * @param s The string to escape.
