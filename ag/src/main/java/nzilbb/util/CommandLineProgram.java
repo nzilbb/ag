@@ -226,15 +226,24 @@ public class CommandLineProgram {
 			setter.invoke(this, sValue);
 		     } else if (parameterClass.equals(Boolean.class)) {
 			setter.invoke(this, Boolean.valueOf(sValue));
+		     } else if (parameterClass.equals(boolean.class)) {
+			setter.invoke(this, Boolean.parseBoolean(sValue));
 		     } else if (parameterClass.equals(Integer.class)) {
 			setter.invoke(this, Integer.valueOf(sValue));
+		     } else if (parameterClass.equals(int.class)) {
+			setter.invoke(this, Integer.parseInt(sValue));
 		     } else if (parameterClass.equals(Double.class)) {
 			setter.invoke(this, Double.valueOf(sValue));
+		     } else if (parameterClass.equals(double.class)) {
+			setter.invoke(this, Double.parseDouble(sValue));
 		     } else if (parameterClass.equals(URL.class)) {
 			setter.invoke(this, new URL(sValue));
 		     } else if (parameterClass.equals(File.class)) {
 			setter.invoke(this, new File(sValue));
 		     }
+                  } catch (java.lang.reflect.InvocationTargetException x) {
+                    System.err.println("Error setting switch: " + sArg 
+                                       + " : " + x.getCause());
 		  } catch (Throwable t) {
 		     System.err.println("Error interpreting switch: " + sArg 
 					+ " : " + t);
