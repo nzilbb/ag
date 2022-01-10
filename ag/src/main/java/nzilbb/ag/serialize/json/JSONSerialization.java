@@ -231,8 +231,14 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
           stream.getStream().reset();
         }
         if (!arrayInput) { // read the whole stream as one graph
-          jsons.put(stream.getName(), Json.createReader(
-                      new InputStreamReader(stream.getStream())).readObject());
+          JsonObject json = Json.createReader(
+            new InputStreamReader(stream.getStream())).readObject();
+          // if the stream is a LaBB-CAT response...
+          if (json.containsKey("title") && json.containsKey("model")) {
+            // ...then the graph is buried in the "model" attribute
+            json = json.getJsonObject("model");
+          }
+          jsons.put(stream.getName(), json);
         } else { // stream is an array of graphs
           JsonArray array = Json.createReader(
             new InputStreamReader(stream.getStream())).readArray();
