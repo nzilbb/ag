@@ -1591,20 +1591,6 @@ public class MFA extends Annotator {
               }
             }
             
-            // tag the utterance as aligned
-            if (utteranceTagLayerId != null) {
-              alignedFragment.getSchema().addLayer(
-                (Layer)schema.getLayer(utteranceTagLayerId).clone());
-              Annotation timestamp = new Annotation()
-                .setLayerId(utteranceTagLayerId)
-                .setLabel(sTimestamp)
-                .setStart(alignedFragment.getStart())
-                .setEnd(alignedFragment.getEnd())
-                .setParentId(editedTurn.getId());
-              timestamp.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-              alignedFragment.addAnnotation(timestamp);
-            }
-            
             if (isCancelling()) break;
             
             // merge the current database utterance with the incoming aligned utterance
@@ -1621,6 +1607,22 @@ public class MFA extends Annotator {
             fragment.trackChanges();
             // merge changes
             merger.transform(fragment);
+            if (utteranceTagLayerId != null) {
+              Annotation[] timestamps = fragment.tagsOn​(utteranceTagLayerId);
+              if (timestamps.length > 0) { // update the existing tag
+                timestamps[0].setLabel(sTimestamp);
+                timestamps[0].setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+              } else { // add new tag
+                Annotation timestamp = new Annotation()
+                  .setLayerId(utteranceTagLayerId)
+                  .setLabel(sTimestamp)
+                  .setStart(utterance.getStart())
+                  .setEnd(utterance.getEnd())
+                  .setParentId(utterance.getParentId());
+                timestamp.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                fragment.addAnnotation(timestamp);
+              } // add new tag            
+            }
 
             // ensure the utterance boundaries are unchanged (e.g. even by rounding)
             utterance.getStart().rollback();
