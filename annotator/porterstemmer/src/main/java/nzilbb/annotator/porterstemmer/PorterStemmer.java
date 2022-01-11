@@ -175,12 +175,12 @@ public class PorterStemmer extends Annotator {
       }
       
       // does the outputLayer need to be added to the schema?
-      if (schema.getLayer(stemLayerId) == null) {
-         schema.addLayer(
-            new Layer(stemLayerId)
-            .setAlignment(Constants.ALIGNMENT_NONE)
-            .setPeers(false)
-            .setParentId(schema.getWordLayerId()));
+      if (stemLayerId != null && schema.getLayer(stemLayerId) == null) {
+        schema.addLayer(
+          new Layer(stemLayerId)
+          .setAlignment(Constants.ALIGNMENT_NONE)
+          .setPeers(false)
+          .setParentId(schema.getWordLayerId()));
       }
    }
 
