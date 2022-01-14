@@ -89,7 +89,11 @@ public class TextToEaf extends Converter {
   public TextToEaf() {
     info = "The plain text transcript must include synchronisation information"
       +"\n- i.e. time codes - and must end in a timecode, indicating the end time"
-      +"\nof the last utterance.";
+      +"\nof the last utterance."
+      +"\n"
+      +"\nCheck the --timestampFormat setting matches your time codes."
+      +"\nThis setting uses Java SimpleDateFormat format:"
+      +"\nhttps://docs.oracle.com/javase/8/docs/api/index.html?java/text/SimpleDateFormat.html";
   } // end of constructor
   
   public static void main(String argv[]) {
