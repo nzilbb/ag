@@ -87,8 +87,9 @@ public class TextToEaf extends Converter {
    * Default constructor.
    */
   public TextToEaf() {
-    info = "The plain text transcript must include synchronisation information - i.e. time codes"
-      +"\n- and must end in a timecode, indicating the end time of the last utterance.";
+    info = "The plain text transcript must include synchronisation information"
+      +"\n- i.e. time codes - and must end in a timecode, indicating the end time"
+      +"\nof the last utterance.";
   } // end of constructor
   
   public static void main(String argv[]) {
