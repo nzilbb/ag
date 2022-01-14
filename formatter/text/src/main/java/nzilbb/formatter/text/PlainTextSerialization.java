@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -627,7 +627,41 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
    public void cancel() {
       setCancelling(true);
    }
-
+  
+   /**
+    * Whether to print debug logging.
+    * @see #getDebug()
+    * @see #setDebug(boolean)
+    */
+   protected boolean debug = false;
+   /**
+    * Getter for {@link #debug}: Whether to print debug logging.
+    * @return Whether to print debug logging.
+    */
+   public boolean getDebug() { return debug; }
+   /**
+    * Setter for {@link #debug}: Whether to print debug logging.
+    * @param newDebug Whether to print debug logging.
+    */
+   public PlainTextSerialization setDebug(boolean newDebug) { debug = newDebug; return this; }
+    
+  /**
+   * Log a debug message, if #debug == true.
+   * @param message
+   */
+  protected void log(Object ... messages) {
+    if (debug) {
+      for (Object m : messages) {
+        if (m == null) {
+          System.err.print("[null] ");
+        } else {
+          System.err.print(m.toString() + " ");
+        }
+      }
+      System.err.println();
+    }
+  } // end of log()
+  
    // Methods:
    
    /**
@@ -1005,6 +1039,13 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
                fmtTimestampFormat.parse(leftover); 
                // parsed, so there are timestamps
                setHasTimestamps(true);
+
+               if (!getHasSpeakers()) { // there's been no speakers so far
+                 // so everything up to here was a header
+                 setHeaderLines(getLines());
+                 // and the transcript content starts here
+                 setLines(new Vector<String>());
+               }
             }
             catch(ParseException exception) {} // not parseable
             catch(NullPointerException exception) {} // null ID
@@ -1264,6 +1305,9 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
 
       if (timers != null) timers.start("process lines");
 
+      log("hasSpeakers", hasSpeakers, "hasTimestamps", hasTimestamps,
+          "units", graph.getOffsetUnits());
+
       Annotation lastLine = null;
       int lineOrdinal = 1;
       for (String sLine : getLines()) {
@@ -1282,9 +1326,10 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
             .setStart(turn.getStart())
             .setOrdinal(lineOrdinal++)
             .setConfidence(Constants.CONFIDENCE_MANUAL);;
-	 
+         log("line", sLine);
+
          line.setStart(lastAnchor);
-         if (lastLine != null) {
+         if (lastLine != null && lastLine.getLabel().trim().length() > 0) {
             if (lastAnchor.getId() == null) {
                graph.addAnchor(lastAnchor);
             }
@@ -1294,8 +1339,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
             if (timers != null) timers.end("add line annotation");
          }
 	 
-         if (getHasSpeakers())
-         {
+         if (getHasSpeakers()) {
             // does the line start with a speaker ID?
             try {
                if (timers != null) timers.start("check for speaker change");
@@ -1350,7 +1394,6 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
                      line.setParentId(turn.getId())
                         .setStart(lastAnchor)
                         .setConfidence(Constants.CONFIDENCE_MANUAL);
-
                   }
                   // consume the speaker ID
                   sLine = sLine.substring(fmtSpeakerFormat.format(oSpeaker).length()).trim();
@@ -1361,6 +1404,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
                // System.out.println("SPEAKER: " + exception);
             } // null ID
          } // HasSpeakers
+         log("line after speaker", sLine);
 	 
          if (graph.getOffsetUnits() != Constants.UNIT_CHARACTERS) {
             // does the line start with a time stamp?
@@ -1371,6 +1415,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
                   Date timestamp = fmtTimestampFormat.parse(sLine);
                   lastAnchor.setOffset(((double)(timestamp.getTime()))/1000);
                   lastAnchor.setConfidence(Constants.CONFIDENCE_MANUAL);
+                  log("timestamp", lastAnchor.getOffset());
 		  
                   // consume the timestamp
                   sLine = sLine.substring(fmtTimestampFormat.format(timestamp).length()).trim();
@@ -1379,6 +1424,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
                if (timers != null) timers.end("check for timestamp");
             } // HasTimestamps
          }
+         log("line after timestamp", sLine);
 
          // process text
          if (sLine.length() > 0) {
@@ -1397,6 +1443,8 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
                lastLine = anComment;
             } // comments
          } // there is text on this line
+         log("line finally", line, ":",
+             graph.getAnchor(line.getStartId()), "-", graph.getAnchor(line.getEndId()));
 	 
          // update current position
          if (!getHasTimestamps()) {
@@ -1405,7 +1453,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
                lastAnchor.getOffset() + (((double)iNumChars + 1) * dOffsetFactor), iWordAlignmentConfidence);
             if (timers != null) timers.start("getOrCreateAnchorAt");
          } else {
-            lastAnchor = new Anchor();
+            lastAnchor = graph.addAnchor(new Anchor());
          }
       } // next line
       if (timers != null) timers.end("process lines");
@@ -1422,12 +1470,14 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
             lastAnchor.setConfidence(Constants.CONFIDENCE_MANUAL);
          }
       }
-      if (lastLine != null) {
-         if (lastAnchor.getId() == null) {
-            graph.addAnchor(lastAnchor);
-         }
-         lastLine.setEndId(lastAnchor.getId());
-         graph.addAnnotation(lastLine);
+      // System.out.println("lastLine " + lastLine + " lastAnchor " + lastAnchor);
+      if (lastLine != null && lastLine.getLabel().trim().length() > 0
+          && lastLine.getId() == null) {
+        if (lastAnchor.getId() == null) {
+          graph.addAnchor(lastAnchor);
+        }
+        lastLine.setEndId(lastAnchor.getId());
+        graph.addAnnotation(lastLine);
       }
       if (turn != null) {
          turn.setEnd(lastAnchor);
@@ -1435,12 +1485,14 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
             // don't create an instantaneous, empty turn
             graph.addAnnotation(turn);
          }
-         if (!line.getStartId().equals(line.getEndId())) {
-            // don't create an instantaneous, empty line
-            graph.addAnnotation(line);
+         if (line.getStartId() != null
+             && line.getLabel().trim().length() > 0
+             && !line.getStartId().equals(line.getEndId())) {
+           // don't create an instantaneous, empty line
+           graph.addAnnotation(line);
          }
       }
-
+      
       // ensure we have an utterance tokenizer
       if (getTokenizer() == null) {
          setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
