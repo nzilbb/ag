@@ -13,18 +13,18 @@ Standalone programs that convert transcripts from one tool format to another, e.
 * txt - *plain text* files
 * kaldi - input files for the [Kaldi](https://kaldi-asr.org/) automatic speech recognition training system
 
-| to↓ from→ | trs | eaf  | vtt | slt | cha | textgrid |
-| --- | :---: | :---:  | :---: | :---: | :---: | :---: |
-| **trs** | | [eaf-to-trs](../bin/eaf-to-trs.jar?raw=true) | [vtt-to-trs](../bin/vtt-to-trs.jar?raw=true) | [slt-to-trs](../bin/slt-to-trs.jar?raw=true) | [cha-to-trs](../bin/cha-to-trs.jar?raw=true) | [textgrid-to-trs](../bin/textgrid-to-trs.jar?raw=true) |
-| **eaf** | [trs-to-eaf](../bin/trs-to-eaf.jar?raw=true) | | [vtt-to-eaf](../bin/vtt-to-eaf.jar?raw=true) | [slt-to-eaf](../bin/slt-to-eaf.jar?raw=true) | [cha-to-eaf](../bin/cha-to-eaf.jar?raw=true) | |
-| **vtt** | [trs-to-vtt](../bin/trs-to-vtt.jar?raw=true) | [eaf-to-vtt](../bin/eaf-to-vtt.jar?raw=true) | | [slt-to-vtt](../bin/slt-to-vtt.jar?raw=true) | [cha-to-vtt](../bin/cha-to-vtt.jar?raw=true) | [textgrid-to-vtt](../bin/textgrid-to-vtt.jar?raw=true) |
-| **slt** | [trs-to-slt](../bin/trs-to-slt.jar?raw=true) | [eaf-to-slt](../bin/eaf-to-slt.jar?raw=true) | | | | |
-| **cha** | [trs-to-cha](../bin/trs-to-cha.jar?raw=true) | [eaf-to-cha](../bin/eaf-to-cha.jar?raw=true) | [vtt-to-cha](../bin/vtt-to-cha.jar?raw=true) | | | |
-| **textgrid** | [trs-to-textgrid](../bin/trs-to-textgrid.jar?raw=true) | | [vtt-to-textgrid](../bin/vtt-to-textgrid.jar?raw=true) | [slt-to-textgrid](../bin/slt-to-textgrid.jar?raw=true) | [cha-to-textgrid](../bin/cha-to-textgrid.jar?raw=true) | |
-| **pdf** | [trs-to-pdf](../bin/trs-to-pdf.jar?raw=true) | [eaf-to-pdf](../bin/eaf-to-pdf.jar?raw=true) | [vtt-to-pdf](../bin/vtt-to-pdf.jar?raw=true) | [slt-to-pdf](../bin/slt-to-pdf.jar?raw=true) | [cha-to-pdf](../bin/cha-to-pdf.jar?raw=true) | [textgrid-to-pdf](../bin/textgrid-to-pdf.jar?raw=true) |
-| **tex** | [trs-to-tex](../bin/trs-to-tex.jar?raw=true) | [eaf-to-tex](../bin/eaf-to-tex.jar?raw=true) | [vtt-to-tex](../bin/vtt-to-tex.jar?raw=true) | [slt-to-tex](../bin/slt-to-tex.jar?raw=true) | | [textgrid-to-tex](../bin/textgrid-to-tex.jar?raw=true) |
-| **txt** | [trs-to-txt](../bin/trs-to-txt.jar?raw=true) | | | | | |
-| **kaldi** | [trs-to-kaldi](../bin/trs-to-kaldi.jar?raw=true) | [eaf-to-kaldi](../bin/eaf-to-kaldi.jar?raw=true) | | | | [textgrid-to-kaldi](../bin/textgrid-to-kaldi.jar?raw=true) |
+| to↓ from→ | trs | eaf  | vtt | slt | cha | textgrid | txt |
+| --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: |
+| **trs** | | [eaf-to-trs](../bin/eaf-to-trs.jar?raw=true) | [vtt-to-trs](../bin/vtt-to-trs.jar?raw=true) | [slt-to-trs](../bin/slt-to-trs.jar?raw=true) | [cha-to-trs](../bin/cha-to-trs.jar?raw=true) | [textgrid-to-trs](../bin/textgrid-to-trs.jar?raw=true) | |
+| **eaf** | [trs-to-eaf](../bin/trs-to-eaf.jar?raw=true) | | [vtt-to-eaf](../bin/vtt-to-eaf.jar?raw=true) | [slt-to-eaf](../bin/slt-to-eaf.jar?raw=true) | [cha-to-eaf](../bin/cha-to-eaf.jar?raw=true) | | [txt-to-eaf](../bin/txt-to-eaf.jar?raw=true) |
+| **vtt** | [trs-to-vtt](../bin/trs-to-vtt.jar?raw=true) | [eaf-to-vtt](../bin/eaf-to-vtt.jar?raw=true) | | [slt-to-vtt](../bin/slt-to-vtt.jar?raw=true) | [cha-to-vtt](../bin/cha-to-vtt.jar?raw=true) | [textgrid-to-vtt](../bin/textgrid-to-vtt.jar?raw=true) | |
+| **slt** | [trs-to-slt](../bin/trs-to-slt.jar?raw=true) | [eaf-to-slt](../bin/eaf-to-slt.jar?raw=true) | | | | | |
+| **cha** | [trs-to-cha](../bin/trs-to-cha.jar?raw=true) | [eaf-to-cha](../bin/eaf-to-cha.jar?raw=true) | [vtt-to-cha](../bin/vtt-to-cha.jar?raw=true) | | | | |
+| **textgrid** | [trs-to-textgrid](../bin/trs-to-textgrid.jar?raw=true) | | [vtt-to-textgrid](../bin/vtt-to-textgrid.jar?raw=true) | [slt-to-textgrid](../bin/slt-to-textgrid.jar?raw=true) | [cha-to-textgrid](../bin/cha-to-textgrid.jar?raw=true) | | |
+| **pdf** | [trs-to-pdf](../bin/trs-to-pdf.jar?raw=true) | [eaf-to-pdf](../bin/eaf-to-pdf.jar?raw=true) | [vtt-to-pdf](../bin/vtt-to-pdf.jar?raw=true) | [slt-to-pdf](../bin/slt-to-pdf.jar?raw=true) | [cha-to-pdf](../bin/cha-to-pdf.jar?raw=true) | [textgrid-to-pdf](../bin/textgrid-to-pdf.jar?raw=true) | |
+| **tex** | [trs-to-tex](../bin/trs-to-tex.jar?raw=true) | [eaf-to-tex](../bin/eaf-to-tex.jar?raw=true) | [vtt-to-tex](../bin/vtt-to-tex.jar?raw=true) | [slt-to-tex](../bin/slt-to-tex.jar?raw=true) | | [textgrid-to-tex](../bin/textgrid-to-tex.jar?raw=true) | |
+| **txt** | [trs-to-txt](../bin/trs-to-txt.jar?raw=true) | | | | | | |
+| **kaldi** | [trs-to-kaldi](../bin/trs-to-kaldi.jar?raw=true) | [eaf-to-kaldi](../bin/eaf-to-kaldi.jar?raw=true) | | | | [textgrid-to-kaldi](../bin/textgrid-to-kaldi.jar?raw=true) | |
 
 
 These use the serializers/deserializers in the *formatter* directory of this repository
