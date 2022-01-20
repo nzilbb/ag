@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.mfa</artifactId>
   <name>nzilbb.annotator.mfa</name>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <description>Annotator that integrates with the Montreal Forced Aligner (MFA)</description>
 
   <properties>
