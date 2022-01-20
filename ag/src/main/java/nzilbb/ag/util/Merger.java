@@ -1669,6 +1669,7 @@ public class Merger extends Transform implements GraphTransformer {
                 if (anOriginalParallel == null) continue; 
                 assert anOriginalParallel.getStart() != null 
                   : "anOriginalParallel.getStart() != null - " + anOriginalParallel;
+                if (anOriginalParallel.getStart() == null) continue;
                 // no use linking to the very same anchor
                 if (anOriginalParallel.getStart() == anOriginal.getStart()) continue;
                 // offset should be the same
