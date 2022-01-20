@@ -1555,6 +1555,7 @@ public class Merger extends Transform implements GraphTransformer {
           if (anParallel == anEdited) continue;		  
           if (hasCounterpart(anParallel)) {
             Annotation anLinkedOriginalParallel = getCounterpart(anParallel);
+            if (anLinkedOriginalParallel.getStart() == null) continue;
             if (anOriginal.getStart() != anLinkedOriginalParallel.getStart()
                 && getConfidence(anOriginal.getStart()) 
                 <= getConfidence(anLinkedOriginalParallel.getStart())) {
@@ -1858,6 +1859,7 @@ public class Merger extends Transform implements GraphTransformer {
             if (anParallel == anEdited) continue;		  
             if (hasCounterpart(anParallel)) {
               Annotation anLinkedOriginalParallel = getCounterpart(anParallel);
+              if (anLinkedOriginalParallel.getEnd() == null) continue;
               if (anOriginal.getEnd() != anLinkedOriginalParallel.getEnd()
                   && getConfidence(anOriginal.getEnd())
                   <= getConfidence(anLinkedOriginalParallel.getEnd())) {
