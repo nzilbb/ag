@@ -223,7 +223,8 @@ function newMapping(pattern, label) {
     
     for (var layerId in schema.layers) {
         var layer = schema.layers[layerId];
-        if (layer.parentId == schema.wordLayerId && layer.alignment == 0) { // word tag
+        if (layer.id == schema.wordLayerId // word layer
+            || (layer.parentId == schema.wordLayerId && layer.alignment == 0)) { // word tag
             option = document.createElement("option");
             option.value = COPY_FROM_LAYER_TEXT + layer.id;
             option.appendChild(document.createTextNode(COPY_FROM_LAYER_TEXT + layer.id));
