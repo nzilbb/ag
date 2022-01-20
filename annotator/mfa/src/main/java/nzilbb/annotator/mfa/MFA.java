@@ -352,6 +352,7 @@ public class MFA extends Annotator {
     getCancellationObservers().add(cancelling -> {
         if (cancelling && exe != null) {
           try {
+            setStatus("Killing process " + exe.getProcess());
             exe.getProcess().destroy();
           } catch(Throwable t) {
             setStatus("Could not destroy process: " + t);
@@ -596,7 +597,9 @@ public class MFA extends Annotator {
       if (!conda.exists()) {
         throw new InvalidConfigurationException(this, "Conda CLI not found: " + conda.getPath());
       }
-      exe.env("MFA_ROOT_DIR", System.getProperty("java.io.tmpdir"))
+      // use %TEMP% instead of java.io.tmpdir because java.io.tmpdir might have spaces in it,
+      // while %TEMP% probably won't (e.g. C:\WINDOWS\TEMP if we're running in a service)
+      exe.env("MFA_ROOT_DIR", System.getenv("TEMP"))
         .setWorkingDirectory(envPath)
         // .setExe(conda)
         .setExe("cmd").arg("/C")
@@ -1089,8 +1092,14 @@ public class MFA extends Annotator {
       sessionName = prefix + "-" + hashCode();
     }
     setStatus("Session " + sessionName);
+    File parentDir = getWorkingDirectory();
+    if (System.getProperty("os.name").startsWith("Windows") && parentDir.getPath().contains(" ")) {
+      // MFA doesn't handle paths with spaces well, so we try to use a path with no spaces
+      // like C:\WINDOWS\TEMP
+      parentDir = new File(System.getenv("TEMP"));
+    }
     sessionWorkingDir = new File(
-      getWorkingDirectory(),
+      parentDir,
       sessionName + "-"
       + new SimpleDateFormat("yyyy-MM-dd-kk-mm-ss").format(new java.util.Date()));
     if (!sessionWorkingDir.mkdirs()) {
@@ -1304,14 +1313,24 @@ public class MFA extends Annotator {
     String prefix = "mfa";
     if (utteranceTagLayerId != null) prefix = utteranceTagLayerId;
     else if (phoneAlignmentLayerId != null) prefix = phoneAlignmentLayerId;
+    File parentDir = getWorkingDirectory();
+    if (System.getProperty("os.name").startsWith("Windows") && parentDir.getPath().contains(" ")) {
+      // MFA doesn't handle paths with spaces well, so we try to use a path with no spaces
+      // like C:\WINDOWS\TEMP
+      parentDir = new File(System.getenv("TEMP"));
+    }
     File newSessionWorkingDirectory = new File(
-      getWorkingDirectory(),
+      parentDir,
       prefix + "-" + newName
       +"-"+new SimpleDateFormat("yyyy-MM-dd-kk-mm-ss").format(new java.util.Date()));
     if (sessionWorkingDir.renameTo(newSessionWorkingDirectory)) {
       sessionWorkingDir = newSessionWorkingDirectory;
       sessionName = newName;
+      File oldLogFile = logFile;
       logFile = new File(getWorkingDirectory(), sessionWorkingDir.getName() + ".log");
+      if (oldLogFile != null && oldLogFile.exists()) {
+        oldLogFile.renameTo(logFile);
+      }
       tempDir = new File(sessionWorkingDir, "temp");
       corpusDir = new File(sessionWorkingDir, "corpus");
       alignedDir = new File(sessionWorkingDir, "aligned");
@@ -1494,6 +1513,10 @@ public class MFA extends Annotator {
           } // next subdir file
         } // subdir
       } // next corpusDir fild
+      if (outputFiles.size() == 0) {
+        setStatus("No alignments were produced.");
+        throw new TransformationException(this, "No alignments were produced.");
+      }
       
       // list all TextGrids in output directory
       for (File f : outputFiles) {
@@ -1590,7 +1613,6 @@ public class MFA extends Annotator {
                 phone.setLabel(mfaToPhonemes.apply(phone.getLabel()));
               }
             }
-            
             if (isCancelling()) break;
             
             // merge the current database utterance with the incoming aligned utterance
@@ -1607,6 +1629,7 @@ public class MFA extends Annotator {
             fragment.trackChanges();
             // merge changes
             merger.transform(fragment);
+            
             if (utteranceTagLayerId != null) {
               Annotation[] timestamps = fragment.tagsOn​(utteranceTagLayerId);
               if (timestamps.length > 0) { // update the existing tag
