@@ -29,7 +29,7 @@ Modules that perform automatic annotation tasks on annotation graphs.
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.0.5,)</version>
+      <version>[1.0.6,)</version>
       <scope>compile</scope>
     </dependency>
    ```
@@ -65,6 +65,10 @@ Modules that perform automatic annotation tasks on annotation graphs.
    ```
    mkdir src/main/java/nzilbb/annotator
    mkdir src/main/java/nzilbb/annotator/myannotator
+   mkdir src/main/resources
+   mkdir src/main/resources/nzilbb
+   mkdir src/main/resources/nzilbb/annotator
+   mkdir src/main/resources/nzilbb/annotator/myannotator
    mkdir src/test/java/nzilbb/annotator
    mkdir src/test/java/nzilbb/annotator/myannotator
    ```
