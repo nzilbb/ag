@@ -852,7 +852,11 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       try {
         Dictionary dictionary = getDictionary(this.dictionary);
         try {
+          int t = 0;
+          int tokenCount = toAnnotate.size();
+          setPercentComplete(0);
           for (Annotation token : toAnnotate) {
+            if (isCancelling()) break;
             boolean found = false;           
             //setStatus("Lookup: " + token + " - " + dictionary.lookup(token.getLabel()));
             for (String entry : dictionary.lookup(token.getLabel())) {
@@ -866,7 +870,10 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
               if (firstVariantOnly) break;
               
             } // next entry
+            setPercentComplete(++t * 100 / tokenCount);
+
           } // next token
+          if (!isCancelling()) setPercentComplete(100);
         } finally {
           dictionary.close();
         }
