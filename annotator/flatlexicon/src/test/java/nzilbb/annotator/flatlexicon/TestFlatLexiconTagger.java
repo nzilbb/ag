@@ -816,8 +816,9 @@ public class TestFlatLexiconTagger {
 
     // dictionary works
     Dictionary dictionary = annotator.getDictionary("dict:type→phonemes");
-    List<String> entries = dictionary.lookup("quick");
-    assertEquals("entry returned", 1, entries.size());
+    List<String> entries = dictionary.lookup("quíck");
+    assertEquals("entry returned, case-insentitive, accent sensitive",
+                 1, entries.size());
     assertEquals("entry correct", "k w ɪ k", entries.get(0));
 
     entries = dictionary.lookup("the");
