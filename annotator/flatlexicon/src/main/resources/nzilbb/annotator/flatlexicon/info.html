@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html><head><title>Flat Lexicon Tagger</title></head>
+  <body>
+    <h1>Flat Lexicon Tagger</h1>
+    
+    <p> This annotator tags annotates words with data from a dictionary loaded from a
+      plain text file (e.g. a CSV file). The file must have a 'flat' structure in the
+      sense that it's a simple list of dictionary entries with a fixed number of
+      columns/fields, rather than having a complex structure. </p>  
+    
+    <p> The dictionary file you supply may contain multiple fields, and multiple entries
+      per word.  It might include: </p>
+    <ul>
+      <li>word orthography</li>
+      <li>lemma</li>
+      <li>part-of-speech</li>
+      <li>pronunciation</li>
+      <li>frequency</li>
+    </ul>
+    <p> ...or any other <q>type</q> data you like. </p>
+    
+    <h3 id="getting"> Getting a dictionary file </h3>
+    
+    <p> What dictionary file you want depends on what you want to annotate.  For
+      pronunciations, you might download some standard dictionary for your target language,
+      such as <a href="http://www.cstr.ed.ac.uk/projects/unisyn/">Unisyn</a>,
+      the <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">CMU Pronouncing
+        dictionary</a>, <a href="http://celex.mpi.nl/">CELEX</a>, etc. (although there are
+      also specialised layer managers for these particular lexicons). Frequency lists
+      include
+      <a href="http://celex.mpi.nl/">CELEX</a>, <a href="http://subtlexus.lexique.org/">SubtlexUS</a>,
+      and
+      <a href="http://kilgarriff.co.uk/bnc-readme.html">Adam Kilgarriff's BNC Frequency Lists</a>.
+    </p> 
+    
+    <p> Alternatively, you might have, or prepare, your own dictionary containing
+      pronunciations, lemmata, etc. </p>
+    
+    <p> <em>NB</em> the text file must use ASCII or UTF-8 character encoding.  If your
+      dictionary file uses another encoding (e.g. <q>Western</q> or ISO-8859, you will
+      need to re-save the file using UTF-8 (in many text editors, the character encoding
+      is an option available when you select <q>Save As...</q> from the <q>File</q> menu). </p> 
+    
+    <p> You can upload as many dictionaries as you like.  Once you have at least one
+      dictionary, you can configure a word layer to lookup the resulting lexicons .</p>
+    
+  </body>
+</html>

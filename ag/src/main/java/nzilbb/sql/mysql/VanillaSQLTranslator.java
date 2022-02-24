@@ -48,8 +48,8 @@ public class VanillaSQLTranslator extends MySQLTranslator {
       } else if (translated.startsWith("CREATE TABLE")) {
          translated = translated
             .replace(" ENGINE=MyISAM","")
-            .replace(" CHARACTER SET utf8mb4","")
-            .replace(" COLLATE utf8mb4_general_ci","")
+            .replaceAll(" CHARACTER SET \\w+","")
+            .replaceAll(" COLLATE \\w+","")
             .replace(" NOT NULL","")
             .replace(" NULL","")
             .replace(" BIT"," SMALLINT")

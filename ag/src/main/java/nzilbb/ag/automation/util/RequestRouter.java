@@ -96,6 +96,11 @@ public class RequestRouter {
       registerMethod(annotator.getClass().getMethod("getStatus"));
     } catch(NoSuchMethodException impossible) {}
       
+    // allow running to be tracked
+    try {
+      registerMethod(annotator.getClass().getMethod("getRunning"));
+    } catch(NoSuchMethodException impossible) {}
+      
     return this;
   }
    

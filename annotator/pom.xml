@@ -28,5 +28,6 @@
     <module>htk</module>
     <module>mfa</module>
     <module>phonemetranscoder</module>
+    <module>flatlexicon</module>
   </modules>  
 </project>
