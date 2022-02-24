@@ -771,7 +771,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
   public Graph transform(Graph graph) throws TransformationException {
     setRunning(true);
     try {
-      setStatus(""); // clear any residual status from the last run...
+      setStatus("Tagging " + graph.getId());
          
       Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
       if (tokenLayer == null) {
@@ -801,14 +801,14 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
         }
       }
 
-      Vector<Annotation> toAnnotate = new Vector<Annotation>();
+      TreeMap<String,Vector<Annotation>> toAnnotate = new TreeMap<String,Vector<Annotation>>();
       // should we just tag everything?
       if (transcriptIsMainlyTargetLang && !thereArePhraseTags) {
         // process all tokens
         for (Annotation token : graph.all(tokenLayerId)) {
           // tag only tokens that are not already tagged
           if (token.first(tagLayerId) == null) { // not tagged yet
-            toAnnotate.add(token);                        
+            registorForAnnotation(token, toAnnotate);
           } // not tagged yet
         } // next token
       } else if (transcriptIsMainlyTargetLang) {
@@ -831,7 +831,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           } else { // TargetLang, so tag it
             // tag only tokens that are not already tagged
             if (token.first(tagLayerId) == null) { // not tagged yet
-              toAnnotate.add(token);
+            registorForAnnotation(token, toAnnotate);
             } // not tagged yet
           } // TargetLang, so tag it
         } // next token
@@ -842,7 +842,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
             for (Annotation token : phrase.all(tokenLayerId)) {
               // tag only tokens that are not already tagged
               if (token.first(tagLayerId) == null) { // not tagged yet
-                toAnnotate.add(token);                  
+                registorForAnnotation(token, toAnnotate);
               } // not tagged yet
             } // next token in the phrase
           } // TargetLang phrase
@@ -853,26 +853,28 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
         Dictionary dictionary = getDictionary(this.dictionary);
         try {
           int t = 0;
-          int tokenCount = toAnnotate.size();
+          int typeCount = toAnnotate.size();
           setPercentComplete(0);
-          for (Annotation token : toAnnotate) {
+          for (String type : toAnnotate.keySet()) { // for each type
             if (isCancelling()) break;
-            boolean found = false;           
-            //setStatus("Lookup: " + token + " - " + dictionary.lookup(token.getLabel()));
-            for (String entry : dictionary.lookup(token.getLabel())) {
+            boolean found = false;
+            for (String entry : dictionary.lookup(type)) {
               
+              if (!found) setStatus("Tagging: " + type); // (log this only once)
               found = true;
               if (strip.length() > 0) entry = entry.replaceAll("["+strip+"]","");              
-              token.createTag(tagLayerId, entry)
-                .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+              for (Annotation token : toAnnotate.get(type)) {
+                token.createTag(tagLayerId, entry)
+                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+              }
               
               // do we want the first entry only?
               if (firstVariantOnly) break;
               
             } // next entry
-            setPercentComplete(++t * 100 / tokenCount);
-
-          } // next token
+            setPercentComplete(++t * 100 / typeCount);
+            
+          } // next type
           if (!isCancelling()) setPercentComplete(100);
         } finally {
           dictionary.close();
@@ -885,6 +887,20 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       setRunning(false);
     }
   }
+  
+  /**
+   * Registers a token for annotation.
+   * @param annotation
+   * @param 
+   * @param toAnnotate
+   */
+  protected void registorForAnnotation(
+    Annotation token, TreeMap<String,Vector<Annotation>> toAnnotate) {
+    if (!toAnnotate.containsKey(token.getLabel())) {
+      toAnnotate.put(token.getLabel(), new Vector<Annotation>());
+    }
+    toAnnotate.get(token.getLabel()).add(token);
+  } // end of registorForAnnotation()
    
   /**
    * Lists the dictionaries implemented by this Annotator.
