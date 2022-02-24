@@ -403,29 +403,11 @@ public class RequestRouter
       Method classMethod, Object[] parameterValues, String method, URI uri)
       throws RequestException {
       try {
-         switch (parameterValues.length) {
-            case 0:
-               return classMethod.invoke(annotator);
-            case 1:
-               return classMethod.invoke(annotator, parameterValues[0]);
-            case 2:
-               return classMethod.invoke(annotator, parameterValues[0], parameterValues[1]);
-            case 3:
-               return classMethod.invoke(
-                  annotator, parameterValues[0], parameterValues[1], parameterValues[2]);
-            case 4:
-               return classMethod.invoke(
-                  annotator, parameterValues[0], parameterValues[1], parameterValues[2],
-                  parameterValues[3]);
-            case 5:
-               return classMethod.invoke(
-                  annotator, parameterValues[0], parameterValues[1], parameterValues[2],
-                  parameterValues[3], parameterValues[4]);
-            default:
-               throw new RequestException(
-                  500, "More than 5 parameters not unsupported, but "
-                  + parameterValues.length + " were specified.", method, uri);
-         }
+        if (parameterValues.length == 0) {
+          return classMethod.invoke(annotator);
+        } else {
+          return classMethod.invoke(annotator, parameterValues);
+        }
       } catch (Throwable error) {
          throw new RequestException(400, method, uri, error);
       }    
