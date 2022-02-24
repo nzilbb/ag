@@ -608,7 +608,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @see #getStrip()
    * @see #setStrip(String)
    */
-  protected String strip; // TODO
+  protected String strip;
   /**
    * Getter for {@link #strip}: Characters to remove from the entry tag labels, if any.
    * @return Characters to remove from the entry tag labels, if any.
@@ -638,6 +638,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       } else {
         tokenLayerId = schema.getWordLayerId();
       }
+      strip = "";
       firstVariantOnly = Boolean.FALSE;
          
       try {
@@ -698,6 +699,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           this, "Invalid Target Language \""+targetLanguagePattern+"\": " + x.getMessage());
       }
     }
+    if (strip == null) strip = "";
       
     // does the outputLayer need to be added to the schema?
     Layer tagLayer = schema.getLayer(tagLayerId);
@@ -850,10 +852,11 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           for (Annotation token : toAnnotate) {
             boolean found = false;           
             //setStatus("Lookup: " + token + " - " + dictionary.lookup(token.getLabel()));
-            for (String pronunciation : dictionary.lookup(token.getLabel())) {
+            for (String entry : dictionary.lookup(token.getLabel())) {
               
               found = true;
-              token.createTag(tagLayerId, pronunciation)
+              if (strip.length() > 0) entry = entry.replaceAll("["+strip+"]","");              
+              token.createTag(tagLayerId, entry)
                 .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
               
               // do we want the first entry only?

@@ -117,6 +117,8 @@ public class TestFlatLexiconTagger {
     assertEquals("pronunciation layer type correct",
                  Constants.TYPE_STRING,
                  schema.getLayer(annotator.getTagLayerId()).getType());
+    assertEquals("strip",
+                 "", annotator.getStrip());
     assertFalse("firstVariantOnly=false",
                 annotator.getFirstVariantOnly());
     assertTrue("pronunciation layer allows peers (firstVariantOnly=false)",
@@ -154,18 +156,18 @@ public class TestFlatLexiconTagger {
                  11, pronLabels.size());
     Iterator<String> prons = pronLabels.iterator();
     assertEquals("Entries in alphabetical order",
-                 "ði:", prons.next());
+                 "ð i:", prons.next());
     assertEquals("Multiple pronunciations",
-                 "ðə", prons.next());
-    assertEquals("kwɪk", prons.next());
-    assertEquals("braʊn", prons.next());
-    assertEquals("fɒks", prons.next());
-    assertEquals("ʤʌmps", prons.next());
-    assertEquals("əʊvə", prons.next());
-    assertEquals("ði:", prons.next());
-    assertEquals("ðə", prons.next());
-    assertEquals("leɪzi:", prons.next());
-    assertEquals("dɒg", prons.next());
+                 "ð ə", prons.next());
+    assertEquals("k w ɪ k", prons.next());
+    assertEquals("b r aʊ n", prons.next());
+    assertEquals("f ɒ k s", prons.next());
+    assertEquals("ʤ ʌ m p s", prons.next());
+    assertEquals("əʊ v ə", prons.next());
+    assertEquals("ð i:", prons.next());
+    assertEquals("ð ə", prons.next());
+    assertEquals("l eɪ z i:", prons.next());
+    assertEquals("d ɒ g", prons.next());
 
     // add a word
     g.addAnnotation(new Annotation().setLayerId("word").setLabel("dog")
@@ -183,20 +185,20 @@ public class TestFlatLexiconTagger {
                  12, pronLabels.size());
     prons = pronLabels.iterator();
     assertEquals("First word is still tagged, because existing tags aren't removed",
-                 "ði:", prons.next());
+                 "ð i:", prons.next());
     assertEquals("First word is still tagged, because existing tags aren't removed",
-                 "ðə", prons.next());
-    assertEquals("kwɪk", prons.next());
-    assertEquals("braʊn", prons.next());
-    assertEquals("fɒks", prons.next());
-    assertEquals("ʤʌmps", prons.next());
-    assertEquals("əʊvə", prons.next());
-    assertEquals("ði:", prons.next());
-    assertEquals("ðə", prons.next());
-    assertEquals("leɪzi:", prons.next());
-    assertEquals("dɒg", prons.next());
+                 "ð ə", prons.next());
+    assertEquals("k w ɪ k", prons.next());
+    assertEquals("b r aʊ n", prons.next());
+    assertEquals("f ɒ k s", prons.next());
+    assertEquals("ʤ ʌ m p s", prons.next());
+    assertEquals("əʊ v ə", prons.next());
+    assertEquals("ð i:", prons.next());
+    assertEquals("ð ə", prons.next());
+    assertEquals("l eɪ z i:", prons.next());
+    assertEquals("d ɒ g", prons.next());
     assertEquals("New token",
-                 "dɒg", prons.next());
+                 "d ɒ g", prons.next());
 
   }   
 
@@ -216,7 +218,8 @@ public class TestFlatLexiconTagger {
       +"&phraseLanguageLayerId="       // no phrase language layer
       +"&tagLayerId=frequency"         // non-default layer
       +"&dictionary=a-z.csv:Word→Frequency"
-      +"&firstVariantOnly=on");        // value = Frequency (non-default)
+      +"&firstVariantOnly=on"
+      +"&strip=");
       
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
@@ -254,7 +257,7 @@ public class TestFlatLexiconTagger {
 
     Annotation firstWord = g.first("word");
     assertEquals("double check the first word is what we think it is: "+firstWord,
-                 "the", firstWord.getLabel());
+                 "The", firstWord.getLabel());
       
     assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                  9, g.all("word").length);
@@ -475,7 +478,7 @@ public class TestFlatLexiconTagger {
 
     Annotation firstWord = g.first("word");
     assertEquals("double check the first word is what we think it is: "+firstWord,
-                 "the", firstWord.getLabel());
+                 "The", firstWord.getLabel());
       
     assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                  9, g.all("word").length);
@@ -489,8 +492,9 @@ public class TestFlatLexiconTagger {
                  0, pronLabels.size());
   }   
 
-  /** Test that language-specific tagging works when only phrases are targeted */
-  @Test public void mostlyNonEnglish() throws Exception {
+  /** Test that language-specific tagging works when only phrases are targeted, and also
+   * that the strip setting works */
+  @Test public void mostlyNonEnglishAndStrip() throws Exception {
       
     Graph g = graph();
     
@@ -515,7 +519,8 @@ public class TestFlatLexiconTagger {
       +"&targetLanguagePattern=en.*"
       +"&tagLayerId=phonemes"
       +"&dictionary=a-z.csv:Word→Pronunciation"
-      +"&firstVariantOnly=false");
+      +"&firstVariantOnly=false"
+      +"&strip=+");
       
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
@@ -537,6 +542,8 @@ public class TestFlatLexiconTagger {
     assertEquals("tag layer type correct",
                  Constants.TYPE_STRING,
                  schema.getLayer(annotator.getTagLayerId()).getType());
+    assertEquals("strip",
+                 " ", annotator.getStrip());
     assertFalse("firstVariantOnly=false",
                 annotator.getFirstVariantOnly());
     assertTrue("tag layer allows peers (firstVariantOnly=false)",
@@ -610,7 +617,8 @@ public class TestFlatLexiconTagger {
       +"&targetLanguagePattern=en.*"
       +"&tagLayerId=phonemes"
       +"&dictionary=a-z.csv:Word→Pronunciation"
-      +"&firstVariantOnly=false");
+      +"&firstVariantOnly=false"
+      +"&strip=");
       
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
@@ -664,16 +672,16 @@ public class TestFlatLexiconTagger {
                  6, pronLabels.size());
     Iterator<String> prons = pronLabels.iterator();
     assertEquals("Entries in alphabetical order",
-                 "ði:", prons.next());
+                 "ð i:", prons.next());
     assertEquals("Multiple pronunciations",
-                 "ðə", prons.next());
+                 "ð ə", prons.next());
     assertEquals("NZE phrase is tagged",
-                 "kwɪk", prons.next());
+                 "k w ɪ k", prons.next());
     assertEquals("NZE phrase is tagged",
-                 "braʊn", prons.next());
+                 "b r aʊ n", prons.next());
     assertEquals("'fox jumps over the' is skipped",
-                 "leɪzi:", prons.next());
-    assertEquals("dɒg", prons.next());
+                 "l eɪ z i:", prons.next());
+    assertEquals("d ɒ g", prons.next());
 
   }
    
