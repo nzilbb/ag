@@ -239,7 +239,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           sql.executeUpdate();
           sql.close();
           sql = rdb.prepareStatement(
-            sqlx.apply("SELECT LAST_INSERT_ID() FROM "+getAnnotatorId() +"_lexicon"));
+            sqlx.apply("SELECT LAST_INSERT_ID() FROM "+getAnnotatorId()+"_lexicon"));
           rs = sql.executeQuery();
           rs.next();
           lexiconId = rs.getInt(1);
@@ -251,7 +251,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
         StringBuilder columnList = new StringBuilder();
         StringBuilder argumentList = new StringBuilder();
         StringBuilder columnDefinitions = new StringBuilder();
-        StringBuilder columnIndexDefinitions = new StringBuilder();
+        Vector<String> columnIndexDefinitions = new Vector<String>();
         int columnCount = 0;
         for (String column : fieldNames.split(fieldDelimiter)) {
           if (column.length() == 0) column = "Field" + columnCount;
@@ -259,9 +259,9 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           argumentList.append(",?");
           columnDefinitions.append(", ").append(sqlQuote).append(column).append(sqlQuote)
             .append(" varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL");
-          columnIndexDefinitions.append(
-            ", INDEX IDX_").append(++columnCount).append("(")
-            .append(sqlQuote).append(column).append(sqlQuote).append(")");
+          columnIndexDefinitions.add(
+            "CREATE INDEX IDX_"+getAnnotatorId()+"_"+lexiconId+"_"+(++columnCount)+" ON "
+            +getAnnotatorId()+"_lexicon_"+lexiconId+" ("+sqlQuote+column+sqlQuote+")");
         } // next column
         
         // drop the table first (just in case it's already there)
@@ -282,12 +282,15 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           +" supplemental SMALLINT NOT NULL DEFAULT 0"
           +" COMMENT 'Whether the word/variant has been manually added since uploading from the original file'"
           + columnDefinitions
-          +", PRIMARY KEY (serial)"
-          + columnIndexDefinitions
-          +") ENGINE=MyISAM;";
+          +", PRIMARY KEY (serial)) ENGINE=MyISAM;";
         sql = rdb.prepareStatement(sqlx.apply(sSql));
         sql.executeUpdate();
         sql.close();
+        for (String indexDecolumnIndexDefinition : columnIndexDefinitions) {
+          sql = rdb.prepareStatement(sqlx.apply(indexDecolumnIndexDefinition));
+          sql.executeUpdate();
+          sql.close();
+        }
 
         // load the lexicon in another thread - the caller must track isRunning...
         
