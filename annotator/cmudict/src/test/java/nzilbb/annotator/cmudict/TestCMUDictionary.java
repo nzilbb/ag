@@ -113,7 +113,7 @@ public class TestCMUDictionary {
       .setEncoding(CMUDictionary.Encoding.DISC);
     List<String> entries = dict.lookup("transcription");
     assertEquals("DSIC",
-                 "tr{nskrIpSVn", entries.iterator().next());
+                 "tr{nskrIpS@n", entries.iterator().next());
   }   
    
   @Test public void pagination() throws Exception {
