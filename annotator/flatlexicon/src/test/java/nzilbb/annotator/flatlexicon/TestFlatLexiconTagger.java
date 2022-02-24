@@ -69,7 +69,7 @@ public class TestFlatLexiconTagger {
     File file = new File(dir, "a-z.csv");
     String error = annotator.loadLexicon(
       file.getName(), ",", "", "", "Word,Pronunciation,Frequency", true, file);
-    if (error != null) {
+    if (error.length() > 0) {
       fail(error);
     }
     // loading is in a separate thread
@@ -713,7 +713,7 @@ public class TestFlatLexiconTagger {
     File file = new File(dir(), "a-z.dict");
     error = annotator.loadLexicon(
       "dict", " - ", "", "", "type - phonemes", false, file);
-    assertNull("loadLexicon returns no error", error);
+    assertEquals("loadLexicon returns no error", "", error);
     // loading is in a separate thread
     while (annotator.getRunning()) {
       try {Thread.sleep(100);} catch(Exception exception) {}
@@ -753,7 +753,7 @@ public class TestFlatLexiconTagger {
     assertEquals("second entry correct", "ð ə", entries.get(1));
 
     // can remove lexicons
-    assertNull("Can delete lexicon", annotator.deleteLexicon("dict"));
+    assertEquals("Can delete lexicon", "", annotator.deleteLexicon("dict"));
     ids = annotator.getDictionaryIds();
     assertEquals("Lexicon (and its dictionaries) were deleted: " + ids,
                  6, ids.size());

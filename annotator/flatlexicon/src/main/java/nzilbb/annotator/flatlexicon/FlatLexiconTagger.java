@@ -175,7 +175,9 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param lexicon The name for the resulting lexicon. If the named lexicon already
    * exists, it will be completely replaced with the contents of the file (i.e. all
    * existing entries will be deleted befor adding new entries from the file).
-   * @param fieldDelimiter The character used to delimit fields in the file.
+   * @param fieldDelimiter The character used to delimit fields in the file. 
+   * If this is " - ", rows are split on only the <em>first</em> space, in line with common
+   * dictionary formats.
    * @param quote The character used to quote field values (if any)
    * @param comment The character used to indicate a line is a comment (not an entry) (if any)
    * @param fieldNames A list of field names, delimited by <var>fieldDelimiter</var>.
@@ -195,18 +197,19 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * <p> This method starts a thread to load the records, and then returns. Callers must
    * track {@link Annotator#getPercentComplete()} and {@link Annotator#getRunning()} for
    * progress updates.
-   * @param lexicon The name for the resulting lexicon. If the named lexicon already
-   * exists, it will be completely replaced with the contents of the file (i.e. all
-   * existing entries will be deleted befor adding new entries from the file).
+   * @param lexicon The name for the resulting lexicon (e.g. "," for CSV). If the named
+   * lexicon already exists, it will be completely replaced with the contents of the file
+   * (i.e. all existing entries will be deleted befor adding new entries from the file).
    * @param fieldDelimiter The character used to delimit fields in the file. 
-   * If this is " ", rows are split on only the <em>first</em> space, in line with common
+   * If this is " - ", rows are split on only the <em>first</em> space, in line with common
    * dictionary formats.
-   * @param quote The character used to quote field values (if any)
-   * @param comment The character used to indicate a line is a comment (not an entry) (if any)
+   * @param quote The character used to quote field values (if any), e.g. "\"".
+   * @param comment The character used to indicate a line is a comment (not an entry) (if
+   * any), e.g. "#".
    * @param fieldNames A list of field names, delimited by <var>fieldDelimiter</var>.
    * @param skipFirstLine Whether to ignore the first line (because it contains field names).
    * @param file The lexicon file.
-   * @return null if upload was successful, an error message otherwise.
+   * @return An empty string if upload was successful, an error message otherwise.
    */
   public String loadLexicon(
     String lexicon, String fieldDelimiter, String quote, String comment, String fieldNames,
@@ -394,7 +397,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
         };
         new Thread(loadFile).start();
         
-        return null;
+        return "";
       } finally {
         try { rdb.close(); } catch(SQLException x) {}
       }
@@ -404,9 +407,32 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
   } // end of loadLexicon()
   
   /**
+   * Lists lexicon names.
+   * @return A list of lexicon names.
+   * @throws SQLException
+   */
+  public List<String> listLexicons() throws SQLException {
+    Vector<String> names = new Vector<String>();
+    Connection rdb = newConnection();
+    try {
+      PreparedStatement sql = rdb.prepareStatement(
+        sqlx.apply("SELECT name FROM "+getAnnotatorId()+"_lexicon ORDER BY name"));
+      ResultSet rs = sql.executeQuery();
+      while (rs.next()) {
+        names.add(rs.getString("name"));
+      } // next lexicon
+      rs.close();
+      sql.close();
+    } finally {
+      rdb.close();
+    }
+    return names;
+  } // end of listLexicons()
+  
+  /**
    * Deletes the given lexicon.
    * @param lexicon
-   * @return An error message, if any.
+   * @return An error message, if any, or an empty string if not.
    */
   public String deleteLexicon(String lexicon) throws SQLException {
     Connection rdb = newConnection();      
@@ -421,7 +447,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
 
           // drop the lexicon table
           String sLexiconTable = getAnnotatorId()+"_lexicon_"+rs.getInt("lexicon_id");
-          String dropError = null;
+          String dropError = "";
           try {
             PreparedStatement deleteLexicon = rdb.prepareStatement(
               sqlx.apply("DROP TABLE " + sLexiconTable));
