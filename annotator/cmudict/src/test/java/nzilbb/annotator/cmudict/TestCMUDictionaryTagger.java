@@ -359,14 +359,14 @@ public class TestCMUDictionaryTagger {
       assertEquals("2", prons.next());
       assertEquals("s{N", prons.next());
       assertEquals("First pronunciation only",
-                   "Vnd", prons.next());
+                   "@nd", prons.next());
       assertEquals("Second pronunciation of 'and' skipped, hesitation tagged",
                    "w@", prons.next());
       assertEquals("w$kt", prons.next());
-      assertEquals("Vb6t", prons.next());
+      assertEquals("@b6t", prons.next());
       assertEquals("m2", prons.next());
       assertEquals("blogging-posting skipped as it's not in the dictionary",
-                   "l{zVli", prons.next());
+                   "l{z@l@", prons.next());
          
     } finally {
       // reset encoding for other tests
