@@ -164,7 +164,7 @@ function selectFile() {
             if (firstLine.startsWith(";;;")) { // most likely the CMU dictionary
                 document.getElementById("comment").value = ";";
                 document.getElementById("skipFirstLine").checked = false;
-                delimiter = " ";
+                delimiter = " - ";
             } else if (firstLine.match(/.*\t.*/)) delimiter = "\t";
             else if (firstLine.match(/.;.*/)) delimiter = ";";
             else if (firstLine.match(/. .*/)) delimiter = " ";
@@ -189,10 +189,10 @@ function showSample() {
     sample.innerHTML = "<caption>Data sample</caption>";
     firstLine = csvRecordsArray[0];
     var parseFields = row => row.split(fieldDelimiter);
-    if (fieldDelimiter == " " || fieldDelimiter == "  ") {
+    if (fieldDelimiter == " - ") {
         // only split on the first occurrence of the delimiter
         parseFields = row => {
-            var firstDelimiter = row.indexOf(fieldDelimiter);
+            var firstDelimiter = row.indexOf(" ");
             if (fieldDelimiter < 0) {
                 return [row, ""];
             } else {
@@ -255,7 +255,7 @@ function showSample() {
     var td = document.createElement("td");
     tr.appendChild(td);
     td.setAttribute("colspan", fieldCount);
-    td.appendChild(document.createTextNode("... "+csvRecordsArray.length+" rows"));
+    td.appendChild(document.createTextNode("... "+csvRecordsArray.length+" rows ..."));
 }
 
 function uploadLexicon() {

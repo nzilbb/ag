@@ -685,80 +685,6 @@ public class TestFlatLexiconTagger {
 
   }
    
-  /**
-   * Returns a graph for annotating.
-   * @return The graph for testing with.
-   */
-  public static Graph graph() {
-    Schema schema = new Schema(
-      "participant", "turn", "utterance", "word",
-      new Layer("transcript_language", "Overall Language")
-      .setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false).setPeersOverlap(false).setSaturated(true),
-      new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(true).setPeersOverlap(true).setSaturated(true),
-      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(false).setSaturated(false)
-      .setParentId("participant").setParentIncludes(true),
-      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(false).setSaturated(true)
-      .setParentId("turn").setParentIncludes(true),
-      new Layer("lang", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(false).setSaturated(false)
-      .setParentId("turn").setParentIncludes(true),
-      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
-      .setPeers(true).setPeersOverlap(false).setSaturated(false)
-      .setParentId("turn").setParentIncludes(true),
-      new Layer("phonemes", "Pronunciation").setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(true).setPeersOverlap(true).setSaturated(true)
-      .setParentId("word").setParentIncludes(true));
-    // annotate a graph
-    Graph g = new Graph()
-      .setSchema(schema);
-    Anchor start = g.getOrCreateAnchorAt(1);
-    Anchor end = g.getOrCreateAnchorAt(100);
-    g.addAnnotation(
-      new Annotation().setLayerId("participant").setLabel("someone")
-      .setStart(start).setEnd(end));
-    Annotation turn = g.addAnnotation(
-      new Annotation().setLayerId("turn").setLabel("someone")
-      .setStart(start).setEnd(end)
-      .setParent(g.first("participant")));
-    g.addAnnotation(
-      new Annotation().setLayerId("utterance").setLabel("someone")
-      .setStart(start).setEnd(end)
-      .setParent(turn));
-      
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("The")
-                    .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("quick")
-                    .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("brown")
-                    .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("fox")
-                    .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(45))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("jumps")
-                    .setStart(g.getOrCreateAnchorAt(45)).setEnd(g.getOrCreateAnchorAt(50))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("over")
-                    .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(60))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("the")
-                    .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(70))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("lazy")
-                    .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(80))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("dog")
-                    .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
-                    .setParent(turn));
-    return g;
-  } // end of graph()
-
   /** Test that lexicons and corresponding dictionaries can be added and removed. */
   @Test public void lexiconManagement() throws Exception {
 
@@ -786,7 +712,7 @@ public class TestFlatLexiconTagger {
     // add a lexicon, using first-space delimiter
     File file = new File(dir(), "a-z.dict");
     error = annotator.loadLexicon(
-      "dict", " ", "", "", "type phonemes", false, file);
+      "dict", " - ", "", "", "type - phonemes", false, file);
     assertNull("loadLexicon returns no error", error);
     // loading is in a separate thread
     while (annotator.getRunning()) {
@@ -832,6 +758,81 @@ public class TestFlatLexiconTagger {
     assertEquals("Lexicon (and its dictionaries) were deleted: " + ids,
                  6, ids.size());
   }   
+
+  /**
+   * Returns a graph for annotating.
+   * @return The graph for testing with.
+   */
+  public static Graph graph() {
+    Schema schema = new Schema(
+      "participant", "turn", "utterance", "word",
+      new Layer("transcript_language", "Overall Language")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("participant").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("lang", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("phonemes", "Pronunciation").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
+    // annotate a graph
+    Graph g = new Graph()
+      .setSchema(schema);
+    g.setId("unit-test");
+    Anchor start = g.getOrCreateAnchorAt(1);
+    Anchor end = g.getOrCreateAnchorAt(100);
+    g.addAnnotation(
+      new Annotation().setLayerId("participant").setLabel("someone")
+      .setStart(start).setEnd(end));
+    Annotation turn = g.addAnnotation(
+      new Annotation().setLayerId("turn").setLabel("someone")
+      .setStart(start).setEnd(end)
+      .setParent(g.first("participant")));
+    g.addAnnotation(
+      new Annotation().setLayerId("utterance").setLabel("someone")
+      .setStart(start).setEnd(end)
+      .setParent(turn));
+      
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("The")
+                    .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("quick")
+                    .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("brown")
+                    .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("fox")
+                    .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(45))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("jumps")
+                    .setStart(g.getOrCreateAnchorAt(45)).setEnd(g.getOrCreateAnchorAt(50))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("over")
+                    .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(60))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("the")
+                    .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(70))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("lazy")
+                    .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(80))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("dog")
+                    .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
+                    .setParent(turn));
+    return g;
+  } // end of graph()
 
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.annotator.flatlexicon.TestFlatLexiconTagger");

@@ -301,7 +301,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
         // we also count records so we can accurates track progress
         int entryCount = 0;
         // and maybe convert the first space to a tab
-        boolean firstSpace = fieldDelimiter.equals(" ");
+        boolean firstSpace = fieldDelimiter.equals(" - ");
         BufferedReader reader = new BufferedReader(new FileReader(file));
         BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
         String line = reader.readLine(); 

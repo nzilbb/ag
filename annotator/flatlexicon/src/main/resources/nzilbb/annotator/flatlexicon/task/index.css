@@ -59,6 +59,9 @@ progress {
     width: 100%;
 }
 
+#uploadForm {
+    padding-bottom: 20px;
+}
 #sample {
     border-collapse: collapse;
     display: inline-table;
