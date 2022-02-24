@@ -54,8 +54,6 @@ import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.sql.ConnectionFactory;
 import nzilbb.util.IO;
 
-// TODO migration from layer manager: rename database table
-
 /**
  * Annotator that tags words with their pronunciations according to the 
  * <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict"> CMU Pronouncing Dictionary </a>.
@@ -704,7 +702,11 @@ public class CMUDictionaryTagger extends Annotator
       try {
         Dictionary dictionary = getDictionary("cmudict");
         try {
+          int t = 0;
+          int tokenCount = toAnnotate.size();
+          setPercentComplete(0);
           for (Annotation token : toAnnotate) {
+            if (isCancelling()) break;
             boolean found = false;
             for (String pronunciation : dictionary.lookup(token.getLabel())) {
 
@@ -723,6 +725,7 @@ public class CMUDictionaryTagger extends Annotator
                   .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
               }
             }
+            setPercentComplete(++t * 100 / tokenCount);
           } // next token
         } finally {
           dictionary.close();
