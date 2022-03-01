@@ -198,7 +198,7 @@ function showSample() {
             } else {
                 return [
                     row.substring(0, firstDelimiter),
-                    row.substring(firstDelimiter + fieldDelimiter.length)];
+                    row.substring(firstDelimiter + 1)];
             }
         }
     }
