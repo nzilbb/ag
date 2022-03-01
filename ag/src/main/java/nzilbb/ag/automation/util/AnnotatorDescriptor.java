@@ -190,6 +190,60 @@ public class AnnotatorDescriptor implements CloneableBean {
   } // end of getInfo()
    
   /**
+   * Retrieves HTML-encoded definition of the task parameters, including a list of all
+   * parameters, and the encoding of the parameter string, for displaying to users who
+   * wish to configure annotator tasks programmatically.
+   * @return The contents of the task/parameters.html file deployed with the annotator, or
+   * null if no information was provided. 
+   */
+  @ClonedProperty
+  public String getTaskParameterInfo() {
+    URL url = annotatorClass.getResource("task/parameters.html");
+    if (url == null) return null;
+    try {
+      return IO.InputStreamToString(url.openConnection().getInputStream());
+    } catch(IOException exception) {
+      return null;
+    }
+  } // end of getTaskParameterInfo()
+   
+  /**
+   * Retrieves HTML-encoded definition of the installation config parameters, including a
+   * list of all parameters, and the encoding of the parameter string, for displaying to
+   * users who wish to configure the annotator programmatically. 
+   * @return The contents of the config/parameters.html file deployed with the annotator,
+   * or null if no information was provided. 
+   */
+  @ClonedProperty
+  public String getConfigParameterInfo() {
+    URL url = annotatorClass.getResource("config/parameters.html");
+    if (url == null) return null;
+    try {
+      return IO.InputStreamToString(url.openConnection().getInputStream());
+    } catch(IOException exception) {
+      return null;
+    }
+  } // end of getConfigParameterInfo()
+   
+  /**
+   * Retrieves HTML-encoded document containing information about what endpoints are
+   * published by the ext web-app, for displaying to users who wish to use it
+   * programmatically.
+   * @return The contents of the ext/api.html file deployed with the annotator,
+   * or null if no information was provided. 
+   */
+  @ClonedProperty
+  public String getExtApiInfo() {
+    URL url = annotatorClass.getResource("ext/api.html");
+    if (url == null) return null;
+    try {
+      return IO.InputStreamToString(url.openConnection().getInputStream());
+    } catch(IOException exception) {
+      return null;
+    }
+  } // end of getConfigParameterInfo()
+   
+  /**
    * Determines whether the annotator includes a web-app for installation or general
    * configuration.
    * @return true if the class includes a web-app at config/index.html, false otherwise.

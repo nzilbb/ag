@@ -15,14 +15,24 @@
       which is displayed to users before they install the module. </li>
     <li> <i> &hellip;/config/&hellip; </i> - a subdirectory of the directory containing
       the Annotator class, containing a general configuration web-app, if the annotator
-      needs overall configuration. </li> 
+      needs overall configuration. This should include <i>index.html</i> for starting the
+      web-app, and also <i>parameters.html</i>, a standalone definition of the installation config
+      parameters, including a list of all parameters, and the encoding of the parameter
+      string, for displaying to users who wish to configure the annotator programmatically.</li>  
     <li> <i> &hellip;/task/&hellip; </i> - a subdirectory of the directory containing
       the Annotator class, containing a task configuration web-app for defining
-      annotation task parameters. </li> 
+      annotation task parameters. This should include <i>index.html</i> for starting the
+      web-app, and also <i>parameters.html</i>, a standalone definition of the installation config
+      parameters, including a list of all parameters, and the encoding of the parameter
+      string, for displaying to users who wish to configure annotator tasks
+      programmatically. </li>  
     <li> <i> &hellip;/ext/&hellip; </i> - a subdirectory of the directory containing
       the Annotator class, containing a web-app providing any extra user interfaces that
       might be useful for the annotator, including post-annotation visualizations,
-      lexicons or models, etc... </li>  
+      lexicons or models, etc... This should include <i>index.html</i> for starting the
+      web-app, and also <i>api.html</i>, a standalone document containing information
+      about what endpoints are published by the web-app, for displaying to users who wish
+      to use it programmatically. </li>   
   </ul> </p>
 
 <p> e.g. a module implementing an Annotator class called <tt> org.fancy.Tagger </tt>
@@ -32,8 +42,11 @@
     <li>org/fancy/Tagger.class</li>
     <li>org/fancy/info.html</li>
     <li>org/fancy/config/index.html</li>
+    <li>org/fancy/config/parameters.html</li>
     <li>org/fancy/task/index.html</li>
+    <li>org/fancy/task/parameters.html</li>
     <li>org/fancy/ext/index.html</li>
+    <li>org/fancy/ext/api.html</li>
 </ul> </p>
 
 <p> Annotators may require access to the file system, a relational database, or the graph

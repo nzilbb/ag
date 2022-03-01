@@ -150,22 +150,23 @@ public class ConfigApp extends AnnotatorWebApp {
       System.err.println("finished: " + result);
       try {
          annotator.setConfig(result);
-
-         if (annotator.getWorkingDirectory() != null) {
-           // save the configuration in a local file
-           File f = new File(
-             annotator.getWorkingDirectory(), annotator.getAnnotatorId() + ".cfg");
-           if (result != null) {
-             try {
-               PrintWriter writer = new PrintWriter(f, "UTF-8");
-               writer.write(result);
-               writer.close();
-             } catch(IOException x) {
-               System.err.println("Could not write configuration file "+f.getPath()+": "+x);
-               x.printStackTrace(System.err);
-             }
-           }
-         }
+         
+         // The annotator has to do its own config persistence, so don't do this:
+         // if (annotator.getWorkingDirectory() != null) {
+         //   // save the configuration in a local file
+         //   File f = new File(
+         //     annotator.getWorkingDirectory(), annotator.getAnnotatorId() + ".cfg");
+         //   if (result != null) {
+         //     try {
+         //       PrintWriter writer = new PrintWriter(f, "UTF-8");
+         //       writer.write(result);
+         //       writer.close();
+         //     } catch(IOException x) {
+         //       System.err.println("Could not write configuration file "+f.getPath()+": "+x);
+         //       x.printStackTrace(System.err);
+         //     }
+         //   }
+         // }
 
       } catch(InvalidConfigurationException exception) {
          System.err.println(""+exception);

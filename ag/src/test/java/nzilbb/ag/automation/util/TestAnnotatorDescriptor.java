@@ -54,6 +54,12 @@ public class TestAnnotatorDescriptor {
                    d.hasExtWebapp());
       assertTrue("Info is accessible",
                  d.getInfo().startsWith("<html><head><title>MinimalExample"));
+      assertNull("No config parameter info is accessible",
+                 d.getConfigParameterInfo());
+      assertNull("No task parameter info is accessible",
+                 d.getTaskParameterInfo());
+      assertNull("No ext API info is accessible",
+                 d.getExtApiInfo());
    }
 
    @Test public void theWorksExample() throws Exception {
@@ -76,6 +82,12 @@ public class TestAnnotatorDescriptor {
                   d.hasExtWebapp());
       assertTrue("Info is accessible",
                  d.getInfo().startsWith("<!DOCTYPE html>\n<html>\n  <head>\n    <title>TheWorksExample"));
+      assertTrue("Config parameter info is accessible",
+                 d.getConfigParameterInfo().startsWith("<!DOCTYPE html>\n<html>\n  <head>\n    <title>Configuration Parameters"));
+      assertTrue("Task parameter info is accessible",
+                 d.getTaskParameterInfo().startsWith("<!DOCTYPE html>\n<html>\n  <head>\n    <title>Task Parameters"));
+      assertTrue("Ext API info is accessible",
+                 d.getExtApiInfo().startsWith("<!DOCTYPE html>\n<html>\n  <head>\n    <title>Extended API"));
    }
 
    public static void main(String args[]) {
