@@ -319,6 +319,42 @@ public class MFA extends Annotator {
   public MFA setMultilingualIPA(boolean newMultilingualIPA) { multilingualIPA = newMultilingualIPA; return this; }
   
   /**
+   * --beam setting given to the mfa command.
+   * @see #getBeam()
+   * @see #setBeam(int)
+   */
+  protected int beam = 10;
+  /**
+   * Getter for {@link #beam}: --beam setting given to the mfa command.
+   * @return --beam setting given to the mfa command.
+   */
+  public int getBeam() { return beam; }
+  /**
+   * Setter for {@link #beam}: --beam setting given to the mfa command.
+   * @param newBeam --beam setting given to the mfa command.
+   */
+  public MFA setBeam(int newBeam) { beam = newBeam; return this; }
+  
+  /**
+   * --retry-beam setting given to the mfa command.
+   * @see #getRetryBeam()
+   * @see #setRetryBeam(int)
+   */
+  protected int retryBeam = 40;
+  /**
+   * Getter for {@link #retryBeam}: --retry-beam setting given to the mfa command (0 = use
+   * default value). 
+   * @return --retry-beam setting given to the mfa command.
+   */
+  public int getRetryBeam() { return retryBeam; }
+  /**
+   * Setter for {@link #retryBeam}: --retry-beam setting given to the mfa command (0 = use
+   * default value). 
+   * @param newRetryBeam --retry-beam setting given to the mfa command.
+   */
+  public MFA setRetryBeam(int newRetryBeam) { retryBeam = newRetryBeam; return this; }
+
+  /**
    * Default constructor.
    */
   public MFA() {
@@ -584,7 +620,8 @@ public class MFA extends Annotator {
     }
 
     File mfa = new File(mfaPath, "mfa");
-    if (!mfa.exists()) mfa = new File(mfaPath, "mfa.exe");
+    File mfaExe = new File(mfaPath, "mfa.exe");
+    if (!mfa.exists() && mfaExe.exists()) mfa = mfaExe;
     File envPath = new File(mfaPath).getParentFile();
     File condaPath = envPath.getParentFile().getParentFile();
     File condaBin = new File(condaPath, "bin");
@@ -698,9 +735,6 @@ public class MFA extends Annotator {
     if (dictionaryName != null && modelsName == null)
       throw new InvalidConfigurationException(
         this, "If a dictionary name is specified, pretrained acoustic models must also be specified.");
-    if (dictionaryName == null && modelsName != null)
-      throw new InvalidConfigurationException(
-        this, "If pretrained acoustic models are specified, a dictionary name must also be specified.");
     if (pronunciationLayerId != null && schema.getLayer(pronunciationLayerId) == null)
       throw new InvalidConfigurationException(
         this, "Pronunciation layer not found: " + pronunciationLayerId);
@@ -979,30 +1013,37 @@ public class MFA extends Annotator {
         if (fragments.size() > 0) {
           
           if (!isCancelling()) {
-            if (dictionaryName == null) { // train & align          
+            if (dictionaryName == null && modelsName == null) { // train & align          
               //mfa("validate", corpusDir.getPath(), dictionaryFile.getPath());
               setPercentComplete(30); // (up to 5 phases of 10% each arrives at 80%)
               if (multilingualIPA) { // --multilingual_ipa
                 mfa(false, "train", "--clean", "--multilingual_ipa",
                     corpusDir.getPath(), dictionaryFile.getPath(),
-                    alignedDir.getPath());
+                    alignedDir.getPath(),
+                    "--beam", ""+beam, "--retry-beam", ""+retryBeam);
               } else {
                 mfa(false, "train", "--clean", 
                     corpusDir.getPath(), dictionaryFile.getPath(),
-                    alignedDir.getPath());
+                    alignedDir.getPath(),
+                    "--beam", ""+beam, "--retry-beam", ""+retryBeam);
               }
+              setPercentComplete(80); // (up to 5 phases of 10% each arrives at 80%)
               // log contents of ${tempDir}/corpus/train_acoustic_model.log
               copyLog(new File(new File(tempDir, "corpus"), "train_acoustic_model.log"));
             } else { // pretrained
               mfa(false, "model","download","acoustic", modelsName);
               setPercentComplete(25);
               if (!isCancelling()) {
-                mfa(false, "model","download","dictionary", dictionaryName);
-                setPercentComplete(30);
+                if (dictionaryName != null) {
+                  mfa(false, "model","download","dictionary", dictionaryName);
+                  setPercentComplete(30);
+                }
+                String dictionary = dictionaryFile != null?dictionaryFile.getPath():dictionaryName;
                 if (!isCancelling()) {
                   mfa(false, "align", "--clean", 
-                      corpusDir.getPath(), dictionaryName, modelsName,
-                      alignedDir.getPath());
+                      corpusDir.getPath(), dictionary, modelsName,
+                      alignedDir.getPath(),
+                      "--beam", ""+beam, "--retry-beam", ""+retryBeam);
                   // log contents of ${tempDir}/corpus/align.log
                   copyLog(new File(new File(tempDir, "corpus"), "align.log"));
                 } // not cancelling
@@ -1397,7 +1438,7 @@ public class MFA extends Annotator {
           // if the last percentage was greater, we've started a new phase
           if (lastPhaseProgress > phaseProgress) phase++;
           lastPhaseProgress = phaseProgress;
-          // update the overallp progress
+          // update the overall progress
           setPercentComplete(initialPercentComplete + (phase * 10) + (phaseProgress/10));
         } else { // not progress, just pass through the message
           setStatus(s);

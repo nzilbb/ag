@@ -234,12 +234,6 @@ document.getElementById("form").onsubmit = function(e) {
             document.getElementById("modelsName").focus();
             return false;
         }
-        if (!document.getElementById("dictionaryName").value
-           && document.getElementById("modelsName").value) {
-            alert("If you have selected Pretrained Acoustic Models, you must also select a Dictionary Name.");
-            document.getElementById("dictionaryName").focus();
-            return false;
-        }
         return true;
     } catch (x) {
         alert(x);

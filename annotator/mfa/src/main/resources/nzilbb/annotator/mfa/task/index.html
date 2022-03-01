@@ -43,6 +43,14 @@
             <option value="">[none]</option>
         </select></span>
       </div>
+      <div class="field" title="This is the value for the --beam mfa parameter.">
+        <label for="beam"> Beam </label>
+        <span><input id="beam" name="beam" type="number" min="0" step="10" value="10" ></span>
+      </div>
+      <div class="field" title="This is the value for the --retry-beam mfa parameter.">
+        <label for="retryBeam"> Retry Beam </label>
+        <span><input id="retryBeam" name="retryBeam" type="number" min="0" step="10" value="40"></span>
+      </div>
       <div class="field" title="Whether manual alignments should be overwritten or not.">
         <label for="ignoreAlignmentStatuses"> Replace Manual Alignments </label>
         <span><input id="ignoreAlignmentStatuses"
