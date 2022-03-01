@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html><head><title>API Flat Lexicon Tagger</title></head>
+  <body>
+    <h1>Flat Lexicon Tagger</h1>
+    
+    <p> This annotator tags annotates words with data from a dictionary loaded from a
+      plain text file (e.g. a CSV file). The file must have a 'flat' structure in the
+      sense that it's a simple list of dictionary entries with a fixed number of
+      columns/fields, rather than having a complex structure. </p>  
+
+    <p> The extension API can be used to upload new lexicon files, by making a
+      multipart <tt>POST</tt> request to the <tt>loadLexicon</tt> endpoint. </p>
+    
+    <p> Parameters are: </p>
+    <dl>
+      <dt> lexicon </dt> <dd> The name for the lexicon. </dd>
+      <dt> fieldDelimiter </dt> <dd> The character that separarates columns/fields in the
+        file. Normal values include:
+        <ul>
+          <li><pre>,</pre> - comma</li>
+          <li><pre>;</pre> - semicolon</li>
+          <li>tab (ASCII value 9, or "\t" in C-like languages)</li>
+          <li>space (ASCII value 32, or " " in C-like languages)</li>
+          <li><pre> - </pre> - i.e. a space, followed by a hyphen, followed by a space -
+            this indicates that the first space only is a field delimiter. This means
+            that the file contains two fields, and the first space on each line indicates
+            where the second field starts. This is a commone dictionary format.</li>
+          <li><pre>\</pre> - backslash</li>
+        </ul>
+      </dd>
+      <dt> quote </dt> <dd> What character is used to 'quote' field values (an so should
+        not be imported as part of field values. Commonly this is <tt>"</tt> </dd>
+      <dt> comment </dt> <dd> The character used to begin line comments, which will be
+        ignored during lexicon import. e.g. for the CMU Pronouncing dictionary, this
+        is <tt>;</tt> </dd>  
+      <dt> fieldNames </dt> <dd> The field names for the lexicon, delimited by the same
+        string passed the value of <i>fieldDelimiter</i>. e.g. if the field delimiter is
+        " - ", indicating the delimiter is the first line only, then <i>fieldNames</i>
+        should be something like <tt>Word - Pronunciation</tt></dd> 
+      <dt> skipFirstLine </dt> <dd> Value should be <tt>on</tt> if the first line in the
+        file should be ignored (because it includes field names). Omit this parameter to
+        import all lines including the first line. </dd>
+      <dt> file </dt> <dd> The plain-text lexicon file. </dd> 
+    </dl>
+
+    <p> Once the file is uploaded, the annotator request returns immediately, before the
+      processing of the lexicon file has been completed. To monitor progress of the
+      import, make <tt>GET</tt> requests for the following endpoints: </p>
+    <dl>
+      <dt>getRunning</dt><dd> <tt>true</tt> if the import is still running, <tt>false</tt>
+        otherwise. </dd>
+      <dt>getPercentComplete</dt><dd> How far through the file the import is. </dd>
+      <dt>getStatus</dt><dd> The last status message from the import. </dd>
+    </dl>
+  </body>
+</html>

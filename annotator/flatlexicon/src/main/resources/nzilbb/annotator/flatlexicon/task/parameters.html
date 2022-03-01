@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html><head><title>Flat Lexicon Tagger</title></head>
+  <body>
+    <h1>Flat Lexicon Tagger</h1>
+    
+    <p> This annotator tags annotates words with data from a dictionary loaded from a
+      plain text file (e.g. a CSV file). The file must have a 'flat' structure in the
+      sense that it's a simple list of dictionary entries with a fixed number of
+      columns/fields, rather than having a complex structure. </p>  
+
+    <p> Configuration parameters are encoded as a URL query string, e.g. <br>
+      <samp>tokenLayerId=orthography&tagLayerId=phonemes&dictionary=german_prosodylab-suppliment.dict:Word→Pronunciation</samp> <br>
+      <em>NB:</em> Ensure the configuration string provided has all parts correctly
+      URI-encoded; in particular <tt>:</tt> should be encoded <tt>%3A</tt> and <tt>→</tt>
+      should be encoded <tt>%E2%86%92</tt>
+    </p>
+
+    <p> Parameters are: </p>
+    <dl>
+      <dt> tokenLayerId </dt> <dd> Input layer from which words come. </dd>
+      <dt> transcriptLanguageLayerId </dt> <dd> Transcript attribute for overall language. </dd>
+      <dt> phraseLanguageLayerId </dt> <dd> Layer for annotating phrases in a different
+        language. </dd> 
+      <dt> targetLanguagePattern </dt> <dd> Regular expression for the ISO language codes
+        of the languages to target, or blank for all. </dd> 
+      <dt> tagLayerId </dt> <dd> Output layer to which looked up entries are added. </dd>
+      <dt> dictionary </dt> <dd> Which dictionary to lookup for tag
+        labels. Invoke <tt>getDictionaryIds</tt> for a JSON-encoded list of valid
+        dictionaries.</dd> 
+      <dt> firstVariantOnly </dt> <dd> If there are multiple entries for the token, use
+        only the first one. Value should be "on" for <tt>true</tt>, and the parameter
+        should be absent to indicate <tt>false</tt>. </dd> 
+    </dl>
+    
+  </body>
+</html>
