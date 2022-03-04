@@ -29,5 +29,6 @@
     <module>mfa</module>
     <module>phonemetranscoder</module>
     <module>flatlexicon</module>
+    <module>basservices</module>
   </modules>  
 </project>

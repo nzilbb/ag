@@ -68,7 +68,6 @@ public class SAMPA2DISC extends PhonemeTranslator {
          map.put("{~:",'0');
          map.put("O~:",'~');
          
-         
          // consonants
          map.put("tS",'J');
          map.put("dZ",'_');
@@ -77,6 +76,13 @@ public class SAMPA2DISC extends PhonemeTranslator {
          map.put("n,",'H');
          map.put("l,",'P');
          map.put("r*",'R');
+
+         // extras from maus-sampa
+         map.put("{I",'1'); // duplicate of "eI"
+         map.put("6",'@'); // 'open schwa' (ɐ)
+         map.put("o:",'$');
+         map.put("O", 'Q');
+         map.put("4", 'L'); // flap - this is an extension to DISC
       }
    } // end of constructor
    
@@ -98,7 +104,9 @@ public class SAMPA2DISC extends PhonemeTranslator {
          if (c < source.length() - 1) {
             candidates.add(""+source.charAt(c)+source.charAt(c+1));
          }
-         // there are no 1-character keys in the map, so no 1-char candidates are required
+         if (c < source.length()) {
+            candidates.add(""+source.charAt(c));
+         }
          boolean bFound = false;
          for (String sTry : candidates) {
             if (map.containsKey(sTry)) {
@@ -113,7 +121,8 @@ public class SAMPA2DISC extends PhonemeTranslator {
             DISC.append(source.charAt(c));
          }
       }
-      return DISC.toString();
+      return DISC.toString()
+        .replace(":",""); // remove any leftover length marks
    }
    
 } // end of class SAMPA2DISC

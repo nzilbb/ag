@@ -141,6 +141,13 @@ public class TestDISC2SAMPA2DISC {
                    "streIndZ", disc2sampa.apply("str1n_"));
       assertEquals("transcription",
                    "str1n_", sampa2disc.apply("streIndZ"));
+
+      assertEquals("maus-sampa - saved",
+                   "s1vd", sampa2disc.apply("s{Ivd"));
+      assertEquals("maus-sampa - up",
+                   "@p", sampa2disc.apply("6p"));
+      assertEquals("maus-sampa - property",
+                   "prQp@Li", sampa2disc.apply("prOp@4i:"));
    }
    
    public static void main(String args[]) {
