@@ -39,7 +39,8 @@ import nzilbb.encoding.DISC2CMU;
 import nzilbb.sql.mysql.MySQLTranslator;
 
 /**
- * This is an example annotator dictionary.
+ * Dictionary for word pronunciations according to the 
+ * <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict"> CMU Pronouncing Dictionary </a>.
  */
 @SuppressWarnings("serial")
 public class CMUDictionary implements Dictionary {
@@ -72,7 +73,7 @@ public class CMUDictionary implements Dictionary {
    * @return The dictionary's ID.
    */
   public String getDictionaryId() {
-    return "frequencies";
+    return "cmudict";
   }
 
   /**
