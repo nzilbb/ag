@@ -27,89 +27,81 @@ import nzilbb.util.Execution;
  * Thread processing media.
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public class MediaThread
-  extends Thread
-{
-   // Attributes:
+public class MediaThread extends Thread {
+  // Attributes:
    
-   /**
-    * Percent complete.
-    * @see #getPercentComplete()
-    * @see #setPercentComplete(int)
-    */
-   protected int percentComplete = 0;
-   /**
-    * Getter for {@link #percentComplete}: Percent complete.
-    * @return Percent complete.
-    */
-   public int getPercentComplete()
-   {      
-      if (percentComplete == 0 && execution != null && execution.getFinished()) return 100;
-      return percentComplete;
-   }
-   /**
-    * Setter for {@link #percentComplete}: Percent complete.
-    * @param newPercentComplete Percent complete.
-    */
-   public MediaThread setPercentComplete(int newPercentComplete) { percentComplete = newPercentComplete; return this; }
-
+  /**
+   * Percent complete.
+   * @see #getPercentComplete()
+   * @see #setPercentComplete(int)
+   */
+  protected int percentComplete = 0;
+  /**
+   * Getter for {@link #percentComplete}: Percent complete.
+   * @return Percent complete.
+   */
+  public int getPercentComplete() {      
+    if (percentComplete == 0 && execution != null && execution.getFinished()) return 100;
+    return percentComplete;
+  }
+  /**
+   * Setter for {@link #percentComplete}: Percent complete.
+   * @param newPercentComplete Percent complete.
+   */
+  public MediaThread setPercentComplete(int newPercentComplete) { percentComplete = newPercentComplete; return this; }
    
-   /**
-    * The external process Execution object, if the thread was given one.
-    * @see #getExecution()
-    * @see #setExecution(Execution)
-    */
-   protected Execution execution;
-   /**
-    * Getter for {@link #execution}: The external process Execution object, if the thread was given one.
-    * @return The external process Execution object, if the thread was given one.
-    */
-   public Execution getExecution() { return execution; }
-   /**
-    * Setter for {@link #execution}: The external process Execution object, if the thread was given one.
-    * @param newExecution The external process Execution object, if the thread was given one.
-    */
-   public MediaThread setExecution(Execution newExecution) { execution = newExecution; return this; }
-
+  /**
+   * The external process Execution object, if the thread was given one.
+   * @see #getExecution()
+   * @see #setExecution(Execution)
+   */
+  protected Execution execution;
+  /**
+   * Getter for {@link #execution}: The external process Execution object, if the thread
+   * was given one. 
+   * @return The external process Execution object, if the thread was given one.
+   */
+  public Execution getExecution() { return execution; }
+  /**
+   * Setter for {@link #execution}: The external process Execution object, if the thread
+   * was given one. 
+   * @param newExecution The external process Execution object, if the thread was given one.
+   */
+  public MediaThread setExecution(Execution newExecution) { execution = newExecution; return this; }
    
-   /**
-    * Last error, if any.
-    * @see #getLastError()
-    * @see #setLastError(Throwable)
-    */
-   protected Throwable lastError;
-   /**
-    * Getter for {@link #lastError}: Last error, if any.
-    * @return Last error, if any.
-    */
-   public Throwable getLastError() { return lastError; }
-   /**
-    * Setter for {@link #lastError}: Last error, if any.
-    * @param newLastError Last error, if any.
-    */
-   public MediaThread setLastError(Throwable newLastError) { lastError = newLastError; return this; }
-
+  /**
+   * Last error, if any.
+   * @see #getLastError()
+   * @see #setLastError(Throwable)
+   */
+  protected Throwable lastError;
+  /**
+   * Getter for {@link #lastError}: Last error, if any.
+   * @return Last error, if any.
+   */
+  public Throwable getLastError() { return lastError; }
+  /**
+   * Setter for {@link #lastError}: Last error, if any.
+   * @param newLastError Last error, if any.
+   */
+  public MediaThread setLastError(Throwable newLastError) { lastError = newLastError; return this; }
    
-   // Methods:
+  // Methods:
    
-   /**
-    * Default constructor.
-    */
-   public MediaThread()
-   {
-      super();
-   } // end of constructor
+  /**
+   * Default constructor.
+   */
+  public MediaThread() {
+    super();
+  } // end of constructor
 
-   /**
-    * Constructor with target.
-    */
-   public MediaThread(Runnable target)
-   {
-      super(target);
-      if (target instanceof Execution)
-      {
-	 setExecution((Execution)target);
-      }
-   }
+  /**
+   * Constructor with target.
+   */
+  public MediaThread(Runnable target) {
+    super(target);
+    if (target instanceof Execution) {
+      setExecution((Execution)target);
+    }
+  }
 } // end of class MediaThread
