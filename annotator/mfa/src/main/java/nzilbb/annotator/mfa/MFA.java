@@ -562,7 +562,7 @@ public class MFA extends Annotator {
   }
   
   /**
-   * Ensures HTK is available.
+   * Ensures MFA is available.
    * @throws InvalidConfigurationException
    * @see #getConfig()
    * @see #beanPropertiesFromQueryString(String)
@@ -747,7 +747,7 @@ public class MFA extends Annotator {
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
           .setPeers(true).setPeersOverlap(false)
           .setParentId(schema.getTurnLayerId())
-          .setDescription("HTK alignment time."));
+          .setDescription("MFA alignment time."));
       } else if (utteranceTagLayerId.equals(orthographyLayerId)
                  || utteranceTagLayerId.equals(pronunciationLayerId)
                  || utteranceTagLayerId.equals(wordAlignmentLayerId)
@@ -770,7 +770,7 @@ public class MFA extends Annotator {
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
           .setPeers(true).setPeersOverlap(false)
           .setParentId(schema.getTurnLayerId())
-          .setDescription("HTK participant alignment time."));
+          .setDescription("MFA participant alignment time."));
       } else if (participantTagLayerId.equals(orthographyLayerId)
                  || participantTagLayerId.equals(pronunciationLayerId)
                  || participantTagLayerId.equals(wordAlignmentLayerId)
@@ -1079,7 +1079,7 @@ public class MFA extends Annotator {
     }
   } // end of transformTranscripts()
 
-  // Bunch of files and resources needed by HTK:
+  // Bunch of files and resources needed by MFA:
 
   /** The working directory for this training session. */
   protected File sessionWorkingDir;
@@ -1171,7 +1171,7 @@ public class MFA extends Annotator {
   } // end of getSessionWorkingDir()
 
   /**
-   * Creates data files HTK needs for training.
+   * Creates data files MFA needs for training.
    * @param graphs Original utterances to align.
    * @param phonemesToHtk Translates phoneme labels to HTK-compatible ones, if necessary.
    * @return The utterances successfully processed.
@@ -1479,7 +1479,7 @@ public class MFA extends Annotator {
   } // end of copyLog()
   
   /**
-   * Reads the alignments from the files output by HTK, and merges the changes into the
+   * Reads the alignments from the files output by MFA, and merges the changes into the
    * original fragments.
    * @param mfaToPhonemes Phoneme label converter to use.
    * @param useP2FACorrection Whether to use the P2FA alignment correction.
