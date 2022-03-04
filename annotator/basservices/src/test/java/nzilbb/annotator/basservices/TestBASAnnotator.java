@@ -226,14 +226,12 @@ public class TestBASAnnotator {
   }
 
   /** Ensure MAUSBasic produces alignments. */ 
-  @Test public void MAUSBasic() throws Exception {
+  @Test public void MAUSBasicTranformFragmentsDISC() throws Exception {
     
     Graph f = fragment();
     Schema schema = f.getSchema();
-    // set phonemes layer to type=ipa so we can test the type is copied
-    schema.getLayer("phonemes").setType(Constants.TYPE_IPA);
     annotator.setSchema(schema);
-    annotator.getStatusObservers().add(status->System.out.println(status));
+    // annotator.getStatusObservers().add(status->System.out.println(status));
 
     assertNotNull("fragment has a language",
                   f.sourceGraph().first("transcript_language"));
@@ -295,7 +293,75 @@ public class TestBASAnnotator {
       // }
     } // next phone    
   }   
-  
+
+  /** Test alignment of full graph works, and encoding phones as SAMPA. */
+  @Test public void graphTransformMAUSBasicSampa() throws Exception {
+    annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    assertNotNull("fragment has a language",
+                  g.sourceGraph().first("transcript_language"));
+    assertEquals("fragment language correct",
+                 "en-NZ", g.first("transcript_language").getLabel());
+    assertEquals("text is correct",
+                 "saved up some money he bought property",
+                 Arrays.stream(g.labels(schema.getWordLayerId()))
+                 .collect(Collectors.joining(" ")).trim());
+    
+    // configure for system layer update
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&service=MAUSBasic"
+      +"&phonemeEncoding=sampa"
+      +"&language=en-NZ"
+      +"&transcriptLanguageLayerId=transcript_language"
+      +"&utteranceTagLayerId=utterance_bas"
+      +"&participantTagLayerId=participant_bas"
+      +"&wordAlignmentLayerId=word"
+      +"&phoneAlignmentLayerId=segment");
+    Layer layer = annotator.getSchema().getLayer("utterance_bas");
+    assertNotNull("utterance_bas layer created", layer);
+    layer = annotator.getSchema().getLayer("participant_bas");
+    assertNotNull("participant_bas layer created", layer);
+
+    g.trackChanges();
+    annotator.transform(g);
+        
+    Annotation[] words = g.all("word");
+    assertEquals("Seven words " + Arrays.asList(words), 7, words.length);
+    
+    Annotation[] phones = g.all("segment");
+    assertEquals("24 phones " + Arrays.asList(phones), 24, phones.length);
+    String[] labels = {
+      "s", "{I", "v", "d",
+      "6", "p",
+      "s", "6", "m",
+      "m", "6", "n", "i:",
+      "i:",
+      "b", "o:", "t",
+      "p", "r", "O", "p", "@", "4", "i:" };
+    for (int p = 0; p < phones.length; p++) {      
+      assertEquals("SAMPA phone label " + p, labels[p], phones[p].getLabel());
+      if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
+        assertEquals("Phone start confidence " + p + " " + phones[p].getStartId(),
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getStart().getConfidence().intValue());
+      }
+      if (p < phones.length - 1) { // last phone might coincide with end and be CONFIDENCE_MANUAL
+        assertEquals("Phone end confidence " + p + " " + phones[p].getEndId(),
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getEnd().getConfidence().intValue());
+      }
+      // TODO if (p > 0) {
+      //   assertEquals("Phone start shared with previous end " + p,
+      //                phones[p-1].getEnd(), phones[p].getStart());
+      // }
+    } // next phone    
+  }   
+
   /**
    * Returns a fragment for annotating.
    * @return The graph for testing with.
