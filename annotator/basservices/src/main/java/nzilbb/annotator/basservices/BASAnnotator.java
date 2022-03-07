@@ -723,7 +723,7 @@ public class BASAnnotator extends Annotator {
       throw new InvalidConfigurationException(this, "Orthography layer is not set.");
     }
     
-    if (targetLanguagePattern == null) {
+    if (transcriptLanguageLayerId != null) {
       requiredLayers.add(transcriptLanguageLayerId);
     }
 
