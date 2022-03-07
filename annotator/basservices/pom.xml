@@ -16,6 +16,7 @@
 
   <properties>
     <nzilbb.formatter.praat.version>2.6.3</nzilbb.formatter.praat.version>
+    <nzilbb.bas.version>0.1.1</nzilbb.bas.version>
     <package.path>nzilbb/annotator/basservices/</package.path>
     <annotator.class>nzilbb.annotator.basservices.BASAnnotator</annotator.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -38,7 +39,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.bas</artifactId>
-      <version>[0.1.0,)</version>
+      <version>[${nzilbb.bas.version},)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -87,6 +88,12 @@
                   <groupId>nzilbb</groupId>
                   <artifactId>nzilbb.formatter.praat</artifactId>
                   <version>${nzilbb.formatter.praat.version}</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>nzilbb</groupId>
+                  <artifactId>nzilbb.bas</artifactId>
+                  <version>${nzilbb.bas.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
               </artifactItems>

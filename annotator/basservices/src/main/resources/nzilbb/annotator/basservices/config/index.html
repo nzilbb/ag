@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title>BAS Annotator</title>    
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    
+    <h1> BAS Annotator </h1>
+    
+    <p> This annotator connects to the BAS web services 
+      - <a href="http://hdl.handle.net/11858/00-1779-0000-0028-421B-4" target="BAS">
+        http://hdl.handle.net/11858/00-1779-0000-0028-421B-4</a>, 
+      hosted by Ludwig Maximilians Universität München -
+      for various annotation tasks.
+    </p> 
+    
+    <p> Current annotation tasks include:
+      <ul>
+        <li> Using
+          <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/#/services/Grapheme2Phoneme"
+             target="BAS">G2P</a>
+          to annotate words with their phonemic transcription, given their orthography.</li>
+        <li> Using
+          <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/#/services/WebMAUSBasic"
+             target="BAS"> WebMAUSBasic</a>
+          to force-align utterances, given their orthographic transcriptions.</li>
+      </ul>
+    </p>
+    
+    <p> Please note that using these services requires sending transcript, annotation, and
+      audio data over the internet to the external provider of these services. </p> 
+    
+    <form method="POST" id="setConfig" action="setConfig">
+      <div class="field" id="g2pUrl"
+           title="This is the URL to use for the G2P (graphemes to phonemes) service. Leave this blank to use the default URL.">
+        <label for="g2pUrl">G2P URL</label>
+        <input id="g2pUrl" name="g2pUrl" type="text" placeholder="(default URL)">
+      </div>
+      <div class="field" id="mausBasicUrl"
+           title="This is the URL to use for the MAUSBasci (forced alignment) service. Leave this blank to use the default URL.">
+        <label for="mausBasicUrl">MAUSBasic URL</label>
+        <input id="mausBasicUrl" name="mausBasicUrl" type="text" placeholder="(default URL)">
+      </div>
+      <div class="checkbox-field"
+           title="This is the path to the Montreal Forced Aligner command line on the server. e.g. /opt/conda/envs/aligner/bin">
+        <input id="tou" name="tou" type="checkbox">
+        <label for="tou">
+          I have read and accepted the
+          <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/help/termsOfUsage"
+             target="termsOfUsage">
+            terms of usage </a>
+          for this service, including the policy of monitoring access to the services
+          (paragraph 5). I hereby confirm that I am a member of an academic institution or
+          that I have obtained a BAS user license for this service. In case of a
+          publication of my results I will use a proper citation to this service.</label> 
+      </div>
+      <div class="controls">
+        <input type="submit" value="Configure">
+      </div>
+    </form>
+
+    <footer><div> BAS Annotator <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>

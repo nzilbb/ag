@@ -857,8 +857,8 @@ public class BASAnnotator extends Annotator {
       setPercentComplete(null);
       SimpleDateFormat timestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
       final BAS bas = new BAS();
-      if (mausBasicUrl != null) bas.setMAUSBasicUrl(mausBasicUrl);
-      if (g2pUrl != null) bas.setG2PUrl(g2pUrl);
+      if (mausBasicUrl != null && mausBasicUrl.length() > 0) bas.setMAUSBasicUrl(mausBasicUrl);
+      if (g2pUrl != null && g2pUrl.length() > 0) bas.setG2PUrl(g2pUrl);
       final DefaultOffsetGenerator defaultOffsetGenerator = new DefaultOffsetGenerator();
       final Vector<String> dependentLayerIds = new Vector<String>();
       Vector<String> ids = new Vector<String>();

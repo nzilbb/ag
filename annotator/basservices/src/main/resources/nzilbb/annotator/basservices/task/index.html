@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title>BAS Annotator</title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <p> This annotator connects to the BAS web services 
+      - <a href="http://hdl.handle.net/11858/00-1779-0000-0028-421B-4" target="BAS">
+        http://hdl.handle.net/11858/00-1779-0000-0028-421B-4</a>, 
+      hosted by Ludwig Maximilians Universität München -
+      for various annotation tasks.
+    </p> 
+    
+    <p> Current annotation tasks include:
+      <ul>
+        <li> Using
+          <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/#/services/Grapheme2Phoneme"
+             target="BAS">G2P</a>
+          to annotate words with their phonemic transcription, given their orthography.</li>
+        <li> Using
+          <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/#/services/WebMAUSBasic"
+             target="BAS"> WebMAUSBasic</a>
+          to force-align utterances, given their orthographic transcriptions.</li>
+      </ul>
+    </p>
+    
+    <p> Please note that using these services requires sending transcript, annotation, and
+      audio data over the internet to the external provider of these services. </p> 
+        
+    <form method="POST" action="setTaskParameters">
+      <div class="field" title="Input layer from which words come">
+        <label for="orthographyLayerId"> Token Layer </label>
+        <span><select id="orthographyLayerId" name="orthographyLayerId" required></select></span>
+      </div>
+      <div class="field" title="Transcript attribute for overall language">
+        <label for="transcriptLanguageLayerId"> Transcript Language Attribute </label>
+        <span>
+          <select id="transcriptLanguageLayerId" name="transcriptLanguageLayerId">
+            <option value="">[none]</option>
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Layer for annotating phrases in a different language">
+        <label for="phraseLanguageLayerId"> Phrase Language Layer </label>
+        <span>
+          <select id="phraseLanguageLayerId" name="phraseLanguageLayerId">
+            <option value="">[none]</option>
+          </select>
+        </span>
+      </div>
+      <div class="field"
+           title="Regular expression for the ISO language codes of the languages to target, or blank for all">
+        <label for="targetLanguagePattern">Target Language Pattern</label>
+        <span><input id="targetLanguagePattern" name="targetLanguagePattern" type="text" placeholder=".*"></span>
+      </div>
+      <fieldset class="options" title="Which BAS web service to use" id="service">
+        <legend> Web Service </legend>
+        <label>
+          <input id="service-MAUSBasic" name="service" type="radio" value="MAUSBasic">
+          MAUSBasic (forced alignment)
+        </label>
+        <label>
+          <input id="service-G2P" name="service" type="radio" value="G2P">
+          G2P (graphemes to phonemes)
+        </label>
+      </fieldset>
+      <div class="field" title="Which set of symbols to use for phoneme layers">
+        <label for="phonemeEncoding"> Phoneme Encoding </label>
+        <span>
+          <select id="phonemeEncoding" name="phonemeEncoding" required>
+            <option value="disc" id="phonemeEncoding-disc">DISC</option>
+            <option value="sampa" id="phonemeEncoding-sampa">SAMPA</option>
+            <option value="x-sampa" id="phonemeEncoding-x-sampa">X-SAMPA</option>
+            <option value="maus-sampa" id="phonemeEncoding-maus-sampa">MAUS SAMPA</option>
+            <option value="ipa" id="phonemeEncoding-ipa">IPA</option>
+            <option value="arpabet" id="phonemeEncoding-arpabet">ARPAbet</option>
+          </select>
+        </span>
+      </div>
+      <div class="field g2p" title="Output layer to which pronunciations are added">
+        <label for="pronunciationLayerId"> Tag Layer </label>
+        <span>
+          <select id="pronunciationLayerId" name="pronunciationLayerId" required>
+            <option disabled>[select layer]</option> <!-- force choice the first time -->
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field g2p"
+           title="Whether to include lexical stress marks.">
+        <label for="wordStress"> Word Stress </label>
+        <span><input id="wordStress" name="wordStress" type="checkbox"></span>
+      </div>
+      <div class="field g2p"
+           title="Whether to include syllabification marks.">
+        <label for="syllabification"> Syllabification </label>
+        <span><input id="syllabification" name="syllabification" type="checkbox"></span>
+      </div>
+      <div class="field mausbasic" title="Output layer on which word alignments are saved">
+        <label for="wordAlignmentLayerId"> Word Alignment Layer </label>
+        <span>
+          <select id="wordAlignmentLayerId" name="wordAlignmentLayerId" required>
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field mausbasic" title="Output layer on which phone alignments are saved">
+        <label for="phoneAlignmentLayerId"> Phone Alignment Layer </label>
+        <span>
+          <select id="phoneAlignmentLayerId" name="phoneAlignmentLayerId" required>
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field mausbasic"
+           title="Output layer for a time stamp tagging each aligned utterance">
+        <label for="utteranceTagLayerId"> Utterance Tag Layer </label>
+        <span>
+          <select id="utteranceTagLayerId" name="utteranceTagLayerId">
+            <option value="">[none]</option>
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="controls"><input type="submit" value="Set Parameters"></div>
+    </form>
+    
+    <footer><div> BAS Annotator <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>
