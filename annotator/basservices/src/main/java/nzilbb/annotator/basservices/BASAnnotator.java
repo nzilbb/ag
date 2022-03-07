@@ -59,6 +59,7 @@ import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.script.*;
@@ -177,22 +178,24 @@ public class BASAnnotator extends Annotator {
   }
   
   /**
-   * Language to assume.
-   * @see #getLanguage()
-   * @see #setLanguage(String)
+   * Regular expression for matching which languages to target.
+   * @see #getTargetLanguagePattern()
+   * @see #setTargetLanguagePattern(String)
    */
-  protected String language;
+  protected String targetLanguagePattern;
   /**
-   * Getter for {@link #language}: Language to assume.
-   * @return Language to assume.
+   * Getter for {@link #targetLanguagePattern}: Regular expression for matching which
+   * languages to target. 
+   * @return Regular expression for matching which languages to target.
    */
-  public String getLanguage() { return language; }
+  public String getTargetLanguagePattern() { return targetLanguagePattern; }
   /**
-   * Setter for {@link #language}: Language to assume.
-   * @param newLanguage Language to assume.
+   * Setter for {@link #targetLanguagePattern}: Regular expression for matching which
+   * languages to target. 
+   * @param newTargetLanguagePattern Regular expression for matching which languages to target.
    */
-  public BASAnnotator setLanguage(String newLanguage) { language = newLanguage; return this; }
-  
+  public BASAnnotator setTargetLanguagePattern(String newTargetLanguagePattern) { targetLanguagePattern = newTargetLanguagePattern; return this; }
+    
   /**
    * Which BAS service is being used - "MAUSBasic" (forced alignment) or "G2P" (graphemes
    * to phonemes tagging). 
@@ -505,8 +508,6 @@ public class BASAnnotator extends Annotator {
     beanPropertiesFromQueryString(parameters);
 
     // convert empty strings into nulls
-    if (language != null && language.length() == 0)
-      language = null;
     if (service != null && service.length() == 0)
       service = null;
     if (phonemeEncoding != null && phonemeEncoding.length() == 0)
@@ -523,6 +524,8 @@ public class BASAnnotator extends Annotator {
       wordAlignmentLayerId = null;
     if (phoneAlignmentLayerId != null && phoneAlignmentLayerId.length() == 0)
       phoneAlignmentLayerId = null;
+    if (targetLanguagePattern != null && targetLanguagePattern.length() == 0)
+      targetLanguagePattern = null;
 
     // validation...
       
@@ -546,6 +549,14 @@ public class BASAnnotator extends Annotator {
         this, "Orthography layer not found: " + orthographyLayerId);
     if (phonemeEncoding == null)
       throw new InvalidConfigurationException(this, "Phoneme encoding not specified.");
+    if (targetLanguagePattern != null) {
+      try {
+        Pattern.compile(targetLanguagePattern);
+      } catch(PatternSyntaxException exception) {
+        throw new InvalidConfigurationException(
+          this, "Target language pattern invalid: " + targetLanguagePattern, exception);
+      }
+    }
     if ("G2P".equals(service)) {
       if (pronunciationLayerId == null) 
         throw new InvalidConfigurationException(this, "Pronunciation layer not specified.");      
@@ -712,7 +723,7 @@ public class BASAnnotator extends Annotator {
       throw new InvalidConfigurationException(this, "Orthography layer is not set.");
     }
     
-    if (language == null) {
+    if (targetLanguagePattern == null) {
       requiredLayers.add(transcriptLanguageLayerId);
     }
 
@@ -899,10 +910,10 @@ public class BASAnnotator extends Annotator {
                 Annotation graphLanguage = fragment.sourceGraph().first(transcriptLanguageLayerId);
                 if (graphLanguage == null || graphLanguage.getLabel().length() == 0) {
                   setStatus(fragment.getId()+" has no language specified and will be ignored.");
-                } else if (language.length() > 0
-                           && !graphLanguage.getLabel().matches(language)) {
+                } else if (targetLanguagePattern != null
+                           && !graphLanguage.getLabel().matches(targetLanguagePattern)) {
                   setStatus(fragment.getId() + ": language \""+graphLanguage
-                            +"\" doesn't match language pattern \""+language
+                            +"\" doesn't match language pattern \""+targetLanguagePattern
                             +"\", fragment will be ignored");
                 } else {
                   languageCode = graphLanguage.getLabel();
@@ -1000,10 +1011,10 @@ public class BASAnnotator extends Annotator {
                 Annotation graphLanguage = fragment.sourceGraph().first(transcriptLanguageLayerId);
                 if (graphLanguage == null || graphLanguage.getLabel().length() == 0) {
                   setStatus(fragment.getId()+" has no language specified and will be ignored.");
-                } else if (language.length() > 0
-                           && !graphLanguage.getLabel().matches(language)) {
+                } else if (targetLanguagePattern != null
+                           && !graphLanguage.getLabel().matches(targetLanguagePattern)) {
                   setStatus(fragment.getId() + ": language \""+graphLanguage
-                            +"\" doesn't match language pattern \""+language
+                            +"\" doesn't match language pattern \""+targetLanguagePattern
                             +"\", fragment will be ignored");
                 } else {
                   languageCode = graphLanguage.getLabel();

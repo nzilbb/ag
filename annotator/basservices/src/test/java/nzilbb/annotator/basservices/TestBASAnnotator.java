@@ -94,7 +94,7 @@ public class TestBASAnnotator {
       "orthographyLayerId=word"
       +"&service=MAUSBasic"
       +"&phonemeEncoding=disc"
-      +"&language=en-NZ"
+      +"&targetLanguagePattern=en-NZ"
       +"&transcriptLanguageLayerId=transcript_language"
       +"&utteranceTagLayerId=mausBasic"
       +"&participantTagLayerId="
@@ -106,7 +106,7 @@ public class TestBASAnnotator {
       "orthographyLayerId=word"
       +"&service=MAUSBasic"
       +"&phonemeEncoding=disc"
-      +"&language=en-NZ"
+      +"&targetLanguagePattern=en-NZ"
       +"&transcriptLanguageLayerId=transcript_language"
       +"&utteranceTagLayerId=utterance_bas"     // nonexistent
       +"&participantTagLayerId=participant_bas" // nonexistent
@@ -132,7 +132,7 @@ public class TestBASAnnotator {
         "orthographyLayerId=nonexistent"
         +"&service=MAUSBasic"
         +"&phonemeEncoding=disc"
-        +"&language=en-NZ"
+        +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
@@ -146,7 +146,7 @@ public class TestBASAnnotator {
         "orthographyLayerId=word"
         +"&service=MAUSBasic"
         +"&phonemeEncoding=disc"
-        +"&language=en-NZ"
+        +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=nonexistent"
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
@@ -160,7 +160,7 @@ public class TestBASAnnotator {
         "orthographyLayerId=word"
         +"&service="
         +"&phonemeEncoding=disc"
-        +"&language=en-NZ"
+        +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
@@ -174,7 +174,7 @@ public class TestBASAnnotator {
         "orthographyLayerId=word"
         +"&service=invalid"
         +"&phonemeEncoding=disc"
-        +"&language=en-NZ"
+        +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
@@ -188,7 +188,7 @@ public class TestBASAnnotator {
         "orthographyLayerId=word"
         +"&service=MAUSBasic"
         +"&phonemeEncoding=disc"
-        +"&language=en-NZ"
+        +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
@@ -202,7 +202,7 @@ public class TestBASAnnotator {
         "orthographyLayerId=word"
         +"&service=MAUSBasic"
         +"&phonemeEncoding=disc"
-        +"&language=en-NZ"
+        +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
@@ -214,9 +214,23 @@ public class TestBASAnnotator {
     try {
       annotator.setTaskParameters(
         "orthographyLayerId=word"
+        +"&service=MAUSBasic"
+        +"&phonemeEncoding=disc"
+        +"&targetLanguagePattern=*"
+        +"&transcriptLanguageLayerId=transcript_language"
+        +"&utteranceTagLayerId=mausBasic"
+        +"&participantTagLayerId="
+        +"&wordAlignmentLayerId=word"
+        +"&phoneAlignmentLayerId=phone");
+      fail("Should fail with invalid targetLanguagePattern regular expression");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "orthographyLayerId=word"
         +"&service=G2P"
         +"&phonemeEncoding=disc"
-        +"&language=en-NZ"
+        +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
         +"&utteranceTagLayerId=mausBasic"
         +"&pronunciationLayerId=");
@@ -247,7 +261,7 @@ public class TestBASAnnotator {
       "orthographyLayerId=word"
       +"&service=MAUSBasic"
       +"&phonemeEncoding=disc"
-      +"&language=en-NZ"
+      +"&targetLanguagePattern=en-NZ"
       +"&transcriptLanguageLayerId=transcript_language"
       +"&utteranceTagLayerId=mausBasic"
       +"&participantTagLayerId="
@@ -319,7 +333,7 @@ public class TestBASAnnotator {
       "orthographyLayerId=word"
       +"&service=MAUSBasic"
       +"&phonemeEncoding=sampa"
-      +"&language=en-NZ"
+      +"&targetLanguagePattern=en-NZ"
       +"&transcriptLanguageLayerId=transcript_language"
       +"&utteranceTagLayerId=utterance_bas"
       +"&participantTagLayerId=participant_bas"
@@ -389,7 +403,7 @@ public class TestBASAnnotator {
       "orthographyLayerId=word"
       +"&service=MAUSBasic"
       +"&phonemeEncoding=disc"
-      +"&language=en-NZ"
+      +"&targetLanguagePattern=" // targetLanguagePattern can be blank = all languages
       +"&transcriptLanguageLayerId=transcript_language"
       +"&utteranceTagLayerId=bas_maus"
       +"&participantTagLayerId="
@@ -488,7 +502,7 @@ public class TestBASAnnotator {
       "orthographyLayerId=word"
       +"&service=G2P"
       +"&phonemeEncoding=disc"
-      +"&language=en-NZ"
+      +"&targetLanguagePattern=en-NZ"
       +"&transcriptLanguageLayerId=transcript_language"
       +"&pronunciationLayerId=phonemes");
     
@@ -539,8 +553,8 @@ public class TestBASAnnotator {
     annotator.setTaskParameters(
       "orthographyLayerId=word"
       +"&service=G2P"
+      +"&targetLanguagePattern=" // targetLanguagePattern can be blank = all languages
       +"&phonemeEncoding=ipa"
-      +"&language=en-NZ"
       +"&transcriptLanguageLayerId=transcript_language"
       +"&pronunciationLayerId=bas_ipa");
     Layer layer = annotator.getSchema().getLayer("bas_ipa");
@@ -574,6 +588,52 @@ public class TestBASAnnotator {
       assertTrue("Pronunctiation tags word " + p + " " + pronunciations[p],
                  pronunciations[p].tags(words[p]));
     } // next phone    
+  }   
+
+  /** targetLanguagePattern filters out unwanted languages. */ 
+  @Test public void targetLanguagePattern() throws Exception {
+    
+    Graph f = fragment();
+    Schema schema = f.getSchema();
+    annotator.setSchema(schema);
+    // annotator.getStatusObservers().add(status->System.out.println(status));
+
+    assertNotNull("fragment has a language",
+                  f.sourceGraph().first("transcript_language"));
+    assertEquals("fragment language correct",
+                 "en-NZ", f.sourceGraph().first("transcript_language").getLabel());
+    assertEquals("text is correct",
+                 "saved up some money he bought property",
+                 Arrays.stream(f.labels(schema.getWordLayerId()))
+                 .collect(Collectors.joining(" ")).trim());
+    
+    // configure for system layer update
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&service=G2P"
+      +"&targetLanguagePattern=es.*" // doesn't match our language
+      +"&phonemeEncoding=ipa"
+      +"&transcriptLanguageLayerId=transcript_language"
+      +"&pronunciationLayerId=bas_ipa");
+    Layer layer = annotator.getSchema().getLayer("bas_ipa");
+    assertNotNull("bas_ipa layer created", layer);
+    assertEquals("bas_ipa word layer", "word", layer.getParentId());    
+    assertTrue("bas_ipa saturated", layer.getSaturated());    
+    assertEquals("bas_ipa layer type", Constants.TYPE_IPA, layer.getType());
+    assertFalse("bas_ipa no peers", layer.getPeers());
+    
+    final Vector<Graph> results = new Vector<Graph>();
+    annotator.transformFragments(
+      Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
+    
+    assertEquals("No utterances " + results, 0, results.size());
+    
+    Annotation[] words = f.all("word");
+    assertEquals("Seven words " + Arrays.asList(words), 7, words.length);
+    
+    Annotation[] pronunciations = f.all("bas_ipa");
+    assertEquals("No pronunciations " + Arrays.asList(pronunciations),
+                 0, pronunciations.length);
   }   
 
   /**
