@@ -277,6 +277,9 @@ public class TestBASAnnotator {
       "p", "r", "Q", "p", "@", "L", "i" };
     for (int p = 0; p < phones.length; p++) {      
       assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
+      assertEquals("Phone label confidence " + p + " " + phones[p],
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   phones[p].getConfidence().intValue());
       if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
         assertEquals("Phone start confidence " + p + " " + phones[p].getStartId(),
                      Constants.CONFIDENCE_AUTOMATIC,
@@ -287,16 +290,16 @@ public class TestBASAnnotator {
                      Constants.CONFIDENCE_AUTOMATIC,
                      phones[p].getEnd().getConfidence().intValue());
       }
-      // TODO if (p > 0) {
-      //   assertEquals("Phone start shared with previous end " + p,
-      //                phones[p-1].getEnd(), phones[p].getStart());
-      // }
+      if (phones[p].getStart().startOf("word").size() == 0) { // not a word boundary
+        assertEquals("Phone start shared with previous end " + p,
+                     phones[p-1].getEnd(), phones[p].getStart());
+      }
     } // next phone    
   }   
 
   /** Test alignment of full graph works, and encoding phones as SAMPA. */
   @Test public void graphTransformMAUSBasicSampa() throws Exception {
-    annotator.getStatusObservers().add(status->System.out.println(status));
+    // annotator.getStatusObservers().add(status->System.out.println(status));
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -345,6 +348,9 @@ public class TestBASAnnotator {
       "p", "r", "O", "p", "@", "4", "i:" };
     for (int p = 0; p < phones.length; p++) {      
       assertEquals("SAMPA phone label " + p, labels[p], phones[p].getLabel());
+      assertEquals("Phone label confidence " + p + " " + phones[p],
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   phones[p].getConfidence().intValue());
       if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
         assertEquals("Phone start confidence " + p + " " + phones[p].getStartId(),
                      Constants.CONFIDENCE_AUTOMATIC,
@@ -355,10 +361,218 @@ public class TestBASAnnotator {
                      Constants.CONFIDENCE_AUTOMATIC,
                      phones[p].getEnd().getConfidence().intValue());
       }
-      // TODO if (p > 0) {
-      //   assertEquals("Phone start shared with previous end " + p,
-      //                phones[p-1].getEnd(), phones[p].getStart());
-      // }
+      if (phones[p].getStart().startOf("word").size() == 0) { // not a word boundary
+        assertEquals("Phone start shared with previous end " + p,
+                     phones[p-1].getEnd(), phones[p].getStart());
+      }
+    } // next phone    
+  }   
+
+  /** Test adding alignments independent of original word alignments. */
+  @Test public void alignToPhraseLayers() throws Exception {
+    Graph f = fragment();
+    Schema schema = f.getSchema();
+    annotator.setSchema(schema);
+    // annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    assertNotNull("fragment has a language",
+                  f.sourceGraph().first("transcript_language"));
+    assertEquals("fragment language correct",
+                 "en-NZ", f.sourceGraph().first("transcript_language").getLabel());
+    assertEquals("text is correct",
+                 "saved up some money he bought property",
+                 Arrays.stream(f.labels(schema.getWordLayerId()))
+                 .collect(Collectors.joining(" ")).trim());
+    
+    // configure for system layer update
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&service=MAUSBasic"
+      +"&phonemeEncoding=disc"
+      +"&language=en-NZ"
+      +"&transcriptLanguageLayerId=transcript_language"
+      +"&utteranceTagLayerId=bas_maus"
+      +"&participantTagLayerId="
+      +"&wordAlignmentLayerId=bas_word"
+      +"&phoneAlignmentLayerId=bas_phone");
+    
+    Layer layer = annotator.getSchema().getLayer("bas_maus");
+    assertNotNull("bas_maus layer created", layer);
+    assertEquals("bas_maus phrase layer",
+                 "turn", layer.getParentId());    
+    assertFalse("bas_maus not saturated",
+                layer.getSaturated());    
+    layer = annotator.getSchema().getLayer("bas_word");
+    assertNotNull("bas_word layer created", layer);
+    assertEquals("bas_word phrase layer",
+                 "turn", layer.getParentId());    
+    assertFalse("bas_word not saturated",
+                layer.getSaturated());    
+    layer = annotator.getSchema().getLayer("bas_phone");
+    assertNotNull("bas_phone layer created", layer);
+    assertEquals("phone layer type", Constants.TYPE_IPA, layer.getType());
+    assertEquals("bas_phone phrase layer",
+                 "turn", layer.getParentId());    
+    assertFalse("bas_phone not saturated",
+                layer.getSaturated());
+    
+    final Vector<Graph> results = new Vector<Graph>();
+    annotator.transformFragments(
+      Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
+    
+    assertEquals("One utterance " + results, 1, results.size());
+    Graph aligned = results.elementAt(0);
+    assertTrue("Original graph is edited", f == aligned);
+    
+    Annotation[] words = aligned.all("word");
+    assertEquals("Seven words " + Arrays.asList(words), 7, words.length);
+    Annotation[] basWords = aligned.all("bas_word");
+    assertEquals("One BAS word token per original word token " + Arrays.asList(basWords),
+                 words.length, basWords.length);
+    Double[] wordStarts = { 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0 };
+    for (int w = 0; w < words.length; w++) {
+      assertEquals("Word start " + w + " ("+words[w]+") unchanged",
+                   wordStarts[w], words[w].getStart().getOffset());
+      assertEquals("BAS word label " + w + " correct",
+                   basWords[w].getLabel(), words[w].getLabel());
+    } // next word      
+    
+    Annotation[] phones = aligned.all("bas_phone");
+    assertEquals("24 phones " + Arrays.asList(phones), 24, phones.length);
+    String[] labels = {
+      "s", "1", "v", "d",
+      "@", "p",
+      "s", "@", "m",
+      "m", "@", "n", "i",
+      "i",
+      "b", "$", "t",
+      "p", "r", "Q", "p", "@", "L", "i" };
+    for (int p = 0; p < phones.length; p++) {      
+      assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
+      if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
+        assertEquals("Phone start confidence " + p + " " + phones[p].getStartId(),
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getStart().getConfidence().intValue());
+      }
+      if (p < phones.length - 1) { // last phone might coincide with end and be CONFIDENCE_MANUAL
+        assertEquals("Phone end confidence " + p + " " + phones[p].getEndId(),
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getEnd().getConfidence().intValue());
+      }
+      if (phones[p].getStart().startOf("bas_word").size() == 0) { // not a word boundary
+        assertEquals("Phone start shared with previous end " + p,
+                     phones[p-1].getEnd(), phones[p].getStart());
+      }
+    } // next phone    
+  }   
+
+  /** Ensure G2P produces pronunciations and they're correctly translated to DISC. */ 
+  @Test public void G2PDISC() throws Exception {
+    
+    Graph f = fragment();
+    Schema schema = f.getSchema();
+    annotator.setSchema(schema);
+    // annotator.getStatusObservers().add(status->System.out.println(status));
+
+    assertNotNull("fragment has a language",
+                  f.sourceGraph().first("transcript_language"));
+    assertEquals("fragment language correct",
+                 "en-NZ", f.sourceGraph().first("transcript_language").getLabel());
+    assertEquals("text is correct",
+                 "saved up some money he bought property",
+                 Arrays.stream(f.labels(schema.getWordLayerId()))
+                 .collect(Collectors.joining(" ")).trim());
+    
+    // configure for system layer update
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&service=G2P"
+      +"&phonemeEncoding=disc"
+      +"&language=en-NZ"
+      +"&transcriptLanguageLayerId=transcript_language"
+      +"&pronunciationLayerId=phonemes");
+    
+    final Vector<Graph> results = new Vector<Graph>();
+    annotator.transformFragments(
+      Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
+    
+    assertEquals("One utterance " + results, 1, results.size());
+    Graph aligned = results.elementAt(0);
+    assertTrue("Original graph is edited", f == aligned);
+    
+    Annotation[] words = aligned.all("word");
+    assertEquals("Seven words " + Arrays.asList(words), 7, words.length);
+    
+    Annotation[] pronunciations = aligned.all("phonemes");
+    assertEquals("One pronunciation per word " + Arrays.asList(pronunciations),
+                 words.length, pronunciations.length);
+    String[] labels = {
+      "s1vd", "@p", "s@m", "m@ni", "hi", "b$t", "prQp@Li" };
+    for (int p = 0; p < pronunciations.length; p++) {      
+      assertEquals("DISC pronunciation label " + p, labels[p], pronunciations[p].getLabel());
+      assertEquals("Pronunciation label confidence " + p + " " + pronunciations[p],
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   pronunciations[p].getConfidence().intValue());
+      assertTrue("Pronunctiation tags word " + p + " " + pronunciations[p],
+                 pronunciations[p].tags(words[p]));
+    } // next phone    
+  }   
+
+  /** Ensure G2P creates pronunciations in IPA, with a new layer. */ 
+  @Test public void G2PIPA() throws Exception {
+    
+    Graph f = fragment();
+    Schema schema = f.getSchema();
+    annotator.setSchema(schema);
+    // annotator.getStatusObservers().add(status->System.out.println(status));
+
+    assertNotNull("fragment has a language",
+                  f.sourceGraph().first("transcript_language"));
+    assertEquals("fragment language correct",
+                 "en-NZ", f.sourceGraph().first("transcript_language").getLabel());
+    assertEquals("text is correct",
+                 "saved up some money he bought property",
+                 Arrays.stream(f.labels(schema.getWordLayerId()))
+                 .collect(Collectors.joining(" ")).trim());
+    
+    // configure for system layer update
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&service=G2P"
+      +"&phonemeEncoding=ipa"
+      +"&language=en-NZ"
+      +"&transcriptLanguageLayerId=transcript_language"
+      +"&pronunciationLayerId=bas_ipa");
+    Layer layer = annotator.getSchema().getLayer("bas_ipa");
+    assertNotNull("bas_ipa layer created", layer);
+    assertEquals("bas_ipa word layer", "word", layer.getParentId());    
+    assertTrue("bas_ipa saturated", layer.getSaturated());    
+    assertEquals("bas_ipa layer type", Constants.TYPE_IPA, layer.getType());
+    assertFalse("bas_ipa no peers", layer.getPeers());
+    
+    final Vector<Graph> results = new Vector<Graph>();
+    annotator.transformFragments(
+      Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
+    
+    assertEquals("One utterance " + results, 1, results.size());
+    Graph aligned = results.elementAt(0);
+    assertTrue("Original graph is edited", f == aligned);
+    
+    Annotation[] words = aligned.all("word");
+    assertEquals("Seven words " + Arrays.asList(words), 7, words.length);
+    
+    Annotation[] pronunciations = aligned.all("bas_ipa");
+    assertEquals("One pronunciation per word " + Arrays.asList(pronunciations),
+                 words.length, pronunciations.length);
+    String[] labels = {
+      "s æɪ v d", "ɐ p", "s ɐ m", "m ɐ n iː", "h iː", "b oː t", "p ɹ ɔ p ə ɾ iː" };
+    for (int p = 0; p < pronunciations.length; p++) {      
+      assertEquals("DISC pronunciation label " + p, labels[p], pronunciations[p].getLabel());
+      assertEquals("Pronunciation label confidence " + p + " " + pronunciations[p],
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   pronunciations[p].getConfidence().intValue());
+      assertTrue("Pronunctiation tags word " + p + " " + pronunciations[p],
+                 pronunciations[p].tags(words[p]));
     } // next phone    
   }   
 

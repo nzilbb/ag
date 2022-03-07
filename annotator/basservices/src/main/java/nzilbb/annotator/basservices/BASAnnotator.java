@@ -567,7 +567,7 @@ public class BASAnnotator extends Annotator {
         schema.addLayer(
           new Layer(utteranceTagLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
-          .setPeers(true).setPeersOverlap(false)
+          .setPeers(true).setPeersOverlap(false).setSaturated(false)
           .setParentId(schema.getTurnLayerId())
           .setDescription("BAS annotation time."));
       } else if (utteranceTagLayerId.equals(orthographyLayerId)
@@ -613,7 +613,7 @@ public class BASAnnotator extends Annotator {
       if (pronunciationLayer == null) {
         pronunciationLayer = new Layer(pronunciationLayerId)
           .setAlignment(Constants.ALIGNMENT_NONE)
-          .setPeers(true).setPeersOverlap(false).setSaturated(true)
+          .setPeers(false).setPeersOverlap(false).setSaturated(true)
           .setParentId(schema.getWordLayerId())
           .setDescription(service + " pronunciation.");
         if ("disc".equals(phonemeEncoding) || "ipa".equals(phonemeEncoding)) {
@@ -936,8 +936,9 @@ public class BASAnnotator extends Annotator {
                       }
                       if (translator != null) {
                         label = translator.apply(
-                          label.replaceAll(" ","") // also remove spaces
-                          .replaceAll("\\.","-")); // also convert syllable boundaries
+                          label.replace(" ","") // also remove spaces
+                          .replace(".","-")) // also convert syllable boundaries
+                          .replace("\\",""); // and remove spurious backslashes
                       }
                       Annotation word = words.next();
                       // is there an existing tag?
@@ -1055,34 +1056,43 @@ public class BASAnnotator extends Annotator {
                             response.getDownloadLink().openConnection().getInputStream(),
                             fragment.getId() + ".TextGrid", "text/praat-textgrid")), schema);
                       // set parameter values
-                      parameters.get("tier0").setValue(schema.getWordLayer()); // ORT-MAU
-                      parameters.get("tier1").setValue(null); // KAN-MAU
-                      parameters.get("tier2").setValue(
-                        schema.getLayer(phoneAlignmentLayerId)); // MAU
+                      parameters.get("tier0").setValue(
+                        schema.getLayer(wordAlignmentLayerId));  // ORT-MAU
+                      parameters.get("tier1").setValue(null);    // KAN-MAU
+                      parameters.get("tier2").setValue(          // MAU
+                        schema.getLayer(phoneAlignmentLayerId));
                       deserializer.setParameters(parameters);
                       Graph edited = deserializer.deserialize()[0];
                       edited.trackChanges();
                       
                       // offsets in the TextGrid start at 0, but the fragment doesn't
                       edited.shiftAnchors(fragment.getStart().getOffset());
-                      
-                      // rename "ORT-MAU" speaker 
-                      Annotation orginalParticipant = fragment.first(
-                        fragment.getSchema().getParticipantLayerId());
-                      Annotation editedParticipant = edited.first(
-                        edited.getSchema().getParticipantLayerId());
-                      editedParticipant.setLabel(orginalParticipant.getLabel());
-                      // also all turns and utterances
-                      for (Annotation a : edited.list(edited.getSchema().getTurnLayerId())) {
-                        a.setLabel(orginalParticipant.getLabel());
-                      }
-                      for (Annotation a : edited.list(edited.getSchema().getUtteranceLayerId())) {
-                        a.setLabel(orginalParticipant.getLabel());
+
+                      if (edited.getSchema().getParticipantLayerId() != null) {
+                        // rename "ORT-MAU" speaker 
+                        Annotation orginalParticipant = fragment.first(
+                          fragment.getSchema().getParticipantLayerId());
+                        Annotation editedParticipant = edited.first(
+                          edited.getSchema().getParticipantLayerId());
+                        editedParticipant.setLabel(orginalParticipant.getLabel());
+                        
+                        // also all turns and utterances
+                        for (Annotation a : edited.list(edited.getSchema().getTurnLayerId())) {
+                          a.setLabel(orginalParticipant.getLabel());
+                        }
+                        for (Annotation a : edited.list(
+                               edited.getSchema().getUtteranceLayerId())) {
+                          a.setLabel(orginalParticipant.getLabel());
+                        }
                       }
                       
                       // set phone anchors and labels with 'automatic' confidence
+                      boolean phonesAreWordChildren = edited.getLayer(phoneAlignmentLayerId)
+                        .getParentId().equals(edited.getSchema().getWordLayerId());
                       for (Annotation a : edited.list(phoneAlignmentLayerId)) {
-                        if (a.getParentId() == null) {
+                        if ((phonesAreWordChildren && a.getParentId() == null) // phone orphan
+                            || a.getLabel().equals("<p:>")) { // pause label
+                          // get rid of it
                           a.destroy();
                         } else {
                           a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
