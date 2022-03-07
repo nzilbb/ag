@@ -159,6 +159,13 @@ function changeService() {
     for (let div of document.getElementsByClassName("mausbasic")) {
         div.style.display = g2p?"none":"";
     } // next mausbasic element
+    if (g2p) {
+        // phonemeEncoding is required
+        document.getElementById("pronunciationLayerId").setAttribute("required","");
+    } else {
+        // phonemeEncoding isn't required
+        document.getElementById("pronunciationLayerId").removeAttribute("required");
+    }
 }
 
 function validateRegularExpression(input) {
