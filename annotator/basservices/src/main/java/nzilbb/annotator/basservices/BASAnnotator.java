@@ -907,7 +907,7 @@ public class BASAnnotator extends Annotator {
               if (text.length() == 0) {
                 setStatus(fragment.getId() + " has no orthography and will be ignored.");
               } else { // has orthography
-                Annotation graphLanguage = fragment.sourceGraph().first(transcriptLanguageLayerId);
+                Annotation graphLanguage = fragment.first(transcriptLanguageLayerId);
                 if (graphLanguage == null || graphLanguage.getLabel().length() == 0) {
                   setStatus(fragment.getId()+" has no language specified and will be ignored.");
                 } else if (targetLanguagePattern != null
@@ -1008,7 +1008,7 @@ public class BASAnnotator extends Annotator {
               if (text.length() == 0) {
                 setStatus(fragment.getId() + " has no orthography and will be ignored.");
               } else { // has orthography
-                Annotation graphLanguage = fragment.sourceGraph().first(transcriptLanguageLayerId);
+                Annotation graphLanguage = fragment.first(transcriptLanguageLayerId);
                 if (graphLanguage == null || graphLanguage.getLabel().length() == 0) {
                   setStatus(fragment.getId()+" has no language specified and will be ignored.");
                 } else if (targetLanguagePattern != null
@@ -1078,22 +1078,46 @@ public class BASAnnotator extends Annotator {
                       
                       // offsets in the TextGrid start at 0, but the fragment doesn't
                       edited.shiftAnchors(fragment.getStart().getOffset());
+                      // all anchors are automatically generated
+                      edited.getAnchors().values().stream().forEach(
+                        anchor -> anchor.setConfidence(Constants.CONFIDENCE_AUTOMATIC));
 
-                      if (edited.getSchema().getParticipantLayerId() != null) {
-                        // rename "ORT-MAU" speaker 
-                        Annotation orginalParticipant = fragment.first(
-                          fragment.getSchema().getParticipantLayerId());
-                        Annotation editedParticipant = edited.first(
-                          edited.getSchema().getParticipantLayerId());
-                        editedParticipant.setLabel(orginalParticipant.getLabel());
-                        
-                        // also all turns and utterances
-                        for (Annotation a : edited.list(edited.getSchema().getTurnLayerId())) {
-                          a.setLabel(orginalParticipant.getLabel());
-                        }
-                        for (Annotation a : edited.list(
-                               edited.getSchema().getUtteranceLayerId())) {
-                          a.setLabel(orginalParticipant.getLabel());
+                      // rename "ORT-MAU" speaker 
+                      Annotation participant = fragment.first(
+                        schema.getParticipantLayerId());
+                      Annotation editedParticipant = edited.first(
+                        schema.getParticipantLayerId());
+                      if (editedParticipant == null) { // create a participant
+                        edited.getSchema().addLayer(
+                          (Layer)schema.getParticipantLayer().clone());
+                        editedParticipant = edited.addAnnotation(
+                          new Annotation()
+                          .setLayerId(schema.getParticipantLayerId())
+                          .setLabel(participant.getLabel()));
+                      }
+                      editedParticipant.setLabel(participant.getLabel());
+                      
+                      Annotation turn = fragment.first(schema.getTurnLayerId());
+                      Annotation editedTurn = edited.first(schema.getTurnLayerId());
+                      if (editedTurn == null) { // create a turn
+                        edited.getSchema().addLayer(
+                          (Layer)schema.getTurnLayer().clone());
+                        editedTurn = edited.addAnnotation(
+                          new Annotation()
+                          .setLayerId(schema.getTurnLayerId())
+                          .setLabel(turn.getLabel())
+                          .setParentId(editedParticipant.getId()));
+                      }
+                      editedTurn.setLabel(turn.getLabel());
+                      //participantIds.add(turn.getParentId());
+                      Annotation utterance = fragment.first(schema.getUtteranceLayerId());
+                      Annotation editedUtterance = edited.first(schema.getUtteranceLayerId());
+                      if (editedUtterance != null) editedUtterance.setLabel(utterance.getLabel());
+
+                      // set turn as parent of words
+                      if (wordAlignmentLayerId != null) {
+                        for (Annotation word : edited.all(wordAlignmentLayerId)) {
+                          word.setParent(editedTurn);
                         }
                       }
                       
@@ -1107,13 +1131,16 @@ public class BASAnnotator extends Annotator {
                           a.destroy();
                         } else {
                           a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                          a.getStart().setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                          a.getEnd().setConfidence(Constants.CONFIDENCE_AUTOMATIC);
                           // convert to DISC?
                           if (translator != null) {
                             String label = translator.apply(a.getLabel());
                             if (label.length() > 0) a.setLabel(label);
                             else setStatus("Could not convert label to DISC: " + a.getLabel());
+                          }
+                          // set turn as parent of phones, if appropriate
+                          if (schema.getLayer(phoneAlignmentLayerId).getParentId()
+                              .equals(schema.getTurnLayerId())) {
+                            a.setParent(editedTurn);
                           }
                         }
                       } // next phone
@@ -1126,6 +1153,7 @@ public class BASAnnotator extends Annotator {
                       merger.getNoChangeLayers().add(fragment.getSchema().getTurnLayerId());
                       merger.getNoChangeLayers().add(fragment.getSchema().getUtteranceLayerId());
                       merger.getNoChangeLayers().add(fragment.getSchema().getWordLayerId());
+                      merger.setIgnoreOffsetConfidence(ignoreAlignmentStatuses);
                       // merger.setDebug(true);
                       merger.setValidator(null); // saveGraph will validate it
                       fragment.trackChanges();
@@ -1168,7 +1196,7 @@ public class BASAnnotator extends Annotator {
                           if (label.length() == 0) {
                             label = timestamp.format(new Date());
                           }
-                          fragment.createTag(utteranceTagLayerId, label);
+                          fragment.createTag(utterance, utteranceTagLayerId, label);
                         }
                         consumer.accept(fragment);
                         utterancesAnnotated++;
