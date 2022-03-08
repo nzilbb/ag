@@ -738,6 +738,7 @@ public class Anchor
       if (this.equals(o)) return 0;
       if (getOffset() == null || o.getOffset() == null || getOffset().equals(o.getOffset()))
       {
+         if (getId() == null) return -1;
          return getId().compareTo(o.getId());
       }
       else
