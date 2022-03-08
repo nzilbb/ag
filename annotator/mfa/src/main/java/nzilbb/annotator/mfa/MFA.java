@@ -745,7 +745,7 @@ public class MFA extends Annotator {
         schema.addLayer(
           new Layer(utteranceTagLayerId)
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
-          .setPeers(true).setPeersOverlap(false)
+          .setPeers(true).setPeersOverlap(false).setSaturated(false)
           .setParentId(schema.getTurnLayerId())
           .setDescription("MFA alignment time."));
       } else if (utteranceTagLayerId.equals(orthographyLayerId)
