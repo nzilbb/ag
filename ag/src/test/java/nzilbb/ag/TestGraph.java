@@ -1239,6 +1239,7 @@ public class TestGraph {
         }
       });
 
+    g.addLayer(new Layer("transcriber", "Transcriber", 0, false, false, true));
     g.addLayer(new Layer("topic", "Topics", 2, true, false, false));
     g.addLayer(new Layer("who", "Participants", 0, true, true, true));
     g.addLayer(new Layer("turn", "Speaker turns", 2, true, false, false, "who", true));
@@ -1266,6 +1267,9 @@ public class TestGraph {
     g.addAnchor(new Anchor("a5", 5.0));
     g.addAnchor(new Anchor("turnEnd", 6.0));
 
+    Annotation transcriber = new Annotation(
+      "transcriber", "Robert Fromont", "transcriber", "turnStart", "turnEnd", "my graph");
+
     Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
     Annotation who2 = new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "my graph");
 
@@ -1290,6 +1294,7 @@ public class TestGraph {
     Annotation N = new Annotation("pos3", "N", "pos", "a4", "a5", "word4");
     Annotation NP = new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1");
 
+    g.addAnnotation(transcriber);
     g.addAnnotation(who1);
     g.addAnnotation(turn1);
     g.addAnnotation(utterance1);
@@ -1321,6 +1326,7 @@ public class TestGraph {
     layers.add("turn"); // include ancestor layer - annotations should have no anchors
     layers.add("utterance");
     layers.add("word");
+    layers.add("transcriber"); // transcript attribute as well
     Graph f = g.getFragment(0.0, 3.0, layers.toArray(new String[0]));
     assertEquals("my graph__0.000-3.000", f.getId());
     assertEquals("fragment's graph is itself", f, f.getGraph());
@@ -1352,6 +1358,8 @@ public class TestGraph {
     assertTrue("turn", f.getAnnotationsById().containsKey("turn1"));
     assertTrue("utterance", f.getAnnotationsById().containsKey("utterance1"));
     assertFalse("utterance afterwards", f.getAnnotationsById().containsKey("utterance2"));
+
+    assertTrue("transcript attribute copied", f.getAnnotationsById().containsKey("transcriber"));
 
     assertTrue("included word", f.getAnnotationsById().containsKey("word1"));
     assertTrue("included word", f.getAnnotationsById().containsKey("word2"));
@@ -1449,6 +1457,7 @@ public class TestGraph {
 
     g.setSchema(new Schema(
                   "who", "turn", "utterance", "word",
+                  new Layer("transcriber", "Transcriber", 0, false, false, true),
                   new Layer("topic", "Topics", 2, true, false, false),
                   new Layer("who", "Participants", 0, true, true, true),
                   new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
@@ -1470,6 +1479,9 @@ public class TestGraph {
     g.addAnchor(new Anchor("a4", 4.0));
     g.addAnchor(new Anchor("a5", 5.0));
     g.addAnchor(new Anchor("turnEnd", 6.0));
+
+    Annotation transcriber = new Annotation(
+      "transcriber", "Robert Fromont", "transcriber", "turnStart", "turnEnd", "my graph");
 
     Annotation who1 = new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "my graph");
     Annotation who2 = new Annotation("who2", "jane doe", "who", "turnStart", "turnEnd", "my graph");
@@ -1495,6 +1507,7 @@ public class TestGraph {
     Annotation N = new Annotation("pos3", "N", "pos", "a4", "a5", "word4");
     Annotation NP = new Annotation("phrase2", "NP", "phrase", "a1", "a5", "turn1");
 
+    g.addAnnotation(transcriber);
     g.addAnnotation(who1);
     g.addAnnotation(turn1);
     g.addAnnotation(utterance1);
@@ -1526,6 +1539,7 @@ public class TestGraph {
     layers.add("turn"); // include ancestor layer - annotations should have no anchors
     layers.add("phone");
     layers.add("pos");
+    layers.add("transcriber"); // transcript attribute
     assertEquals(2, quick.getOrdinal());
     Graph f = g.getFragment(quick, layers.toArray(new String[0]));
     assertEquals("my graph__2.000-3.000", f.getId());
@@ -1539,6 +1553,7 @@ public class TestGraph {
                  g.getSchema().getUtteranceLayerId(), f.getSchema().getUtteranceLayerId());
     assertEquals("graph schema copied to fragment",
                  g.getSchema().getWordLayerId(), f.getSchema().getWordLayerId());
+    assertTrue("transcript attribute copied", f.getAnnotationsById().containsKey("transcriber"));
 
     // check anchors
     assertFalse("check anchors", f.getAnchors().containsKey("turnStart")); 
