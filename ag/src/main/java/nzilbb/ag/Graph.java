@@ -417,21 +417,37 @@ public class Graph extends Annotation {
       if (layerSet.contains(layer.getId())) {
         if (layer.getId().equals(getSchema().getRoot().getId())) continue;
         fragment.addLayer((Layer)layer.clone());
-        for (Annotation annotation : all(layer.getId())) {
-          Double min = annotation.getStart().getOffsetMin();
-          Double max = annotation.getEnd().getOffsetMax();
-          if (min != null && min >= startOffset
-              && max != null && max <= endOffset) {
-            ensureAllAncestorsPresentInFragment(annotation, fragment);
-
-            // add the anchors
-            fragment.addAnchor((Anchor)annotation.getStart().clone());
-            fragment.addAnchor((Anchor)annotation.getEnd().clone());
-
-            // add the annotation
-            fragment.addAnnotation((Annotation)annotation.clone());
-          }
-        } // next annotation
+        
+        // is it a transcript attribute layer?
+        if ((layer.getParentId() == null
+             || layer.getParentId().equals(getSchema().getRoot().getId()))
+            && layer.getAlignment() == Constants.ALIGNMENT_NONE
+            && !layer.getId().equals(getSchema().getParticipantLayerId())) {
+          for (Annotation annotation : all(layer.getId())) {
+            Annotation attribute = (Annotation)annotation.clone();
+            attribute.setParentId(fragment.getId());
+            fragment.addAnnotation(attribute);
+          } // next attribute
+          
+        } else { // not a transcript attribute layer
+          
+          for (Annotation annotation : all(layer.getId())) {
+            Double min = annotation.getStart().getOffsetMin();
+            Double max = annotation.getEnd().getOffsetMax();
+            if (min != null && min >= startOffset
+                && max != null && max <= endOffset) {
+              ensureAllAncestorsPresentInFragment(annotation, fragment);
+              
+              // add the anchors
+              fragment.addAnchor((Anchor)annotation.getStart().clone());
+              fragment.addAnchor((Anchor)annotation.getEnd().clone());
+              
+              // add the annotation
+              fragment.addAnnotation((Annotation)annotation.clone());
+            }
+          } // next annotation
+          
+        } // not a transcript attribute layer
       } // layer exists
     } // next layer
 
@@ -495,28 +511,42 @@ public class Graph extends Annotation {
       layer = getLayer(layerId);
       if (layer != null) {
         fragment.addLayer((Layer)layer.clone());
-        // TODO this could be more efficient by traversing definingAnnotation first
-        // TODO and then using definingAnnotation.all(layerId) for any remaining layers
-        for (Annotation annotation : definingAnnotation.all(layerId)) {
-          ensureAllAncestorsPresentInFragment(annotation, fragment);
-          // add the anchors that fit
-          if (fragment.getAnchor(annotation.getStart().getId()) == null
-              && (annotation.getStart().getOffset() == null
-                  || definingAnnotation.includesOffset(annotation.getStart().getOffset()))) {
-            fragment.addAnchor((Anchor)annotation.getStart().clone());
-          }
-          if (fragment.getAnchor(annotation.getEnd().getId()) == null
-              && (annotation.getEnd().getOffset() == null
-                  || definingAnnotation.includesOffset(annotation.getEnd().getOffset())
-                  // 'includesOffset' == false if annotation.end.offset == end.offset, so:
-                  || annotation.getEnd().getOffset().equals(lastAnchor.getOffset()))) {
-            fragment.addAnchor((Anchor)annotation.getEnd().clone());
-          }
-          if (fragment.getAnnotation(annotation.getId()) == null) {
-            // add the annotation
-            fragment.addAnnotation((Annotation)annotation.clone());
-          }
-        } // next annotation
+        // is it a transcript attribute layer?
+        if ((layer.getParentId() == null
+             || layer.getParentId().equals(getSchema().getRoot().getId()))
+            && layer.getAlignment() == Constants.ALIGNMENT_NONE
+            && !layer.getId().equals(getSchema().getParticipantLayerId())) {
+          for (Annotation annotation : all(layer.getId())) {
+            Annotation attribute = (Annotation)annotation.clone();
+            attribute.setParentId(fragment.getId());
+            fragment.addAnnotation(attribute);
+          } // next attribute
+          
+        } else { // not a transcript attribute layer
+          
+          // TODO this could be more efficient by traversing definingAnnotation first
+          // TODO and then using definingAnnotation.all(layerId) for any remaining layers
+          for (Annotation annotation : definingAnnotation.all(layerId)) {
+            ensureAllAncestorsPresentInFragment(annotation, fragment);
+            // add the anchors that fit
+            if (fragment.getAnchor(annotation.getStart().getId()) == null
+                && (annotation.getStart().getOffset() == null
+                    || definingAnnotation.includesOffset(annotation.getStart().getOffset()))) {
+              fragment.addAnchor((Anchor)annotation.getStart().clone());
+            }
+            if (fragment.getAnchor(annotation.getEnd().getId()) == null
+                && (annotation.getEnd().getOffset() == null
+                    || definingAnnotation.includesOffset(annotation.getEnd().getOffset())
+                    // 'includesOffset' == false if annotation.end.offset == end.offset, so:
+                    || annotation.getEnd().getOffset().equals(lastAnchor.getOffset()))) {
+              fragment.addAnchor((Anchor)annotation.getEnd().clone());
+            }
+            if (fragment.getAnnotation(annotation.getId()) == null) {
+              // add the annotation
+              fragment.addAnnotation((Annotation)annotation.clone());
+            }
+          } // next annotation
+        } // not a transcript attribute layer
       } // layer exists
     } // next layer
       
@@ -563,20 +593,35 @@ public class Graph extends Annotation {
         Layer layer = getLayer(layerId);
         if (layer != null) {
           fragment.addLayer((Layer)layer.clone());
-          for (Annotation annotation : all(layerId)) {
-            Double min = annotation.getStart().getOffsetMin();
-            Double max = annotation.getEnd().getOffsetMax();
-            if (min != null && min >= startOffset
-                && max != null && max <= endOffset
-                && annotation.getAncestors().contains(ancestor)) {
-              ensureAllAncestorsPresentInFragment(annotation, fragment);
-              // add the anchors
-              fragment.addAnchor((Anchor)annotation.getStart().clone());
-              fragment.addAnchor((Anchor)annotation.getEnd().clone());
-              // add the annotation
-              fragment.addAnnotation((Annotation)annotation.clone());
-            }
-          } // next annotation
+        
+          // is it a transcript attribute layer?
+          if ((layer.getParentId() == null
+               || layer.getParentId().equals(getSchema().getRoot().getId()))
+              && layer.getAlignment() == Constants.ALIGNMENT_NONE
+              && !layer.getId().equals(getSchema().getParticipantLayerId())) {
+            for (Annotation annotation : all(layer.getId())) {
+              Annotation attribute = (Annotation)annotation.clone();
+              attribute.setParentId(fragment.getId());
+              fragment.addAnnotation(attribute);
+            } // next attribute
+
+          } else { // not a transcript attribute
+            
+            for (Annotation annotation : all(layerId)) {
+              Double min = annotation.getStart().getOffsetMin();
+              Double max = annotation.getEnd().getOffsetMax();
+              if (min != null && min >= startOffset
+                  && max != null && max <= endOffset
+                  && annotation.getAncestors().contains(ancestor)) {
+                ensureAllAncestorsPresentInFragment(annotation, fragment);
+                // add the anchors
+                fragment.addAnchor((Anchor)annotation.getStart().clone());
+                fragment.addAnchor((Anchor)annotation.getEnd().clone());
+                // add the annotation
+                fragment.addAnnotation((Annotation)annotation.clone());
+              }
+            } // next annotation
+          } // not a transcript attribute
         } // layer exists
       } // next layer
 	 
