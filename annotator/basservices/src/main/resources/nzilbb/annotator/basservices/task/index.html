@@ -31,7 +31,7 @@
     <p> Please note that using these services requires sending transcript, annotation, and
       audio data over the internet to the external provider of these services. </p> 
         
-    <form method="POST" action="setTaskParameters">
+    <form method="POST" action="setTaskParameters" id="taskParameters">
       <div class="field" title="Input layer from which words come">
         <label for="orthographyLayerId"> Token Layer </label>
         <span><select id="orthographyLayerId" name="orthographyLayerId" required></select></span>
@@ -40,14 +40,6 @@
         <label for="transcriptLanguageLayerId"> Transcript Language Attribute </label>
         <span>
           <select id="transcriptLanguageLayerId" name="transcriptLanguageLayerId">
-            <option value="">[none]</option>
-          </select>
-        </span>
-      </div>
-      <div class="field" title="Layer for annotating phrases in a different language">
-        <label for="phraseLanguageLayerId"> Phrase Language Layer </label>
-        <span>
-          <select id="phraseLanguageLayerId" name="phraseLanguageLayerId">
             <option value="">[none]</option>
           </select>
         </span>
@@ -68,6 +60,112 @@
           G2P (graphemes to phonemes)
         </label>
       </fieldset>
+      <div class="field mausbasic"
+           title="Language to tell the web service the utterances are in">
+        <label for="forceLanguageMAUSBasic">Language to assume</label>
+        <span>
+          <select id="forceLanguageMAUSBasic" name="forceLanguageMAUSBasic">
+            <option value="">Use transcript language</option>
+            <!-- 2022-03-09 These options copied from https://clarin.phonetik.uni-muenchen.de/BASWebServices/interface/WebMAUSBasic -->
+            <option value="aus-AU">Aboriginal Languages (AU)</option>
+            <option value="afr-ZA">Afrikaans (ZA)</option>
+            <option value="sqi-AL">Albanian (AL)</option>
+            <option value="arb">Arabic (macro)</option>
+            <option value="eus-ES">Basque (ES)</option>
+            <option value="eus-FR">Basque (FR)</option>
+            <option value="cat-ES">Catalan (ES)</option>
+            <option value="nld-BE">Dutch (BE)</option>
+            <option value="nld-NL">Dutch (NL)</option>
+            <option value="eng-AU">English (AU)</option>
+            <option value="eng-US">English (US) </option>
+            <option value="eng-GB">English (GB) </option>
+            <option value="eng-SC">English (SC) </option>
+            <option value="eng-NZ">English (NZ) </option>
+            <option value="ekk-EE">Estonian (EE)</option>
+            <option value="fin-FI">Finnish (FI)</option>
+            <option value="fra-FR">French (FR)</option>
+            <option value="kat-GE">Georgian (GE)</option>
+            <option value="deu-AT">German (AT)</option>
+            <option value="deu-CH">German (CH)</option>
+            <option value="deu-DE">German (DE)</option>
+            <option value="gsw-CH">German Dieth (CH)</option>
+            <option value="gsw-CH-BE">German Dieth (CH), Bern dialect</option>
+            <option value="gsw-CH-BS">German Dieth (CH), Basel dialect</option>
+            <option value="gsw-CH-GR">German Dieth (CH), Graubunden dialect</option>
+            <option value="gsw-CH-SG">German Dieth (CH), St. Gallen dialect</option>
+            <option value="gsw-CH-ZH">German Dieth (CH), Zurich dialect</option>
+            <option value="hun-HU">Hungarian (HU)</option>
+            <option value="isl-IS">Icelandic (IS)</option>
+            <option value="ita-IT">Italian (IT)</option>
+            <option value="jpn-JP">Japanese (JP)</option>
+            <option value="gup-AU">Kunwinjku, Western and Central Arnhem Land (AU)</option>
+            <option value="ltz-LU">Luxembourgish (LU)</option>
+            <option value="mlt-MT">Maltese (MT)</option>
+            <option value="nor-NO">Norwegian (NO)</option>
+            <option value="fas-IR">Persian (IR)</option>
+            <option value="pol-PL">Polish (PL)</option>
+            <option value="ron-RO">Romanian (RO)</option>
+            <option value="rus-RU">Russian (RU)</option>
+            <option value="spa-ES">Spanish (ES)</option>
+            <option value="swe-SE">Swedish (SE)</option>
+            <option value="tha-TH">Thai (TH)</option>
+            <option value="guf-AU">Yolŋu Matha, Gupapuyngu, Eastern Arnhem Land (AU)</option></select>
+          </select>
+        </span>
+      </div>
+      <div class="field g2p"
+           title="Language to tell the web service the utterances are in">
+        <label for="forceLanguageG2P">Language to assume</label>
+        <span>
+          <select id="forceLanguageG2P" name="forceLanguageG2P">
+            <option value="">Use transcript language</option>
+            <!-- 2022-03-09 These options copied from https://clarin.phonetik.uni-muenchen.de/BASWebServices/interface/Grapheme2Phoneme -->
+            <option value="aus-AU">Aboriginal Languages (AU)</option>
+            <option value="afr-ZA">Afrikaans (ZA)</option>
+            <option value="sqi-AL">Albanian (AL)</option>
+            <option value="arb">Arabic (macro)</option>
+            <option value="eus-ES">Basque (ES)</option>
+            <option value="eus-FR">Basque (FR)</option>
+            <option value="cat-ES">Catalan (ES)</option>
+            <option value="cze-CZ">Czech (CZ)</option>
+            <option value="nld-NL">Dutch (NL)</option>
+            <option value="eng-US">English (US)</option>
+            <option value="eng-AU">English (AU)</option>
+            <option value="eng-GB">English (GB)</option>
+            <option value="eng-NZ">English (NZ)</option>
+            <option value="ekk-EE">Estonian (EE)</option>
+            <option value="fin-FI">Finnish (FI)</option>
+            <option value="fra-FR">French (FR)</option>
+            <option value="kat-GE">Georgian (GE)</option>
+            <option value="deu-DE">German (DE)</option>
+            <option value="gsw-CH-BE">German Dieth (CH), Bern dialect</option>
+            <option value="gsw-CH-BS">German Dieth (CH), Basel dialect</option>
+            <option value="gsw-CH-GR">German Dieth (CH), Graubunden dialect</option>
+            <option value="gsw-CH-SG">German Dieth (CH), St. Gallen dialect</option>
+            <option value="gsw-CH-ZH">German Dieth (CH), Zurich dialect</option>
+            <option value="gsw-CH">German Dieth (CH)</option>
+            <option value="hat-HT">Haitian Creole (HT)</option>
+            <option value="hun-HU">Hungarian (HU)</option>
+            <option value="isl-IS">Icelandic (IS)</option>
+            <option value="ita-IT">Italian (IT)</option>
+            <option value="jpn-JP">Japanese (JP)</option>
+            <option value="gup-AU">Kunwinjku, Western and Central Arnhem Land (AU)</option>
+            <option value="ltz-LU">Luxembourgish (LU)</option>
+            <option value="mlt-MT">Maltese (MT)</option>
+            <option value="nan-TW">Min Nan (TW)</option>
+            <option value="nor-NO">Norwegian (NO)</option>
+            <option value="fas-IR">Persian (IR)</option>
+            <option value="pol-PL">Polish (PL)</option>
+            <option value="ron-RO">Romanian (RO)</option>
+            <option value="rus-RU">Russian (RU)</option>
+            <option value="slk-SK">Slovak (SK)</option>
+            <option value="spa-ES">Spanish (ES)</option>
+            <option value="swe-SE">Swedish (SE)</option>
+            <option value="tha-TH">Thai (TH)</option>
+            <option value="guf-AU">Yolŋu Matha, Gupapuyngu, Eastern Arnhem Land (AU)</option>
+          </select>
+        </span>
+      </div>
       <div class="field" title="Which set of symbols to use for phoneme layers">
         <label for="phonemeEncoding"> Phoneme Encoding </label>
         <span>
@@ -85,8 +183,8 @@
         <label for="pronunciationLayerId"> Tag Layer </label>
         <span>
           <select id="pronunciationLayerId" name="pronunciationLayerId" required>
-            <option disabled>[select layer]</option> <!-- force choice the first time -->
-            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+            <option value="" disabled>[select layer]</option> <!-- force choice the first time -->
+            <option value="">[add new layer]</option>         <!-- allow adding a new layer -->
           </select>
         </span>
       </div>

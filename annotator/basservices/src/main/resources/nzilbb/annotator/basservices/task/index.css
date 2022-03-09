@@ -36,7 +36,7 @@ label:after {
     flex-direction: row;
 }
 .field label {
-    width: 50%;
+    width: 45%;
     display: block;
 }
 .field span {

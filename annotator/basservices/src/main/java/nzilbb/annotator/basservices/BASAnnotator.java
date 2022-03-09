@@ -87,8 +87,8 @@ import nzilbb.util.ISO639;
 
 /**
  * BAS web services annotator.  This uses BAS services for various annotation tasks.
- * <p> <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/#/services">
- *  https://clarin.phonetik.uni-muenchen.de/BASWebServices/#/services</a> 
+ * <p> <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/interface">
+ *  https://clarin.phonetik.uni-muenchen.de/BASWebServices/interface</a> 
  * <p> For service discovery, links are like 
  *  <a href="http://clarin.phonetik.uni-muenchen.de/BASWebServices/BAS_Webservices.cmdi.xml">
  *  http://clarin.phonetik.uni-muenchen.de/BASWebServices/BAS_Webservices.cmdi.xml</a>
@@ -217,6 +217,47 @@ public class BASAnnotator extends Annotator {
    * "G2P" (graphemes to phonemes tagging). 
    */
   public BASAnnotator setService(String newService) { service = newService; return this; }
+  
+  /**
+   * Language to send to the MAUSBasic web service, null or "" to use the transcript's language.
+   * @see #getForceLanguageMAUSBasic()
+   * @see #setForceLanguageMAUSBasic(String)
+   */
+  protected String forceLanguageMAUSBasic;
+  /**
+   * Getter for {@link #forceLanguageMAUSBasic}: Language to send to the MAUSBasic web
+   * service, null or "" to use the transcript's language. 
+   * @return Language to send to the MAUSBasic web service, null or "" to use the
+   * transcript's language. 
+   */
+  public String getForceLanguageMAUSBasic() { return forceLanguageMAUSBasic; }
+  /**
+   * Setter for {@link #forceLanguageMAUSBasic}: Language to send to the MAUSBasic web
+   * service, null or "" to use the transcript's language. 
+   * @param newForceLanguageMAUSBasic Language to send to the MAUSBasic web service, null
+   * or "" to use the transcript's language. 
+   */
+  public BASAnnotator setForceLanguageMAUSBasic(String newForceLanguageMAUSBasic) { forceLanguageMAUSBasic = newForceLanguageMAUSBasic; return this; }
+
+  /**
+   * Language to send to the G2O web service, null or "" to use the transcript's language.
+   * @see #getForceLanguageG2P()
+   * @see #setForceLanguageG2P(String)
+   */
+  protected String forceLanguageG2P;
+  /**
+   * Getter for {@link #forceLanguageG2P}: Language to send to the G2O web service, null
+   * or "" to use the transcript's language. 
+   * @return Language to send to the G2O web service, null or "" to use the transcript's language.
+   */
+  public String getForceLanguageG2P() { return forceLanguageG2P; }
+  /**
+   * Setter for {@link #forceLanguageG2P}: Language to send to the G2O web service, null
+   * or "" to use the transcript's language. 
+   * @param newForceLanguageG2P Language to send to the G2O web service, null or "" to use
+   * the transcript's language. 
+   */
+  public BASAnnotator setForceLanguageG2P(String newForceLanguageG2P) { forceLanguageG2P = newForceLanguageG2P; return this; }
   
   /**
    * The encoding to use for final phoneme labels.
@@ -526,6 +567,10 @@ public class BASAnnotator extends Annotator {
       phoneAlignmentLayerId = null;
     if (targetLanguagePattern != null && targetLanguagePattern.length() == 0)
       targetLanguagePattern = null;
+    if (forceLanguageMAUSBasic != null && forceLanguageMAUSBasic.length() == 0)
+      forceLanguageMAUSBasic = null;
+    if (forceLanguageG2P != null && forceLanguageG2P.length() == 0)
+      forceLanguageG2P = null;
 
     // validation...
       
@@ -536,10 +581,8 @@ public class BASAnnotator extends Annotator {
     if (requiredLayers.length == 0) {
       throw new InvalidConfigurationException(this, "There are no source layers specified.");
     }
-    if (transcriptLanguageLayerId == null) 
-      throw new InvalidConfigurationException(
-        this, "Transcript language layer not specifed.");
-    if (schema.getLayer(transcriptLanguageLayerId) == null) 
+    if (transcriptLanguageLayerId != null
+        && schema.getLayer(transcriptLanguageLayerId) == null) 
       throw new InvalidConfigurationException(
         this, "Transcript language layer not found: " + transcriptLanguageLayerId);
     if (orthographyLayerId == null)
@@ -550,6 +593,10 @@ public class BASAnnotator extends Annotator {
     if (phonemeEncoding == null)
       throw new InvalidConfigurationException(this, "Phoneme encoding not specified.");
     if (targetLanguagePattern != null) {
+      if (forceLanguageG2P == null && transcriptLanguageLayerId == null) {
+        throw new InvalidConfigurationException(
+          this, "If target language pattern is set, transcript layer must also be set");
+      }
       try {
         Pattern.compile(targetLanguagePattern);
       } catch(PatternSyntaxException exception) {
@@ -559,7 +606,11 @@ public class BASAnnotator extends Annotator {
     }
     if ("G2P".equals(service)) {
       if (pronunciationLayerId == null) 
-        throw new InvalidConfigurationException(this, "Pronunciation layer not specified.");      
+        throw new InvalidConfigurationException(this, "Pronunciation layer not specified.");
+      if (forceLanguageG2P == null && transcriptLanguageLayerId == null) {
+        throw new InvalidConfigurationException(
+          this, "If transcript language is to be used, transcript layer must be set");
+      }
     } else if ("MAUSBasic".equals(service)) {
       if (wordAlignmentLayerId == null)
         throw new InvalidConfigurationException(
@@ -567,6 +618,10 @@ public class BASAnnotator extends Annotator {
       if (phoneAlignmentLayerId == null)
         throw new InvalidConfigurationException(
           this, "Phone alignment layer not specified.");
+      if (forceLanguageMAUSBasic == null && transcriptLanguageLayerId == null) {
+        throw new InvalidConfigurationException(
+          this, "If transcript language is to be used, transcript layer must be set");
+      }
     } else { // service none of the above
       throw new InvalidConfigurationException(
         this, "Invalid service: " + service);
@@ -901,32 +956,38 @@ public class BASAnnotator extends Annotator {
             try {
               PhonemeTranslator translator =
                 "disc".equals(phonemeEncoding)?new SAMPA2DISC():null;
-              String languageCode = "";
+              String languageCode = forceLanguageG2P;
               String text = Arrays.stream(fragment.labels(orthographyLayerId))
                 .collect(Collectors.joining(" ")).trim();
               if (text.length() == 0) {
                 setStatus(fragment.getId() + " has no orthography and will be ignored.");
               } else { // has orthography
-                Annotation graphLanguage = fragment.first(transcriptLanguageLayerId);
-                if (graphLanguage == null || graphLanguage.getLabel().length() == 0) {
-                  setStatus(fragment.getId()+" has no language specified and will be ignored.");
-                } else if (targetLanguagePattern != null
-                           && !graphLanguage.getLabel().matches(targetLanguagePattern)) {
-                  setStatus(fragment.getId() + ": language \""+graphLanguage
-                            +"\" doesn't match language pattern \""+targetLanguagePattern
-                            +"\", fragment will be ignored");
-                } else {
-                  languageCode = graphLanguage.getLabel();
-                  // try to make it an alpha-3 code
-                  languageCode = iso639.alpha3(languageCode).orElse(languageCode);
-              
+                if (transcriptLanguageLayerId != null) {
+                  Annotation graphLanguage = fragment.first(transcriptLanguageLayerId);
+                  if (languageCode == null // if not forcing language, we need graphLanguage
+                      && (graphLanguage == null || graphLanguage.getLabel().length() == 0)) {
+                    setStatus(fragment.getId()+" has no language specified and will be ignored.");
+                  } else if (targetLanguagePattern != null
+                             && !graphLanguage.getLabel().matches(targetLanguagePattern)) {
+                    setStatus(fragment.getId() + ": language \""+graphLanguage
+                              +"\" doesn't match language pattern \""+targetLanguagePattern
+                              +"\", fragment will be ignored");
+                    languageCode = null; // ensure it isn't sent to BAS
+                  } else if (languageCode == null) {
+                    languageCode = graphLanguage.getLabel();
+                    // try to make it an alpha-3 code
+                    languageCode = iso639.alpha3(languageCode).orElse(languageCode);
+                  }
+                } // infer language code
+                if (languageCode != null) {
                   // send request to BAS server
                   BASResponse response = bas.G2P(
                     languageCode, text, 
                     translator != null?"sampa":phonemeEncoding, 
                     "standard", "txt", syllabification, wordStress);
-                  setStatus(fragment.getId() + ": " + (response.getSuccess()?"succeeded":"failed")
-                            + " - " + response.getOutput());
+                  setStatus(
+                    fragment.getId() + ": " + (response.getSuccess()?"succeeded":"failed")
+                    + " - " + response.getOutput());
                   if (response.getWarnings() != null && response.getWarnings().length() > 0) {
                     setStatus(fragment.getId() + ": WARNING: " + response.getWarnings());
                   }
@@ -949,6 +1010,7 @@ public class BASAnnotator extends Annotator {
                         label = translator.apply(
                           label.replace(" ","") // also remove spaces
                           .replace(".","-")) // also convert syllable boundaries
+                          .replace("`","")  // and remove spurious back ticks
                           .replace("\\",""); // and remove spurious backslashes
                       }
                       Annotation word = words.next();
@@ -967,7 +1029,7 @@ public class BASAnnotator extends Annotator {
                       fragment = null;
                     }
                     if (fragment != null) {
-
+                      
                       // tag this utterance
                       if (utteranceTagLayerId != null) {
                         String label = response.getOutput();
@@ -977,14 +1039,14 @@ public class BASAnnotator extends Annotator {
                         }
                         fragment.createTag(utteranceTagLayerId, label);
                       }
-
+                      
                       consumer.accept(fragment);
                       utterancesAnnotated++;
                     }
                   } else { // no result returned
                     errors.add(fragment.getId() + ": failed: " + response.getWarnings());
                   }
-                } // language matches
+                } // language code is known
               } // has orthography                  
                   
               if (utteranceCount > 0) {
@@ -1002,33 +1064,38 @@ public class BASAnnotator extends Annotator {
             try {
               PhonemeTranslator translator =
                 "disc".equals(phonemeEncoding)?new SAMPA2DISC():null;
-              String languageCode = "";
+              String languageCode = forceLanguageMAUSBasic;
               String text = Arrays.stream(fragment.labels(orthographyLayerId))
                 .collect(Collectors.joining(" ")).trim();
               if (text.length() == 0) {
                 setStatus(fragment.getId() + " has no orthography and will be ignored.");
               } else { // has orthography
-                Annotation graphLanguage = fragment.first(transcriptLanguageLayerId);
-                if (graphLanguage == null || graphLanguage.getLabel().length() == 0) {
-                  setStatus(fragment.getId()+" has no language specified and will be ignored.");
-                } else if (targetLanguagePattern != null
-                           && !graphLanguage.getLabel().matches(targetLanguagePattern)) {
-                  setStatus(fragment.getId() + ": language \""+graphLanguage
-                            +"\" doesn't match language pattern \""+targetLanguagePattern
-                            +"\", fragment will be ignored");
-                } else {
-                  languageCode = graphLanguage.getLabel();
-                  // try to make it an alpha-3 code
-                  languageCode = iso639.alpha3(languageCode).orElse(languageCode);
+                if (transcriptLanguageLayerId != null) {
+                  Annotation graphLanguage = fragment.first(transcriptLanguageLayerId);
+                  if (languageCode == null // if not forcing language, we need graphLanguage
+                      && (graphLanguage == null || graphLanguage.getLabel().length() == 0)) {
+                    setStatus(fragment.getId()+" has no language specified and will be ignored.");
+                  } else if (targetLanguagePattern != null
+                             && !graphLanguage.getLabel().matches(targetLanguagePattern)) {
+                    setStatus(fragment.getId() + ": language \""+graphLanguage
+                              +"\" doesn't match language pattern \""+targetLanguagePattern
+                              +"\", fragment will be ignored");
+                    languageCode = null; // ensure it isn't sent to BAS
+                  } else if (languageCode == null) {
+                    languageCode = graphLanguage.getLabel();
+                    // try to make it an alpha-3 code
+                    languageCode = iso639.alpha3(languageCode).orElse(languageCode);
+                  }
+                } // get language from transcript
                 
+                if (languageCode != null) {
                   // get audio fragment
                   
                   // source media
                   String fragmentAudioURL = fragment.getMediaProvider()
                     .getMedia(null, "audio/wav");
                   if (fragmentAudioURL == null) {
-                    setStatus(
-                      fragment.getId() + " has no audio file and will be ignored");
+                    setStatus(fragment.getId() + " has no audio file and will be ignored");
                   } else { // has audio
                     
                     File fragmentAudio = new File(new URI(fragmentAudioURL));
@@ -1081,7 +1148,7 @@ public class BASAnnotator extends Annotator {
                       // all anchors are automatically generated
                       edited.getAnchors().values().stream().forEach(
                         anchor -> anchor.setConfidence(Constants.CONFIDENCE_AUTOMATIC));
-
+                      
                       // rename "ORT-MAU" speaker 
                       Annotation participant = fragment.first(
                         schema.getParticipantLayerId());
@@ -1113,7 +1180,7 @@ public class BASAnnotator extends Annotator {
                       Annotation utterance = fragment.first(schema.getUtteranceLayerId());
                       Annotation editedUtterance = edited.first(schema.getUtteranceLayerId());
                       if (editedUtterance != null) editedUtterance.setLabel(utterance.getLabel());
-
+                      
                       // set turn as parent of words
                       if (wordAlignmentLayerId != null) {
                         for (Annotation word : edited.all(wordAlignmentLayerId)) {
@@ -1133,7 +1200,8 @@ public class BASAnnotator extends Annotator {
                           a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
                           // convert to DISC?
                           if (translator != null) {
-                            String label = translator.apply(a.getLabel());
+                            String label = translator.apply(a.getLabel())
+                              .replace("`","");  // and remove spurious back ticks
                             if (label.length() > 0) a.setLabel(label);
                             else setStatus("Could not convert label to DISC: " + a.getLabel());
                           }
@@ -1189,7 +1257,7 @@ public class BASAnnotator extends Annotator {
                           } // next dependent layer
                         } // dependentLayerIds
                         
-                        // tag this utterance
+                          // tag this utterance
                         if (utteranceTagLayerId != null) {
                           String label = response.getOutput();
                           if (label.length() > 100) label = label.substring(0,100) + " ...";
@@ -1208,7 +1276,7 @@ public class BASAnnotator extends Annotator {
                     } 
                     audioFile.delete();
                   } // has audio
-                } // language matches
+                } // language code is known
               } // has orthography
               if (utteranceCount > 0) {
                 setPercentComplete(++utterancesSoFar * 100 / utteranceCount);

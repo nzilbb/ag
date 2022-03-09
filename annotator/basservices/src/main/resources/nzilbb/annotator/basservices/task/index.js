@@ -26,8 +26,7 @@ getSchema(s => {
         orthographyLayerId.value = schema.wordLayerId;
     }
     
-    // populate the language layers...
-    
+    // populate the language layer options    
     var transcriptLanguageLayerId = document.getElementById("transcriptLanguageLayerId");
     addLayerOptions(
         transcriptLanguageLayerId, schema,
@@ -35,14 +34,6 @@ getSchema(s => {
             && /.*lang.*/.test(layer.id));
     // select the first one by default
     transcriptLanguageLayerId.selectedIndex = 1;
-    
-    var phraseLanguageLayerId = document.getElementById("phraseLanguageLayerId");
-    addLayerOptions(
-        phraseLanguageLayerId, schema,
-        layer => layer.parentId == schema.turnLayerId && layer.alignment == 2
-            && /.*lang.*/.test(layer.id));
-    // select the first one by default
-    phraseLanguageLayerId.selectedIndex = 1;
     
     // populate layer output select options...          
     var pronunciationLayerId = document.getElementById("pronunciationLayerId");
@@ -93,38 +84,116 @@ getSchema(s => {
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getText("getTaskParameters", text => {
-        try {
-            var parameters = new URLSearchParams(text);
-            
-            // set initial values of properties in the form above
-            // (this assumes bean property names match input id's in the form above)
-            for (const [key, value] of parameters) {
+        var parameters = new URLSearchParams(text);
+        
+        // set initial values of properties in the form above
+        // (this assumes bean property names match input id's in the form above)
+        for (const [key, value] of parameters) {
+            try {
                 document.getElementById(key).value = value;
+            } catch (x) {
+                console.log(`Unrecognized parameter: ${key}: ${x}`);
             }
-            // set the checkboxes
-            document.getElementById("wordStress").checked
-                = parameters.get("wordStress");
-            document.getElementById("syllabification").checked
-                = parameters.get("syllabification");
-            if (parameters.get("service") == "G2P") {
-                document.getElementById("service-G2P").checked = true;
-            } else {
-                document.getElementById("service-MAUSBasic").checked = true;
-            }
-            changeService();
-            // if there's no utterance tag layer defined
-            if (pronunciationLayerId.selectedIndex == 0
-                // but there's a layer named after the task
-                && schema.layers[taskId]) {
-                
-                // select that layer by default
-                pronunciationLayerId.value = taskId;
-            }
-        } finally {
-            finishedLoading();
         }
+        // set the checkboxes
+        document.getElementById("wordStress").checked
+            = parameters.get("wordStress");
+        document.getElementById("syllabification").checked
+            = parameters.get("syllabification");
+        if (parameters.get("service") == "G2P") {
+            document.getElementById("service-G2P").checked = true;
+        } else {
+            document.getElementById("service-MAUSBasic").checked = true;
+        }
+        changeService();
+        // if there's no utterance tag layer defined
+        if (pronunciationLayerId.selectedIndex == 0
+            // but there's a layer named after the task
+            && schema.layers[taskId]) {
+            
+            // select that layer by default
+            pronunciationLayerId.value = taskId;
+        }
+        loadLanguageOptions();
     });
 });
+
+// load the current language options from clarin, for populating the dropdown options
+function loadLanguageOptions() {
+    const url = "https://clarin.phonetik.uni-muenchen.de/BASWebServices/BAS_Webservices.cmdi.xml";
+    const request = new XMLHttpRequest();
+    request.overrideMimeType("text/xml");
+    request.addEventListener("error", ()=>{ finishedLoading(); });
+    request.addEventListener("abort", ()=>{ finishedLoading(); });
+    request.addEventListener("load", function() {
+        finishedLoading();
+        
+        cmd = this.responseXML;
+        // the document has a namespace defined, so we have to implement a resolver
+        var resolver = p=>"http://www.clarin.eu/cmd/";
+        // the xpath expressions need to include a namespace, our resolver doesn't care what
+        // so we use x:...
+
+        // first MAUSBasic options:
+        let optionsXpath = "//x:Operation[x:Name='runMAUSBasic']/x:Input/x:Parameter[x:Name='LANGUAGE']/x:Values/x:ParameterValue";
+        let options = cmd.evaluate(
+            optionsXpath, cmd, resolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE)
+        let thisOption = options.iterateNext();
+        if (thisOption) { // there are values
+            const forceLanguageMAUSBasic = document.getElementById("forceLanguageMAUSBasic");
+            const orginalValue = forceLanguageMAUSBasic.value;
+            forceLanguageMAUSBasic.innerHTML = ""; // remove current items
+            let option = document.createElement("option");
+            option.value = "";
+            option.appendChild(document.createTextNode("Use transcript language"));
+            forceLanguageMAUSBasic.appendChild(option)
+            while (thisOption) {
+                const value = cmd.evaluate(
+                    "x:Value", thisOption, resolver, XPathResult.STRING_TYPE).stringValue;
+                const description = cmd.evaluate(
+                    "x:Description", thisOption, resolver, XPathResult.STRING_TYPE).stringValue;
+                option = document.createElement("option");
+                option.value = value;
+                option.appendChild(document.createTextNode(description||value));
+                forceLanguageMAUSBasic.appendChild(option)
+                
+                thisOption = options.iterateNext();
+            } // next option
+            forceLanguageMAUSBasic.value = orginalValue;
+        } // there are values
+
+        // now G2P options:
+        optionsXpath = "//x:Operation[x:Name='runG2P']/x:Input/x:Parameter[x:Name='LANGUAGE']/x:Values/x:ParameterValue";
+        options = cmd.evaluate(
+            optionsXpath, cmd, resolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE)
+        thisOption = options.iterateNext();
+        if (thisOption) { // there are values
+            const forceLanguageG2P = document.getElementById("forceLanguageG2P");
+            const orginalValue = forceLanguageG2P.value;
+            forceLanguageG2P.innerHTML = ""; // remove current items
+            let option = document.createElement("option");
+            option.value = "";
+            option.appendChild(document.createTextNode("Use transcript language"));
+            forceLanguageG2P.appendChild(option)
+            while (thisOption) {
+                const value = cmd.evaluate(
+                    "x:Value", thisOption, resolver, XPathResult.STRING_TYPE).stringValue;
+                const description = cmd.evaluate(
+                    "x:Description", thisOption, resolver, XPathResult.STRING_TYPE).stringValue;
+                option = document.createElement("option");
+                option.value = value;
+                option.appendChild(document.createTextNode(description||value));
+                forceLanguageG2P.appendChild(option)
+                
+                thisOption = options.iterateNext();
+            } // next option
+            forceLanguageG2P.value = orginalValue;
+        } // there are values
+    });
+    request.open("GET", url);
+    request.send();
+}
+
 
 // this function detects when the user selects [add new layer]:
 function changedLayer(select, defaultNewLayerName) {
@@ -187,6 +256,33 @@ function validateRegularExpression(input) {
     }
 }
 
+function validateParameters() {
+    if (document.getElementById("targetLanguagePattern").value
+        && !document.getElementById("transcriptLanguageLayerId").value) {
+        alert("If you want to target a specific language,"
+              +" you must select a layer that specifies the transcript's language");
+        document.getElementById("transcriptLanguageLayerId").focus();
+        return false;
+    }
+    if (document.getElementById("service-MAUSBasic").checked
+        && !document.getElementById("forceLanguageMAUSBasic").value
+        && !document.getElementById("transcriptLanguageLayerId").value) {
+        alert("If you don't select a language to assume,"
+              +" you must select a layer that specifies the transcript's language");
+        document.getElementById("transcriptLanguageLayerId").focus();
+        return false;
+    }
+    if (document.getElementById("service-G2P").checked
+        && !document.getElementById("forceLanguageG2P").value
+        && !document.getElementById("transcriptLanguageLayerId").value) {
+        alert("If you don't select a language to assume,"
+              +" you must select a layer that specifies the transcript's language");
+        document.getElementById("transcriptLanguageLayerId").focus();
+        return false;
+    }
+    return true;
+}
+
 document.getElementById("pronunciationLayerId").onchange = function(e) {
     changedLayer(this, taskId + "Pronunciation"); };
 document.getElementById("wordAlignmentLayerId").onchange = function(e) {
@@ -200,3 +296,4 @@ document.getElementById("service-MAUSBasic").onchange = changeService;
 document.getElementById("targetLanguagePattern").onkeyup = function(e) {
     validateRegularExpression(this);
 }
+document.getElementById("taskParameters").onsubmit = validateParameters;

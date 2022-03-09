@@ -96,6 +96,20 @@ public class TestBASAnnotator {
       +"&phonemeEncoding=disc"
       +"&targetLanguagePattern=en-NZ"
       +"&transcriptLanguageLayerId=transcript_language"
+      +"&forceLanguageMAUSBasic="
+      +"&utteranceTagLayerId=mausBasic"
+      +"&participantTagLayerId="
+      +"&wordAlignmentLayerId=word"
+      +"&phoneAlignmentLayerId=segment");
+
+    // configure with no language pattern/layer, but a forced language
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&service=MAUSBasic"
+      +"&phonemeEncoding=disc"
+      +"&targetLanguagePattern="
+      +"&transcriptLanguageLayerId="
+      +"&forceLanguageMAUSBasic=deu-DE"
       +"&utteranceTagLayerId=mausBasic"
       +"&participantTagLayerId="
       +"&wordAlignmentLayerId=word"
@@ -134,6 +148,7 @@ public class TestBASAnnotator {
         +"&phonemeEncoding=disc"
         +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
+        +"&forceLanguageMAUSBasic="
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
         +"&wordAlignmentLayerId=word"
@@ -148,6 +163,7 @@ public class TestBASAnnotator {
         +"&phonemeEncoding=disc"
         +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=nonexistent"
+        +"&forceLanguageMAUSBasic="
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
         +"&wordAlignmentLayerId=word"
@@ -162,6 +178,7 @@ public class TestBASAnnotator {
         +"&phonemeEncoding=disc"
         +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
+        +"&forceLanguageMAUSBasic="
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
         +"&wordAlignmentLayerId=word"
@@ -176,6 +193,7 @@ public class TestBASAnnotator {
         +"&phonemeEncoding=disc"
         +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
+        +"&forceLanguageMAUSBasic="
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
         +"&wordAlignmentLayerId=word"
@@ -190,6 +208,7 @@ public class TestBASAnnotator {
         +"&phonemeEncoding=disc"
         +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
+        +"&forceLanguageMAUSBasic="
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
         +"&wordAlignmentLayerId="
@@ -204,6 +223,7 @@ public class TestBASAnnotator {
         +"&phonemeEncoding=disc"
         +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
+        +"&forceLanguageMAUSBasic="
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
         +"&wordAlignmentLayerId=word"
@@ -218,6 +238,7 @@ public class TestBASAnnotator {
         +"&phonemeEncoding=disc"
         +"&targetLanguagePattern=*"
         +"&transcriptLanguageLayerId=transcript_language"
+        +"&forceLanguageMAUSBasic="
         +"&utteranceTagLayerId=mausBasic"
         +"&participantTagLayerId="
         +"&wordAlignmentLayerId=word"
@@ -228,13 +249,70 @@ public class TestBASAnnotator {
     try {
       annotator.setTaskParameters(
         "orthographyLayerId=word"
+        +"&service=MAUSBasic"
+        +"&phonemeEncoding=disc"
+        +"&targetLanguagePattern=.*"
+        +"&transcriptLanguageLayerId="
+        +"&utteranceTagLayerId=mausBasic"
+        +"&forceLanguageMAUSBasic="
+        +"&participantTagLayerId="
+        +"&wordAlignmentLayerId=word"
+        +"&phoneAlignmentLayerId=phone");
+      fail("Should fail with language pattern but no language layer");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "orthographyLayerId=word"
+        +"&service=MAUSBasic"
+        +"&phonemeEncoding=disc"
+        +"&targetLanguagePattern="
+        +"&transcriptLanguageLayerId="
+        +"&forceLanguageMAUSBasic="
+        +"&utteranceTagLayerId=mausBasic"
+        +"&participantTagLayerId="
+        +"&wordAlignmentLayerId=word"
+        +"&phoneAlignmentLayerId=phone");
+      fail("Should fail with not force language layer and no language layer");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "orthographyLayerId=word"
         +"&service=G2P"
         +"&phonemeEncoding=disc"
         +"&targetLanguagePattern=en-NZ"
         +"&transcriptLanguageLayerId=transcript_language"
+        +"&forceLanguageG2P="
         +"&utteranceTagLayerId=mausBasic"
         +"&pronunciationLayerId=");
       fail("Should fail with no pronunciationLayerId");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "orthographyLayerId=word"
+        +"&service=G2P"
+        +"&phonemeEncoding=disc"
+        +"&targetLanguagePattern=en-NZ"
+        +"&transcriptLanguageLayerId="
+        +"&forceLanguageG2P="
+        +"&utteranceTagLayerId=mausBasic"
+        +"&pronunciationLayerId=phonemes");
+      fail("Should fail with language pattern but no language layer");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "orthographyLayerId=word"
+        +"&service=G2P"
+        +"&phonemeEncoding=disc"
+        +"&targetLanguagePattern="
+        +"&forceLanguageG2P="
+        +"&transcriptLanguageLayerId="
+        +"&utteranceTagLayerId=mausBasic"
+        +"&pronunciationLayerId=phonemes");
+      fail("Should fail with no force language and no language layer");
     } catch (InvalidConfigurationException x) {
     }
   }
@@ -480,6 +558,77 @@ public class TestBASAnnotator {
     } // next phone    
   }   
 
+  /** Ensure forcing MAUSBasic language ignores transcript language. */ 
+  @Test public void MAUSBasicForceLanguage() throws Exception {
+    
+    Graph f = fragment();
+    Schema schema = f.getSchema();
+    annotator.setSchema(schema);
+    // annotator.getStatusObservers().add(status->System.out.println(status));
+
+    assertNotNull("fragment has a language",
+                  f.sourceGraph().first("transcript_language"));
+    assertEquals("fragment language correct",
+                 "en-NZ", f.sourceGraph().first("transcript_language").getLabel());
+    assertEquals("text is correct",
+                 "saved up some money he bought property",
+                 Arrays.stream(f.labels(schema.getWordLayerId()))
+                 .collect(Collectors.joining(" ")).trim());
+    
+    // configure for system layer update
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&service=MAUSBasic"
+      +"&phonemeEncoding=disc"
+      +"&forceLanguageMAUSBasic=eng-US"
+      +"&utteranceTagLayerId=mausBasic"
+      +"&participantTagLayerId="
+      +"&wordAlignmentLayerId=word"
+      +"&phoneAlignmentLayerId=segment");
+    
+    final Vector<Graph> results = new Vector<Graph>();
+    annotator.transformFragments(
+      Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
+    
+    assertEquals("One utterance " + results, 1, results.size());
+    Graph aligned = results.elementAt(0);
+    assertTrue("Original graph is edited", f == aligned);
+    
+    Annotation[] words = aligned.all("word");
+    assertEquals("Seven words " + Arrays.asList(words), 7, words.length);
+    
+    Annotation[] phones = aligned.all("segment");
+    assertEquals("24 phones " + Arrays.asList(phones), 24, phones.length);
+    String[] labels = {
+      "s", "1", "v", "d",
+      "V", "p",
+      "s", "V", "m",
+      "m", "V", "n", "i",
+      "h", "i",
+      "b", "Q",
+      "p", "R", "Q", "p", "3", "t", "i" };
+    for (int p = 0; p < phones.length; p++) {      
+      assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
+      assertEquals("Phone label confidence " + p + " " + phones[p],
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   phones[p].getConfidence().intValue());
+      if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
+        assertEquals("Phone start confidence " + p + " " + phones[p].getStartId(),
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getStart().getConfidence().intValue());
+      }
+      if (p < phones.length - 1) { // last phone might coincide with end and be CONFIDENCE_MANUAL
+        assertEquals("Phone end confidence " + p + " " + phones[p].getEndId(),
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getEnd().getConfidence().intValue());
+      }
+      if (phones[p].getStart().startOf("word").size() == 0) { // not a word boundary
+        assertEquals("Phone start shared with previous end " + p,
+                     phones[p-1].getEnd(), phones[p].getStart());
+      }
+    } // next phone    
+  }   
+
   /** Ensure G2P produces pronunciations and they're correctly translated to DISC. */ 
   @Test public void G2PDISC() throws Exception {
     
@@ -580,6 +729,57 @@ public class TestBASAnnotator {
                  words.length, pronunciations.length);
     String[] labels = {
       "s æɪ v d", "ɐ p", "s ɐ m", "m ɐ n iː", "h iː", "b oː t", "p ɹ ɔ p ə ɾ iː" };
+    for (int p = 0; p < pronunciations.length; p++) {      
+      assertEquals("DISC pronunciation label " + p, labels[p], pronunciations[p].getLabel());
+      assertEquals("Pronunciation label confidence " + p + " " + pronunciations[p],
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   pronunciations[p].getConfidence().intValue());
+      assertTrue("Pronunctiation tags word " + p + " " + pronunciations[p],
+                 pronunciations[p].tags(words[p]));
+    } // next phone    
+  }   
+
+  /** Ensure forcing G2P language ignores transcript language. */ 
+  @Test public void G2PForceLanguage() throws Exception {
+    
+    Graph f = fragment();
+    Schema schema = f.getSchema();
+    annotator.setSchema(schema);
+    // annotator.getStatusObservers().add(status->System.out.println(status));
+
+    assertNotNull("fragment has a language",
+                  f.sourceGraph().first("transcript_language"));
+    assertEquals("fragment language correct",
+                 "en-NZ", f.sourceGraph().first("transcript_language").getLabel());
+    assertEquals("text is correct",
+                 "saved up some money he bought property",
+                 Arrays.stream(f.labels(schema.getWordLayerId()))
+                 .collect(Collectors.joining(" ")).trim());
+    
+    // configure for system layer update
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&service=G2P"
+      +"&phonemeEncoding=disc"
+      +"&forceLanguageG2P=eng-US"
+      +"&pronunciationLayerId=phonemes");
+    
+    final Vector<Graph> results = new Vector<Graph>();
+    annotator.transformFragments(
+      Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
+    
+    assertEquals("One utterance " + results, 1, results.size());
+    Graph aligned = results.elementAt(0);
+    assertTrue("Original graph is edited", f == aligned);
+    
+    Annotation[] words = aligned.all("word");
+    assertEquals("Seven words " + Arrays.asList(words), 7, words.length);
+    
+    Annotation[] pronunciations = aligned.all("phonemes");
+    assertEquals("One pronunciation per word " + Arrays.asList(pronunciations),
+                 words.length, pronunciations.length);
+    String[] labels = {
+      "s1vd", "Vp", "sVm", "mVni", "hi", "bQt", "pRQp3ti" };
     for (int p = 0; p < pronunciations.length; p++) {      
       assertEquals("DISC pronunciation label " + p, labels[p], pronunciations[p].getLabel());
       assertEquals("Pronunciation label confidence " + p + " " + pronunciations[p],
