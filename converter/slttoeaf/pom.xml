@@ -17,7 +17,7 @@
     
     <input.package>nzilbb.formatter.salt</input.package>
     <input.path>nzilbb/formatter/salt/</input.path>
-    <input.version>0.1.5</input.version>
+    <input.version>0.2.0</input.version>
     
     <output.package>nzilbb.formatter.elan</output.package>
     <output.path>nzilbb/formatter/elan/</output.path>
@@ -126,7 +126,7 @@
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.0.6</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

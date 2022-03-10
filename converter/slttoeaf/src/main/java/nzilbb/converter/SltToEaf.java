@@ -21,8 +21,12 @@
 //
 package nzilbb.converter;
 
+import java.util.Vector;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import nzilbb.ag.Anchor;
+import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
+import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.GraphDeserializer;
@@ -181,8 +185,40 @@ public class SltToEaf extends Converter {
       new Layer("partial_word", "Partial Words").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    // make utterance layer unsaturated so that utterance alignments can be refined
+    schema.getLayer(schema.getUtteranceLayerId()).setSaturated(false);
     return schema;
   } // end of getSchema()
+
+  /**
+   * Unshare anchors between utterances, so that it's easier in ELAN to split and refine
+   * utterance boundaries (SALT transcripts usually have very coarse utterance alignment). 
+   * @param transcripts
+   */
+  public void processTranscripts(Graph[] transcripts) {
+    for (Graph transcript : transcripts) {
+      String utteranceLayerId = transcript.getSchema().getUtteranceLayerId();
+      for (Annotation u : transcript.all(utteranceLayerId)) {
+        // if this utterance starts at the end of another utterance
+        if (u.getStart().isEndOn(utteranceLayerId)) { // split starts from endsxjoin
+
+          // we'll change the start anchor of any annotation that starts here
+          Vector<Annotation> annotationsToUpdate = new Vector<Annotation>(
+            u.getStart().getStartingAnnotations());
+          
+          // create a new anchor
+          Anchor newStart = (Anchor)u.getStart().clone();
+          newStart.setId(null);
+          transcript.addAnchor(newStart);
+
+          // everything that started on the old start anchor now starts on its copy
+          for (Annotation a : annotationsToUpdate) {
+            a.setStart(newStart);
+          } // next annotation that starts here
+        } // this anchor is an utterance end
+      } // next utterance
+    } // next trascript
+  } // end of processTranscripts()
   
   /**
    * Specifies which layers should be given to the serializer. The default implementaion
