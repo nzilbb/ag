@@ -102,11 +102,19 @@ getSchema(s => {
             = parameters.get("syllabification");
         if (parameters.get("service") == "G2P") {
             document.getElementById("service-G2P").checked = true;
-        } else {
+        } else if (parameters.get("service") == "MAUSBasic"){
+            document.getElementById("service-MAUSBasic").checked = true;
+        } else if (schema.layers[taskId]) { // there's a layer named after the task
+            // if the layer is a word layer
+            if (schema.layers[taskId].parentId == "word") {
+                document.getElementById("service-G2P").checked = true;
+            } else {
+                document.getElementById("service-MAUSBasic").checked = true;
+            }
+        } else { // MAUSBasic by default
             document.getElementById("service-MAUSBasic").checked = true;
         }
-        changeService();
-        // if there's no utterance tag layer defined
+        // if there's no pronunciation tag layer defined (for G2P)
         if (pronunciationLayerId.selectedIndex == 0
             // but there's a layer named after the task
             && schema.layers[taskId]) {
@@ -114,6 +122,15 @@ getSchema(s => {
             // select that layer by default
             pronunciationLayerId.value = taskId;
         }
+        // if there's no utterance tag layer defined (for MAUSBasic)
+        if (utteranceTagLayerId.selectedIndex == 0
+            // but there's a layer named after the task
+            && schema.layers[taskId]) {
+            
+            // select that layer by default
+            utteranceTagLayerId.value = taskId;
+        }
+        changeService();        
         loadLanguageOptions();
     });
 });
