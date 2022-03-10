@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html><head><title>BAS Annotator</title></head>
+  <body>
+    <h1>BAS Annotator</h1>
+    
+    <p> This annotator connects to the BAS web services 
+      - <a href="http://hdl.handle.net/11858/00-1779-0000-0028-421B-4" target="BAS">
+        http://hdl.handle.net/11858/00-1779-0000-0028-421B-4</a>, 
+      hosted by Ludwig Maximilians Universität München -
+      for various annotation tasks.
+    </p> 
+    
+    <p> Current annotation tasks include:
+      <ul>
+        <li> Using
+          <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/interface/Grapheme2Phoneme"
+             target="BAS">G2P</a>
+          to annotate words with their phonemic transcription, given their orthography.</li>
+        <li> Using
+          <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/interface/WebMAUSBasic"
+             target="BAS"> WebMAUSBasic</a>
+          to force-align utterances, given their orthographic transcriptions.</li>
+      </ul>
+    </p>
+    
+    <p> Please note that using these services requires sending transcript, annotation, and
+      audio data over the internet to the external provider of these services. </p> 
+        
+    <p> Configuration parameters are encoded as a URL query string, e.g. <br>
+      <samp>orthographyLayerId=orthography&service=MAUSBasic&forceLanguageMAUSBasic=deu-DE&phonemeEncoding=disc&wordAlignmentLayerId=word&phoneAlignmentLayerId=segment&utteranceTagLayerId=bas</samp>
+    </p>
+
+    <p> Parameters are: </p>
+    <dl>
+      <dt> orthographyLayerId </dt> <dd> Input layer from which words come. </dd>
+      <dt> transcriptLanguageLayerId </dt> <dd> Transcript attribute for overall language. </dd>
+      <dt> targetLanguagePattern </dt> <dd> Regular expression for the ISO language codes
+        of the languages to target, or blank for all. </dd> 
+      <dt> service </dt> <dd> Which BAS web service to use - "MAUSBasic" or "G2P" </dd>
+      <dt> phonemeEncoding </dt> <dd> Which set of symbols to use for phoneme
+        layers. Options are:
+        <ul>
+            <li>disc</li>
+            <li>sampa</li>
+            <li>x-sampa</li>
+            <li>maus-sampa</li>
+            <li>ipa</li>
+            <li>arpabet</li>
+        </ul>
+      </dd>
+      <dt> forceLanguageMAUSBasic </dt> <dd> Language to tell the MAUSBasic web service the
+        utterances are in, regardless of the language the transcript is in (Optional -
+        <tt>service=MAUSBasic</tt> only).</dd>  
+      <dt> forceLanguageG2P </dt> <dd> Language to tell the G2P web service the
+        utterances are in, regardless of the language the transcript is in (Optional -
+        <tt>service=G2P</tt> only).</dd>  
+      <dt> pronunciationLayerId </dt> <dd> Output layer to which pronunciations are
+        added (<tt>service=G2P</tt> only).</dd>
+      <dt> wordStress </dt> <dd> Send any non-empty value of this parameter to include
+        lexical stress marks, omit the parameter to omit stress marks
+        (<tt>service=G2P</tt> only).  </dd>
+      <dt> syllabification </dt> <dd> Send any non-empty value of this parameter to include
+        syllabification marks, omit the parameter to syllabification marks
+        (<tt>service=G2P</tt> only).  </dd>
+      <dt> wordAlignmentLayerId </dt> <dd> Output layer on which word alignments are
+        saved. This can be <tt>word</tt> to update main word token alignments, or a
+        phrase layer to save alignments separately from main word token alignments. If
+        the specified layer doesn't exist, a phrase layer will be created
+        (<tt>service=MAUSBasic</tt> only). </dd>
+      <dt> phoneAlignmentLayerId </dt> <dd> Output layer on which phone alignments are
+        saved. This can be <tt>segment</tt> to update main phone segment alignments, or a
+        phrase layer to save alignments separately from main phone segment alignments. If
+        the specified layer doesn't exist, a phrase layer will be created
+        (<tt>service=MAUSBasic</tt> only). </dd>
+      <dt> utteranceTagLayerId </dt> <dd> Optional output layer for a time stamp tagging
+        each aligned utterance. If the specified layer doesn't exist, a phrase layer will
+        be created (<tt>service=MAUSBasic</tt> only). </dd>
+      
+    </dl>
+    
+  </body>
+</html>

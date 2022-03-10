@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html><head><title>BAS Annotator</title></head>
+  <body>
+    <h1>BAS Annotator</h1>
+    
+    <p> This annotator connects to the BAS web services 
+      - <a href="http://hdl.handle.net/11858/00-1779-0000-0028-421B-4" target="BAS">
+        http://hdl.handle.net/11858/00-1779-0000-0028-421B-4</a>, 
+      hosted by Ludwig Maximilians Universität München -
+      for various annotation tasks.
+    </p> 
+    
+    <p> Current annotation tasks include:
+      <ul>
+        <li> Using
+          <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/interface/Grapheme2Phoneme"
+             target="BAS">G2P</a>
+          to annotate words with their phonemic transcription, given their orthography.</li>
+        <li> Using
+          <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/interface/WebMAUSBasic"
+             target="BAS"> WebMAUSBasic</a>
+          to force-align utterances, given their orthographic transcriptions.</li>
+      </ul>
+    </p>
+    
+    <p> Please note that using these services requires sending transcript, annotation, and
+      audio data over the internet to the external provider of these services. </p> 
+        
+    <p> Configuration parameters are encoded as a URL query string, e.g. <br>
+      <samp>tou=true&g2pUrl=&mausBasicUrl=</samp> <br>
+    </p>
+    
+    <p> Parameters are: </p>
+    <dl>
+      <dt> tou </dt> <dd> (Mandatory) Terms of Use I have read and accepted the
+        <a href="https://clarin.phonetik.uni-muenchen.de/BASWebServices/help/termsOfUsage"
+           target="termsOfUsage">
+          terms of usage </a>
+        for this service, including the policy of monitoring access to the services
+        (paragraph 5). I hereby confirm that I am a member of an academic institution or
+        that I have obtained a BAS user license for this service. In case of a
+        publication of my results I will use a proper citation to this service.. </dd>
+      <dt> g2pUrl </dt> <dd> This is the URL to use for the G2P (graphemes to phonemes)
+        service. Leave this blank to use the default URL. </dd>
+      <dt> mausBasicUrl </dt> <dd> This is the URL to use for the MAUSBasic (forced
+        alignment) service. Leave this blank to use the default URL. </dd>      
+    </dl>
+    
+  </body>
+</html>
