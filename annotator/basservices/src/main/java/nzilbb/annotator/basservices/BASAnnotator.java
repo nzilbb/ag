@@ -1201,7 +1201,8 @@ public class BASAnnotator extends Annotator {
                           // convert to DISC?
                           if (translator != null) {
                             String label = translator.apply(a.getLabel())
-                              .replace("`","");  // and remove spurious back ticks
+                              .replace(":","")  // and remove length marks
+                              .replace("`",""); // and remove spurious back ticks
                             if (label.length() > 0) a.setLabel(label);
                             else setStatus("Could not convert label to DISC: " + a.getLabel());
                           }
