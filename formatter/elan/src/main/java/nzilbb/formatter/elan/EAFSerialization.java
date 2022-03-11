@@ -79,9 +79,9 @@ import org.xml.sax.SAXException;
 // TODO serialize using token-lt (Symbolic subdivision) for layers that are alignment=2,peers, and no non-parent-linked anchors are aligned or have confidence above CONFIDENCE_DEFAULT
 
 /**
- * Converter that converts ELAN EAF v2.7 files to Annotation Graphs
+ * Converter that converts ELAN EAF v3.0 files to Annotation Graphs
  * <p>The original XSD is here:
- * <a href="http://www.mpi.nl/tools/elan/EAFv2.7.xsd">http://www.mpi.nl/tools/elan/EAFv2.7.xsd</a>
+ * <a href="http://www.mpi.nl/tools/elan/EAFv3.0.xsd">http://www.mpi.nl/tools/elan/EAFv3.0.xsd</a>
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class EAFSerialization extends Deserialize implements GraphDeserializer, GraphSerializer {
@@ -816,19 +816,22 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
 	  
       ParameterSet mappings = new ParameterSet();
       Vector<Layer> vIntervalLayers = new Vector<Layer>();
+      Vector<Layer> vAttributeLayers = new Vector<Layer>();
       for (Layer layer : getSchema().getLayers().values()) {
         if (!layer.getId().equals(getSchema().getRoot().getId())
             && !layer.getId().equals(getParticipantLayer().getId())) {
           switch (layer.getAlignment()) {
-            case 0: 
+            case Constants.ALIGNMENT_NONE:
+              // graph or participant tag?
               if (!layer.getParentId().equals(getSchema().getRoot().getId())
                   && !layer.getParentId().equals(getParticipantLayer().getId())) {
-                // not graph or participant tags
                 vIntervalLayers.add(layer); 
+              } else { // metadata
+                vAttributeLayers.add(layer);
               }
               break; 
-            case 2: vIntervalLayers.add(layer); break; 
-            case 1: break; // point tiers are not supported in ELAN
+            case Constants.ALIGNMENT_INTERVAL: vIntervalLayers.add(layer); break; 
+            case Constants.ALIGNMENT_INSTANT: break; // point tiers are not supported in ELAN
           }
         }
       } // next layer
@@ -838,7 +841,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
 
       // map tiers to layers by name
       Layer ignore = new Layer();
-      ignore.setId("[ignore tier]");
+      ignore.setId("[ignore]");
       in = new FileInputStream(eafFile);
       XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(in);
       int t = 0;
@@ -859,9 +862,9 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
             Parameter p = new Parameter(
               "tier"+(t++), Layer.class, tierName,
               "Layer for tier called: " + tierName, true);
-            Vector<Layer> vPossiblLayers = new Vector<Layer>();
-            vPossiblLayers.add(ignore);
-            vPossiblLayers.addAll(vIntervalLayers);
+            Vector<Layer> vPossibleLayers = new Vector<Layer>();
+            vPossibleLayers.add(ignore);
+            vPossibleLayers.addAll(vIntervalLayers);
 	     
             // look for a layer with the same name
             if (tierName.equalsIgnoreCase("lines")
@@ -882,7 +885,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
               // try a case-insensitive match
               // ignore spaces too
               String tierNameNoWhitespace = tierName.toLowerCase().replaceAll("\\s","");
-              for (Layer mappableLayer : vPossiblLayers) {
+              for (Layer mappableLayer : vPossibleLayers) {
                 if (tierNameNoWhitespace.equals(
                       mappableLayer.getId().toLowerCase().replaceAll("\\s",""))) {
                   layer = mappableLayer;
@@ -895,7 +898,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
               // try a prefix-match - i.e. "word - John Smith" should map to the "word" layer
               // ignore spaces too
               String tierNameNoWhitespace = tierName.replaceAll("\\s","");
-              for (Layer mappableLayer : vPossiblLayers) {
+              for (Layer mappableLayer : vPossibleLayers) {
                 if (tierNameNoWhitespace.startsWith(mappableLayer.getId().replaceAll("\\s",""))) {
                   layer = mappableLayer;
                   break;
@@ -906,7 +909,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
               // try a suffix-match - i.e. "John Smith - word" should map to the "word" layer
               // ignore spaces too
               String tierNameNoWhitespace = tierName.replaceAll("\\s","");
-              for (Layer mappableLayer : vPossiblLayers) {
+              for (Layer mappableLayer : vPossibleLayers) {
                 if (tierNameNoWhitespace.endsWith(mappableLayer.getId().replaceAll("\\s",""))) {
                   layer = mappableLayer;
                   break;
@@ -921,11 +924,27 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
               // assume it's a tier named after a speaker - make the utteranceLayer the default
               p.setValue(getUtteranceLayer());
             }
-            p.setPossibleValues(vPossiblLayers);
+            p.setPossibleValues(vPossibleLayers);
             mappings.addParameter(p);
-          } else if (parser.getLocalName().equals("HEADER")) {
+          } else if (parser.getLocalName().equals("HEADER")) { // time units
             timeUnits = parser.getAttributeValue(null, "TIME_UNITS");
             if (timeUnits == null) timeUnits = "milliseconds";
+          } else if (parser.getLocalName().equals("PROPERTY")) { // possible metadata
+            String name = parser.getAttributeValue(null, "NAME");
+            if (name != null && name.startsWith("metadata:")) {
+              String attributeName = name.substring("metadata:".length());
+              Parameter p = new Parameter(
+                name, Layer.class, attributeName,
+                "Layer for metadata property called: " + attributeName, false);
+              Vector<Layer> vPossibleLayers = new Vector<Layer>();
+              vPossibleLayers.add(ignore);
+              vPossibleLayers.addAll(vAttributeLayers);
+              Layer layer = getSchema().getLayer(attributeName);
+              if (layer == null) layer = getSchema().getLayer("transcript_"+attributeName);
+              if (layer == null) layer = getSchema().getLayer("participant_"+attributeName);
+              if (vAttributeLayers.contains(layer)) p.setValue(layer);
+              mappings.addParameter(p);
+            } // metadata:...
           }
         } // START_ELEMENT
       } // next event
@@ -944,7 +963,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     } catch(XMLStreamException x) {
       throw new SerializationException(x);
     }
-  }
+  } // load
 
   /**
    * Sets parameters for a given deserialization operation, after loading the serialized
@@ -968,7 +987,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     for (Parameter p : mappings.values()) {
       if (p.getValue() != null && p.getValue() instanceof Layer) {
         Layer layer = (Layer)p.getValue();
-        if (!layer.getId().equals("[ignore tier]")) {
+        if (!layer.getId().equals("[ignore]")) {
           if (layer.equals(getTurnLayer())
               || layer.getAncestors().contains(getTurnLayer())) {
             mappingsDependOnTurn = true;
@@ -1069,7 +1088,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     for (Parameter p : mappings.values()) {
       if (p.getValue() != null && p.getValue() instanceof Layer) {
         Layer layer = (Layer)p.getValue();
-        if (!layer.getId().equals("[ignore tier]")) {
+        if (!layer.getId().equals("[ignore]")) {
           if (layer.getId().equals(getTurnLayer().getId())) {
             turnLayerMapped = true;
           } else if (layer.getId().equals(getUtteranceLayer().getId())) {
@@ -1081,7 +1100,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
           if (graph.getLayer(layer.getId()) == null) {
             graph.addLayer((Layer)layer.clone());
           }          
-        } // tier is mapped to a layer
+        } // mapped to a layer
       } // Layer value
     } // next mapping
     
@@ -1117,6 +1136,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     String annotationRef = null;
     String timeSlot1 = null;
     String timeSlot2 = null;
+    HashMap<String,String> participantTags = new HashMap<String,String>();
 
     Vector<Annotation> symbolicAnnotations = new Vector<Annotation>();
     
@@ -1221,8 +1241,30 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
               }              
             } // not an ignored annotation
             
-          } // ANNOTATION_VALUE
+          } else if (parser.getLocalName().equals("PROPERTY")) { // metadata
+            
+            String name = parser.getAttributeValue(null, "NAME");
+            Parameter attributeMapping = mappings.get(name);
+            if (attributeMapping != null) {              
+              Layer attributeLayer = (Layer)attributeMapping.getValue();
+              if (attributeLayer != null && !attributeLayer.getId().equals("[ignore]")) {
+                // metadata to save
+                String value = parser.getElementText();
+                if (attributeLayer.getParentId() == null
+                    || attributeLayer.getParentId().equals(schema.getRoot().getId())) {
+                  // transcript attribute
+                  graph.createTag(graph, attributeLayer.getId(), value)
+                    .setConfidence(Constants.CONFIDENCE_MANUAL);
+                } else { // participant attribute
+                  // save it up for when we have participants
+                  participantTags.put(attributeLayer.getId(), value);
+                } // participant attribute
+              } // mapped metadata
+            } // there is a mapping
+          }
+          
         } else if (event == XMLStreamConstants.END_ELEMENT) {
+          
           if (parser.getLocalName().equals("ANNOTATION")) {
             // reset annotation attributes
             annotationId = null;
@@ -1234,6 +1276,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
             tierId = null;
             layer = null;
           }
+          
         } // END_ELEMENT
       } // next element
     } catch(IOException x) {
@@ -1761,6 +1804,16 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       }
     }
 
+    if (participantTags.size() > 0) { // there are participant tags
+      // we don't know which participant they belong to, so tag them all!
+      for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
+        for (String layerId : participantTags.keySet()) {
+          graph.createTag(participant, layerId, participantTags.get(layerId))
+            .setConfidence(Constants.CONFIDENCE_MANUAL);
+        } // next participant attribute layer
+      } // next participant
+    }
+
     // ensure anchors are shared between children and parents where required
     Vector<Layer> layers = graph.getLayersTopDown();
     // (bottom up to propagate changes from below)
@@ -1978,11 +2031,11 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     } else {
       annotationDocument.setAttribute("DATE", ""); // TODO invalid!!
     }
-    annotationDocument.setAttribute("FORMAT", "2.7");
-    annotationDocument.setAttribute("VERSION", "2.7");
+    annotationDocument.setAttribute("FORMAT", "3.0");
+    annotationDocument.setAttribute("VERSION", "3.0");
     annotationDocument.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
     annotationDocument.setAttribute(
-      "xsi:noNamespaceSchemaLocation", "http://www.mpi.nl/tools/elan/EAFv2.7.xsd");
+      "xsi:noNamespaceSchemaLocation", "http://www.mpi.nl/tools/elan/EAFv3.0.xsd");
       
     Element header = document.createElement("HEADER");
     annotationDocument.appendChild(header);
@@ -2035,7 +2088,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
         for (Annotation attribute : graph.all(attributeLayer.getId())) {
           Element property = document.createElement("PROPERTY");
           header.appendChild(property);
-          property.setAttribute("NAME", attribute.getLayerId());
+          property.setAttribute("NAME", "metadata:"+attribute.getLayerId());
           property.setTextContent(attribute.getLabel());
         } // next attribute 
       } // is an attribute layer

@@ -53,6 +53,8 @@ public class TestEAFSerialization {
   @Test public void utterance()  throws Exception {    
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
+      new Layer("location", "Arbitrary metadata").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
       new Layer("scribe", "Author").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
       new Layer("version_date", "Date").setAlignment(Constants.ALIGNMENT_NONE)
@@ -61,6 +63,9 @@ public class TestEAFSerialization {
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
       new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("participant_gender", "Gender").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("who").setParentIncludes(true),
       new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(true),
       new Layer("noise", "Noise").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -91,7 +96,7 @@ public class TestEAFSerialization {
       
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
-    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     assertEquals(11, configuration.size());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
@@ -122,16 +127,21 @@ public class TestEAFSerialization {
                  deserializer.getMinimumTurnPauseLength());
 
     // load the stream
-    ParameterSet defaultParamaters = deserializer.load(streams, schema);
-    // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
-    assertEquals(2, defaultParamaters.size());
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals("Number of parameters: " + defaultParameters.values(),
+                 4, defaultParameters.size());
     assertEquals("utterance mapping", "utterance", 
-                 ((Layer)defaultParamaters.get("tier0").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier0").getValue()).getId());
     assertEquals("utterance mapping", "utterance", 
-                 ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier1").getValue()).getId());
+    assertEquals("transcript attribute mapping", "location", 
+                 ((Layer)defaultParameters.get("metadata:location").getValue()).getId());
+    assertEquals("participant attribute mapping", "participant_gender", 
+                 ((Layer)defaultParameters.get("metadata:gender").getValue()).getId());
 
     // configure the deserialization
-    deserializer.setParameters(defaultParamaters);
+    deserializer.setParameters(defaultParameters);
       
     // build the graph
     Graph[] graphs = deserializer.deserialize();
@@ -148,6 +158,7 @@ public class TestEAFSerialization {
     assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
     assertEquals("language is alpha-2", "en", g.first("lang").getLabel());
     assertEquals("version date", "2017-08-28T16:48:05-03:00", g.first("version_date").getLabel());
+    assertEquals("metadata", "Flores", g.first("location").getLabel());
 
     // participants     
     Annotation[] who = g.all("who");
@@ -156,6 +167,12 @@ public class TestEAFSerialization {
     assertEquals(g, who[0].getParent());
     assertEquals("participant", who[1].getLabel());
     assertEquals(g, who[1].getParent());
+
+    // participant attributes
+    assertEquals("participant attribute - first speaker",
+                 "F", who[0].first("participant_gender").getLabel());
+    assertEquals("participant attribute - second speaker",
+                 "F", who[1].first("participant_gender").getLabel());
       
     // turns
     Annotation[] turns = g.all("turn");
@@ -385,24 +402,24 @@ public class TestEAFSerialization {
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
 
     // load the stream
-    ParameterSet defaultParamaters = deserializer.load(streams, schema);
-    // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
-    assertEquals(6, defaultParamaters.size());
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals(6, defaultParameters.size());
     assertEquals("utterance mapping", "utterance", 
-                 ((Layer)defaultParamaters.get("tier0").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier0").getValue()).getId());
     assertEquals("utterance mapping", "utterance", 
-                 ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier1").getValue()).getId());
     assertEquals("noise mapping - case mismatch", "noise", 
-                 ((Layer)defaultParamaters.get("tier2").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier2").getValue()).getId());
     assertEquals("comment mapping", "comment", 
-                 ((Layer)defaultParamaters.get("tier3").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier3").getValue()).getId());
     assertEquals("word mapping", "word", 
-                 ((Layer)defaultParamaters.get("tier4").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier4").getValue()).getId());
     assertEquals("word mapping", "word", 
-                 ((Layer)defaultParamaters.get("tier5").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier5").getValue()).getId());
 
     // configure the deserialization
-    deserializer.setParameters(defaultParamaters);
+    deserializer.setParameters(defaultParameters);
       
     // build the graph
     Graph[] graphs = deserializer.deserialize();
@@ -632,29 +649,29 @@ public class TestEAFSerialization {
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
 
     // load the stream
-    ParameterSet defaultParamaters = deserializer.load(streams, schema);
-    // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
-    assertEquals(6, defaultParamaters.size());
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals(6, defaultParameters.size());
     assertEquals("utterance mapping", "utterance", 
-                 ((Layer)defaultParamaters.get("tier0").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier0").getValue()).getId());
     assertEquals("utterance mapping", "utterance", 
-                 ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier1").getValue()).getId());
     assertEquals("word mapping", "word", 
-                 ((Layer)defaultParamaters.get("tier2").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier2").getValue()).getId());
     assertEquals("word mapping", "word", 
-                 ((Layer)defaultParamaters.get("tier3").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier3").getValue()).getId());
 
     // phones tiers doesn't automatically map to phone layer, because their names don't match
     assertNull("phone mapping default",
-               defaultParamaters.get("tier4").getValue());
+               defaultParameters.get("tier4").getValue());
     assertNull("phone mapping default",
-               defaultParamaters.get("tier5").getValue());
+               defaultParameters.get("tier5").getValue());
     // but we set it 'manually'
-    defaultParamaters.get("tier4").setValue(schema.getLayer("phone"));
-    defaultParamaters.get("tier5").setValue(schema.getLayer("phone"));
+    defaultParameters.get("tier4").setValue(schema.getLayer("phone"));
+    defaultParameters.get("tier5").setValue(schema.getLayer("phone"));
 
     // configure the deserialization
-    deserializer.setParameters(defaultParamaters);
+    deserializer.setParameters(defaultParameters);
       
     // build the graph
     Graph[] graphs = deserializer.deserialize();
@@ -878,16 +895,21 @@ public class TestEAFSerialization {
                  deserializer.getIgnoreBlankAnnotations());
 
     // load the stream
-    ParameterSet defaultParamaters = deserializer.load(streams, schema);
-    // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
-    assertEquals(2, defaultParamaters.size());
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals("correct number of parameters " + defaultParameters.values(),
+                 4, defaultParameters.size());
     assertEquals("utterance mapping", "i", 
-                 ((Layer)defaultParamaters.get("tier0").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier0").getValue()).getId());
     assertEquals("utterance mapping", "p", 
-                 ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier1").getValue()).getId());
+    assertNull("no transcript attribute mapping", 
+                 defaultParameters.get("metadata:location").getValue());
+    assertNull("participant attribute mapping",
+                 defaultParameters.get("metadata:gender").getValue());
 
     // configure the deserialization
-    deserializer.setParameters(defaultParamaters);
+    deserializer.setParameters(defaultParameters);
       
     // build the graph
     Graph[] graphs = deserializer.deserialize();
@@ -1003,16 +1025,21 @@ public class TestEAFSerialization {
                  deserializer.getUseConventions());
 
     // load the stream
-    ParameterSet defaultParamaters = deserializer.load(streams, schema);
-    // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
-    assertEquals(2, defaultParamaters.size());
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals("correct number of parameters " + defaultParameters.values(),
+                 4, defaultParameters.size());
     assertEquals("utterance mapping", "i", 
-                 ((Layer)defaultParamaters.get("tier0").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier0").getValue()).getId());
     assertEquals("utterance mapping", "p", 
-                 ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier1").getValue()).getId());
+    assertNull("no transcript attribute mapping", 
+                 defaultParameters.get("metadata:location").getValue());
+    assertNull("participant attribute mapping",
+                 defaultParameters.get("metadata:gender").getValue());
 
     // configure the deserialization
-    deserializer.setParameters(defaultParamaters);
+    deserializer.setParameters(defaultParameters);
       
     // build the graph
     Graph[] graphs = deserializer.deserialize();
@@ -1121,18 +1148,18 @@ public class TestEAFSerialization {
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
     
     // load the stream
-    ParameterSet defaultParamaters = deserializer.load(streams, schema);
-    // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
-    assertEquals(3, defaultParamaters.size());
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals(3, defaultParameters.size());
     assertEquals("utterance mapping", "utterance", 
-                 ((Layer)defaultParamaters.get("tier0").getValue()).getId());    
+                 ((Layer)defaultParameters.get("tier0").getValue()).getId());    
     assertEquals("orthography mapping", "orthography", 
-                 ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier1").getValue()).getId());
     assertEquals("word mapping", "word", 
-                 ((Layer)defaultParamaters.get("tier2").getValue()).getId());
+                 ((Layer)defaultParameters.get("tier2").getValue()).getId());
 
     // configure the deserialization
-    deserializer.setParameters(defaultParamaters);
+    deserializer.setParameters(defaultParameters);
     
     // build the graph
     try {
