@@ -1210,6 +1210,9 @@ public class TestEAFSerialization {
       new Layer("lang", "Language")
       .setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("location", "Location")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("comment", "Comment")
       .setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false),
@@ -1251,6 +1254,8 @@ public class TestEAFSerialization {
     graph.addAnchor(new Anchor("a15", 15.0));
     // language
     graph.addAnnotation(new Annotation("l", "en", "lang", "a0", "a15"));
+    // other metadata
+    graph.addAnnotation(new Annotation("loc", "Flores", "location", "a0", "a15"));
     // participants
     graph.addAnnotation(new Annotation("p1", "p1", "who", "a0", "a15"));
     graph.addAnnotation(new Annotation("p2", "p2", "who", "a0", "a15"));

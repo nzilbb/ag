@@ -2,6 +2,7 @@
   <HEADER MEDIA_FILE="test.wav" TIME_UNITS="milliseconds">
     <MEDIA_DESCRIPTOR MEDIA_URL="file://test.wav" MIME_TYPE="audio/wav"/>
     <PROPERTY NAME="lastUnusedAnnotationId">16</PROPERTY>
+    <PROPERTY NAME="location">Flores</PROPERTY>
   </HEADER>
   <TIME_ORDER>
     <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="0"/>

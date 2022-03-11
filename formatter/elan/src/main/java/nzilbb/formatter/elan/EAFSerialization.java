@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -2019,6 +2019,27 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     Element lastUnusedAnnotationId = document.createElement("PROPERTY");
     header.appendChild(lastUnusedAnnotationId);
     lastUnusedAnnotationId.setAttribute("NAME", "lastUnusedAnnotationId");
+
+    // we'll also store any transcript attributes as PROPERTY tags in the header
+    // ELAN ignores these, but seems to preserve them, so round-trip conversions from/to
+    // other formats can preserve metadata
+    for (Layer attributeLayer : schema.getRoot().getChildren().values()) {
+      // is it actually a transcript attribute layer?
+      if (attributeLayer.getAlignment() == Constants.ALIGNMENT_NONE
+          && !attributeLayer.getId().equals(schema.getParticipantLayerId())) {
+        // skip attribute layers we save elsewhere
+        if (languageLayer != null && attributeLayer.getId().equals(languageLayer.getId())) continue;
+        if (authorLayer != null && attributeLayer.getId().equals(authorLayer.getId())) continue;
+        if (dateLayer != null && attributeLayer.getId().equals(dateLayer.getId())) continue;
+        // save annotations as properties
+        for (Annotation attribute : graph.all(attributeLayer.getId())) {
+          Element property = document.createElement("PROPERTY");
+          header.appendChild(property);
+          property.setAttribute("NAME", attribute.getLayerId());
+          property.setTextContent(attribute.getLabel());
+        } // next attribute 
+      } // is an attribute layer
+    } // next top-level layer
       
     // create time slots
     Element timeOrder = document.createElement("TIME_ORDER");
