@@ -6,7 +6,8 @@
         <PROPERTY NAME="URN">urn:nl-mpi-tools-elan-eaf:00f5166f-26e8-4e1d-b9d9-e559f6b8801e</PROPERTY>
         <PROPERTY NAME="lastUsedAnnotationId">948</PROPERTY>
         <PROPERTY NAME="metadata:location">Flores</PROPERTY>
-        <PROPERTY NAME="metadata:gender">F</PROPERTY>
+        <PROPERTY NAME="metadata:Gender:participant">F</PROPERTY>
+        <PROPERTY NAME="metadata:Gender:interviewer">NB</PROPERTY>
     </HEADER>
     <TIME_ORDER>
         <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="4675"/>

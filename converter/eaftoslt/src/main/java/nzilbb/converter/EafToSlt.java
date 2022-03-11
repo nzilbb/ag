@@ -76,7 +76,10 @@ public class EafToSlt extends Converter {
     // default ELAN setting to false, as it's what users of this converter most likely expect,
     setSwitch("useConventions", "false");
     
-    info = "By default, inline SALT annotations (mazes, codes, bound morphemes, etc.)"
+    info = "ELAN doesn't natively support meta-data like Dob, Doe, Ethnicity, etc."
+      +" however if this data is present in the .eaf HEADER in PROPERTY tags, named"
+      +" \"metadata:Doe\" etc. then they will be copied to the .slt header." 
+      +"\nBy default, inline SALT annotations (mazes, codes, bound morphemes, etc.)"
       +" are not interpreted. If you want them to be processed, use --parseInlineConventions"
       +"\nAll tiers will be interpreted as transcription of participant speech."
       +" If some tiers contain other annotations, use the --ignoreTiers command line switch"
@@ -88,6 +91,114 @@ public class EafToSlt extends Converter {
     new EafToSlt().mainRun(argv);
   }
   
+  /**
+   * Specify the schema to used by  {@link #convert(File)}.
+   * @return The schema.
+   */
+  public Schema getSchema() {
+    Schema schema = super.getSchema();
+    // include SALT layers
+    schema.addLayer(
+      new Layer("Language", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("Doe", "Recording date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("Ca", "Current Age").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("Context", "Context").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("Subgroup", "Subgroup/Story").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("Collect", "Collection Point").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("Location", "Location").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("comment", "Comments").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(true).setSaturated(false));
+    schema.addLayer(
+      new Layer("main_participant", "Target Speaker").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getParticipantLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("ParticipantId", "Participant ID").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getParticipantLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("Gender", "Gender").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getParticipantLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("Dob", "Birth Date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getParticipantLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("Ethnicity", "Ethnicity").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getParticipantLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("pause", "Pauses").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("cunit", "C-Unit").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("parenthetical", "Parentheticals").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("repetition", "Repetitions").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("error", "Errors").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("code", "Non-error Codes").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("maze", "Mazes").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("noise", "Verbal sound effects etc.").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("entity", "Proper Names").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("omission", "Omissions").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("root", "Root form").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("bound_morpheme", "Bound Morphemes").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("partial_word", "Partial Words").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    // make utterance layer unsaturated so that utterance alignments can be refined
+    schema.getLayer(schema.getUtteranceLayerId()).setSaturated(false);
+    return schema;
+  } // end of getSchema()
+
   /**
    * Un-map tiers that are matched by {@link #ignoreTiers}.
    * @param parameters The default parameters.

@@ -35,6 +35,8 @@ import nzilbb.formatter.elan.EAFSerialization;
 import nzilbb.formatter.salt.SltSerialization;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
+import nzilbb.configure.Parameter;
+import nzilbb.configure.ParameterSet;
 
 /**
  * Converts SALT .slt transcripts to ELAN .eaf files.
@@ -51,8 +53,9 @@ public class SltToEaf extends Converter {
     // and it means that if the idea is a round-trip conversion, inline annotations are not lost
     setSwitch("parseInlineConventions", "false");
 
-    info = "ELAN doesn't support meta-data like Dob, Doe, Ethnicity, etc."
-      +" so almost all SALT header meta-data is lost when converting to .eaf."
+    info = "ELAN doesn't natively support meta-data like Dob, Doe, Ethnicity, etc."
+      +" however this data is added to the .eaf HEADER in PROPERTY tags, which are"
+      +" preserved by ELAN."
       +"\nBy default, inline annotations (mazes, codes, bound morphemes, etc.)"
       +" are not interpreted. If you want them to be processed, use --parseInlineConventions";
   } // end of constructor
@@ -73,7 +76,7 @@ public class SltToEaf extends Converter {
   public GraphDeserializer getDeserializer() {
     return new SltSerialization();
   }
-  
+
   /**
    * Gets the serializer that #convert(File) uses.
    * @return The serializer to use.
@@ -90,25 +93,25 @@ public class SltToEaf extends Converter {
     Schema schema = super.getSchema();
     // include SALT layers
     schema.addLayer(
-      new Layer("transcript_language", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("Language", "Language").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
     schema.addLayer(
-      new Layer("transcript_doe", "Recording date").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("Doe", "Recording date").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
     schema.addLayer(
-      new Layer("transcript_ca", "Current Age").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("Ca", "Current Age").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
     schema.addLayer(
-      new Layer("transcript_context", "Context").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("Context", "Context").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
     schema.addLayer(
-      new Layer("transcript_subgroup", "Subgroup/Story").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("Subgroup", "Subgroup/Story").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
     schema.addLayer(
-      new Layer("transcript_collect", "Collection Point").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("Collect", "Collection Point").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
     schema.addLayer(
-      new Layer("transcript_location", "Location").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("Location", "Location").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
     schema.addLayer(
       new Layer("comment", "Comments").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -118,19 +121,19 @@ public class SltToEaf extends Converter {
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId(schema.getParticipantLayerId()).setParentIncludes(true));
     schema.addLayer(
-      new Layer("participant_id", "Participant ID").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("ParticipantId", "Participant ID").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId(schema.getParticipantLayerId()).setParentIncludes(true));
     schema.addLayer(
-      new Layer("participant_gender", "Gender").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("Gender", "Gender").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId(schema.getParticipantLayerId()).setParentIncludes(true));
     schema.addLayer(
-      new Layer("participant_dob", "Birth Date").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("Dob", "Birth Date").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId(schema.getParticipantLayerId()).setParentIncludes(true));
     schema.addLayer(
-      new Layer("participant_ethnicity", "Ethnicity").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("Ethnicity", "Ethnicity").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId(schema.getParticipantLayerId()).setParentIncludes(true));
     schema.addLayer(
@@ -226,7 +229,7 @@ public class SltToEaf extends Converter {
    * @return An array of layer IDs.
    */
   public String[] getLayersToSerialize() {
-    String[] layers = { "utterance" };
+    String[] layers = { "utterance", "Language" };
     return layers;
   } // end of getLayersToSerialize()
   

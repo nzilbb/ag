@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><ANNOTATION_DOCUMENT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" AUTHOR="" DATE="" FORMAT="2.7" VERSION="2.7" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv2.7.xsd">
   <HEADER MEDIA_FILE="" TIME_UNITS="milliseconds">
     <PROPERTY NAME="lastUnusedAnnotationId">22</PROPERTY>
+    <PROPERTY NAME="metadata:Doe">2021-03-30</PROPERTY>
+    <PROPERTY NAME="metadata:Ca">4;4</PROPERTY>
+    <PROPERTY NAME="metadata:Context">Nar</PROPERTY>
+    <PROPERTY NAME="metadata:Subgroup">TEST</PROPERTY>
+    <PROPERTY NAME="metadata:Collect">1</PROPERTY>
+    <PROPERTY NAME="metadata:ParticipantId:salt-Child">Ada-Lovelace</PROPERTY>
+    <PROPERTY NAME="metadata:Gender:salt-Child">F</PROPERTY>
+    <PROPERTY NAME="metadata:Dob:salt-Child">1972-09-26</PROPERTY>
+    <PROPERTY NAME="metadata:Ethnicity:salt-Child">NZ European</PROPERTY>
   </HEADER>
   <TIME_ORDER>
     <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="0"/>
@@ -26,7 +35,7 @@
     <TIME_SLOT TIME_SLOT_ID="ts21" TIME_VALUE="93000"/>
     <TIME_SLOT TIME_SLOT_ID="ts22" TIME_VALUE="94000"/>
   </TIME_ORDER>
-  <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="salt-Child" TIER_ID="salt-Child">
+  <TIER LANG_REF="eng" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="salt-Child" TIER_ID="salt-Child">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a7" TIME_SLOT_REF1="ts7" TIME_SLOT_REF2="ts8">
         <ANNOTATION_VALUE>(Um the kids) the kid/s, {in-situ comment} they quickly put their gumboot/s on.</ANNOTATION_VALUE>
@@ -73,7 +82,7 @@
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
   </TIER>
-  <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="salt-Examiner" TIER_ID="salt-Examiner">
+  <TIER LANG_REF="eng" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="salt-Examiner" TIER_ID="salt-Examiner">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a1" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts2">
         <ANNOTATION_VALUE>I'm at Byron kindergarten on ((what date is it)) the 30th of March 2021?</ANNOTATION_VALUE>
@@ -139,6 +148,7 @@
   <LINGUISTIC_TYPE CONSTRAINTS="Symbolic_Association" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="tag-lt" TIME_ALIGNABLE="false"/>
   <LINGUISTIC_TYPE CONSTRAINTS="Included_In" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="subinterval-lt" TIME_ALIGNABLE="true"/>
   <LINGUISTIC_TYPE CONSTRAINTS="Time_Subdivision" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="partition-lt" TIME_ALIGNABLE="true"/>
+  <LANGUAGE LANG_DEF="http://cdb.iso.org/lg/CDB-00138502-001" LANG_ID="eng" LANG_LABEL="English"/>
   <CONSTRAINT DESCRIPTION="Time subdivision of parent annotation's time interval, no time gaps allowed within this interval" STEREOTYPE="Time_Subdivision"/>
   <CONSTRAINT DESCRIPTION="Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered" STEREOTYPE="Symbolic_Subdivision"/>
   <CONSTRAINT DESCRIPTION="1-1 association with a parent annotation" STEREOTYPE="Symbolic_Association"/>

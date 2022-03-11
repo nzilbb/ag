@@ -3,6 +3,8 @@
     <MEDIA_DESCRIPTOR MEDIA_URL="file://test.wav" MIME_TYPE="audio/wav"/>
     <PROPERTY NAME="lastUnusedAnnotationId">16</PROPERTY>
     <PROPERTY NAME="metadata:location">Flores</PROPERTY>
+    <PROPERTY NAME="metadata:gender:p1">gender1</PROPERTY>
+    <PROPERTY NAME="metadata:gender:p2">gender2</PROPERTY>
   </HEADER>
   <TIME_ORDER>
     <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="0"/>

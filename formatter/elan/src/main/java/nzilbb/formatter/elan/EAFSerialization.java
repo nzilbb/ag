@@ -816,7 +816,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
 	  
       ParameterSet mappings = new ParameterSet();
       Vector<Layer> vIntervalLayers = new Vector<Layer>();
-      Vector<Layer> vAttributeLayers = new Vector<Layer>();
+      LinkedHashMap<String,Layer> attributeLayers = new LinkedHashMap<String,Layer>();
       for (Layer layer : getSchema().getLayers().values()) {
         if (!layer.getId().equals(getSchema().getRoot().getId())
             && !layer.getId().equals(getParticipantLayer().getId())) {
@@ -827,7 +827,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                   && !layer.getParentId().equals(getParticipantLayer().getId())) {
                 vIntervalLayers.add(layer); 
               } else { // metadata
-                vAttributeLayers.add(layer);
+                attributeLayers.put(layer.getId(), layer);
               }
               break; 
             case Constants.ALIGNMENT_INTERVAL: vIntervalLayers.add(layer); break; 
@@ -932,18 +932,26 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
           } else if (parser.getLocalName().equals("PROPERTY")) { // possible metadata
             String name = parser.getAttributeValue(null, "NAME");
             if (name != null && name.startsWith("metadata:")) {
-              String attributeName = name.substring("metadata:".length());
-              Parameter p = new Parameter(
-                name, Layer.class, attributeName,
-                "Layer for metadata property called: " + attributeName, false);
-              Vector<Layer> vPossibleLayers = new Vector<Layer>();
-              vPossibleLayers.add(ignore);
-              vPossibleLayers.addAll(vAttributeLayers);
-              Layer layer = getSchema().getLayer(attributeName);
-              if (layer == null) layer = getSchema().getLayer("transcript_"+attributeName);
-              if (layer == null) layer = getSchema().getLayer("participant_"+attributeName);
-              if (vAttributeLayers.contains(layer)) p.setValue(layer);
-              mappings.addParameter(p);
+              // the name will be formatted "metadata:${attribute}"
+              // or "metadata:${attribute}:${participant}"
+              String[] nameParts = name.split(":");
+              String attributeName = nameParts[1];
+              String parameterName = "metadata:"+attributeName;
+              if (!mappings.containsKey(parameterName)) {
+                Parameter p = new Parameter(
+                  parameterName, Layer.class, attributeName,
+                  "Layer for metadata property called: " + attributeName, false);
+                Vector<Layer> vPossibleLayers = new Vector<Layer>();
+                vPossibleLayers.add(ignore);
+                vPossibleLayers.addAll(attributeLayers.values());
+                String[] attributePossibilities = {
+                  attributeName.toLowerCase(), "participant_"+attributeName.toLowerCase(),
+                  "transcript_"+attributeName.toLowerCase()
+                };
+                p.setValue(Utility.FindLayerById(
+                             attributeLayers, Arrays.asList(attributePossibilities)));
+                mappings.addParameter(p);
+              }
             } // metadata:...
           }
         } // START_ELEMENT
@@ -1136,7 +1144,8 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     String annotationRef = null;
     String timeSlot1 = null;
     String timeSlot2 = null;
-    HashMap<String,String> participantTags = new HashMap<String,String>();
+    HashMap<String,HashMap<String,String>> participantTags
+      = new HashMap<String,HashMap<String,String>>();
 
     Vector<Annotation> symbolicAnnotations = new Vector<Annotation>();
     
@@ -1244,23 +1253,31 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
           } else if (parser.getLocalName().equals("PROPERTY")) { // metadata
             
             String name = parser.getAttributeValue(null, "NAME");
-            Parameter attributeMapping = mappings.get(name);
-            if (attributeMapping != null) {              
-              Layer attributeLayer = (Layer)attributeMapping.getValue();
-              if (attributeLayer != null && !attributeLayer.getId().equals("[ignore]")) {
-                // metadata to save
-                String value = parser.getElementText();
-                if (attributeLayer.getParentId() == null
-                    || attributeLayer.getParentId().equals(schema.getRoot().getId())) {
-                  // transcript attribute
-                  graph.createTag(graph, attributeLayer.getId(), value)
-                    .setConfidence(Constants.CONFIDENCE_MANUAL);
-                } else { // participant attribute
-                  // save it up for when we have participants
-                  participantTags.put(attributeLayer.getId(), value);
-                } // participant attribute
-              } // mapped metadata
-            } // there is a mapping
+            if (name.startsWith("metadata:")) { // metadata:...
+              String[] nameParts = name.split(":"); // optional third part could be participant
+              Parameter attributeMapping = mappings.get(nameParts[0]+":"+nameParts[1]);
+              if (attributeMapping != null) {
+                Layer attributeLayer = (Layer)attributeMapping.getValue();
+                if (attributeLayer != null && !attributeLayer.getId().equals("[ignore]")) {
+                  // metadata to save
+                  String value = parser.getElementText();
+                  if (attributeLayer.getParentId() == null
+                      || attributeLayer.getParentId().equals(schema.getRoot().getId())) {
+                    // transcript attribute
+                    graph.createTag(graph, attributeLayer.getId(), value)
+                      .setConfidence(Constants.CONFIDENCE_MANUAL);
+                  } else { // participant attribute
+                    // save it up for when we have participants
+                    // the name will be formatted "metadata:${attribute}:${participant}"
+                    String participant = nameParts.length > 2?nameParts[2]:"";
+                    if (!participantTags.containsKey(participant)) {
+                      participantTags.put(participant, new HashMap<String,String>());
+                    }
+                    participantTags.get(participant).put(attributeLayer.getId(), value);
+                  } // participant attribute
+                } // mapped metadata
+              } // there is a mapping
+            } // metadata:
           }
           
         } else if (event == XMLStreamConstants.END_ELEMENT) {
@@ -1805,14 +1822,23 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     }
 
     if (participantTags.size() > 0) { // there are participant tags
-      // we don't know which participant they belong to, so tag them all!
+      // participantTags is keyed by participant label
       for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
-        for (String layerId : participantTags.keySet()) {
-          graph.createTag(participant, layerId, participantTags.get(layerId))
-            .setConfidence(Constants.CONFIDENCE_MANUAL);
-        } // next participant attribute layer
+        HashMap<String,String> tags = participantTags.get(participant.getLabel());
+        if (tags == null) { // no tags named after this participant
+          tags = participantTags.get(""); // try for anonymous attribute
+          if (tags != null) { // only apply anonymous attributes to one participant
+            participantTags.remove("");
+          }
+        }
+        if (tags != null) { // there are tags for this participant
+          for (String layerId : tags.keySet()) {
+            graph.createTag(participant, layerId, tags.get(layerId))
+              .setConfidence(Constants.CONFIDENCE_MANUAL);
+          } // next participant attribute layer
+        } // there are tags for this participant
       } // next participant
-    }
+    } // there are participant tags
 
     // ensure anchors are shared between children and parents where required
     Vector<Layer> layers = graph.getLayersTopDown();
@@ -2093,7 +2119,23 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
         } // next attribute 
       } // is an attribute layer
     } // next top-level layer
-      
+
+    if (schema.getParticipantLayer() != null) {
+      // save participant attributes as properties
+      for (Layer attributeLayer : schema.getParticipantLayer().getChildren().values()) {
+        if (attributeLayer.getAlignment() == Constants.ALIGNMENT_NONE) {
+          for (Annotation attribute : graph.all(attributeLayer.getId())) {
+            Element property = document.createElement("PROPERTY");
+            header.appendChild(property);
+            property.setAttribute("NAME", "metadata:"+attribute.getLayerId()
+                                  // include info to identify which participant
+                                  +":"+attribute.getParent().getLabel());
+            property.setTextContent(attribute.getLabel());
+          } // next attribute 
+        } // is an attribute layer
+      } // next participant layer
+    } // there is a participant layer
+    
     // create time slots
     Element timeOrder = document.createElement("TIME_ORDER");
     annotationDocument.appendChild(timeOrder);

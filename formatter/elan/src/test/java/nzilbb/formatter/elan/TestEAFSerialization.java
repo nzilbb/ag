@@ -63,7 +63,7 @@ public class TestEAFSerialization {
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
       new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
-      new Layer("participant_gender", "Gender").setAlignment(Constants.ALIGNMENT_NONE)
+      new Layer("participant_GENDER", "Gender").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("who").setParentIncludes(true),
       new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -128,7 +128,7 @@ public class TestEAFSerialization {
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
-    for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    //for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
     assertEquals("Number of parameters: " + defaultParameters.values(),
                  4, defaultParameters.size());
     assertEquals("utterance mapping", "utterance", 
@@ -137,8 +137,8 @@ public class TestEAFSerialization {
                  ((Layer)defaultParameters.get("tier1").getValue()).getId());
     assertEquals("transcript attribute mapping", "location", 
                  ((Layer)defaultParameters.get("metadata:location").getValue()).getId());
-    assertEquals("participant attribute mapping", "participant_gender", 
-                 ((Layer)defaultParameters.get("metadata:gender").getValue()).getId());
+    assertEquals("participant attribute mapping, case insensitive", "participant_GENDER", 
+                 ((Layer)defaultParameters.get("metadata:Gender").getValue()).getId());
 
     // configure the deserialization
     deserializer.setParameters(defaultParameters);
@@ -147,8 +147,7 @@ public class TestEAFSerialization {
     Graph[] graphs = deserializer.deserialize();
     Graph g = graphs[0];
 
-    for (String warning : deserializer.getWarnings())
-    {
+    for (String warning : deserializer.getWarnings()) {
       System.out.println(warning);
     }
       
@@ -169,10 +168,10 @@ public class TestEAFSerialization {
     assertEquals(g, who[1].getParent());
 
     // participant attributes
-    assertEquals("participant attribute - first speaker",
-                 "F", who[0].first("participant_gender").getLabel());
-    assertEquals("participant attribute - second speaker",
-                 "F", who[1].first("participant_gender").getLabel());
+    assertEquals("participant attribute - interviewer has correct gender",
+                 "NB", who[0].first("participant_GENDER").getLabel());
+    assertEquals("participant attribute - participant has correct gender",
+                 "F", who[1].first("participant_GENDER").getLabel());
       
     // turns
     Annotation[] turns = g.all("turn");
@@ -337,7 +336,7 @@ public class TestEAFSerialization {
     }
   }
 
-  /** Deserializaion of file includeing word alignments as well as utterance divisions. */
+  /** Deserialization of file includeing word alignments as well as utterance divisions. */
   @Test public void utterance_word()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -905,8 +904,8 @@ public class TestEAFSerialization {
                  ((Layer)defaultParameters.get("tier1").getValue()).getId());
     assertNull("no transcript attribute mapping", 
                  defaultParameters.get("metadata:location").getValue());
-    assertNull("participant attribute mapping",
-                 defaultParameters.get("metadata:gender").getValue());
+    assertNull("no participant attribute mapping",
+               defaultParameters.get("metadata:Gender").getValue());
 
     // configure the deserialization
     deserializer.setParameters(defaultParameters);
@@ -1035,8 +1034,8 @@ public class TestEAFSerialization {
                  ((Layer)defaultParameters.get("tier1").getValue()).getId());
     assertNull("no transcript attribute mapping", 
                  defaultParameters.get("metadata:location").getValue());
-    assertNull("participant attribute mapping",
-                 defaultParameters.get("metadata:gender").getValue());
+    assertNull("no participant attribute mapping",
+                 defaultParameters.get("metadata:Gender").getValue());
 
     // configure the deserialization
     deserializer.setParameters(defaultParameters);
@@ -1249,6 +1248,10 @@ public class TestEAFSerialization {
       new Layer("who", "Participants")
       .setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("gender", "Gender")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("who").setParentIncludes(true),
       new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("who").setParentIncludes(true),
@@ -1284,13 +1287,18 @@ public class TestEAFSerialization {
     // other metadata
     graph.addAnnotation(new Annotation("loc", "Flores", "location", "a0", "a15"));
     // participants
-    graph.addAnnotation(new Annotation("p1", "p1", "who", "a0", "a15"));
-    graph.addAnnotation(new Annotation("p2", "p2", "who", "a0", "a15"));
+    graph.addAnnotation(new Annotation("part1", "p1", "who", "a0", "a15"));
+    graph.addAnnotation(new Annotation("part2", "p2", "who", "a0", "a15"));
+    // participant genders
+    graph.addAnnotation(new Annotation(
+                          "g1", "gender1", "gender", "a0", "a15", "part1"));
+    graph.addAnnotation(new Annotation(
+                          "g2", "gender2", "gender", "a0", "a15", "part2"));
     // turns
-    graph.addAnnotation(new Annotation("t1", "p1", "turn", "a0", "a15", "p1"));
+    graph.addAnnotation(new Annotation("t1", "p1", "turn", "a0", "a15", "part1"));
     graph.addAnchor(new Anchor("a5", 5.0));
     graph.addAnchor(new Anchor("a10", 10.0));
-    graph.addAnnotation(new Annotation("t2", "p2", "turn", "a5", "a10", "p2"));
+    graph.addAnnotation(new Annotation("t2", "p2", "turn", "a5", "a10", "part2"));
     // utterances
     graph.addAnnotation(new Annotation("u1-1", "p1", "utterance", "a0", "a5", "t1"));
     graph.addAnnotation(new Annotation("u1-2", "p1", "utterance", "a5", "a10", "t1"));
@@ -1450,16 +1458,10 @@ public class TestEAFSerialization {
   @Test public void serialize() throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
-      new Layer("scribe", "Transcriber")
-      .setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(true)
-      .setPeersOverlap(true)
-      .setSaturated(true),
-      new Layer("who", "Participants")
-      .setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(true)
-      .setPeersOverlap(true)
-      .setSaturated(true),
+      new Layer("scribe", "Transcriber").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
       new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(true),
       new Layer("noise", "Noise").setAlignment(Constants.ALIGNMENT_INTERVAL)
