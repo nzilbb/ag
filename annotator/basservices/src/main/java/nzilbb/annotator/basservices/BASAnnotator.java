@@ -1265,7 +1265,14 @@ public class BASAnnotator extends Annotator {
                           if (label.length() == 0) {
                             label = timestamp.format(new Date());
                           }
-                          fragment.createTag(utterance, utteranceTagLayerId, label);
+                          Annotation[] timestamps = fragment.tagsOn​(utteranceTagLayerId);
+                          if (timestamps.length > 0) { // update the existing tag
+                            timestamps[0].setLabel(label);
+                            timestamps[0].setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                          } else { // add new tag
+                            fragment.createTag(utterance, utteranceTagLayerId, label)
+                              .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                          }
                         }
                         consumer.accept(fragment);
                         utterancesAnnotated++;
