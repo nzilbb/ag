@@ -907,6 +907,7 @@ public class Graph extends Annotation {
    * @param offset The anchor offset.
    * @return An anchor that has the given offset.
    * @see #getAnchorAt(double)
+   * @see #createAnchorAt(double)
    */
   public Anchor getOrCreateAnchorAt(double offset) {
     Anchor anchor = getAnchorAt(offset);
@@ -920,7 +921,7 @@ public class Graph extends Annotation {
 
   /**
    * Gets an anchor at the given offset. If there isn't already one in the graph, one is created.
-   * <p>This convenience method allows, for example, the creation of an anchor with
+   * <p> This convenience method allows, for example, the creation of an anchor with
    * a confidence value in one step:
    * <pre>
    * Anchor anchor = graph.getOrCreateAnchorAt(456.789, Constants.CONFIDENCE_AUTOMATIC);
@@ -929,6 +930,7 @@ public class Graph extends Annotation {
    * @param confidence Confidence rating.
    * @return An anchor that has the given offset.
    * @see #getAnchorAt(double)
+   * @see #createAnchorAt(double,Integer)
    */
   public Anchor getOrCreateAnchorAt(double offset, Integer confidence) {
     Anchor anchor = getAnchorAt(offset);
@@ -938,6 +940,41 @@ public class Graph extends Annotation {
       anchor.setConfidence(confidence);
       addAnchor(anchor);
     }
+    return anchor;
+  } // end of getAnchorAt()
+
+  /**
+   * Creates an anchor at the given offset.
+   * @param offset The anchor offset.
+   * @return A new anchor that has the given offset.
+   * @see #getAnchorAt(double)
+   * @see #getOrCreateAnchorAt(double)
+   */
+  public Anchor createAnchorAt(double offset) {
+    Anchor anchor = new Anchor();
+    anchor.setOffset(offset);
+    addAnchor(anchor);
+    return anchor;
+  } // end of createAnchorAt()
+
+  /**
+   * Creates an anchor at the given offset.
+   * <p> This convenience method allows, for example, the creation of an anchor with
+   * a confidence value in one step:
+   * <pre>
+   * Anchor anchor = graph.createAnchorAt(456.789, Constants.CONFIDENCE_AUTOMATIC);
+   * </pre>
+   * @param offset The anchor offset.
+   * @param confidence Confidence rating.
+   * @return A new anchor that has the given offset.
+   * @see #getAnchorAt(double)
+   * @see #getOrCreateAnchorAt(double,Integer)
+   */
+  public Anchor createAnchorAt(double offset, Integer confidence) {
+    Anchor anchor = new Anchor();
+    anchor.setOffset(offset);
+    anchor.setConfidence(confidence);
+    addAnchor(anchor);
     return anchor;
   } // end of getAnchorAt()
 
