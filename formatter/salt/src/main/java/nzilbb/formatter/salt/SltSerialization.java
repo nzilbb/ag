@@ -1926,6 +1926,13 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
         }
         transformer.transform(graph).commit();
         
+        // omissions - something like "We *went home"
+        transformer = new ConventionTransformer(wordLayer.getId(), "\\*(?<omission>.+)");
+        if (omissionLayer != null) {
+          transformer.addDestinationResult(omissionLayer.getId(), "${omission}");
+        }
+        transformer.transform(graph).commit();        
+
         // bound morphemes  - something like "bird/s/z" ...
 
         // just stripping out the slashes doesn't produce well-formed words
@@ -2175,13 +2182,6 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
           transformer.addDestinationResult(pauseLayer.getId(), "${pause}");
         }
         transformer.transform(graph).commit();      
-        
-        // omissions - something like "We *went home"
-        transformer = new ConventionTransformer(wordLayer.getId(), "\\*(?<omission>.+)");
-        if (omissionLayer != null) {
-          transformer.addDestinationResult(omissionLayer.getId(), "${omission}");
-        }
-        transformer.transform(graph).commit();
         
         // c-units
         if (cUnitLayer != null) {

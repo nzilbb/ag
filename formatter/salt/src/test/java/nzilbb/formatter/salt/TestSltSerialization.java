@@ -699,12 +699,13 @@ public class TestSltSerialization {
     // omissions
     Annotation[] omissions = g.all("omission");
     assertEquals("Correct number of omissions: " + Arrays.asList(omissions),
-                 1, omissions.length);
+                 2, omissions.length);
     assertEquals("omission label", "of", omissions[0].getLabel());
     assertEquals("omission previous word",
                  "out", omissions[0].getStart().endOf("word").iterator().next().getLabel());
     assertEquals("omission next word",
                  "the", omissions[0].getEnd().startOf("word").iterator().next().getLabel());
+    assertEquals("bound morpheme omission label", "they/'re", omissions[1].getLabel());
 
     // partial words
     Annotation[] partialWords = g.all("partial_word");
@@ -1185,7 +1186,7 @@ public class TestSltSerialization {
       "And then it/'s heaps_and_heaps|heaps dark.",
       "What happened next?",
       "%yip_yip Schnitzel_von_Krumm s[EP:s][LEXICAL:#is#]* :02 falled|fall[EW] out *of the baby/s/z nest.",
-      "What happened next?",
+      "*they/'re What happened next?",
       "They put (them) it back in the nest (um).",
       "Bye bye little bird.",
       "Anything else that happened?",
