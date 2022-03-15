@@ -240,7 +240,10 @@ public class TestEAFSerialization {
     assertEquals(147, utterances.length);
     assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
     assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
-    assertEquals("participant", utterances[0].getParent().getLabel());
+    assertEquals("Correct participant",
+                 "participant", utterances[0].getParent().getLabel());
+    assertEquals("Annotator is set on utterance",
+                 "robert", utterances[0].getAnnotator());
     assertEquals(turns[0], utterances[0].getParent());
 
     assertEquals(Double.valueOf(7.658), utterances[1].getStart().getOffset());
@@ -252,7 +255,10 @@ public class TestEAFSerialization {
 
     assertEquals(Double.valueOf(14.889000000000001), utterances[4].getStart().getOffset());
     assertEquals(Double.valueOf(15.639000000000001), utterances[4].getEnd().getOffset());
-    assertEquals("interviewer", utterances[4].getParent().getLabel());
+    assertEquals("correct other participant",
+                 "interviewer", utterances[4].getParent().getLabel());
+    assertNull("annotator not set (because it's not set for the TIER",
+               utterances[4].getAnnotator());
     assertEquals(turns[2], utterances[4].getParent());
 
     Annotation[] words = g.all("word");
@@ -264,6 +270,8 @@ public class TestEAFSerialization {
       assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                    i+1, words[i].getOrdinal());
       assertEquals(turns[0].getId(), words[i].getParentId());
+      assertEquals("Annotator set on word tokens",
+                   "robert", words[i].getAnnotator());
     }
     String[] wordLabelsAfterPause = {
       "generously", "agreed", "that", "she", "could", "go", "with", "him", "but", 
@@ -1209,13 +1217,14 @@ public class TestEAFSerialization {
         assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
                      i+1, words[i].getOrdinal());
         assertEquals(turns[0].getId(), words[i].getParentId());
-        assertNotNull("has orthography " + i, words[i].first("orthography"));
-        assertEquals("orthography label " + i,
-                     orthLabels[i], words[i].first("orthography").getLabel());
-        assertEquals("orthography start " + i,
-                     words[i].getStart(), words[i].first("orthography").getStart());
-        assertEquals("orthography end " + i,
-                     words[i].getEnd(), words[i].first("orthography").getEnd());
+        assertEquals("annotator " + i, "Robert", words[i].getAnnotator());
+        
+        Annotation orthography = words[i].first("orthography");
+        assertNotNull("has orthography " + i, orthography);
+        assertEquals("orthography label " + i, orthLabels[i], orthography.getLabel());
+        assertEquals("orthography start " + i, words[i].getStart(), orthography.getStart());
+        assertEquals("orthography end " + i, words[i].getEnd(), orthography.getEnd());
+        assertEquals("annotator " + i, "Robert-ortho", orthography.getAnnotator());
       }
     } catch (SerializationException x) {
       fail(x.toString());

@@ -250,6 +250,7 @@ public class SimpleTokenizer implements GraphTransformer {
               source.getStart().getId(), source.getEnd().getId(), 
               source.getParentId());
             span.setConfidence(source.getConfidence());
+            span.setAnnotator(source.getAnnotator());
             graph.addAnnotation(span);
           }
 	       
@@ -281,6 +282,7 @@ public class SimpleTokenizer implements GraphTransformer {
             getTokensInSourceLayer()?getSourceLayerId():getDestinationLayerId(), 
             start.getId(), end.getId());
           token.setConfidence(source.getConfidence());
+          token.setAnnotator(source.getAnnotator());
           if (getTokensInSourceLayer() || sharedParent) {
             // explicitly set the ordinal
             token.setOrdinal(ordinal);//);

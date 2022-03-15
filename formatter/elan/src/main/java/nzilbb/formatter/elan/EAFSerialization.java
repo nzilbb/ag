@@ -457,7 +457,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
   public SerializationDescriptor getDescriptor() {
     return new SerializationDescriptor(
       "ELAN EAF Transcript", getClass().getPackage().getImplementationVersion(),
-      "text/x-eaf+xml", ".eaf", "1.0.5",
+      "text/x-eaf+xml", ".eaf", "1.0.6",
       getClass().getResource("icon.png"));
   }
    
@@ -1139,6 +1139,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     String lang = null;
     String speaker = null;
     String tierId = null;
+    String annotator = null;
     Layer layer = null;
     String annotationId = null;
     String annotationRef = null;
@@ -1202,6 +1203,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
             if (langRef == null) langRef = parser.getAttributeValue(null, "DEFAULT_LOCALE");
             if (langRef != null) lang = langRef;
             tierId = parser.getAttributeValue(null, "TIER_ID");
+            annotator = parser.getAttributeValue(null, "ANNOTATOR");
             tierIndex++;
             speaker = parser.getAttributeValue(null, "PARTICIPANT");
             if (speaker == null) speaker = tierId;
@@ -1232,7 +1234,6 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                 annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
                 annotation.put("@tierId", tierId); // this might come in handy later
                 annotation.put("@participant", speaker); // this might come in handy later
-                // TODO annotation.setAnnotator(...), from the tier's settings.
                 // add anchors if they're not in the graph
                 if (!graph.getAnchors().containsKey(start.getId())) graph.addAnchor(start);
                 if (!graph.getAnchors().containsKey(end.getId())) graph.addAnchor(end);
@@ -1245,6 +1246,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                 annotation.put("@tierId", tierId); // this might come in handy later
                 annotation.put("@participant", speaker); // this might come in handy later
                 annotation.put("@annotationRef", annotationRef); // this might come in handy later
+                if (annotator != null) annotation.setAnnotator(annotator);
                 // save for later...
                 symbolicAnnotations.add(annotation);
               }              
@@ -1292,6 +1294,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
             // reset annotation attributes
             tierId = null;
             layer = null;
+            annotator = null;
           }
           
         } // END_ELEMENT
@@ -1323,14 +1326,15 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
           annotationId = annotation.getId();
           tierId = (String)annotation.get("@tierId");
           speaker = (String)annotation.get("@participant");
+          annotator = annotation.getAnnotator();
           annotation = graph.createSubdivision(
             ref, annotation.getLayerId(), annotation.getLabel());
           annotation.setId(annotationId); // use EAF ID 
           annotation.setConfidence(Constants.CONFIDENCE_MANUAL);
+          annotation.setAnnotator(annotator);
           annotation.put("@tierId", tierId); // this might come in handy later
           annotation.put("@participant", speaker); // this might come in handy later
           annotation.put("@ref", ref); // this might come in handy later
-          // TODO annotation.setAnnotator(...), from the tier's settings.
           if (ref.getLayerId().equals(annotation.getLayer().getParentId())) {
             // ref is parent
             annotation.setParent(ref);

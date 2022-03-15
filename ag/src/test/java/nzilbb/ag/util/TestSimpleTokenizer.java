@@ -71,12 +71,18 @@ public class TestSimpleTokenizer
       g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a3", "participant1"));
       g.addAnnotation(new Annotation("turn2", "jane doe", "turn", "a2", "a3", "participant2"));
 
-      g.addAnnotation(new Annotation("utterance1", "the quick brown fox", "utterance",
-                                     "a0", "a1", "turn1", 1, Constants.CONFIDENCE_MANUAL));
-      g.addAnnotation(new Annotation("utterance2", "jumps over", "utterance", "a1", "a3", "turn1",
-                                     2, Constants.CONFIDENCE_MANUAL));
-      g.addAnnotation(new Annotation("utterance3", "the lazy dog", "utterance",
-                                     "a2", "a3", "turn2", 1, Constants.CONFIDENCE_MANUAL));
+      Annotation utterance = new Annotation("utterance1", "the quick brown fox", "utterance",
+                                            "a0", "a1", "turn1", 1, Constants.CONFIDENCE_MANUAL);
+      utterance.setAnnotator("annotator");
+      g.addAnnotation(utterance);
+      utterance = new Annotation("utterance2", "jumps over", "utterance", "a1", "a3", "turn1",
+                                 2, Constants.CONFIDENCE_MANUAL);
+      utterance.setAnnotator("annotator");
+      g.addAnnotation(utterance);
+      utterance = new Annotation("utterance3", "the lazy dog", "utterance",
+                                 "a2", "a3", "turn2", 1, Constants.CONFIDENCE_MANUAL);
+      utterance.setAnnotator("annotator");
+      g.addAnnotation(utterance);
 
       try
       {
@@ -114,14 +120,18 @@ public class TestSimpleTokenizer
 	 {
             assertEquals("Tokens have same confidence as original annotation: " + word,
                          Integer.valueOf(Constants.CONFIDENCE_MANUAL), word.getConfidence());
+            assertEquals("Tokens have same annotator as original annotation: " + word,
+                         "annotator", word.getAnnotator());
 	    if (!word.getStart().isStartOn("utterance"))
 	    {
-	       assertNull("Word start anchors have no confidence: " + word + " - " + word.getStart() + ":" + word.getStart().getConfidence(),
+	       assertNull("Word start anchors have no confidence: " + word + " - "
+                          + word.getStart() + ":" + word.getStart().getConfidence(),
 			  word.getStart().getConfidence());
 	    }
 	    if (!word.getEnd().isEndOn("utterance"))
 	    {
-	       assertNull("Word end anchors have no confidence: " + word + " - " + word.getEnd() + ":" + word.getEnd().getConfidence(),
+	       assertNull("Word end anchors have no confidence: " + word + " - "
+                          + word.getEnd() + ":" + word.getEnd().getConfidence(),
 			  word.getEnd().getConfidence());
 	    }
 	 } // next word
