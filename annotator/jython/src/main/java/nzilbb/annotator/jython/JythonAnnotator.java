@@ -48,13 +48,10 @@ import nzilbb.util.IO;
  * Annotator that executes a Python script on each transcript.
  * @author Robert Fromont robert@fromont.net.nz
  */
-// Migration notes:
-//  - thisLayer.id -> "${layer.id}"
-//  - annotator.cancelling -> isCancelling()
 @UsesFileSystem
 public class JythonAnnotator extends Annotator {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-   public String getMinimumApiVersion() { return "1.0.0"; }
+   public String getMinimumApiVersion() { return "1.0.6"; }
 
    /**
     * The URL for downloading Jython.

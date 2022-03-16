@@ -46,7 +46,7 @@ import nzilbb.util.IO;
 //  - thisLayer.id -> "${layer.id}"
 public class JavascriptAnnotator extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-  public String getMinimumApiVersion() { return "1.0.0"; }
+  public String getMinimumApiVersion() { return "1.0.6"; }
 
   /**
    * The Javascript script engine.
