@@ -41,9 +41,6 @@ import nzilbb.util.IO;
  * Annotator that executes a JavaScript script on each transcript.
  * @author Robert Fromont robert@fromont.net.nz
  */
-// Migration notes:
-//  - mode == "label" -> labelMapping
-//  - thisLayer.id -> "${layer.id}"
 public class JavascriptAnnotator extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
   public String getMinimumApiVersion() { return "1.0.6"; }
