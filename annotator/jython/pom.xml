@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.jython</artifactId>
   <name>nzilbb.annotator.jython</name>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
 
   <properties>
     <package.path>nzilbb/annotator/jython/</package.path>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.0.4,)</version>
+      <version>[1.0.6,)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -52,6 +52,7 @@
               <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
             </manifestEntries>
           </archive>
+          <outputDirectory>../../bin</outputDirectory>
         </configuration>
       </plugin>
     </plugins>

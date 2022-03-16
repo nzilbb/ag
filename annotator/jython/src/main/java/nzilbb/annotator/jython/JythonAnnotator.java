@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -49,9 +49,8 @@ import nzilbb.util.IO;
  * @author Robert Fromont robert@fromont.net.nz
  */
 // Migration notes:
-//  - thisLayer references -> sourceLayerIds[0]
-//  - labbcat references -> ??
-//  - cancelling() references -> isCancelling()
+//  - thisLayer.id -> "${layer.id}"
+//  - annotator.cancelling -> isCancelling()
 @UsesFileSystem
 public class JythonAnnotator extends Annotator {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
@@ -190,6 +189,7 @@ public class JythonAnnotator extends Annotator {
                      setPercentComplete(percentComplete);
                   }
                });
+            setStatus("Downloading complete.");
          }
          setPercentComplete(100);
       } catch (IOException x) {
@@ -261,24 +261,23 @@ public class JythonAnnotator extends Annotator {
       HashSet<String> requiredLayers = new HashSet<String>();
       // look for patterns that access layers
       String[] patterns = { // https://xkcd.com/1421/
-         "\\.list\\(\"([^\"]+)\"\\)",       "\\.list\\('([^']+)'\\)",
-         "\\.all\\(\"([^\"]+)\"\\)",        "\\.all\\('([^']+)'\\)",
-         "\\.my\\(\"([^\"]+)\"\\)",         "\\.my\\('([^']+)'\\)",
-         "\\.first\\(\"([^\"]+)\"\\)",      "\\.first\\('([^']+)'\\)",
-         "\\.last\\(\"([^\"]+)\"\\)",       "\\.last\\('([^']+)'\\)",
-         "\\.getAnnotations\\(\"([^\"]+)\"\\)"
-         ,                                  "\\.getAnnotations\\('([^']+)'\\)",
-         "\\.annotations\\(\"([^\"]+)\"\\)","\\.annotations\\('([^']+)'\\)",
+         "\\.list\\(\"([^\"]+)\"\\)",          "\\.list\\('([^']+)'\\)",
+         "\\.all\\(\"([^\"]+)\"\\)",           "\\.all\\('([^']+)'\\)",
+         "\\.my\\(\"([^\"]+)\"\\)",            "\\.my\\('([^']+)'\\)",
+         "\\.first\\(\"([^\"]+)\"\\)",         "\\.first\\('([^']+)'\\)",
+         "\\.last\\(\"([^\"]+)\"\\)",          "\\.last\\('([^']+)'\\)",
+         "\\.getAnnotations\\(\"([^\"]+)\"\\)","\\.getAnnotations\\('([^']+)'\\)",
+         "\\.annotations\\(\"([^\"]+)\"\\)",   "\\.annotations\\('([^']+)'\\)",
          "\\.includingAnnotationsOn\\(\"([^\"]+)\"\\)"
-         ,                                  "\\.includingAnnotationsOn\\('([^']+)'\\)",
+         ,                                     "\\.includingAnnotationsOn\\('([^']+)'\\)",
          "\\.includedAnnotationsOn\\(\"([^\"]+)\"\\)"
-         ,                                  "\\.includedAnnotationsOn\\('([^']+)'\\)",
+         ,                                     "\\.includedAnnotationsOn\\('([^']+)'\\)",
          "\\.midpointIncludingAnnotationsOn\\(\"([^\"]+)\"\\)"
-         ,                                  "\\.midpointIncludingAnnotationsOn\\('([^']+)'\\)",
-         "\\.tagsOn\\(\"([^\"]+)\"\\)",     "\\.tagsOn\\('([^']+)'\\)",
-         "\\.getAncestor\\(\"([^\"]+)\"\\)","\\.getAncestor\\('([^']+)'\\)",
+         ,                                     "\\.midpointIncludingAnnotationsOn\\('([^']+)'\\)",
+         "\\.tagsOn\\(\"([^\"]+)\"\\)",        "\\.tagsOn\\('([^']+)'\\)",
+         "\\.getAncestor\\(\"([^\"]+)\"\\)",   "\\.getAncestor\\('([^']+)'\\)",
          "\\.overlappingAnnotations\\([^)]+\"([^\"]+)\"\\)"
-         ,                                  "\\.overlappingAnnotations\\([^)]+'([^']+)'\\)"
+         ,                                     "\\.overlappingAnnotations\\([^)]+'([^']+)'\\)"
       };
       for (String pattern : patterns) {
          Matcher matcher = Pattern.compile(pattern).matcher(script);
@@ -331,7 +330,17 @@ public class JythonAnnotator extends Annotator {
       } // next pattern
       return outputLayers.toArray(new String[0]);
    }
-   
+
+  /**
+   * Determines whether the user has requested that processing be cancelled.
+   * <p> This methos is implemented primarily to make it available to scripts, which
+   * should be able to include lines like <code>if annotator.cancelling: break</code>
+   * @return true if {@link #cancel()} has been called, false otherwise.
+   */
+  public boolean getCancelling() {
+    return isCancelling();
+  } // end of isCancelling()
+
    /**
     * Transforms the graph. In this case, the graph is simply summarized, by counting all
     * tokens of each word type, and printing out the result to stdout.

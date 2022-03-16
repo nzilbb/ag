@@ -40,8 +40,6 @@ getSchema(s => {
                 // set initial values of properties in the form
                 setScript(parameters.script);
             }
-            checkMode();
-            updateLabelScript();
         } finally {
             // hide spinner
             finishedLoading();
@@ -81,18 +79,6 @@ function changedLayer(select) {
         }
     }
     return true;
-}
-
-function checkMode() {
-    if (document.getElementById("labelMappingTrue").checked) {
-        document.getElementById("scriptConfiguration").style.display = "none";
-        document.getElementById("labelMappingConfiguration").style.display = "";
-        document.getElementById("labelScript").focus();
-    } else {
-        document.getElementById("scriptConfiguration").style.display = "";
-        document.getElementById("labelMappingConfiguration").style.display = "none";
-        editor.focus();
-    }
 }
 
 function setScript(python) {
@@ -135,26 +121,6 @@ function saveScript() {
         document.body.appendChild(downloadLink);
         downloadLink.click();
     } catch(X) { alert(X); }
-}
-
-function validateRegularExpression(input) {
-    if (input.value.length == 0) {
-        input.className = "";
-        input.title = "";
-    } else {
-        try {        
-            // test regular expression is valid
-            new RegExp(input.value);
-            // pattern is valid, so don't mark it as an error
-            input.className = "";
-            input.title = "";
-        } catch(error) {
-            // pattern is invalid, so don't mark it as an error
-            input.className = "error";
-            input.title = error;
-        }
-    }
-    return input.className == "";
 }
 
 function setTaskParameters(form) {
