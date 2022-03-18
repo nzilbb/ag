@@ -265,7 +265,7 @@ public class TestHTKAligner {
     
     Annotation[] phones = word.all("segment");
     assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
-    String[] labels = { "s", "t", "{", "J", "u", "t" };
+    String[] labels = { "s", "t", "{", "J", "@", "t" };
     Double[] starts = { 11.1, 11.25, 11.28, 11.44, 11.620000000000001, 11.7 };
     for (int p = 0; p < phones.length; p++) {      
       assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
@@ -334,7 +334,7 @@ public class TestHTKAligner {
     // don't bother testing offsets, as they'll be rubbish
     Annotation[] phones = word.all("segment");
     assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
-    String[] labels = { "s", "t", "{", "J", "u", "t" };
+    String[] labels = { "s", "t", "{", "J", "@", "t" };
     for (int p = 0; p < phones.length; p++) {      
       assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
       assertNotNull("Scored " + p, phones[p].first("score"));
@@ -391,7 +391,7 @@ public class TestHTKAligner {
     
     Annotation[] phones = word.all("segment");
     assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
-    String[] labels = { "s", "t", "{", "J", "u", "t" };
+    String[] labels = { "s", "t", "{", "J", "@", "t" };
     Double[] starts = { 11.1, 11.25, 11.28, 11.44, 11.620000000000001, 11.7 };
     for (int p = 0; p < phones.length; p++) {      
       assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
