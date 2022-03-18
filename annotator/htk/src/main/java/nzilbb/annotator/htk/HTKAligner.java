@@ -667,8 +667,10 @@ public class HTKAligner extends Annotator {
       File HVite = fHtkPath == null?null:new File(htkPath, "HVite");
       if (HVite != null && !HVite.exists()) HVite = new File(htkPath, "HVite.exe");
       if (HVite == null || !HVite.exists()) { // don't have HTK exes
+        setStatus("HTK not found");
 
         if (htkUserId != null && htkPassword != null) { // have user/password
+          setStatus("Attempt to download HTK...");
           if (java.lang.System.getProperty("os.name").startsWith("Windows")) { // Windows
             
             // download exes...
@@ -698,7 +700,9 @@ public class HTKAligner extends Annotator {
             }            
           } else { // not windows
             boolean canCompileSource = Execution.Which("make") != null;
-            if (canCompileSource) {
+            if (!canCompileSource) {
+              setStatus("Cannot build from source as 'make' is not available.");
+            } else {
               // don't have HTK path but maybe we can download/build/install it
               
               // TODO build for Mac too
@@ -811,7 +815,7 @@ public class HTKAligner extends Annotator {
         new File(getWorkingDirectory(), getAnnotatorId() + ".cfg"), "UTF-8");
       writer.print("htkPath="+URLEncoder.encode(htkPath, "UTF-8"));
       writer.close();
-      
+
       setPercentComplete(100);
     } catch (IOException ioX) {
       setStatus("ERROR: " + ioX);
