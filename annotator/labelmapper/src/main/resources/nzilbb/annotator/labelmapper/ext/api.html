@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html><head><title>API Label Mapper</title></head>
+  <body>
+    <h1>Label Mapper</h1>
+    
+    <p> This annotator creates a mapping between the labels of a pair of layers, by finding the
+      minimum edit path between them. If any <i>sub-mappings</i> have been configured - where two
+      pairs of layers are mapped, two word layers and two corresponding phone layers -
+      these mappings are tracked in detail so that alignments and label assignments can be
+      compared. </p>
+    
+    <p> This API provides access to tracked sub-mapping information, including raw
+      mapping data and summary information including mean <i>Overlap Rate</i>. </p>
+    
+    <details><summary> <i>Overlap Rate</i> is a value between 0 and 1. A value of 0 means that the
+        two intervals do not overlap at all, with 1 meaning they completely
+        overlap. </summary>
+      
+      <p><a href="http://dx.doi.org/10.1007/978-3-540-30228-5_4" target="PauloOliveira2004"> Paulo and Oliveira (2004) </a>
+        devised Overlap Rate (OvR) to compare alignments, which measures how
+        much two intervals overlap, independent of their absolute durations. OvR is
+        calculated as follows: </p>
+      <div class="formula">
+        OνR =
+        <span class="division">
+          <span class="numerator"> CommonDur <span class="for-copy-paste">/</span> </span>
+          <span class="denominator"> DurMax </span>
+        </span>
+        = 
+        <span class="division">
+          <span class="numerator"> CommonDur <span class="for-copy-paste">/</span> </span>
+          <span class="denominator"><span class="for-copy-paste">(</span>DurRef + DurAuto - CommonDur<span class="for-copy-paste">)</span></span>
+        </span>
+      </div>
+      
+      <p> The result is a value between 0 and 1. A value of 0 means that the two intervals
+        do not overlap at all, with 1 meaning they completely overlap (i.e., the
+        alignments exactly agree). Overlap Rate has several advantages over comparing
+        start/end offsets directly: </p>
+      <ol>
+        <li> It provides a single result, with no need to specify different thresholds for
+          offset accuracy. </li>
+        <li> It gives a measure of how time-spans (rather than time-points) align, and
+          these time-spans correspond directly to what is usually the primary unit of
+          interest: phones. </li>
+        <li> It ensures that a small absolute discrepancy in alignment is more serious for
+          short intervals than for longer ones. </li>
+      </ol>
+    </details>
+
+    <p> The extension API can be used to list and download tracked mappings, by using the
+      following endpoints, accessed with a GET http request: </p>
+    <dl>
+      <dt><tt>listMappings</tt></dt> <dd>Lists tracked mappings. The response is a JSON-encoded list of
+        strings formatted sourceLayerId→targetLayerId, representing tracked mappings that
+        can be accessed via other endpoints.</dd>
+      <dt><tt>summarizeMapping?<var>id</var></tt></dt> <dd>Provides summary information about the
+        given mapping. The query string should be a mapping ID returned
+        by <i>listMappings</i>. The response is a JSON-encoded object with summary
+        information about the given mapping, e.g.
+        <ul><li>utteranceCount - number of utterances with a mapping</li>
+          <li>stepCount - total number of edit steps</li>
+          <li>meanOverlapRate - mean overlap rate across all edit steps</li>
+          <li>sourceCount - number of source annotations mapped</li>
+          <li>targetCount - number of target annotations mapped</li></ul>
+      </dd>
+      <dt><tt>mappingToCsv?<var>id</var></tt></dt> <dd>Provides access to the mapping between the given two
+        layers, as a CSV stream. The query string should be a mapping ID returned
+        by <i>listMappings</i>. The response is a CSV file containing all edit steps
+        mapping all source annotations to target annotations, with the following fields:
+        <ul><li><i>transcript</i> - Transcript ID</li>
+          <li><i>scope</i> - Parent utterance/word ID </li>
+          <li><i>URL</i> - URL to the utterance </li>
+          <li><i>step</i> - The edit step index in the sequence </li>
+          <li><i>sourceLayer</i> - Layer of the source annotations </li>
+          <li><i>sourceParentId</i> - ID of the parent of source annotation, if this is a sub-mapping </li>
+          <li><i>sourceParentLabel</i> - Label of the parent of source annotation, if this is a sub-mapping </li>
+          <li><i>sourceId</i> - ID of the source annotation </li>
+          <li><i>sourceLabel</i> - Label of the source annotation </li>
+          <li><i>sourceStart</i> - Start offset of the source annotation </li>
+          <li><i>sourceEnd</i> - End offset of the source annotation </li>
+          <li><i>targetLayer</i> - Layer of the target annotations </li>
+          <li><i>targetParentId</i> - ID of the parent of target annotation, if this is a sub-mapping </li>
+          <li><i>targetParentLabel</i> - Label of the parent of target annotation, if this is a sub-mapping </li>
+          <li><i>targetId</i> - ID of the target annotation </li>
+          <li><i>targetLabel</i> - Label of the target annotation </li>
+          <li><i>targetStart</i> - Start offset of the target annotation </li>
+          <li><i>targetEnd</i> - End offset of the target annotation </li>
+          <li><i>operation</i> - The edit operation:
+            <tt>+</tt> for insert, <tt>-</tt> for delete, <tt>!</tt> for change, <tt>=</tt> for no change </li>
+          <li><i>distance</i> - Distance (cost) for this edit step </li>
+          <li><i>hierarchy</i> - This mappings position in the sub-mapping hierarchy:
+            <tt>parent</tt>, <tt>child</tt>, or <tt>none</tt> </li>
+          <li><i>overlapRate</i> - As per Paulo and Oliveira (2004):
+            0 means no overlap at all, 1 means they complete overlap </li> </ul>
+      </dd>
+      <dt><tt>deleteMapping?<var>id</var></tt></dt> <dd>Deletes all data associated with the given
+        mapping. The query string should be a mapping ID returned by <i>listMappings</i>.</dd>
+    </dl>
+  </body>
+</html>

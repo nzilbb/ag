@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html><head><title>Label Mapper</title></head>
+  <body>
+    <h1>Label Mapper</h1>
+    
+    <p> This annotator creates a mapping between the labels of two layers, a <q>source</q>
+      layer and a <q>target</q> layer, by finding the minimum edit path between them. </p>
+    
+    <h2> Phone Sub-mapping </h2>
+    
+    <p> A phone Sub-mapping may be configured if you are mapping word tokens on one layer
+      to word tokens on another layer. In this case, map phone tokens on a source layer
+      to phone tokens on a target layer - i.e. you can compare two sets of word/phone
+      annotations. </p>
+
+    <p> The words on the <b>sourceLayerId</b> are assumed to be divided into phones
+      that are on the <b>subSourceLayerId</b>, and
+      the words on the <b>targetLayerId</b> are assumed to be divided into phones that
+      are on the <b>subTargetLayerId</b>. </p>
+    
+    <p> These mappings are tracked in detail, to facilitate comparison of alignment
+      and labelling. Mapping information can be accessed via this annotator's
+      extensions. </p>
+
+    <h2>Encoding</h2>
+    
+    <p> Configuration parameters are encoded as a URL query string, e.g. <br>
+      <samp>sourceLayerId=orthography&splitLabels=&mappingLayerId=&comparator=CharacterToCharacter&targetLayerId=mfaPretrainedARPAbet&subSourceLayerId=segment&subComparator=DISCToArpabet&subTargetLayerId=mfaPretrainedARPAbetPhone</samp>
+    </p>
+
+    <h2>Parameters</h2>
+    
+    <dl>
+      <dt> sourceLayerId </dt> <dd> Input layer from which the resulting annotations'
+        labels come from come. </dd>
+      <dt> targetLayerId </dt> <dd> This layer defines which tokens will be tagged. Each
+        annotation on this layer will have one tag added, with one or more labels from
+        the <em>sourceLayerId</em>, unless no correspondence can be found, in which case
+        the token is not tagged. </dd> 
+      <dt> mappingLayerId </dt> <dd> Output layer mapping the Source layer to the Target
+          layer. If no <i>Phone Sub-mapping</i> is specified (see below), any Source Layer
+          labels that cannot be directly mapped to a Target token will be appended to a nearby
+          Mapping Layer label; i.e. appended to the last one where possible.</dd> 
+      <dt> comparator </dt> <dd> How the Source layer and the Target layer labels relate
+        to each other. Possible values are:
+        <ul>
+          <li><q>CharacterToCharacter</q> - Orthography → Orthography</li>
+          <li><q>OrthographyToDISC</q> - Orthography → DISC</li>
+          <li><q>OrthographyToArpabet</q> - Orthography → ARPAbet</li>
+          <li><q>DISCToDISC</q> - DISC → DISC</li>
+          <li><q>DISCToArpabet</q> - DISC → ARPAbet</li>
+          <li><q>ArpabetToDISC</q> - ARPAbet → DISC</li>
+          <li><q>IPAToIPA</q> - IPA → IPA</li>
+          <li><q>DISCToIPA</q> - DISC → IPA</li>
+          <li><q>IPAToDISC</q> - IPA → DISC</li>
+      </ul></dd>
+      <dt> splitLabels </dt> <dd>
+        Possible values are:
+        <ul>
+          <li><q>char</q> - Use the first annotation in the scope, split its label into
+            characters, and map each to labels on the target layer (e.g. DISC word
+            transcriptions to phones). </li> 
+          <li><q>space</q> - Use the first annotation in the scope, split its label on
+            spaces, and map each to labels on the target layer (e.g. ARPAbet word
+            transcriptions to phones). </li>
+          <li><q></q> (nothing) - Use all annotations in the scope, and do not split their
+            labels (e.g. phone alignments to other phone alignments). </li>
+        </ul>
+        <dt> subSourceLayerId </dt> <dd> (Optional) Source Layer and Target Layer above identify
+        words, which can be subdivided into phones on this layer and the subTargetLayerId
+        below.
+        <br> The Sub-mapping option should only be configured if: <ul>
+          <li> The <b>splitLabels</b> parameter is omitted, and</li>
+          <li> The <b>comparator</b> is set to <q>CharacterToCharacter</q> </li>
+        </ul>
+        i.e. you are mapping word tokens on one layer to word tokens on another layer.
+        </dd>
+      <dt> subTargetLayerId </dt> <dd> Which tokens will be tagged for the sub-mapping. </dd>
+      <dt> subComparator </dt> <dd> How the Source layer and the Target layer labels relate
+        to each other. Possible values are:
+        <ul>
+          <li><q>CharacterToCharacter</q> - Orthography → Orthography</li>
+          <li><q>OrthographyToDISC</q> - Orthography → DISC</li>
+          <li><q>OrthographyToArpabet</q> - Orthography → ARPAbet</li>
+          <li><q>DISCToDISC</q> - DISC → DISC</li>
+          <li><q>DISCToArpabet</q> - DISC → ARPAbet</li>
+          <li><q>ArpabetToDISC</q> - ARPAbet → DISC</li>
+          <li><q>IPAToIPA</q> - IPA → IPA</li>
+          <li><q>DISCToIPA</q> - DISC → IPA</li>
+          <li><q>IPAToDISC</q> - IPA → DISC</li>
+      </ul></dd>
+      </dd>
+    </dl>
+  </body>
+</html>
