@@ -519,7 +519,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
           Method setter = annotatorClass.getMethod(
             "set" + property.substring(0,1).toUpperCase() + property.substring(1),
             String.class);
-          setter.invoke(this, URLDecoder.decode(valueString, "UTF-8"));
+          setter.invoke(this, valueString);
         } catch(Throwable notString) {
           try {
             Method setter = annotatorClass.getMethod(
