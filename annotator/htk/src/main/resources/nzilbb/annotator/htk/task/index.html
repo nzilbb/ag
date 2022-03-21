@@ -26,7 +26,7 @@
         <label for="pronunciationLayerId"> Pronunciation Layer </label>
         <span><select id="pronunciationLayerId" name="pronunciationLayerId" required></select></span>
       </div>
-      <div class="field" title="Layer for noise annotations">
+      <div class="field" title="Layer that has noise annotations">
         <label for="noiseLayerId"> Noise Layer </label>
         <span>
           <select id="noiseLayerId" name="noiseLayerId">
@@ -52,7 +52,12 @@
           </select>
         </span>
       </div>
-      <div class="field" title="Layer for noise annotations">
+      <div class="field" title="Space-delimited list of regular expressions for matching on the noise layer, that HTK should model for. e.g: 
+laugh.* unclear .*noise.* 
+...will train three non-speech models for all noise annotations
+ - whose label starts with the word 'laugh', or 
+ - the label is 'unclear', or 
+ - the label includes the word 'noise'.">
         <label for="noisePatterns"> Noise Patterns </label>
         <span><input id="noisePatterns" name="noisePatterns" type="text"></span>
       </div>
@@ -71,7 +76,7 @@
         <span><input id="sampleRate" name="sampleRate"
                      value="11025" type="checkbox"></span>
       </div>
-      <div class="field" title="Regular expression for matching the participant ID of the participant in the left audio channel. ">
+      <div class="field" title="Regular expression for matching the participant ID of the participant in the left audio channel.">
         <label for="leftPattern"> Participant on Left Channel </label>
         <span><input id="leftPattern" name="leftPattern" type="text"></span>
       </div>

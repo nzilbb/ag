@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html><head><title>HTK Aligner</title></head>
+  <body>
+    <h1>HTK Aligner</h1>
+    
+    <p> The HTK Aligner can use words with phonemic transcriptions, and the
+      corresponding audio, to force-align words and phones; i.e. determine the start and
+      end time of each speech sound within each word, and thus the start/end times of the
+      words. </p>
+    
+    <p> The configuration parameter is encoded as a URL query string, e.g. <br>
+      <samp>mfaPath=/opt/conda/envs/aligner/bin</samp> <br>
+      <em>NB:</em> Ensure the configuration string provided has all parts correctly
+      URI-encoded; in particular <tt>/</tt> should be encoded <tt>%2F</tt> </p>
+    
+    <p> The possible parameters are: </p>
+    <dl>
+      <dt> htkPath </dt> <dd> Path to the HTK programs on the
+        server. e.g. <q>C:\\HTK.3.3</q>
+        This can only be ommitted if the following two parameters are specified <b>and</b>
+        the server system has sufficient permissions for downloading files from the
+        internet and compiling source code.  </dd>
+      <dt> htkUserId </dt> <dd> If the server system has sufficient permissions for
+        downloading files from the internet and compiling source code, the annotator may
+        be able to download and install HTK directly from <a href="https://htk.eng.cam.ac.uk/" target="htk">htk.eng.cam.ac.uk</a>
+        - this parameter is the user ID registered at
+        <a href="http://htk.eng.cam.ac.uk/register.shtml" target="htk">http://htk.eng.cam.ac.uk/register.shtml</a> </dd>
+      <dt> htkUserId </dt> <dd> Password for your User ID registered at
+      <a href="http://htk.eng.cam.ac.uk/register.shtml" target="htk">http://htk.eng.cam.ac.uk/register.shtml</a> </dd>
+    </dl>
+  </body>
+</html>
