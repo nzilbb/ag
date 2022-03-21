@@ -53,6 +53,41 @@
       </ol>
     </details>
 
+    <details>
+      <summary>Detailed edit-step data can be downloaded for each mapping in CSV format.</summary>
+      <p> The CSV fields are: </p>
+      <dl>
+        <dt>transcript</dt> <dd>Transcript ID</dd>
+        <dt>scope</dt> <dd>Parent utterance/word ID </dd>
+        <dt>URL</dt> <dd>URL to the utterance </dd>
+        <dt>step</dt> <dd>The edit step index in the sequence </dd>
+        <dt>sourceLayer</dt> <dd>Layer of the source annotations </dd>
+        <dt>sourceParentId</dt>
+        <dd>ID of the parent of source annotation, if this is a sub-mapping </dd>
+        <dt>sourceParentLabel</dt>
+        <dd>Label of the parent of source annotation, if this is a sub-mapping </dd>
+        <dt>sourceId</dt> <dd>ID of the source annotation </dd>
+        <dt>sourceLabel</dt> <dd>Label of the source annotation </dd>
+        <dt>sourceStart</dt> <dd>Start offset of the source annotation </dd>
+        <dt>sourceEnd</dt> <dd>End offset of the source annotation </dd>
+        <dt>targetLayer</dt> <dd>Layer of the target annotations </dd>
+        <dt>targetParentId</dt>
+        <dd>ID of the parent of target annotation, if this is a sub-mapping </dd>
+        <dt>targetParentLabel</dt>
+        <dd>Label of the parent of target annotation, if this is a sub-mapping </dd>
+        <dt>targetId</dt> <dd>ID of the target annotation </dd>
+        <dt>targetLabel</dt> <dd>Label of the target annotation </dd>
+        <dt>targetStart</dt> <dd>Start offset of the target annotation </dd>
+        <dt>targetEnd</dt> <dd>End offset of the target annotation </dd>
+        <dt>operation</dt> <dd>The edit operation:
+          <tt>+</tt> for insert, <tt>-</tt> for delete, <tt>!</tt> for change, <tt>=</tt> for no change </dd>
+        <dt>distance</dt> <dd>Distance (cost) for this edit step </dd>
+        <dt>hierarchy</dt> <dd>This mappings position in the sub-mapping hierarchy:
+          <tt>parent</tt>, <tt>child</tt>, or <tt>none</tt> </dd>
+        <dt>overlapRate</dt> <dd>As per Paulo and Oliveira (2004):
+          0 means no overlap at all, 1 means they complete overlap </dd> </dl>
+    </details>
+
     <h3> Tracked Mappings </h3>
     <table>
       <thead>

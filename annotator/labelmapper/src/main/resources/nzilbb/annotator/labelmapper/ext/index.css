@@ -122,6 +122,16 @@ progress {
     opacity: 0;
 }
 
+dt {
+    font-style: italic;
+}
+summary {
+    cursor: zoom-in;
+}
+details[open] summary {
+    cursor: zoom-out;
+}
+
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
     .field { flex-direction: column; }
