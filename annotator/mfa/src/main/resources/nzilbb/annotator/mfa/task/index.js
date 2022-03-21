@@ -16,26 +16,6 @@ getText("mfaVersion", version => {
 const taskId = window.location.search.substring(1);
 let existingPhoneLayerId = null;
 
-// populate list of dictionary names
-getJSON("validDictionaryNames", names => {
-    const dictionaryName = document.getElementById("dictionaryName");
-    for (name of names) {
-        var layerOption = document.createElement("option");
-        layerOption.appendChild(document.createTextNode(name));
-        dictionaryName.appendChild(layerOption);
-    } // next name
-});
-
-// populate list of pretrained models names
-getJSON("validAcousticModels", names => {
-    const modelsName = document.getElementById("modelsName");
-    for (name of names) {
-        var layerOption = document.createElement("option");
-        layerOption.appendChild(document.createTextNode(name));
-        modelsName.appendChild(layerOption);
-    } // next name
-});
-
 // get the layer schema
 let schema = null;
 getSchema(s => {
@@ -123,6 +103,31 @@ getSchema(s => {
     //     // participant attributes
     //     layer => layer.parentId == schema.participantLayerId && layer.alignment == 0);
     
+    // populate list of dictionary names
+    getJSON("validDictionaryNames", names => {
+        const dictionaryName = document.getElementById("dictionaryName");
+        for (name of names) {
+            var layerOption = document.createElement("option");
+            layerOption.appendChild(document.createTextNode(name));
+            dictionaryName.appendChild(layerOption);
+        } // next name
+
+        // populate list of pretrained models names
+        getJSON("validAcousticModels", names => {
+            const modelsName = document.getElementById("modelsName");
+            for (name of names) {
+                var layerOption = document.createElement("option");
+                layerOption.appendChild(document.createTextNode(name));
+                modelsName.appendChild(layerOption);
+            } // next name
+
+            getTaskParameters();
+            
+        });
+    });
+});
+
+function getTaskParameters() {    
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getText("getTaskParameters", parameters => {
         try {
@@ -173,7 +178,7 @@ getSchema(s => {
             finishedLoading();
         }
     });
-});
+} // getTaskParameters
 
 // this function detects when the user selects [add new layer]:
 function changedLayer(select, defaultNewLayerName) {
@@ -244,6 +249,5 @@ document.getElementById("form").onsubmit = function(e) {
 document.getElementById("dictionaryName").onchange = function(e) {
     // either pronunciationLayerId or dictionaryName
     document.getElementById("pronunciationLayerId").disabled
-        = document.getElementById("multilingualIPA").disabled
         = document.getElementById("dictionaryName").value != ""; 
 }

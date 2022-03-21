@@ -25,15 +25,18 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FilenameFilter;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -43,9 +46,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -404,42 +407,46 @@ public class MFA extends Annotator {
    * @param condaPath Path to "conda" executable, e.g. "/opt/anaconda/bin"
    * @param mfaEnvironment Name of the Anaconda environment that has been created for
    * MFA, e.g. "aligner".
-   * @return A valid path to MFA, or null if it could not be inferred.
+   * @return A valid path to MFA, or an empty string if it could not be inferred.
    */
   public String inferMfaPath(String condaPath, String mfaEnvironment) {
-    File conda = new File(condaPath);
-    File envs = null;
-    do { // search this and ancestor directories for "envs" subdirectory
-      envs = new File(conda, "envs");
-      if (!envs.exists()) { // not here
-        envs = null;
-        // try parent directory
-        conda = conda.getParentFile();
-      }
-    } while (envs == null && conda != null);
-
-    if (envs.exists()) {
-      File aligner = new File(envs, mfaEnvironment);
-      if (aligner.exists()) {
-        File mfaPath = new File(aligner, "bin");
-        if (!mfaPath.exists()) {
-          mfaPath = new File(aligner, "Scripts");
+    try {
+      File conda = new File(condaPath);
+      File envs = null;
+      do { // search this and ancestor directories for "envs" subdirectory
+        envs = new File(conda, "envs");
+        if (!envs.exists()) { // not here
+          envs = null;
+          // try parent directory
+          conda = conda.getParentFile();
         }
-
-        if (mfaPath.exists()) {
-          // ensure mfa is actually there
-          File mfa = new File(mfaPath, "mfa");
-          if (!mfa.exists()) mfa = new File(mfaPath, "mfa.exe");
-
-          if (mfa.exists()) {
-            setMfaPath(mfaPath.getPath());
-            return mfaPath.getPath();
+      } while (envs == null && conda != null);
+      
+      if (envs.exists()) {
+        File aligner = new File(envs, mfaEnvironment);
+        if (aligner.exists()) {
+          File mfaPath = new File(aligner, "bin");
+          if (!mfaPath.exists()) {
+            mfaPath = new File(aligner, "Scripts");
+          }
+          
+          if (mfaPath.exists()) {
+            // ensure mfa is actually there
+            File mfa = new File(mfaPath, "mfa");
+            if (!mfa.exists()) mfa = new File(mfaPath, "mfa.exe");
+            
+            if (mfa.exists()) {
+              setMfaPath(mfaPath.getPath());
+              return mfaPath.getPath();
+            }
           }
         }
       }
+    } catch(Exception t) {
+      setStatus("inferMfaPath("+condaPath+", "+mfaEnvironment+"): " + t);
     }
       
-    return null;
+    return "";
   } // end of inferMfaPath()
   
   /**
@@ -585,6 +592,7 @@ public class MFA extends Annotator {
 
       beanPropertiesFromQueryString(config);
 
+      // check MFA is accessible
       setStatus("MFA version: " + mfaVersion());
       
       // persist configuration
@@ -602,6 +610,77 @@ public class MFA extends Annotator {
       setRunning(false);
     }
   }
+  
+  /**
+   * Start an attempt to install MFA.
+   * <p> This is only likely to work inside a Docker container, where the current user has
+   * superuser privileges.
+   * <p> This method starts the installation process in a new thread, and returns
+   * immediately. In order to follow progress, use {@link Annotator#isRunning()}, 
+   * {@link Annotator#getPercentComplete()}, and {@link Annotator#getStatus()}.
+   */
+  public void installMfa() {
+    new Thread(()->{
+        setRunning(true);
+        setPercentComplete(1);
+        try {
+          // wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.10.3-Linux-x86_64.sh
+          
+          URL url = new URL(
+            "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.10.3-Linux-x86_64.sh");
+          setStatus("Attempting to download Miniconda from: " + url);
+          HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+          InputStream input = connection.getInputStream();
+          File sh = new File(getWorkingDirectory(), url.getPath().replaceAll(".*/",""));
+          try {
+            IO.Pump(input, new FileOutputStream(sh));
+            setStatus("Downloaded " + sh.getName());
+            setPercentComplete(33);
+            if (isCancelling()) return;
+            
+            // bash Miniconda3-py38_4.10.3-Linux-x86_64.sh -b -s -p /opt/conda
+            setStatus("Installing Miniconda...");
+            Execution cmd = new Execution()
+              .setExe("bash")
+              .arg(sh.getPath())
+              .arg("-b") // run install in batch mode (without manual intervention)
+              .arg("-s") // skip running pre/post-link/install scripts
+              .arg("-p").arg("/opt/conda") // prefix:        
+              .setWorkingDirectory(getWorkingDirectory());
+            cmd.getStdoutObservers().add(m->setStatus(m));
+            cmd.getStderrObservers().add(m->setStatus(m));
+            cmd.run();
+            if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
+            setStatus(cmd.getInput().toString());
+            setPercentComplete(66);
+            if (isCancelling()) return;
+            
+            // /opt/conda/bin/conda create -y -n aligner -c conda-forge montreal-forced-aligner
+            setStatus("Installing montreal-forced-aligner...");
+            cmd = new Execution()
+              .setExe("/opt/conda/bin/conda")
+              .arg("create")
+              .arg("-y") // yes to everything
+              .arg("-n").arg("aligner") // env name
+              .arg("-c").arg("conda-forge")
+              .arg("montreal-forced-aligner")
+              .setWorkingDirectory(getWorkingDirectory());
+            cmd.getStdoutObservers().add(m->setStatus(m));
+            cmd.getStderrObservers().add(m->setStatus(m));
+            cmd.run();
+            setStatus("Installation finished.");
+            setPercentComplete(100);
+            
+          } finally {
+            sh.delete();
+          }
+        } catch (Throwable t) {
+          setStatus("installMfa: "+t.getMessage());
+        } finally {
+          setRunning(false);
+        }
+    }).start();
+  } // end of installMfa()
   
   /**
    * Returns the version of the Montreal Forced Aligner that's installed.

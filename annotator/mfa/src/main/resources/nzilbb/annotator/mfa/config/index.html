@@ -23,8 +23,14 @@
     <details>
       <summary><b>In order to function, the Montreal Forced Aligner must first be manually installed.</b></summary>
       
-      <p> This annotator cannot install the Montreal Forced Aligner. You must manually
-        install it in a location that is accessible to you annotation server user. </p>
+      <p> This annotator cannot install the Montreal Forced Aligner. Under most
+        circumstances you must manually install it in a location that is accessible to you
+        annotation server user. </p>
+
+      <p> (The only exception to this is if your server is running in a Docker container,
+        in which case, it's possible that your system has sufficient privileges to
+        install MFA for itself. In this case, you can click the <i>Attempt to Install
+        MFA</i> button below.) </p>
       
       <p> Up-to-date installation instructions for the Montreal Forced Aligner are available
         here: <br>
@@ -70,7 +76,14 @@
       </ol>
       
     </details>
-
+    
+    <div id="attemptInstallation">
+      <p> If your server is running in a Docker container, it may be able to install MFA
+        itself, instead of you having to install MFA manually. </p>
+      <button id="installMfa" x-style="display: none;">Attempt to Install MFA</button>
+      <progress id="installMfaProgress" value="0" max="100" style="display: none;"></progress>
+      <pre id="installMfaStatus" style="display: none;"></pre>
+    </div> 
     <form method="POST" id="setConfig" action="setConfig">
       <div class="field" id="condaPathField"
            title="This is the path to where Miniconda or Anaconda is installed on the server, e.g. /opt/conda">
@@ -88,7 +101,7 @@
         <input id="mfaPath" name="mfaPath" type="text">
       </div>
       <div class="controls">
-        <input type="submit" value="Configure">
+        <input id="submit" type="submit" value="Configure">
       </div>
     </form>
 
