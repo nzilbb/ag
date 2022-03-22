@@ -1175,14 +1175,12 @@ public class MFA extends Annotator {
   /** Directory for MFA output file */
   protected File alignedDir;
   Pattern errorPattern = Pattern.compile(".*error.*", Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
-  // MFA reports progress during training, but there are up to five phases that go from 0% to 100%
-  // We detect these percentages and use them to increment the annotator progress,
-  // but each phase represents 10% of overall progress.
+  // MFA reports progress during training, but there are a variable umber phases that go from
+  // 0% to 100%
+  // We detect these percentages but can't use them to increment the annotator progress,
+  // because we can't preict how many there are.
   // The following member variables are used to manage phase transitions and percent progress
   Pattern progressPattern = Pattern.compile("([0-9]+)%");
-  int initialPercentComplete = 0;
-  int lastPhaseProgress = 0;
-  int phase = 0;  
   
   /**
    * Reset any current state associated with past alignment sessions.
@@ -1258,6 +1256,7 @@ public class MFA extends Annotator {
    */
   public List<Graph> createInputFiles(Stream<Graph> graphs, PhonemeTranslator phonemesToHtk)
     throws TransformationException {
+    setStatus("Creating input files...");
     try {
       // directories
       tempDir = new File(sessionWorkingDir, "temp");
@@ -1471,13 +1470,6 @@ public class MFA extends Annotator {
   public String mfa(boolean ignoreErrors, String... args) throws TransformationException {
     setStatus("mfa " + Arrays.stream(args).collect(Collectors.joining(" ")));
 
-    // MFA reports progress during training, but there are up to five phases that go from
-    // 0% to 100%. We detect these percentages and use them to increment the annotator progress,
-    // but each phase represents 10% of overall progress.
-    initialPercentComplete = getPercentComplete()==null?0:getPercentComplete();
-    lastPhaseProgress = 0;
-    phase = 0;
-
     File mfa = new File(mfaPath, "mfa");
     if (!mfa.exists()) mfa = new File(mfaPath, "mfa.exe");
     File envPath = new File(mfaPath).getParentFile();
@@ -1511,15 +1503,7 @@ public class MFA extends Annotator {
     exe.getStderrObservers().add(s-> {
         // is it a progress bar?
         Matcher progressMatcher = progressPattern.matcher(s);
-        if (progressMatcher.find()) {
-          // parse out the percentage
-          int phaseProgress = Integer.parseInt(progressMatcher.group(1));
-          // if the last percentage was greater, we've started a new phase
-          if (lastPhaseProgress > phaseProgress) phase++;
-          lastPhaseProgress = phaseProgress;
-          // update the overall progress
-          setPercentComplete(initialPercentComplete + (phase * 10) + (phaseProgress/10));
-        } else { // not progress, just pass through the message
+        if (!progressMatcher.find()) {
           setStatus(s);
         }
       });
