@@ -1114,6 +1114,7 @@ public class LabelMapper extends Annotator {
       earliestEnd - latestStart
       // otherwise, there's no common duration
       : 0.0;
+    if (dur1 + dur2 - commonDur == 0) return 0.0;
     return commonDur / (dur1 + dur2 - commonDur);
   } // end of overlapRate()
 
