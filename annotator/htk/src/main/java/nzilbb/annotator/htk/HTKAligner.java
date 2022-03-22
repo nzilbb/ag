@@ -864,6 +864,10 @@ public class HTKAligner extends Annotator {
       leftPattern = null;
     if (rightPattern != null && rightPattern.length() == 0)
       rightPattern = null;
+    if (pauseMarkers != null && pauseMarkers.length() == 0)
+      pauseMarkers = null;
+    if (noisePatterns != null && noisePatterns.length() == 0)
+      noisePatterns = null;
 
     // validation...
       
@@ -1676,23 +1680,29 @@ public class HTKAligner extends Annotator {
       grammarOut.write("( SENT-START ( ");
       grammarOut.newLine();
       htPauseMarkers = new HashMap<String,String>();
-      for (String sPauseMarker : pauseMarkers.split(" ")) {
-        htPauseMarkers.put(sPauseMarker, "SILENCE");
-      }
-      
-      StringTokenizer stNoisePatterns = new StringTokenizer(noisePatterns);
-      noisePatternsMap = new HashMap<String,Pattern>();
-      while (stNoisePatterns.hasMoreTokens()) {
-        String sPattern = stNoisePatterns.nextToken();
-        String sName = sPattern.replaceAll("[^a-zA-Z0-9]","").toLowerCase();
-        if (sName.length() == 0) sName = "noise";
-        try {
-          noisePatternsMap.put(sName, Pattern.compile(sPattern, Pattern.CASE_INSENSITIVE));
-          setStatus("Noise pattern: " + sName + " = " + sPattern);
-        } catch(Exception exception) {
-          setStatus("Ignoring noise pattern: " + sName + " = " + sPattern + " : " + exception);
+      if (pauseMarkers != null) {
+        for (String sPauseMarker : pauseMarkers.split(" ")) {
+          if (sPauseMarker.trim().length() > 0) {
+            htPauseMarkers.put(sPauseMarker, "SILENCE");
+          }
         }
-      } // next pattern
+      }
+
+      noisePatternsMap = new HashMap<String,Pattern>();
+      if (noisePatterns != null) {
+        StringTokenizer stNoisePatterns = new StringTokenizer(noisePatterns);
+        while (stNoisePatterns.hasMoreTokens()) {
+          String sPattern = stNoisePatterns.nextToken();
+          String sName = sPattern.replaceAll("[^a-zA-Z0-9]","").toLowerCase();
+          if (sName.length() == 0) sName = "noise";
+          try {
+            noisePatternsMap.put(sName, Pattern.compile(sPattern, Pattern.CASE_INSENSITIVE));
+            setStatus("Noise pattern: " + sName + " = " + sPattern);
+          } catch(Exception exception) {
+            setStatus("Ignoring noise pattern: " + sName + " = " + sPattern + " : " + exception);
+          }
+        } // next pattern
+      }
       
       leftPatternRegex = leftPattern == null?null:Pattern.compile(leftPattern);
       rightPatternRegex = rightPattern == null?null:Pattern.compile(rightPattern);
