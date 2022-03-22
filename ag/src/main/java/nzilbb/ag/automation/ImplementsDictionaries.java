@@ -53,6 +53,10 @@ public interface ImplementsDictionaries {
     *  <li> {@link Annotator#setRdbConnectionFactory(ConnectionFactory)}
     *       (if applicable) </li>
     * </ul>
+    * @param id The indentifier of the desired dictionary. This can be null if the
+    * Annotator supports only one dictionary, or the Annotator has already been configured
+    * (e.g. via {@link Annotator#setTaskParameters(String)} sufficiently to know which
+    * dictionary to return.
     * @return The identified dictionary.
     * @throws DictionaryException If the given dictionary doesn't exist.
     */
