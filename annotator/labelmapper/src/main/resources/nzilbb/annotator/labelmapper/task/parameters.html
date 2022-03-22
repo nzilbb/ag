@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html><head><title>Label Mapper</title></head>
-  <body>
+<!DOCTYPE html><html><head><title>Label Mapper</title></head><body>
     <h1>Label Mapper</h1>
     
     <p> This annotator creates a mapping between the labels of two layers, a <q>source</q>
@@ -25,11 +23,9 @@
     <h2>Encoding</h2>
     
     <p> Configuration parameters are encoded as a URL query string, e.g. <br>
-      <samp>sourceLayerId=orthography&splitLabels=&mappingLayerId=&comparator=CharacterToCharacter&targetLayerId=mfaPretrainedARPAbet&subSourceLayerId=segment&subComparator=DISCToArpabet&subTargetLayerId=mfaPretrainedARPAbetPhone</samp>
-    </p>
+      <samp>sourceLayerId=orthography&splitLabels=&mappingLayerId=&comparator=CharacterToCharacter&targetLayerId=mfaPretrainedARPAbet&subSourceLayerId=segment&subComparator=DISCToArpabet&subTargetLayerId=mfaPretrainedARPAbetPhone</samp> </p>
 
-    <h2>Parameters</h2>
-    
+    <h2>Parameters</h2>    
     <dl>
       <dt> sourceLayerId </dt> <dd> Input layer from which the resulting annotations'
         labels come from come. </dd>
@@ -42,8 +38,7 @@
           labels that cannot be directly mapped to a Target token will be appended to a nearby
           Mapping Layer label; i.e. appended to the last one where possible.</dd> 
       <dt> comparator </dt> <dd> How the Source layer and the Target layer labels relate
-        to each other. Possible values are:
-        <ul>
+        to each other. Possible values are: <ul>
           <li><q>CharacterToCharacter</q> - Orthography → Orthography</li>
           <li><q>OrthographyToDISC</q> - Orthography → DISC</li>
           <li><q>OrthographyToArpabet</q> - Orthography → ARPAbet</li>
@@ -55,8 +50,7 @@
           <li><q>IPAToDISC</q> - IPA → DISC</li>
       </ul></dd>
       <dt> splitLabels </dt> <dd>
-        Possible values are:
-        <ul>
+        Possible values are: <ul>
           <li><q>char</q> - Use the first annotation in the scope, split its label into
             characters, and map each to labels on the target layer (e.g. DISC word
             transcriptions to phones). </li> 
@@ -77,8 +71,7 @@
         </dd>
       <dt> subTargetLayerId </dt> <dd> Which tokens will be tagged for the sub-mapping. </dd>
       <dt> subComparator </dt> <dd> How the Source layer and the Target layer labels relate
-        to each other. Possible values are:
-        <ul>
+        to each other. Possible values are: <ul>
           <li><q>CharacterToCharacter</q> - Orthography → Orthography</li>
           <li><q>OrthographyToDISC</q> - Orthography → DISC</li>
           <li><q>OrthographyToArpabet</q> - Orthography → ARPAbet</li>

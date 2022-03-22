@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html><head><title>HTK Aligner</title></head>
-  <body>
+<!DOCTYPE html><html><head><title>HTK Aligner</title></head><body>
     <h1>HTK Aligner</h1>
     
     <p> The HTK Aligner can use words with phonemic transcriptions, and the
@@ -14,27 +12,22 @@
       URI-encoded; in particular, the space delimiter of <tt>noisePatterns</tt> should be
       encoded <tt>%20</tt> or <tt>+</tt> </p>
     
-    <p> Parameters are: </p>
-    <dl>
+    <p> Parameters are: </p><dl>
       <dt> orthographyLayerId </dt> <dd> Input layer from which words come. </dd>
       <dt> pauseMarkers </dt> <dd> Characters that mark pauses in speech in the
         transcript, separated by spaces. </dd>
       <dt> pronunciationLayerId </dt> <dd> Input layer from which word pronunciations come. </dd>
       <dt> mainUtteranceGrouping </dt> <dd> How to group main-participant utterances for
-        automatic training. Possible values are :
-        <ul>
+        automatic training. Possible values are : <ul>
           <li>"Speaker" - group all main-participant utterances from the same speaker
             together, across all their transcripts. </li>
           <li>"Transcript" - group all main-participant utterances from the same speaker
-            together, but only within the same transcript.</li>
-      </ul></dd>
+            together, but only within the same transcript.</li> </ul></dd>
       <dt> otherUtteranceGrouping </dt> <dd> How to group non-main-participant utterances
-        for automatic training. Possible values are:
-        <ul>
+        for automatic training. Possible values are: <ul>
           <li>"Not Aligned" - do not include non-main participant speech. </li>
           <li>"Transcript" - group all non-main-participant utterances from the same
-            speaker together, but only within the same transcript.</li>
-      </ul></dd>
+            speaker together, but only within the same transcript.</li> </ul></dd>
       <dt> pauseMarkers </dt> <dd> Characters that mark pauses in speech in the
         transcript, separated by spaces, e.g. <q>- .</q> </dd>
       <dt> noiseLayerId </dt> <dd> Layer that has noise annotations. </dd>
@@ -68,14 +61,12 @@
         be created. </dd>
       <dt> scoreLayerId </dt> <dd> Output layer on which phone acoustic scores are saved. </dd>
       <dt> cleanupOption </dt> <dd> What should happen with working files after
-        training/alignment is finished. Possible values are:
-        <ul>
+        training/alignment is finished. Possible values are: <ul>
           <li><q>75</q> - Working files should be deleted if alignment succeeds.</li>
           <li><q>25</q> - Working files should be deleted if alignment fails.</li>
           <li><q>100</q> - Working files should be deleted whether alignment succeeds or not.</li>
           <li><q>0</q> - Working files should <b>not</b> be deleted whether alignment
-            succeeds or not.</li> 
-      </ul></dd>
+            succeeds or not.</li> </ul></dd>
     </dl>
   </body>
 </html>
