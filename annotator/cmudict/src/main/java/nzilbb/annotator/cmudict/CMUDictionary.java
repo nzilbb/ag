@@ -397,8 +397,22 @@ public class CMUDictionary implements Dictionary {
       try {
         sql.setString(1, key);
         if (sql.executeUpdate() == 0) {
-          throw new DictionaryReadOnlyException(
-            this, "No supplemental entries found for " + key);
+          // if there are non-supplemental entries, it's a read-only word
+          sql.close();
+          sql = rdb.prepareStatement(
+            "SELECT COUNT(*) FROM "+annotator.getAnnotatorId()+"_wordform"
+            +" WHERE wordform = ? AND supplemental <> 1");
+          sql.setString(1, key);
+          ResultSet rs = sql.executeQuery();
+          try {
+            rs.next();
+            if (rs.getInt(1) > 0) {
+              throw new DictionaryReadOnlyException(
+                this, "No supplemental entries found for " + key);
+            } // otherwise, it was just not in the dictionary in the first place
+          } finally {
+            rs.close();
+          }
         }
       } finally {
         sql.close();

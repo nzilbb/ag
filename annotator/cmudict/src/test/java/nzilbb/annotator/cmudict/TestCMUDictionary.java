@@ -201,6 +201,8 @@ public class TestCMUDictionary {
       entries = dict.lookup("floof");
       assertEquals("remove all entries - now no entries: " + entries,
                    0, entries.size());
+      
+      dict.remove("floof"); // can remove an entry that's not there
     } finally {
       try { dict.remove("floof"); } catch(Exception exception) {}
     }

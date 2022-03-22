@@ -770,7 +770,7 @@ public class CMUDictionaryTagger extends Annotator
    * @throws DictionaryException If the given dictionary doesn't exist.
    */
   public Dictionary getDictionary(String id) throws DictionaryException {
-    if (!"cmudict".equals(id)) {
+    if (id != null && !id.equals("cmudict")) { // null is allowed
       throw new DictionaryException(null, "Invalid dictionary: " + id);
     }
     try {

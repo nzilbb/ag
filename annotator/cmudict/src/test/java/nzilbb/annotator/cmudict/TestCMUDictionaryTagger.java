@@ -778,8 +778,9 @@ public class TestCMUDictionaryTagger {
                     .setParent(turn));
     return g;
   } // end of graph()
-   
-  @Test public void dictionaryRegsitration() throws Exception {
+
+  /** Test dictionary registration. */
+  @Test public void dictionaryRegistration() throws Exception {
 
     List<String> ids = annotator.getDictionaryIds();
     assertEquals("there's only one dictionary: " + ids,
@@ -788,6 +789,9 @@ public class TestCMUDictionaryTagger {
     Dictionary dict = annotator.getDictionary(ids.iterator().next());
     assertTrue("Dictionary is the right type: " + dict.getClass().getName(),
                dict instanceof CMUDictionary);
+
+    assertNotNull("null dictionary ID is supported",
+               annotator.getDictionary(null));
   }   
 
   public static void main(String args[]) {
