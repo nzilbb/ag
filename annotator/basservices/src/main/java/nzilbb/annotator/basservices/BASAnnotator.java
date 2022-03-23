@@ -1145,9 +1145,11 @@ public class BASAnnotator extends Annotator {
                       
                       // offsets in the TextGrid start at 0, but the fragment doesn't
                       edited.shiftAnchors(fragment.getStart().getOffset());
-                      // all anchors are automatically generated
-                      edited.getAnchors().values().stream().forEach(
-                        anchor -> anchor.setConfidence(Constants.CONFIDENCE_AUTOMATIC));
+                      // all phone anchors are automatically generated
+                      for (Annotation phone : edited.all(phoneAlignmentLayerId)) {
+                        phone.getStart().setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                        phone.getEnd().setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                      }
                       
                       // rename "ORT-MAU" speaker 
                       Annotation participant = fragment.first(
