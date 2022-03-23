@@ -1645,9 +1645,11 @@ public class MFA extends Annotator {
           String[] fragmentParts = Graph.ParseFragmentId(alignedFragment.getId());
           double startTime = Double.parseDouble(fragmentParts[1]);
           alignedFragment.shiftAnchors(startTime);
-          // all anchors are automatically generated
-          alignedFragment.getAnchors().values().stream().forEach(
-            anchor -> anchor.setConfidence(Constants.CONFIDENCE_AUTOMATIC));
+          // all phone anchors are automatically generated
+          for (Annotation phone : alignedFragment.all(phoneAlignmentLayerId)) {
+            phone.getStart().setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+            phone.getEnd().setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+          }
 
           // remove "spn" phones (for out of dictionary words)
           for (Annotation phone : alignedFragment.all(phoneAlignmentLayerId)) {
