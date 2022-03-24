@@ -3216,6 +3216,7 @@ public class HTKAligner extends Annotator {
         
         // anchors start from zero, which they don't in the database
         alignedFragment.shiftAnchors((Double)alignedFragment.get("@startTime"));
+        // (no need to set the phone anchor confidences to automatic, MlfDeserializer does that)
         
         try {
           
