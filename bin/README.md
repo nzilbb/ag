@@ -32,7 +32,7 @@ to another, including:
 | **vtt** | [trs-to-vtt](trs-to-vtt.jar?raw=true) | [eaf-to-vtt](eaf-to-vtt.jar?raw=true) | | [slt-to-vtt](slt-to-vtt.jar?raw=true) | [cha-to-vtt](cha-to-vtt.jar?raw=true) | [textgrid-to-vtt](textgrid-to-vtt.jar?raw=true) | |
 | **slt** | [trs-to-slt](trs-to-slt.jar?raw=true) | [eaf-to-slt](eaf-to-slt.jar?raw=true) | | | | |
 | **cha** | [trs-to-cha](trs-to-cha.jar?raw=true) | [eaf-to-cha](eaf-to-cha.jar?raw=true) | [vtt-to-cha](vtt-to-cha.jar?raw=true) | | | | |
-| **textgrid** | [trs-to-textgrid](trs-to-textgrid.jar?raw=true) | | [vtt-to-textgrid](vtt-to-textgrid.jar?raw=true) | [slt-to-textgrid](slt-to-textgrid.jar?raw=true) | [cha-to-textgrid](cha-to-textgrid.jar?raw=true) | | |
+| **textgrid** | [trs-to-textgrid](trs-to-textgrid.jar?raw=true) | [eaf-to-textgrid](eaf-to-textgrid.jar?raw=true) | [vtt-to-textgrid](vtt-to-textgrid.jar?raw=true) | [slt-to-textgrid](slt-to-textgrid.jar?raw=true) | [cha-to-textgrid](cha-to-textgrid.jar?raw=true) | | |
 | **pdf** | [trs-to-pdf](trs-to-pdf.jar?raw=true) |  [eaf-to-pdf](eaf-to-pdf.jar?raw=true) |  [vtt-to-pdf](vtt-to-pdf.jar?raw=true) | [slt-to-pdf](slt-to-pdf.jar?raw=true) | [cha-to-pdf](cha-to-pdf.jar?raw=true) | [textgrid-to-pdf](textgrid-to-pdf.jar?raw=true) | |
 | **tex** | [trs-to-tex](trs-to-tex.jar?raw=true) | [eaf-to-tex](eaf-to-tex.jar?raw=true) | [vtt-to-tex](vtt-to-tex.jar?raw=true) |  [slt-to-tex](slt-to-tex.jar?raw=true) | | [textgrid-to-tex](textgrid-to-tex.jar?raw=true) | |
 | **txt** | [trs-to-txt](trs-to-txt.jar?raw=true) | | | | | | |

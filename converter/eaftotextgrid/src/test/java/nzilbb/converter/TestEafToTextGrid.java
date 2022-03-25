@@ -53,6 +53,22 @@ public class TestEafToTextGrid {
     }
   }
   
+  /** Test conversion of a multi-tier transcript, in which there are PARTICIPANT attributes. */
+  @Test public void monotierWithParticipants() throws Exception {
+    File dir = getDir();
+    File input = new File(dir, "multitier.eaf");
+    EafToTextGrid converter = new EafToTextGrid();
+    converter.convert(input);
+    File actual = new File(dir, "multitier.TextGrid");
+    File expected = new File(dir, "expected_multitier.TextGrid");
+    String differences = diff(expected, actual);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      actual.delete();
+    }
+  }
+  
   /**
    * Diffs two files.
    * @param expected

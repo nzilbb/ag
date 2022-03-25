@@ -4,11 +4,113 @@ Object class = "TextGrid"
 xmin = 0 
 xmax = 320.757 
 tiers? <exists> 
-size = 1 
+size = 2 
 item []: 
     item [1]:
         class = "IntervalTier" 
-        name = "P" 
+        name = "interviewer" 
+        xmin = 0 
+        xmax = 320.757 
+        intervals: size = 24 
+        intervals [1]:
+            xmin = 0 
+            xmax = 14.889000000000001 
+            text = "" 
+        intervals [2]:
+            xmin = 14.889000000000001 
+            xmax = 15.639000000000001 
+            text = "right -" 
+        intervals [3]:
+            xmin = 15.639000000000001 
+            xmax = 17.983 
+            text = "wa they just didn't get on to the interviews ? or" 
+        intervals [4]:
+            xmin = 17.983 
+            xmax = 23.17 
+            text = "it was just - everybody talked and had a chat ? yeah" 
+        intervals [5]:
+            xmin = 23.17 
+            xmax = 140.366 
+            text = "" 
+        intervals [6]:
+            xmin = 140.366 
+            xmax = 142.053 
+            text = "<and> which is why grandpop was a builder" 
+        intervals [7]:
+            xmin = 142.053 
+            xmax = 144.147 
+            text = "and ah . grandpop ." 
+        intervals [8]:
+            xmin = 144.147 
+            xmax = 145.584 
+            text = "did his trade ." 
+        intervals [9]:
+            xmin = 145.584 
+            xmax = 148.459 
+            text = "not with Pepper but with -" 
+        intervals [10]:
+            xmin = 148.459 
+            xmax = 151.489 
+            text = "ah the Wanganui Sash and Door company --" 
+        intervals [11]:
+            xmin = 151.489 
+            xmax = 154.614 
+            text = "and he was more of a mmm" 
+        intervals [12]:
+            xmin = 154.614 
+            xmax = 155.708 
+            text = "what did they used to call them" 
+        intervals [13]:
+            xmin = 155.708 
+            xmax = 156.77 
+            text = "not a fitter and turner" 
+        intervals [14]:
+            xmin = 156.77 
+            xmax = 158.92600000000002 
+            text = "but he was more of a cabinet maker" 
+        intervals [15]:
+            xmin = 158.92600000000002 
+            xmax = 159.457 
+            text = "oh yeah" 
+        intervals [16]:
+            xmin = 159.457 
+            xmax = 282.871 
+            text = "" 
+        intervals [17]:
+            xmin = 282.871 
+            xmax = 283.96500000000003 
+            text = "that's why he was brought up by his" 
+        intervals [18]:
+            xmin = 283.96500000000003 
+            xmax = 284.84000000000003 
+            text = "" 
+        intervals [19]:
+            xmin = 284.84000000000003 
+            xmax = 285.34000000000003 
+            text = "grandmother" 
+        intervals [20]:
+            xmin = 285.34000000000003 
+            xmax = 310.60200000000003 
+            text = "" 
+        intervals [21]:
+            xmin = 310.60200000000003 
+            xmax = 311.071 
+            text = "yeah" 
+        intervals [22]:
+            xmin = 311.071 
+            xmax = 316.258 
+            text = "" 
+        intervals [23]:
+            xmin = 316.258 
+            xmax = 317.195 
+            text = "how did she die ?" 
+        intervals [24]:
+            xmin = 317.195 
+            xmax = 320.757 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "participant" 
         xmin = 0 
         xmax = 320.757 
         intervals: size = 138 

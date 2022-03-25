@@ -68,7 +68,35 @@ public class EafToTextGrid extends Converter {
   public EafToTextGrid setIgnoreTiers(String newIgnoreTiers) { ignoreTiers = newIgnoreTiers; return this; }
    
   // Methods:
-   
+
+  /**
+   * Un-map tiers that are matched by {@link #ignoreTiers}, and map all other tiers to
+   * "utterance".
+   * @param parameters The default parameters.
+   * @return The new configuration.
+   */
+  public ParameterSet deserializationParameters(ParameterSet parameters) {
+    Schema schema = getSchema();
+    Pattern ignorePattern = null;
+    if (ignoreTiers != null && ignoreTiers.length() > 0) {
+      ignorePattern = Pattern.compile(ignoreTiers);
+    }
+    // for each parameter
+    for (Parameter p : parameters.values()) {
+      // if it's a tier mapping
+      if (p.getName().startsWith("tier")) {
+        if (ignorePattern != null && ignorePattern.matcher(p.getLabel()).matches()) {
+          // ignore this tier
+          p.setValue(null);
+        } else {
+          // otherwise map to "utterance" layer
+          p.setValue(schema.getUtteranceLayer());
+        }
+      }
+    } // next parameter
+    return parameters;
+  } // end of deserializationConfiguration()
+
   /**
    * Default constructor.
    */
@@ -82,15 +110,6 @@ public class EafToTextGrid extends Converter {
     new EafToTextGrid().mainRun(argv);
   }
 
-  /**
-   * Don't assume any schema structure.
-   * @return The schema.
-   */
-  @Override
-  public Schema getSchema() {    
-    return new Schema();
-  } // end of getSchema()
-
   /** File filter for identifying files of the correct type */
   protected FileNameExtensionFilter getFileFilter() {
     return new FileNameExtensionFilter("ELAN files", "eaf");
@@ -103,7 +122,7 @@ public class EafToTextGrid extends Converter {
   public GraphDeserializer getDeserializer() {
     return new EAFSerialization();
   }
-
+  
   /**
    * Gets the serializer that #convert(File) uses.
    * @return The serializer to use.
@@ -113,12 +132,12 @@ public class EafToTextGrid extends Converter {
   }
   
   /**
-   * Specifies which layers should be given to the serializer. The default implementaion
-   * returns only the "utterance" layer.
+   * Everything in the EAF file will have been interpreted as an utterance, so serialize
+   * the utterance layer.
    * @return An array of layer IDs.
    */
   public String[] getLayersToSerialize() {
-    return null;
+    return new String[] { getSchema().getUtteranceLayerId() };
   } // end of getLayersToSerialize()
       
   private static final long serialVersionUID = -1;
