@@ -108,7 +108,6 @@ public class EafToTrs extends Converter {
   @Override
   public Schema getSchema() {
     Schema schema = super.getSchema();
-    // include SALT layers
     schema.addLayer(
       new Layer("transcript_language", "Language").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true));
