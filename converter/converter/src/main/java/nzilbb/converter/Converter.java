@@ -545,10 +545,14 @@ public abstract class Converter extends GuiProgram {
       g.setId(IO.WithoutExtension(g.getId()));
     }
 
-    Normalizer normalizer = new Normalizer();
-    for (Graph g : graphs) {
-      normalizer.transform(g);
-      g.commit();
+    if (schema.getParticipantLayer() != null
+        && schema.getTurnLayer() != null
+        && schema.getUtteranceLayer() != null) {
+      Normalizer normalizer = new Normalizer();
+      for (Graph g : graphs) {
+        normalizer.transform(g);
+        g.commit();
+      }
     }
 
     // let the subclass process the graphs before they're serialized

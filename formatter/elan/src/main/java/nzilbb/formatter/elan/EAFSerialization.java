@@ -1869,10 +1869,12 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       a.remove("@participant");
     }
 
-    // set end anchors of graph tags
-    for (Annotation a : graph.all(getParticipantLayer().getId())) {
-      a.setStartId(graphStart.getId());
-      a.setEndId(graphEnd.getId());
+    if (getParticipantLayer() != null) {
+      // set end anchors of graph tags TODO not just participants
+      for (Annotation a : graph.all(getParticipantLayer().getId())) {
+        a.setStartId(graphStart.getId());
+        a.setEndId(graphEnd.getId());
+      }
     }
 
     graph.commit();
