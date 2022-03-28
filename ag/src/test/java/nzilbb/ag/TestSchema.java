@@ -505,21 +505,27 @@ public class TestSchema {
          .setPeers(false).setPeersOverlap(false).setSaturated(true)
          .setParentId("word").setParentIncludes(true));
 
-      Set<String> matches = Arrays.stream(s.getMatchingLayers("layer.id == 'who'"))
+      // Set<String> matches = Arrays.stream(s.getMatchingLayers("layer.id == 'who'"))
+      //    .map(l->l.getId()).collect(Collectors.toSet());
+      Set<String> matches = Arrays.stream(s.getMatchingLayers(layer -> layer.getId().equals("who")))
          .map(l->l.getId()).collect(Collectors.toSet());
       assertEquals("one participant layer", 1, matches.size());
       assertTrue("correct participant layer", matches.contains("who"));
 
       matches = Arrays.stream(
+         // s.getMatchingLayers(
+         //    "layer.parentId == schema.participantLayerId && layer.alignment == 0"))
          s.getMatchingLayers(
-            "layer.parentId == schema.participantLayerId && layer.alignment == 0"))
+            layer -> s.getParticipantLayerId().equals(layer.getParentId()) && layer.getAlignment() == 0))
          .map(l->l.getId()).collect(Collectors.toSet());
       assertEquals("one participant attribute layer", 1, matches.size());
       assertTrue("correct participant attribute layer", matches.contains("participant_lang"));
-
+      
       matches = Arrays.stream(
+         // s.getMatchingLayers(
+         //    "layer.parent == schema.wordLayer"))
          s.getMatchingLayers(
-            "layer.parent == schema.wordLayer"))
+            layer -> s.getWordLayer().equals(layer.getParent())))
          .map(l->l.getId()).collect(Collectors.toSet());
       assertEquals("object comparison: one participant attribute layer",
                    2, matches.size());
@@ -528,7 +534,8 @@ public class TestSchema {
       assertTrue("object comparison: includes tag layer",
                  matches.contains("pos"));
 
-      matches = Arrays.stream(s.getMatchingLayers("layer.id == 'none'"))
+      // matches = Arrays.stream(s.getMatchingLayers("layer.id == 'none'"))
+      matches = Arrays.stream(s.getMatchingLayers(layer -> layer.getId().equals("none")))
          .map(l->l.getId()).collect(Collectors.toSet());
       assertEquals("no layers", 0, matches.size());
 
