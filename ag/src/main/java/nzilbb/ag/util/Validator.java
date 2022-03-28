@@ -194,6 +194,9 @@ public class Validator extends Transform implements GraphTransformer {
 
   /**
    * Maximum allowed label length, or null (the default) for no limit.
+   * <p> Graph/participant attributes (i.e. unaligned child layers of the schema root or
+   * the participant layer) are not subject to this label limit, only aligned annotations
+   * and their tags.
    * @see #getMaxLabelLength()
    * @see #setMaxLabelLength(Integer)
    */
@@ -201,11 +204,17 @@ public class Validator extends Transform implements GraphTransformer {
   /**
    * Getter for {@link #maxLabelLength}: Maximum allowed label length, or null (the
    * default) for no limit. 
+   * <p> Graph/participant attributes (i.e. unaligned child layers of the schema root or
+   * the participant layer) are not subject to this label limit, only aligned annotations
+   * and their tags.
    * @return Maximum allowed label length, or null for no limit.
    */
   public Integer getMaxLabelLength() { return maxLabelLength; }
   /**
    * Setter for {@link #maxLabelLength}: Maximum allowed label length, or null for no limit.
+   * <p> Graph/participant attributes (i.e. unaligned child layers of the schema root or
+   * the participant layer) are not subject to this label limit, only aligned annotations
+   * and their tags.
    * @param newMaxLabelLength Maximum allowed label length, or null for no limit.
    */
   @Switch("The maximum length of a label")
@@ -446,8 +455,17 @@ public class Validator extends Transform implements GraphTransformer {
    */
   protected void checkLabels(Graph graph) { // TODO check/enforce validLabels
     if (maxLabelLength != null) {
+      Schema schema = graph.getSchema();
       for (Annotation annotation : graph.getAnnotationsById().values()) {
         if (annotation.getChange() != Change.Operation.Destroy) {
+          // don't check graph/participant attributes
+          Layer layer = annotation.getLayer(); 
+          if (layer.getAlignment() == Constants.ALIGNMENT_NONE
+              && (layer.getParentId() == null
+                  || layer.getParentId().equals(schema.getRoot().getId())
+                  || layer.getParentId().equals(schema.getParticipantLayerId()))) {
+            continue;
+          }
           if (annotation.getLabel() != null && annotation.getLabel().length() > maxLabelLength) {
             errors.add("Label too long (>" + maxLabelLength + ") for "
                        + annotation.getLayerId()

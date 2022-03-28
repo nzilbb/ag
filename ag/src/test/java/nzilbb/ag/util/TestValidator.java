@@ -2185,11 +2185,24 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
       
+    g.addLayer(new Layer("transcript_attribute", "Transcript Attribute")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true));
     g.addLayer(new Layer("who", "Participants")
                .setAlignment(Constants.ALIGNMENT_NONE) 
                .setPeers(true)
                .setPeersOverlap(true)
                .setSaturated(true));
+    g.getSchema().setParticipantLayerId("who");
+    g.addLayer(new Layer("participant_attribute", "Participant Attribute")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("who")
+               .setParentIncludes(true));
     g.addLayer(new Layer("turn", "Speaker turns")
                .setAlignment(Constants.ALIGNMENT_INTERVAL) 
                .setPeers(true)
@@ -2240,8 +2253,13 @@ public class TestValidator {
     g.addAnchor(new Anchor("a?2", null)); // over
     g.addAnchor(new Anchor("a5", 5.0)); // end of over
     g.addAnchor(new Anchor("a6", 6.0)); // turn end
-      
+
+    g.addAnnotation(new Annotation("attribute1", "very-very-very-very-very-very",
+                                   "transcript_attribute", "a0", "a6", "my graph"));
+
     g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+    g.addAnnotation(new Annotation("attribute2", "very-very-very-very-very-very",
+                                   "participant_attribute", "a0", "a6", "participant1"));
       
     g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
       
