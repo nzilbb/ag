@@ -24,6 +24,8 @@ package nzilbb.ag;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.function.Predicate;
 import javax.script.*;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.util.CloneableBean;
@@ -437,8 +439,9 @@ public class Schema implements Cloneable, CloneableBean {
    public Layer[] getMatchingLayers(String expression) throws ScriptException {
       Vector<Layer> layers = new Vector<Layer>();
       ScriptEngineManager manager = new ScriptEngineManager();
-      ScriptEngine engine = manager.getEngineByExtension("js");
-      ScriptEngineFactory factory = engine.getFactory();
+      ScriptEngine engine = manager.getEngineByMimeType("application/javascript");
+      System.out.println("engine " + engine);
+      //ScriptEngineFactory factory = engine.getFactory();
       ScriptContext context = engine.getContext();
       context.setAttribute("schema", this, ScriptContext.ENGINE_SCOPE);
       for (Layer layer : layers()) {
@@ -448,6 +451,23 @@ public class Schema implements Cloneable, CloneableBean {
          }
       } // next layer
       return layers.toArray(new Layer[0]);
+   } // end of getMatchingLayers()
+
+   /**
+    * Returns layers that match the given expression.
+    * <p> The expression is evaluated as a JavaScript boolean expressin and can assume
+    * that <var> layer </var> is a reference to a candidate layer and <var> schema </var>
+    * is a reference to this schema.
+    * <p> e.g. <q>layer.parentId == schema.participantLayerId &amp;&amp; layer.alignment == 0</q>
+    * should match all un-aligned children of the participant layer; i.e. participant attributes.
+    * @param predicate A predicate that returns true for the desired layers.
+    * @return A list of matching layers, which may be empty.
+    */
+   public Layer[] getMatchingLayers(Predicate<Layer> predicate) throws ScriptException {
+      return layers.values().stream()
+         .filter(predicate)
+         .collect(Collectors.toList())
+         .toArray(new Layer[0]);
    } // end of getMatchingLayers()
 
    /**
