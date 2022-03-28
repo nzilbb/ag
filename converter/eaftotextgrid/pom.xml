@@ -127,7 +127,7 @@
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.0.6</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

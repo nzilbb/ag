@@ -120,7 +120,8 @@ public class EafToTextGrid extends Converter {
    * @return The deserializer to use.
    */
   public GraphDeserializer getDeserializer() {
-    return new EAFSerialization();
+    return new EAFSerialization()
+       .setUseConventions(false);
   }
   
   /**

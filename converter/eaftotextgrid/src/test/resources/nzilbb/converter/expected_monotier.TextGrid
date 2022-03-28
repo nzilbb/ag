@@ -19,7 +19,7 @@ item []:
         intervals [2]:
             xmin = 4.675 
             xmax = 6.752 
-            text = ". rest of that side of the famly so he --" 
+            text = ". rest of that side of the famly[f{mli](family) so he --" 
         intervals [3]:
             xmin = 6.752 
             xmax = 7.658 
@@ -27,7 +27,7 @@ item []:
         intervals [4]:
             xmin = 7.658 
             xmax = 10.348 
-            text = "generously agreed that she could go with him but" 
+            text = "generously agreed(agrees)[@grid] that she could go with him but" 
         intervals [5]:
             xmin = 10.348 
             xmax = 10.515 
@@ -183,7 +183,7 @@ item []:
         intervals [43]:
             xmin = 101.514 
             xmax = 103.20100000000001 
-            text = "" 
+            text = "whatever {unclear} and their family." 
         intervals [44]:
             xmin = 103.20100000000001 
             xmax = 103.857 
@@ -235,7 +235,7 @@ item []:
         intervals [56]:
             xmin = 127.258 
             xmax = 132.992 
-            text = "" 
+            text = "he - was a um -- [click]" 
         intervals [57]:
             xmin = 132.992 
             xmax = 134.492 
