@@ -1,0 +1,668 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 320.757 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "interviewer" 
+        xmin = 0 
+        xmax = 320.757 
+        intervals: size = 24 
+        intervals [1]:
+            xmin = 0 
+            xmax = 14.889000000000001 
+            text = "" 
+        intervals [2]:
+            xmin = 14.889000000000001 
+            xmax = 15.639000000000001 
+            text = "right -" 
+        intervals [3]:
+            xmin = 15.639000000000001 
+            xmax = 17.983 
+            text = "wa they just didn't get on to the interviews ? or" 
+        intervals [4]:
+            xmin = 17.983 
+            xmax = 23.17 
+            text = "it was just - everybody talked and had a chat ? yeah" 
+        intervals [5]:
+            xmin = 23.17 
+            xmax = 140.366 
+            text = "" 
+        intervals [6]:
+            xmin = 140.366 
+            xmax = 142.053 
+            text = "<and> which is why grandpop was a builder" 
+        intervals [7]:
+            xmin = 142.053 
+            xmax = 144.147 
+            text = "and ah . grandpop ." 
+        intervals [8]:
+            xmin = 144.147 
+            xmax = 145.584 
+            text = "did his trade ." 
+        intervals [9]:
+            xmin = 145.584 
+            xmax = 148.459 
+            text = "not with Pepper but with -" 
+        intervals [10]:
+            xmin = 148.459 
+            xmax = 151.489 
+            text = "ah the Wanganui Sash and Door company --" 
+        intervals [11]:
+            xmin = 151.489 
+            xmax = 154.614 
+            text = "and he was more of a mmm" 
+        intervals [12]:
+            xmin = 154.614 
+            xmax = 155.708 
+            text = "what did they used to call them" 
+        intervals [13]:
+            xmin = 155.708 
+            xmax = 156.77 
+            text = "not a fitter and turner" 
+        intervals [14]:
+            xmin = 156.77 
+            xmax = 158.92600000000002 
+            text = "but he was more of a cabinet maker" 
+        intervals [15]:
+            xmin = 158.92600000000002 
+            xmax = 159.457 
+            text = "oh yeah" 
+        intervals [16]:
+            xmin = 159.457 
+            xmax = 282.871 
+            text = "" 
+        intervals [17]:
+            xmin = 282.871 
+            xmax = 283.96500000000003 
+            text = "that's why he was brought up by his" 
+        intervals [18]:
+            xmin = 283.96500000000003 
+            xmax = 284.84000000000003 
+            text = "" 
+        intervals [19]:
+            xmin = 284.84000000000003 
+            xmax = 285.34000000000003 
+            text = "grandmother" 
+        intervals [20]:
+            xmin = 285.34000000000003 
+            xmax = 310.60200000000003 
+            text = "" 
+        intervals [21]:
+            xmin = 310.60200000000003 
+            xmax = 311.071 
+            text = "yeah" 
+        intervals [22]:
+            xmin = 311.071 
+            xmax = 316.258 
+            text = "" 
+        intervals [23]:
+            xmin = 316.258 
+            xmax = 317.195 
+            text = "how did she die ?" 
+        intervals [24]:
+            xmin = 317.195 
+            xmax = 320.757 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "participant" 
+        xmin = 0 
+        xmax = 320.757 
+        intervals: size = 138 
+        intervals [1]:
+            xmin = 0 
+            xmax = 4.675 
+            text = "" 
+        intervals [2]:
+            xmin = 4.675 
+            xmax = 6.752 
+            text = ". rest of that side of the famly[f{mli](family) so he --" 
+        intervals [3]:
+            xmin = 6.752 
+            xmax = 7.658 
+            text = "" 
+        intervals [4]:
+            xmin = 7.658 
+            xmax = 10.348 
+            text = "generously agreed(agrees)[@grid] that she could go with him but" 
+        intervals [5]:
+            xmin = 10.348 
+            xmax = 10.515 
+            text = "" 
+        intervals [6]:
+            xmin = 10.515 
+            xmax = 12.171 
+            text = "there were so many people there" 
+        intervals [7]:
+            xmin = 12.171 
+            xmax = 14.889000000000001 
+            text = "that nothing was done constructively" 
+        intervals [8]:
+            xmin = 14.889000000000001 
+            xmax = 17.983 
+            text = "" 
+        intervals [9]:
+            xmin = 17.983 
+            xmax = 23.17 
+            text = "there were no interviews they all talked - everybody talked -- yeah -- and just" 
+        intervals [10]:
+            xmin = 23.17 
+            xmax = 24.857 
+            text = "caught up to date <yeah>" 
+        intervals [11]:
+            xmin = 24.857 
+            xmax = 26.888 
+            text = "whereas he wanted to go along -" 
+        intervals [12]:
+            xmin = 26.888 
+            xmax = 30.044 
+            text = "just on a . one to one basis -" 
+        intervals [13]:
+            xmin = 30.044 
+            xmax = 31.45 
+            text = "and say now Nin -" 
+        intervals [14]:
+            xmin = 31.45 
+            xmax = 33.918 
+            text = "tell us about grandfather. you know -" 
+        intervals [15]:
+            xmin = 33.918 
+            xmax = 35.855000000000004 
+            text = "gran er f grandfather Pepper and" 
+        intervals [16]:
+            xmin = 35.855000000000004 
+            xmax = 38.51 
+            text = "how he built up his business . and na na -" 
+        intervals [17]:
+            xmin = 38.51 
+            xmax = 40.695 
+            text = "and tell us what you can remember of the house" 
+        intervals [18]:
+            xmin = 40.695 
+            xmax = 41.791000000000004 
+            text = "you used to live in because ." 
+        intervals [19]:
+            xmin = 41.791000000000004 
+            xmax = 43.416000000000004 
+            text = "Barry and I knew the house" 
+        intervals [20]:
+            xmin = 43.416000000000004 
+            xmax = 45.666000000000004 
+            text = "that they lived in you know - <yeah>" 
+        intervals [21]:
+            xmin = 45.666000000000004 
+            xmax = 47.447 
+            text = "and he was a very actually" 
+        intervals [22]:
+            xmin = 47.447 
+            xmax = 51.321 
+            text = "a very well to do builder in Wanganui at that time" 
+        intervals [23]:
+            xmin = 51.321 
+            xmax = 54.664 
+            text = "and -- ah -- ah -" 
+        intervals [24]:
+            xmin = 54.664 
+            xmax = 58.225 
+            text = "ah Thelma Pepper was the eldest daughter of about" 
+        intervals [25]:
+            xmin = 58.225 
+            xmax = 60.397 
+            text = "oh I don't know six -" 
+        intervals [26]:
+            xmin = 60.397 
+            xmax = 60.968 
+            text = "children -" 
+        intervals [27]:
+            xmin = 60.968 
+            xmax = 67.661 
+            text = "or seven six or seven children and um --" 
+        intervals [28]:
+            xmin = 67.661 
+            xmax = 72.816 
+            text = "she - um -- was -" 
+        intervals [29]:
+            xmin = 72.816 
+            xmax = 75.285 
+            text = "fairly - um --" 
+        intervals [30]:
+            xmin = 75.285 
+            xmax = 76.41 
+            text = "what's the word ah" 
+        intervals [31]:
+            xmin = 76.41 
+            xmax = 79.971 
+            text = "well she they were a very correct family - <mmm>" 
+        intervals [32]:
+            xmin = 79.971 
+            xmax = 82.252 
+            text = "and and although they weren't ." 
+        intervals [33]:
+            xmin = 82.252 
+            xmax = 84.158 
+            text = "very religious necessarily" 
+        intervals [34]:
+            xmin = 84.158 
+            xmax = 86.049 
+            text = "I'd I think they were --" 
+        intervals [35]:
+            xmin = 86.049 
+            xmax = 87.517 
+            text = "they were Anglican maybe" 
+        intervals [36]:
+            xmin = 87.517 
+            xmax = 89.235 
+            text = "and maybe they didn't really have a -" 
+        intervals [37]:
+            xmin = 89.235 
+            xmax = 92.141 
+            text = "an official religion or something but -" 
+        intervals [38]:
+            xmin = 92.141 
+            xmax = 93.485 
+            text = "of course . if ." 
+        intervals [39]:
+            xmin = 93.485 
+            xmax = 95.922 
+            text = "a Arthur Pepper and Fred were ." 
+        intervals [40]:
+            xmin = 95.922 
+            xmax = 97.671 
+            text = "out of England -" 
+        intervals [41]:
+            xmin = 97.671 
+            xmax = 99.171 
+            text = "<mmm> they'd come from England ." 
+        intervals [42]:
+            xmin = 99.171 
+            xmax = 101.514 
+            text = "to . establish --" 
+        intervals [43]:
+            xmin = 101.514 
+            xmax = 103.20100000000001 
+            text = "whatever {unclear} and their family." 
+        intervals [44]:
+            xmin = 103.20100000000001 
+            xmax = 103.857 
+            text = "and so on . and" 
+        intervals [45]:
+            xmin = 103.857 
+            xmax = 106.45 
+            text = "lived in New Zealand and --" 
+        intervals [46]:
+            xmin = 106.45 
+            xmax = 110.105 
+            text = "ah Fred ah Pepper was a" 
+        intervals [47]:
+            xmin = 110.105 
+            xmax = 111.543 
+            text = "um plumber guy -" 
+        intervals [48]:
+            xmin = 111.543 
+            xmax = 114.574 
+            text = "ah but had he was a ah" 
+        intervals [49]:
+            xmin = 114.574 
+            xmax = 116.793 
+            text = "a much a very much of an entrepreneur" 
+        intervals [50]:
+            xmin = 116.793 
+            xmax = 118.292 
+            text = "also and did th" 
+        intervals [51]:
+            xmin = 118.292 
+            xmax = 120.479 
+            text = "things with barges on the Wanganui river" 
+        intervals [52]:
+            xmin = 120.479 
+            xmax = 121.885 
+            text = "and all that sort of thing -" 
+        intervals [53]:
+            xmin = 121.885 
+            xmax = 123.634 
+            text = "and of course if" 
+        intervals [54]:
+            xmin = 123.634 
+            xmax = 125.806 
+            text = "Arthur who was our -" 
+        intervals [55]:
+            xmin = 125.806 
+            xmax = 127.258 
+            text = "Barry and I's grandfather --" 
+        intervals [56]:
+            xmin = 127.258 
+            xmax = 132.992 
+            text = "he - was a um -- [click]" 
+        intervals [57]:
+            xmin = 132.992 
+            xmax = 134.492 
+            text = "he was always a builder" 
+        intervals [58]:
+            xmin = 134.492 
+            xmax = 137.398 
+            text = "and had a very successful building company" 
+        intervals [59]:
+            xmin = 137.398 
+            xmax = 140.366 
+            text = "and had all his sons in it <mmm>" 
+        intervals [60]:
+            xmin = 140.366 
+            xmax = 159.457 
+            text = "" 
+        intervals [61]:
+            xmin = 159.457 
+            xmax = 161.55100000000002 
+            text = "and then he worked because he -" 
+        intervals [62]:
+            xmin = 161.55100000000002 
+            xmax = 164.363 
+            text = "he was impressed with Mother -" 
+        intervals [63]:
+            xmin = 164.363 
+            xmax = 167.20600000000002 
+            text = "<hm> he hung around for years --" 
+        intervals [64]:
+            xmin = 167.20600000000002 
+            xmax = 168.643 
+            text = "right through the depression" 
+        intervals [65]:
+            xmin = 168.643 
+            xmax = 169.736 
+            text = "and the parent ." 
+        intervals [66]:
+            xmin = 169.736 
+            xmax = 171.454 
+            text = "the Pepper parents -" 
+        intervals [67]:
+            xmin = 171.454 
+            xmax = 172.391 
+            text = "were wealthy -" 
+        intervals [68]:
+            xmin = 172.391 
+            xmax = 174.64000000000001 
+            text = "and here was a young fellow --" 
+        intervals [69]:
+            xmin = 174.64000000000001 
+            xmax = 176.171 
+            text = "ah who rode a motorbike <hm> -" 
+        intervals [70]:
+            xmin = 176.171 
+            xmax = 179.452 
+            text = "which wasn't exactly the thing to be done <no>" 
+        intervals [71]:
+            xmin = 179.452 
+            xmax = 181.108 
+            text = "and um - they w" 
+        intervals [72]:
+            xmin = 181.108 
+            xmax = 184.04500000000002 
+            text = "he was chasing their eldest daughter . ah . wi" 
+        intervals [73]:
+            xmin = 184.04500000000002 
+            xmax = 186.67000000000002 
+            text = "with whom they were very proud you see ? -" 
+        intervals [74]:
+            xmin = 186.67000000000002 
+            xmax = 189.123 
+            text = "and she sang and she sang on the radio" 
+        intervals [75]:
+            xmin = 189.123 
+            xmax = 191.623 
+            text = "and did all sorts of interesting things" 
+        intervals [76]:
+            xmin = 191.623 
+            xmax = 193.029 
+            text = "in those days ." 
+        intervals [77]:
+            xmin = 193.029 
+            xmax = 196.341 
+            text = "and um . he ah -" 
+        intervals [78]:
+            xmin = 196.341 
+            xmax = 198.841 
+            text = "but he kept hanging around and -" 
+        intervals [79]:
+            xmin = 198.841 
+            xmax = 199.841 
+            text = "the father took ." 
+        intervals [80]:
+            xmin = 199.841 
+            xmax = 202.716 
+            text = "the girls because of course there were ." 
+        intervals [81]:
+            xmin = 202.716 
+            xmax = 205.403 
+            text = "three or four girls in the family ." 
+        intervals [82]:
+            xmin = 205.403 
+            xmax = 208.809 
+            text = "Mother . Thelma was the eldest -" 
+        intervals [83]:
+            xmin = 208.809 
+            xmax = 211.34 
+            text = "he took them all to Fiji or somewhere" 
+        intervals [84]:
+            xmin = 211.34 
+            xmax = 214.15200000000002 
+            text = "for a long holiday trying to shake off ." 
+        intervals [85]:
+            xmin = 214.15200000000002 
+            xmax = 217.058 
+            text = "this guy August Fromont <yeah>" 
+        intervals [86]:
+            xmin = 217.058 
+            xmax = 220.214 
+            text = "and um --" 
+        intervals [87]:
+            xmin = 220.214 
+            xmax = 222.745 
+            text = "because August was a devout Catholic ." 
+        intervals [88]:
+            xmin = 222.745 
+            xmax = 224.80700000000002 
+            text = "and had been bought by ." 
+        intervals [89]:
+            xmin = 224.80700000000002 
+            xmax = 227.119 
+            text = "a very strict French grandmother" 
+        intervals [90]:
+            xmin = 227.119 
+            xmax = 229.274 
+            text = "who was a devout Catholic -" 
+        intervals [91]:
+            xmin = 229.274 
+            xmax = 231.649 
+            text = "and he became a very devout" 
+        intervals [92]:
+            xmin = 231.649 
+            xmax = 235.023 
+            text = "Catholic himself of course but . um ." 
+        intervals [93]:
+            xmin = 235.023 
+            xmax = 236.741 
+            text = "ah they weren't all that keen about" 
+        intervals [94]:
+            xmin = 236.741 
+            xmax = 238.709 
+            text = "the Catholicism thing <mmm>" 
+        intervals [95]:
+            xmin = 238.709 
+            xmax = 240.64600000000002 
+            text = "ah and he had nothing ." 
+        intervals [96]:
+            xmin = 240.64600000000002 
+            xmax = 241.802 
+            text = "he he had a motorbike" 
+        intervals [97]:
+            xmin = 241.802 
+            xmax = 243.42600000000002 
+            text = "he didn't have anything else ." 
+        intervals [98]:
+            xmin = 243.42600000000002 
+            xmax = 244.707 
+            text = "he owned some property" 
+        intervals [99]:
+            xmin = 244.707 
+            xmax = 246.769 
+            text = "in the Petone foreshore ." 
+        intervals [100]:
+            xmin = 246.769 
+            xmax = 248.175 
+            text = "w ah as he" 
+        intervals [101]:
+            xmin = 248.175 
+            xmax = 250.862 
+            text = "saved up some money he bought property" 
+        intervals [102]:
+            xmin = 250.862 
+            xmax = 252.83 
+            text = "but during the depression" 
+        intervals [103]:
+            xmin = 252.83 
+            xmax = 253.98600000000002 
+            text = "they were out of work" 
+        intervals [104]:
+            xmin = 253.98600000000002 
+            xmax = 255.61100000000002 
+            text = "and he couldn't keep the payments up" 
+        intervals [105]:
+            xmin = 255.61100000000002 
+            xmax = 257.75100000000003 
+            text = "so he lost the property <mmm>" 
+        intervals [106]:
+            xmin = 257.75100000000003 
+            xmax = 260.282 
+            text = "and they grew potatoes on it" 
+        intervals [107]:
+            xmin = 260.282 
+            xmax = 261.407 
+            text = "so he used to tell us" 
+        intervals [108]:
+            xmin = 261.407 
+            xmax = 263.469 
+            text = "just as a cash crop you know ?" 
+        intervals [109]:
+            xmin = 263.469 
+            xmax = 265.531 
+            text = "<mmm> but of course he lost the property -" 
+        intervals [110]:
+            xmin = 265.531 
+            xmax = 270.468 
+            text = "and whatever he'd built up for himself - as --" 
+        intervals [111]:
+            xmin = 270.468 
+            xmax = 272.218 
+            text = "financial background backing" 
+        intervals [112]:
+            xmin = 272.218 
+            xmax = 274.186 
+            text = "cos he had nothing at all --" 
+        intervals [113]:
+            xmin = 274.186 
+            xmax = 276.529 
+            text = "ah - and his own father" 
+        intervals [114]:
+            xmin = 276.529 
+            xmax = 279.341 
+            text = "died when he was five -" 
+        intervals [115]:
+            xmin = 279.341 
+            xmax = 281.71500000000003 
+            text = "grandpops father had been killed on the railway" 
+        intervals [116]:
+            xmin = 281.71500000000003 
+            xmax = 282.871 
+            text = "<yeah yeah> when he was five" 
+        intervals [117]:
+            xmin = 282.871 
+            xmax = 283.96500000000003 
+            text = "" 
+        intervals [118]:
+            xmin = 283.96500000000003 
+            xmax = 284.797 
+            text = "and his grandmother" 
+        intervals [119]:
+            xmin = 284.797 
+            xmax = 285.34000000000003 
+            text = "brought" 
+        intervals [120]:
+            xmin = 285.34000000000003 
+            xmax = 286.21500000000003 
+            text = "brought him up" 
+        intervals [121]:
+            xmin = 286.21500000000003 
+            xmax = 289.214 
+            text = "and the whole family was split up -" 
+        intervals [122]:
+            xmin = 289.214 
+            xmax = 291.183 
+            text = "and and ah when ." 
+        intervals [123]:
+            xmin = 291.183 
+            xmax = 293.885 
+            text = "when the disaster happened again ." 
+        intervals [124]:
+            xmin = 293.885 
+            xmax = 296.416 
+            text = "because he'd had disaster after disaster" 
+        intervals [125]:
+            xmin = 296.416 
+            xmax = 297.444 
+            text = "in his family life -" 
+        intervals [126]:
+            xmin = 297.444 
+            xmax = 299.666 
+            text = "when his own wife was killed" 
+        intervals [127]:
+            xmin = 299.666 
+            xmax = 301.478 
+            text = "when he was fifty -" 
+        intervals [128]:
+            xmin = 301.478 
+            xmax = 303.572 
+            text = "the day he was fifty -" 
+        intervals [129]:
+            xmin = 303.572 
+            xmax = 305.446 
+            text = "then um -" 
+        intervals [130]:
+            xmin = 305.446 
+            xmax = 307.914 
+            text = "he refused to let any" 
+        intervals [131]:
+            xmin = 307.914 
+            xmax = 309.633 
+            text = "of the family be broken up" 
+        intervals [132]:
+            xmin = 309.633 
+            xmax = 310.60200000000003 
+            text = "that was us" 
+        intervals [133]:
+            xmin = 310.60200000000003 
+            xmax = 311.071 
+            text = "" 
+        intervals [134]:
+            xmin = 311.071 
+            xmax = 312.696 
+            text = "we were the eldest ones" 
+        intervals [135]:
+            xmin = 312.696 
+            xmax = 314.165 
+            text = "of course I was seventeen ." 
+        intervals [136]:
+            xmin = 314.165 
+            xmax = 316.258 
+            text = "Barry was nineteen" 
+        intervals [137]:
+            xmin = 316.258 
+            xmax = 317.195 
+            text = "" 
+        intervals [138]:
+            xmin = 317.195 
+            xmax = 320.757 
+            text = "and ah . he she -" 

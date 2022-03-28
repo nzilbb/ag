@@ -16,7 +16,7 @@ Standalone programs that convert transcripts from one tool format to another, e.
 | to↓ from→ | trs | eaf  | vtt | slt | cha | textgrid | txt |
 | --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: |
 | **trs** | | [eaf-to-trs](../bin/eaf-to-trs.jar?raw=true) | [vtt-to-trs](../bin/vtt-to-trs.jar?raw=true) | [slt-to-trs](../bin/slt-to-trs.jar?raw=true) | [cha-to-trs](../bin/cha-to-trs.jar?raw=true) | [textgrid-to-trs](../bin/textgrid-to-trs.jar?raw=true) | |
-| **eaf** | [trs-to-eaf](../bin/trs-to-eaf.jar?raw=true) | | [vtt-to-eaf](../bin/vtt-to-eaf.jar?raw=true) | [slt-to-eaf](../bin/slt-to-eaf.jar?raw=true) | [cha-to-eaf](../bin/cha-to-eaf.jar?raw=true) | | [txt-to-eaf](../bin/txt-to-eaf.jar?raw=true) |
+| **eaf** | [trs-to-eaf](../bin/trs-to-eaf.jar?raw=true) | | [vtt-to-eaf](../bin/vtt-to-eaf.jar?raw=true) | [slt-to-eaf](../bin/slt-to-eaf.jar?raw=true) | [cha-to-eaf](../bin/cha-to-eaf.jar?raw=true) | [textgrid-to-eaf](../bin/textgrid-to-eaf.jar?raw=true) | [txt-to-eaf](../bin/txt-to-eaf.jar?raw=true) |
 | **vtt** | [trs-to-vtt](../bin/trs-to-vtt.jar?raw=true) | [eaf-to-vtt](../bin/eaf-to-vtt.jar?raw=true) | | [slt-to-vtt](../bin/slt-to-vtt.jar?raw=true) | [cha-to-vtt](../bin/cha-to-vtt.jar?raw=true) | [textgrid-to-vtt](../bin/textgrid-to-vtt.jar?raw=true) | |
 | **slt** | [trs-to-slt](../bin/trs-to-slt.jar?raw=true) | [eaf-to-slt](../bin/eaf-to-slt.jar?raw=true) | | | | | |
 | **cha** | [trs-to-cha](../bin/trs-to-cha.jar?raw=true) | [eaf-to-cha](../bin/eaf-to-cha.jar?raw=true) | [vtt-to-cha](../bin/vtt-to-cha.jar?raw=true) | | | | |
@@ -174,7 +174,7 @@ switch, or use the *Help|Information* menu option of the conversion utility conc
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.0.6</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

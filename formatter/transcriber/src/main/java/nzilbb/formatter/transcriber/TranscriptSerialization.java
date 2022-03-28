@@ -1174,7 +1174,7 @@ public class TranscriptSerialization
                     }
                   } else if (event.getExtent().equals("instantaneous")) {
                     anEvent.setStart(anWord.getEnd());
-                    anEvent.setEnd(anWord.getEnd());
+                    anEvent.setEnd(anWord.getEnd()); // TODO make these intervals not instants
                     graph.addAnnotation(anEvent);
                   } else { // wrap around the current word 
                     anEvent.setStart(anWord.getStart());

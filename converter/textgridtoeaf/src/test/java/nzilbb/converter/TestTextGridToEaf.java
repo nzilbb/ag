@@ -31,20 +31,20 @@ import java.io.FileReader;
 import java.util.List;
 import java.util.Vector;
 import java.net.URL;
-import nzilbb.converter.EafToTextGrid;
+import nzilbb.converter.TextGridToEaf;
 import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
 
-public class TestEafToTextGrid {
+public class TestTextGridToEaf {
 
-  /** Test conversion of a one-tier transcript, in which there's no PARTICIPANT attribute. */
-  @Test public void monotierNoParticipant() throws Exception {
+  /** Test conversion of a one-tier transcript. */
+  @Test public void monotier() throws Exception {
     File dir = getDir();
-    File input = new File(dir, "monotier.eaf");
-    EafToTextGrid converter = new EafToTextGrid();
+    File input = new File(dir, "monotier.TextGrid");
+    TextGridToEaf converter = new TextGridToEaf();
     converter.convert(input);
-    File actual = new File(dir, "monotier.TextGrid");
-    File expected = new File(dir, "expected_monotier.TextGrid");
+    File actual = new File(dir, "monotier.eaf");
+    File expected = new File(dir, "expected_monotier.eaf");
     String differences = diff(expected, actual);
     if (differences != null) {
       fail(differences);
@@ -53,14 +53,30 @@ public class TestEafToTextGrid {
     }
   }
   
-  /** Test conversion of a multi-tier transcript, in which there are PARTICIPANT attributes. */
-  @Test public void multitierWithParticipants() throws Exception {
+  /** Test conversion of a multi-tier transcript. */
+  @Test public void multitier() throws Exception {
     File dir = getDir();
-    File input = new File(dir, "multitier.eaf");
-    EafToTextGrid converter = new EafToTextGrid();
+    File input = new File(dir, "multitier.TextGrid");
+    TextGridToEaf converter = new TextGridToEaf();
     converter.convert(input);
-    File actual = new File(dir, "multitier.TextGrid");
-    File expected = new File(dir, "expected_multitier.TextGrid");
+    File actual = new File(dir, "multitier.eaf");
+    File expected = new File(dir, "expected_multitier.eaf");
+    String differences = diff(expected, actual);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      actual.delete();
+    }
+  }
+  
+  /** Test conversion of a transcript that includes a point tier. */
+  @Test public void pointtier() throws Exception {
+    File dir = getDir();
+    File input = new File(dir, "pointtier.TextGrid");
+    TextGridToEaf converter = new TextGridToEaf();
+    converter.convert(input);
+    File actual = new File(dir, "pointtier.eaf");
+    File expected = new File(dir, "pointtier.eaf");
     String differences = diff(expected, actual);
     if (differences != null) {
       fail(differences);
@@ -167,6 +183,6 @@ public class TestEafToTextGrid {
   public void setDir(File fNewDir) { fDir = fNewDir; }
 
   public static void main(String args[]) {
-    org.junit.runner.JUnitCore.main("nzilbb.converter.TestEafToTextGrid");
+    org.junit.runner.JUnitCore.main("nzilbb.converter.TestTextGridToEaf");
   }
 }

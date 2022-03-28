@@ -1237,6 +1237,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                 // add anchors if they're not in the graph
                 if (!graph.getAnchors().containsKey(start.getId())) graph.addAnchor(start);
                 if (!graph.getAnchors().containsKey(end.getId())) graph.addAnchor(end);
+                if (annotator != null) annotation.setAnnotator(annotator);
                 // add annotation
                 graph.addAnnotation(annotation);
               } else { // symbolic reference annotation

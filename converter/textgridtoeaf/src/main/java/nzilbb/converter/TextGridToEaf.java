@@ -39,33 +39,33 @@ import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
 
 /**
- * Converts ELAN .eaf files to Praat .TextGrid files.
+ * Converts Praat .TextGrid files to ELAN .eaf files.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@ProgramDescription(value="Converts ELAN .eaf files to Praat .TextGrid files",arguments="file1.eaf file2.eaf ...")
-public class EafToTextGrid extends Converter {
+@ProgramDescription(value="Converts Praat .TextGrid files to ELAN .eaf files",arguments="file1.TextGrid file2.TextGrid ...")
+public class TextGridToEaf extends Converter {
   
   // Attributes:
   
   /**
-   * Regular rexpression to match ELAN tiers to ignore during conversion.
+   * Regular rexpression to match Praat tiers to ignore during conversion.
    * @see #getIgnoreTiers()
    * @see #setIgnoreTiers(String)
    */
   protected String ignoreTiers;
   /**
-   * Getter for {@link #ignoreTiers}: Regular rexpression to match ELAN tiers to ignore
+   * Getter for {@link #ignoreTiers}: Regular rexpression to match Praat tiers to ignore
    * during conversion. 
-   * @return Regular rexpression to match ELAN tiers to ignore during conversion.
+   * @return Regular rexpression to match Praat tiers to ignore during conversion.
    */
   public String getIgnoreTiers() { return ignoreTiers; }
   /**
-   * Setter for {@link #ignoreTiers}: Regular rexpression to match ELAN tiers to ignore
+   * Setter for {@link #ignoreTiers}: Regular rexpression to match Praat tiers to ignore
    * during conversion. 
-   * @param newIgnoreTiers Regular rexpression to match ELAN tiers to ignore during conversion.
+   * @param newIgnoreTiers Regular rexpression to match Praat tiers to ignore during conversion.
    */
   @Switch("Comma-separated list of ELAN tiers to ignore during conversion")
-  public EafToTextGrid setIgnoreTiers(String newIgnoreTiers) { ignoreTiers = newIgnoreTiers; return this; }
+  public TextGridToEaf setIgnoreTiers(String newIgnoreTiers) { ignoreTiers = newIgnoreTiers; return this; }
    
   // Methods:
 
@@ -89,8 +89,11 @@ public class EafToTextGrid extends Converter {
           // ignore this tier
           p.setValue(null);
         } else {
-          // otherwise map to "utterance" layer
-          p.setValue(schema.getUtteranceLayer());
+          // point tiers will have p.getValue() == null, and we don't want to map them to anything
+          if (p.getValue() != null) { // otherwise, if it's mapped to any layer
+            // make sure it's the "utterance" layer
+            p.setValue(schema.getUtteranceLayer());
+          }
         }
       }
     } // next parameter
@@ -100,27 +103,26 @@ public class EafToTextGrid extends Converter {
   /**
    * Default constructor.
    */
-  public EafToTextGrid() {
-    info = "ELAN tiers are converted directly to Praat tiers as-is."
-      +"\nTiers have the same names, unless the ELAN tier has the 'Participant' attribute set"
-      +" in which case, the resulting TextGrid tier will be named after the participant";
+  public TextGridToEaf() {
+    info = "Praat tiers are converted directly to ELAN tiers as-is, except for point tiers"
+      +" which are not supported by ELAN.";
   } // end of constructor
-   
+  
   public static void main(String argv[]) {
-    new EafToTextGrid().mainRun(argv);
+    new TextGridToEaf().mainRun(argv);
   }
-
+  
   /** File filter for identifying files of the correct type */
   protected FileNameExtensionFilter getFileFilter() {
     return new FileNameExtensionFilter("ELAN files", "eaf");
   }
-
+  
   /**
    * Gets the deserializer that #convert(File) uses.
    * @return The deserializer to use.
    */
   public GraphDeserializer getDeserializer() {
-    return new EAFSerialization()
+    return new TextGridSerialization()
        .setUseConventions(false);
   }
   
@@ -129,7 +131,7 @@ public class EafToTextGrid extends Converter {
    * @return The serializer to use.
    */
   public GraphSerializer getSerializer() {
-    return new TextGridSerialization();
+    return new EAFSerialization();
   }
   
   /**
@@ -140,6 +142,6 @@ public class EafToTextGrid extends Converter {
   public String[] getLayersToSerialize() {
     return new String[] { getSchema().getUtteranceLayerId() };
   } // end of getLayersToSerialize()
-      
+  
   private static final long serialVersionUID = -1;
-} // end of class EafToTextGrid
+} // end of class TextGridToEaf

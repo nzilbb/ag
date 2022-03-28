@@ -28,7 +28,7 @@ to another, including:
 | to↓ from→ | trs | eaf  | vtt | slt | cha | textgrid | txt |
 | --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: |
 | **trs** | | [eaf-to-trs](eaf-to-trs.jar?raw=true) | [vtt-to-trs](vtt-to-trs.jar?raw=true) | [slt-to-trs](slt-to-trs.jar?raw=true) | [cha-to-trs](cha-to-trs.jar?raw=true) | [textgrid-to-trs](textgrid-to-trs.jar?raw=true) | |
-| **eaf** | [trs-to-eaf](trs-to-eaf.jar?raw=true) | | [vtt-to-eaf](vtt-to-eaf.jar?raw=true) | [slt-to-eaf](slt-to-eaf.jar?raw=true) | [cha-to-eaf](cha-to-eaf.jar?raw=true) | | [txt-to-eaf](txt-to-eaf.jar?raw=true) |
+| **eaf** | [trs-to-eaf](trs-to-eaf.jar?raw=true) | | [vtt-to-eaf](vtt-to-eaf.jar?raw=true) | [slt-to-eaf](slt-to-eaf.jar?raw=true) | [cha-to-eaf](cha-to-eaf.jar?raw=true) | [textgrid-to-eaf](textgrid-to-eaf.jar?raw=true) | [txt-to-eaf](txt-to-eaf.jar?raw=true) |
 | **vtt** | [trs-to-vtt](trs-to-vtt.jar?raw=true) | [eaf-to-vtt](eaf-to-vtt.jar?raw=true) | | [slt-to-vtt](slt-to-vtt.jar?raw=true) | [cha-to-vtt](cha-to-vtt.jar?raw=true) | [textgrid-to-vtt](textgrid-to-vtt.jar?raw=true) | |
 | **slt** | [trs-to-slt](trs-to-slt.jar?raw=true) | [eaf-to-slt](eaf-to-slt.jar?raw=true) | | | | |
 | **cha** | [trs-to-cha](trs-to-cha.jar?raw=true) | [eaf-to-cha](eaf-to-cha.jar?raw=true) | [vtt-to-cha](vtt-to-cha.jar?raw=true) | | | | |

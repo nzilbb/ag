@@ -57,5 +57,6 @@
     <module>textgridtokaldi</module>
     <module>txttoeaf</module>
     <module>eaftotextgrid</module>
+    <module>textgridtoeaf</module>
   </modules>
 </project>

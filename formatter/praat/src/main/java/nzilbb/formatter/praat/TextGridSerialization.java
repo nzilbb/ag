@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -76,7 +76,7 @@ public class TextGridSerialization
    * Setter for {@link #schema}: Layer schema.
    * @param newSchema Layer schema.
    */
-  public void setSchema(Schema newSchema) { schema = newSchema; }
+  public TextGridSerialization setSchema(Schema newSchema) { schema = newSchema; return this; }
 
   /**
    * Participant information layer.
@@ -93,7 +93,7 @@ public class TextGridSerialization
    * Setter for {@link #participantLayer}: Participant information layer.
    * @param newParticipantLayer Participant information layer.
    */
-  public void setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; }
+  public TextGridSerialization setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; return this; }
 
   /**
    * Turn layer.
@@ -110,7 +110,7 @@ public class TextGridSerialization
    * Setter for {@link #turnLayer}: Turn layer.
    * @param newTurnLayer Turn layer.
    */
-  public void setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; }
+  public TextGridSerialization setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; return this; }
 
   /**
    * Utterance layer.
@@ -127,7 +127,7 @@ public class TextGridSerialization
    * Setter for {@link #utteranceLayer}: Utterance layer.
    * @param newUtteranceLayer Utterance layer.
    */
-  public void setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; }
+  public TextGridSerialization setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; return this; }
 
   /**
    * Word token layer.
@@ -144,7 +144,7 @@ public class TextGridSerialization
    * Setter for {@link #wordLayer}: Word token layer.
    * @param newWordLayer Word token layer.
    */
-  public void setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; }
+  public TextGridSerialization setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; return this; }
 
   /**
    * Layer for lexical word tags.
@@ -161,7 +161,7 @@ public class TextGridSerialization
    * Setter for {@link #lexicalLayer}: Layer for lexical word tags.
    * @param newLexicalLayer Layer for lexical word tags.
    */
-  public void setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; }
+  public TextGridSerialization setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; return this; }
 
   /**
    * Layer for pronounce events.
@@ -178,7 +178,7 @@ public class TextGridSerialization
    * Setter for {@link #pronounceLayer}: Layer for pronounce events.
    * @param newPronounceLayer Layer for pronounce events.
    */
-  public void setPronounceLayer(Layer newPronounceLayer) { pronounceLayer = newPronounceLayer; }
+  public TextGridSerialization setPronounceLayer(Layer newPronounceLayer) { pronounceLayer = newPronounceLayer; return this; }
 
   /**
    * Layer for commentary.
@@ -195,7 +195,7 @@ public class TextGridSerialization
    * Setter for {@link #commentLayer}: Layer for commentary.
    * @param newCommentLayer Layer for commentary.
    */
-  public void setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; }
+  public TextGridSerialization setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; return this; }
 
   /**
    * Layer for noise annotations.
@@ -212,7 +212,7 @@ public class TextGridSerialization
    * Setter for {@link #noiseLayer}: Layer for noise annotations.
    * @param newNoiseLayer Layer for noise annotations.
    */
-  public void setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; }
+  public TextGridSerialization setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
 
   /**
    * Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
@@ -233,7 +233,7 @@ public class TextGridSerialization
    * @param bNewTranscriptOnly Whether to use text conventions for comment, noise,
    * lexical, and pronounce annotations. 
    */
-  public void setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; }
+  public TextGridSerialization setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; return this; }
    
   /**
    * Short speaker names like "S1" should be prefixed with the transcript name during import.
@@ -254,7 +254,7 @@ public class TextGridSerialization
    * @param newRenameShortNumericSpeakers Short speaker names like "S1" should be prefixed
    * with the transcript name during import. 
    */
-  public void setRenameShortNumericSpeakers(Boolean newRenameShortNumericSpeakers) { renameShortNumericSpeakers = newRenameShortNumericSpeakers; }
+  public TextGridSerialization setRenameShortNumericSpeakers(Boolean newRenameShortNumericSpeakers) { renameShortNumericSpeakers = newRenameShortNumericSpeakers; return this; }
 
   /**
    * Returns the deserializer's descriptor.
@@ -283,7 +283,7 @@ public class TextGridSerialization
    * Setter for {@link #id}: Graph ID.
    * @param newId Graph ID.
    */
-  public void setId(String newId) { id = newId; }
+  public TextGridSerialization setId(String newId) { id = newId; return this; }
 
   /**
    * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
@@ -300,7 +300,7 @@ public class TextGridSerialization
    * Setter for {@link #tokenizer}: Utterance tokenizer.
    * @param newTokenizer Utterance tokenizer.
    */
-  public void setTokenizer(GraphTransformer newTokenizer) { tokenizer = newTokenizer; }
+  public TextGridSerialization setTokenizer(GraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
    
   /**
    * Timers for measuring performance.
@@ -317,7 +317,7 @@ public class TextGridSerialization
    * Setter for {@link #timers}: Timers for measuring performance.
    * @param newTimers Timers for measuring performance.
    */
-  public void setTimers(Timers newTimers) { timers = newTimers; }
+  public TextGridSerialization setTimers(Timers newTimers) { timers = newTimers; return this; }
    
   private long graphCount = 0;
   private long consumedGraphCount = 0;
