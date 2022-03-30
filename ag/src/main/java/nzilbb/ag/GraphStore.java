@@ -67,17 +67,36 @@ public interface GraphStore extends GraphStoreQuery {
     * @param toId The end anchor's ID. TODO an expression identifying the end anchor's
     * ID. e.g. "'n_123'" or "end.id" or maybe something like "last('segments').end.id)"
     * @param layerId The layer ID of the resulting annotation.
-    * @param label The label of the resulting annotation. TODO an expression identifying
-    * the label. e.g. "'@gz#mpP'" or "my('orthography').label" or maybe something like
-    * "SUM(list('segments').duration)"
+    * @param label The label of the resulting annotation. 
     * @param confidence The confidence rating.
-    * @param parentId The new annotation's parent's ID. TODO an expression identifying the
-    * parent. e.g. "'em_0_123'" or "layer.id = 'orthography' AND label = 'example'"
+    * @param parentId The new annotation's parent's ID. 
     * @return The ID of the new annotation.
     */
    public String createAnnotation(String id, String fromId, String toId, String layerId, String label, Integer confidence, String parentId)
-      throws StoreException, PermissionException, GraphNotFoundException;   
+      throws StoreException, PermissionException, GraphNotFoundException;
+  // TODO label can be an expression identifying the parent. e.g. "'em_0_123'" or "layer.id = 'orthography' AND label = 'example'"
 
+   /**
+    * Identifies a list of annotations that match a particular pattern, and tags them on
+    * the given layer with the given label. 
+    * @param expression An expression that determines which annotations match.
+    * <p> The expression language is loosely based on JavaScript; expressions such as the
+    * following can be used: 
+    * <ul>
+    *  <li><code>layer.id == 'orthography' &amp;&amp; label == 'word'</code></li>
+    *  <li><code>first('language').label == 'en' &amp;&amp; layer.id == 'orthography' &amp;&amp; label == 'word'</code></li> 
+    * </ul>
+    * <p><em>NB</em> all expressions must match by either id or layer.id.
+    * @param layerId The layer ID of the resulting annotation.
+    * @param label The label of the resulting annotation.
+    * @param confidence The confidence rating.
+    * @return The number of new annotations added.
+    * @throws StoreException If an error occurs.
+    * @throws PermissionException If the operation is not permitted.
+    */
+  public int tagMatchingAnnotations(String expression, String layerId, String label, Integer confidence)
+    throws StoreException, PermissionException;
+  
    /**
     * Destroys the annotation with the given ID.
     * @param id The ID of the transcript.
