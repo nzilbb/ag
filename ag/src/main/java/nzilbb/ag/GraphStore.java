@@ -80,12 +80,14 @@ public interface GraphStore extends GraphStoreQuery {
 
   /**
    * Identifies a list of annotations that match a particular pattern, and tags them on
-   * the given layer with the given label. All pre-existing tags are deleted.
+   * the given layer with the given label. If the specified layer ID does not allow peers,
+   * all existing tags will be deleted. Otherwise, tagging does not affect any existing tags on
+   * the matching annotations.
    * @param expression An expression that determines which annotations match.
    * <p> The expression language is loosely based on JavaScript; expressions such as the
    * following can be used: 
    * <ul>
-   *  <li><code>layer.id == 'orthography' &amp;&amp; label == 'word'</code></li>
+   *  <li><code>layer.id == 'orthography' &amp;&amp; label == 'the'</code></li>
    *  <li><code>first('language').label == 'en' &amp;&amp; layer.id == 'orthography'
    *       &amp;&amp; label == 'word'</code></li> 
    * </ul>
@@ -180,4 +182,23 @@ public interface GraphStore extends GraphStoreQuery {
   public void deleteParticipant(String id)
     throws StoreException, PermissionException, GraphNotFoundException;
    
+  /**
+   * Deletes all annotations that match a particular pattern
+   * @param expression An expression that determines which annotations match.
+   * <p> The expression language is loosely based on JavaScript; expressions such as the
+   * following can be used: 
+   * <ul>
+   *  <li><code>layer.id == 'pronunciation' 
+   *       &amp;&amp; first('orthography').label == 'the'</code></li>
+   *  <li><code>first('language').label == 'en' &amp;&amp; layer.id == 'pronunciation' 
+   *       &amp;&amp; first('orthography').label == 'the'</code></li> 
+   * </ul>
+   * <p><em>NB</em> all expressions must match by either id or layer.id.
+   * @return The number of new annotations deleted.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   */
+  public int deleteMatchingAnnotations(String expression)
+    throws StoreException, PermissionException;
+  
 } // end of interface GraphStore
