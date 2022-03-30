@@ -477,7 +477,7 @@ public class TestSchema {
 
    }
    
-   @Test public void getMatchingLayers() throws Exception {
+   @Test public void getMatchingLayersExpression() throws Exception {
       Schema s = new Schema(
          "who", "turn", "utterance", "word",
          new Layer("transcript_lang", "Transcript Language")
@@ -505,27 +505,21 @@ public class TestSchema {
          .setPeers(false).setPeersOverlap(false).setSaturated(true)
          .setParentId("word").setParentIncludes(true));
 
-      // Set<String> matches = Arrays.stream(s.getMatchingLayers("layer.id == 'who'"))
-      //    .map(l->l.getId()).collect(Collectors.toSet());
-      Set<String> matches = Arrays.stream(s.getMatchingLayers(layer -> layer.getId().equals("who")))
+      Set<String> matches = Arrays.stream(s.getMatchingLayers("layer.id == 'who'"))
          .map(l->l.getId()).collect(Collectors.toSet());
       assertEquals("one participant layer", 1, matches.size());
       assertTrue("correct participant layer", matches.contains("who"));
 
       matches = Arrays.stream(
-         // s.getMatchingLayers(
-         //    "layer.parentId == schema.participantLayerId && layer.alignment == 0"))
          s.getMatchingLayers(
-            layer -> s.getParticipantLayerId().equals(layer.getParentId()) && layer.getAlignment() == 0))
+            "layer.parentId == schema.participantLayerId && layer.alignment == 0"))
          .map(l->l.getId()).collect(Collectors.toSet());
       assertEquals("one participant attribute layer", 1, matches.size());
       assertTrue("correct participant attribute layer", matches.contains("participant_lang"));
       
       matches = Arrays.stream(
-         // s.getMatchingLayers(
-         //    "layer.parent == schema.wordLayer"))
          s.getMatchingLayers(
-            layer -> s.getWordLayer().equals(layer.getParent())))
+            "layer.parent == schema.wordLayer"))
          .map(l->l.getId()).collect(Collectors.toSet());
       assertEquals("object comparison: one participant attribute layer",
                    2, matches.size());
@@ -534,8 +528,7 @@ public class TestSchema {
       assertTrue("object comparison: includes tag layer",
                  matches.contains("pos"));
 
-      // matches = Arrays.stream(s.getMatchingLayers("layer.id == 'none'"))
-      matches = Arrays.stream(s.getMatchingLayers(layer -> layer.getId().equals("none")))
+      matches = Arrays.stream(s.getMatchingLayers("layer.id == 'none'"))
          .map(l->l.getId()).collect(Collectors.toSet());
       assertEquals("no layers", 0, matches.size());
 
@@ -550,6 +543,69 @@ public class TestSchema {
             .map(l->l.getId()).collect(Collectors.toSet());
          fail("layer variable required: " + matches); // TODO I'd prefer it weren't
       } catch(Exception x) {}
+   }
+   
+   @Test public void getMatchingLayersPredicate() throws Exception {
+      Schema s = new Schema(
+         "who", "turn", "utterance", "word",
+         new Layer("transcript_lang", "Transcript Language")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true),
+         new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(true).setPeersOverlap(true).setSaturated(true),
+         new Layer("participant_lang", "Participant Language")
+         .setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("who").setParentIncludes(true),
+         new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("who").setParentIncludes(true),
+         new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("turn").setParentIncludes(true),
+         new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(false)
+         .setParentId("turn").setParentIncludes(true),
+         new Layer("phone", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true).setPeersOverlap(false).setSaturated(true)
+         .setParentId("word").setParentIncludes(true),
+         new Layer("pos", "Part of Speech").setAlignment(Constants.ALIGNMENT_NONE)
+         .setPeers(false).setPeersOverlap(false).setSaturated(true)
+         .setParentId("word").setParentIncludes(true));
+
+      Set<String> matches = Arrays.stream(s.getMatchingLayers(layer -> layer.getId().equals("who")))
+         .map(l->l.getId()).collect(Collectors.toSet());
+      assertEquals("one participant layer", 1, matches.size());
+      assertTrue("correct participant layer", matches.contains("who"));
+
+      matches = Arrays.stream(
+         s.getMatchingLayers(
+            layer -> s.getParticipantLayerId().equals(layer.getParentId()) && layer.getAlignment() == 0))
+         .map(l->l.getId()).collect(Collectors.toSet());
+      assertEquals("one participant attribute layer", 1, matches.size());
+      assertTrue("correct participant attribute layer", matches.contains("participant_lang"));
+      
+      matches = Arrays.stream(
+         s.getMatchingLayers(
+            layer -> s.getWordLayer().equals(layer.getParent())))
+         .map(l->l.getId()).collect(Collectors.toSet());
+      assertEquals("object comparison: one participant attribute layer",
+                   2, matches.size());
+      assertTrue("object comparison: includes aligned layer",
+                 matches.contains("phone"));
+      assertTrue("object comparison: includes tag layer",
+                 matches.contains("pos"));
+
+      matches = Arrays.stream(s.getMatchingLayers(layer -> layer.getId().equals("none")))
+         .map(l->l.getId()).collect(Collectors.toSet());
+      assertEquals("no layers", 0, matches.size());
+
+      try {
+         matches = Arrays.stream(s.getMatchingLayers("invalid expression"))
+            .map(l->l.getId()).collect(Collectors.toSet());
+         fail("invalid expression should fail: " + matches);
+      } catch(Exception x) {}
+            
    }
    
    public static void main(String args[]) {
