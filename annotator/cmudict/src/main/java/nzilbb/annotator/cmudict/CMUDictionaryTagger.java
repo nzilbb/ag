@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -75,7 +75,7 @@ import nzilbb.util.IO;
 public class CMUDictionaryTagger extends Annotator
   implements ImplementsDictionaries {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.0"; }
+  public String getMinimumApiVersion() { return "1.0.6"; }
    
   private PrintWriter log;
   private static SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
@@ -518,20 +518,26 @@ public class CMUDictionaryTagger extends Annotator
       try {
         // default transcript language layer
         Layer[] candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.root.id && layer.alignment == 0" // transcript attribute
-          +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
+          layer -> schema.getRoot().getId().equals(layer.getParentId())
+          && layer.getAlignment() == Constants.ALIGNMENT_NONE // transcript attribute
+          && layer.getId().toLowerCase().matches(".*lang.*")); // with 'lang' in the name
         if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
             
         // default phrase language layer
         candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.turnLayerId" // child of turn
-          +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
+          layer -> schema.getTurnLayerId() != null
+          && schema.getTurnLayerId().equals(layer.getParentId()) // child of turn
+          && layer.getId().toLowerCase().matches(".*lang.*")); // with 'lang' in the name
         if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
 
         // default output layer
         candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId && layer.alignment == 0" // word tag
-          +" && (/.*phoneme.*/.test(layer.id) || /.*pronunciation.*/.test(layer.id))");
+          layer -> schema.getWordLayerId() != null
+          && schema.getWordLayerId().equals(layer.getParentId())
+          && layer.getAlignment() == Constants.ALIGNMENT_NONE // word tag
+          && layer.getId().toLowerCase().matches(".*lang.*") // with 'lang' in the name
+          && (layer.getId().toLowerCase().matches(".*phoneme.*")
+              || layer.getId().toLowerCase().matches(".*pronunciation.*")));
         if (candidates.length > 0) {
           pronunciationLayerId = candidates[0].getId();
         } else { // suggest adding a new one
@@ -781,6 +787,59 @@ public class CMUDictionaryTagger extends Annotator
       throw new DictionaryException(null, sqlX);
     }
   }
+
+  /**
+   * Tags all instances of the given word in the given graph store, using the dictionary
+   * specified by current task configuration (i.e. the dictionary returned by
+   * <code>getDictionary(null)</code>).
+   * <p> The default implementation throws TransformationException
+   * @param store
+   * @param sourceLabel
+   * @return The number of tags created.
+   * @throws DictionaryException, TransformationException, InvalidConfigurationException,
+   * StoreException 
+   */
+  @Override public int tagAllInstances(GraphStore store, String sourceLabel)
+    throws DictionaryException, TransformationException, InvalidConfigurationException,
+    StoreException {
+    Dictionary dictionary = getDictionary("cmudict");
+    try {
+      
+      store.deleteMatchingAnnotations(
+        "layerId = '"+esc(pronunciationLayerId)+"'"
+        +" && first('"+esc(tokenLayerId)+"').label == '"+esc(sourceLabel)+"'");
+
+      String tokenExpression = "layerId = '"+esc(tokenLayerId)+"'"
+        +" && label = '"+esc(sourceLabel)+"'";
+      if (transcriptLanguageLayerId != null) {
+        tokenExpression += " && /en.*/.test(first('"+esc(transcriptLanguageLayerId)+"').label)";
+      }
+      int count = 0;
+      for (String pronunciation : dictionary.lookup(sourceLabel)) {
+        
+        store.tagMatchingAnnotations(
+          tokenExpression, pronunciationLayerId, pronunciation, Constants.CONFIDENCE_AUTOMATIC);
+        count++;
+        // do we want the first entry only?
+        if (firstVariantOnly) break;        
+      } // next entry
+      return count;
+    } catch(PermissionException x) {
+      throw new TransformationException(this, x);
+    } finally {
+      dictionary.close();
+    }
+  }
+  
+  /**
+   * Escapes quotes in the given string for inclusion in QL or SQL queries.
+   * @param s The string to escape.
+   * @return The given string, with quotes escapeed.
+   */
+  private String esc(String s) {
+    if (s == null) return "";
+    return s.replace("\\","\\\\").replace("'","\\'");
+  } // end of esc()  
 
   /**
    * Converts a possible single-phoneme hesitation into it's DISC phonology

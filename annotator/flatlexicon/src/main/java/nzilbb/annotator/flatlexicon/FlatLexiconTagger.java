@@ -927,7 +927,62 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
     }
     toAnnotate.get(token.getLabel()).add(token);
   } // end of registorForAnnotation()
-   
+
+  /**
+   * Tags all instances of the given word in the given graph store, using the dictionary
+   * specified by current task configuration (i.e. the dictionary returned by
+   * <code>getDictionary(null)</code>).
+   * <p> The default implementation throws TransformationException
+   * @param store
+   * @param sourceLabel
+   * @return The number of tags created.
+   * @throws DictionaryException, TransformationException, InvalidConfigurationException,
+   * StoreException 
+   */
+  @Override public int tagAllInstances(GraphStore store, String sourceLabel)
+    throws DictionaryException, TransformationException, InvalidConfigurationException,
+    StoreException {
+    Dictionary dictionary = getDictionary("cmudict");
+    try {
+      
+      store.deleteMatchingAnnotations(
+        "layerId = '"+esc(tagLayerId)+"'"
+        +" && first('"+esc(tokenLayerId)+"').label == '"+esc(sourceLabel)+"'");
+
+      String tokenExpression = "layerId = '"+esc(tokenLayerId)+"'"
+        +" && label = '"+esc(sourceLabel)+"'";
+      if (transcriptLanguageLayerId != null
+          && (targetLanguagePattern != null && targetLanguagePattern.length() > 0)) {
+        tokenExpression += " && /"+targetLanguagePattern+"/.test(first('"
+          +esc(transcriptLanguageLayerId)+"').label)";
+      }
+      int count = 0;
+      for (String tag : dictionary.lookup(sourceLabel)) {        
+        if (strip.length() > 0) tag = tag.replaceAll("["+strip+"]","");              
+        store.tagMatchingAnnotations(
+          tokenExpression, tagLayerId, tag, Constants.CONFIDENCE_AUTOMATIC);
+        count++;
+        // do we want the first entry only?
+        if (firstVariantOnly) break;        
+      } // next entry
+      return count;
+    } catch(PermissionException x) {
+      throw new TransformationException(this, x);
+    } finally {
+      dictionary.close();
+    }
+  }
+  
+  /**
+   * Escapes quotes in the given string for inclusion in QL or SQL queries.
+   * @param s The string to escape.
+   * @return The given string, with quotes escapeed.
+   */
+  private String esc(String s) {
+    if (s == null) return "";
+    return s.replace("\\","\\\\").replace("'","\\'");
+  } // end of esc()
+
   /**
    * Lists the dictionaries implemented by this Annotator.
    * <p> This method can assume that the following methods have been previously called:
