@@ -58,13 +58,13 @@ java -jar trs-to-textgrid.jar --batchmode *.trs
 Some conversions have configurable output, e.g.
 
 ```
-java -jar trs-to-txt.jar *.txt
+java -jar trs-to-txt.jar *.trs
 ```
 
 ...will include annotations and participant names in the output text files, but:
 
 ```
-java -jar trs-to-txt.jar --textonly *.txt
+java -jar trs-to-txt.jar --textonly *.trs
 ```
 
 ...produces text files that exclude all annotations and participant names.
