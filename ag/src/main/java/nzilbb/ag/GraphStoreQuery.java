@@ -533,8 +533,8 @@ public interface GraphStoreQuery {
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
    */
-  public String[] aggregateMatchingAnnotations(String operation, String expression)
-    throws StoreException, PermissionException;
+//TODO  public String[] aggregateMatchingAnnotations(String operation, String expression)
+//    throws StoreException, PermissionException;
   
   /**
    * Gets the annotations on the given layer of the given transcript.
