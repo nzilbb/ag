@@ -78,7 +78,7 @@ public interface GraphStore extends GraphStoreQuery {
 
   /**
    * Identifies a list of annotations that match a particular pattern, and tags them on
-   * the given layer with the given label. 
+   * the given layer with the given label. All pre-existing tags are deleted.
    * @param expression An expression that determines which annotations match.
    * <p> The expression language is loosely based on JavaScript; expressions such as the
    * following can be used: 
