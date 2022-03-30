@@ -483,7 +483,8 @@ public interface GraphStoreQuery {
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
    */
-  public Annotation[] getMatchingAnnotations(String expression, Integer pageLength, Integer pageNumber)
+  public Annotation[] getMatchingAnnotations(
+    String expression, Integer pageLength, Integer pageNumber)
     throws StoreException, PermissionException; 
 
   /**

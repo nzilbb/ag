@@ -72,7 +72,9 @@ public interface GraphStore extends GraphStoreQuery {
    * @param parentId The new annotation's parent's ID. 
    * @return The ID of the new annotation.
    */
-  public String createAnnotation(String id, String fromId, String toId, String layerId, String label, Integer confidence, String parentId)
+  public String createAnnotation(
+    String id, String fromId, String toId, String layerId, String label, Integer confidence,
+    String parentId)
     throws StoreException, PermissionException, GraphNotFoundException;
   // TODO label can be an expression identifying the parent. e.g. "'em_0_123'" or "layer.id = 'orthography' AND label = 'example'"
 
@@ -84,7 +86,8 @@ public interface GraphStore extends GraphStoreQuery {
    * following can be used: 
    * <ul>
    *  <li><code>layer.id == 'orthography' &amp;&amp; label == 'word'</code></li>
-   *  <li><code>first('language').label == 'en' &amp;&amp; layer.id == 'orthography' &amp;&amp; label == 'word'</code></li> 
+   *  <li><code>first('language').label == 'en' &amp;&amp; layer.id == 'orthography'
+   *       &amp;&amp; label == 'word'</code></li> 
    * </ul>
    * <p><em>NB</em> all expressions must match by either id or layer.id.
    * @param layerId The layer ID of the resulting annotation.
@@ -94,7 +97,8 @@ public interface GraphStore extends GraphStoreQuery {
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
    */
-  public int tagMatchingAnnotations(String expression, String layerId, String label, Integer confidence)
+  public int tagMatchingAnnotations(
+    String expression, String layerId, String label, Integer confidence)
     throws StoreException, PermissionException;
   
   /**
