@@ -1731,6 +1731,7 @@ public class HTKAligner extends Annotator {
       Vector<Graph> utterances = new Vector<Graph>();
       
       graphs.forEach(fragment -> {
+          if (isCancelling()) return;
           try {
             
             // unaligned?
