@@ -52,7 +52,7 @@ public class TestFlatLexiconTagger {
   public static void install() throws Exception {
 
     // output all statuses
-    annotator.getStatusObservers().add(s->System.out.println(s));
+    //annotator.getStatusObservers().add(s->System.out.println(s));
 
     System.out.println("Installing lexicon...");
 
@@ -98,7 +98,7 @@ public class TestFlatLexiconTagger {
     annotator.setTaskParameters(null);
     
     assertEquals("dictionary",
-                 "a-z.csv:Word→Pronunciation", annotator.getDictionary());
+                 "a-z.csv:Word->Pronunciation", annotator.getDictionary());
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
     assertEquals("transcript language layer",
@@ -217,7 +217,7 @@ public class TestFlatLexiconTagger {
       +"&transcriptLanguageLayerId="   // no transcript language layer
       +"&phraseLanguageLayerId="       // no phrase language layer
       +"&tagLayerId=frequency"         // non-default layer
-      +"&dictionary=a-z.csv:Word→Frequency"
+      +"&dictionary=a-z.csv:Word->Frequency"
       +"&firstVariantOnly=on"
       +"&strip=");
       
@@ -240,7 +240,7 @@ public class TestFlatLexiconTagger {
                  Constants.TYPE_STRING,
                  schema.getLayer(annotator.getTagLayerId()).getType());
     assertEquals("lexicon",
-                 "a-z.csv:Word→Frequency", annotator.getDictionary());
+                 "a-z.csv:Word->Frequency", annotator.getDictionary());
     assertFalse("tag layer disallows peers (firstVariantOnly=true)",
                 schema.getLayer(annotator.getTagLayerId()).getPeers());
     Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
@@ -295,7 +295,7 @@ public class TestFlatLexiconTagger {
         +"&phraseLanguageLayerId=lang"
         +"&tagLayerId=phonemes"
         +"&firstVariantOnly=on"
-        +"&dictionary=a-z.csv:Word→Pronunciation");
+        +"&dictionary=a-z.csv:Word->Pronunciation");
       fail("Should fail with nonexistent tokenLayerId");
     } catch (InvalidConfigurationException x) {
     }
@@ -307,7 +307,7 @@ public class TestFlatLexiconTagger {
         +"&phraseLanguageLayerId=lang"
         +"&tagLayerId=phonemes"
         +"&firstVariantOnly=on"
-        +"&dictionary=a-z.csv:Word→Pronunciation");
+        +"&dictionary=a-z.csv:Word->Pronunciation");
       fail("Should fail with nonexistent transcriptLanguageLayerId");
     } catch (InvalidConfigurationException x) {
     }
@@ -319,7 +319,7 @@ public class TestFlatLexiconTagger {
         +"&phraseLanguageLayerId=language"
         +"&tagLayerId=phonemes"
         +"&firstVariantOnly=on"
-        +"&dictionary=a-z.csv:Word→Pronunciation");
+        +"&dictionary=a-z.csv:Word->Pronunciation");
       fail("Should fail with nonexistent phraseLanguageLayerId");
     } catch (InvalidConfigurationException x) {
     }
@@ -331,7 +331,7 @@ public class TestFlatLexiconTagger {
         // same as token layer
         +"&tagLayerId=word"
         +"&firstVariantOnly=on"
-        +"&dictionary=a-z.csv:Word→Pronunciation");
+        +"&dictionary=a-z.csv:Word->Pronunciation");
       fail("Should fail with pronunciationLayerId = tokenLayerId");
     } catch (InvalidConfigurationException x) {
     }
@@ -355,7 +355,7 @@ public class TestFlatLexiconTagger {
         +"&tagLayerId=phonemes"
         +"&firstVariantOnly=on"
         // nonexistent
-        +"&dictionary=nonexistent:Word→Pronunciation");
+        +"&dictionary=nonexistent:Word->Pronunciation");
       fail("Should fail with nonexistent lexicon");
     } catch (InvalidConfigurationException x) {
     }
@@ -366,7 +366,7 @@ public class TestFlatLexiconTagger {
         +"&phraseLanguageLayerId=lang"
         +"&tagLayerId=phonemes"
         +"&firstVariantOnly=on"
-        +"&dictionary=a-z.csv:nonexistent→Pronunciation");
+        +"&dictionary=a-z.csv:nonexistent->Pronunciation");
       fail("Should fail with nonexistent key field");
     } catch (InvalidConfigurationException x) {
     }
@@ -377,7 +377,7 @@ public class TestFlatLexiconTagger {
         +"&phraseLanguageLayerId=lang"
         +"&tagLayerId=phonemes"
         +"&firstVariantOnly=on"
-        +"&dictionary=a-z.csv:Word→nonexistent");
+        +"&dictionary=a-z.csv:Word->nonexistent");
       fail("Should fail with nonexistent value field");
     } catch (InvalidConfigurationException x) {
     }
@@ -388,7 +388,7 @@ public class TestFlatLexiconTagger {
         +"&phraseLanguageLayerId=lang"
         +"&tagLayerId=phonemes"
         +"&firstVariantOnly=on"
-        +"&dictionary=a-z.csv:Word→Pronunciation"
+        +"&dictionary=a-z.csv:Word->Pronunciation"
         // invalid regular expression
         +"&targetLanguagePattern=*");
       fail("Should fail with invalid targetLanguage pattern");
@@ -409,7 +409,7 @@ public class TestFlatLexiconTagger {
       +"&tagLayerId=frequency"
       // all variants
       +"&firstVariantOnly=false"
-      +"&dictionary=a-z.csv:Word→Frequency"
+      +"&dictionary=a-z.csv:Word->Frequency"
       +"&targetLanguagePattern=");
     // no exception is thrown, but firstVariantOnly is now true
     assertTrue("firstVariantOnly has been corrected", annotator.getFirstVariantOnly());
@@ -433,7 +433,7 @@ public class TestFlatLexiconTagger {
       +"&phraseLanguageLayerId=lang"
       +"&targetLanguagePattern=en.*"
       +"&tagLayerId=phonemes"
-      +"&dictionary=a-z.csv:Word→Pronunciation"
+      +"&dictionary=a-z.csv:Word->Pronunciation"
       +"&firstVariantOnly=false");
     
     assertEquals("token layer",
@@ -518,7 +518,7 @@ public class TestFlatLexiconTagger {
       +"&phraseLanguageLayerId=lang"
       +"&targetLanguagePattern=en.*"
       +"&tagLayerId=phonemes"
-      +"&dictionary=a-z.csv:Word→Pronunciation"
+      +"&dictionary=a-z.csv:Word->Pronunciation"
       +"&firstVariantOnly=false"
       +"&strip=+");
       
@@ -616,7 +616,7 @@ public class TestFlatLexiconTagger {
       +"&phraseLanguageLayerId=lang"
       +"&targetLanguagePattern=en.*"
       +"&tagLayerId=phonemes"
-      +"&dictionary=a-z.csv:Word→Pronunciation"
+      +"&dictionary=a-z.csv:Word->Pronunciation"
       +"&firstVariantOnly=false"
       +"&strip=");
       
@@ -696,18 +696,18 @@ public class TestFlatLexiconTagger {
     List<String> ids = annotator.getDictionaryIds();
     assertEquals("Correct number of dictionaries: " + ids,
                  6, ids.size());
-    assertTrue("a-z.csv:Word→Pronunciation",
-               ids.contains("a-z.csv:Word→Pronunciation"));
-    assertTrue("a-z.csv:Word→Frequency",
-               ids.contains("a-z.csv:Word→Frequency"));
-    assertTrue("a-z.csv:Pronunciation→Word",
-               ids.contains("a-z.csv:Pronunciation→Word"));
-    assertTrue("a-z.csv:Pronunciation→Frequency",
-               ids.contains("a-z.csv:Pronunciation→Frequency"));
-    assertTrue("a-z.csv:Frequency→Word",
-               ids.contains("a-z.csv:Frequency→Word"));
-    assertTrue("a-z.csv:Frequency→Pronunciation",
-               ids.contains("a-z.csv:Frequency→Pronunciation"));
+    assertTrue("a-z.csv:Word->Pronunciation",
+               ids.contains("a-z.csv:Word->Pronunciation"));
+    assertTrue("a-z.csv:Word->Frequency",
+               ids.contains("a-z.csv:Word->Frequency"));
+    assertTrue("a-z.csv:Pronunciation->Word",
+               ids.contains("a-z.csv:Pronunciation->Word"));
+    assertTrue("a-z.csv:Pronunciation->Frequency",
+               ids.contains("a-z.csv:Pronunciation->Frequency"));
+    assertTrue("a-z.csv:Frequency->Word",
+               ids.contains("a-z.csv:Frequency->Word"));
+    assertTrue("a-z.csv:Frequency->Pronunciation",
+               ids.contains("a-z.csv:Frequency->Pronunciation"));
 
     // add a lexicon, using first-space delimiter
     File file = new File(dir(), "a-z.dict");
@@ -723,25 +723,25 @@ public class TestFlatLexiconTagger {
     ids = annotator.getDictionaryIds();
     assertEquals("New dictionaries present: " + ids,
                  8, ids.size());
-    assertTrue("a-z.csv:Word→Pronunciation",
-               ids.contains("a-z.csv:Word→Pronunciation"));
-    assertTrue("a-z.csv:Word→Frequency",
-               ids.contains("a-z.csv:Word→Frequency"));
-    assertTrue("a-z.csv:Pronunciation→Word",
-               ids.contains("a-z.csv:Pronunciation→Word"));
-    assertTrue("a-z.csv:Pronunciation→Frequency",
-               ids.contains("a-z.csv:Pronunciation→Frequency"));
-    assertTrue("a-z.csv:Frequency→Word",
-               ids.contains("a-z.csv:Frequency→Word"));
-    assertTrue("a-z.csv:Frequency→Pronunciation",
-               ids.contains("a-z.csv:Frequency→Pronunciation"));
-    assertTrue("dict:type→phonemes",
-               ids.contains("dict:type→phonemes"));
-    assertTrue("dict:phonemes→type",
-               ids.contains("dict:phonemes→type"));
+    assertTrue("a-z.csv:Word->Pronunciation",
+               ids.contains("a-z.csv:Word->Pronunciation"));
+    assertTrue("a-z.csv:Word->Frequency",
+               ids.contains("a-z.csv:Word->Frequency"));
+    assertTrue("a-z.csv:Pronunciation->Word",
+               ids.contains("a-z.csv:Pronunciation->Word"));
+    assertTrue("a-z.csv:Pronunciation->Frequency",
+               ids.contains("a-z.csv:Pronunciation->Frequency"));
+    assertTrue("a-z.csv:Frequency->Word",
+               ids.contains("a-z.csv:Frequency->Word"));
+    assertTrue("a-z.csv:Frequency->Pronunciation",
+               ids.contains("a-z.csv:Frequency->Pronunciation"));
+    assertTrue("dict:type->phonemes",
+               ids.contains("dict:type->phonemes"));
+    assertTrue("dict:phonemes->type",
+               ids.contains("dict:phonemes->type"));
 
     // dictionary works
-    Dictionary dictionary = annotator.getDictionary("dict:type→phonemes");
+    Dictionary dictionary = annotator.getDictionary("dict:type->phonemes");
     List<String> entries = dictionary.lookup("quíck");
     assertEquals("entry returned, case-insentitive, accent sensitive",
                  1, entries.size());

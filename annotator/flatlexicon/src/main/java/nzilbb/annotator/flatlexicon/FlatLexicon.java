@@ -137,7 +137,7 @@ public class FlatLexicon implements Dictionary {
    * dictionaries implemented by the same annotator.
    * @return The dictionary's ID.
    */
-  public String getDictionaryId() { return lexicon+":"+keyField+"→"+valueField; }
+  public String getDictionaryId() { return lexicon+":"+keyField+"->"+valueField; }
   
   /**
    * Constructor.

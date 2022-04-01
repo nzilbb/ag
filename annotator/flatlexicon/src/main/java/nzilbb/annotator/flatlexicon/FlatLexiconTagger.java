@@ -168,7 +168,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
   }
    
   /**
-   * Takes a file to be used instead of the built-in copy of cmudict.txt.
+   * Takes a file to be used as a lexicon.
    * <p> This is the same as {@link #loadLexicon(String,String,String,String,String,boolean,File)}
    * Except that <var>skipFirstLine</var> is defined as a string, so it can be martialled
    * from a HTTP post request.
@@ -695,7 +695,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
         // default lexicon/keyField/valueField if possible
         List<String> dictionaries = getDictionaryIds();
         if (dictionaries.size() > 0) { // there are dictionaries
-          // default to the first, which will be field1→field2
+          // default to the first, which will be field1->field2
           dictionary = dictionaries.get(0);
         } // there are dictionaries
       } catch(ScriptException impossible) {}
@@ -942,7 +942,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
   @Override public int tagAllInstances(GraphStore store, String sourceLabel)
     throws DictionaryException, TransformationException, InvalidConfigurationException,
     StoreException {
-    Dictionary dictionary = getDictionary("cmudict");
+    Dictionary dictionary = getDictionary(this.dictionary);
     try {
       
       store.deleteMatchingAnnotations(
@@ -1028,8 +1028,8 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           for (String keyField : fields) {
             for (String valueField : fields) {
               if (!keyField.equals(valueField)) {
-                // dictionary IDs are formatted "${lexicon}:${keyField}→${valueField}"
-                ids.add(name+":"+keyField+"→"+valueField);
+                // dictionary IDs are formatted "${lexicon}:${keyField}->${valueField}"
+                ids.add(name+":"+keyField+"->"+valueField);
               }
             } // next valueField candidate
           } // next keyField candidate
@@ -1058,8 +1058,11 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    */
   public Dictionary getDictionary(String id) throws DictionaryException {
     try {
-      // dictionary IDs are formatted "${lexicon}:${keyField}→${valueField}"
-      Matcher idParser = Pattern.compile("^(?<lexicon>[^:]+):(?<keyField>.+)→(?<valueField>.+)$")
+      if (id == null) {
+        id = this.dictionary;  
+      }
+      // dictionary IDs are formatted "${lexicon}:${keyField}->${valueField}"
+      Matcher idParser = Pattern.compile("^(?<lexicon>[^:]+):(?<keyField>.+)->(?<valueField>.+)$")
         .matcher(id);
       if (idParser.matches()) {
         return getDictionary(
