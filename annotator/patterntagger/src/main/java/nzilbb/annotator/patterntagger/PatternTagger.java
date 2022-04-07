@@ -667,7 +667,9 @@ public class PatternTagger extends Annotator {
             existingTag = token.createTag(destinationLayerId, tagLabel);
            }
          }
-         existingTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+         if (existingTag != null) {
+           existingTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+         }
          return existingTag;
 
       } else if (deleteOnNoMatch) {
