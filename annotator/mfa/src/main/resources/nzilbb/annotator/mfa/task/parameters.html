@@ -1,47 +1,44 @@
-<!DOCTYPE html><html><head><title>MFA</title></head><body>
-    <h1>MFA</h1>
-    
-    <p> The MFA Annotator integrates with the
-      <a href="https://montrealcorpustools.github.io/Montreal-Forced-Aligner/">
-        Montreal Forced Aligner</a>, which can use words with phonemic transcriptions, and
-      the corresponding audio, to force-align words and phones; i.e. determine the start
-      and end time of each speech sound within each word, and thus the start/end times
-      of the words. </p>
-    
-    <p> Configuration parameters are encoded as a URL query string, e.g. <br>
-      <samp>orthographyLayerId=orthography&dictionaryName=english&modelsName=english&wordAlignmentLayerId=word&phoneAlignmentLayerId=segment&utteranceTagLayerId=mfa</samp> </p>
+<h3>MFA</h3>
 
-    <p> Parameters are: </p> <dl>
-      <dt> orthographyLayerId </dt> <dd> Input layer from which words come. </dd>
-      <dt> pronunciationLayerId </dt> <dd> Input layer from which word pronunciations
-        come. If you don't select this layer, you must specify a value for <tt>dictionaryName</tt>. </dd>
-      <dt> multilingualIPA </dt> <dd> Set any non-empty value for this parameter to use
-        the <tt>--multilingual</tt>_ipa switch, omit the parameter otherwise</dd> 
-      <dt> dictionaryName </dt> <dd> If you wish to use one of the available language
-        dictionaries instead of specifying a Pronunciation Layer, specify the name with
-        this parameter. Available dictionaries are listed at
-        <a href="https://github.com/MontrealCorpusTools/mfa-models/tree/main/dictionary" target="mfa">https://github.com/MontrealCorpusTools/mfa-models/tree/main/dictionary</a></dd>
-      <dt> modelsName </dt> <dd> If you wish to use pre-trained acoustic models instead of
-        training models from your speech data, specify the name with this
-        parameter. If not specified, acoustic models will be trained from the speech itself.
-        Available models are listed at 
-        <a href="https://github.com/MontrealCorpusTools/mfa-models/tree/main/acoustic" target="mfa">https://github.com/MontrealCorpusTools/mfa-models/tree/main/acoustic</a>
-      </dd>
-      <dt> beam </dt> <dd> This is the value for the <tt>--beam</tt> mfa parameter.</dd>  
-      <dt> retryBeam </dt> <dd> This is the value for the <tt>--retry-beam</tt> mfa parameter.</dd>   
-      <dt> ignoreAlignmentStatuses </dt> <dd> Set any non-empty value of this parameter to
-        overwrite manual alignments, otherwise omit this parameter.  </dd>
-      <dt> wordAlignmentLayerId </dt> <dd> Output layer on which word alignments are
-        saved. This can be <tt>word</tt> to update main word token alignments, or a
-        phrase layer to save alignments separately from main word token alignments. If
-        the specified layer doesn't exist, a phrase layer will be created. </dd>
-      <dt> phoneAlignmentLayerId </dt> <dd> Output layer on which phone alignments are
-        saved. This can be <tt>segment</tt> to update main phone segment alignments, or a
-        phrase layer to save alignments separately from main phone segment alignments. If
-        the specified layer doesn't exist, a phrase layer will be created. </dd>
-      <dt> utteranceTagLayerId </dt> <dd> Optional output layer for a time stamp tagging
-        each aligned utterance. If the specified layer doesn't exist, a phrase layer will
-        be created. </dd>      
-    </dl>
-  </body>
-</html>
+<p> The MFA Annotator integrates with the
+  <a href="https://montrealcorpustools.github.io/Montreal-Forced-Aligner/">
+    Montreal Forced Aligner</a>, which can use words with phonemic transcriptions, and
+  the corresponding audio, to force-align words and phones; i.e. determine the start
+  and end time of each speech sound within each word, and thus the start/end times
+  of the words. </p>
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>orthographyLayerId=orthography&dictionaryName=english&modelsName=english&wordAlignmentLayerId=word&phoneAlignmentLayerId=segment&utteranceTagLayerId=mfa</samp> </p>
+
+<p> Parameters are: </p> <dl>
+  <dt> orthographyLayerId </dt> <dd> Input layer from which words come. </dd>
+  <dt> pronunciationLayerId </dt> <dd> Input layer from which word pronunciations
+    come. If you don't select this layer, you must specify a value for <tt>dictionaryName</tt>. </dd>
+  <dt> multilingualIPA </dt> <dd> Set any non-empty value for this parameter to use
+    the <tt>--multilingual</tt>_ipa switch, omit the parameter otherwise</dd> 
+  <dt> dictionaryName </dt> <dd> If you wish to use one of the available language
+    dictionaries instead of specifying a Pronunciation Layer, specify the name with
+    this parameter. Available dictionaries are listed at
+    <a href="https://github.com/MontrealCorpusTools/mfa-models/tree/main/dictionary" target="mfa">https://github.com/MontrealCorpusTools/mfa-models/tree/main/dictionary</a></dd>
+  <dt> modelsName </dt> <dd> If you wish to use pre-trained acoustic models instead of
+    training models from your speech data, specify the name with this
+    parameter. If not specified, acoustic models will be trained from the speech itself.
+    Available models are listed at 
+    <a href="https://github.com/MontrealCorpusTools/mfa-models/tree/main/acoustic" target="mfa">https://github.com/MontrealCorpusTools/mfa-models/tree/main/acoustic</a>
+  </dd>
+  <dt> beam </dt> <dd> This is the value for the <tt>--beam</tt> mfa parameter.</dd>  
+  <dt> retryBeam </dt> <dd> This is the value for the <tt>--retry-beam</tt> mfa parameter.</dd>   
+  <dt> ignoreAlignmentStatuses </dt> <dd> Set any non-empty value of this parameter to
+    overwrite manual alignments, otherwise omit this parameter.  </dd>
+  <dt> wordAlignmentLayerId </dt> <dd> Output layer on which word alignments are
+    saved. This can be <tt>word</tt> to update main word token alignments, or a
+    phrase layer to save alignments separately from main word token alignments. If
+    the specified layer doesn't exist, a phrase layer will be created. </dd>
+  <dt> phoneAlignmentLayerId </dt> <dd> Output layer on which phone alignments are
+    saved. This can be <tt>segment</tt> to update main phone segment alignments, or a
+    phrase layer to save alignments separately from main phone segment alignments. If
+    the specified layer doesn't exist, a phrase layer will be created. </dd>
+  <dt> utteranceTagLayerId </dt> <dd> Optional output layer for a time stamp tagging
+    each aligned utterance. If the specified layer doesn't exist, a phrase layer will
+    be created. </dd>      
+</dl>

@@ -296,7 +296,8 @@ public class RequestRouter {
           } else {
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             bodyParts.readBodyData(output);
-            parts.add(output.toString("UTF-8"));
+            String part = output.toString("UTF-8");
+            parts.add(part);
           }
                
           nextPart = bodyParts.readBoundary();
@@ -305,6 +306,7 @@ public class RequestRouter {
         // find a methods that matches the parameters passed
         Method classMethod = null;
         for (Method m : possibleMethods) {
+
           if (m.getParameterCount() == parts.size()) {
             classMethod = m;
             // check the parameters are the right type

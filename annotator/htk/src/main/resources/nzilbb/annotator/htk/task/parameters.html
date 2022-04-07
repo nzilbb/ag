@@ -1,72 +1,70 @@
-<!DOCTYPE html><html><head><title>HTK Aligner</title></head><body>
-    <h1>HTK Aligner</h1>
-    
-    <p> The HTK Aligner can use words with phonemic transcriptions, and the
-      corresponding audio, to force-align words and phones; i.e. determine the start and
-      end time of each speech sound within each word, and thus the start/end times of the
-      words. </p>
-    
-    <p> Configuration parameters are encoded as a URL query string, e.g. <br>
-      <samp>orthographyLayerId=orthography&pauseMarkers=-&pronunciationLayerId=cmudict&noiseLayerId=noise&mainUtteranceGrouping=Speaker&otherUtteranceGrouping=Not Aligned&noisePatterns=laugh.* unclear .*noise.*&overlapThreshold=5&wordAlignmentLayerId=word&phoneAlignmentLayerId=segmentutteranceTagLayerId=htk&cleanupOption=100</samp>
-      <br> <em>NB</em> Ensure the configuration string provided has all parts correctly
-      URI-encoded; in particular, the space delimiter of <tt>noisePatterns</tt> should be
-      encoded <tt>%20</tt> or <tt>+</tt> </p>
-    
-    <p> Parameters are: </p><dl>
-      <dt> orthographyLayerId </dt> <dd> Input layer from which words come. </dd>
-      <dt> pauseMarkers </dt> <dd> Characters that mark pauses in speech in the
-        transcript, separated by spaces. </dd>
-      <dt> pronunciationLayerId </dt> <dd> Input layer from which word pronunciations come. </dd>
-      <dt> mainUtteranceGrouping </dt> <dd> How to group main-participant utterances for
-        automatic training. Possible values are : <ul>
-          <li>"Speaker" - group all main-participant utterances from the same speaker
-            together, across all their transcripts. </li>
-          <li>"Transcript" - group all main-participant utterances from the same speaker
-            together, but only within the same transcript.</li> </ul></dd>
-      <dt> otherUtteranceGrouping </dt> <dd> How to group non-main-participant utterances
-        for automatic training. Possible values are: <ul>
-          <li>"Not Aligned" - do not include non-main participant speech. </li>
-          <li>"Transcript" - group all non-main-participant utterances from the same
-            speaker together, but only within the same transcript.</li> </ul></dd>
-      <dt> pauseMarkers </dt> <dd> Characters that mark pauses in speech in the
-        transcript, separated by spaces, e.g. <q>- .</q> </dd>
-      <dt> noiseLayerId </dt> <dd> Layer that has noise annotations. </dd>
-      <dt> noisePatterns </dt> <dd> Space-delimited list of regular expressions for
-        matching on the noise layer, that HTK should model for. e.g.
-        "laugh.* unclear .*noise.*" will train three non-speech models for all noise
-        annotations whose label starts with the word "laugh", or the label is "unclear", or the
-        label includes the word "noise". </dd>
-      <dt> overlapThreshold </dt> <dd> Percentage of overlap with other speech, above
-        which the utterance is ignored. 0 or blank means no utterances are ignored, no
-        matter how much they overlap with other speech. </dd>
-      <dt> useP2FA </dt> <dd> Whether to use pre-trained P2FA models or not. </dd>
-      <dt> sampleRate </dt> <dd> (optional) "11025" to downsample audio to 11,025Hz before
-        alignment. </dd>
-      <dt> leftPattern </dt> <dd> Regular expression for matching the ID of the
-        participant in the left audio channel. </dd>
-      <dt> rightPattern </dt> <dd> Regular expression for matching the ID of the
-        participant in the right audio channel. </dd>
-      <dt> ignoreAlignmentStatuses </dt> <dd> Set any non-empty value of this parameter to
-        overwrite manual alignments, otherwise omit this parameter.  </dd>
-      <dt> wordAlignmentLayerId </dt> <dd> Output layer on which word alignments are
-        saved. This can be <tt>word</tt> to update main word token alignments, or a
-        phrase layer to save alignments separately from main word token alignments. If
-        the specified layer doesn't exist, a phrase layer will be created. </dd>
-      <dt> phoneAlignmentLayerId </dt> <dd> Output layer on which phone alignments are
-        saved. This can be <tt>segment</tt> to update main phone segment alignments, or a
-        phrase layer to save alignments separately from main phone segment alignments. If
-        the specified layer doesn't exist, a phrase layer will be created. </dd>
-      <dt> utteranceTagLayerId </dt> <dd> Optional output layer for a time stamp tagging
-        each aligned utterance. If the specified layer doesn't exist, a phrase layer will
-        be created. </dd>
-      <dt> scoreLayerId </dt> <dd> Output layer on which phone acoustic scores are saved. </dd>
-      <dt> cleanupOption </dt> <dd> What should happen with working files after
-        training/alignment is finished. Possible values are: <ul>
-          <li><q>75</q> - Working files should be deleted if alignment succeeds.</li>
-          <li><q>25</q> - Working files should be deleted if alignment fails.</li>
-          <li><q>100</q> - Working files should be deleted whether alignment succeeds or not.</li>
-          <li><q>0</q> - Working files should <b>not</b> be deleted whether alignment
-            succeeds or not.</li> </ul></dd>
-    </dl>
-  </body>
-</html>
+<h3>HTK Aligner</h3>
+
+<p> The HTK Aligner can use words with phonemic transcriptions, and the
+  corresponding audio, to force-align words and phones; i.e. determine the start and
+  end time of each speech sound within each word, and thus the start/end times of the
+  words. </p>
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>orthographyLayerId=orthography&pauseMarkers=-&pronunciationLayerId=cmudict&noiseLayerId=noise&mainUtteranceGrouping=Speaker&otherUtteranceGrouping=Not Aligned&noisePatterns=laugh.* unclear .*noise.*&overlapThreshold=5&wordAlignmentLayerId=word&phoneAlignmentLayerId=segmentutteranceTagLayerId=htk&cleanupOption=100</samp>
+  <br> <em>NB</em> Ensure the configuration string provided has all parts correctly
+  URI-encoded; in particular, the space delimiter of <tt>noisePatterns</tt> should be
+  encoded <tt>%20</tt> or <tt>+</tt> </p>
+
+<p> Parameters are: </p><dl>
+  <dt> orthographyLayerId </dt> <dd> Input layer from which words come. </dd>
+  <dt> pauseMarkers </dt> <dd> Characters that mark pauses in speech in the
+    transcript, separated by spaces. </dd>
+  <dt> pronunciationLayerId </dt> <dd> Input layer from which word pronunciations come. </dd>
+  <dt> mainUtteranceGrouping </dt> <dd> How to group main-participant utterances for
+    automatic training. Possible values are : <ul>
+      <li>"Speaker" - group all main-participant utterances from the same speaker
+        together, across all their transcripts. </li>
+      <li>"Transcript" - group all main-participant utterances from the same speaker
+        together, but only within the same transcript.</li> </ul></dd>
+  <dt> otherUtteranceGrouping </dt> <dd> How to group non-main-participant utterances
+    for automatic training. Possible values are: <ul>
+      <li>"Not Aligned" - do not include non-main participant speech. </li>
+      <li>"Transcript" - group all non-main-participant utterances from the same
+        speaker together, but only within the same transcript.</li> </ul></dd>
+  <dt> pauseMarkers </dt> <dd> Characters that mark pauses in speech in the
+    transcript, separated by spaces, e.g. <q>- .</q> </dd>
+  <dt> noiseLayerId </dt> <dd> Layer that has noise annotations. </dd>
+  <dt> noisePatterns </dt> <dd> Space-delimited list of regular expressions for
+    matching on the noise layer, that HTK should model for. e.g.
+    "laugh.* unclear .*noise.*" will train three non-speech models for all noise
+    annotations whose label starts with the word "laugh", or the label is "unclear", or the
+    label includes the word "noise". </dd>
+  <dt> overlapThreshold </dt> <dd> Percentage of overlap with other speech, above
+    which the utterance is ignored. 0 or blank means no utterances are ignored, no
+    matter how much they overlap with other speech. </dd>
+  <dt> useP2FA </dt> <dd> Whether to use pre-trained P2FA models or not. </dd>
+  <dt> sampleRate </dt> <dd> (optional) "11025" to downsample audio to 11,025Hz before
+    alignment. </dd>
+  <dt> leftPattern </dt> <dd> Regular expression for matching the ID of the
+    participant in the left audio channel. </dd>
+  <dt> rightPattern </dt> <dd> Regular expression for matching the ID of the
+    participant in the right audio channel. </dd>
+  <dt> ignoreAlignmentStatuses </dt> <dd> Set any non-empty value of this parameter to
+    overwrite manual alignments, otherwise omit this parameter.  </dd>
+  <dt> wordAlignmentLayerId </dt> <dd> Output layer on which word alignments are
+    saved. This can be <tt>word</tt> to update main word token alignments, or a
+    phrase layer to save alignments separately from main word token alignments. If
+    the specified layer doesn't exist, a phrase layer will be created. </dd>
+  <dt> phoneAlignmentLayerId </dt> <dd> Output layer on which phone alignments are
+    saved. This can be <tt>segment</tt> to update main phone segment alignments, or a
+    phrase layer to save alignments separately from main phone segment alignments. If
+    the specified layer doesn't exist, a phrase layer will be created. </dd>
+  <dt> utteranceTagLayerId </dt> <dd> Optional output layer for a time stamp tagging
+    each aligned utterance. If the specified layer doesn't exist, a phrase layer will
+    be created. </dd>
+  <dt> scoreLayerId </dt> <dd> Output layer on which phone acoustic scores are saved. </dd>
+  <dt> cleanupOption </dt> <dd> What should happen with working files after
+    training/alignment is finished. Possible values are: <ul>
+      <li><q>75</q> - Working files should be deleted if alignment succeeds.</li>
+      <li><q>25</q> - Working files should be deleted if alignment fails.</li>
+      <li><q>100</q> - Working files should be deleted whether alignment succeeds or not.</li>
+      <li><q>0</q> - Working files should <b>not</b> be deleted whether alignment
+        succeeds or not.</li> </ul></dd>
+</dl>
+

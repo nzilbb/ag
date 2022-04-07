@@ -1148,7 +1148,7 @@ public class MFA extends Annotator {
       }
       
       // cleanup
-      IO.RecursivelyDelete(sessionWorkingDir);
+      //IO.RecursivelyDelete(sessionWorkingDir);
       
       if (failure != null) throw failure;
       

@@ -1,24 +1,19 @@
-<!DOCTYPE html>
-<html><head><title>MFA</title></head>
-  <body>
-    <h1>MFA</h1>
-    
-    <p> The MFA Annotator integrates with the
-      <a href="https://montrealcorpustools.github.io/Montreal-Forced-Aligner/">
-        Montreal Forced Aligner</a>, which can use words with phonemic transcriptions, and
-      the corresponding audio, to force-align words and phones; i.e. determine the start
-      and end time of each speech sound within each word, and thus the start/end times
-      of the words. </p>
-    
-    <p> The configuration parameter is encoded as a URL query string, e.g. <br>
-      <samp>mfaPath=/opt/conda/envs/aligner/bin</samp> <br>
-      <em>NB:</em> Ensure the configuration string provided has all parts correctly
-      URI-encoded; in particular <tt>/</tt> should be encoded <tt>%2F</tt> </p>
-    
-    <p> The only parameter is: </p>
-    <dl>
-      <dt> mfaPath </dt> <dd> Path to the <tt>bin</tt> directory of the installed MFA
-        environment. </dd>
-    </dl>
-  </body>
-</html>
+<h3>MFA</h3>
+
+<p> The MFA Annotator integrates with the
+  <a href="https://montrealcorpustools.github.io/Montreal-Forced-Aligner/">
+    Montreal Forced Aligner</a>, which can use words with phonemic transcriptions, and
+  the corresponding audio, to force-align words and phones; i.e. determine the start
+  and end time of each speech sound within each word, and thus the start/end times
+  of the words. </p>
+
+<p> The configuration parameter is encoded as a URL query string, e.g. <br>
+  <samp>mfaPath=/opt/conda/envs/aligner/bin</samp> <br>
+  <em>NB:</em> Ensure the configuration string provided has all parts correctly
+  URI-encoded; in particular <tt>/</tt> should be encoded <tt>%2F</tt> </p>
+
+<p> The only parameter is: </p>
+<dl>
+  <dt> mfaPath </dt> <dd> Path to the <tt>bin</tt> directory of the installed MFA
+    environment. </dd>
+</dl>

@@ -108,7 +108,7 @@ function changedLayer(select) {
 function changedEncoding(select) {
     var example = "T R AE2 N S K R IH1 P SH AH0 N"; // CMU
     if (select.value == "DISC") {
-        example = "tr{nskrIpSVn";
+        example = "tr{nskrIpS@n";
     }
     document.getElementById("encoding-example").innerHTML = example;
 }

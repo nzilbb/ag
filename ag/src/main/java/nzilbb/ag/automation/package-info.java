@@ -16,13 +16,15 @@
     <li> <i> &hellip;/config/&hellip; </i> - a subdirectory of the directory containing
       the Annotator class, containing a general configuration web-app, if the annotator
       needs overall configuration. This should include <i>index.html</i> for starting the
-      web-app, and also <i>parameters.html</i>, a standalone definition of the installation config
+      web-app, and also <i>parameters.html</i>, an HTML document fragment
+      (i.e. not wrapped in &lt;html&gt; and &lt;body&gt; tags) defining the installation config
       parameters, including a list of all parameters, and the encoding of the parameter
       string, for displaying to users who wish to configure the annotator programmatically.</li>  
     <li> <i> &hellip;/task/&hellip; </i> - a subdirectory of the directory containing
       the Annotator class, containing a task configuration web-app for defining
       annotation task parameters. This should include <i>index.html</i> for starting the
-      web-app, and also <i>parameters.html</i>, a standalone definition of the installation config
+      web-app, and also <i>parameters.html</i>, an HTML document fragment
+      (i.e. not wrapped in &lt;html&gt; and &lt;body&gt; tags) defining of the installation config
       parameters, including a list of all parameters, and the encoding of the parameter
       string, for displaying to users who wish to configure annotator tasks
       programmatically. </li>  
@@ -30,7 +32,8 @@
       the Annotator class, containing a web-app providing any extra user interfaces that
       might be useful for the annotator, including post-annotation visualizations,
       lexicons or models, etc... This should include <i>index.html</i> for starting the
-      web-app, and also <i>api.html</i>, a standalone document containing information
+      web-app, and also <i>api.html</i>, an HTML document fragment
+      (i.e. not wrapped in &lt;html&gt; and &lt;body&gt; tags) containing information
       about what endpoints are published by the web-app, for displaying to users who wish
       to use it programmatically. </li>   
   </ul> </p>

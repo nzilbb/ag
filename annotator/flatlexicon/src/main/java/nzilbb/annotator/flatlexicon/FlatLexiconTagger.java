@@ -189,7 +189,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
     String lexicon, String fieldDelimiter, String quote, String comment, String fieldNames,
     String skipFirstLine, File file) {
     return loadLexicon(
-      lexicon, fieldDelimiter, quote, comment, fieldNames, "true".equals(skipFirstLine), file);
+      lexicon, fieldDelimiter, quote, comment, fieldNames, "true".equalsIgnoreCase(skipFirstLine), file);
   }
   
   /**
