@@ -31,12 +31,9 @@
     <p> If this automatic installation fails, you will need to download and install HTK
       manually, and enter its path below. </p>
 
-    <form method="POST" action="setConfig">
-      <div class="field"
-           title="This is the path to the HTK on the server. e.g. C:\\HTK.3.3 - Under some conditions this can be ommitted if the htk.eng.cam.ac.uk User ID/Password is supplied.">
-        <label for="htkPath">Path to HTK tools</label>
-        <input id="htkPath" name="htkPath" type="text">
-      </div>
+    <div id="attemptInstallation">
+      <p> If your server is running in a Docker container, it may be able to install HTK
+        itself, instead of you having to install HTK manually. </p>
       <div class="field"
            title="If you have not already done so, register a User ID at http://htk.eng.cam.ac.uk/register.shtml">
         <label for="htkUserId">htk.eng.cam.ac.uk User ID</label>
@@ -47,8 +44,18 @@
         <label for="htkPassword">htk.eng.cam.ac.uk User Password</label>
         <input id="htkPassword" name="htkPassword" type="password">
       </div>
+      <button id="installHtk" x-style="display: none;">Attempt to Install HTK</button>
+      <progress id="installHtkProgress" value="0" max="100" style="display: none;"></progress>
+      <pre id="installHtkStatus" style="display: none; white-space: pre-wrap;"></pre>
+    </div> 
+    <form method="POST" action="setConfig">
+      <div class="field"
+           title="This is the path to the HTK on the server. e.g. C:\\HTK.3.3 - Under some conditions this can be ommitted if the htk.eng.cam.ac.uk User ID/Password is supplied.">
+        <label for="htkPath">Path to HTK tools</label>
+        <input id="htkPath" name="htkPath" type="text">
+      </div>
       <div class="controls">
-        <input type="submit" value="Configure">
+        <input id="submit" type="submit" value="Configure">
       </div>
     </form>
 

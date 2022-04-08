@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -668,8 +668,39 @@ public class HTKAligner extends Annotator {
       if (HVite != null && !HVite.exists()) HVite = new File(htkPath, "HVite.exe");
       if (HVite == null || !HVite.exists()) { // don't have HTK exes
         setStatus("HTK not found");
-
         if (htkUserId != null && htkPassword != null) { // have user/password
+          installHtk(htkUserId, htkPassword);
+        } else { // don't have user/password
+          throw new InvalidConfigurationException(this, "No path to HTK.");
+        }
+      } // bad htkPath
+
+      // persist configuration
+      PrintWriter writer = new PrintWriter(
+        new File(getWorkingDirectory(), getAnnotatorId() + ".cfg"), "UTF-8");
+      writer.print("htkPath="+URLEncoder.encode(htkPath, "UTF-8"));
+      writer.close();
+
+      setPercentComplete(100);
+    } catch (IOException ioX) {
+      setStatus("ERROR: " + ioX);
+      throw new InvalidConfigurationException(
+        this, "Error processing file: " + ioX.getMessage(), ioX);
+    } finally {
+      setRunning(false);
+    }
+  }
+  
+  /**
+   * Start an attempt to install HTK.
+   * @param htkUserId
+   * @param htkPassword
+   */
+  public void installHtk(String htkUserId, String htkPassword) {
+    new Thread(()->{
+        setRunning(true);
+        setPercentComplete(1);
+        try {
           setStatus("Attempt to download HTK...");
           if (java.lang.System.getProperty("os.name").startsWith("Windows")) { // Windows
             
@@ -684,19 +715,21 @@ public class HTKAligner extends Annotator {
             File zip = new File(getWorkingDirectory(), url.getPath().replaceAll(".*/",""));
             IO.Pump(input, new FileOutputStream(zip));
             
+            setPercentComplete(30);
+            
             setStatus("Unzipping: " + zip.getName());
             IO.Unzip(zip, getWorkingDirectory());
 
-            fHtkPath = new File(getWorkingDirectory(), "htk");
-            HVite = new File(fHtkPath, "HVite.exe");
+            setPercentComplete(60);
+            
+            File fHtkPath = new File(getWorkingDirectory(), "htk");
+            File HVite = new File(fHtkPath, "HVite.exe");
             if (HVite.exists()) {
               htkPath = fHtkPath.getPath();
               setStatus("Download successful, htkPath: " + htkPath);
               System.out.println("Download successful, htkPath: " + htkPath);
             } else {
               setStatus("Sorry, could not download HTK.");
-              throw new InvalidConfigurationException(
-                this, "No path to HTK, and could not download it.");
             }            
           } else { // not windows
             boolean canCompileSource = Execution.Which("make") != null;
@@ -713,26 +746,25 @@ public class HTKAligner extends Annotator {
               htkSourceDirectory.mkdir();
               
               // wget --user=... --password=... http://htk.eng.cam.ac.uk/ftp/software/HTK-3.4.1.tar.gz
-              setStatus("Attempting to download HTK source code...");
-              Execution cmd = new Execution()
-                .setExe("wget")
-                .arg("--user=" + htkUserId)
-                .arg("--password=" + htkPassword)
-                .arg("http://htk.eng.cam.ac.uk/ftp/software/HTK-3.4.1.tar.gz")
-                .setWorkingDirectory(htkSourceDirectory);
-              cmd.run();
-              if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
-              setStatus(cmd.getInput().toString());
+              URL url = new URL("https://htk.eng.cam.ac.uk/ftp/software/HTK-3.4.1.tar.gz");
+              setStatus("Attempting to download HTK source code from " + url);
+              HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+              String authorization = "Basic " + java.util.Base64.getEncoder()
+                .encodeToString((htkUserId+":"+htkPassword).getBytes());
+              connection.setRequestProperty("Authorization", authorization);
+              InputStream input = connection.getInputStream();
+              File tar = new File(getWorkingDirectory(), url.getPath().replaceAll(".*/",""));
+              IO.Pump(input, new FileOutputStream(tar));
               
               setPercentComplete(20);
               if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
               
               // tar -xzf HTK-3.4.1.tar.gz
               setStatus("Extracting HTK source code...");
-              cmd = new Execution()
+              Execution cmd = new Execution()
                 .setExe("tar")
                 .arg("-xzf")
-                .arg("HTK-3.4.1.tar.gz")
+                .arg(tar.getPath())
                 .setWorkingDirectory(htkSourceDirectory);
               cmd.run();
               if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
@@ -756,7 +788,9 @@ public class HTKAligner extends Annotator {
                   .setWorkingDirectory(htkSrc);
                 cmd.run();
                 if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
-                setStatus(cmd.getInput().toString());
+                if (cmd.getInput().toString().trim().length() > 0) {
+                  setStatus(cmd.getInput().toString());
+                }
                 
                 setPercentComplete(40);
                 if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
@@ -769,7 +803,9 @@ public class HTKAligner extends Annotator {
                   .setWorkingDirectory(htkSrc);
                 cmd.run();
                 if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
-                setStatus(cmd.getInput().toString());
+                if (cmd.getInput().toString().trim().length() > 0) {
+                  setStatus(cmd.getInput().toString());
+                }
                 
                 setPercentComplete(50);
                 if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
@@ -782,7 +818,9 @@ public class HTKAligner extends Annotator {
                   .setWorkingDirectory(htkSrc);
                 cmd.run();
                 if (cmd.getError().length() > 0) setStatus("stderr: " + cmd.getError());
-                setStatus(cmd.getInput().toString());
+                if (cmd.getInput().toString().trim().length() > 0) {
+                  setStatus(cmd.getInput().toString());
+                }
                 
                 setPercentComplete(60);
                 if (isCancelling()) throw new InvalidConfigurationException(this, "Cancelled");
@@ -790,14 +828,12 @@ public class HTKAligner extends Annotator {
                 File HVitePath = Execution.Which("HVite");
                 if (HVitePath != null) {
                   setStatus("HVite: " + HVitePath.getPath());
-                  fHtkPath = HVitePath.getParentFile();
+                  File fHtkPath = HVitePath.getParentFile();
                   if (fHtkPath != null) {
                     setStatus("Build successful, htkPath: " + fHtkPath.getPath());
                     htkPath = fHtkPath.getPath();
                   } else {
                     setStatus("Sorry, could not build HTK from source code.");
-                    throw new InvalidConfigurationException(
-                      this, "No path to HTK, and could not build it.");
                   }
                 }
               } finally { // no matter what, delete our working files
@@ -805,26 +841,17 @@ public class HTKAligner extends Annotator {
               }
             } // canCompileSource
           } // not Windows
-        } else { // don't have user/password
-          throw new InvalidConfigurationException(this, "No path to HTK.");
+        } catch (Throwable t) {
+          if (t.getMessage().indexOf("401") >= 0) {
+            setStatus("Check your username/password: "+t.getMessage());
+          } else {
+            setStatus("installHtk: "+t.getMessage());
+          }
+        } finally {
+          setRunning(false);
         }
-      } // bad htkPath
-
-      // persist configuration
-      PrintWriter writer = new PrintWriter(
-        new File(getWorkingDirectory(), getAnnotatorId() + ".cfg"), "UTF-8");
-      writer.print("htkPath="+URLEncoder.encode(htkPath, "UTF-8"));
-      writer.close();
-
-      setPercentComplete(100);
-    } catch (IOException ioX) {
-      setStatus("ERROR: " + ioX);
-      throw new InvalidConfigurationException(
-        this, "Error processing file: " + ioX.getMessage(), ioX);
-    } finally {
-      setRunning(false);
-    }
-  }
+    }).start();
+  } // end of installHtk()
    
   /**
    * Sets the configuration for a given annotation task.
