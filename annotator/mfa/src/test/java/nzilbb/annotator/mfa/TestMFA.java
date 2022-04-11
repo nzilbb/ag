@@ -93,7 +93,7 @@ public class TestMFA {
   }
 
   /** Ensure validDictionaryNames method works. */
-  /*@Test*/ public void validDictionaryNames() throws Exception {
+  @Test public void validDictionaryNames() throws Exception {
     Collection<String> names = annotator.validDictionaryNames();
     assertTrue("validDictionaryNames contains english " + names,
                names.contains("english_mfa")); // 2.0.0rc3 was "english"
@@ -104,7 +104,7 @@ public class TestMFA {
   }   
 
   /** Ensure validDictionaryNames method works. */
-  /*@Test*/ public void validAcousticModels() throws Exception {
+  @Test public void validAcousticModels() throws Exception {
     Collection<String> names = annotator.validAcousticModels();
     assertTrue("validAcousticModels contains english " + names,
                names.contains("english_mfa")); // 2.0.0rc3 was "english"
@@ -115,13 +115,13 @@ public class TestMFA {
   }   
 
   /** Ensure mfaVersion method works. */
-  /*@Test*/ public void mfaVersion() throws Exception {
+  @Test public void mfaVersion() throws Exception {
     String version = annotator.mfaVersion();
     assertTrue("MFA version is 2...: " + version, version.startsWith("2"));
   }   
 
   /** Ensure default (null) task parameters return an error. */
-  /*@Test*/ public void defaultParameters() throws Exception {
+  @Test public void defaultParameters() throws Exception {
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -136,7 +136,7 @@ public class TestMFA {
   }   
 
   /** Ensure valid task parameters don't raise errors, and change the schema when appropriate. */
-  /*@Test*/ public void setValidParameters() throws Exception {
+  @Test public void setValidParameters() throws Exception {
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -185,7 +185,7 @@ public class TestMFA {
   }   
 
   /** Ensure that invalid task parameters generate errors. */
-  /*@Test*/ public void setInvalidTaskParameters() throws Exception {
+  @Test public void setInvalidTaskParameters() throws Exception {
     
     try {
       annotator.setTaskParameters(
@@ -252,7 +252,7 @@ public class TestMFA {
 
   /** Test alignment of fragment with pre-trained models/dictionary (english/english),
    * updating word token alignments and creating children. */
-  /*@Test*/ public void pretrainedModels() throws Exception {
+  @Test public void pretrainedModels() throws Exception {
     annotator.setSessionName("pretrainedModels");
     annotator.getStatusObservers().add(status->System.out.println(status));
     
@@ -311,7 +311,7 @@ public class TestMFA {
   
   /** Test alignment of fragment with pre-trained IPA models/dictionary
    * (english_ipa/english_uk_ipa), updating word token alignments and creating children. */
-  /*@Test*/ public void pretrainedIPAModels() throws Exception {
+  @Test public void pretrainedIPAModels() throws Exception {
     annotator.setSessionName("pretrainedModels");
     annotator.getStatusObservers().add(status->System.out.println(status));
     
@@ -369,7 +369,7 @@ public class TestMFA {
   }   
   
   /** Test alignment of full graph works. */
-  /*@Test*/ public void graphTransform() throws Exception {
+  @Test public void graphTransform() throws Exception {
     annotator.setSessionName("graphTransform");
     //annotator.getStatusObservers().add(status->System.out.println(status));
     
@@ -431,7 +431,7 @@ public class TestMFA {
 
   /** Test alignment of fragment with pre-trained models, adding alignments independent of 
    *  original word alignments. */
-  /*@Test*/ public void alignToPhraseLayers() throws Exception {
+  @Test public void alignToPhraseLayers() throws Exception {
     annotator.setSessionName("alignToPhraseLayers");
     //annotator.getStatusObservers().add(status->System.out.println(status));
     
@@ -520,7 +520,7 @@ public class TestMFA {
   }
 
   /** Test train/align modality. */
-  /*@Test*/ public void trainAndAlign() throws Exception {
+  @Test public void trainAndAlign() throws Exception {
     annotator.setSessionName("trainAndAlign");
     annotator.getStatusObservers().add(status->System.out.println(status));
     
