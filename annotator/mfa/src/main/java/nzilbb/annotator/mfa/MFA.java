@@ -457,11 +457,12 @@ public class MFA extends Annotator {
   public Collection<String> validDictionaryNames() throws TransformationException {
     String dictionariesRaw = mfa(true, "model", "download", "dictionary");
     String[] dictionaryLines = dictionariesRaw.split("\n");
-    Set<String> dictionaries = Arrays.stream(dictionaryLines)
+    List<String> dictionaries = Arrays.stream(dictionaryLines)
       .map(s->s.trim().replaceAll("^-","").trim())
       .filter(s->s.length() > 0) // no blank lines
       .filter(s->s.indexOf(":") < 0) // not the list header
-      .collect(Collectors.toSet());
+      .sorted()
+      .collect(Collectors.toList());
     return dictionaries;
   } // end of validDictionaryNames()
    
@@ -473,11 +474,12 @@ public class MFA extends Annotator {
   public Collection<String> validAcousticModels() throws TransformationException {
     String acousticModelsRaw = mfa(true, "model", "download", "acoustic");
     String[] acousticModelLines = acousticModelsRaw.split("\n");
-    Set<String> acousticModels = Arrays.stream(acousticModelLines)
+    List<String> acousticModels = Arrays.stream(acousticModelLines)
       .map(s->s.trim().replaceAll("^-","").trim())
       .filter(s->s.length() > 0) // no blank lines
       .filter(s->s.indexOf(":") < 0) // not the list header
-      .collect(Collectors.toSet());
+      .sorted()
+      .collect(Collectors.toList());
     return acousticModels;
   } // end of validAcousticModels()
   
@@ -1079,11 +1081,14 @@ public class MFA extends Annotator {
             }
           }
         } else { // pretrained
-          if (discOutput && dictionaryName.indexOf("_ipa") < 0) { // pretrained models use ARPAbet
-            mfaToPhonemes = new CMU2DISC();
-          }
-        }
-          
+          if (discOutput) {
+            if (dictionaryName.indexOf("_arpa") > 0) {
+              // some pretrained models use ARPAbet
+              mfaToPhonemes = new CMU2DISC();
+            }
+          } // discOutput
+        } // pretrained
+        
         // create input files
         fragments = createInputFiles(graphs, phonemesToMfa);
         setPercentComplete(15);
@@ -1119,7 +1124,8 @@ public class MFA extends Annotator {
                 }
                 String dictionary = dictionaryFile != null?dictionaryFile.getPath():dictionaryName;
                 if (!isCancelling()) {
-                  mfa(false, "align", "--clean", 
+                  mfa(false, "align", "--clean",
+                      "--output_format", "long_textgrid",
                       corpusDir.getPath(), dictionary, modelsName,
                       alignedDir.getPath(),
                       "--beam", ""+beam, "--retry-beam", ""+retryBeam);
@@ -1148,7 +1154,7 @@ public class MFA extends Annotator {
       }
       
       // cleanup
-      //IO.RecursivelyDelete(sessionWorkingDir);
+      IO.RecursivelyDelete(sessionWorkingDir);
       
       if (failure != null) throw failure;
       
