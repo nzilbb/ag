@@ -2,6 +2,14 @@
 getVersion(version => { // <- a function to execute when we have a response
     document.getElementById("version").innerHTML = version;
 });
+getText("mfaVersion", version => {
+    if (version) {
+        document.getElementById("mfaVersion").innerHTML = version;
+    } else {
+        document.getElementById("mfaVersion").innerHTML = "Could not determine MFA version";
+        document.getElementById("mfaVersion").className = "error";
+    }
+});
 
 function deleteLog(log) {
     getJSON(resourceForFunction("deleteLog",log), deleted => {
