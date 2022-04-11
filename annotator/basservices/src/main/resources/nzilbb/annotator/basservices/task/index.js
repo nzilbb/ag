@@ -125,7 +125,9 @@ getSchema(s => {
         // if there's no utterance tag layer defined (for MAUSBasic)
         if (utteranceTagLayerId.selectedIndex == 0
             // but there's a layer named after the task
-            && schema.layers[taskId]) {
+            && schema.layers[taskId]
+            // and this is the first time we're loading
+            && !text) {
             
             // select that layer by default
             utteranceTagLayerId.value = taskId;
