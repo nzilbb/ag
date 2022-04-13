@@ -1150,6 +1150,10 @@ public class BASAnnotator extends Annotator {
                         phone.getStart().setConfidence(Constants.CONFIDENCE_AUTOMATIC);
                         phone.getEnd().setConfidence(Constants.CONFIDENCE_AUTOMATIC);
                       }
+
+                      // create unaligned start/end anchors for assigning edited participant/turn
+                      Anchor unknownStart = edited.addAnchor(new Anchor());
+                      Anchor unknownEnd = edited.addAnchor(new Anchor());
                       
                       // rename "ORT-MAU" speaker 
                       Annotation participant = fragment.first(
@@ -1162,7 +1166,9 @@ public class BASAnnotator extends Annotator {
                         editedParticipant = edited.addAnnotation(
                           new Annotation()
                           .setLayerId(schema.getParticipantLayerId())
-                          .setLabel(participant.getLabel()));
+                          .setLabel(participant.getLabel())
+                          .setStartId(unknownStart.getId())
+                          .setEndId(unknownEnd.getId()));
                       }
                       editedParticipant.setLabel(participant.getLabel());
                       
@@ -1175,7 +1181,9 @@ public class BASAnnotator extends Annotator {
                           new Annotation()
                           .setLayerId(schema.getTurnLayerId())
                           .setLabel(turn.getLabel())
-                          .setParentId(editedParticipant.getId()));
+                          .setParentId(editedParticipant.getId())
+                          .setStartId(unknownStart.getId())
+                          .setEndId(unknownEnd.getId()));
                       }
                       editedTurn.setLabel(turn.getLabel());
                       //participantIds.add(turn.getParentId());

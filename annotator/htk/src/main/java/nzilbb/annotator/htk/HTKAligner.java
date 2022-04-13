@@ -1845,8 +1845,8 @@ public class HTKAligner extends Annotator {
               Annotation[] pronunciations = word.all(pronunciationLayerId);
               if (pronunciations.length == 0) {
                 setStatus(
-                  "Fragment contains unknown word \"" + orthography.getLabel()
-                  + "\" and will be ignored: \"" + fragment.getId() + "\"");
+                  "Fragment contains unknown word \"" + orthography
+                  + "\" ("+word+") and will be ignored: \"" + fragment.getId() + "\"");
                 return;
               }
               if (orthography != null
@@ -1910,7 +1910,11 @@ public class HTKAligner extends Annotator {
             utterances.add(fragment);            
             
           } catch (Exception x) {
-            setStatus("Error processing fragment : \"" + fragment + "\" : " + x);
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            x.printStackTrace(pw);
+
+            setStatus("Error processing fragment : \"" + fragment + "\" : " + x + "\n" + sw);
             // TODO?? setLastException(x);
           }
         }); // next utterance
@@ -3254,7 +3258,11 @@ public class HTKAligner extends Annotator {
             throw new TransformationException(
               this, "Original fragment not found: " + alignedFragment.getId());
           }
-          
+
+          // create unaligned start/end anchors for assigning to dummy participant/turn
+          Anchor unknownStart = alignedFragment.addAnchor(new Anchor());
+          Anchor unknownEnd = alignedFragment.addAnchor(new Anchor());
+
           // get ancestor annotations and add copies to the aligned fragment
           Annotation participant = fragment.first(schema.getParticipantLayerId());
           alignedFragment.getSchema().addLayer(
@@ -3263,7 +3271,9 @@ public class HTKAligner extends Annotator {
             new Annotation()
             .setLayerId(schema.getParticipantLayerId())
             .setId(participant.getId())
-            .setLabel(participant.getLabel()));
+            .setLabel(participant.getLabel())
+            .setStartId(unknownStart.getId())
+            .setEndId(unknownEnd.getId()));
           Annotation turn = fragment.first(schema.getTurnLayerId());
           alignedFragment.getSchema().addLayer(
             (Layer)schema.getTurnLayer().clone());
@@ -3272,7 +3282,9 @@ public class HTKAligner extends Annotator {
             .setLayerId(schema.getTurnLayerId())
             .setId(turn.getId())
             .setLabel(turn.getLabel())
-            .setParentId(turn.getParentId()));
+            .setParentId(turn.getParentId())
+            .setStartId(unknownStart.getId())
+            .setEndId(unknownEnd.getId()));
           participantIds.add(turn.getParentId());
           
           // set turn as parent of words

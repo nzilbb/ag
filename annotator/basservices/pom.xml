@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.basservices</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 
   <name>nzilbb.annotator.basservices</name>
   <description>Uses CLARIN-D's BAS web services for various annotation tasks.</description>
