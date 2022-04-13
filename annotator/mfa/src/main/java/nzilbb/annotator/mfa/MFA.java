@@ -1665,7 +1665,10 @@ public class MFA extends Annotator {
             }
           } // next phone
           alignedFragment.commit();
-          
+
+          // get start/end anchors for assigning to dummy participant/turn
+          String alignedStartId = alignedFragment.getStartId();
+          String alignedEndId = alignedFragment.getEndId();
           try {
             
             // get the original fragment
@@ -1674,7 +1677,7 @@ public class MFA extends Annotator {
               throw new TransformationException(
                 this, "Original fragment not found: " + alignedFragment.getId());
             }
-            
+
             // get ancestor annotations and add copies to the aligned fragment
             Annotation participant = fragment.first(schema.getParticipantLayerId());
             Annotation editedParticipant = alignedFragment.first(schema.getParticipantLayerId());
@@ -1684,7 +1687,9 @@ public class MFA extends Annotator {
               editedParticipant = alignedFragment.addAnnotation(
                 new Annotation()
                 .setLayerId(schema.getParticipantLayerId())
-                .setLabel(participant.getLabel()));
+                .setLabel(participant.getLabel())
+                .setStartId(alignedStartId)
+                .setEndId(alignedEndId));
             }
             editedParticipant.setLabel(participant.getLabel());
             Annotation turn = fragment.first(schema.getTurnLayerId());
@@ -1696,7 +1701,9 @@ public class MFA extends Annotator {
                 new Annotation()
                 .setLayerId(schema.getTurnLayerId())
                 .setLabel(turn.getLabel())
-                .setParentId(editedParticipant.getId()));
+                .setParentId(editedParticipant.getId())
+                .setStartId(alignedStartId)
+                .setEndId(alignedEndId));
             }
             editedTurn.setLabel(turn.getLabel());
             participantIds.add(turn.getParentId());
@@ -1741,7 +1748,7 @@ public class MFA extends Annotator {
             fragment.trackChanges();
             // merge changes
             merger.transform(fragment);
-            
+           
             if (utteranceTagLayerId != null) {
               Annotation[] timestamps = fragment.tagsOn​(utteranceTagLayerId);
               if (timestamps.length > 0) { // update the existing tag
