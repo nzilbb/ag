@@ -11,7 +11,8 @@
     <li> a manifest attribute called <q>nzilbb-ag-automation-Annotator</q> whose value
       is the fully-qualified class name of the Annotator-implementing class, </li>
     <li> <i> info.html </i> - a file in the directory containing the Annotator class
-      containing a description of the type of annotation tasks the annotator can do,
+      containing an HTML document fragment (i.e. not wrapped in &lt;html&gt; and &lt;body&gt;
+      tags) describing the type of annotation tasks the annotator can do,
       which is displayed to users before they install the module. </li>
     <li> <i> &hellip;/config/&hellip; </i> - a subdirectory of the directory containing
       the Annotator class, containing a general configuration web-app, if the annotator

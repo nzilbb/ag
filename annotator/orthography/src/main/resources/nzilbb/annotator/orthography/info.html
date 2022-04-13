@@ -1,37 +1,32 @@
-<!DOCTYPE html>
-<html><head><title>Orthography Standardizer</title></head>
-  <body>
-    <h1>Orthography Standardizer</h1>
+<h2>Orthography Standardizer</h2>
 
-    <p> The Orthography Standardizer annotator takes tokens from the word layer and
-      'cleans up' their labels, creating tags on a new layer with standardized labels,
-      which should be optimal for looking up lexicons, frequency computation, etc.
-      Specifically: </p>
+<p> The Orthography Standardizer annotator takes tokens from the word layer and
+  'cleans up' their labels, creating tags on a new layer with standardized labels,
+  which should be optimal for looking up lexicons, frequency computation, etc.
+  Specifically: </p>
 
-    <ol>
-      <li> the word label is converted to all lowercase, </li>
-      <li> standardizes characters sometimes produced by word-processing software -
-        e.g. em-dashes are converted to hyphens, 'smart-quote' apostrophes <tt> ’ </tt> are
-        converted to plain apostrophes <tt> ' </tt>, etc.</li>
-      <li> removes all punctuation characters <b> except: </b> <tt> ~ - ' : </tt> </li>
-      <li> trailing aprostrophes and hyphens are removed (leaving word-internal ones
-        intact), and </li>
-      <li> leading/trailing whitespace is trimmed off. </li>
-    </ol>
+<ol>
+  <li> the word label is converted to all lowercase, </li>
+  <li> standardizes characters sometimes produced by word-processing software -
+    e.g. em-dashes are converted to hyphens, 'smart-quote' apostrophes <tt> ’ </tt> are
+    converted to plain apostrophes <tt> ' </tt>, etc.</li>
+  <li> removes all punctuation characters <b> except: </b> <tt> ~ - ' : </tt> </li>
+  <li> trailing aprostrophes and hyphens are removed (leaving word-internal ones
+    intact), and </li>
+  <li> leading/trailing whitespace is trimmed off. </li>
+</ol>
 
-    <p> For example: </p> 
+<p> For example: </p> 
 
-    <table style="margin: auto;">
-      <tr><th> word   </th> <td> </td> <th> orthography </th></tr>
-      <tr><td> “Why   </td> <td>→</td> <td> why </td></tr>
-      <tr><td> hasn’t </td> <td>→</td> <td> hasn't </td></tr>
-      <tr><td> Inés   </td> <td>→</td> <td> inés </td></tr>
-      <tr><td> d~     </td> <td>→</td> <td> d~ </td></tr>
-      <tr><td> got —  </td> <td>→</td> <td> got </td></tr>
-      <tr><td> her    </td> <td>→</td> <td> her </td></tr>
-      <tr><td> X—ray  </td> <td>→</td> <td> x-ray </td></tr>
-      <tr><td> yet?”  </td> <td>→</td> <td> yet </td></tr>
-    </table>
-    
-  </body>
-</html>
+<table style="margin: auto;">
+  <tr><th> word   </th> <td> </td> <th> orthography </th></tr>
+  <tr><td> “Why   </td> <td>→</td> <td> why </td></tr>
+  <tr><td> hasn’t </td> <td>→</td> <td> hasn't </td></tr>
+  <tr><td> Inés   </td> <td>→</td> <td> inés </td></tr>
+  <tr><td> d~     </td> <td>→</td> <td> d~ </td></tr>
+  <tr><td> got —  </td> <td>→</td> <td> got </td></tr>
+  <tr><td> her    </td> <td>→</td> <td> her </td></tr>
+  <tr><td> X—ray  </td> <td>→</td> <td> x-ray </td></tr>
+  <tr><td> yet?”  </td> <td>→</td> <td> yet </td></tr>
+</table>
+

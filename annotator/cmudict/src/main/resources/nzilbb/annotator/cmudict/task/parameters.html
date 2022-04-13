@@ -1,0 +1,26 @@
+<h3>CMU Pronouncing Dictionary</h3>
+
+<p> This annotator tags words with their pronunciations according to the
+  <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">CMU Pronouncing dictionary</a>,
+  a machine-readable pronunciation dictionary for North American English that contains
+  over 125,000 words and their transcriptions. </p> 
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>tokenLayerId=orthography&pronunciationLayerId=phonemes&encoding=DISC</samp></p>
+
+<p> Parameters are: </p>
+<dl>
+  <dt> tokenLayerId </dt> <dd> Input layer from which words come. </dd>
+  <dt> transcriptLanguageLayerId </dt> <dd> Transcript attribute for overall language, so the
+    annotator can avoid tagging non-English transcripts.</dd>
+  <dt> phraseLanguageLayerId </dt> <dd> Layer for annotating phrases in a different
+    language, so the annotator can avoid tagging non-English phrases. </dd> 
+  <dt> pronunciationLayerId </dt> <dd> Output layer to which pronunciations are added. </dd>
+  <dt> encoding </dt> <dd> Which encoding system should be used for the resulting annotation
+    labels. Possible values are: <ul>
+      <li>"CMU" - CMU ARPAbet encoding, e.g. "T R AE2 N S K R IH1 P SH AH0 N"</li>
+      <li>"DISC" - CELEX DISC encoding, e.g. "tr{nskrIpS@n"</li></ul></dd> 
+  <dt> firstVariantOnly </dt> <dd> If there are multiple entries for the token, use
+    only the first one. Value should be "on" for <tt>true</tt>, and the parameter
+    should be absent to indicate <tt>false</tt>. </dd> 
+</dl>

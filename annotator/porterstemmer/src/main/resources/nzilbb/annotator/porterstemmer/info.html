@@ -1,50 +1,45 @@
-<!DOCTYPE html>
-<html><head><title>Porter Stemmer</title></head>
-  <body>
-    <h1>Porter Stemmer</h1>
+<h2>Porter Stemmer</h2>
 
-    <p> The Porter Stemmer annotator uses the Porter Algorithm to compute the stems of
-      English words from their orthography. It achieves this by systematically stripping
-      off or converting suffixes of word orthographies, in several passes, until a 'stem'
-      remains, which is the same as the 'stem' for other forms of the same word. </p>
+<p> The Porter Stemmer annotator uses the Porter Algorithm to compute the stems of
+  English words from their orthography. It achieves this by systematically stripping
+  off or converting suffixes of word orthographies, in several passes, until a 'stem'
+  remains, which is the same as the 'stem' for other forms of the same word. </p>
 
-    <p> It's important to realise that, in the words of M. F. Porter himself,
-      <q> the suffixes are being removed simply to improve IR performance, and not as a
-        linguistic exercise</q>.
-      It doesn't get the stems 100% right.  It is pretty good for regular words, e.g.</p> 
+<p> It's important to realise that, in the words of M. F. Porter himself,
+  <q> the suffixes are being removed simply to improve IR performance, and not as a
+    linguistic exercise</q>.
+  It doesn't get the stems 100% right.  It is pretty good for regular words, e.g.</p> 
 
-    <table>
-      <tr><td> walk    </td> <td>&rarr;</td> <td> walk </td></tr>
-      <tr><td> walks   </td> <td>&rarr;</td> <td> walk </td></tr>
-      <tr><td> walked  </td> <td>&rarr;</td> <td> walk </td></tr>
-      <tr><td> walking </td> <td>&rarr;</td> <td> walk </td></tr>
-    </table>
-    
-    <p>&hellip;however, it behaves less well for irregular cases, e.g.</p>
-    
-    <table>
-      <tr><td> sing    </td> <td>&rarr;</td> <td>    sing     </td></tr>
-      <tr><td> sings   </td> <td>&rarr;</td> <td>    sing     </td></tr>
-      <tr><td> sang    </td> <td>&rarr;</td> <td><b> sang </b></td></tr>
-      <tr><td> sung    </td> <td>&rarr;</td> <td><b> sung </b></td></tr>
-      <tr><td> singing </td> <td>&rarr;</td> <td>    sing     </td></tr>
-    </table>
-    
-    <p>However, it's also worth noting that it will do better than lexicon-based methods
-    when it comes to new words, e.g.</p> 
-    
-    <table>
-      <tr><td> blog     </td> <td>&rarr;</td> <td> blog </td></tr>
-      <tr><td> blogs    </td> <td>&rarr;</td> <td> blog </td></tr>
-      <tr><td> blogging </td> <td>&rarr;</td> <td> blog </td></tr>
-      <tr><td> blogged  </td> <td>&rarr;</td> <td> blog </td></tr>
-    </table>
-    
-    <p>For more information about the algorithm, see
-      <em>Porter, 1980, An algorithm for suffix stripping, Program, Vol. 14, no. 3, pp 130-137,</em>
-      
-      or <a href="http://www.tartarus.org/~martin/PorterStemmer">
-        http://www.tartarus.org/~martin/PorterStemmer</a>
-    </p>
-  </body>
-</html>
+<table>
+  <tr><td> walk    </td> <td>&rarr;</td> <td> walk </td></tr>
+  <tr><td> walks   </td> <td>&rarr;</td> <td> walk </td></tr>
+  <tr><td> walked  </td> <td>&rarr;</td> <td> walk </td></tr>
+  <tr><td> walking </td> <td>&rarr;</td> <td> walk </td></tr>
+</table>
+
+<p>&hellip;however, it behaves less well for irregular cases, e.g.</p>
+
+<table>
+  <tr><td> sing    </td> <td>&rarr;</td> <td>    sing     </td></tr>
+  <tr><td> sings   </td> <td>&rarr;</td> <td>    sing     </td></tr>
+  <tr><td> sang    </td> <td>&rarr;</td> <td><b> sang </b></td></tr>
+  <tr><td> sung    </td> <td>&rarr;</td> <td><b> sung </b></td></tr>
+  <tr><td> singing </td> <td>&rarr;</td> <td>    sing     </td></tr>
+</table>
+
+<p>However, it's also worth noting that it will do better than lexicon-based methods
+  when it comes to new words, e.g.</p> 
+
+<table>
+  <tr><td> blog     </td> <td>&rarr;</td> <td> blog </td></tr>
+  <tr><td> blogs    </td> <td>&rarr;</td> <td> blog </td></tr>
+  <tr><td> blogging </td> <td>&rarr;</td> <td> blog </td></tr>
+  <tr><td> blogged  </td> <td>&rarr;</td> <td> blog </td></tr>
+</table>
+
+<p>For more information about the algorithm, see
+  <em>Porter, 1980, An algorithm for suffix stripping, Program, Vol. 14, no. 3, pp 130-137,</em>
+  
+  or <a href="http://www.tartarus.org/~martin/PorterStemmer">
+    http://www.tartarus.org/~martin/PorterStemmer</a>
+</p>
