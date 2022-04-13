@@ -1664,11 +1664,13 @@ public class MFA extends Annotator {
               phone.destroy();
             }
           } // next phone
+
+          // create unaligned start/end anchors for assigning to dummy participant/turn
+          Anchor unknownStart = alignedFragment.addAnchor(new Anchor());
+          Anchor unknownEnd = alignedFragment.addAnchor(new Anchor());
+
           alignedFragment.commit();
 
-          // get start/end anchors for assigning to dummy participant/turn
-          String alignedStartId = alignedFragment.getStartId();
-          String alignedEndId = alignedFragment.getEndId();
           try {
             
             // get the original fragment
@@ -1688,8 +1690,8 @@ public class MFA extends Annotator {
                 new Annotation()
                 .setLayerId(schema.getParticipantLayerId())
                 .setLabel(participant.getLabel())
-                .setStartId(alignedStartId)
-                .setEndId(alignedEndId));
+                .setStartId(unknownStart.getId())
+                .setEndId(unknownEnd.getId()));
             }
             editedParticipant.setLabel(participant.getLabel());
             Annotation turn = fragment.first(schema.getTurnLayerId());
@@ -1702,8 +1704,8 @@ public class MFA extends Annotator {
                 .setLayerId(schema.getTurnLayerId())
                 .setLabel(turn.getLabel())
                 .setParentId(editedParticipant.getId())
-                .setStartId(alignedStartId)
-                .setEndId(alignedEndId));
+                .setStartId(unknownStart.getId())
+                .setEndId(unknownEnd.getId()));
             }
             editedTurn.setLabel(turn.getLabel());
             participantIds.add(turn.getParentId());
