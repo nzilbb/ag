@@ -1,0 +1,63 @@
+<h3>MFA</h3>
+
+<p> The MFA annotator integrates with the
+  <a href="https://montrealcorpustools.github.io/Montreal-Forced-Aligner/">
+    Montreal Forced Aligner</a>, which can use words with phonemic transcriptions, and
+  the corresponding audio, to force-align words and phones; i.e. determine the start
+  and end time of each speech sound within each word, and thus the start/end times
+  of the words. </p>
+
+<p> This API provides access to information about the currently installed version of the
+  montreal-forced-aligner conda package, and also provides access to logs. </p>
+
+<p> The following GET http enpoints are available:</p>
+<dl>
+  <dt><tt>mfaVersion</tt></dt> <dd>Provide the version number of the montreal-forced-aligner
+    package currently installed. The response is plain text; the raw output from running
+    the command:
+    <tt>mfa version</tt></dd>
+  <dt><tt>validDictionaryNames</tt></dt> <dd>List valid pronunciation dictionary
+    names. The response is a JSON-encoded array; the parsed output from running the
+    command:
+    <tt>model download dictionary</tt></dd> 
+  <dt><tt>validAcousticModels</tt></dt> <dd>List valid acoustic model names. The response
+    is a JSON-encoded array; the parsed output from running the command:
+    <tt>model download acoustic</tt></dd> 
+  <dt><tt>listLogs</tt></dt> <dd>List logs from forced-alignment runs. The response is a
+    JSON-encoded array of log file names.</dd>
+  <dt><tt>downloadLog?<var>log</var></tt></dt> <dd>Downloads the given log file.</dd>
+  <dt><tt>deleteLog?<var>log</var></tt></dt> <dd>Deletes the given log file.</dd>
+  <dt><tt>mappingToCsv?<var>id</var></tt></dt> <dd>Provides access to the mapping between the given two
+    layers, as a CSV stream. The query string should be a mapping ID returned
+    by <i>listMappings</i>. The response is a CSV file containing all edit steps
+    mapping all source annotations to target annotations, with the following fields:
+    <ul><li><i>transcript</i> - Transcript ID</li>
+      <li><i>scope</i> - Parent utterance/word ID </li>
+      <li><i>URL</i> - URL to the utterance </li>
+      <li><i>step</i> - The edit step index in the sequence </li>
+      <li><i>sourceLayer</i> - Layer of the source annotations </li>
+      <li><i>sourceParentId</i> - ID of the parent of source annotation, if this is a sub-mapping </li>
+      <li><i>sourceParentLabel</i> - Label of the parent of source annotation, if this is a sub-mapping </li>
+      <li><i>sourceId</i> - ID of the source annotation </li>
+      <li><i>sourceLabel</i> - Label of the source annotation </li>
+      <li><i>sourceStart</i> - Start offset of the source annotation </li>
+      <li><i>sourceEnd</i> - End offset of the source annotation </li>
+      <li><i>targetLayer</i> - Layer of the target annotations </li>
+      <li><i>targetParentId</i> - ID of the parent of target annotation, if this is a sub-mapping </li>
+      <li><i>targetParentLabel</i> - Label of the parent of target annotation, if this is a sub-mapping </li>
+      <li><i>targetId</i> - ID of the target annotation </li>
+      <li><i>targetLabel</i> - Label of the target annotation </li>
+      <li><i>targetStart</i> - Start offset of the target annotation </li>
+      <li><i>targetEnd</i> - End offset of the target annotation </li>
+      <li><i>operation</i> - The edit operation:
+        <tt>+</tt> for insert, <tt>-</tt> for delete, <tt>!</tt> for change, <tt>=</tt> for no change </li>
+      <li><i>distance</i> - Distance (cost) for this edit step </li>
+      <li><i>hierarchy</i> - This mappings position in the sub-mapping hierarchy:
+        <tt>parent</tt>, <tt>child</tt>, or <tt>none</tt> </li>
+      <li><i>overlapRate</i> - As per Paulo and Oliveira (2004):
+        0 means no overlap at all, 1 means they complete overlap </li> </ul>
+  </dd>
+  <dt><tt>deleteMapping?<var>id</var></tt></dt> <dd>Deletes all data associated with the given
+    mapping. The query string should be a mapping ID returned by <i>listMappings</i>.</dd>
+</dl>
+
