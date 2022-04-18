@@ -7,7 +7,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.ag</artifactId>
   <name>nzilbb.ag</name>
-  <version>1.0.6</version>
+  <version>1.0.7</version>
   <packaging>jar</packaging>
   <description>Implementation of an Annotation Graph API for linguistic annotations.</description>
   <url>https://github.com/nzilbb/ag/</url>
@@ -147,7 +147,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <!--trimStackTrace>false</trimStackTrace-->
+          <trimStackTrace>false</trimStackTrace>
         </configuration>
       </plugin>
       <plugin>

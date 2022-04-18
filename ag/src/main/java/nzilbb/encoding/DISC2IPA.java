@@ -37,19 +37,19 @@ public class DISC2IPA extends PhonemeTranslator {
    private static HashMap<Character,String> map;
    
    /**
-    * Delimiter between phonemes, if any.
+    * Delimiter between IPA phonemes, if any.
     * @see #getDelimiter()
     * @see #setDelimiter(String)
     */
    protected String delimiter;
    /**
-    * Getter for {@link #delimiter}: Delimiter between phonemes, if any.
-    * @return Delimiter between phonemes, if any.
+    * Getter for {@link #delimiter}: Delimiter between IPA phonemes, if any.
+    * @return Delimiter between IPA phonemes, if any.
     */
    public String getDelimiter() { return delimiter; }
    /**
-    * Setter for {@link #delimiter}: Delimiter between phonemes, if any.
-    * @param newDelimiter Delimiter between phonemes, if any.
+    * Setter for {@link #delimiter}: Delimiter between IPA phonemes, if any.
+    * @param newDelimiter Delimiter between IPA phonemes, if any.
     */
    public DISC2IPA setDelimiter(String newDelimiter) { delimiter = newDelimiter; return this; }
    

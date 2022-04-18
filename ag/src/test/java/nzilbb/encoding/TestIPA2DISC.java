@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -25,10 +25,11 @@ package nzilbb.encoding;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import nzilbb.encoding.DISC2IPA;
+import nzilbb.encoding.IPA2DISC;
 
-public class TestDISC2IPA {
-   
+public class TestIPA2DISC {
+
+  /** Ensure that two-way DISC2IPA transcriptions are correctly converted.  */
   @Test public void codebook() throws Exception {
     String[] aCodebook = {
       "&", /* <-> */"a",
@@ -73,7 +74,6 @@ public class TestDISC2IPA {
       "4", /* <-> */"ɔɪ", // CHOICE      - toy/boy
       "p", /* <-> */"p",
       "r", /* <-> */"ɹ",
-      "R", /* <-> */"ɹ", // possible linking R
       "s", /* <-> */"s",
       "S", /* <-> */"ʃ",
       "t", /* <-> */"t",
@@ -111,32 +111,43 @@ public class TestDISC2IPA {
       "ö", /* <-> */"ö" // UNICODE letter
     };
 
-    DISC2IPA translator = new DISC2IPA();
-    assertEquals("Encoding name", "DISC", translator.getSourceEncoding());
-    assertEquals("Encoding name", "IPA", translator.getDestinationEncoding());
+    IPA2DISC translatorDelimiter = new IPA2DISC().setDelimiter(" ");
+    IPA2DISC translatorNoDelimiter = new IPA2DISC();
+    assertEquals("Encoding name", "IPA", translatorDelimiter.getSourceEncoding());
+    assertEquals("Encoding name", "DISC", translatorDelimiter.getDestinationEncoding());
 
     StringBuffer sDISC = new StringBuffer(aCodebook.length/2);
     StringBuffer sIPADelimited = new StringBuffer(3*aCodebook.length/2);
     // for each pair of elements into the array
     for (int i = 0; i < aCodebook.length; i += 2) {
       // check  mapping
-      assertEquals("DISC " + aCodebook[i], aCodebook[i+1], translator.apply(aCodebook[i]));
-        
+      assertEquals("IPA (delim) " + aCodebook[i+1],
+                   aCodebook[i], translatorDelimiter.apply(aCodebook[i+1]));
+      assertEquals("IPA (no delim) " + aCodebook[i+1],
+                   aCodebook[i], translatorNoDelimiter.apply(aCodebook[i+1]));
+      
       // accumulate the whole set into strings
       sDISC.append(aCodebook[i]);
       if (sIPADelimited.length() > 0) sIPADelimited.append(" ");
       sIPADelimited.append(aCodebook[i+1]);
     } // next pair
     String sIPANoDelimiter = sIPADelimited.toString().replace(" ","");
-      
+    
     assertEquals("No delimiter",
-                 sIPANoDelimiter, translator.apply(sDISC.toString()));
-    translator.setDelimiter(" ");
+                 sDISC.toString(), translatorNoDelimiter.apply(sIPANoDelimiter));
     assertEquals("Space delimiter",
-                 sIPADelimited.toString(), translator.apply(sDISC.toString()));
-  }   
+                 sDISC.toString(), translatorDelimiter.apply(sIPADelimited.toString()));
+  }
+
   
+  @Test public void oneway() { 
+    IPA2DISC translator = new IPA2DISC().setDelimiter(" ");
+    assertEquals("LATIN SMALL LETTER TURNED E instead of schwa",
+                 "@5789",
+                 translator.apply("ǝ ǝʊ ɪǝ ɛǝ ʊǝ"));
+  }
+   
   public static void main(String args[]) {
-    org.junit.runner.JUnitCore.main("nzilbb.encoding.TestDISC2IPA");
+    org.junit.runner.JUnitCore.main("nzilbb.encoding.TestIPA2DISC");
   }
 }
