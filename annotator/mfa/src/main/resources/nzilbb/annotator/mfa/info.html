@@ -81,3 +81,16 @@
   <li> Install the Montreal Forced Aligner by specifying a path to the environment <br>
     <tt>conda create -c conda-forge -p C:\ProgramData\Miniconda3\envs\aligner montreal-forced-aligner</tt></li>
 </ol>
+
+<h2> Upgrading Montreal Forced Aligner </h2>
+
+<p> If the Montreal Forced Aligner is already installed an in use with the MFA Annotator,
+  but you want to upgrade to its latest version, you can use the same command as for
+  installing it, but use <tt>update</tt> instead of <tt>create</tt> - i.e.</p>
+
+<p> On Linux: 
+  <br><tt>/opt/conda/bin/conda update -n aligner -c conda-forge montreal-forced-aligner</tt>
+</p>
+<p> On Windows: 
+  <br><tt>conda update -c conda-forge -p C:\ProgramData\Miniconda3\envs\aligner montreal-forced-aligner</tt>
+</p>
