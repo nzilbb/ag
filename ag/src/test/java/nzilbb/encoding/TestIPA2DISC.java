@@ -147,8 +147,9 @@ public class TestIPA2DISC {
                  translator.apply("ǝ ǝʊ ɪǝ ɛǝ ʊǝ"));
 
     assertEquals("MFA labels",
-                 "26bjdj_1fjkmjppjttjJvj@AQ45E3jglP}j",
-                 translator.apply("aj aw bʲ dʲ dʒ ej fʲ kʰ mʲ pʰ pʲ tʰ tʲ tʃ vʲ ɐ ɑ ɒː ɔj əw ɛ ɜ ɟ ɡ ɫ ɫ̩ ʉː ʎ"));
+                 "26bjdj_1fjkmjppjttjJvjVAQ45E3jglP}j",
+                 translator.apply(
+                   "aj aw bʲ dʲ dʒ ej fʲ kʰ mʲ pʰ pʲ tʰ tʲ tʃ vʲ ɐ ɑ ɒː ɔj əw ɛ ɜ ɟ ɡ ɫ ɫ̩ ʉː ʎ"));
 
   }
    

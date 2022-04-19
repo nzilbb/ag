@@ -181,7 +181,7 @@ public class IPA2DISC extends PhonemeTranslator {
       map.put("tʲ", "tj");
       map.put("tʃ", "J");
       map.put("vʲ", "vj");
-      map.put("ɐ", "@");
+      map.put("ɐ", "V");
       map.put("ɒː", "Q");
       map.put("ɔj", "4");
       map.put("əw", "5");
