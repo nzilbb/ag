@@ -166,9 +166,12 @@ public class IPA2DISC extends PhonemeTranslator {
       // MFA phoneme labels
       // aj aw b bʲ c cʰ d dʒ dʲ ej f fʲ h i iː j k kʰ l m mʲ m̩ n n̩ p pʰ pʲ s t tʃ tʰ tʲ
       // v vʲ w z æ ç ð ŋ ɐ ɑ ɑː ɒ ɒː ɔj ə əw ɛ ɛː ɜ ɜː ɟ ɡ ɪ ɫ ɫ̩ ɱ ɲ ɹ ʃ ʉ ʉː ʊ ʎ ʒ ʔ θ
+      map.put("aj", "2");
+      map.put("aw", "6");
       map.put("bʲ", "bj");
       map.put("dʲ", "dj");
       map.put("dʒ", "_");
+      map.put("ej", "1");
       map.put("fʲ", "fj");
       map.put("kʰ", "k");
       map.put("mʲ", "mj");
@@ -180,8 +183,8 @@ public class IPA2DISC extends PhonemeTranslator {
       map.put("vʲ", "vj");
       map.put("ɐ", "@");
       map.put("ɒː", "Q");
-      map.put("ɔj", "$j");
-      map.put("əw", "@w");
+      map.put("ɔj", "4");
+      map.put("əw", "5");
       map.put("ɜ", "3");
       map.put("ɟ", "j");
       map.put("ɡ", "g");
