@@ -76,8 +76,8 @@ import nzilbb.ag.util.Merger;
 import nzilbb.configure.ParameterSet;
 import nzilbb.encoding.CMU2DISC;
 import nzilbb.encoding.DISC2CMU;
-import nzilbb.encoding.DISC2HTK;
-import nzilbb.encoding.HTK2DISC;
+import nzilbb.encoding.DISC2IPA;
+import nzilbb.encoding.IPA2DISC;
 import nzilbb.encoding.PhonemeTranslator;
 import nzilbb.formatter.praat.TextGridSerialization;
 import nzilbb.util.Execution;
@@ -93,7 +93,7 @@ import nzilbb.util.IO;
 @UsesFileSystem @UsesGraphStore
 public class MFA extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.5"; }
+  public String getMinimumApiVersion() { return "1.0.7"; }
   
   /**
    * Path to the mfa executable. 
@@ -1072,8 +1072,8 @@ public class MFA extends Annotator {
           if (!multilingualIPA) { // (pass through IPA labels as-is)
             // convert output to DISC?
             if (discDictionary) {           
-              phonemesToMfa = new DISC2HTK();
-              mfaToPhonemes = new HTK2DISC();
+              phonemesToMfa = new DISC2IPA().setDelimiter(" ");
+              mfaToPhonemes = new IPA2DISC().setDelimiter(" ");
             } else {
               if (discOutput) {
                 mfaToPhonemes = new CMU2DISC();
@@ -1102,11 +1102,13 @@ public class MFA extends Annotator {
               setPercentComplete(30); // (up to 5 phases of 10% each arrives at 80%)
               if (multilingualIPA) { // --multilingual_ipa
                 mfa(false, "train", "--clean", "--multilingual_ipa",
+                    "--output_format", "long_textgrid",
                     corpusDir.getPath(), dictionaryFile.getPath(),
                     alignedDir.getPath(),
                     "--beam", ""+beam, "--retry-beam", ""+retryBeam);
               } else {
                 mfa(false, "train", "--clean", 
+                    "--output_format", "long_textgrid",
                     corpusDir.getPath(), dictionaryFile.getPath(),
                     alignedDir.getPath(),
                     "--beam", ""+beam, "--retry-beam", ""+retryBeam);
@@ -1256,11 +1258,11 @@ public class MFA extends Annotator {
   /**
    * Creates data files MFA needs for training.
    * @param graphs Original utterances to align.
-   * @param phonemesToHtk Translates phoneme labels to HTK-compatible ones, if necessary.
+   * @param phonemesToIPA Translates phoneme labels to IPA, if necessary.
    * @return The utterances successfully processed.
    * @throws TransformationException
    */
-  public List<Graph> createInputFiles(Stream<Graph> graphs, PhonemeTranslator phonemesToHtk)
+  public List<Graph> createInputFiles(Stream<Graph> graphs, PhonemeTranslator phonemesToIPA)
     throws TransformationException {
     setStatus("Creating input files...");
     try {
@@ -1343,7 +1345,7 @@ public class MFA extends Annotator {
                     for (Annotation pronunciation : pronunciations) {
                       String sPhonology = pronunciation.getLabel();
                       if (!prons.contains(sPhonology)) {
-                        prons.add(phonemesToHtk.apply(sPhonology));
+                        prons.add(phonemesToIPA.apply(sPhonology));
                       }
                     } // next pronunciation
                   } // pronunciation is present
