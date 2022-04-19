@@ -145,6 +145,11 @@ public class TestIPA2DISC {
     assertEquals("LATIN SMALL LETTER TURNED E instead of schwa",
                  "@5789",
                  translator.apply("ǝ ǝʊ ɪǝ ɛǝ ʊǝ"));
+
+    assertEquals("MFA labels",
+                 "bjdj_fjkmjppjttjJvj@AQ$j@wE3jglP}j",
+                 translator.apply("bʲ dʲ dʒ fʲ kʰ mʲ pʰ pʲ tʰ tʲ tʃ vʲ ɐ ɑ ɒː ɔj əw ɛ ɜ ɟ ɡ ɫ ɫ̩ ʉː ʎ"));
+
   }
    
   public static void main(String args[]) {

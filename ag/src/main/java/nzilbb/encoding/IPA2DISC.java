@@ -38,7 +38,7 @@ import java.util.HashMap;
  */
 public class IPA2DISC extends PhonemeTranslator {
 
-  private static HashMap<String,Character> map;
+  private static HashMap<String,String> map;
    
   /**
    * Delimiter between IPA phonemes, if any.
@@ -66,104 +66,130 @@ public class IPA2DISC extends PhonemeTranslator {
       
     // populate the static map of individual phones, if it's not already initialized...
     if (map == null) {
-      map = new HashMap<String,Character>();
+      map = new HashMap<String,String>();
 
       // reverse mappings from DISC2IPA ...
          
-      map.put("a", '&');
-      map.put("ɑː", '#');
-      map.put("ɑ", 'A');
+      map.put("a", "&");
+      map.put("ɑː", "#");
+      map.put("ɑ", "A");
       
-      map.put("æ̃", 'c');
-      map.put("ɑ̃ː", 'q');
-      map.put("æ̃ː", '0');
-      map.put("ɒ̃ː", '~');
+      map.put("æ̃", "c");
+      map.put("ɑ̃ː", "q");
+      map.put("æ̃ː", "0");
+      map.put("ɒ̃ː", "~");
          
       // x is now /x/ and C is /ç/
          
       // syllabics
-      map.put("ŋ̩", 'C');
-      map.put("m̩", 'F');
-      map.put("n̩", 'H');
-      map.put("l̩", 'P');
+      map.put("ŋ̩", "C");
+      map.put("m̩", "F");
+      map.put("n̩", "H");
+      map.put("l̩", "P");
          
       //to be strictly correct
-      map.put("ɹ", 'r');
-      map.put("ɡ", 'g'); // this is LATIN SMALL LETTER SCRIPT G which is always straight-backed
+      map.put("ɹ", "r");
+      map.put("ɡ", "g"); // this is LATIN SMALL LETTER SCRIPT G which is always straight-backed
          
-      map.put("uː", 'u');
-      map.put("iː", 'i');
-      map.put("yː", 'y');
-      map.put("oː", 'o');
-      map.put("ɛː", ')');
-      map.put("øː", '|');
-      map.put("œ̃ː", '^');
-      map.put("œ", '/');      
+      map.put("uː", "u");
+      map.put("iː", "i");
+      map.put("yː", "y");
+      map.put("oː", "o");
+      map.put("ɛː", ")");
+      map.put("øː", "|");
+      map.put("œ̃ː", "^");
+      map.put("œ", "/");      
          
       // diphthongs
-      map.put("eɪ", '1');
-      map.put("aɪ", '2');
-      map.put("əʊ", '5');
-      map.put("ɔɪ", '4');
-      map.put("aʊ", '6');
-      map.put("ɪə", '7');
-      map.put("ɛə", '8');
-      map.put("ʊə", '9');
-      map.put("ai", 'W');
-      map.put("au", 'B');
-      map.put("ɔy", 'X');
+      map.put("eɪ", "1");
+      map.put("aɪ", "2");
+      map.put("əʊ", "5");
+      map.put("ɔɪ", "4");
+      map.put("aʊ", "6");
+      map.put("ɪə", "7");
+      map.put("ɛə", "8");
+      map.put("ʊə", "9");
+      map.put("ai", "W");
+      map.put("au", "B");
+      map.put("ɔy", "X");
          
       // affricates
-      map.put("d͜ʒ", '_');
-      map.put("t͜ʃ", 'J');
+      map.put("d͜ʒ", "_");
+      map.put("t͜ʃ", "J");
          
-      map.put("ɛ", 'E');
+      map.put("ɛ", "E");
          
-      map.put("t͜s", '=');
+      map.put("t͜s", "=");
          
       // glottal stop
-      map.put("ʔ", '?');
+      map.put("ʔ", "?");
       // flap
-      map.put("œy", 'L');
+      map.put("œy", "L");
          
       // consonants
-      map.put("ŋ", 'N');
-      map.put("θ", 'T');
-      map.put("ð", 'D');
-      map.put("ʃ", 'S');
-      map.put("ʒ", 'Z');
-      map.put("pf", '+');
+      map.put("ŋ", "N");
+      map.put("θ", "T");
+      map.put("ð", "D");
+      map.put("ʃ", "S");
+      map.put("ʒ", "Z");
+      map.put("pf", "+");
          
       // vowels
-      map.put("ɜː", '3');
-      map.put("æ", '{');
-      map.put("ʉ", '}');
-      map.put("ɔː", '$');
-      map.put("ɪ", 'I');
-      map.put("ʏ", 'Y');
-      map.put("ʌ", 'V');
-      map.put("ɒ", 'Q');
-      map.put("ɔ", 'O');
-      map.put("ʊ", 'U');
-      map.put("ə", '@');
+      map.put("ɜː", "3");
+      map.put("æ", "{");
+      map.put("ʉ", "}");
+      map.put("ɔː", "$");
+      map.put("ɪ", "I");
+      map.put("ʏ", "Y");
+      map.put("ʌ", "V");
+      map.put("ɒ", "Q");
+      map.put("ɔ", "O");
+      map.put("ʊ", "U");
+      map.put("ə", "@");
 
       // other mappings...
 
       // afficate ligatures
-      map.put("ʤ", '_');
-      map.put("ʧ", 'J');
+      map.put("ʤ", "_");
+      map.put("ʧ", "J");
       // and over-joined
-      map.put("d͡ʒ", '_');
-      map.put("t͡ʃ", 'J');
+      map.put("d͡ʒ", "_");
+      map.put("t͡ʃ", "J");
          
       // LATIN SMALL LETTER TURNED E instead of schwa
-      map.put("ǝ", '@');
-      map.put("ǝʊ", '5');
-      map.put("ɪǝ", '7');
-      map.put("ɛǝ", '8');
-      map.put("ʊǝ", '9');
+      map.put("ǝ", "@");
+      map.put("ǝʊ", "5");
+      map.put("ɪǝ", "7");
+      map.put("ɛǝ", "8");
+      map.put("ʊǝ", "9");
 
-      // TODO MFA characters         
+      // MFA phoneme labels
+      // aj aw b bʲ c cʰ d dʒ dʲ ej f fʲ h i iː j k kʰ l m mʲ m̩ n n̩ p pʰ pʲ s t tʃ tʰ tʲ
+      // v vʲ w z æ ç ð ŋ ɐ ɑ ɑː ɒ ɒː ɔj ə əw ɛ ɛː ɜ ɜː ɟ ɡ ɪ ɫ ɫ̩ ɱ ɲ ɹ ʃ ʉ ʉː ʊ ʎ ʒ ʔ θ
+      map.put("bʲ", "bj");
+      map.put("dʲ", "dj");
+      map.put("dʒ", "_");
+      map.put("fʲ", "fj");
+      map.put("kʰ", "k");
+      map.put("mʲ", "mj");
+      map.put("pʰ", "p");
+      map.put("pʲ", "pj");
+      map.put("tʰ", "t");
+      map.put("tʲ", "tj");
+      map.put("tʃ", "J");
+      map.put("vʲ", "vj");
+      map.put("ɐ", "@");
+      map.put("ɒː", "Q");
+      map.put("ɔj", "$j");
+      map.put("əw", "@w");
+      map.put("ɜ", "3");
+      map.put("ɟ", "j");
+      map.put("ɡ", "g");
+      map.put("ɫ", "l");
+      map.put("ɫ̩", "P");
+      map.put("ʉː", "}");
+      map.put("ʎ", "j");
+      
     }
   } // end of constructor
   
