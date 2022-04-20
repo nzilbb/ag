@@ -270,7 +270,8 @@ public class Anchor
       for (Annotation startsHere : starting)
       {
          // check it still uses this anchor
-         if (startsHere.getStartId().equals(oldId))
+         if (startsHere.getStartId() != null
+             && startsHere.getStartId().equals(oldId))
          {
             startsHere.setStartId(id);
          }
@@ -278,7 +279,8 @@ public class Anchor
       for (Annotation endsHere : ending)
       {
          // check it still uses this anchor
-         if (endsHere.getEndId().equals(oldId))
+         if (endsHere.getEndId() != null
+             && endsHere.getEndId().equals(oldId))
          {
             endsHere.setEndId(id);
          }
