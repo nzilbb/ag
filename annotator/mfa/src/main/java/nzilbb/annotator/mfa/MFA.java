@@ -1819,7 +1819,8 @@ public class MFA extends Annotator {
         } // unaligned.txt
       } // next file
       setStatus("Finished updating alignments.");
-    } catch (Exception x) {
+    } catch (Throwable x) {
+      setStatus("updateAlignments: " + x);
       throw new TransformationException(this, x);
     }
   } // end of updateAlignments()

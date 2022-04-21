@@ -3388,7 +3388,7 @@ public class HTKAligner extends Annotator {
           if (merger.getLog() != null) for (String l : merger.getLog()) setStatus(l);
           if (isCancelling()) break;
           if (consumer != null) consumer.accept(fragment);
-        } catch (Exception x) {
+        } catch (Throwable x) {
           setStatus("Could not process " + alignedFragment.getId() + ": " + x);
           StringWriter sw = new StringWriter();
           PrintWriter pw = new PrintWriter(sw);
