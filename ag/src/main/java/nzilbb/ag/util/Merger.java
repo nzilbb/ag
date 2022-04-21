@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.function.Consumer;
 import nzilbb.ag.*;
 import nzilbb.ag.cli.Transform;
 import nzilbb.ag.serialize.SerializationException;
@@ -124,6 +125,23 @@ public class Merger extends Transform implements GraphTransformer {
    * @param newLog Messages for debugging.
    */
   protected Merger setLog(Vector<String> newLog) { log = newLog; return this; }
+
+  /**
+   * Listeners for log messages.
+   * @see #getLogObservers()
+   * @see #setLogObservers(List)
+   */
+  protected List<Consumer<String>> logObservers = new Vector<Consumer<String>>();
+  /**
+   * Getter for {@link #logObservers}: Listeners for log messages.
+   * @return Listeners for log messages.
+   */
+  public List<Consumer<String>> getLogObservers() { return logObservers; }
+  /**
+   * Setter for {@link #logObservers}: Listeners for log messages.
+   * @param newLogObservers Listeners for log messages.
+   */
+  public Merger setLogObservers(List<Consumer<String>> newLogObservers) { logObservers = newLogObservers; return this; }
    
   /**
    * The edited version of the graph.
@@ -2953,9 +2971,10 @@ public class Merger extends Transform implements GraphTransformer {
         } else {
           s.append(m.toString());
         }
-      }	 
-      log.add(s.toString());
-      System.err.println(s.toString());
+      }
+      String message = s.toString();
+      log.add(message);
+      for (Consumer<String> observer : logObservers) observer.accept(message);
     }
   } // end of log()
 
