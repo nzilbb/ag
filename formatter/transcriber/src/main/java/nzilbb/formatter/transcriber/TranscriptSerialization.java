@@ -1599,8 +1599,10 @@ public class TranscriptSerialization
         if (turn.getSpeakerId().length() == 0) {
           turn.setSpeakerId(mSpeakerToSpk.get(anThisTurn.getLabel()));
         } else { // more than one speaker
-          turn.setSpeakerId(turn.getSpeakerId() 
-                            + " " + mSpeakerToSpk.get(anThisTurn.getLabel()));
+          if (turn.getSpeakerId().indexOf(mSpeakerToSpk.get(anThisTurn.getLabel())) < 0) {
+            turn.setSpeakerId(turn.getSpeakerId() 
+                              + " " + mSpeakerToSpk.get(anThisTurn.getLabel()));
+          }
         }
         consumed.add(anThisTurn.getId());
       } // next turn

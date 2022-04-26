@@ -44,8 +44,10 @@
 <Sync time="41.000"/>You need to put your gumboots on.
 <Sync time="46.000"/>It's too dark^
 </Turn>
-<Turn speaker="spk2" startTime="47.000" endTime="52.000">
-<Sync time="47.000"/>What happened in this one?
+<Turn speaker="spk2 spk1" startTime="47.000" endTime="52.000">
+<Sync time="47.000"/>
+<Who nb="1"/>&lt;What happened in this one?&gt;
+<Who nb="2"/>&lt;And then&gt;
 </Turn>
 <Turn speaker="spk1" startTime="52.000" endTime="62.000">
 <Sync time="52.000"/>And then it's heaps and heaps dark.
