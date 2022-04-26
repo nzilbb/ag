@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -320,6 +320,8 @@ public class Validator extends Transform implements GraphTransformer {
         log("Skipping default offset generation");
       }
     } // default offset threshold
+
+    checkForFloatingUtterances(graph);
 
     // ensure there are no backwards annotations on system layers
     Vector<String> checkLayers = new Vector<String>();
@@ -2050,7 +2052,72 @@ public class Validator extends Transform implements GraphTransformer {
       }
     } // next child layer
   } // end of resetChildAnchorsAfter()
-
+  
+  /**
+   * Ensures that all turn and utterance anchors are manual confidence. Throws an
+   * exception if not - i.e. this is a fatal error.
+   * @param graph Annotation graph to check.
+   * @throws TransformationException If any low-confidence turn/utterance boundaries are found.
+   */
+  public void checkForFloatingUtterances(Graph graph) throws TransformationException {
+    if (graph.getSchema().getTurnLayerId() != null) {
+      for (Annotation a : graph.list(graph.getSchema().getTurnLayerId())) {
+        String error = null;
+        if (a.getStart() != null) {
+          if (a.getStart().getOffset() == null) {
+            error = "Turn has no start offset: " + a.getId() + ": " + a.getLabel();
+          } else if (a.getStart().getConfidence() != null
+                     && a.getStart().getConfidence() < Constants.CONFIDENCE_MANUAL) {
+            error = "Turn start is low confidence: "
+              + a.getId() + ": ("+a.getStart()+"-"+a.getEnd()+") " + a.getLabel() ;
+          }
+        }
+        if (error == null && a.getEnd() != null) {
+          if (a.getEnd().getOffset() == null) {
+            error = "Turn has no end offset: "
+              + a.getId() + ": ("+a.getStart()+")" + a.getLabel();
+          } else if (a.getEnd().getConfidence() != null
+                     && a.getEnd().getConfidence() < Constants.CONFIDENCE_MANUAL) {
+            error = "Turn end is low confidence: "
+              + a.getId() + ": ("+a.getEnd()+"-"+a.getEnd()+") " + a.getLabel() ;
+          }
+        }
+        if (error != null) {
+          errors.add(error);
+          throw new TransformationException(this, error);
+        }
+      } // next annotation
+    }
+    if (graph.getSchema().getUtteranceLayerId() != null) {
+      for (Annotation a : graph.list(graph.getSchema().getUtteranceLayerId())) {
+        String error = null;
+        if (a.getStart() != null) {
+          if (a.getStart().getOffset() == null) {
+            error = "Utterance has no start offset: " + a.getId() + ": " + a.getLabel();
+          } else if (a.getStart().getConfidence() != null
+                     && a.getStart().getConfidence() < Constants.CONFIDENCE_MANUAL) {
+            error = "Utterance start is low confidence: "
+              + a.getId() + ": ("+a.getStart()+"-"+a.getEnd()+") " + a.getLabel() ;
+          }
+        }
+        if (error == null && a.getEnd() != null) {
+          if (a.getEnd().getOffset() == null) {
+            error = "Utterance has no end offset: "
+              + a.getId() + ": ("+a.getStart()+")" + a.getLabel();
+          } else if (a.getEnd().getConfidence() != null
+                     && a.getEnd().getConfidence() < Constants.CONFIDENCE_MANUAL) {
+            error = "Utterance end is low confidence: "
+              + a.getId() + ": ("+a.getEnd()+"-"+a.getEnd()+") " + a.getLabel() ;
+          }
+        }
+        if (error != null) {
+          errors.add(error);
+          throw new TransformationException(this, error);
+        }
+      } // next annotation
+    }
+  } // end of checkForFloatingUtterances()
+  
   /**
    * A representation of the given annotation for logging purposes.
    * @param annotation The annotation to log.

@@ -2309,6 +2309,151 @@ public class TestValidator {
     }
   }
 
+  /** Ensure turn/utterance boundaries unset or with low confidence is a fatal error. */
+  @Test public void floatingUtterance() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.setSchema(new Schema(
+                  "who", "turn", "utterance", "word",
+                  new Layer("who", "Participants")
+                  .setAlignment(Constants.ALIGNMENT_NONE)
+                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                  new Layer("turn", "Speaker turns")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("who").setParentIncludes(true),
+                  new Layer("utterance", "Utterance")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                  .setParentId("turn").setParentIncludes(true),
+                  new Layer("word", "Words")
+                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                  .setParentId("turn").setParentIncludes(true)));
+    
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+
+    g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT)); // the
+    g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
+    g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
+    g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
+    g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
+
+    g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+    g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+    g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+    g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+    g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+    g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // dog
+    g.addAnchor(new Anchor("a54", null)); // end of dog
+
+    g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+
+    g.addAnnotation(
+      new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+      
+    g.addAnnotation(
+      new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+
+    g.addAnnotation(
+      new Annotation(
+        "utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+    g.addAnnotation(
+      new Annotation(
+        "utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+      
+    g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a02", "turn1"));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a02",  "a03", "turn1"));
+    g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04a", "turn1"));
+
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn1"));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn1"));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn1"));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
+    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
+
+    g.getAnnotation("jumps").setLabel("test");
+
+    Validator v = new Validator();
+    v.setFullValidation(true);
+    // v.setDebug(true);
+    try { // valid version
+      v.transform(g);
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+
+    // unset turn anchor
+    g.getAnchor("turnStart").setOffset(null);
+    try {
+      v.transform(g);
+      fail("Unset turnStart should fail validation");
+    } catch(TransformationException exception) {
+    }
+    // reset turn anchor
+    g.getAnchor("turnStart").setOffset(0.0);
+    // set confidence lower
+    g.getAnchor("turnStart").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+    try {
+      v.transform(g);
+      fail("Low confidence turnStart should fail validation");
+    } catch(TransformationException exception) {
+    }
+    // reset confidence
+    g.getAnchor("turnStart").setConfidence(Constants.CONFIDENCE_MANUAL);
+
+    // unset utterance anchor
+    g.getAnchor("utteranceChange").setOffset(null);
+    try {
+      v.transform(g);
+      fail("Unset utteranceChange should fail validation");
+    } catch(TransformationException exception) {
+    }
+    // reset utterance anchor
+    g.getAnchor("utteranceChange").setOffset(0.0);
+    // set confidence lower
+    g.getAnchor("utteranceChange").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+    try {
+      v.transform(g);
+      fail("Low confidence utteranceChange should fail validation");
+    } catch(TransformationException exception) {
+    }
+    // reset confidence
+    g.getAnchor("utteranceChange").setConfidence(Constants.CONFIDENCE_MANUAL);    
+
+    // unset turn anchor
+    g.getAnchor("turnEnd").setOffset(null);
+    try {
+      v.transform(g);
+      fail("Unset turnEnd should fail validation");
+    } catch(TransformationException exception) {
+    }
+    // reset turn anchor
+    g.getAnchor("turnEnd").setOffset(0.0);
+    // set confidence lower
+    g.getAnchor("turnEnd").setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+    try {
+      v.transform(g);
+      fail("Low confidence turnEnd should fail validation");
+    } catch(TransformationException exception) {
+    }
+    // reset confidence
+    g.getAnchor("turnEnd").setConfidence(Constants.CONFIDENCE_MANUAL);
+
+    // check it still passes with everything back to normal
+    try { // valid version
+      v.transform(g);
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+
+
+  }
+
   /** saturated anchor sharing, and non-saturated by parent-including violations (TODO) */
   @Test public void validateHierarchyParentChildSynchronicity() {
   }
