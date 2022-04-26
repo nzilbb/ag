@@ -1321,11 +1321,13 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
     Pattern codePattern = Pattern.compile("\\[([^\\]]+)\\]");
     Pattern inlineCommentPattern = Pattern.compile("\\{([^\\}]+):[^\\}]+\\}");
     Pattern lineCommentPattern = Pattern.compile("^\\+ ([^:]+):.+$");
+    Pattern utterancePattern = Pattern.compile("^[a-zA-Z] .*");
     
     // read stream line by line
     boolean inHeader = true;
     BufferedReader reader = new BufferedReader(new InputStreamReader(slt.getStream(), "UTF-8"));
     String line = reader.readLine();
+    boolean utteranceHasStartTime = false;
     // remove byte-order-mark if any
     if (line != null) line = line.replace("\uFEFF", "");
     while (line != null) {
@@ -1343,6 +1345,20 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
           }
         } else { // transcript line
           lines.add(line);
+          
+          try { // try to parse it at a time-stamp
+            timesStampFormat.parse(line);
+            utteranceHasStartTime = true;
+          } catch(ParseException exception) { // not a timestamp
+            // is it an utterance?
+            if (utterancePattern.matcher(line).matches()) { // utterance
+              if (utteranceHasStartTime) { // there is a start time for this one
+                utteranceHasStartTime = false;
+              } else { // warn about not knowing the start time
+                warnings.add("Utterance with unknown start time: " + line);
+              }
+            }
+          }
 
           if (parseInlineConventions) {      
             // any codes?
@@ -1408,6 +1424,9 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
       } // not a blank line
       line = reader.readLine();
     } // next line
+    if (!utteranceHasStartTime) { // no final time stamp
+      warnings.add("End time of transcript is unknown.");
+    }
 
     // validation
     if (participantsHeader.trim().length() == 0) {
@@ -1733,6 +1752,12 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
         }
         
       } else { // utterance
+
+        // TODO handle simultaneous speech, like:
+        // TODO - 1:22
+        // TODO E <Now>
+        // TODO C <Yes>
+        // TODO - 1:25
         
         String p = line.substring(0,1);
         Annotation participant = idToParticipant.get(p);

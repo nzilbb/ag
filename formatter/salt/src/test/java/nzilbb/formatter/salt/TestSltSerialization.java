@@ -976,8 +976,9 @@ public class TestSltSerialization {
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
   }
-  
-  @Test public void deserializeDontUseConventions()  throws Exception {
+
+  /** Ensure unaligned utterance boundaries generate a warning. */
+  @Test public void deserializeUnalignedUtterance()  throws Exception {
     // just a basic schema, nothing SALT-specific
     Schema schema = new Schema(
       "participant", "turn", "utterance", "word",      
@@ -997,7 +998,7 @@ public class TestSltSerialization {
       .setParentId("turn").setParentIncludes(true)
       );
     // access file
-    NamedStream[] streams = { new NamedStream(new File(getDir(), "test.slt")) };
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "unaligned-utterance.slt")) };
     
     // create deserializer
     SltSerialization deserializer = new SltSerialization();
@@ -1035,21 +1036,14 @@ public class TestSltSerialization {
     assertNull(configuration.get("subgroupLayer").getValue());
     assertNull(configuration.get("collectLayer").getValue());
     assertNull(configuration.get("locationLayer").getValue());
-    // change to day-first
-    configuration.get("dateFormat").setValue("d/M/yyyy");
-    assertEquals("parseInlineConventions is true default",
-                 Boolean.TRUE, configuration.get("parseInlineConventions").getValue());
-    // change to false
-    configuration.get("parseInlineConventions").setValue(Boolean.FALSE);
-
     // final configuration
     deserializer.configure(configuration, schema);
     
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
-    for (Parameter p : defaultParameters.values()) {
-      System.out.println("" + p.getName() + " = " + p.getValue());
-    }
+    // for (Parameter p : defaultParameters.values()) {
+    //   System.out.println("" + p.getName() + " = " + p.getValue());
+    // }
     assertEquals("No stream-specific parameters", 0, defaultParameters.size());
 
     // configure the deserialization
@@ -1059,156 +1053,31 @@ public class TestSltSerialization {
     Graph[] graphs = deserializer.deserialize();
     assertEquals("conversion is 1-1", 1, graphs.length);
     Graph g = graphs[0];
-    
-    for (String warning : deserializer.getWarnings()) {
-      System.out.println(warning);
-    }
-    
-    assertEquals("test.slt", g.getId());
 
-    // participants     
-    assertEquals("Two participants", 2, g.all("participant").length);
-    assertEquals("One target", 1, g.all("main_participant").length);
-    Annotation child = g.first("main_participant").getParent();
-    assertEquals("Target participant prefixed with value of Name header",
-                 "ADAL-Child", child.getLabel());
-    Annotation examiner = null;
-    for (Annotation p : g.all("participant")) {
-      if (!p.getId().equals(child.getId())) {
-        examiner = p;
-        break;
-      }
-    }
-    assertNotNull("Examiner found", examiner);
-    assertEquals("Examiner name prefixed with value of Name header",
-                 "ADAL-Examiner", examiner.getLabel());
+    String[] warnings = deserializer.getWarnings();
+    assertEquals("There are two warnings: " + Arrays.asList(warnings),
+                 2, warnings.length);
+    assertTrue("First warning about lack of utterance start time",
+               warnings[0].startsWith("Utterance with unknown start time:"));
+    assertEquals("Second warning about lack of overall end time",
+                 "End time of transcript is unknown.", warnings[1]);
+    // for (String warning : deserializer.getWarnings()) {
+    //   System.out.println(warning);
+    // }
     
-     // turns
-    Annotation[] turns = g.all("turn");
-    assertEquals(12, turns.length);
-
-    // check turn timestamps
-    double[] turnTimeStamps = {
-      0, 29, 34.56, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
-    Annotation lastTurn = null;
-    assertEquals("Examiner is first", "ADAL-Examiner", turns[0].getLabel());
-    for (int t = 0; t < turns.length; t++) {
-      assertEquals("start of turn " + t,
-                   Double.valueOf(turnTimeStamps[t]), turns[t].getStart().getOffset());
-      assertEquals("confidence of start of turn " + t + " " + turns[t].getStart(),
-                   Integer.valueOf(Constants.CONFIDENCE_MANUAL),
-                   turns[t].getStart().getConfidence());
-      if (lastTurn != null) {
-        assertEquals("End of turn " + (t-1),
-                     turns[t].getStart(), lastTurn.getEnd());
-        assertNotEquals("Speaker has changed",
-                        lastTurn.getLabel(), turns[t].getLabel());
-      }
-      lastTurn = turns[t];
-    } // next turn
-    // transcript has no end timestamp, so it should be 1s after the last known timestamp
-    assertEquals("Dummy last timestamp (" + lastTurn.getStart() + "-" + lastTurn.getEnd() + ")",
-                 Double.valueOf(94.0), lastTurn.getEnd().getOffset());
-    assertEquals("Dummy last timestamp has low confidence",
-                 Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
-                 lastTurn.getEnd().getConfidence());
-      
+    assertEquals("unaligned-utterance.slt", g.getId());
+    
     // utterances
     Annotation[] utterances = g.all("utterance");
-    assertEquals(21, utterances.length);
+    assertEquals("Correct number of utterances " + Arrays.asList(utterances),
+                 7, utterances.length);
     
     // check utterance timestamps and speakers
-    double[] utteranceTimeStamps = {
-      0, 5, 12, 16, 20, 24, 29, 34.56, 37, 39, 41, 46, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
-    String[] utteranceSpeakers = {
-      "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner", "ADAL-Examiner",
-      "ADAL-Child",
-      "ADAL-Examiner", "ADAL-Examiner",
-      "ADAL-Child", "ADAL-Child", "ADAL-Child",
-      "ADAL-Examiner",
-      "ADAL-Child",
-      "ADAL-Examiner",
-      "ADAL-Child",
-      "ADAL-Examiner",
-      "ADAL-Child", "ADAL-Child",
-      "ADAL-Examiner",
-      "ADAL-Child"
-    };
-    Annotation lastUtterance = null;
+    Double[] utteranceTimeStamps = {0.0, 5.0, 10.0, 12.0, null, 15.0, 24.0 };
     for (int u = 0; u < utterances.length; u++) {
       assertEquals("start of utterance " + u,
-                   Double.valueOf(utteranceTimeStamps[u]), utterances[u].getStart().getOffset());
-      if (u != 3 && u != 4) {
-        assertEquals("confidence of start of utterance " + u,
-                     Integer.valueOf(Constants.CONFIDENCE_MANUAL),
-                     utterances[u].getStart().getConfidence());
-      } else { // u == 3 or 4 are special cases:
-        // it has the same start time as the previous utterance,
-        // so the offset has been bumped forward and given lower confidence
-        assertEquals("confidence of bumped start of utterance " + u,
-                     Integer.valueOf(Constants.CONFIDENCE_DEFAULT),
-                     utterances[u].getStart().getConfidence());
-      }
-      assertEquals("speaker of utterance " + u + " ("+utterances[u].getStart()+")",
-                   utteranceSpeakers[u], utterances[u].getParent().getLabel());
-      if (lastUtterance != null) {
-        assertEquals("End of utterance " + (u-1) + " ("+utterances[u-1].getStart()+")",
-                     utterances[u].getStart(), lastUtterance.getEnd());
-      }
-      lastUtterance = utterances[u];
+                   utteranceTimeStamps[u], utterances[u].getStart().getOffset());
     } // next utterance
-    // transcript has no end timestamp, so it should be 1s after the last known timestamp
-    assertEquals("Dummy last timestamp",
-                 Double.valueOf(94.0), lastUtterance.getEnd().getOffset());
-    assertEquals("Dummy last timestamp has low confidence",
-                 Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
-                 lastUtterance.getEnd().getConfidence());
-
-    // words
-    Annotation[] words = g.all("word");
-    //assertEquals(153, words.length);
-
-    // check utterance transcriptions
-    String[] lines = {
-      "I'm at Byron kindergarten on ((what date is it)) the 30th of March 2021?",
-      "My name is X[REDACTED]. and I'm here with X[REDACTED], doing the oral language assessment. [CENSOR]",
-      "Okay, so now Ada it's your turn to tell the story.",
-      "You can look at the pictures when you're telling the story.",
-      "So let's start at the beginning.",
-      "What was the story about?",
-      "(Um the kids) the kid/s, {in-situ comment} they quickly put their gumboot/s on.",
-      "save/ed mud/y bush/s bus/s put/ing girl/z[EP:boy/z] want/3s go/3s shop/ing> run/ing drop/ed help/ed aunty/z stop/ed leave/ing come/ing it/z lift/*ed. Hug/ing Hunt/ing can/'nt can/n't carry/ed eat/ing gentle/ly gentle/y girl/'z go/s guy/s happen/ing help/ing hug/ed hurry/ed kid/'z learn/ing let/'us say/s see/ing tramp/ing try/ed tweet/ing wait/ing?",
-      "Anything else?",
-      "And please go for a walk? [EU]",
-      "You need to {NOISE:bing} put your gumboot/s on [EU].",
-      "It/'s too dark^",
-      "What happened in this one?",
-      "And then it/'s heaps_and_heaps|heaps dark.",
-      "What happened next?",
-      "%yip_yip Schnitzel_von_Krumm s[EP:s][LEXICAL:#is#]* :02 falled|fall[EW] out *of the baby/s/z nest.",
-      "*they/'re What happened next?",
-      "They put (them) it back in the nest (um).",
-      "Bye bye little bird.",
-      "Anything else that happened?",
-      "x."
-    };
-
-    // setting default anchor offsets ensures that the utterance words are found
-    new DefaultOffsetGenerator().transform(g).commit();
-    
-    for (int u = 0; u < utterances.length; u++) {
-      String transcription = Arrays.stream(utterances[u].all("word"))
-        .map(word -> word.getLabel())
-        .collect(Collectors.joining(" "));
-      assertEquals("Transcription of utterance " + u + " ("+utterances[u].getStart()+")",
-                   lines[u], transcription);
-    }        
-      
-    // check all annotations have 'manual' confidence
-    for (Annotation a : g.getAnnotationsById().values()) {
-      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
-                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
-    }
   }
 
   @Test public void serialize()  throws Exception {

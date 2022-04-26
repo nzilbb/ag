@@ -1,0 +1,14 @@
+$ Child, Examiner
+- 0:00
+E This transcript contains various aligned utterances
+- 00:05
+C i.e. they are interspersed with
+- 00:10
+E time stamp lines
+- 00:12
+E But these are two utterances
+C with no intervening time stamp
+- 00:15
+E So the end of the first and the start of the second are unknown
+- 00:24
+C This should generate a warning, as well as the lack of final end time:
