@@ -1755,12 +1755,6 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
         
       } else { // utterance
 
-        // TODO handle simultaneous speech, like:
-        // TODO - 1:22
-        // TODO E <Now>
-        // TODO C <Yes>
-        // TODO - 1:25
-        
         String p = line.substring(0,1);
         Annotation participant = idToParticipant.get(p);
         if (participant == null) {
