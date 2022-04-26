@@ -1,0 +1,15 @@
+$ Child, Examiner
+- 0:00
+E This transcript contains various aligned utterances
+- 00:05
+C i.e. they are interspersed with
+- 00:10
+E time stamp lines
+- 00:12
+E <These are two utterances have not intervening time stamp>
+C <But they're marked as simultaneous speech>
+- 00:15
+E So they create two parallel, aligned utterances.
+- 00:24
+C This should not generate a warning.
+- 00:29

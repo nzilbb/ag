@@ -1008,35 +1008,7 @@ public class TestSltSerialization {
     // for (Parameter p : configuration.values()) {
     //   System.out.println("" + p.getName() + " = " + p.getValue());
     // }
-    assertEquals("Correct number of configuration parameters", 28, configuration.size());
-    assertEquals(schema.getLayer("main_participant"),
-                 configuration.get("targetParticipantLayer").getValue());
-    assertNull(configuration.get("cUnitLayer").getValue());
-    assertNull(configuration.get("commentLayer").getValue());
-    assertNull(configuration.get("parentheticalLayer").getValue());
-    assertNull(configuration.get("properNameLayer").getValue());
-    assertNull(configuration.get("repetitionsLayer").getValue());
-    assertNull(configuration.get("rootLayer").getValue());
-    assertNull(configuration.get("errorLayer").getValue());
-    assertNull(configuration.get("soundEffectLayer").getValue());
-    assertNull(configuration.get("pauseLayer").getValue());
-    assertNull(configuration.get("boundMorphemeLayer").getValue());
-    assertNull(configuration.get("mazeLayer").getValue());
-    assertNull(configuration.get("partialWordLayer").getValue());
-    assertNull(configuration.get("omissionLayer").getValue());
-    assertNull(configuration.get("codeLayer").getValue());
-    assertNull(configuration.get("languageLayer").getValue());
-    assertNull(configuration.get("participantIdLayer").getValue());
-    assertNull(configuration.get("genderLayer").getValue());
-    assertNull(configuration.get("dobLayer").getValue());
-    assertNull(configuration.get("doeLayer").getValue());
-    assertNull(configuration.get("caLayer").getValue());
-    assertNull(configuration.get("ethnicityLayer").getValue());
-    assertNull(configuration.get("contextLayer").getValue());
-    assertNull(configuration.get("subgroupLayer").getValue());
-    assertNull(configuration.get("collectLayer").getValue());
-    assertNull(configuration.get("locationLayer").getValue());
-    // final configuration
+    // set configuration
     deserializer.configure(configuration, schema);
     
     // load the stream
@@ -1055,12 +1027,14 @@ public class TestSltSerialization {
     Graph g = graphs[0];
 
     String[] warnings = deserializer.getWarnings();
-    assertEquals("There are two warnings: " + Arrays.asList(warnings),
-                 2, warnings.length);
+    assertEquals("There are three warnings: " + Arrays.asList(warnings),
+                 3, warnings.length);
     assertTrue("First warning about lack of utterance start time",
                warnings[0].startsWith("Utterance with unknown start time:"));
-    assertEquals("Second warning about lack of overall end time",
-                 "End time of transcript is unknown.", warnings[1]);
+    assertTrue("Second warning about lack of utterance start time after simultaneous speech",
+               warnings[1].startsWith("Utterance with unknown start time:"));
+    assertEquals("Last warning about lack of overall end time",
+                 "End time of transcript is unknown.", warnings[2]);
     // for (String warning : deserializer.getWarnings()) {
     //   System.out.println(warning);
     // }
@@ -1070,13 +1044,83 @@ public class TestSltSerialization {
     // utterances
     Annotation[] utterances = g.all("utterance");
     assertEquals("Correct number of utterances " + Arrays.asList(utterances),
-                 7, utterances.length);
+                 10, utterances.length);
     
     // check utterance timestamps and speakers
-    Double[] utteranceTimeStamps = {0.0, 5.0, 10.0, 12.0, null, 15.0, 24.0 };
+    Double[] utteranceTimeStamps = {0.0, 5.0, 10.0, 12.0, null, 15.0, 24.0, 24.0, null, 27.0 };
     for (int u = 0; u < utterances.length; u++) {
       assertEquals("start of utterance " + u,
                    utteranceTimeStamps[u], utterances[u].getStart().getOffset());
+    } // next utterance
+  }
+
+  /** Ensure simultaneous utterances are handled correctly. */
+  @Test public void deserializeSimultaneousSpeech()  throws Exception {
+    // just a basic schema, nothing SALT-specific
+    Schema schema = new Schema(
+      "participant", "turn", "utterance", "word",      
+      new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("main_participant", "Target Speaker").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("participant").setParentIncludes(true),      
+      new Layer("turn", "Speaker Turn").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("participant").setParentIncludes(true),
+      new Layer("utterance", "Lines").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true)
+      );
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "simultaneous-speech.slt")) };
+    
+    // create deserializer
+    SltSerialization deserializer = new SltSerialization();
+    
+    // general configuration
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) {
+    //   System.out.println("" + p.getName() + " = " + p.getValue());
+    // }
+    // set configuration
+    deserializer.configure(configuration, schema);
+    
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) {
+    //   System.out.println("" + p.getName() + " = " + p.getValue());
+    // }
+    assertEquals("No stream-specific parameters", 0, defaultParameters.size());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+    
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    assertEquals("conversion is 1-1", 1, graphs.length);
+    Graph g = graphs[0];
+
+    String[] warnings = deserializer.getWarnings();
+    assertEquals("There are no warnings: " + Arrays.asList(warnings),
+                 0, warnings.length);    
+    assertEquals("simultaneous-speech.slt", g.getId());
+    
+    // utterances
+    Annotation[] utterances = g.all("utterance");
+    assertEquals("Correct number of utterances " + Arrays.asList(utterances),
+                 7, utterances.length);
+    
+    // check utterance timestamps and speakers
+    Double[] utteranceStarts = {0.0, 5.0, 10.0, 12.0, 12.0, 15.0, 24.0 };
+    Double[] utteranceEnds = {5.0, 10.0, 12.0, 15.0, 15.0, 24.0, 29.0 };
+    for (int u = 0; u < utterances.length; u++) {
+      assertEquals("start of utterance " + u,
+                   utteranceStarts[u], utterances[u].getStart().getOffset());
+      assertEquals("end of utterance " + u,
+                   utteranceEnds[u], utterances[u].getEnd().getOffset());
     } // next utterance
   }
 

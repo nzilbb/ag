@@ -1322,6 +1322,7 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
     Pattern inlineCommentPattern = Pattern.compile("\\{([^\\}]+):[^\\}]+\\}");
     Pattern lineCommentPattern = Pattern.compile("^\\+ ([^:]+):.+$");
     Pattern utterancePattern = Pattern.compile("^[a-zA-Z] .*");
+    Pattern simultaneousSpeechPattern = Pattern.compile("^[a-zA-Z] <.*>$");
     
     // read stream line by line
     boolean inHeader = true;
@@ -1352,11 +1353,11 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
           } catch(ParseException exception) { // not a timestamp
             // is it an utterance?
             if (utterancePattern.matcher(line).matches()) { // utterance
-              if (utteranceHasStartTime) { // there is a start time for this one
-                utteranceHasStartTime = false;
-              } else { // warn about not knowing the start time
+              if (!utteranceHasStartTime // no recent start time
+                  && !simultaneousSpeechPattern.matcher(line).matches()) { // not simultanous
                 warnings.add("Utterance with unknown start time: " + line);
               }
+              utteranceHasStartTime = false;
             }
           }
 
@@ -1647,6 +1648,7 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
 
     // utterances
     Annotation currentTurn = new Annotation(null, "", turnLayer.getId());
+    Annotation lastUtterance = null;
     Annotation cUnit = null;
     Anchor lastAnchor = start;
     Anchor lastAlignedAnchor = start;
@@ -1740,9 +1742,9 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
               // prefix it to the next line
               prefixNextUtterance += pauseLabel + " ";
             } else {
-              Annotation lastUtterance = endingUtterances.iterator().next();
-              lastUtterance.setLabel(
-                lastUtterance.getLabel()
+              Annotation previousUtterance = endingUtterances.iterator().next();
+              previousUtterance.setLabel(
+                previousUtterance.getLabel()
                 // insert before utterance code if any
                 .replaceFirst(
                   "(?<utterance>.*)(?<terminator>[.?!~^>]?)(?<code> \\[[\\w0-9:]+\\])$",
@@ -1765,9 +1767,16 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
           warnings.add("Unknown speaker: \"" + p + "\" - ignoring line: " + line);
           continue;
         }
+
+        String label = line.substring(1).trim();
+        boolean simultaneousSpeech = lastUtterance != null
+          && lastUtterance.getLabel().startsWith("<") && lastUtterance.getLabel().endsWith(">")
+          && label.startsWith("<") && label.endsWith(">");
         
-        Anchor utteranceStart = lastAnchor;
-        Anchor utteranceEnd = graph.addAnchor(new Anchor());
+        Anchor utteranceStart = simultaneousSpeech?
+          lastUtterance.getStart() : lastAnchor;
+        Anchor utteranceEnd = simultaneousSpeech?
+          lastUtterance.getEnd() : graph.addAnchor(new Anchor());
         // new speaker?
         if (!participant.getLabel().equals(currentTurn.getLabel())) {
           currentTurn = new Annotation()
@@ -1779,7 +1788,6 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
           graph.addAnnotation(currentTurn);
         } // new turn
 
-        String label = line.substring(1).trim();
         if (prefixNextUtterance.length() > 0) {
           label = prefixNextUtterance + label;
           prefixNextUtterance = "";
@@ -1794,6 +1802,7 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
         graph.addAnnotation(utterance);
         currentTurn.setEndId(utteranceEnd.getId());
         lastAnchor = utteranceEnd;
+        lastUtterance = utterance;
         
       } // utterance
     } // next line

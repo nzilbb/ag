@@ -11,4 +11,8 @@ C with no intervening time stamp
 - 00:15
 E So the end of the first and the start of the second are unknown
 - 00:24
-C This should generate a warning, as well as the lack of final end time:
+C <This should generate a warning. Not when it's simultaneous speech>
+E <But it should with non-simultaneous speech trailing simultaneous speech:>
+C 
+- 00:27
+E A warning should also be generated if there's no overall end time:
