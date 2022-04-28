@@ -35,26 +35,41 @@ public class IPA2IPAComparator<E> implements EditComparator<E> {
   // phone classes
   Set<String> vowels;
   Set<String> diphthongs = new HashSet<String>(
-    Arrays.asList("ɔɪ","ǝʊ","əʊ","eɪ","oʊ","aʊ","ɪǝ","ɪə","ɛǝ","ɛə","ʊǝ","ʊə","ai","aɪ","au","ɔy",
-                  "œy"));
+    Arrays.asList(
+      "ɔɪ","ǝʊ","əʊ","eɪ","oʊ","aʊ","ɪǝ","ɪə","ɛǝ","ɛə","ʊǝ","ʊə","ai","aɪ","au","ɔy","œy",
+      // MFA diphtongs
+      "aj","aw","ej","ɔj","əw"
+      ));
   Set<String> monophthongs = new HashSet<String>(
-    Arrays.asList("c","ŋ̩","ɛ","m̩","n̩","i","iː","ɪ","l̩","ɑ̃ː","ɒ","u","uː","ʊ","ʌ","æ̃ː","ɒ̃ː","ɑ",
-                  "ɑː","æ","ɔː","ɔ","ǝ","ə","y","yː","œ","ɜː","ɜ","ɛ","œː","ɛː","ɨ","ʉ","ɯ","ʏ","ø",
-                  "ɵ","ɘ","ɞ","ɶ","ɐ"));
+    Arrays.asList(
+      "c","ŋ̩","ɛ","m̩","n̩","i","iː","ɪ","l̩","ɑ̃ː","ɒ","ɒː","ɒ̃ː","u","uː","ʉː","ʊ","ʌ","æ̃ː",
+      "ɑ","ɑː","æ","ɔː","ɔ","ǝ","ə","y","yː","œ","ɜː","ɜ","ɛ","œː","ɛː","ɨ","ʉ","ɯ","ʏ",
+      "ø","ɵ","ɘ","ɞ","ɶ","ɐ"));
   Set<String> consonants;
   Set<String> plosives = new HashSet<String>(
-    Arrays.asList("p","b","t","d","ʈ","ɖ","c","ɟ","k","g","ɡ","q","ɢ","ʔ"));
+    Arrays.asList(
+      "p","b","t","d","ʈ","ɖ","c","ɟ","k","g","ɡ","q","ɢ","ʔ",
+      // MFA
+      "bʲ","dʲ","kʰ","pʰ","pʲ","tʰ","tʲ"));
   Set<String> nasals = new HashSet<String>(
-    Arrays.asList("m","ɱ","n","ɳ","ɲ","ŋ","ɴ"));
+    Arrays.asList(
+      "m","ɱ","n","ɳ","ɲ","ŋ","ɴ",
+      // MFA
+      "mʲ"));
   Set<String> trills = new HashSet<String>(
     Arrays.asList("ʙ","r","ʀ"));
   Set<String> tapFlap = new HashSet<String>(
     Arrays.asList("ⱱ","ɾ","ɽ"));
   Set<String> fricatives = new HashSet<String>(
-    Arrays.asList("ɸ","β","f","v","θ","ð","s","z","ʃ","ʒ","ʂ","ʐ","ç","ʝ","x","ɣ","χ","ʁ",
-                  "ħ","ʕ","h","ɦ","ɬ","ɮ"));
+    Arrays.asList(
+      "ɸ","β","f","v","θ","ð","s","z","ʃ","ʒ","ʂ","ʐ","ç","ʝ","x","ɣ","χ","ʁ",
+      "ħ","ʕ","h","ɦ","ɬ","ɮ",
+      // MFA
+      "fʲ","vʲ"));
   Set<String> approximants = new HashSet<String>(
-    Arrays.asList("ʋ","	ɹ","ɻ","j","ɰ","l","ɭ","ʎ","ʟ"));
+    Arrays.asList("ʋ","	ɹ","ɻ","j","ɰ","l","ɭ","ʎ","ʟ",
+                  // MFA
+                  "ɟ","ɫ","ɫ̩"));
   Set<String> clicks = new HashSet<String>(
     Arrays.asList("ʘ","ǀ","ǃ","ǂ","ǁ"));
   Set<String> voicedImplosives = new HashSet<String>(
@@ -62,14 +77,18 @@ public class IPA2IPAComparator<E> implements EditComparator<E> {
   Set<String> ejectives = new HashSet<String>(
     Arrays.asList("pʼ","tʼ","kʼ", "sʼ"));
   Set<String> affricates = new HashSet<String>(
-    Arrays.asList("ʧ","t͜ʃ","ʤ","d͜ʒ","pf","t͜s",
-                  "t͡s","t͡ʃ","t͡ɕ","ʈ͡ʂ","d͡z","d͡ʒ","d͡ʑ","ɖ͡ʐ "));
+    Arrays.asList(
+      "ʧ","t͜ʃ","ʤ","d͜ʒ","pf","t͜s",
+      "t͡s","t͡ʃ","t͡ɕ","ʈ͡ʂ","d͡z","d͡ʒ","d͡ʑ","ɖ͡ʐ ",
+      // MFA
+      "dʒ","tʃ"));
   Set<String> typesOfR = new HashSet<String>(Arrays.asList("ɹ","r","ɾ","ɽ"));
   Set<String> flapTD = new HashSet<String>(Arrays.asList("t","d","ɾ"));
+  Set<String> stopFricativeD = new HashSet<String>(Arrays.asList("ð","d"));
   Set<String> vocalisedNG = new HashSet<String>(Arrays.asList("ŋ","ŋ̩"));
   Set<String> vocalisedM = new HashSet<String>(Arrays.asList("m","m̩"));
   Set<String> vocalisedN = new HashSet<String>(Arrays.asList("n","n̩"));
-  Set<String> vocalisedL = new HashSet<String>(Arrays.asList("l","l̩"));
+  Set<String> vocalisedL = new HashSet<String>(Arrays.asList("l","l̩","ɫ̩"));
   
   /** Constructor */
   public IPA2IPAComparator() {
@@ -126,6 +145,7 @@ public class IPA2IPAComparator<E> implements EditComparator<E> {
         || (vocalisedM.contains(sFrom) && vocalisedM.contains(sTo))
         || (vocalisedN.contains(sFrom) && vocalisedN.contains(sTo))
         || (vocalisedL.contains(sFrom) && vocalisedL.contains(sTo))
+        || (stopFricativeD.contains(sFrom) && stopFricativeD.contains(sTo))
         ) {
         iDistance = 4;
       } else if ( // same narrow type
