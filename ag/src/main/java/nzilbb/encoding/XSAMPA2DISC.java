@@ -67,6 +67,16 @@ public class XSAMPA2DISC extends PhonemeTranslator {
          map.put("A~:",'q');
          map.put("{~:",'0');
          map.put("O~:",'~');
+
+         // vowels output by MAUSBasic
+         map.put("@}",'5');
+         map.put("Ae",'2');
+         map.put("{Q",'6');
+         map.put("{I",'1'); // duplicate of "eI"
+         map.put("6",'@'); // 'open schwa' (ɐ)
+         map.put("o:",'$');
+         map.put("O", 'Q');
+         map.put("4", 'L'); // flap - this is an extension to DISC
          
          // different from SAMPA
          map.put("}:",'}');
@@ -83,6 +93,7 @@ public class XSAMPA2DISC extends PhonemeTranslator {
          map.put("m=",'F');
          map.put("n=",'H');
          map.put("l=",'P');
+
       }
    } // end of constructor
    
@@ -98,13 +109,14 @@ public class XSAMPA2DISC extends PhonemeTranslator {
       for (int c = 0; c < source.length(); c++)
       {
          candidates.clear();
+         char nextChar = source.charAt(c);
          if (c < source.length() - 2) {
-             candidates.add(""+source.charAt(c)+source.charAt(c+1)+source.charAt(c+2));
+             candidates.add(""+nextChar+source.charAt(c+1)+source.charAt(c+2));
          }
          if (c < source.length() - 1) {
-            candidates.add(""+source.charAt(c)+source.charAt(c+1));
+            candidates.add(""+nextChar+source.charAt(c+1));
          }
-         candidates.add(""+source.charAt(c));
+         candidates.add(""+nextChar);
          boolean bFound = false;
          for (String sTry : candidates) {
             if (map.containsKey(sTry)) {
@@ -115,8 +127,10 @@ public class XSAMPA2DISC extends PhonemeTranslator {
             }
          }
          if (!bFound) { // unknown or unexceptional phone
-            // pass it through unchanged
-            DISC.append(source.charAt(c));
+           if (nextChar != ':' && nextChar != ' ') {
+             // pass it through unchanged
+             DISC.append(nextChar);
+           }
          }
       }
       return DISC.toString();

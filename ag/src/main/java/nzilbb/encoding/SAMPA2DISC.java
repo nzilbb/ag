@@ -78,11 +78,11 @@ public class SAMPA2DISC extends PhonemeTranslator {
          map.put("r*",'R');
 
          // extras from maus-sampa
-         map.put("{I",'1'); // duplicate of "eI"
-         map.put("6",'@'); // 'open schwa' (ɐ)
-         map.put("o:",'$');
-         map.put("O", 'Q');
-         map.put("4", 'L'); // flap - this is an extension to DISC
+//         map.put("{I",'1'); // duplicate of "eI"
+//         map.put("6",'@'); // 'open schwa' (ɐ)
+//         map.put("o:",'$');
+//         map.put("O", 'Q');
+//         map.put("4", 'L'); // flap - this is an extension to DISC
       }
    } // end of constructor
    

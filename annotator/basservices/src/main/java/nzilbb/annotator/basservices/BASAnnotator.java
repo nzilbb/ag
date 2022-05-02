@@ -75,7 +75,7 @@ import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.util.Merger;
 import nzilbb.configure.ParameterSet;
 import nzilbb.encoding.PhonemeTranslator;
-import nzilbb.encoding.SAMPA2DISC;
+import nzilbb.encoding.XSAMPA2DISC;
 import nzilbb.formatter.praat.TextGridSerialization;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
@@ -955,7 +955,7 @@ public class BASAnnotator extends Annotator {
             if (isCancelling()) return;
             try {
               PhonemeTranslator translator =
-                "disc".equals(phonemeEncoding)?new SAMPA2DISC():null;
+                "disc".equals(phonemeEncoding)?new XSAMPA2DISC():null;
               String languageCode = forceLanguageG2P;
               String text = Arrays.stream(fragment.labels(orthographyLayerId))
                 .collect(Collectors.joining(" ")).trim();
@@ -1063,7 +1063,7 @@ public class BASAnnotator extends Annotator {
             if (isCancelling()) return;
             try {
               PhonemeTranslator translator =
-                "disc".equals(phonemeEncoding)?new SAMPA2DISC():null;
+                "disc".equals(phonemeEncoding)?new XSAMPA2DISC():null;
               String languageCode = forceLanguageMAUSBasic;
               String text = Arrays.stream(fragment.labels(orthographyLayerId))
                 .collect(Collectors.joining(" ")).trim();
