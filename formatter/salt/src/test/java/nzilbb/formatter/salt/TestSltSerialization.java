@@ -335,7 +335,12 @@ public class TestSltSerialization {
       assertEquals("confidence of start of turn " + t + " " + turns[t].getStart(),
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL),
                    turns[t].getStart().getConfidence());
-      if (lastTurn != null && t != 10) { // turn 10 is a break of the same speaker
+      if (t == 10) {  // turn 10 is a break of the same speaker
+        assertEquals("End of turn " + (t-1),
+                     Double.valueOf(75.0), lastTurn.getEnd().getOffset());
+        assertEquals("Speaker has not changed",
+                        lastTurn.getLabel(), turns[t].getLabel());
+      } else if (lastTurn != null) {
         assertEquals("End of turn " + (t-1),
                      turns[t].getStart(), lastTurn.getEnd());
         assertNotEquals("Speaker has changed",
@@ -872,7 +877,12 @@ public class TestSltSerialization {
       assertEquals("confidence of start of turn " + t + " " + turns[t].getStart(),
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL),
                    turns[t].getStart().getConfidence());
-      if (lastTurn != null && t != 10) { // turn 10 is a break of the same speaker
+      if (t == 10) {  // turn 10 is a break of the same speaker
+        assertEquals("End of turn " + (t-1),
+                     Double.valueOf(75.0), lastTurn.getEnd().getOffset());
+        assertEquals("Speaker has not changed",
+                        lastTurn.getLabel(), turns[t].getLabel());
+      } else if (lastTurn != null) {
         assertEquals("End of turn " + (t-1),
                      turns[t].getStart(), lastTurn.getEnd());
         assertNotEquals("Speaker has changed",
