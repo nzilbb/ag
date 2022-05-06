@@ -312,13 +312,21 @@ public class TestSltSerialization {
     assertNull("Examiner Dob not set", examiner.first("participant_dob"));
     assertNull("Examiner Ethnicity not set", examiner.first("participant_ethnicity"));
 
-     // turns
+    // turns
     Annotation[] turns = g.all("turn");
-    assertEquals(12, turns.length);
+    // "- 01:15" line followed by "- 01:23" results in a new turn with the same speaker
+    assertEquals("Start of break",
+                 Double.valueOf(75.0), turns[9].getEnd().getOffset());
+    assertEquals("End of break",
+                 Double.valueOf(83.0), turns[10].getStart().getOffset());
+    assertEquals("Same speaker before and after break",
+                 turns[9].getLabel(), turns[10].getLabel());
+
+    assertEquals(13, turns.length);
 
     // check turn timestamps
     double[] turnTimeStamps = {
-      0, 29, 34.56, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
+      0, 29, 34.56, 39, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     Annotation lastTurn = null;
     assertEquals("Examiner is first", "ADAL-Examiner", turns[0].getLabel());
     for (int t = 0; t < turns.length; t++) {
@@ -327,7 +335,7 @@ public class TestSltSerialization {
       assertEquals("confidence of start of turn " + t + " " + turns[t].getStart(),
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL),
                    turns[t].getStart().getConfidence());
-      if (lastTurn != null) {
+      if (lastTurn != null && t != 10) { // turn 10 is a break of the same speaker
         assertEquals("End of turn " + (t-1),
                      turns[t].getStart(), lastTurn.getEnd());
         assertNotEquals("Speaker has changed",
@@ -380,7 +388,7 @@ public class TestSltSerialization {
       }
       assertEquals("speaker of utterance " + u + " ("+utterances[u].getStart()+")",
                    utteranceSpeakers[u], utterances[u].getParent().getLabel());
-      if (lastUtterance != null) {
+      if (lastUtterance != null && u != 18) { // utterance 18 start after the same-speaker break
         assertEquals("End of utterance " + (u-1) + " ("+utterances[u-1].getStart()+")",
                      utterances[u].getStart(), lastUtterance.getEnd());
       }
@@ -851,11 +859,11 @@ public class TestSltSerialization {
     
      // turns
     Annotation[] turns = g.all("turn");
-    assertEquals(12, turns.length);
+    assertEquals(13, turns.length);
 
     // check turn timestamps
     double[] turnTimeStamps = {
-      0, 29, 34.56, 39, 47, 52, 62, 63, 69, 71, 86, 93 };
+      0, 29, 34.56, 39, 47, 52, 62, 63, 69, 71, 83, 86, 93 };
     Annotation lastTurn = null;
     assertEquals("Examiner is first", "ADAL-Examiner", turns[0].getLabel());
     for (int t = 0; t < turns.length; t++) {
@@ -864,7 +872,7 @@ public class TestSltSerialization {
       assertEquals("confidence of start of turn " + t + " " + turns[t].getStart(),
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL),
                    turns[t].getStart().getConfidence());
-      if (lastTurn != null) {
+      if (lastTurn != null && t != 10) { // turn 10 is a break of the same speaker
         assertEquals("End of turn " + (t-1),
                      turns[t].getStart(), lastTurn.getEnd());
         assertNotEquals("Speaker has changed",
@@ -917,7 +925,7 @@ public class TestSltSerialization {
       }
       assertEquals("speaker of utterance " + u + " ("+utterances[u].getStart()+")",
                    utteranceSpeakers[u], utterances[u].getParent().getLabel());
-      if (lastUtterance != null) {
+      if (lastUtterance != null && u != 18) { // utterance 18 start after the same-speaker break
         assertEquals("End of utterance " + (u-1) + " ("+utterances[u-1].getStart()+")",
                      utterances[u].getStart(), lastUtterance.getEnd());
       }

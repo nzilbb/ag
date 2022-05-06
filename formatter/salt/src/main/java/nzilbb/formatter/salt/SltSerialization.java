@@ -1654,6 +1654,7 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
     Anchor lastAlignedAnchor = start;
     String prefixNextUtterance = "";
     boolean misalignedUtterancesExist = false;
+    int consecutiveTimeStamps = 0;
     for (String line : lines) {
       // skip blank lines
       if (line.trim().length() == 0) continue;
@@ -1693,6 +1694,7 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
           lastAnchor = graph.getOrCreateAnchorAt(offset, confidence);
         }
         lastAlignedAnchor = lastAnchor;
+        consecutiveTimeStamps++;
         
       } else if (line.startsWith("+") || line.startsWith("=")) { // comment line
         
@@ -1772,7 +1774,8 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
         Anchor utteranceEnd = simultaneousSpeech?
           lastUtterance.getEnd() : graph.addAnchor(new Anchor());
         // new speaker?
-        if (!participant.getLabel().equals(currentTurn.getLabel())) {
+        if (!participant.getLabel().equals(currentTurn.getLabel())
+            || consecutiveTimeStamps > 1) { // consecutive timestamp trigger new turn
           currentTurn = new Annotation()
             .setLayerId(turnLayer.getId())
             .setLabel(participant.getLabel())
@@ -1797,7 +1800,9 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
         currentTurn.setEndId(utteranceEnd.getId());
         lastAnchor = utteranceEnd;
         lastUtterance = utterance;
-        
+
+        // reset count of consecutive timestamp lines
+        consecutiveTimeStamps = 0;
       } // utterance
     } // next line
 
