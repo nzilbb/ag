@@ -338,7 +338,7 @@ public class TestSltSerialization {
       if (t == 10) {  // turn 10 is a break of the same speaker
         assertEquals("End of turn " + (t-1) + " (start of break)",
                      Double.valueOf(75.0), lastTurn.getEnd().getOffset());
-        assertEquals("Speaker has not changed (start of break)"",
+        assertEquals("Speaker has not changed (start of break)",
                         lastTurn.getLabel(), turns[t].getLabel());
       } else if (lastTurn != null) {
         assertEquals("End of turn " + (t-1),
@@ -880,7 +880,7 @@ public class TestSltSerialization {
       if (t == 10) {  // turn 10 is a break of the same speaker
         assertEquals("End of turn " + (t-1) + " (start of break)",
                      Double.valueOf(75.0), lastTurn.getEnd().getOffset());
-        assertEquals("Speaker has not changed (start of break)"",
+        assertEquals("Speaker has not changed (start of break)",
                         lastTurn.getLabel(), turns[t].getLabel());
       } else if (lastTurn != null) {
         assertEquals("End of turn " + (t-1),
