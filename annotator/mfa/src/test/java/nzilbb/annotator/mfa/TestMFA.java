@@ -526,8 +526,9 @@ public class TestMFA {
     assertEquals("word/phone end shared", mfa_word.getEnd(), mfa_phones[5].getEnd());
   }
 
-  /** Test train/align modality. */
-  /*@Test*/ public void trainAndAlign() throws Exception {
+  /** Test train/align modality with no --phone_set specified. */
+  /* @Test doesn't work, presumably because there's almost no data!
+   */ public void trainAndAlign() throws Exception {
     annotator.setSessionName("trainAndAlign");
     annotator.getStatusObservers().add(status->System.out.println(status));
     
@@ -539,6 +540,67 @@ public class TestMFA {
     annotator.setTaskParameters(
       "orthographyLayerId=word"
       +"&pronunciationLayerId=phonemes"
+      +"&utteranceTagLayerId=utterance_mfa" // nonexistent
+      +"&participantTagLayerId=participant_mfa" // nonexistent
+      +"&wordAlignmentLayerId=word"
+      +"&phoneAlignmentLayerId=segment");
+    Layer layer = annotator.getSchema().getLayer("utterance_mfa");
+    assertNotNull("utterance_mfa layer created", layer);
+    layer = annotator.getSchema().getLayer("participant_mfa");
+    assertNotNull("participant_mfa layer created", layer);
+
+    final Vector<Graph> results = new Vector<Graph>();
+    annotator.transformFragments(
+      Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
+
+    assertEquals("One utterance " + results, 1, results.size());
+    Graph aligned = results.elementAt(0);
+    assertTrue("Original graph is edited", f == aligned);
+    
+    Annotation[] words = aligned.all("word");
+    assertEquals("One word " + Arrays.asList(words), 1, words.length);
+    Annotation word = words[0];
+    assertEquals("Word label " + word, "statute", word.getLabel());
+
+    // don't bother testing offsets, as they'll be rubbish
+    Annotation[] phones = word.all("segment");
+    assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
+    String[] labels = { "s", "t", "{", "J", "@", "t" };
+    for (int p = 0; p < phones.length; p++) {      
+      assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
+      if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
+        assertEquals("Phone start confidence " + p,
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getStart().getConfidence().intValue());
+      }
+      if (p < phones.length - 1) { // last phone might coincide with end and be CONFIDENCE_MANUAL
+        assertEquals("Phone end confidence " + p,
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].getEnd().getConfidence().intValue());
+      }
+      if (p > 0) {
+        assertEquals("Phone start shared with previous end " + p,
+                     phones[p-1].getEnd(), phones[p].getStart());
+      }
+    } // next phone    
+  }   
+  
+  /** Test train/align modality with --phone_set specified. */
+  /*@Test doesn't work, apparently because not all ARPABET phonemes are represented in the
+   * data
+   */ public void trainAndAlignWithPhoneSet() throws Exception {
+    annotator.setSessionName("trainAndAlign");
+    annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    Graph f = fragment();
+    Schema schema = f.getSchema();
+    annotator.setSchema(schema);    
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&pronunciationLayerId=phonemes"
+      +"&phoneSet=ARPA"
       +"&utteranceTagLayerId=utterance_mfa" // nonexistent
       +"&participantTagLayerId=participant_mfa" // nonexistent
       +"&wordAlignmentLayerId=word"

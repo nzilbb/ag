@@ -26,6 +26,20 @@
             <option value="">[none]</option>
         </select></span>
       </div>
+      <div class="field" title="Value for --phone_set parameter, which allows the selection of different numbers of HMM states depending on the type of phoneme. This value should match the phoneme encoding of the Pronunciation Layer.">
+        <label for="phoneSet"> Phone Set
+          <a href="https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/workflows/train_acoustic_model.html"
+             title="More information about this parameter in the MFA manual"
+             target="mfa">🛈</a>.
+        </label>
+        <span><select id="phoneSet" name="phoneSet">
+            <option value="">[none]</option>
+            <option value="AUTO">AUTO</option>
+            <option value="IPA">IPA</option>
+            <option value="ARPA">ARPA</option>
+            <option value="PINYIN">PINYIN</option>
+        </select></span>
+      </div>
       <div class="field" title="Whether use the --multilingual_ipa switch or not.">
         <label for="multilingualIPA"> Multilingual IPA </label>
         <span><input id="multilingualIPA"

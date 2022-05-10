@@ -249,5 +249,7 @@ document.getElementById("form").onsubmit = function(e) {
 document.getElementById("dictionaryName").onchange = function(e) {
     // either pronunciationLayerId or dictionaryName
     document.getElementById("pronunciationLayerId").disabled
-        = document.getElementById("dictionaryName").value != ""; 
+    // if pronunciationLayerId, then phoneSet
+        = document.getElementById("phoneSet").disabled
+        = document.getElementById("dictionaryName").value != "";
 }

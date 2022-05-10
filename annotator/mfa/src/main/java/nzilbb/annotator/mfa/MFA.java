@@ -91,7 +91,7 @@ import nzilbb.util.IO;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @UsesFileSystem @UsesGraphStore
-public class MFA extends Annotator {
+public class MFA extends Annotator { 
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
   public String getMinimumApiVersion() { return "1.0.7"; }
   
@@ -356,7 +356,37 @@ public class MFA extends Annotator {
    * @param newRetryBeam --retry-beam setting given to the mfa command.
    */
   public MFA setRetryBeam(int newRetryBeam) { retryBeam = newRetryBeam; return this; }
-
+  
+  /**
+   * The value for the mfa --phone_set command line parameter, which is used for training
+   * new models. Default is null, meaning the parameter is not used. 
+   * <p> For more information, see
+   * <a href="https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/workflows/train_acoustic_model.html">
+   * the documentation</a>.
+   * @see #getPhoneSet()
+   * @see #setPhoneSet(String)
+   */
+  protected String phoneSet;
+  /**
+   * Getter for {@link #phoneSet}: The value for the mfa --phone_set command line
+   * parameter, which is used for training new models. Default is null, meaning the
+   * parameter is not used. 
+   * @return The value for the mfa --phone_set command line parameter, which is used for
+   * training new models. Default is null, meaning the parameter is not used. 
+   */
+  public String getPhoneSet() { return phoneSet; }
+  /**
+   * Setter for {@link #phoneSet}: The value for the mfa --phone_set command line
+   * parameter, which is used for training new models. Default is null, meaning the
+   * parameter is not used. 
+   * <p> For more information, see
+   * <a href="https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/workflows/train_acoustic_model.html">
+   * the documentation</a>.
+   * @param newPhoneSet The value for the mfa --phone_set command line parameter, which is
+   * used for training new models. Default is null, meaning the parameter is not used. 
+   */
+  public MFA setPhoneSet(String newPhoneSet) { phoneSet = newPhoneSet; return this; }
+  
   /**
    * Default constructor.
    */
@@ -1100,19 +1130,27 @@ public class MFA extends Annotator {
             if (dictionaryName == null && modelsName == null) { // train & align          
               //mfa("validate", corpusDir.getPath(), dictionaryFile.getPath());
               setPercentComplete(30); // (up to 5 phases of 10% each arrives at 80%)
-              if (multilingualIPA) { // --multilingual_ipa
-                mfa(false, "train", "--clean", "--multilingual_ipa",
-                    "--output_format", "long_textgrid",
-                    corpusDir.getPath(), dictionaryFile.getPath(),
-                    alignedDir.getPath(),
-                    "--beam", ""+beam, "--retry-beam", ""+retryBeam);
-              } else {
-                mfa(false, "train", "--clean", 
-                    "--output_format", "long_textgrid",
-                    corpusDir.getPath(), dictionaryFile.getPath(),
-                    alignedDir.getPath(),
-                    "--beam", ""+beam, "--retry-beam", ""+retryBeam);
+              Vector<String> parameters = new Vector<String>();
+              parameters.add("train");
+              parameters.add("--clean");
+              if (multilingualIPA) {
+                parameters.add("--multilingual_ipa");
               }
+              if (phoneSet != null && phoneSet.length() > 0) {
+                parameters.add("--phone_set");
+                parameters.add(phoneSet);
+              }
+              parameters.add("--output_format");
+              parameters.add("long_textgrid");
+              parameters.add(corpusDir.getPath());
+              parameters.add(dictionaryFile.getPath());
+              parameters.add(alignedDir.getPath());
+              parameters.add("--beam");
+              parameters.add(""+beam);
+              parameters.add("--retry-beam");
+              parameters.add(""+retryBeam);
+              String[] paramatersArray = parameters.toArray(new String[0]);
+              mfa(false, paramatersArray);
               setPercentComplete(80); // (up to 5 phases of 10% each arrives at 80%)
               // log contents of ${tempDir}/corpus/train_acoustic_model.log
               copyLog(new File(new File(tempDir, "corpus"), "train_acoustic_model.log"));
