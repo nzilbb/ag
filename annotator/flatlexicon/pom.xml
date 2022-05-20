@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.flatlexicon</artifactId>
-  <version>3.0.2</version>
+  <version>3.1.0</version>
 
   <name>nzilbb.annotator.flatlexicon</name>
   <description>Looks up lexicons derived from a flat file (e.g. in CSV format)</description>
@@ -90,7 +90,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <trimStackTrace>false</trimStackTrace>
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>

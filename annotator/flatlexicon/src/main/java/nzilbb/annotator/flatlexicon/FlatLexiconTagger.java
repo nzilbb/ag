@@ -650,6 +650,25 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
   public FlatLexiconTagger setStrip(String newStrip) { strip = newStrip; return this; }
 
   /**
+   * Whether dictionary lookups are case sensitive or not. By default, lookups are
+   * case-insensitive. 
+   * @see #getCaseSensitive()
+   * @see #setCaseSensitive(Boolean)
+   */
+  protected Boolean caseSensitive;
+  /**
+   * Getter for {@link #caseSensitive}: Whether dictionary lookups are case sensitive or
+   * not. By default, lookups are case-insensitive. 
+   * @return Whether dictionary lookups are case sensitive or not.
+   */
+  public Boolean getCaseSensitive() { return caseSensitive; }
+  /**
+   * Setter for {@link #caseSensitive}: Whether dictionary lookups are case sensitive or not.
+   * @param newCaseSensitive Whether dictionary lookups are case sensitive or not. 
+   */
+  public FlatLexiconTagger setCaseSensitive(Boolean newCaseSensitive) { caseSensitive = newCaseSensitive; return this; }
+  
+  /**
    * Sets the configuration for a given annotation task.
    * @param parameters The configuration of the annotator; a value of <tt> null </tt>
    * will apply the default task parameters, with {@link #tokenLayerId} set to the
@@ -669,6 +688,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       }
       strip = "";
       firstVariantOnly = Boolean.FALSE;
+      caseSensitive = Boolean.FALSE;
          
       try {
         // default transcript language layer
@@ -704,6 +724,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       beanPropertiesFromQueryString(parameters);
     }
     if (firstVariantOnly == null) firstVariantOnly = Boolean.FALSE;
+    if (caseSensitive == null) caseSensitive = Boolean.FALSE;
       
     if (schema.getLayer(tokenLayerId) == null)
       throw new InvalidConfigurationException(this, "Token layer not found: " + tokenLayerId);
@@ -1088,7 +1109,8 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    public Dictionary getDictionary(String lexicon, String keyField, String valueField)
      throws DictionaryException {
      try {
-       return new FlatLexicon(this, newConnection(), sqlx, lexicon, keyField, valueField);
+       return new FlatLexicon(this, newConnection(), sqlx, lexicon, keyField, valueField)
+         .setCaseSensitive(caseSensitive);
      } catch(SQLException sqlX) {
        throw new DictionaryException(null, sqlX);
      }

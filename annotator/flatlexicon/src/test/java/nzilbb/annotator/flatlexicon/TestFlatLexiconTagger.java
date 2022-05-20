@@ -618,6 +618,7 @@ public class TestFlatLexiconTagger {
       +"&tagLayerId=phonemes"
       +"&dictionary=a-z.csv:Word->Pronunciation"
       +"&firstVariantOnly=false"
+      +"&caseSensitive=false"
       +"&strip=");
       
     assertEquals("token layer",
@@ -644,6 +645,8 @@ public class TestFlatLexiconTagger {
                 annotator.getFirstVariantOnly());
     assertTrue("tag layer allows peers (firstVariantOnly=false)",
                schema.getLayer(annotator.getTagLayerId()).getPeers());
+    assertFalse("caseSensitive=false",
+                annotator.getCaseSensitive());
     Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
       .collect(Collectors.toSet());
     assertEquals("3 required layer: "+requiredLayers,
@@ -675,6 +678,108 @@ public class TestFlatLexiconTagger {
                  "ð i:", prons.next());
     assertEquals("Multiple pronunciations",
                  "ð ə", prons.next());
+    assertEquals("NZE phrase is tagged",
+                 "k w ɪ k", prons.next());
+    assertEquals("NZE phrase is tagged",
+                 "b r aʊ n", prons.next());
+    assertEquals("'fox jumps over the' is skipped",
+                 "l eɪ z i:", prons.next());
+    assertEquals("d ɒ g", prons.next());
+
+  }
+   
+  /** Test that case-sensitive matching works. */
+  @Test public void caseSensitive() throws Exception {
+      
+    Graph g = graph();
+      
+    // tag the graph as being in English - strictly it should be the ISO code,
+    // but "English" should also work
+    g.addTag(g, "transcript_language", "en");
+
+    // tag some words as being in Te Reo Māori
+    g.addAnnotation(new Annotation().setLayerId("lang").setLabel("mi")
+                    .setStart(g.getOrCreateAnchorAt(40))
+                    // 40."fox".45."jumps".50."over".60."the".70
+                    .setEnd(g.getOrCreateAnchorAt(70))
+                    .setParent(g.first("turn")));
+
+    // tag some as being in NZ English
+    g.addAnnotation(new Annotation().setLayerId("lang").setLabel("en-NZ")
+                    .setStart(g.getOrCreateAnchorAt(20))
+                    // 20."quick".30."brown".40
+                    .setEnd(g.getOrCreateAnchorAt(40))
+                    .setParent(g.first("turn")));
+      
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+      
+    // use default configuration
+    annotator.setTaskParameters(
+      "tokenLayerId=word"
+      +"&transcriptLanguageLayerId=transcript_language"
+      +"&phraseLanguageLayerId=lang"
+      +"&targetLanguagePattern=en.*"
+      +"&tagLayerId=phonemes"
+      +"&dictionary=a-z.csv:Word->Pronunciation"
+      +"&firstVariantOnly=false"
+      +"&caseSensitive=on"
+      +"&strip=");
+      
+    assertEquals("token layer",
+                 "word", annotator.getTokenLayerId());
+    assertEquals("transcript language layer",
+                 "transcript_language", annotator.getTranscriptLanguageLayerId());
+    assertEquals("phrase language layer",
+                 "lang", annotator.getPhraseLanguageLayerId());
+    assertEquals("target language",
+                 "en.*", annotator.getTargetLanguagePattern());
+    assertEquals("tag layer",
+                 "phonemes", annotator.getTagLayerId());
+    assertNotNull("tag layer was created",
+                  schema.getLayer(annotator.getTagLayerId()));
+    assertEquals("tag layer child of word",
+                 "word", schema.getLayer(annotator.getTagLayerId()).getParentId());
+    assertEquals("tag layer not aligned",
+                 Constants.ALIGNMENT_NONE,
+                 schema.getLayer(annotator.getTagLayerId()).getAlignment());
+    assertEquals("tag layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getTagLayerId()).getType());
+    assertFalse("firstVariantOnly=false",
+                annotator.getFirstVariantOnly());
+    assertTrue("tag layer allows peers (firstVariantOnly=false)",
+               schema.getLayer(annotator.getTagLayerId()).getPeers());
+    assertTrue("caseSensitive=true",
+                annotator.getCaseSensitive());
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("3 required layer: "+requiredLayers,
+                 3, requiredLayers.size());
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    assertTrue("transcript_language required "+requiredLayers,
+               requiredLayers.contains("transcript_language"));
+    assertTrue("lang required "+requiredLayers,
+               requiredLayers.contains("lang"));
+    String outputLayers[] = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                 1, outputLayers.length);
+    assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                 "phonemes", outputLayers[0]);
+
+    assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                 9, g.all("word").length);
+    assertEquals("double check there are no pronunciations: "+Arrays.asList(g.all("phonemes")),
+                 0, g.all("phonemes").length);
+    // run the annotator
+    annotator.transform(g);
+    List<String> pronLabels = Arrays.stream(g.all("phonemes"))
+      .map(annotation->annotation.getLabel()).collect(Collectors.toList());
+    assertEquals("Correct number of annotations "+pronLabels,
+                 4, pronLabels.size());
+    Iterator<String> prons = pronLabels.iterator();
+    // "The" is not tagged because case doesn't match dictionary "the"
     assertEquals("NZE phrase is tagged",
                  "k w ɪ k", prons.next());
     assertEquals("NZE phrase is tagged",

@@ -63,9 +63,11 @@ getSchema(s => {
                 for (const [key, value] of parameters) {
                     document.getElementById(key).value = value;
                 }
-                // set the checkbox
+                // set the checkboxes
                 document.getElementById("firstVariantOnly").checked
                     = parameters.get("firstVariantOnly");
+                document.getElementById("caseSensitive").checked
+                    = parameters.get("caseSensitive");
                 // if there's no utterance tag layer defined
                 if (tagLayerId.selectedIndex == 0
                     // but there's a layer named after the task

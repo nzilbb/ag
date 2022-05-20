@@ -46,7 +46,7 @@ public class FlatLexicon implements Dictionary {
   private MySQLTranslator sqlx = new MySQLTranslator();
   private PreparedStatement sql;
   private String quote;
-
+  
   /**
    * Lexicon name
    * @see #getLexicon()
@@ -140,6 +140,39 @@ public class FlatLexicon implements Dictionary {
   public String getDictionaryId() { return lexicon+":"+keyField+"->"+valueField; }
   
   /**
+   * Whether dictionary lookups are case sensitive or not.
+   * @see #getCaseSensitive()
+   * @see #setCaseSensitive(boolean)
+   */
+  protected boolean caseSensitive = false;
+  /**
+   * Getter for {@link #caseSensitive}: Whether dictionary lookups are case sensitive or not. 
+   * @return Whether dictionary lookups are case sensitive or not.
+   */
+  public boolean getCaseSensitive() { return caseSensitive; }
+  /**
+   * Setter for {@link #caseSensitive}: Whether dictionary lookups are case sensitive or
+   * not.
+   * @param newCaseSensitive Whether dictionary lookups are case sensitive or not. 
+   */
+  public FlatLexicon setCaseSensitive(boolean newCaseSensitive) throws SQLException {
+    if (sql != null) {
+      try { sql.close(); } catch(Exception exception) {}
+    }
+    caseSensitive = newCaseSensitive;
+    sql = rdb.prepareStatement(
+      sqlx.apply(
+        "SELECT DISTINCT "+quote+valueField+quote+", supplemental"
+        +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
+        // use BINARY for accent sensitivity
+        // use LOWER to remove case sensitivity of BINARY
+        +" WHERE "+(caseSensitive?"":"LOWER")+"("+quote+keyField+quote+")"
+        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)"
+        +" ORDER BY "+quote+valueField+quote+""));
+    return this;
+  }
+  
+  /**
    * Constructor.
    */
   public FlatLexicon(
@@ -153,6 +186,7 @@ public class FlatLexicon implements Dictionary {
     this.lexicon = lexicon;
     this.keyField = keyField;
     this.valueField = valueField;
+    this.caseSensitive = caseSensitive;
     sql = rdb.prepareStatement(
       sqlx.apply(
         "SELECT lexicon_id FROM "+annotator.getAnnotatorId()+"_lexicon WHERE name = ?"));
@@ -170,14 +204,7 @@ public class FlatLexicon implements Dictionary {
     } finally {
       sql.close();
     }
-    sql = rdb.prepareStatement(
-      sqlx.apply(
-        "SELECT DISTINCT "+quote+valueField+quote+", supplemental"
-        +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-        // use BINARY for accent sensitivity
-        // use LOWER to remove case sensitivity of BINARY 
-        +" WHERE LOWER("+quote+keyField+quote+") = BINARY LOWER(?)"
-        +" ORDER BY "+quote+valueField+quote+""));
+    setCaseSensitive(false); // this creates the sql query
     // ensure keyField/valueField are valid
     try {
       lookupEntries("test", true);
@@ -453,8 +480,9 @@ public class FlatLexicon implements Dictionary {
       PreparedStatement sql = rdb.prepareStatement(
         "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
         // use BINARY for accent sensitivity
-        // use LOWER to remove case sensitivity of BINARY 
-        +" WHERE LOWER("+quote+keyField+quote+") = BINARY LOWER(?) AND supplemental = 1");
+        // use LOWER to remove case sensitivity of BINARY
+        +" WHERE "+(caseSensitive?"":"LOWER")+"("+quote+keyField+quote+")"
+        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?) AND supplemental = 1");
       try {
         sql.setString(1, key);
         if (sql.executeUpdate() == 0) {
@@ -483,9 +511,12 @@ public class FlatLexicon implements Dictionary {
       PreparedStatement sql = rdb.prepareStatement(
         "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
         // use BINARY for accent sensitivity
-        // use LOWER to remove case sensitivity of BINARY 
-        +" WHERE LOWER("+quote+keyField+quote+") = BINARY LOWER(?)"
-        +" AND LOWER("+quote+valueField+quote+") = BINARY LOWER(?) AND supplemental = 1");
+        // use LOWER to remove case sensitivity of BINARY
+        +" WHERE "+(caseSensitive?"":"LOWER")+"("+quote+keyField+quote+")"
+        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)"
+        +" AND "+(caseSensitive?"":"LOWER")+"("+quote+valueField+quote+")"
+        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)"
+        +" AND supplemental = 1");
       try {
         sql.setString(1, key);
         sql.setString(2, entry);
