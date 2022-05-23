@@ -362,7 +362,7 @@ public class TestLabelMapper {
     Annotation[] phones = g.all("phone");
     assertEquals("Right number of phones " + Arrays.asList(phones), 15, phones.length);
     String[] phoneLabels = { "@", "d","I","f","@", "r","H", "t",  "f","2","@","f","2","t","@" };
-    String[] discLabels = {  "1", "d","I","f",null,"r@","n","t",  "f","2","r","f","2","L","@r" };
+    String[] discLabels = {  "1", "d","I","f",null,"r","@n","t",  "f","2","r","f","2","L","@r" };
     for (int p = 0; p < phones.length; p++) {
       assertEquals("Phone label " + p, phoneLabels[p], phones[p].getLabel());
       Annotation[] tags = phones[p].all("disc");
@@ -379,6 +379,84 @@ public class TestLabelMapper {
     }
     assertEquals("Right number of tags " + Arrays.asList(g.all("disc")),
                  14, g.all("disc").length);
+  }   
+
+
+  /** Test mapping of Te Ara Dictionary style phoneme word labels to phones. In this case,
+   * diphtongs are multiple characters, but should be collapsed into the same phone, not
+   * just added to the previous phone.
+   */
+  @Test public void TeAraToDISC() throws Exception {
+    LabelMapper annotator = newAnnotator();
+    // annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    g.trackChanges();
+
+    // edit the graph to use Te Reo labels
+    Annotation[] words = g.all("word");
+    words[1].setLabel("kaiako"); // kaiako/kWako
+    words[1].first("phonemes").setLabel("kaiako"); // Te Aka
+    Annotation[] phones = words[1].all("phone");
+    phones[0].setLabel("k"); // -> k
+    phones[1].setLabel("W"); // -> ai
+    phones[2].setLabel("a"); // -> a
+    phones[3].setLabel("k"); // -> k
+    phones[4].setLabel("o"); // -> o
+    phones[5].destroy();
+    phones[6].destroy();
+    words[2].setLabel("uaua"); // uaua/u5a
+    words[2].first("phonemes").setLabel("uaua"); // Te Aka
+    phones = words[2].all("phone");
+    phones[0].setLabel("u"); // -> u
+    phones[1].setLabel("5"); // -> au
+    phones[2].setLabel("a"); // -> a
+    phones[3].destroy();
+    phones[4].destroy();
+    phones[5].destroy();
+    phones[6].destroy();
+    g.commit();
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "sourceLayerId=phonemes"
+      +"&splitLabels=char"
+      +"&targetLayerId=phone"
+      +"&comparator=DISCToDISC"
+      +"&mappingLayerId=disc"); // nonexistent
+    Layer layer = annotator.getSchema().getLayer("disc");
+    assertNotNull("disc layer created", layer);
+    assertEquals("disc layer correct type", Constants.TYPE_IPA, layer.getType());
+    assertEquals("disc layer correct parent", "phone", layer.getParentId());
+    assertEquals("disc layer alignment", Constants.ALIGNMENT_NONE, layer.getAlignment());
+
+    // create a 'pre-existing' tag to ensure it's deleted or changed
+    layer.setPeers(true); // fool the API into allowing more than one tag
+    g.all("phone")[0].createTag("disc", "to-delete");
+    g.commit();
+
+    g.trackChanges();
+    annotator.transform(g);
+    g.commit(); // remove destroyed annotations
+    
+    phones = g.all("phone");
+    assertEquals("Right number of phones " + Arrays.asList(phones), 9, phones.length);
+    String[] phoneLabels = { "@",  "k","W", "a","k","o",  "u","5", "a" };
+    String[] discLabels = {  "1",  "k","ai","a","k","o",  "u","au","a" };
+    for (int p = 0; p < phones.length; p++) {
+      assertEquals("Phone label " + p, phoneLabels[p], phones[p].getLabel());
+      Annotation[] tags = phones[p].all("disc");
+      assertEquals("One tag " + p + " " + Arrays.asList(tags), 1, tags.length);
+      assertNotNull("Tagged " + p, phones[p].first("disc"));
+      assertEquals("Tag label " + p, discLabels[p], phones[p].first("disc").getLabel());
+      assertEquals("Tag confidence " + p,
+                   Constants.CONFIDENCE_AUTOMATIC,
+                   phones[p].first("disc").getConfidence().intValue());
+    }
+    assertEquals("Right number of tags " + Arrays.asList(g.all("disc")),
+                 9, g.all("disc").length);
   }   
 
   /** Test mapping of orthography to phones. */
@@ -409,7 +487,7 @@ public class TestLabelMapper {
     Annotation[] phones = g.all("phone");
     assertEquals("Right number of phones " + Arrays.asList(phones), 15, phones.length);
     String[] phoneLabels = { "@", "d","I","f", "@","r","H", "t", "f","2", "@","f","2",  "t","@" };
-    String[] letterLabels = {"a", "d","i","ff","e","re","n","t", "f","ir","e","f","igh","t","er"};
+    String[] letterLabels = {"a", "d","i","ff","e","r","en","t", "f","ir","e","f","igh","t","er"};
     for (int p = 0; p < phones.length; p++) {
       assertEquals("Phone label " + p, phoneLabels[p], phones[p].getLabel());
       assertNotNull("Tagged " + p, phones[p].first("letter"));
@@ -1132,7 +1210,15 @@ public class TestLabelMapper {
           throws StoreException, PermissionException, GraphNotFoundException {
           throw new StoreException();
         }
-   
+        public int deleteMatchingAnnotations(String expression)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
+        public int tagMatchingAnnotations(
+          String expression, String layerId, String label, Integer confidence)
+          throws StoreException, PermissionException {
+          throw new StoreException();
+        }
       });     
     // use derby for relational database
     annotator.setRdbConnectionFactory(new DerbyConnectionFactory(dir));

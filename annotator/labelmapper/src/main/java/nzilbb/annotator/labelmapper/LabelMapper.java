@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -832,9 +832,14 @@ public class LabelMapper extends Annotator {
               }
               case DELETE: {
                 if (!subMapping) {
-                  // append to the previous one
-                  if (lastTag != null) {
-                    if (concatDelimiter) {                
+                  // we try to cluster deleted vowels with the subsequent vowel if any
+                  if (step.getFrom().label.matches("[aeiouAEIOU]") // orthographic vowel
+                      || (getComparator().startsWith("DISC") // DISC vowels..
+                          && step.getFrom().label.matches("[cCFHPqQV0123456789~#\\{\\$@WX]"))) {
+                    initialInserts += step.getFrom().label;
+                    if (concatDelimiter) initialInserts += " ";
+                  } else if (lastTag != null) { // otherwise append to the previous one
+                    if (concatDelimiter) {
                       lastTag.setLabel(lastTag.getLabel() + " " + step.getFrom().label);
                     } else {
                       lastTag.setLabel(lastTag.getLabel() + step.getFrom().label);
