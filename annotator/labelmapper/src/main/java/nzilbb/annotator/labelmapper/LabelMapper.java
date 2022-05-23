@@ -907,6 +907,14 @@ public class LabelMapper extends Annotator {
               }
             }
           } // next step
+          if (initialInserts.length() > 0 && lastTag != null) {
+            // leftover vowel cluster - append it to the end of the last tag
+            if (concatDelimiter) {
+              lastTag.setLabel(lastTag.getLabel() + " " + initialInserts.trim());
+            } else {
+              lastTag.setLabel(lastTag.getLabel() + initialInserts);
+            }
+          } // leftover initialInserts
         } // next scope annotation
       } finally {
         if (rdb != null) {
