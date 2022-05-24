@@ -397,9 +397,20 @@ public class TestLabelMapper {
 
     // edit the graph to use Te Reo labels
     Annotation[] words = g.all("word");
+    words[0].setLabel("uaua"); // uaua/u5a
+    words[0].first("phonemes").setLabel("uaua"); // Te Aka
+    Annotation[] phones = words[0].all("phone");
+    phones[0].setLabel("u"); // -> u
+    phones[0].setEnd(g.getOrCreateAnchorAt(13));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("5") // -> au
+                    .setStart(g.getOrCreateAnchorAt(13)).setEnd(g.getOrCreateAnchorAt(16))
+                    .setParent(words[0]));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("a") // -> a
+                    .setStart(g.getOrCreateAnchorAt(16)).setEnd(g.getOrCreateAnchorAt(20))
+                    .setParent(words[0]));
     words[1].setLabel("kaiako"); // kaiako/kWako
     words[1].first("phonemes").setLabel("kaiako"); // Te Aka
-    Annotation[] phones = words[1].all("phone");
+    phones = words[1].all("phone");
     phones[0].setLabel("k"); // -> k
     phones[1].setLabel("W"); // -> ai
     phones[2].setLabel("a"); // -> a
@@ -407,16 +418,16 @@ public class TestLabelMapper {
     phones[4].setLabel("o"); // -> o
     phones[5].destroy();
     phones[6].destroy();
-    words[2].setLabel("uaua"); // uaua/u5a
-    words[2].first("phonemes").setLabel("uaua"); // Te Aka
+    words[2].setLabel("whakaaetia"); // fakaaetia/fak2tia
+    words[2].first("phonemes").setLabel("fakaaetia"); // Te Aka
     phones = words[2].all("phone");
-    phones[0].setLabel("u"); // -> u
-    phones[1].setLabel("5"); // -> au
-    phones[2].setLabel("a"); // -> a
-    phones[3].destroy();
-    phones[4].destroy();
-    phones[5].destroy();
-    phones[6].destroy();
+    phones[0].setLabel("f"); // -> f
+    phones[1].setLabel("a"); // -> a
+    phones[2].setLabel("k"); // -> k
+    phones[3].setLabel("2"); // -> aae
+    phones[4].setLabel("t"); // -> t
+    phones[5].setLabel("i"); // -> i
+    phones[6].setLabel("a"); // -> a
     g.commit();
     
     // layers are created as required
@@ -442,9 +453,9 @@ public class TestLabelMapper {
     g.commit(); // remove destroyed annotations
     
     phones = g.all("phone");
-    assertEquals("Right number of phones " + Arrays.asList(phones), 9, phones.length);
-    String[] phoneLabels = { "@",  "k","W", "a","k","o",  "u","5", "a" };
-    String[] discLabels = {  "1",  "k","ai","a","k","o",  "u","au","a" };
+    assertEquals("Right number of phones " + Arrays.asList(phones), 15, phones.length);
+    String[] phoneLabels = {"u","5", "a",  "k","W", "a","k","o", "f","a","k","2",  "t","i","a"};
+    String[] discLabels = { "u","au","a",  "k","ai","a","k","o", "f","a","k","aae","t","i","a"};
     for (int p = 0; p < phones.length; p++) {
       assertEquals("Phone label " + p, phoneLabels[p], phones[p].getLabel());
       Annotation[] tags = phones[p].all("disc");
@@ -456,7 +467,7 @@ public class TestLabelMapper {
                    phones[p].first("disc").getConfidence().intValue());
     }
     assertEquals("Right number of tags " + Arrays.asList(g.all("disc")),
-                 9, g.all("disc").length);
+                 15, g.all("disc").length);
   }   
 
   /** Test mapping of orthography to phones. */

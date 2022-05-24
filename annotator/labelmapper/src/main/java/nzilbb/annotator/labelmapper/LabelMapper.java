@@ -730,7 +730,11 @@ public class LabelMapper extends Annotator {
           for (Annotation a : graph.all(subMappingLayerId)) a.destroy();
         }
         
-        boolean concatDelimiter = !splitLabels.equals("char");
+        String concatDelimiter = !splitLabels.equals("char")?" ":"";
+        // we try to cluster deleted vowels with subsequent vowel if any, so need a vowel pattern
+        String vowelPattern = getComparator().startsWith("DISC")?
+          "[aeiouAEIOUcCFHPqQV0123456789~#\\{\\$@WX]":"[aeiouAEIOU]";
+
         setStatus("for each " + scopeLayerId + " map " + sourceLayerId + " → " + targetLayerId);
         // for each scope annotator
         for (Annotation scope : graph.list(scopeLayerId)) {
@@ -783,14 +787,23 @@ public class LabelMapper extends Annotator {
               case NONE:
               case CHANGE: {
                 if (mappingLayerId != null) {
-                  lastTag = step.getTo().source.createTag(
+                  Annotation tag = step.getTo().source.createTag(
                     mappingLayerId, step.getFrom().label);
-                  lastTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                  tag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
                   if (!subMapping
-                      && initialInserts.length() > 0) { // prepend inserts we had already found
-                    lastTag.setLabel(initialInserts + lastTag.getLabel());
+                      && initialInserts.length() > 0) { // prepend inserts we had already found?
+                    if (lastTag != null // may be a clustering vowel
+                        && !step.getFrom().label.matches(vowelPattern) // not vowel
+                        && lastTag.getLabel().matches(vowelPattern+"+")) { // previous is vowel
+                      // not a vowel, so don't cluster forward, cluster back instead
+                      lastTag.setLabel(
+                        lastTag.getLabel() + concatDelimiter + initialInserts.trim());
+                      initialInserts = "";
+                    } // this is not a vowel, and initialInserts can cluster with lastTag
+                    tag.setLabel(initialInserts + tag.getLabel());
                     initialInserts = "";
                   }
+                  lastTag = tag;
                 }
                 if (subMapping) { // subMapping
                   Annotation from = step.getFrom().source;
@@ -833,20 +846,12 @@ public class LabelMapper extends Annotator {
               case DELETE: {
                 if (!subMapping) {
                   // we try to cluster deleted vowels with the subsequent vowel if any
-                  if (step.getFrom().label.matches("[aeiouAEIOU]") // orthographic vowel
-                      || (getComparator().startsWith("DISC") // DISC vowels..
-                          && step.getFrom().label.matches("[cCFHPqQV0123456789~#\\{\\$@WX]"))) {
-                    initialInserts += step.getFrom().label;
-                    if (concatDelimiter) initialInserts += " ";
+                  if (step.getFrom().label.matches(vowelPattern)) { // vowel
+                    initialInserts += step.getFrom().label + concatDelimiter;
                   } else if (lastTag != null) { // otherwise append to the previous one
-                    if (concatDelimiter) {
-                      lastTag.setLabel(lastTag.getLabel() + " " + step.getFrom().label);
-                    } else {
-                      lastTag.setLabel(lastTag.getLabel() + step.getFrom().label);
-                    }
+                    lastTag.setLabel(lastTag.getLabel() + concatDelimiter + step.getFrom().label);
                   } else { // remember the label until we can prepend it to something
-                    initialInserts += step.getFrom().label;
-                    if (concatDelimiter) initialInserts += " ";
+                    initialInserts += step.getFrom().label + concatDelimiter;
                   }
                 } else { // sub-mapping
                   Annotation from = step.getFrom().source;
@@ -909,11 +914,7 @@ public class LabelMapper extends Annotator {
           } // next step
           if (initialInserts.length() > 0 && lastTag != null) {
             // leftover vowel cluster - append it to the end of the last tag
-            if (concatDelimiter) {
-              lastTag.setLabel(lastTag.getLabel() + " " + initialInserts.trim());
-            } else {
-              lastTag.setLabel(lastTag.getLabel() + initialInserts);
-            }
+            lastTag.setLabel(lastTag.getLabel() + concatDelimiter + initialInserts.trim());
           } // leftover initialInserts
         } // next scope annotation
       } finally {
