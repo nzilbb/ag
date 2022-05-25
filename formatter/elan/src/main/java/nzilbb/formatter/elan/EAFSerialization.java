@@ -649,7 +649,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       layerToPossibilities.put(
         new Parameter("utteranceLayer", Layer.class, "Utterance layer", 
                       "Layer for speaker utterances", true), 
-        Arrays.asList("utterance","utterances","line","lines"));
+        Arrays.asList("utterance","utterances","line","lines","transcript"));
       layerToCandidates.put("utteranceLayer", possibleTurnChildLayers);
     }
     if (getWordLayer() == null) {
@@ -2470,12 +2470,15 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     //   }
     //   sAnnotationTag = "REF_ANNOTATION";
     // } // not top level
-    if (!layer.getPeers()
-        && layer.getSaturated()
+    if (layer.getSaturated()
         && layer.getAlignment() == Constants.ALIGNMENT_NONE
         && dominatingLayer.getId().equals(wordLayer.getId())) { // word tag layer
-      sLinguisticTypeRef = "tag-lt";
       sAnnotationTag = "REF_ANNOTATION";
+      if (layer.getPeers()) {
+        sLinguisticTypeRef = "token-lt";
+      } else {
+        sLinguisticTypeRef = "tag-lt";
+      }
     } else if (layer.getPeers()) {
       if (layer.getSaturated()) {
         sLinguisticTypeRef = "partition-lt";
@@ -2622,10 +2625,15 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       // add all the tiers we created
     if (mSpeakerTiers.size() > 0) {
       for (String s : mSpeakerTiers.keySet()) {
+        int i = 1;
         for (Element t : mSpeakerTiers.get(s)) {
           if (mSpeakerTiers.size() == 1) {
             // no need to distinguish tiers using speaker name...
-            t.setAttribute("TIER_ID", layer.getId());
+            if (mSpeakerTiers.get(s).size() == 1) {
+              t.setAttribute("TIER_ID", layer.getId());
+            } else { // multiple of the same name, so still need to add index
+              t.setAttribute("TIER_ID", layer.getId() + " - " + (i++));
+            }
           }
           annotationDocument.appendChild(t);
         } // next tier
