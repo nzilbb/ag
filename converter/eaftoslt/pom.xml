@@ -10,17 +10,17 @@
   <groupId>nzilbb</groupId>
   <artifactId>eaf-to-slt</artifactId>
   <name>nzilbb.converter.eaftoslt</name>
-  <version>0.1.2</version>
+  <version>0.2.0</version>
   <description>ELAN file to SALT transcript converter</description>
 
   <properties>
     <input.package>nzilbb.formatter.elan</input.package>
     <input.path>nzilbb/formatter/elan/</input.path>
-    <input.version>1.7.4</input.version>
+    <input.version>1.7.5</input.version>
     
     <output.package>nzilbb.formatter.salt</output.package>
     <output.path>nzilbb/formatter/salt/</output.path>
-    <output.version>0.2.0</output.version>    
+    <output.version>0.3.0</output.version>    
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>converter-base</artifactId>
-      <version>[1.0.3,)</version>
+      <version>[1.0.6,)</version>
     </dependency>
     <dependency>
       <groupId>nzilbb</groupId>
@@ -120,7 +120,7 @@
                 <artifactItem>
                   <groupId>nzilbb</groupId>
                   <artifactId>converter-base</artifactId>
-                  <version>1.0.3</version>
+                  <version>1.0.6</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

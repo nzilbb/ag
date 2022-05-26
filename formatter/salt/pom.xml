@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.salt</artifactId>
   <name>nzilbb.formatter.salt</name>
-  <version>0.2.2</version>
+  <version>0.3.0</version>
 
   <properties>
     <package.path>nzilbb/formatter/salt/</package.path>

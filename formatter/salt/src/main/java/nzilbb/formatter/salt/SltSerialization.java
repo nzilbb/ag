@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -2822,7 +2822,8 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
           
           if (otherUtterance != null) { // overlaps with another utterance
             if (!inOverlap) {
-              if (token.distance(otherUtterance) < 0) { // overlaps with otherUtterance
+              Double distance = token.distance(otherUtterance);
+              if (distance != null && distance < 0) { // overlaps with otherUtterance
                 // overlap starts here
                 if (!word.startsWith("<")) { // isn't already in the transcript
                   writer.print("<");
