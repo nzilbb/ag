@@ -24,6 +24,8 @@ package nzilbb.converter;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDragEvent;
@@ -639,7 +641,20 @@ public abstract class Converter extends GuiProgram {
 
     about.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          JPanel aboutPanel = new JPanel(new java.awt.GridLayout(10, 1, 3, 3));
+          String info = getClass().getPackage().getImplementationTitle()
+            + " Version: " + getClass().getPackage().getImplementationVersion()
+            + "\nInput: " + getDeserializer().getDescriptor()
+            + "\nOutput: " + getSerializer().getDescriptor();
+          
+          // print version info
+          System.out.println(info);
+
+          // copy version info to clipboard
+          StringSelection selection = new StringSelection(info);
+          Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+
+          // display version info
+          JPanel aboutPanel = new JPanel(new java.awt.GridLayout(11, 1, 3, 3));
           aboutPanel.add(new JLabel(getClass().getPackage().getImplementationTitle(),
                                     SwingConstants.CENTER));
           aboutPanel.add(new JLabel(
@@ -649,6 +664,10 @@ public abstract class Converter extends GuiProgram {
                                     SwingConstants.CENTER));
           aboutPanel.add(new JLabel("Output: " + getSerializer().getDescriptor(),
                                     SwingConstants.CENTER));
+          JLabel clipboardMessage = new JLabel(
+            "(Version information has been copied to the clipboard)", SwingConstants.CENTER);
+          clipboardMessage.setForeground(java.awt.Color.GRAY);
+          aboutPanel.add(clipboardMessage);
           aboutPanel.add(new JLabel("Developed by:",
                                     SwingConstants.CENTER));
           aboutPanel.add(new JLabel(getClass().getPackage().getImplementationVendor(),
