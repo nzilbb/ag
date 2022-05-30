@@ -32,6 +32,7 @@
     <module>transcriber</module>
     <module>webvtt</module>
     <module>salt</module>
+    <module>doccano</module>
   </modules>
 
 </project>

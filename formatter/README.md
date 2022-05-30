@@ -57,10 +57,17 @@ the file extension, e.g `nzilbb.formatter.praat.TextGridSerialization`
           <outputDirectory>../../bin</outputDirectory>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <trimStackTrace>false</trimStackTrace>
+        </configuration>
+      </plugin>
     </plugins>    
    ```
 3. Add directory structure for the formatter code:
    ```
+   rm src/main/java/nzilbb.App.java
    mkdir src/main/java/nzilbb/formatter
    mkdir src/main/java/nzilbb/formatter/myformatter
    mkdir src/test/java/nzilbb/formatter
