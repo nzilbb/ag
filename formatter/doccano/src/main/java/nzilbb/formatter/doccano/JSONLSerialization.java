@@ -241,8 +241,7 @@ public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
    * Determines how far through the serialization is.
    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
    */
-  public Integer getPercentComplete()
-  {
+  public Integer getPercentComplete() {
     if (graphCount < 0) return null;
     return (int)((consumedGraphCount * 100) / graphCount);
   }
@@ -1027,7 +1026,7 @@ public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
           // each element is a triple: startChar, endChar, "layerId:label"
           int e = 0;
           for (JsonValue element : labelArray) {
-            JsonArray triple = element.asJsonArray();
+            JsonArray triple = (JsonArray)element;
             // character offsets as doubles because that's what we need later
             double startChar = triple.getJsonNumber(0).doubleValue();
             double endChar = triple.getJsonNumber(1).doubleValue();
