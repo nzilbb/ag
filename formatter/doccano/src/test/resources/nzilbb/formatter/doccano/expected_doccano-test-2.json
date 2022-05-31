@@ -1,0 +1,286 @@
+
+{
+    "id": "doccano-test-2",
+    "schema": {
+        "participantLayerId": "who",
+        "turnLayerId": "turn",
+        "utteranceLayerId": "utterance",
+        "wordLayerId": "word",
+        "transcript": {
+            "description": "The annotation graph as a whole",
+            "children": {
+                "who": {
+                    "description": "Participants",
+                    "alignment": 0,
+                    "peers": true,
+                    "peersOverlap": true,
+                    "parentIncludes": true,
+                    "saturated": true,
+                    "children": {
+                        "turn": {
+                            "description": "Speaker turns",
+                            "alignment": 2,
+                            "peers": true,
+                            "peersOverlap": false,
+                            "parentIncludes": true,
+                            "saturated": false,
+                            "children": {
+                                "role": {
+                                    "description": "Subject/Object",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false
+                                },
+                                "utterance": {
+                                    "description": "Utterances",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": true
+                                },
+                                "word": {
+                                    "description": "Words",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false,
+                                    "children": {
+                                        "pos": {
+                                            "description": "Part of Speech",
+                                            "alignment": 0,
+                                            "peers": false,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "anchors": {
+        "1": {
+            "offset": 0.0,
+            "confidence": 100
+        },
+        "5": {
+            "offset": 25.0,
+            "confidence": 100
+        },
+        "a": {
+            "offset": 45.0,
+            "confidence": 100
+        },
+        "e": {
+            "offset": null,
+            "confidence": 10
+        },
+        "g": {
+            "offset": null,
+            "confidence": 10
+        },
+        "i": {
+            "offset": null,
+            "confidence": 10
+        },
+        "k": {
+            "offset": null,
+            "confidence": 10
+        },
+        "r": {
+            "offset": null,
+            "confidence": 10
+        },
+        "t": {
+            "offset": null,
+            "confidence": 10
+        },
+        "v": {
+            "offset": null,
+            "confidence": 10
+        }
+    },
+    "who": [
+        {
+            "id": "4",
+            "label": "speaker1",
+            "startId": null,
+            "endId": null,
+            "confidence": 100,
+            "turn": [
+                {
+                    "id": "2",
+                    "label": "speaker1",
+                    "startId": "1",
+                    "endId": "5",
+                    "confidence": 100,
+                    "role": [
+                        {
+                            "id": "12",
+                            "label": "subject",
+                            "startId": "i",
+                            "endId": "k"
+                        }
+                    ],
+                    "utterance": [
+                        {
+                            "id": "6",
+                            "label": "speaker1:\tThe 'quick brown' fox jumps -",
+                            "startId": "1",
+                            "endId": "5",
+                            "confidence": 100
+                        }
+                    ],
+                    "word": [
+                        {
+                            "id": "f",
+                            "label": "The",
+                            "startId": "1",
+                            "endId": "e",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "h",
+                            "label": "'quick",
+                            "startId": "e",
+                            "endId": "g",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "10",
+                                    "label": "ADJ",
+                                    "startId": "e",
+                                    "endId": "g"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "j",
+                            "label": "brown'",
+                            "startId": "g",
+                            "endId": "i",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "l",
+                            "label": "fox",
+                            "startId": "i",
+                            "endId": "k",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "11",
+                                    "label": "N",
+                                    "startId": "i",
+                                    "endId": "k"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "n",
+                            "label": "jumps -",
+                            "startId": "k",
+                            "endId": "5",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "13",
+                                    "label": "V",
+                                    "startId": "k",
+                                    "endId": "5"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "7",
+            "label": "speaker2",
+            "startId": null,
+            "endId": null,
+            "confidence": 100,
+            "turn": [
+                {
+                    "id": "8",
+                    "label": "speaker2",
+                    "startId": "5",
+                    "endId": "a",
+                    "confidence": 100,
+                    "role": [
+                        {
+                            "id": "16",
+                            "label": "object",
+                            "startId": "v",
+                            "endId": "a"
+                        }
+                    ],
+                    "utterance": [
+                        {
+                            "id": "b",
+                            "label": "speaker2:\tover the lazy \"dog\" .",
+                            "startId": "5",
+                            "endId": "a",
+                            "confidence": 100
+                        }
+                    ],
+                    "word": [
+                        {
+                            "id": "s",
+                            "label": "over",
+                            "startId": "5",
+                            "endId": "r",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "u",
+                            "label": "the",
+                            "startId": "r",
+                            "endId": "t",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "w",
+                            "label": "lazy",
+                            "startId": "t",
+                            "endId": "v",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "14",
+                                    "label": "ADJ",
+                                    "startId": "t",
+                                    "endId": "v"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "y",
+                            "label": "\"dog\" .",
+                            "startId": "v",
+                            "endId": "a",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "15",
+                                    "label": "N",
+                                    "startId": "v",
+                                    "endId": "a"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

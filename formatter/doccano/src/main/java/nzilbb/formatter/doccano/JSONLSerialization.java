@@ -23,11 +23,13 @@ package nzilbb.formatter.doccano;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -35,10 +37,12 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -46,6 +50,13 @@ import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+import javax.json.stream.JsonGenerator;
+import javax.json.stream.JsonGeneratorFactory;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -60,12 +71,6 @@ import nzilbb.configure.ParameterSet;
 import nzilbb.util.IO;
 import nzilbb.util.TempFileInputStream;
 import nzilbb.util.Timers;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonException;
-import javax.json.JsonObject;
-import javax.json.stream.JsonGenerator;
-import javax.json.stream.JsonGeneratorFactory;
 
 /**
  * Serializer/deserializer for JSONL files compatible with
@@ -90,9 +95,20 @@ import javax.json.stream.JsonGeneratorFactory;
  *         <q>utterance</q> offsets, one annotation for each line in the <q>text</q> </dd>  
  *   </dl></li>
  * </ul>
+ * <p> <em>NB</em> If a graph is serialized with annotations, edited with Doccano, and
+ * then exported for deserialization, the annotations included in the serialization will
+ * be ignored during deserialization.
+ * <p> This is because serialized annotations have their original anchor offsets included,
+ * but we can't guarantee that these annotations haven't been edited in Doccano, and so
+ * the saved offsets may be no longer valid.
+ * <p> For this reason, Doccano can currently only be used to <em>add</em> annotations on
+ * new layers, not for editing existing layers.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSerializer {
+public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
+
+  protected Vector<String> warnings;
+   
   /**
    * Participant information layer.
    * @see #getParticipantLayer()
@@ -160,6 +176,63 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
    * @param newWordLayer Word token layer.
    */
   public JSONLSerialization setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; return this; }
+
+  /**
+   * Parameters and mappings for the next deserialization.
+   * @see #getParameters()
+   * @see #setParameters(ParameterSet)
+   */
+  protected ParameterSet parameters;
+  /**
+   * Getter for {@link #parameters}: Parameters and mappings for the next deserialization.
+   * @return Parameters and mappings for the next deserialization.
+   */
+  public ParameterSet getParameters() { return parameters; }
+  /**
+   * Setter for {@link #parameters}: Sets parameters for a given deserialization
+   * operation, after loading the serialized form of the graph. This might include
+   * mappings from format-specific objects like tiers to graph layers, etc. 
+   * @param newParameters The configuration for a given deserialization operation.
+   * @throws SerializationParametersMissingException If not all required parameters have a value.
+   */
+  public void setParameters(ParameterSet newParameters)
+    throws SerializationParametersMissingException {
+    parameters = newParameters;
+  }
+  
+  /**
+   * The schema for import.
+   * @see #getSchema()
+   * @see #setSchema(Schema)
+   */
+  protected Schema schema;
+  /**
+   * Getter for {@link #schema}: The schema for import.
+   * @return The schema for import.
+   */
+  public Schema getSchema() { return schema; }
+  /**
+   * Setter for {@link #schema}: The schema for import.
+   * @param newSchema The schema for import.
+   */
+  public JSONLSerialization setSchema(Schema newSchema) { schema = newSchema; return this; }
+
+  /**
+   * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
+   * @see #getTokenizer()
+   * @see #setTokenizer(GraphTransformer)
+   */
+  protected GraphTransformer tokenizer;
+  /**
+   * Getter for {@link #tokenizer}: Utterance tokenizer.
+   * @return Utterance tokenizer.
+   */
+  public GraphTransformer getTokenizer() { return tokenizer; }
+  /**
+   * Setter for {@link #tokenizer}: Utterance tokenizer.
+   * @param newTokenizer Utterance tokenizer.
+   */
+  public JSONLSerialization setTokenizer(GraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
 
   private long graphCount = 0;
   private long consumedGraphCount = 0;
@@ -375,11 +448,18 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
    * @throws SerializationParametersMissingException If not all required parameters have a value.
    */
   public String[] getRequiredLayers() throws SerializationParametersMissingException {
+    if (getTurnLayer() == null)
+      throw new SerializationParametersMissingException("No turn layer specified");
+    if (getUtteranceLayer() == null)
+      throw new SerializationParametersMissingException("No utterance layer specified");
+    if (getWordLayer() == null)
+      throw new SerializationParametersMissingException("No word layer specified");
+    
     Vector<String> requiredLayers = new Vector<String>();
     if (getParticipantLayer() != null) requiredLayers.add(getParticipantLayer().getId());
-    if (getTurnLayer() != null) requiredLayers.add(getTurnLayer().getId());
-    if (getUtteranceLayer() != null) requiredLayers.add(getUtteranceLayer().getId());
-    if (getWordLayer() != null) requiredLayers.add(getWordLayer().getId());
+    requiredLayers.add(getTurnLayer().getId());
+    requiredLayers.add(getUtteranceLayer().getId());
+    requiredLayers.add(getWordLayer().getId());
     return requiredLayers.toArray(new String[0]);
   } // getRequiredLayers()
 
@@ -554,6 +634,7 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
       
       // write anchors
       json.writeStartObject("anchors");
+      json.write("offsetUnits", graph.getOffsetUnits());
 
       // utterance anchors
       json.writeStartArray(schema.getUtteranceLayerId());
@@ -587,5 +668,507 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
       throw errors;
     }      
   }
-   
+
+  // GraphDeserializer methods:
+
+  private File jsonlFile;
+
+  /**
+   * Loads the serialized form of the graphs, using the given set of named streams.
+   * @param streams A list of named streams that contain all the transcription/annotation
+   * data required, and possibly (a) stream(s) for the media annotated. 
+   * @param schema The layer schema, definining layers and the way they interrelate.
+   * @return A list of parameters that require setting before
+   * {@link GraphDeserializer#deserialize()} can be invoked. This may be an empty list,
+   * and may include parameters with the value already set to a workable default. If there
+   * are parameters, and user interaction is possible, then the user may be presented with
+   * an interface for setting/confirming these parameters, before they are then passed to
+   * {@link GraphDeserializer#setParameters(ParameterSet)}.
+   * @throws SerializationException If the graphs could not be loaded.
+   * @throws IOException On IO error.
+   */
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public ParameterSet load(NamedStream[] streams, Schema schema)
+    throws SerializationException, IOException {
+    warnings = new Vector<String>();
+    // if there are errors, accumulate as many as we can before throwing SerializationException
+    SerializationException errors = null;
+
+    // take the first stream, ignore all others.
+    NamedStream jsonl = Utility.FindSingleStream(streams, ".jsonl", "application/x-jsonlines");
+    if (jsonl == null) throw new SerializationException("No JSONL document stream found");
+      
+    setSchema(schema);
+
+    // create a list of layers we need and possible matching layer names
+    LinkedHashMap<Parameter,List<String>> layerToPossibilities
+      = new LinkedHashMap<Parameter,List<String>>();
+    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates
+      = new HashMap<String,LinkedHashMap<String,Layer>>();	 
+
+    // the stream can contain multiple graphs and may be quite large, so save it to a
+    // temporary file
+    jsonlFile = File.createTempFile(
+      IO.WithoutExtension(jsonl.getName()), "." + IO.Extension(jsonl.getName()));
+    IO.SaveInputStreamToFile(jsonl.getStream(), jsonlFile);    
+
+    // now go looking for tags to match to annotation layers...
+
+    LinkedHashMap<String,Layer> tagLayers = new LinkedHashMap<String,Layer>();
+    // span layers
+    for (Layer layer : schema.getRoot().getChildren().values()) {
+      if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
+        tagLayers.put(layer.getId(), layer);
+      }
+    }
+    // phrase layers
+    for (Layer layer : schema.getTurnLayer().getChildren().values()) {
+      if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
+        tagLayers.put(layer.getId(), layer);
+      }
+    }
+    // word tag layers
+    for (Layer layer : schema.getWordLayer().getChildren().values()) {
+      if (layer.getAlignment() == Constants.ALIGNMENT_NONE) {
+        tagLayers.put(layer.getId(), layer);
+      }
+    }
+    
+    // labels are formatted "${layerId}:${label}"
+    MessageFormat labelFormat = new MessageFormat("{0}:{1}");
+
+    // each line is a transcript document
+    BufferedReader reader = new BufferedReader(
+      new InputStreamReader(new FileInputStream(jsonlFile), "UTF-8"));
+    String document = reader.readLine();
+    int l = 1;
+    while (document != null) { // for each document
+      // parse JSON
+      JsonObject json = Json.createReader(new StringReader(document)).readObject();
+
+      // we must have a "transcript" attribute to determine the ID of the resulting graph
+      if (!json.containsKey("transcript")) {
+        if (errors == null) errors = new SerializationException();
+        errors.addError(SerializationException.ErrorType.InvalidDocument,
+                        "Line "+l+": no transcript attribute to define transcript ID");
+        continue;
+      }
+
+      // the anchors object is keyed on layerId, and contains arrays of couples with the
+      // original offsets of the annotions when they were serialized
+      JsonObject anchors = json.containsKey("anchors")?json.getJsonObject("anchors"):null;
+
+      // look for labels to map to layers
+      if (json.containsKey("label")) {
+        JsonArray labelArray = json.getJsonArray("label");
+        Set<String> anchoredLayers = anchors != null?anchors.keySet():new HashSet<String>();
+        
+        // each element is a triple
+        for (JsonValue element : labelArray) {
+          JsonArray triple = (JsonArray)element;
+          // third element is the label
+          String label = triple.getString(2);
+          try {
+            Object[] parts = labelFormat.parse(label);
+            String layerId = ((String)parts[0]).trim();
+            if (layerId.length() > 0 // there is a layerId
+                // exclude layers that have anchors because they were serialized and we
+                // can't guarantee they haven't changed
+                && !anchoredLayers.contains(layerId)
+                // we haven't seen it before
+                && !layerToCandidates.containsKey(layerId)) { 
+              layerToPossibilities.put(
+                new Parameter(layerId, Layer.class, layerId), 
+                new Vector<String>() {{ add(layerId); }});
+              layerToCandidates.put(layerId, tagLayers);
+            }
+          } catch (ParseException x) {
+            warnings.add("Line "+l+": Label cannot be interpreted as layer mapping: " + label);
+          }
+        }
+      } // has "label" array
+
+      document = reader.readLine();
+      l++;
+    } // next line
+    reader.close();
+    if (errors != null) throw errors;
+	 
+    ParameterSet parameters = new ParameterSet();
+    // add parameters that aren't in the configuration yet, and set possibile/default values
+    for (Parameter p : layerToPossibilities.keySet()) {
+      List<String> possibleNames = layerToPossibilities.get(p);
+      LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
+      parameters.addParameter(p);
+      p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
+      p.setPossibleValues(candidateLayers.values());
+    }
+    return parameters;
+  }
+
+  /**
+   * Deserializes the serialized data, generating one or more {@link Graph}s.
+   * <p>Many data formats will only yield one graph (e.g. Transcriber
+   * transcript or Praat textgrid), however there are formats that
+   * are capable of storing multiple transcripts in the same file
+   * (e.g. AGTK, Transana XML export), which is why this method
+   * returns a list.
+   * @return A list of valid (if incomplete) {@link Graph}s. 
+   * @throws SerializerNotConfiguredException if the object has not been configured.
+   * @throws SerializationParametersMissingException if the parameters for this
+   * particular graph have not been set. 
+   * @throws SerializationException if errors occur during deserialization.
+   */
+  public Graph[] deserialize()
+    throws SerializerNotConfiguredException, SerializationParametersMissingException,
+    SerializationException {
+    Vector<Graph> graphs = new Vector<Graph>();
+      
+    if (participantLayer == null) {
+      throw new SerializerNotConfiguredException("Participant layer not set");
+    }
+    if (turnLayer == null) {
+      throw new SerializerNotConfiguredException("Turn layer not set");
+    }
+    if (utteranceLayer == null) {
+      throw new SerializerNotConfiguredException("Utterance layer not set");
+    }
+    if (wordLayer == null) {
+      throw new SerializerNotConfiguredException("Word layer not set");
+    }
+    if (schema == null) {
+      throw new SerializerNotConfiguredException("Layer schema not set");
+    }
+    if (jsonlFile == null) {
+      throw new SerializerNotConfiguredException("No stream to deserialize");
+    }
+    if (!jsonlFile.exists()) {
+      throw new SerializerNotConfiguredException(
+        "JSONL stream has been removed: " + jsonlFile.getPath());
+    }
+
+    // if there are errors, accumulate as many as we can before throwing SerializationException
+    SerializationException errors = null;
+      
+    try {
+      // labels are formatted "${layerId}:${label}"
+      MessageFormat labelFormat = new MessageFormat("{0}:{1}");
+      
+      // each line is a transcript document
+      BufferedReader reader = new BufferedReader(
+        new InputStreamReader(new FileInputStream(jsonlFile), "UTF-8"));
+      String document = reader.readLine();
+      int d = 1;
+      while (document != null) { // for each document
+        // parse JSON
+        JsonObject json = Json.createReader(new StringReader(document)).readObject();
+        
+        Graph graph = new Graph();
+        graphs.add(graph);
+        graph.setId(json.getString("transcript"));
+        // anchor offsets are characters for now
+        graph.setOffsetUnits(Constants.UNIT_CHARACTERS);
+        
+        // creat the 0 anchor to prevent graph tagging from creating one with no confidence
+        Anchor firstAnchor = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
+        Anchor lastAnchor = firstAnchor;
+        
+        // add layers to the graph
+        graph.addLayer((Layer)participantLayer.clone());
+        graph.getSchema().setParticipantLayerId(participantLayer.getId());
+        graph.addLayer((Layer)turnLayer.clone());
+        graph.getSchema().setTurnLayerId(turnLayer.getId());
+        graph.addLayer((Layer)utteranceLayer.clone());
+        graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
+        graph.addLayer((Layer)wordLayer.clone());
+        graph.getSchema().setWordLayerId(wordLayer.getId());
+        if (parameters != null) {
+          for (Parameter p : parameters.values()) {
+            Layer layer = (Layer)p.getValue();
+            if (layer != null && graph.getLayer(layer.getId()) == null) {
+              // haven't added this layer yet
+              graph.addLayer((Layer)layer.clone());
+            }
+          }
+        }
+        
+        // split text into lines
+        String[] lines = json.getString("text").split("\n");
+        
+        HashMap<String,Annotation> participants = new HashMap<String,Annotation>();
+        Annotation participant = new Annotation(
+          null,
+          IO.WithoutExtension(graph.getId()),
+          schema.getParticipantLayerId());
+        participant.setConfidence(Constants.CONFIDENCE_AUTOMATIC);      
+        Annotation turn = new Annotation(
+          null, participant.getLabel(), getTurnLayer().getId());
+        turn.setConfidence(Constants.CONFIDENCE_MANUAL);
+        graph.addAnnotation(turn);
+        turn.setParent(participant);
+        turn.setStart(
+          graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL));
+        
+        MessageFormat fmtParticipantFormat = new MessageFormat("{0}:\t");
+        int lineOrdinal = 1;
+        Vector<Annotation> utterances = new Vector<Annotation>();
+        
+        // one utterance per line, anchor offsets are character offsets for now
+        for (String line : lines) {
+          Annotation utterance = new Annotation(null, line, getUtteranceLayer().getId());
+          utterance.setParentId(turn.getId())
+            .setConfidence(Constants.CONFIDENCE_MANUAL);
+          
+          // does the line start with a participant ?
+          try {
+            Object[] oParticipant = fmtParticipantFormat.parse(line);
+            String participantId = (String)oParticipant[0];
+            participant = participants.get(participantId);
+            if (participant == null) {
+              participant = new Annotation(null, participantId, schema.getParticipantLayerId());
+              participant.setConfidence(Constants.CONFIDENCE_MANUAL);
+              graph.addAnnotation(participant);
+              participants.put(participantId, participant);
+            }
+            
+            if (lastAnchor.getOffset().equals(0.0)) {
+              // just started, so recycle the turn and utterance we're already in
+              turn.setLabel(participant.getLabel());
+              turn.setParentId(participant.getId());
+            } else {
+              // finish old turn
+              graph.addAnnotation(turn);
+              
+              // new turn		  
+              turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
+              turn.setParentId(participant.getId())
+                .setConfidence(Constants.CONFIDENCE_MANUAL);
+              graph.addAnnotation(turn);
+              turn.setStart(lastAnchor);
+            } // not the first turn
+            lineOrdinal = 1;
+          } catch(ParseException exception) {
+          } catch(NullPointerException exception) {
+          } // null ID
+          
+          utterance.setParentId(turn.getId())
+            .setOrdinal(lineOrdinal++)
+            .setStart(lastAnchor)
+            .setConfidence(Constants.CONFIDENCE_MANUAL);
+          // update current position
+          lastAnchor = graph.getOrCreateAnchorAt(
+            lastAnchor.getOffset() + ((double)line.length() + 1), Constants.CONFIDENCE_MANUAL);
+          utterance.setEnd(lastAnchor);
+          turn.setEnd(lastAnchor);
+          graph.addAnnotation(utterance);
+          utterances.add(utterance);
+          
+        } // next line      
+        graph.addAnnotation(turn);
+        
+        if (graph.first(getParticipantLayer().getId()) == null) {
+          // we haven't added a participant yet, so add the default one
+          graph.addAnnotation(participant);
+        }
+        
+        // ensure we have an utterance tokenizer
+        if (getTokenizer() == null) {
+          setTokenizer(new SimpleTokenizer(
+                         getUtteranceLayer().getId(), getWordLayer().getId())
+                       .setCharacterAnchorConfidence(Constants.CONFIDENCE_DEFAULT));
+        }
+        // tokenize utterances
+        try {
+          tokenizer.transform(graph);
+        } catch(TransformationException exception) {
+          if (errors == null) errors = new SerializationException();
+          if (errors.getCause() == null) errors.initCause(exception);
+          errors.addError(
+            SerializationException.ErrorType.Tokenization,
+            "Transcript " + d + ": " + exception.getMessage());
+        }
+        
+        graph.trackChanges();
+        
+        // delete tokens that are turn-start markers
+        for (Annotation t : graph.all(turnLayer.getId())) {
+          Annotation firstWord = t.first(wordLayer.getId());
+          if (firstWord != null && firstWord.getLabel().equals(t.getLabel() + ":")) {
+            Annotation second = firstWord.getNext();
+            if (second != null // there is a second word
+                // and it's not the start of a second utterance
+                && second.getStart().startOf(schema.getUtteranceLayer().getId()).size() == 0) {
+              // join the second word (and any annotations) back to the start of the first word
+              for (Annotation startsHere : second.getStart().getStartingAnnotations()) {
+                startsHere.setStart(firstWord.getStart());
+              }
+            }
+            firstWord.destroy();
+          }
+        } // next turn
+        graph.commit();
+        
+        OrthographyClumper clumper = new OrthographyClumper(
+          wordLayer.getId(), utteranceLayer.getId());
+        try {
+          // clump non-orthographic 'words' with real words
+          clumper.transform(graph);
+          graph.commit();
+        } catch(TransformationException exception) {
+          if (errors == null) errors = new SerializationException();
+          if (errors.getCause() == null) errors.initCause(exception);
+          errors.addError(SerializationException.ErrorType.Tokenization,
+                          "Transcript " + d + ": " + exception.getMessage());
+        }
+        
+        if (json.containsKey("label")) {
+          // add label annotations
+          JsonArray labelArray = json.getJsonArray("label");
+          // each element is a triple: startChar, endChar, "layerId:label"
+          int e = 0;
+          for (JsonValue element : labelArray) {
+            JsonArray triple = element.asJsonArray();
+            // character offsets as doubles because that's what we need later
+            double startChar = triple.getJsonNumber(0).doubleValue();
+            double endChar = triple.getJsonNumber(1).doubleValue();
+            String annotation = triple.getString(2);
+            try {
+              Object[] parts = labelFormat.parse(annotation);
+              String layerId = ((String)parts[0]).trim();
+              String label = ((String)parts[1]).trim();
+
+              // has this layer been mapped?
+              if (parameters.containsKey(layerId)){
+                Parameter p = parameters.get(layerId);
+                Layer l = (Layer)p.getValue();
+                if (l != null && l.getId() != null) {
+
+                  // find the correct anchors
+                  Annotation[] overlapping = graph.overlappingAnnotations(startChar, endChar, wordLayer.getId());
+                  if (overlapping.length == 0) {
+                    errors.addError(
+                      SerializationException.ErrorType.Tokenization,
+                      "Transcript " + d + " label "+l+" \""+annotation+"\""
+                      +": Interval "+startChar+"-"+endChar+" includes no words");
+                  } else {
+                    Annotation firstWord = overlapping[0];
+                    Annotation lastWord = overlapping[overlapping.length-1];
+                    Annotation parent = graph;
+                    if (l.getParentId().equals(turnLayer.getId())) {
+                      parent = firstWord.getParent();
+                    } else if (l.getParentId().equals(wordLayer.getId())) {
+                      parent = firstWord;
+                    } 
+                    graph.createSpan(firstWord, lastWord, l.getId(), label, parent);
+                  } // found annotated words
+                } // layer is mapped
+              } // parameter for the layer
+              
+            } catch (ParseException exception) {
+              errors.addError(
+                SerializationException.ErrorType.Tokenization,
+                "Transcript " + d + " label "+e
+                +": Could not parse 'layerId:label' from \""+annotation+"\" : "
+                + exception.getMessage());
+            }
+            e++;
+          }
+        }
+        
+        // the anchors object is keyed on layerId, and contains arrays of couples with the
+        // original offsets of the annotions when they were serialized
+        if (json.containsKey("anchors")) {
+          JsonObject anchors = json.getJsonObject("anchors");
+          if (anchors.containsKey(schema.getUtteranceLayer().getId())) {
+            // set utterance/turn anchors to their original values
+            JsonArray utteranceAnchors = anchors.getJsonArray(schema.getUtteranceLayer().getId());
+            if (utterances.size() != utteranceAnchors.size()) {
+              if (errors == null) errors = new SerializationException();
+              errors.addError(
+                SerializationException.ErrorType.InvalidDocument,
+                "Transcript " + d + ": Expected " + utterances.size()
+                + " utterance anchor elements, found " + utteranceAnchors.size());
+            } else {
+              // set offset units
+              if (anchors.containsKey("offsetUnits")) {
+                graph.setOffsetUnits(anchors.getString("offsetUnits"));
+              } else {
+                graph.setOffsetUnits(Constants.UNIT_SECONDS);
+              }
+              
+              // update offsets
+              double lastEndOffset = 0.0;
+              for (int u = 0; u < utterances.size(); u++) {
+                Annotation utt = utterances.elementAt(u);
+                JsonArray uttStartEnd = utteranceAnchors.getJsonArray(u);
+                if (uttStartEnd.size() < 2) {
+                  errors.addError(SerializationException.ErrorType.InvalidDocument,
+                                  "Too few anchor offsets for utterance " + u);
+                } else {
+                  
+                  // start
+                  double startOffset = uttStartEnd.getJsonNumber(0).doubleValue();
+                  if (startOffset == lastEndOffset) {
+                    // update existing anchor
+                    utt.getStart().setOffset(startOffset);
+                  } else { // this start different from last end
+                    // create a new anchor
+                    Anchor newStart = graph.getOrCreateAnchorAt(startOffset);
+                    // bring all other annotations starting here too
+                    for (Annotation startingHere : utt.getStart().getStartingAnnotations()) {
+                      startingHere.setStart(newStart);
+                    } // next starting annotation
+                  }
+                  utt.getStart().setConfidence(Constants.CONFIDENCE_MANUAL);
+                  
+                  // end
+                  double endOffset = uttStartEnd.getJsonNumber(1).doubleValue();
+                  utt.getEnd().setOffset(endOffset)
+                    .setConfidence(Constants.CONFIDENCE_MANUAL);
+                  
+                  lastEndOffset = endOffset;
+                } // there are two anchors
+              } // next utterance
+              
+              // unset word anchor offsets
+              for (Annotation word : graph.all(wordLayer.getId())) {
+                if (word.getStart().startOf(utteranceLayer.getId()).size() == 0) {
+                  word.getStart().setOffset(null);
+                }
+                if (word.getEnd().endOf(utteranceLayer.getId()).size() == 0) {
+                  word.getEnd().setOffset(null);
+                }
+              } // next word
+              
+            } // number of anchors ok
+          } // utterance anchors exist
+        } // anchors exist
+        
+        graph.commit();
+        
+        // reset all change tracking
+        graph.getTracker().reset();
+        graph.setTracker(null);
+
+        document = reader.readLine();
+        d++;
+      } // next document
+    } catch (Exception exception) {
+      if (errors == null) errors = new SerializationException();
+      if (errors.getCause() == null) errors.initCause(exception);
+      errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+    }
+    if (errors != null) throw errors;        
+    return graphs.toArray(new Graph[0]);
+  }
+
+  /**
+   * Returns any warnings that may have arisen during the last execution of 
+   * {@link #deserialize()}.
+   * @return A possibly empty list of warnings.
+   */
+  public String[] getWarnings() {
+    return warnings.toArray(new String[0]);
+  }
+
 } // end of class JSONLSerialization

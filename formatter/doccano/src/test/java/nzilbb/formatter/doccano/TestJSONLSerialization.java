@@ -99,6 +99,67 @@ public class TestJSONLSerialization {
     }
   }
   
+  /** Test deserialization works for a graph that was previously serialized, edited in
+   * Doccano, and exported with new annotations. */
+  @Test public void deserializeAfterSerializeAndEdit() throws Exception {
+
+    // create serializer
+    JSONLSerialization deserializer = new JSONLSerialization();
+      
+    // general configuration
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema());
+    assertEquals(0, deserializer.configure(configuration, schema()).size());
+    
+    // deserialize...
+    
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "edited.jsonl")) };
+    ParameterSet defaultParameters = deserializer.load(streams, schema());
+    //for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals(2, defaultParameters.size());
+    assertEquals("pos", "pos", 
+                 ((Layer)defaultParameters.get("pos").getValue()).getId());
+    assertEquals("role", "role", 
+                 ((Layer)defaultParameters.get("role").getValue()).getId());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+
+    // build the graphs
+    Graph[] graphs = deserializer.deserialize();
+    //for visualization we can interpolate null offsets:
+    //for (Graph g : graphs) new nzilbb.ag.util.DefaultOffsetGenerator().transform(g);
+
+    // save the graphs a JSON
+    JSONSerialization serializer = new JSONSerialization();
+    final Vector<Exception> exceptions = new Vector<Exception>();
+    serializer.serialize(
+      Arrays.spliterator(graphs), null,
+      stream -> {
+        try {
+          stream.save(getDir());
+        } catch(Exception exception) {
+          exceptions.add(exception);
+        }
+      },
+      warning -> System.out.println(warning),
+      exception -> exceptions.add(exception));
+    if (exceptions.size() > 0) {
+      for (Exception x : exceptions) x.printStackTrace(System.out);
+      fail(""+exceptions);
+    }
+    
+    // test using diff
+    for (Graph graph : graphs) {
+      File result = new File(getDir(), graph.getId() + ".json");
+      String differences = diff(new File(getDir(), "expected_"+graph.getId() + ".json"), result);
+      if (differences != null) {
+        fail(differences);
+      } else {
+        result.delete();
+      }
+    }
+  }
+  
   /**
    * Schema for test graphs.
    * @return Schema for test graphs.
@@ -119,6 +180,11 @@ public class TestJSONLSerialization {
       .setPeers(true).setPeersOverlap(false)
       .setSaturated(false)
       .setParentId("who").setParentIncludes(true),
+      new Layer("role", "Subject/Object")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false)
+      .setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
       new Layer("utterance", "Utterances")
       .setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false)
@@ -240,61 +306,63 @@ public class TestJSONLSerialization {
   public Graph graph2() {
     Graph graph = new Graph()
       .setId("doccano-test-2")
-      .setSchema(schema());
+      .setSchema(schema())
+      .setOffsetUnits(Constants.UNIT_CHARACTERS);
+    
     graph.addAnchor(new Anchor("a0", 0.0));
-    graph.addAnchor(new Anchor("a5", 5.5));
-    graph.addAnchor(new Anchor("a10", 10.0));
+    graph.addAnchor(new Anchor("a25", 25.0));
+    graph.addAnchor(new Anchor("a45", 45.0));
     // participants
-    graph.addAnnotation(new Annotation("speaker1", "speaker1", "who", "a0", "a10"));
-    graph.addAnnotation(new Annotation("speaker2", "speaker2", "who", "a0", "a10"));
+    graph.addAnnotation(new Annotation("speaker1", "speaker1", "who", "a0", "a45"));
+    graph.addAnnotation(new Annotation("speaker2", "speaker2", "who", "a0", "a45"));
     // turns
-    graph.addAnnotation(new Annotation("t1", "speaker1", "turn", "a0", "a10", "speaker1"));
-    graph.addAnnotation(new Annotation("t2", "speaker2", "turn", "a0", "a10", "speaker2"));
+    graph.addAnnotation(new Annotation("t1", "speaker1", "turn", "a0", "a45", "speaker1"));
+    graph.addAnnotation(new Annotation("t2", "speaker2", "turn", "a0", "a45", "speaker2"));
     // utterances
-    graph.addAnnotation(new Annotation("u1", "author", "utterance", "a0", "a5", "t1"));
-    graph.addAnnotation(new Annotation("u2", "author", "utterance", "a5", "a10", "t2"));
+    graph.addAnnotation(new Annotation("u1", "author", "utterance", "a0", "a25", "t1"));
+    graph.addAnnotation(new Annotation("u2", "author", "utterance", "a25", "a45", "t2"));
 
     // words
     graph.addAnnotation(new Annotation("the", "The", "word",
                                        "a0",
-                                       graph.addAnchor(new Anchor("a1", 1.1)).getId(),
+                                       graph.addAnchor(new Anchor("a3", 3.0)).getId(),
                                        "t1"));
     graph.addAnnotation(new Annotation("quick", "'quick", "word", 
-                                       "a1",
-                                       graph.addAnchor(new Anchor("a2", 2.2)).getId(),
+                                       "a3",
+                                       graph.addAnchor(new Anchor("a9", 9.0)).getId(),
                                        "t1"));
     graph.addAnnotation(new Annotation("brown", "brown'", "word", 
-                                       "a2",
-                                       graph.addAnchor(new Anchor("a3", 3.3)).getId(),
+                                       "a9",
+                                       graph.addAnchor(new Anchor("a15", 15.0)).getId(),
                                        "t1"));
     graph.addAnnotation(new Annotation("fox", "fox", "word", 
-                                       "a3",
-                                       graph.addAnchor(new Anchor("a4", 4.4)).getId(),
+                                       "a15",
+                                       graph.addAnchor(new Anchor("a19", 19.0)).getId(),
                                        "t1"));
     graph.addAnnotation(new Annotation("jumps", "jumps -", "word", 
-                                       "a4",
-                                       "a5",
+                                       "a19",
+                                       "a25",
                                        "t1"));
       
     graph.addAnnotation(new Annotation("over", "over", "word",
-                                       "a5",
-                                       graph.addAnchor(new Anchor("a6", 6.6)).getId(),
+                                       "a25",
+                                       graph.addAnchor(new Anchor("a30", 30.0)).getId(),
                                        "t2"));
     graph.addAnnotation(new Annotation("the2", "the", "word", 
-                                       "a6",
-                                       graph.addAnchor(new Anchor("a7", 7.7)).getId(),
+                                       "a30",
+                                       graph.addAnchor(new Anchor("a34", 34.0)).getId(),
                                        "t2"));
     graph.addAnnotation(new Annotation("lazy", "lazy", "word", 
-                                       "a7",
-                                       graph.addAnchor(new Anchor("a8", 8.8)).getId(),
+                                       "a34",
+                                       graph.addAnchor(new Anchor("a39", 39.0)).getId(),
                                        "t2"));
     graph.addAnnotation(new Annotation("dog", "\"dog\"", "word", 
-                                       "a8",
-                                       graph.addAnchor(new Anchor("a9", 9.9)).getId(),
+                                       "a39",
+                                       graph.addAnchor(new Anchor("a44", 44.0)).getId(),
                                        "t2"));
     graph.addAnnotation(new Annotation(".", ".", "word", 
-                                       "a9",
-                                       "a10",
+                                       "a44",
+                                       "a45",
                                        "t2"));
 
     // orthography
@@ -321,8 +389,8 @@ public class TestJSONLSerialization {
     graph.addTag(graph.getAnnotation("."), "pos", "PUNC");
 
     // topic
-    graph.addAnnotation(new Annotation("topic-fox", "fox", "topic", "a0", "a4"));
-    graph.addAnnotation(new Annotation("topic-dog", "dog", "topic", "a6", "a10"));
+    graph.addAnnotation(new Annotation("topic-fox", "fox", "topic", "a0", "a19"));
+    graph.addAnnotation(new Annotation("topic-dog", "dog", "topic", "a30", "a45"));
 
     return graph;
   } // end of graph2()

@@ -1,0 +1,272 @@
+
+{
+    "id": "doccano-test-1",
+    "schema": {
+        "participantLayerId": "who",
+        "turnLayerId": "turn",
+        "utteranceLayerId": "utterance",
+        "wordLayerId": "word",
+        "transcript": {
+            "description": "The annotation graph as a whole",
+            "children": {
+                "who": {
+                    "description": "Participants",
+                    "alignment": 0,
+                    "peers": true,
+                    "peersOverlap": true,
+                    "parentIncludes": true,
+                    "saturated": true,
+                    "children": {
+                        "turn": {
+                            "description": "Speaker turns",
+                            "alignment": 2,
+                            "peers": true,
+                            "peersOverlap": false,
+                            "parentIncludes": true,
+                            "saturated": false,
+                            "children": {
+                                "role": {
+                                    "description": "Subject/Object",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false
+                                },
+                                "utterance": {
+                                    "description": "Utterances",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": true
+                                },
+                                "word": {
+                                    "description": "Words",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false,
+                                    "children": {
+                                        "pos": {
+                                            "description": "Part of Speech",
+                                            "alignment": 0,
+                                            "peers": false,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "anchors": {
+        "1": {
+            "offset": 0.0,
+            "confidence": 100
+        },
+        "5": {
+            "offset": 5.5,
+            "confidence": 100
+        },
+        "7": {
+            "offset": 10.0,
+            "confidence": 100
+        },
+        "b": {
+            "offset": null,
+            "confidence": 10
+        },
+        "d": {
+            "offset": null,
+            "confidence": 10
+        },
+        "f": {
+            "offset": null,
+            "confidence": 10
+        },
+        "h": {
+            "offset": null,
+            "confidence": 10
+        },
+        "m": {
+            "offset": null,
+            "confidence": 10
+        },
+        "o": {
+            "offset": null,
+            "confidence": 10
+        },
+        "q": {
+            "offset": null,
+            "confidence": 10
+        }
+    },
+    "who": [
+        {
+            "id": "4",
+            "label": "author",
+            "startId": null,
+            "endId": null,
+            "confidence": 100,
+            "turn": [
+                {
+                    "id": "2",
+                    "label": "author",
+                    "startId": "1",
+                    "endId": "7",
+                    "confidence": 100,
+                    "role": [
+                        {
+                            "id": "v",
+                            "label": "subject",
+                            "startId": "1",
+                            "endId": "h"
+                        },
+                        {
+                            "id": "10",
+                            "label": "object",
+                            "startId": "m",
+                            "endId": "7"
+                        }
+                    ],
+                    "utterance": [
+                        {
+                            "id": "6",
+                            "label": "author:\tThe 'quick brown' fox jumps -",
+                            "startId": "1",
+                            "endId": "5",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "8",
+                            "label": "over the lazy \"dog\" .",
+                            "startId": "5",
+                            "endId": "7",
+                            "confidence": 100
+                        }
+                    ],
+                    "word": [
+                        {
+                            "id": "c",
+                            "label": "The",
+                            "startId": "1",
+                            "endId": "b",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "e",
+                            "label": "'quick",
+                            "startId": "b",
+                            "endId": "d",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "w",
+                                    "label": "ADJ",
+                                    "startId": "b",
+                                    "endId": "d"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "g",
+                            "label": "brown'",
+                            "startId": "d",
+                            "endId": "f",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "x",
+                                    "label": "ADJ",
+                                    "startId": "d",
+                                    "endId": "f"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "i",
+                            "label": "fox",
+                            "startId": "f",
+                            "endId": "h",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "y",
+                                    "label": "N",
+                                    "startId": "f",
+                                    "endId": "h"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "k",
+                            "label": "jumps -",
+                            "startId": "h",
+                            "endId": "5",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "z",
+                                    "label": "V",
+                                    "startId": "h",
+                                    "endId": "5"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "n",
+                            "label": "over",
+                            "startId": "5",
+                            "endId": "m",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "p",
+                            "label": "the",
+                            "startId": "m",
+                            "endId": "o",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "r",
+                            "label": "lazy",
+                            "startId": "o",
+                            "endId": "q",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "11",
+                                    "label": "ADJ",
+                                    "startId": "o",
+                                    "endId": "q"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "t",
+                            "label": "\"dog\" .",
+                            "startId": "q",
+                            "endId": "7",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "12",
+                                    "label": "N",
+                                    "startId": "q",
+                                    "endId": "7"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
