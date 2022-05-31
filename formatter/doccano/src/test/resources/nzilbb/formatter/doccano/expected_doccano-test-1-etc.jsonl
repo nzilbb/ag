@@ -1,0 +1,2 @@
+{"transcript":"doccano-test-1","text":"author:\tThe 'quick brown' fox jumps -\nover the lazy \"dog\" .","label":[[8,42,"topic:fox"],[43,59,"topic:dog"]],"anchors":{"utterance":[[0.0,5.5],[5.5,10.0]],"topic":[[0.0,6.6],[6.6,10.0]]}}
+{"transcript":"doccano-test-2","text":"speaker1:\tThe 'quick brown' fox jumps -\nspeaker2:\tover the lazy \"dog\" .","label":[[10,31,"topic:fox"],[55,71,"topic:dog"]],"anchors":{"utterance":[[0.0,5.5],[5.5,10.0]],"topic":[[0.0,4.4],[6.6,10.0]]}}

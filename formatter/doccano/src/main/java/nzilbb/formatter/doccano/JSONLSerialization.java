@@ -45,6 +45,7 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -213,7 +214,7 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
   public SerializationDescriptor getDescriptor() {
     return new SerializationDescriptor(
       "Doccano JSONL Dataset", getClass().getPackage().getImplementationVersion(),
-      "application/pdf", ".jsonl", "1.0.0",
+      "application/x-jsonlines", ".jsonl", "1.0.0",
       getClass().getResource("icon.png"));
   }
   
@@ -384,12 +385,12 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
 
   /**
    * Determines the cardinality between graphs and serialized streams.
-   * <p>The cardinality of this deserializer is NToM as there are two streams produced
-   * regardless of how many graphs are serialized; the dataset, and the labels definition.
+   * <p>The cardinality of this deserializer is NToOne as there is one stream produced
+   * regardless of how many graphs are serialized.
    * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToOne.
    */
   public Cardinality getCardinality() {
-    return Cardinality.NToM;
+    return Cardinality.NToOne;
   }
 
   /**
@@ -416,7 +417,6 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
     try {
       final StringBuffer fileName = new StringBuffer();
       final File jsonlFile = File.createTempFile("doccano.",".jsonl");
-      final TreeSet<String> labels = new TreeSet<String>();
 
       graphs.forEachRemaining(graph -> {
           if (getCancelling()) return;
@@ -433,36 +433,17 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
             } catch(IOException exception) {}
           }
           try { // serialize graph
-            serializeGraph(graph, layerIds, jsonlFile, labels);
+            serializeGraph(graph, layerIds, jsonlFile);
             consumedGraphCount++;
           } catch(Exception exception) {
             errors.accept(new SerializationException(exception));
           }
         }); // next graph
 
-      // write labels file
-      File labelsJsonFile = File.createTempFile("doccano-labels.",".json");
-      FileOutputStream out = new FileOutputStream(labelsJsonFile, true);
-      JsonGenerator json = Json.createGenerator(out);
-      json.writeStartArray();
-      for (String label : labels) {
-        json.writeStartObject();
-        json.write("text", label);
-        json.write("suffix_key", "");
-        json.write("background_color", "#96A339");
-        json.write("text_color", "#AAAAAA");
-        json.writeEnd(); // label
-      } // next label
-      json.writeEnd(); // array
-      json.close();
-
       // pass on streams
       consumer.accept(
        new NamedStream(new TempFileInputStream(jsonlFile),
                        fileName+".jsonl", "application/x-jsonlines"));     
-      consumer.accept(
-        new NamedStream(new TempFileInputStream(labelsJsonFile),
-                        "labels.json", "application/json"));
     } catch(Exception exception) {
       errors.accept(new SerializationException(exception));
     }
@@ -474,11 +455,10 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
    * @param layerIds The IDs of the layers to include in the serializaton.
    * @param jsonlFile The file to serialize to. This method will append one JSON-encoded
    * line to this file, followed by a new-line.
-   * @param labels Set of annotation labels encountered so far, which the method should add to.
    * @return A named stream that contains the PDF. 
    * @throws SerializationException if errors occur during deserialization.
    */
-  protected void serializeGraph(Graph graph, String[] layerIds, File jsonlFile, TreeSet<String> labels)
+  protected void serializeGraph(Graph graph, String[] layerIds, File jsonlFile)
     throws SerializationException {
     SerializationException errors = null;
     Schema schema = graph.getSchema();
@@ -495,13 +475,16 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
       // keep a list of utterances in the order they appear in the text
       Vector<Annotation> utterances = new Vector<Annotation>();
       // extract other annotations
-      LinkedHashMap<String, Annotation[]> annotations = new LinkedHashMap<String, Annotation[]>();
+      LinkedHashMap<String, List<Annotation>> annotations
+        = new LinkedHashMap<String, List<Annotation>>();
       for (String layerId : layerIds) {
         if (layerId.equals(schema.getParticipantLayerId())) continue;
         if (layerId.equals(schema.getTurnLayerId())) continue;
         if (layerId.equals(schema.getUtteranceLayerId())) continue;
         if (layerId.equals(schema.getWordLayerId())) continue;
-        annotations.put(layerId, graph.all(layerId));
+        annotations.put(layerId, Arrays.stream(graph.all(layerId))
+                        .filter(a->a.getAnchored())
+                        .collect(Collectors.toList()));
       } // next layer 
       
       // write the text
@@ -564,16 +547,16 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
             String label = layerId + ":" + a.getLabel();
             json.write(label);
             json.writeEnd(); // annotation triple
-            labels.add(label); // accumulate labels for labels definition stream
           }
         } // next annotation
       } // next layer
       json.writeEnd(); // label array
-
+      
       // write anchors
       json.writeStartObject("anchors");
-      String layerId = schema.getUtteranceLayerId();
-      json.writeStartArray(layerId);
+
+      // utterance anchors
+      json.writeStartArray(schema.getUtteranceLayerId());
       for (Annotation utterance : utterances) {        
         json.writeStartArray(); // start offset couple
         json.write(utterance.getStart().getOffset());
@@ -581,6 +564,18 @@ public class JSONLSerialization implements /*TODO GraphDeserializer,*/ GraphSeri
         json.writeEnd();  // end offset couple
       } // next utterance
       json.writeEnd(); // utterance array
+
+      // annotation anchors
+      for (String layerId : annotations.keySet()) {
+        json.writeStartArray(layerId);
+        for (Annotation a : annotations.get(layerId)) {
+          json.writeStartArray(); // start offset couple
+          json.write(a.getStart().getOffset());
+          json.write(a.getEnd().getOffset());
+          json.writeEnd();  // end offset couple
+        } // next annotation
+        json.writeEnd(); // layer array
+      } // next layer
       json.writeEnd(); // anchors
       
       json.writeEnd();
