@@ -1243,8 +1243,8 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
    
   /**
    * Determines whether the anchors have offsets or not.
-   * @return true if both #getStart() and #getEnd() anchors have non-null offsets, false
-   * otherwise. 
+   * @return true if both {@link #getStart()} and {@link #getEnd()} anchors have non-null
+   * offsets, false otherwise. 
    */
   public boolean getAnchored() {
     Anchor start = getStart();
