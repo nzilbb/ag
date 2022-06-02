@@ -73,7 +73,7 @@
  *   <tr><td> <b>m</b>ad      </td><td> m </td><td> m </td><td> m </td><td> m </td><td> m </td><td> M </td><td> M </td></tr>
  *   <tr><td> <b>n</b>at      </td><td> n </td><td> n </td><td> n </td><td> n </td><td> n </td><td> N </td><td> N </td></tr>
  *   <tr><td> <b>l</b>ad      </td><td> l </td><td> l </td><td> l </td><td> l </td><td> l </td><td> L </td><td> L </td></tr>
- *   <tr><td> <b>r</b>at      </td><td> r </td><td> r </td><td> r </td><td> r </td><td> r </td><td> R </td><td> R </td></tr>
+ *   <tr><td> <b>r</b>at      </td><td> ɹ </td><td> r </td><td> r </td><td> r </td><td> r </td><td> R </td><td> R </td></tr>
  *   <tr><td> <b>f</b>at      </td><td> f </td><td> f </td><td> f </td><td> f </td><td> f </td><td> F </td><td> F </td></tr>
  *   <tr><td> <b>v</b>at      </td><td> v </td><td> v </td><td> v </td><td> v </td><td> v </td><td> V </td><td> V </td></tr>
  *   <tr><td> <b>th</b>in     </td><td> Ɵ </td><td> <b>T</b> </td><td> T </td><td> T </td><td> T </td><td> TH </td><td> TH </td></tr>
