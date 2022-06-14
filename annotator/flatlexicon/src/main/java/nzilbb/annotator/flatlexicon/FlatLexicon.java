@@ -207,7 +207,7 @@ public class FlatLexicon implements Dictionary {
     setCaseSensitive(false); // this creates the sql query
     // ensure keyField/valueField are valid
     try {
-      lookupEntries("test", true);
+      lookupEntries("test", false);
     } catch(SQLException exception) {
       throw new DictionaryException(null, "Invalid key/value field: " + exception.getMessage());
     }
@@ -337,8 +337,7 @@ public class FlatLexicon implements Dictionary {
       PreparedStatement sql = rdb.prepareStatement(
         sqlx.apply(
           "SELECT COUNT(DISTINCT "+quote+keyField+quote+")"
-          +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-          +" WHERE supplemental = TRUE"));
+          +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId));
       try {
         ResultSet rs = sql.executeQuery();
         try {
@@ -365,8 +364,7 @@ public class FlatLexicon implements Dictionary {
       PreparedStatement sql = rdb.prepareStatement(
         sqlx.apply(
           "SELECT COUNT(DISTINCT "+quote+valueField+quote+")"
-          +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-          +" WHERE supplemental = TRUE"));
+          +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId));
       try {
         ResultSet rs = sql.executeQuery();
         try {
@@ -482,12 +480,12 @@ public class FlatLexicon implements Dictionary {
         // use BINARY for accent sensitivity
         // use LOWER to remove case sensitivity of BINARY
         +" WHERE "+(caseSensitive?"":"LOWER")+"("+quote+keyField+quote+")"
-        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?) AND supplemental = 1");
+        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)");
       try {
         sql.setString(1, key);
         if (sql.executeUpdate() == 0) {
           throw new DictionaryReadOnlyException(
-            this, "No supplemental entries found for " + key);
+            this, "No entries found for " + key);
         }
       } finally {
         sql.close();
@@ -515,14 +513,13 @@ public class FlatLexicon implements Dictionary {
         +" WHERE "+(caseSensitive?"":"LOWER")+"("+quote+keyField+quote+")"
         +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)"
         +" AND "+(caseSensitive?"":"LOWER")+"("+quote+valueField+quote+")"
-        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)"
-        +" AND supplemental = 1");
+        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)");
       try {
         sql.setString(1, key);
         sql.setString(2, entry);
         if (sql.executeUpdate() == 0) {
           throw new DictionaryReadOnlyException(
-            this, "No supplemental entry found for " + key + " = " + entry);
+            this, "No entry found for " + key + " = " + entry);
         }
       } finally {
         sql.close();
@@ -548,14 +545,14 @@ public class FlatLexicon implements Dictionary {
       Map<String,List<String>> words = new LinkedHashMap<String,List<String>>();
       PreparedStatement sql = rdb.prepareStatement(
         "SELECT DISTINCT "+quote+keyField+quote+" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-        +" WHERE supplemental = 1 ORDER BY "+quote+keyField+quote+""
+        +" ORDER BY "+quote+keyField+quote+""
         + (length > 0? " LIMIT " + start + ", " + length:""));
       try {
         ResultSet rs = sql.executeQuery();
         try {
           while (rs.next()) {
-            String word = rs.getString("wordform");
-            Vector<String> entries = lookupEntries(word, true);
+            String word = rs.getString(keyField);
+            Vector<String> entries = lookupEntries(word, false);
             if (entries.size() == 0) continue;
             words.put(word, entries);
           } // next word
@@ -580,7 +577,7 @@ public class FlatLexicon implements Dictionary {
   public List<String> lookupEditableEntry(String key)
     throws DictionaryReadOnlyException, DictionaryException {
     try {
-      return lookupEntries(key, true);
+      return lookupEntries(key, false);
     } catch (SQLException sqlX) {
       throw new DictionaryException(this, sqlX);
     }
