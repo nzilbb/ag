@@ -518,7 +518,7 @@ public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
             errors.accept(new SerializationException(exception));
           }
         }); // next graph
-
+ 
       // pass on streams
       consumer.accept(
        new NamedStream(new TempFileInputStream(jsonlFile),
@@ -573,36 +573,42 @@ public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
         delimiter += turn.getLabel() + ":\t"; // first delimiter is participant ID
         for (Annotation utterance : turn.all("utterance")) {
           utterances.add(utterance);
-          for (Annotation token : utterance.all(getWordLayer().getId())) {
-            
+          Annotation[] words =  utterance.all(getWordLayer().getId());
+          if (words.length > 0) {
+            for (Annotation token : words) {
+              
+              text.append(delimiter);
+              
+              // check for annotations that start before/during this token
+              for (String layerId : annotations.keySet()) {
+                for (Annotation a : annotations.get(layerId)) {
+                  if (!a.containsKey("@startChar")
+                      && a.getStart().getOffset() < token.getEnd().getOffset()) {
+                    a.put("@startChar", text.length());
+                  }
+                } // next annotation
+              } // next layer
+              
+              // add the token
+              delimiter = " "; // subsequent delimiters are spaces
+              text.append(token);
+              
+              // check for annotations that end after/during this token
+              for (String layerId : annotations.keySet()) {
+                for (Annotation a : annotations.get(layerId)) {
+                  if (!a.containsKey("@endChar")
+                      && a.getEnd().getOffset() <= token.getEnd().getOffset()) {
+                    a.put("@endChar", text.length());
+                  }
+                } // next annotation
+              } // next layer            
+              
+            } // next token
+            delimiter = "\n"; // next delimiter is new line
+          } else { // utterance has no words in it, but must be included anyway
             text.append(delimiter);
-            
-            // check for annotations that start before/during this token
-            for (String layerId : annotations.keySet()) {
-              for (Annotation a : annotations.get(layerId)) {
-                if (!a.containsKey("@startChar")
-                    && a.getStart().getOffset() < token.getEnd().getOffset()) {
-                  a.put("@startChar", text.length());
-                }
-              } // next annotation
-            } // next layer
-            
-            // add the token
-            delimiter = " "; // subsequent delimiters are spaces
-            text.append(token);
-            
-            // check for annotations that end after/during this token
-            for (String layerId : annotations.keySet()) {
-              for (Annotation a : annotations.get(layerId)) {
-                if (!a.containsKey("@endChar")
-                    && a.getEnd().getOffset() <= token.getEnd().getOffset()) {
-                  a.put("@endChar", text.length());
-                }
-              } // next annotation
-            } // next layer            
-            
-          } // next token
-          delimiter = "\n"; // next delimiter is new line
+            delimiter = "\n"; // next delimiter is new line
+          }
         } // next utterance
       } // next turn
       json.write("text", text.toString());

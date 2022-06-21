@@ -311,16 +311,23 @@ public class TestJSONLSerialization {
     
     graph.addAnchor(new Anchor("a0", 0.0));
     graph.addAnchor(new Anchor("a25", 25.0));
+    graph.addAnchor(new Anchor("a22", 22.0));
     graph.addAnchor(new Anchor("a45", 45.0));
     // participants
     graph.addAnnotation(new Annotation("speaker1", "speaker1", "who", "a0", "a45"));
     graph.addAnnotation(new Annotation("speaker2", "speaker2", "who", "a0", "a45"));
+    // silent 'speaker'
+    graph.addAnnotation(new Annotation("speaker3", "speaker3", "who", "a0", "a45"));
     // turns
-    graph.addAnnotation(new Annotation("t1", "speaker1", "turn", "a0", "a45", "speaker1"));
-    graph.addAnnotation(new Annotation("t2", "speaker2", "turn", "a0", "a45", "speaker2"));
+    graph.addAnnotation(new Annotation("t1", "speaker1", "turn", "a0", "a25", "speaker1"));
+    graph.addAnnotation(new Annotation("t2", "speaker2", "turn", "a25", "a45", "speaker2"));
+    // silent turn
+    graph.addAnnotation(new Annotation("t3", "speaker3", "turn", "a22", "a25", "speaker3"));
     // utterances
     graph.addAnnotation(new Annotation("u1", "author", "utterance", "a0", "a25", "t1"));
     graph.addAnnotation(new Annotation("u2", "author", "utterance", "a25", "a45", "t2"));
+    // silent utterance
+    graph.addAnnotation(new Annotation("u3", "author", "utterance", "a22", "a25", "t3"));
 
     // words
     graph.addAnnotation(new Annotation("the", "The", "word",
