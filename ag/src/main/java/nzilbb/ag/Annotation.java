@@ -1661,8 +1661,8 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
    * @return true if #getStartId() equals #getEndId(), false otherwise.
    */
   public boolean getInstantaneous() {
-    assert getStartId() != null : "getStartId() != null - " + getLayerId() + " " + getLabel();
-    return getStartId().equals(getEndId());
+    assert getStartId() != null : "getStartId() != null - " + getLayerId() + " " + getLabel();    
+    return getStartId() != null && getStartId().equals(getEndId());
   } // end of getInstantaneous()
 
   /**
