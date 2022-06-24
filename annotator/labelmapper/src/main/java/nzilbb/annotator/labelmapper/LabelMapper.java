@@ -734,6 +734,8 @@ public class LabelMapper extends Annotator {
         // we try to cluster deleted vowels with subsequent vowel if any, so need a vowel pattern
         String vowelPattern = getComparator().startsWith("DISC")?
           "[aeiouAEIOUcCFHPqQV0123456789~#\\{\\$@WX]":"[aeiouAEIOU]";
+        String diphthongPattern = getComparator().endsWith("DISC")?
+          "[O123456789WBX]":vowelPattern;
 
         setStatus("for each " + scopeLayerId + " map " + sourceLayerId + " → " + targetLayerId);
         // for each scope annotator
@@ -793,8 +795,8 @@ public class LabelMapper extends Annotator {
                   if (!subMapping
                       && initialInserts.length() > 0) { // prepend inserts we had already found?
                     if (lastTag != null // may be a clustering vowel
-                        && !step.getFrom().label.matches(vowelPattern) // not vowel
-                        && lastTag.getLabel().matches(vowelPattern+"+")) { // previous is vowel
+                        && lastTag.getLabel().matches(vowelPattern+"+") // previous is vowel
+                        && !step.getTo().label.matches(diphthongPattern)) { // next not diphthong
                       // not a vowel, so don't cluster forward, cluster back instead
                       lastTag.setLabel(
                         lastTag.getLabel() + concatDelimiter + initialInserts.trim());

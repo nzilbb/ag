@@ -428,6 +428,29 @@ public class TestLabelMapper {
     phones[4].setLabel("t"); // -> t
     phones[5].setLabel("i"); // -> i
     phones[6].setLabel("a"); // -> a
+    // add a word
+    Annotation pouaka = new Annotation().setLayerId("word").setLabel("pouaka")
+      .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(50))
+      .setParent(words[0].getParent());
+    g.addAnnotation(pouaka);
+    g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("pouaka") // Te Aka
+                    .setParent(pouaka));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("p") // -> p
+                    .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(42))
+                    .setParent(pouaka));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("O") // -> ou
+                    .setStart(g.getOrCreateAnchorAt(42)).setEnd(g.getOrCreateAnchorAt(44))
+                    .setParent(pouaka));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("a") // -> a
+                    .setStart(g.getOrCreateAnchorAt(44)).setEnd(g.getOrCreateAnchorAt(46))
+                    .setParent(pouaka));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("k") // -> k
+                    .setStart(g.getOrCreateAnchorAt(46)).setEnd(g.getOrCreateAnchorAt(48))
+                    .setParent(pouaka));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("a") // -> a
+                    .setStart(g.getOrCreateAnchorAt(48)).setEnd(g.getOrCreateAnchorAt(50))
+                    .setParent(pouaka));
+    
     g.commit();
     
     // layers are created as required
@@ -453,9 +476,11 @@ public class TestLabelMapper {
     g.commit(); // remove destroyed annotations
     
     phones = g.all("phone");
-    assertEquals("Right number of phones " + Arrays.asList(phones), 15, phones.length);
-    String[] phoneLabels = {"u","5", "a",  "k","W", "a","k","o", "f","a","k","2",  "t","i","a"};
-    String[] discLabels = { "u","au","a",  "k","ai","a","k","o", "f","a","k","aae","t","i","a"};
+    assertEquals("Right number of phones " + Arrays.asList(phones), 20, phones.length);
+    String[] phoneLabels
+      = {"u","5", "a", "k","W", "a","k","o", "f","a","k","2",  "t","i","a", "p","O", "a","k","a"};
+    String[] discLabels
+      = {"u","au","a", "k","ai","a","k","o", "f","a","k","aae","t","i","a", "p","ou","a","k","a"};
     for (int p = 0; p < phones.length; p++) {
       assertEquals("Phone label " + p, phoneLabels[p], phones[p].getLabel());
       Annotation[] tags = phones[p].all("disc");
@@ -467,7 +492,7 @@ public class TestLabelMapper {
                    phones[p].first("disc").getConfidence().intValue());
     }
     assertEquals("Right number of tags " + Arrays.asList(g.all("disc")),
-                 15, g.all("disc").length);
+                 20, g.all("disc").length);
   }   
 
   /** Test mapping of orthography to phones. */
