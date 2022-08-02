@@ -49,7 +49,7 @@ getSchema(s => {
     var destinationLayerId = document.getElementById("destinationLayerId");
     addLayerOptions(
         destinationLayerId, schema,
-        layer => layer.parentId == schema.wordLayerId && layer.alignment == 0);
+        layer => layer.parentId == schema.wordLayerId);
     destinationLayerId.selectedIndex = 0;
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
