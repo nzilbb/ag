@@ -163,10 +163,10 @@ public class TestFlatLexiconTagger {
     assertEquals("b r aʊ n", prons.next());
     assertEquals("f ɒ k s", prons.next());
     assertEquals("ʤ ʌ m p s", prons.next());
-    assertEquals("əʊ v ə", prons.next());
+    assertEquals("'əʊ - v ə", prons.next());
     assertEquals("ð i:", prons.next());
     assertEquals("ð ə", prons.next());
-    assertEquals("l eɪ z i:", prons.next());
+    assertEquals("l 'eɪ - z i:", prons.next());
     assertEquals("d ɒ g", prons.next());
 
     // add a word
@@ -192,10 +192,10 @@ public class TestFlatLexiconTagger {
     assertEquals("b r aʊ n", prons.next());
     assertEquals("f ɒ k s", prons.next());
     assertEquals("ʤ ʌ m p s", prons.next());
-    assertEquals("əʊ v ə", prons.next());
+    assertEquals("'əʊ - v ə", prons.next());
     assertEquals("ð i:", prons.next());
     assertEquals("ð ə", prons.next());
-    assertEquals("l eɪ z i:", prons.next());
+    assertEquals("l 'eɪ - z i:", prons.next());
     assertEquals("d ɒ g", prons.next());
     assertEquals("New token",
                  "d ɒ g", prons.next());
@@ -520,7 +520,7 @@ public class TestFlatLexiconTagger {
       +"&tagLayerId=phonemes"
       +"&dictionary=a-z.csv:Word->Pronunciation"
       +"&firstVariantOnly=false"
-      +"&strip=+");
+      +"&strip=]'-"); // strip primary stress and syllable markers
       
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
@@ -543,7 +543,7 @@ public class TestFlatLexiconTagger {
                  Constants.TYPE_STRING,
                  schema.getLayer(annotator.getTagLayerId()).getType());
     assertEquals("strip",
-                 " ", annotator.getStrip());
+                 "]'-", annotator.getStrip());
     assertFalse("firstVariantOnly=false",
                 annotator.getFirstVariantOnly());
     assertTrue("tag layer allows peers (firstVariantOnly=false)",
@@ -575,11 +575,11 @@ public class TestFlatLexiconTagger {
     assertEquals("Correct number of annotations "+pronLabels,
                  5, pronLabels.size());
     Iterator<String> prons = pronLabels.iterator();
-    assertEquals("fɒks", prons.next());
-    assertEquals("ʤʌmps", prons.next());
-    assertEquals("əʊvə", prons.next());
-    assertEquals("ði:", prons.next());
-    assertEquals("ðə", prons.next());
+    assertEquals("f ɒ k s", prons.next());
+    assertEquals("ʤ ʌ m p s", prons.next());
+    assertEquals("əʊ v ə", prons.next());
+    assertEquals("ð i:", prons.next());
+    assertEquals("ð ə", prons.next());
 
   }   
 
@@ -683,7 +683,7 @@ public class TestFlatLexiconTagger {
     assertEquals("NZE phrase is tagged",
                  "b r aʊ n", prons.next());
     assertEquals("'fox jumps over the' is skipped",
-                 "l eɪ z i:", prons.next());
+                 "l 'eɪ - z i:", prons.next());
     assertEquals("d ɒ g", prons.next());
 
   }
@@ -785,7 +785,7 @@ public class TestFlatLexiconTagger {
     assertEquals("NZE phrase is tagged",
                  "b r aʊ n", prons.next());
     assertEquals("'fox jumps over the' is skipped",
-                 "l eɪ z i:", prons.next());
+                 "l 'eɪ - z i:", prons.next());
     assertEquals("d ɒ g", prons.next());
 
   }

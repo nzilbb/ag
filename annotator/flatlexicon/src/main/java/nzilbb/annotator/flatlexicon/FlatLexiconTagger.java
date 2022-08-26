@@ -909,7 +909,16 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
               
               if (!found) setStatus("Tagging: " + type); // (log this only once)
               found = true;
-              if (strip.length() > 0) entry = entry.replaceAll("["+strip+"]","");              
+              if (strip.length() > 0) {
+                entry = entry.replaceAll(
+                  // replace characters in this class
+                  "["+strip
+                  // ...escape ']' so it doesn't accidentally close the class
+                  .replace("]","\\]") 
+                  // also any trailing space in case phonemes are space-delimited,
+                  // extra spaces aren't left behind
+                  +"] *","");
+              }
               for (Annotation token : toAnnotate.get(type)) {
                 token.createTag(tagLayerId, entry)
                   .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
