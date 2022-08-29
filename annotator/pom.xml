@@ -30,5 +30,6 @@
     <module>phonemetranscoder</module>
     <module>flatlexicon</module>
     <module>basservices</module>
+    <module>reaper</module>
   </modules>  
 </project>

@@ -1,0 +1,25 @@
+<h3>REAPER</h3>
+
+<p> This annotator runs REAPER
+  (<a target="reaper" href="https://github.com/google/REAPER">https://github.com/google/REAPER</a>)
+  over sound files in order to estimate pitch (F0). </p>
+    
+<p> It generates:</p>
+<ul><li>A .f0 (pitch) track file </li>
+  <li>A .pm (pitchmark) track file </li>
+  <li>Optionally, annotations labelled with the computed pitch at different instants </li></ul>
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>f0LayerId=f0&f0FrameInterval=0.001&hilbertTransform=true</samp> </p>
+
+<p> Parameters are: </p> <dl>
+  <dt> f0FrameInterval </dt> <dd> The output frame interval for F0 - default is 0.005. </dd>
+  <dt> minF0 </dt> <dd> minimum f0 to look for. </dd>
+  <dt> maxF0 </dt> <dd> maximum f0 to look for. </dd>
+  <dt> hilbertTransform </dt> <dd> Set any non-empty value for this parameter to use
+    the <tt>-t</tt> command-line switch, which enables a Hilbert transform that may
+    reduce phase distortion.</dd> 
+  <dt> f0LayerId </dt> <dd> Output layer on which instantaneous pitch measurements are
+    saved. This must be a span layer with instantaneous annotations. If the layer doesn't
+    exist, it will be created. </dd>
+</dl>

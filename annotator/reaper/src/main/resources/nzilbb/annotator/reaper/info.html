@@ -1,0 +1,16 @@
+<h2>REAPER</h2>
+
+<p> This annotator runs REAPER
+  (<a target="reaper" href="https://github.com/google/REAPER">https://github.com/google/REAPER</a>)
+  over sound files in order to estimate pitch (F0). </p>
+
+<p> In order to generate:</p>
+<ul><li>A .f0 (pitch) track file </li>
+  <li>A .pm (pitchmark) track file </li>
+  <li>Annotations labelled with the computed pitch at different instants </li></ul>
+
+<p> ... create a <i>span</i> layer with the following characteristics: </p>
+<dl><dt>Layer ID</dt> <dd><tt>f0</tt> (or <tt>reaper</tt> or whatever else you like)</dd>
+  <dt>Type</dt> <dd><i>Number</i></dd>
+  <dt>Alignment</dt> <dd><i>Instants</i></dd>
+  <dt>Manager</dt> <dd><i>Reaper Manager</i></dd></dl>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> REAPER </title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <p> This annotator runs REAPER
+      (<a target="reaper" href="https://github.com/google/REAPER">https://github.com/google/REAPER</a>)
+      over sound files in order to estimate pitch (F0). </p>
+    
+    <p> It generates:</p>
+    <ul><li>A .f0 (pitch) track file </li>
+      <li>A .pm (pitchmark) track file </li>
+      <li>Optionally, annotations labelled with the computed pitch at different instants </li></ul>
+
+    <form method="POST" action="setTaskParameters" id="form">
+      <div class="field" title="The output frame interval for F0 - default is 0.005">
+        <label for="f0FrameInterval"> F0 Frame Interval </label>
+        <span><input id="f0FrameInterval" name="f0FrameInterval"
+                     type="number" min="0.000" step="0.001"></span>
+      </div>
+      <div class="field" title="Minimum F0 to look for">
+        <label for="minF0"> Minimum F0 </label>
+        <span><input id="minF0" name="minF0"
+                     type="number" min="0" step="100"></span>
+      </div>
+      <div class="field" title="Maximum F0 to look for">
+        <label for="maxF0"> Maximum F0 </label>
+        <span><input id="maxF0" name="maxF0"
+                     type="number" min="0" step="100"></span>
+      </div>
+      <div class="field" title="Enables a Hilbert transform that may reduce phase distortion">
+        <label for="hilbertTransform"> Hilbert Transform </label>
+        <span><input id="hilbertTransform" name="hilbertTransform" type="checkbox"></span>
+      </div>
+      <div class="field" title="Suppress applying high pass filter at 80Hz (rumble-removal highpass filter)">
+        <label for="suppressHighPassFilter"> Suppress High Pass Filter </label>
+        <span><input id="suppressHighPassFilter" name="suppressHighPassFilter" type="checkbox"></span>
+      </div>
+      <div class="field" title="Output layer on which instantaneous pitch measurements are saved">
+        <label for="f0LayerId"> Pitch Layer </label>
+        <span>
+          <select id="f0LayerId" name="f0LayerId">
+            <option>[don't save annotations]</option>
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="controls"><input type="submit" value="Set Parameters"></div>
+    </form>
+    
+    <footer>
+      <div title="Version of this annotator module">
+        Reaper Annotator <small id="version"></small> </div>
+    </footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>
