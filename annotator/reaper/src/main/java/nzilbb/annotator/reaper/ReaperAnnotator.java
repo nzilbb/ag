@@ -44,6 +44,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -51,6 +52,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -432,6 +434,14 @@ public class ReaperAnnotator extends Annotator {
             Map<String, String> env = System.getenv();
             for (String key : env.keySet()) {
               setStatus(key+"="+env.get(key));
+            }
+            setStatus("System properties:");
+            Properties systemProperties = System.getProperties();
+            Enumeration enuProp = systemProperties.propertyNames();
+            while (enuProp.hasMoreElements()) {
+              String propertyName = (String) enuProp.nextElement();
+              String propertyValue = systemProperties.getProperty(propertyName);
+              setStatus(propertyName + ": " + propertyValue);
             }
             setStatus(transcript.getId() + " : Running reaper...");
             reaper.run();
