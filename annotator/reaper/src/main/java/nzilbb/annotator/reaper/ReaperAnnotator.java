@@ -434,41 +434,7 @@ public class ReaperAnnotator extends Annotator {
               setStatus(key+"="+env.get(key));
             }
             setStatus(transcript.getId() + " : Running reaper...");
-            new Thread(reaper).start();
-            String lastCommand = null;
-            String lastCommandLine = null;
-            java.time.Instant lastStartInstant = null;
-            java.time.Duration lastTotalCpuDuration = null;
-            String lastUser = "";
-            // wait until it's finished
-            while (!reaper.getFinished()) {
-              try { Thread.sleep(1000); } catch(Exception exception) {}
-              if (reaper.getProcess() != null) { // TODO remove debug tracing
-                ProcessHandle.Info info = reaper.getProcess().info();
-                if (info != null) {
-                  if (info.command().isPresent() && !info.command().get().equals(lastCommand)) {
-                    lastCommand = info.command().get();
-                    setStatus("command: " + lastCommand);
-                  }
-                  if (info.commandLine().isPresent() && !info.commandLine().get().equals(lastCommandLine)) {
-                    lastCommandLine = info.commandLine().get();
-                    setStatus("commandLine: " + lastCommandLine);
-                  }
-                  if (info.startInstant().isPresent() && !info.startInstant().get().equals(lastStartInstant)) {
-                    lastStartInstant = info.startInstant().get();
-                    setStatus("startInstant: " + lastStartInstant);
-                  }
-                  if (info.totalCpuDuration().isPresent() && !info.totalCpuDuration().get().equals(lastStartInstant)) {
-                    lastTotalCpuDuration = info.totalCpuDuration().get();
-                    setStatus("totalCpuDuration: " + lastTotalCpuDuration);
-                  }
-                  if (info.user().isPresent() && !info.user().get().equals(lastUser)) {
-                    lastUser = info.user().get();
-                    setStatus("user: " + lastUser);
-                  }
-                }
-              }
-            }
+            reaper.run();
 
             if (reaper.stderr().trim().length() > 0) {
               setStatus("Reaper execution error: " + reaper.stderr());

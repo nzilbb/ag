@@ -132,9 +132,9 @@ public class TestReaperAnnotator {
     try {
       annotator.setTaskParameters(
         "f0LayerId=word"); // not child of graph
-      fail("Should fail with nonexistent orthographyLayerId");
+      fail("Should fail with non-span layer configured");
     } catch (InvalidConfigurationException x) {
-      System.out.println(""+x);
+      //System.out.println(""+x);
     }
   }
 
