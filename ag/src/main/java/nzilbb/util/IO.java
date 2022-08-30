@@ -439,7 +439,7 @@ public class IO
    } // end of JarCommentOfClass()
 
    /**
-    * Unzips a .zip file into teh given directory
+    * Unzips a .zip file into the given directory
     * @param zip The zip file to unzip.
     * @param dir The destination directory into which the contents should be unzipped,
     * which must already exist.
