@@ -45,6 +45,7 @@ import nzilbb.ag.MediaFile;
 import nzilbb.ag.PermissionException;
 import nzilbb.ag.Schema;
 import nzilbb.ag.StoreException;
+import nzilbb.ag.TransformationException;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
@@ -137,6 +138,35 @@ public class TestReaperAnnotator {
     }
   }
 
+  /** Ensure it only runs on full graphs, not fragments. */
+  @Test public void fullGraphOnly() throws Exception {
+
+    ReaperAnnotator annotator = new ReaperAnnotator();   
+    GraphStoreHarness store = new GraphStoreHarness(dir());
+    Graph f = fragment(store);
+    Schema schema = f.getSchema();
+    annotator.setStore(store);
+    annotator.setSchema(schema);
+    annotator.setWorkingDirectory(dir());
+    annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    annotator.setTaskParameters(null);
+    assertNull("f0LayerId unset", annotator.getF0LayerId());
+    assertNull("f0FrameInterval unset", annotator.getF0FrameInterval());
+    assertNull("minF0 unset", annotator.getMinF0());
+    assertNull("maxF0 unset", annotator.getMaxF0());
+    assertFalse("hilbertTransform unset", annotator.getHilbertTransform());
+    assertFalse("suppressHighPassFilter unset", annotator.getHilbertTransform());
+
+    try {
+      annotator.transform(f);
+      fail("Should not transform fragments");
+    } catch(TransformationException exception) {
+    }
+    assertFalse("f0 file doesn't exist", store.savedMedia.keySet().contains("Test.f0"));
+    assertFalse("pm file doesn't exist", store.savedMedia.keySet().contains("Test.pm"));
+  }   
+
   /** F0 annotations. */
   @Test public void f0Annotations() throws Exception {
 
@@ -147,7 +177,7 @@ public class TestReaperAnnotator {
     annotator.setStore(store);
     annotator.setSchema(schema);
     annotator.setWorkingDirectory(dir());
-    // annotator.getStatusObservers().add(status->System.out.println(status));
+    //annotator.getStatusObservers().add(status->System.out.println(status));
     
     annotator.setTaskParameters("f0LayerId=pitch");
     assertEquals("f0LayerId set", "pitch", annotator.getF0LayerId());

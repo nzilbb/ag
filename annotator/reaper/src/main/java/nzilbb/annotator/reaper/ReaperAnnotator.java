@@ -427,7 +427,12 @@ public class ReaperAnnotator extends Annotator {
 
             reaper.getStderrObservers().add(err -> setStatus(err));
             reaper.getStdoutObservers().add(out -> setStatus(out));
-            
+
+            setStatus("Environment:");
+            Map<String, String> env = System.getenv();
+            for (String key : env.keySet()) {
+              setStatus(key+"="+env.get(key));
+            }
             setStatus(transcript.getId() + " : Running reaper...");
             new Thread(reaper).start();
             String lastCommand = null;
@@ -543,6 +548,8 @@ public class ReaperAnnotator extends Annotator {
         transcript.put("@valid", Boolean.TRUE); // TODO remove this workaround
       } // parse .f0 file to generate annotations
 
+    } catch (TransformationException x) {
+      throw x;
     } catch (Exception x) {
       throw new TransformationException(
         this, "Error processing " + transcript.getId(), x);
