@@ -302,7 +302,11 @@ public class ReaperAnnotator extends Annotator {
    */
   public void cancel() {
     if (reaper != null && reaper.getProcess() != null) {
-      reaper.getProcess().destroy();
+      if (!isCancelling()) { // first time
+        reaper.getProcess().destroy();
+      } else { // multiple cancel requests, kill -9
+        reaper.getProcess().destroyForcibly();
+      }
     }
     super.cancel();
   } // end of cancel()
