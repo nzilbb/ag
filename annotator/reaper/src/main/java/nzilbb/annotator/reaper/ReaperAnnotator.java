@@ -397,19 +397,40 @@ public class ReaperAnnotator extends Annotator {
                 setStatus("Extracting " + url + " to " + reaperExe.getAbsolutePath());
                 IO.Pump(url.openStream(), new FileOutputStream(reaperExe));
 
-                // try to mark it as executable
-                setStatus("Marking as executable: " + reaperExe.getAbsolutePath());
-                Execution chmod = new Execution().setExe("chmod")
-                  .arg("u+x").arg(reaperExe.getAbsolutePath());
-                chmod.run();
-                String output = (chmod.stderr()+"\n"+chmod.stdout()).trim();
-                if (output.length() > 0) setStatus("chmod: " + output);
+                if (!osName.equals("Windows")) { // unix-like system
+                  // try to mark it as executable
+                  setStatus("Marking as executable: " + reaperExe.getAbsolutePath());
+                  Execution chmod = new Execution().setExe("chmod")
+                    .arg("u+x").arg(reaperExe.getAbsolutePath());
+                  chmod.run();
+                  String output = (chmod.stderr()+"\n"+chmod.stdout()).trim();
+                  if (output.length() > 0) setStatus("chmod: " + output);
+                }
               } catch(Exception exception) {
                 setStatus("Could not extract " + reaperExe.getPath() + " : " + exception);
                 throw new TransformationException(
                   this, "Could not extract " + reaperExe.getPath(), exception);
               }
             }
+            
+            if (exeName.equals("reaper_Windowsx86.exe")) { // Windows x86 has dll dependencies
+              
+              File dll = new File(getWorkingDirectory(), "libgcc_s_dw2-1.dll");
+              if (!dll.exists()) {
+                URL url = getClass().getResource(dll.getName());
+                setStatus("Extracting " + url + " to " + dll.getAbsolutePath());
+                IO.Pump(url.openStream(), new FileOutputStream(dll));
+              }
+              
+              dll = new File(getWorkingDirectory(), "libstdc++-6.dll");
+              if (!dll.exists()) {
+                URL url = getClass().getResource(dll.getName());
+                setStatus("Extracting " + url + " to " + dll.getAbsolutePath());
+                IO.Pump(url.openStream(), new FileOutputStream(dll));
+                
+              }
+            } // Windows x86
+            
             if (!reaperExe.exists()) {
               throw new TransformationException(
                 this, "Reaper not found: " + reaperExe.getPath());
