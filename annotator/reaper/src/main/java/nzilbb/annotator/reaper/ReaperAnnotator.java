@@ -389,22 +389,17 @@ public class ReaperAnnotator extends Annotator {
 	    if (osName.startsWith("Windows")) osName = "Windows";
 	    String exeName = getExeName();
 	    File reaperExe = new File(getWorkingDirectory(), exeName);
-            setStatus("Reaper " + reaperExe.getAbsolutePath());
             if (!reaperExe.exists()) {
               try {
                 // unpack reaper from our own jar file
                 URL url = getClass().getResource(exeName);
-                setStatus("Extracting " + url + " to " + reaperExe.getAbsolutePath());
                 IO.Pump(url.openStream(), new FileOutputStream(reaperExe));
 
                 if (!osName.equals("Windows")) { // unix-like system
                   // try to mark it as executable
-                  setStatus("Marking as executable: " + reaperExe.getAbsolutePath());
                   Execution chmod = new Execution().setExe("chmod")
                     .arg("u+x").arg(reaperExe.getAbsolutePath());
                   chmod.run();
-                  String output = (chmod.stderr()+"\n"+chmod.stdout()).trim();
-                  if (output.length() > 0) setStatus("chmod: " + output);
                 }
               } catch(Exception exception) {
                 setStatus("Could not extract " + reaperExe.getPath() + " : " + exception);
@@ -412,22 +407,18 @@ public class ReaperAnnotator extends Annotator {
                   this, "Could not extract " + reaperExe.getPath(), exception);
               }
             }
-            
             if (exeName.equals("reaper_Windowsx86.exe")) { // Windows x86 has dll dependencies
               
               File dll = new File(getWorkingDirectory(), "libgcc_s_dw2-1.dll");
               if (!dll.exists()) {
                 URL url = getClass().getResource(dll.getName());
-                setStatus("Extracting " + url + " to " + dll.getAbsolutePath());
                 IO.Pump(url.openStream(), new FileOutputStream(dll));
               }
               
               dll = new File(getWorkingDirectory(), "libstdc++-6.dll");
               if (!dll.exists()) {
                 URL url = getClass().getResource(dll.getName());
-                setStatus("Extracting " + url + " to " + dll.getAbsolutePath());
-                IO.Pump(url.openStream(), new FileOutputStream(dll));
-                
+                IO.Pump(url.openStream(), new FileOutputStream(dll));                
               }
             } // Windows x86
             
@@ -451,20 +442,7 @@ public class ReaperAnnotator extends Annotator {
             reaper.getStderrObservers().add(err -> setStatus(err));
             reaper.getStdoutObservers().add(out -> setStatus(out));
 
-            setStatus("Environment:");
-            Map<String, String> env = System.getenv();
-            for (String key : env.keySet()) {
-              setStatus(key+"="+env.get(key));
-            }
-            setStatus("System properties:");
-            Properties systemProperties = System.getProperties();
-            Enumeration enuProp = systemProperties.propertyNames();
-            while (enuProp.hasMoreElements()) {
-              String propertyName = (String) enuProp.nextElement();
-              String propertyValue = systemProperties.getProperty(propertyName);
-              setStatus(propertyName + ": " + propertyValue);
-            }
-            setStatus(transcript.getId() + " : Running reaper...");
+            setStatus(transcript.getId() + " : Running "+exeName+"...");
             reaper.run();
 
             if (reaper.stderr().trim().length() > 0) {
@@ -478,14 +456,13 @@ public class ReaperAnnotator extends Annotator {
             }
             
             if (f0.exists()) {              
-              setStatus("Saving " + f0.toURI().toString());
+              setStatus("Saving " + f0.getName());
               getStore().saveMedia(transcript.getId(), "", f0.toURI().toString());
               // remove temporary file
               f0.delete();
 
               // get back the file URL
               for (MediaFile media : transcript.getMediaProvider().getAvailableMedia()) {
-                setStatus("File: " + media.getName());
                 if (media.getExtension().equals("f0")
                     && media.getFile() != null
                     && media.getFile().exists()) {
@@ -506,8 +483,6 @@ public class ReaperAnnotator extends Annotator {
           }
         }
       } // has wav
-
-      setStatus("f0File: " + f0File);
 
       if (!isCancelling()
           && f0LayerId != null && f0File != null) { // parse .f0 file to generate annotations
