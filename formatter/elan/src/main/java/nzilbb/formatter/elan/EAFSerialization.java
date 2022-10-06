@@ -656,7 +656,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       layerToPossibilities.put(
         new Parameter("wordLayer", Layer.class, "Word layer", 
                       "Layer for individual word tokens", true), 
-        Arrays.asList("transcript","word","words","w"));
+        Arrays.asList("word","words","w"));
       layerToCandidates.put("wordLayer", possibleTurnChildLayers);
     }
     LinkedHashMap<String,Layer> possiblePhraseLayers = new LinkedHashMap<String,Layer>();
@@ -876,8 +876,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                        || tierName.equalsIgnoreCase("turn")) {
               tierName = getTurnLayer().getId();
             } else if (tierName.toLowerCase().indexOf("word") >= 0
-                       || tierName.toLowerCase().indexOf("word") >= 0
-                       || tierName.toLowerCase().endsWith("transcript")) { // backwards compat.
+                       || tierName.toLowerCase().indexOf("word") >= 0) {
               tierName = getWordLayer().getId();
             }
             Layer layer = getSchema().getLayer(tierName);
