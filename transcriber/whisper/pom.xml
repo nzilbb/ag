@@ -15,7 +15,7 @@
   <description>Transcriber that uses Whisper to transcribe audio</description>
 
   <properties>
-    <nzilbb.formatter.webvtt.version>0.6.1</nzilbb.formatter.webvtt.version>
+    <nzilbb.formatter.webvtt.version>0.6.2</nzilbb.formatter.webvtt.version>
     <package.path>nzilbb/transcriber/whisper/</package.path>
     <annotator.class>nzilbb.transcriber.whisper.WhisperTranscriber</annotator.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

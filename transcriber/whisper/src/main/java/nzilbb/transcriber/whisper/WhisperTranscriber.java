@@ -398,6 +398,8 @@ public class WhisperTranscriber extends Transcriber {
     beanPropertiesFromQueryString(config);
     setPercentComplete(100);
     setRunning(false);
+
+    // TODO try to install whisper if it isn't installed?
   }
 
   /**
@@ -520,9 +522,19 @@ public class WhisperTranscriber extends Transcriber {
         // if we already had a speaker...
         String participantLayerId = transcript.getSchema().getParticipantLayerId();
         Annotation participant = transcript.first(participantLayerId);
-        if (participant != null) {
-          // ... use that speaker label
-          graphFromVtt.first(participantLayerId).setLabel(participant.getLabel());
+        String speakerName = IO.WithoutExtension(speech);
+        if (participant != null) speakerName = participant.getLabel();
+        graphFromVtt.first(participantLayerId).setLabel(speakerName);
+        
+        // ensure turn labels are correspondingly changed
+        for (Annotation t : graphFromVtt.all(transcript.getSchema().getTurnLayerId())) {
+          t.setLabel(speakerName);
+        }
+        if (transcript.getSchema().getWordLayerId() != null) {
+          // ensure utterance labels are correspondingly changed
+          for (Annotation u : graphFromVtt.all(transcript.getSchema().getUtteranceLayerId())) {
+            u.setLabel(speakerName);
+          }
         }
         
         // merge into given transcript
@@ -530,7 +542,7 @@ public class WhisperTranscriber extends Transcriber {
         merger.transform(transcript);
         
       } finally {
-        //TODO vtt.delete();
+        vtt.delete();
       }
     } else {
       setStatus("VTT transcript not found: " + vtt.getName());
