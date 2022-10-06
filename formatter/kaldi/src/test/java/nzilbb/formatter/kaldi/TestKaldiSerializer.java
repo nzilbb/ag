@@ -130,12 +130,13 @@ public class TestKaldiSerializer {
 
     // some layers required
     String[] requiredLayers = serializer.getRequiredLayers();
-    assertEquals(5, requiredLayers.length);
+    assertEquals(6, requiredLayers.length);
     assertEquals("who", requiredLayers[0]);
     assertEquals("utterance", requiredLayers[1]);
-    assertEquals("orthography", requiredLayers[2]);
-    assertEquals("phonemes", requiredLayers[3]);
-    assertEquals("gender", requiredLayers[4]);
+    assertEquals("word", requiredLayers[2]);
+    assertEquals("orthography", requiredLayers[3]);
+    assertEquals("phonemes", requiredLayers[4]);
+    assertEquals("gender", requiredLayers[5]);
 
     // split out fragments
     String[] allLayers = {
@@ -291,12 +292,13 @@ public class TestKaldiSerializer {
 
     // some layers required
     String[] requiredLayers = serializer.getRequiredLayers();
-    assertEquals(5, requiredLayers.length);
+    assertEquals(6, requiredLayers.length);
     assertEquals("who", requiredLayers[0]);
     assertEquals("utterance", requiredLayers[1]);
-    assertEquals("orthography", requiredLayers[2]);
-    assertEquals("phonemes", requiredLayers[3]);
-    assertEquals("gender", requiredLayers[4]);
+    assertEquals("word", requiredLayers[2]);
+    assertEquals("orthography", requiredLayers[3]);
+    assertEquals("phonemes", requiredLayers[4]);
+    assertEquals("gender", requiredLayers[5]);
 
     // split out fragments
     String[] allLayers = {

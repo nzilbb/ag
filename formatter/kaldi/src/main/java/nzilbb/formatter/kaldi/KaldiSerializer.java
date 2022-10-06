@@ -335,6 +335,7 @@ public class KaldiSerializer implements GraphSerializer {
     Vector<String> requiredLayers = new Vector<String>();
     requiredLayers.add(schema.getParticipantLayerId());
     requiredLayers.add(schema.getUtteranceLayerId());
+    requiredLayers.add(schema.getWordLayerId());
     if (getOrthographyLayer() != null) requiredLayers.add(getOrthographyLayer().getId());
     if (getPronunciationLayer() != null) requiredLayers.add(getPronunciationLayer().getId());
     if (getGenderLayer() != null) requiredLayers.add(getGenderLayer().getId());
