@@ -17,5 +17,6 @@
   <modules>
     <module>deepspeech</module>
     <module>google</module>
+    <module>whisper</module>
   </modules>
 </project>
