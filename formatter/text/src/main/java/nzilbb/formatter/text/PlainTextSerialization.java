@@ -1721,7 +1721,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
             tagLayers.add(l); // TODO maybe allow other layers
           }
         }
-      } // next layeyId
+      } // next layerId
     } else {
       for (Layer l : graph.getSchema().getLayers().values()) selectedLayers.add(l.getId());
     }
