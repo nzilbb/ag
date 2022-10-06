@@ -605,9 +605,11 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
 
     // look for the time-interval pattern - something like
     // 00:00:03.389 --> 00:00:05.269 align:start position:0%
-    // TODO can also be 00:03.389 --> 00:05.269 align:start position:0%
-    MessageFormat intervalFormat = new MessageFormat(
+    // can also be 00:03.389 --> 00:05.269 align:start position:0%
+    MessageFormat intervalFormatFull = new MessageFormat(
       "{0,number,integer}:{1,number,integer}:{2,number,integer}.{3,number,integer} --> {4,number,integer}:{5,number,integer}:{6,number,integer}.{7,number,integer}{8}");
+    MessageFormat intervalFormatAbbr = new MessageFormat(
+      "{0,number,integer}:{1,number,integer}.{2,number,integer} --> {3,number,integer}:{4,number,integer}.{5,number,integer}{6}");
 
     for (Parameter cue : parameters.values()) {
       Layer mappedLayer = (Layer)cue.getValue();
@@ -638,14 +640,50 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
         if (!line.startsWith("NOTE ")
             // skip cue-number lines
             && !line.matches("^[0-9]+$")) {
-          try {
-            Object[] intervalLine = intervalFormat.parse(line);
-            // this is an interval line...
-                  
+          
+          Long startHours = null;
+          Long startMinutes = null;
+          Long startSeconds = null;
+          Long startMilliseconds = null;
+          Long endHours = null;
+          Long endMinutes = null;
+          Long endSeconds = null;
+          Long endMilliseconds = null;
+          String suffix = null;
+
+          try { // try full pattern
+            Object[] intervalLine = intervalFormatFull.parse(line);            
+            startHours = (Long)intervalLine[0];
+            startMinutes = (Long)intervalLine[1];
+            startSeconds = (Long)intervalLine[2];
+            startMilliseconds = (Long)intervalLine[3];
+            endHours = (Long)intervalLine[4];
+            endMinutes = (Long)intervalLine[5];
+            endSeconds = (Long)intervalLine[6];
+            endMilliseconds = (Long)intervalLine[7];
+            suffix = (String)intervalLine[8];
+          } catch(ParseException exception) { 
+            try { // try abbreviated pattern
+              Object[] intervalLine = intervalFormatAbbr.parse(line);
+              // this is an interval line...
+              startHours = Long.valueOf(0);
+              startMinutes = (Long)intervalLine[0];
+              startSeconds = (Long)intervalLine[1];
+              startMilliseconds = (Long)intervalLine[2];
+              endHours = Long.valueOf(0);
+              endMinutes = (Long)intervalLine[3];
+              endSeconds = (Long)intervalLine[4];
+              endMilliseconds = (Long)intervalLine[5];
+              suffix = (String)intervalLine[6];
+            } catch(ParseException exception2) {
+            }
+          }
+
+          if (startMinutes != null) { // this is an interval line...
             // finish last utterance
             if (currentUtterance.getLabel().trim().length() > 0)
             { // the utterance actually contains something
-                     
+              
               currentUtterance.setLabel(
                 currentUtterance.getLabel()
                 // remove <...> tags TODO extract voice tags for speakers
@@ -654,36 +692,27 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
                 .replaceAll("[\r\n ]+", " ").replaceAll(" +", " ").trim());
               graph.addAnnotation(currentUtterance);
             }
-                  
+            
             // start new utterance
-            Long hours = (Long)intervalLine[0];
-            Long minutes = (Long)intervalLine[1];
-            Long seconds = (Long)intervalLine[2];
-            Long milliseconds = (Long)intervalLine[3];
             Anchor start = graph.getOrCreateAnchorAt(
-              hours * 3600 + minutes * 60 + seconds + milliseconds.doubleValue()/1000,
+              startHours * 3600 + startMinutes * 60
+              + startSeconds + startMilliseconds.doubleValue()/1000,
               Constants.CONFIDENCE_MANUAL);
-                  
-            hours = (Long)intervalLine[4];
-            minutes = (Long)intervalLine[5];
-            seconds = (Long)intervalLine[6];
-            milliseconds = (Long)intervalLine[7];
+            
             Anchor end = graph.getOrCreateAnchorAt(
-              hours * 3600 + minutes * 60 + seconds + milliseconds.doubleValue()/1000,
+              endHours * 3600 + endMinutes * 60
+              + endSeconds + endMilliseconds.doubleValue()/1000,
               Constants.CONFIDENCE_MANUAL);
-                  
-            String suffix = (String)intervalLine[8]; // TODO do something with this?
-                  
+            
             currentUtterance = new Annotation(
               null, "", schema.getUtteranceLayerId(), start.getId(), end.getId(), currentTurn.getId());
             currentUtterance.setConfidence(Constants.CONFIDENCE_MANUAL);
             currentTurn.setEndId(end.getId());
-                  
+            
             line = vtt.readLine();
             continue;
-          } catch(ParseException exception) {
-          }
-               
+          } // this is an interval line
+          
           // not an interval definition, so add the text to the utterance
           // TODO looks for cue tags like: <c.colorE5E5E5>first question</c>
           currentUtterance.setLabel(currentUtterance.getLabel() + " " + line);

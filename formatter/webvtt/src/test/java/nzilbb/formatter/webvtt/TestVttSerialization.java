@@ -316,7 +316,84 @@ public class TestVttSerialization {
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
   }
+  
+  /** Ensure parsing of timestamps works if hours are not specified
+   * - e.g. output of Whisper ASR. */
+  @Test public void abbreviatedTimestamps()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("who", "Participants", 0, true, true, true),
+      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+      new Layer("word", "Words", 2, true, false, false, "turn", true));
+    
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "abbreviated.vtt")) };
+    
+    // create deserializer
+    VttSerialization deserializer = new VttSerialization();
+    
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals("Configuration parameters" + configuration, 0,
+                 deserializer.configure(configuration, schema).size());
+    
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals(0, defaultParameters.size());
+    
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
 
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+    
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+    
+    assertEquals("abbreviated.vtt", g.getId());
+    assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
+    
+    // meta data
+    assertNull("graph meta data", g.first("transcript_language"));
+    assertNull("graph meta data", g.first("kind"));
+
+    // participants     
+    Annotation[] authors = g.all("who"); 
+    assertEquals(1, authors.length);
+    assertEquals("speaker", authors[0].getLabel());
+    
+    // turns
+    Annotation[] turns = g.all("turn");
+    assertEquals("One turn", 1, turns.length);
+    assertEquals("Turn start", Double.valueOf(0.0), turns[0].getStart().getOffset());
+    assertEquals("Turn end", Double.valueOf(5.6), turns[0].getEnd().getOffset());
+
+    // utterances
+    Annotation[] utterances = g.all("utterance");
+    assertEquals("One utterance", 1, utterances.length);
+    assertEquals("Utterance start", Double.valueOf(0.0), utterances[0].getStart().getOffset());
+    assertEquals("Utterance end", Double.valueOf(5.6), utterances[0].getEnd().getOffset());
+    
+    // utterances
+    Annotation[] words = g.all("word");
+    assertEquals(13, words.length);
+    String[] checkWords = {
+      "Well", "I", "have", "a", "fairly", "vivid", "recollection", "of",
+      "all", "of", "the", "major", "quakes."};
+    for (int w = 0; w < checkWords.length; w++) {
+      assertEquals("check word " + w + ": " + checkWords[w], checkWords[w], words[w].getLabel());
+    } // next word
+    
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+    }
+  }
 
   /** Serialization of similtaneous speech. */
   @Test public void serializeSimultaneousSpeech() throws Exception {

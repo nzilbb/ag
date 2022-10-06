@@ -10,7 +10,7 @@
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.webvtt</artifactId>
   <name>nzilbb.formatter.webvtt</name>
-  <version>0.6.1</version>
+  <version>0.6.2</version>
 
   <properties>
     <package.path>nzilbb/formatter/webvtt/</package.path>
