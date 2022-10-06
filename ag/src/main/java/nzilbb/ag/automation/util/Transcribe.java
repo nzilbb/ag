@@ -72,6 +72,7 @@ public class Transcribe extends CommandLineProgram {
     * Setter for {@link #verbose}: Print verbose output to stderr
     * @param newVerbose Print verbose output to stderr
     */
+   @Switch("Whether to print debug tracing")
    public Transcribe setVerbose(boolean newVerbose) { verbose = newVerbose; return this; }
    
    /**
@@ -184,6 +185,8 @@ public class Transcribe extends CommandLineProgram {
       if (!transcriberDir.exists()) transcriberDir.mkdir();
       transcriber.setWorkingDirectory(transcriberDir);      
       // TODO transcriber.getDiarizationRequired()
+
+      if (verbose) transcriber.getStatusObservers().add(s->System.err.println(s));
 
       if (!args.hasNext()) {
          throw new NullPointerException(
