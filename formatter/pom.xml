@@ -33,6 +33,7 @@
     <module>webvtt</module>
     <module>salt</module>
     <module>doccano</module>
+    <module>whisper</module>
   </modules>
 
 </project>

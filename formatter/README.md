@@ -31,7 +31,7 @@ the file extension, e.g `nzilbb.formatter.praat.TextGridSerialization`
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.0.0,)</version>
+      <version>[1.0.7,)</version>
       <scope>compile</scope>
     </dependency>
    ```
@@ -67,10 +67,10 @@ the file extension, e.g `nzilbb.formatter.praat.TextGridSerialization`
    ```
 3. Add directory structure for the formatter code:
    ```
-   rm src/main/java/nzilbb.App.java
+   rm src/main/java/nzilbb/App.java
    mkdir src/main/java/nzilbb/formatter
    mkdir src/main/java/nzilbb/formatter/myformatter
    mkdir src/test/java/nzilbb/formatter
-   mkdir src/test/java/nzilbb/formatter/
+   mkdir src/test/java/nzilbb/formatter/myformatter
    ```
 4. Add your implementation to *myformatter/src/main/java/nzilbb/formatter/myformatter*
