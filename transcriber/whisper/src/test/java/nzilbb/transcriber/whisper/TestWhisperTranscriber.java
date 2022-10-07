@@ -51,7 +51,7 @@ public class TestWhisperTranscriber {
   @BeforeClass
   public static void install() throws Exception {
     
-    System.out.println("Installing Whisper if necessary...");
+    System.out.println("Configuring module...");
     
     // find the current directory
     File dir = dir();
@@ -65,8 +65,8 @@ public class TestWhisperTranscriber {
     // set the annotator configuration
     transcriber.setConfig(transcriber.getConfig());
     
-    //transcriber.getStatusObservers().add(status->System.out.println(status));
-    System.out.println("Installed.");
+    transcriber.getStatusObservers().add(s->System.err.println(s));
+    System.out.println("Configured.");
   }
 
   public static File dir() throws Exception { 
@@ -82,7 +82,6 @@ public class TestWhisperTranscriber {
     // setup
     File audio = new File(dir(), "utterance.wav");
     transcriber.setSchema(getSchema());
-    transcriber.getStatusObservers().add(s->System.err.println(s));
     
     Graph transcript = new Graph();
     transcript.setSchema(getSchema());
@@ -125,7 +124,6 @@ public class TestWhisperTranscriber {
     // setup
     File audio = new File(dir(), "wordlist.wav");
     transcriber.setSchema(getSchema());
-    transcriber.getStatusObservers().add(s->System.err.println(s));
     
     Graph transcript = new Graph();
     transcript.setSchema(getSchema());
