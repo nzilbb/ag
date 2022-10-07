@@ -24,6 +24,8 @@ package nzilbb.transcriber.whisper;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -478,8 +480,9 @@ public class WhisperTranscriber extends Transcriber {
       whisper.arg("--compression_ratio_threshold").arg(""+compressionRatioThreshold);
     if (logprobThreshold != null) whisper.arg("--logprob_threshold").arg(""+logprobThreshold);
     if (noSpeechThreshold != null) whisper.arg("--no_speeech_threshold").arg(""+noSpeechThreshold);
-    // output files to same directory as audio
-    whisper.arg("--output_dir").arg(speech.getParentFile().getPath());
+    // output files to temporary directory so they can't overwrite anything important
+    Path dir = Files.createTempDirectory("WhisperTranscriber");
+    whisper.arg("--output_dir").arg(dir.toString());
     // specify audio last
     whisper.arg(speech.getPath());
     setStatus("Running whisper on " + speech.getName() + " ...");
@@ -489,9 +492,11 @@ public class WhisperTranscriber extends Transcriber {
     setPercentComplete(50);
 
     // parse transcript file
-    File txt = new File(speech.getParentFile().getPath(), speech.getName() + ".txt");
+    File txt = new File(dir.toFile(), speech.getName() + ".txt");
     if (txt.exists()) txt.delete();
-    File vtt = new File(speech.getParentFile().getPath(), speech.getName() + ".vtt");
+    File srt = new File(dir.toFile(), speech.getName() + ".srt");
+    if (srt.exists()) srt.delete();
+    File vtt = new File(dir.toFile(), speech.getName() + ".vtt");
     if (vtt.exists()) {
       setStatus("Parsing " + vtt.getName());
       try {
@@ -529,6 +534,7 @@ public class WhisperTranscriber extends Transcriber {
         
       } finally {
         vtt.delete();
+        dir.toFile().delete();
       }
     } else {
       setStatus("VTT transcript not found: " + vtt.getName());
