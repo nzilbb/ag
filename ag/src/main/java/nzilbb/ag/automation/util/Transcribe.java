@@ -42,8 +42,9 @@ import nzilbb.util.Switch;
 import nzilbb.ag.serialize.util.Utility;
 
 /**
- * Base class for collecting together common functionality of Annatotor web app
- * utilities.
+ * Command line utility for manual testing of automatic Transcriber modules.
+ * <p> This can be invoked from the command line something like this:
+ * <br> <tt>java -cp nzilbb.ag.jar nzilbb.ag.automation.util.Transcribe nzilbb.transcriber.whisper.jar speech.wav </tt>
  */
 @ProgramDescription(
    value="Utility for manual testing of automatic Transcriber modules",
