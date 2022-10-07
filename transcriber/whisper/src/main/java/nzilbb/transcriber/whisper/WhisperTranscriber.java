@@ -50,7 +50,6 @@ import nzilbb.util.IO;
  * ASR system to perform speech-to-text.
  * @author Robert Fromont robert@fromont.net.nz
  */
-@UsesFileSystem
 public class WhisperTranscriber extends Transcriber {
 
   File whisperExe;
@@ -512,7 +511,6 @@ public class WhisperTranscriber extends Transcriber {
         Graph[] graphs = deserializer.deserialize();
         setPercentComplete(90);
         Graph graphFromVtt = graphs[0];        
-        setStatus("Parsed: " + vtt.getName());
         graphFromVtt.setId(transcript.getId());
         // if we already had a speaker...
         String participantLayerId = transcript.getSchema().getParticipantLayerId();
