@@ -754,10 +754,6 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
           errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
         }
 
-        // utterance annotations are speaker labels then
-        for (Annotation utterance : graph.all(utteranceLayer.getId())) {
-          utterance.setLabel(utterance.getParent().getLabel());
-        } // next turn
       } // there is a word layer
       graph.commit();
     } catch(IOException exception) {

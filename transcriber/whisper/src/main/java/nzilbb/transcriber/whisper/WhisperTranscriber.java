@@ -432,19 +432,6 @@ public class WhisperTranscriber extends Transcriber {
    * graph. 
    * @param speech An audio file containing the speech to transcribe.
    * @param transcript The annotation graph that should contain the transcription. 
-   * <p> If the transcriber's {@link #getDiarizationRequired()} returns false, the
-   * annotation graph may or may not have any annotations on the
-   * {@link Schema#getTurnLayerId() turn}, {@link Schema#getUtteranceLayerId() utterance}, and
-   * {@link Schema#getWordLayerId() word} layers. If there are existing annotations, they
-   * should be re-used if possible, or {@link Annotation#destroy()} should be called on
-   * each to ensure they're removed from the graph.
-   * <p> If the transcriber's {@link #getDiarizationRequired()} returns true, it should
-   * be assumed that the annotation graph has annotations on the
-   * {@link Schema#getParticipantLayerId() participant}, {@link Schema#getTurnLayerId() turn}, 
-   * and {@link Schema#getUtteranceLayerId() utterance} layers, and that the utterance
-   * annotations define the start and end times of individual speaker utterances for
-   * transcription. In this case, the transcriber should fill in the labels of the given
-   * utterance annotations.
    * @return The given graph. This should have annotations structured as follows:
    *  <ul>
    *   <li> Annotations on the {@link Schema#getParticipantLayerId() participant} layer,
@@ -465,6 +452,7 @@ public class WhisperTranscriber extends Transcriber {
   @Override
   public Graph transcribe(File speech, Graph transcript) throws Exception {
 
+    setPercentComplete(0);
     if (whisperExe == null) throw new Exception("Whisper is not installed.");
     
     // run deepspeech recognizer
@@ -498,6 +486,7 @@ public class WhisperTranscriber extends Transcriber {
     whisper.getStderrObservers().add(err->setStatus(err));
     whisper.run();
     setStatus("Execution of whisper finished.");
+    setPercentComplete(50);
 
     // parse transcript file
     File txt = new File(speech.getParentFile().getPath(), speech.getName() + ".txt");
@@ -516,6 +505,7 @@ public class WhisperTranscriber extends Transcriber {
         deserializer.setParameters(parameters);
         // parse transcript
         Graph[] graphs = deserializer.deserialize();
+        setPercentComplete(90);
         Graph graphFromVtt = graphs[0];        
         setStatus("Parsed: " + vtt.getName());
         graphFromVtt.setId(transcript.getId());
@@ -530,16 +520,12 @@ public class WhisperTranscriber extends Transcriber {
         for (Annotation t : graphFromVtt.all(transcript.getSchema().getTurnLayerId())) {
           t.setLabel(speakerName);
         }
-        if (transcript.getSchema().getWordLayerId() != null) {
-          // ensure utterance labels are correspondingly changed
-          for (Annotation u : graphFromVtt.all(transcript.getSchema().getUtteranceLayerId())) {
-            u.setLabel(speakerName);
-          }
-        }
+        // utterance labels should be the transcript, not the speaker name, so leave them as is
         
         // merge into given transcript
         Merger merger = new Merger(graphFromVtt);
         merger.transform(transcript);
+        setPercentComplete(100);
         
       } finally {
         vtt.delete();

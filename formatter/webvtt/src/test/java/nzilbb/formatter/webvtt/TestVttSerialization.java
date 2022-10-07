@@ -115,8 +115,10 @@ public class TestVttSerialization {
 
     // utterances
     Annotation[] utterances = g.all("utterance");
-    assertEquals("Utterance label is speaker name",
-                 "speaker", utterances[0].getLabel());
+    assertEquals(
+      "Utterance label is transcript",
+      "Before we move to the first question to the First Minister, I invite the First Minister",
+      utterances[0].getLabel());
     assertEquals(Double.valueOf(1.849), utterances[0].getStart().getOffset());
     assertEquals(Double.valueOf(6.43), utterances[0].getEnd().getOffset());
 

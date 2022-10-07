@@ -75,7 +75,8 @@ public class TestWhisperTranscriber {
     File fThisClass = new File(urlThisClass.toURI());
     return fThisClass.getParentFile();
   }
-    
+
+  /** Test transcription of a single short utterance. */
   @Test public void utterance() throws Exception {
 
     // setup
@@ -103,17 +104,59 @@ public class TestWhisperTranscriber {
 
     Annotation[] utterances = transcript.all("utterance");
     assertEquals("One utterance " + Arrays.asList(utterances), 1, utterances.length);
-    assertEquals("Utterance label", "utterance", utterances[0].getLabel());
     assertEquals("Utterance start", Double.valueOf(0.0), utterances[0].getStart().getOffset());
     assertEquals("Utterance end", Double.valueOf(5.6), utterances[0].getEnd().getOffset());
 
     Annotation[] words = transcript.all("word");
     assertTrue("At least word " + Arrays.asList(words), words.length > 0);
     for (Annotation utterance : utterances) {
-      System.out.println("\"" +Arrays.stream(utterance.all("word"))
-                         .map(w->w.getLabel())
-                         .collect(Collectors.joining(" "))
-                         +"\"");
+      System.out.println(
+        transcript.getId() + " ("+utterance.getStart()+"-"+utterance.getEnd()+"): \""
+        +Arrays.stream(utterance.all("word"))
+        .map(w->w.getLabel())
+        .collect(Collectors.joining(" "))
+        +"\"");
+    }
+  }   
+
+  /** Test transcription of a long, multi-utterance recording. */
+  @Test public void wordlist() throws Exception {
+
+    // setup
+    File audio = new File(dir(), "wordlist.wav");
+    transcriber.setSchema(getSchema());
+    transcriber.getStatusObservers().add(s->System.err.println(s));
+    
+    Graph transcript = new Graph();
+    transcript.setSchema(getSchema());
+    transcript.setId(IO.WithoutExtension(audio));
+    transcript.setSchema((Schema)transcriber.getSchema().clone());
+
+    // transcribe the audio
+    transcriber.transcribe(audio, transcript);
+
+    // check the graph
+
+    Annotation[] participants = transcript.all("participant");
+    assertEquals("One participant " + Arrays.asList(participants), 1, participants.length);
+    assertEquals("Participant name", "wordlist", participants[0].getLabel());
+
+    Annotation[] turns = transcript.all("turn");
+    assertEquals("One turn " + Arrays.asList(turns), 1, turns.length);
+    assertEquals("Turn label", "wordlist", turns[0].getLabel());
+
+    Annotation[] utterances = transcript.all("utterance");
+    assertTrue("Multiple utterances " + Arrays.asList(utterances), utterances.length > 1);
+
+    Annotation[] words = transcript.all("word");
+    assertTrue("At least word " + Arrays.asList(words), words.length > 0);
+    for (Annotation utterance : utterances) {
+      System.out.println(
+        transcript.getId() + " ("+utterance.getStart()+"-"+utterance.getEnd()+"): \""
+        +Arrays.stream(utterance.all("word"))
+        .map(w->w.getLabel())
+        .collect(Collectors.joining(" "))
+        +"\"");
     }
   }   
 
