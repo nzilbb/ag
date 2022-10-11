@@ -266,6 +266,11 @@ public class Evaluate extends CommandLineProgram {
       return;
     }
     setTranscriber((Transcriber)annotator);
+    if (verbose) {
+      System.err.println(transcriberJar + " implements "
+                         + transcriber.getAnnotatorId()
+                         + " (" + transcriber.getVersion() + ")");
+    }
       
     // give the transcriber the resources it needs...      
     transcriber.setSchema(
@@ -285,8 +290,12 @@ public class Evaluate extends CommandLineProgram {
         new Layer("orthography", "Orthography").setAlignment(Constants.ALIGNMENT_NONE)
         .setPeers(false).setPeersOverlap(false).setSaturated(true)
         .setParentId("word").setParentIncludes(true)));      
-    // TODO transcriber.getDiarizationRequired()
-
+    if (transcriber.getDiarizationRequired()) {
+      System.err.println(
+        transcriber.getAnnotatorId() + " requires diarization, which is not currently supported.");
+      return;
+    }
+    
     if (verbose) transcriber.getStatusObservers().add(s->System.err.println(s));
 
     File dir = new File(files);
@@ -338,6 +347,7 @@ public class Evaluate extends CommandLineProgram {
       System.err.println("Could not write to \""+csvFile.getPath()+"\": " + x);
       return;
     }
+    final CSVPrinter finalOut = out;
     try {
       try {
         // add CSV headers
@@ -361,21 +371,30 @@ public class Evaluate extends CommandLineProgram {
       }
 
       // transcribe recordings
-      for (File wav : wavs) {
-        File txt = new File(wav.getParentFile(), IO.WithoutExtension(wav) + ".txt");
-        try {
-          out.print(wav.getName());
-          out.flush();
-          double WER = evaluate(wav, txt);
-          out.print(WER);
-          out.println();
-          out.flush();
-        } catch(Exception exception) {
-          System.err.println();
-          System.err.println("Error transcribing " + wav.getName() + ": " + exception);
-          exception.printStackTrace(System.err);
-        }
-      } // next av
+      transcriber.transcribeFragments(Arrays.stream(wavs), transcribed -> { 
+          try {
+            // ensure the schema has everything we expect
+            transcribed.setSchema(transcriber.getSchema());
+            // standarize orthography
+            standardizer.transform(transcribed);
+            File wav = new File(dir, IO.WithoutExtension(transcribed.getId()) + ".wav");
+            File txt = new File(wav.getParentFile(), IO.WithoutExtension(wav) + ".txt");
+            finalOut.print(wav.getName());
+            finalOut.flush();
+            double WER = evaluate(wav, txt, transcribed);
+            finalOut.print(WER);
+            finalOut.println();
+            finalOut.flush();
+          } catch(Exception exception) {
+            System.err.println();
+            System.err.println("Error transcribing " + transcribed.getId() + ": " + exception);
+            exception.printStackTrace(System.err);
+          }
+        });
+    } catch(Exception exception) {
+      System.err.println();
+      System.err.println("Error: " + exception);
+      exception.printStackTrace(System.err);
     } finally {
       try {
         csv.close();
@@ -388,20 +407,12 @@ public class Evaluate extends CommandLineProgram {
    * Evaluate a single audio/reference-transcript pair.
    * @param wav The recording of speech.
    * @param txt The reference transcript.
+   * @param transcribed The new transcript.
    * @return The word error rate (WER) of the pair.
    * @throws Exception
    */
-  public double evaluate(File wav, File txt) throws Exception {
-    
-    Graph transcript = new Graph();
-    transcript.setId(IO.WithoutExtension(wav));
-    transcript.setSchema((Schema)transcriber.getSchema().clone());
-    
-    // transcribe the audio
-    transcriber.transcribe(wav, transcript);
-    // standarize orthography
-    standardizer.transform(transcript);
-    
+  public double evaluate(File wav, File txt, Graph transcribed) throws Exception {
+      
     // load reference transcript
     NamedStream[] streams = { new NamedStream(txt) };
     // use default parameters for loading this file
@@ -424,7 +435,7 @@ public class Evaluate extends CommandLineProgram {
         }));
     List<EditStep<Annotation>> path = mapper.minimumEditPath(
       Arrays.asList(reference.all("orthography")),
-      Arrays.asList(transcript.all("orthography")));
+      Arrays.asList(transcribed.all("orthography")));
     // collapse subsequent delete/create steps into a single change step
     path = mapper.collapse(path);
 

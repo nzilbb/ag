@@ -28,8 +28,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -455,6 +458,9 @@ public class WhisperTranscriber extends Transcriber {
 
     setPercentComplete(0);
     if (whisperExe == null) throw new Exception("Whisper is not installed.");
+
+    // TODO check whether diarization is already done
+    // TODO if so, transcribe each utterance separately
     
     // run deepspeech recognizer
     Execution whisper = new Execution()
@@ -542,4 +548,94 @@ public class WhisperTranscriber extends Transcriber {
     return transcript;
   }
 
+    /**
+   * Transcribes all audio files in the given stream.
+   * <p> Implementors may override this to provide more efficient processing in cases
+   * where overhead can be saved by invoking a recogniser only once for a collection of
+   * recordings, instead of one invocation per recording.
+   * <p> The default implementation simply creates an empty graph and calls
+   * #transcribe(File,Graph) for each speech file.
+   * @param speech A stream of speech files to transcribe.
+   * @param consumer A consumer for receiving the graphs once they're transcribed.
+   * @throws Exception
+   */
+  public void transcribeFragments(Stream<File> speech, Consumer<Graph> consumer)
+    throws Exception {
+
+    setPercentComplete(0);
+    if (whisperExe == null) throw new Exception("Whisper is not installed.");
+    
+    List<File> wavs = speech.collect(Collectors.toList());
+    
+    // run deepspeech recognizer
+    Execution whisper = new Execution()
+      .setExe(whisperExe)
+      .arg("--model").arg(model);
+    if (language != null) {
+      whisper.arg("--language").arg(language);
+    } else if (model.endsWith(".en")) {
+      whisper.arg("--language").arg("en");
+    }
+    if (temperature != null) whisper.arg("--temperature").arg(""+temperature);
+    if (bestOf != null) whisper.arg("--best_of").arg(""+bestOf);
+    if (beamSize != null) whisper.arg("--beam_size").arg(""+beamSize);
+    if (patience != null) whisper.arg("--patience").arg(""+patience);
+    if (lengthPenalty != null) whisper.arg("--length_penalty").arg(""+lengthPenalty);
+    if (suppressTokens != null && suppressTokens.trim().length() > 0)
+      whisper.arg("--suppress_tokens").arg(suppressTokens);
+    if (fp16 != null) whisper.arg("--fp16").arg(""+fp16);
+    if (temperatureIncrementOnFallback != null)
+      whisper.arg("--temperature_increment_on_fallback").arg(""+temperatureIncrementOnFallback);
+    if (compressionRatioThreshold != null)
+      whisper.arg("--compression_ratio_threshold").arg(""+compressionRatioThreshold);
+    if (logprobThreshold != null) whisper.arg("--logprob_threshold").arg(""+logprobThreshold);
+    if (noSpeechThreshold != null) whisper.arg("--no_speeech_threshold").arg(""+noSpeechThreshold);
+    // output files to temporary directory so they can't overwrite anything important
+    Path dir = Files.createTempDirectory("WhisperTranscriber");
+    whisper.arg("--output_dir").arg(dir.toString());
+    // specify audio files last
+    for (File wav : wavs) whisper.arg(wav.getPath());
+    setStatus("Running whisper on " + wavs.size() + " files ...");
+    whisper.getStderrObservers().add(err->setStatus(err));
+    setPercentComplete(1);
+    whisper.run();
+    setStatus("Execution of whisper finished.");
+    setPercentComplete(50);
+    
+    VttSerialization deserializer = new VttSerialization();
+    // default configuration
+    deserializer.configure(new ParameterSet(), getSchema());
+
+    int w = 0;
+    for (File wav : wavs) {      
+      // parse transcript file
+      File txt = new File(dir.toFile(), wav.getName() + ".txt");
+      if (txt.exists()) txt.delete();
+      File srt = new File(dir.toFile(), wav.getName() + ".srt");
+      if (srt.exists()) srt.delete();
+      File vtt = new File(dir.toFile(), wav.getName() + ".vtt");
+      if (vtt.exists()) {
+        setStatus("Parsing " + vtt.getName());
+        try {
+          // load transcript
+          ParameterSet parameters = deserializer.load(
+            Utility.OneNamedStreamArray​(vtt), getSchema());
+          // default parameters
+          deserializer.setParameters(parameters);
+          // parse transcript
+          Graph[] graphs = deserializer.deserialize();
+          setPercentComplete(90);
+          Graph graphFromVtt = graphs[0];        
+          graphFromVtt.setId(wav.getName());
+          consumer.accept(graphFromVtt);
+        } finally {
+          vtt.delete();
+        }
+        setPercentComplete(50 + w * 50 / wavs.size());
+      } else {
+        setStatus("VTT transcript not found: " + vtt.getName());
+      }
+      dir.toFile().delete();
+    } // next wav file
+  }    
 } // end of class WhisperTranscriber

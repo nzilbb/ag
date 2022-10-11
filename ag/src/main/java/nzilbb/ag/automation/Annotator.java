@@ -638,8 +638,8 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    */
   public abstract String[] getOutputLayers() throws InvalidConfigurationException;
   
-  private boolean ignoreSetPercentComplete = false;
-  private Integer percentComplete;
+  protected boolean ignoreSetPercentComplete = false;
+  protected Integer percentComplete;
   /**
    * Setter for {@link #percentComplete}: Progress indicator; set to 100 when processing
    * is complete. 

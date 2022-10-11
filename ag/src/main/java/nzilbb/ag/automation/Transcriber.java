@@ -33,7 +33,11 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashSet;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonObject;
 import nzilbb.ag.*;
@@ -132,6 +136,40 @@ public abstract class Transcriber extends Annotator {
    * @throws Exception
    */
   public abstract Graph transcribe(File speech, Graph transcript) throws Exception;
+  
+  /**
+   * Transcribes all audio files in the given stream.
+   * <p> Implementors may override this to provide more efficient processing in cases
+   * where overhead can be saved by invoking a recogniser only once for a collection of
+   * recordings, instead of one invocation per recording.
+   * <p> The default implementation simply creates an empty graph and calls
+   * #transcribe(File,Graph) for each speech file.
+   * @param speech A stream of speech files to transcribe.
+   * @param consumer A consumer for receiving the graphs once they're transcribed.
+   * @throws Exception
+   */
+  public void transcribeFragments(Stream<File> speech, Consumer<Graph> consumer)
+    throws Exception {
+    List<File> wavs = speech.collect(Collectors.toList());
+    ignoreSetPercentComplete = true; // global progress
+    percentComplete = 0;
+    try {
+      int soFar = 0;
+      for (File wav : wavs) {
+        if (isCancelling()) break;
+        Graph transcript = new Graph();
+        transcript.setId(IO.WithoutExtension(wav));
+        transcript.setSchema((Schema)getSchema().clone());
+        // transcribe the audio
+        consumer.accept(transcribe(wav, transcript));
+        if (isCancelling()) break;
+        percentComplete = (int)((double)(soFar * 100) / (double)wavs.size());
+      } // next transcript
+      percentComplete = 100;
+    } finally {
+      ignoreSetPercentComplete = false;
+    }
+  } // end of transcribeFragments()
   
   /**
    * Normally, a transcriber has no specific task configuration, so this implementation
