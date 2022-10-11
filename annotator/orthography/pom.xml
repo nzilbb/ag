@@ -4,13 +4,13 @@
   <parent>
     <groupId>nzilbb</groupId>
     <artifactId>nzilbb.annotator</artifactId>
-    <version>[1.0.0,)</version>
+    <version>1.0.0</version>
   </parent>
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.orthography</artifactId>
   <name>nzilbb.annotator.orthography</name>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
 
   <properties>
     <package.path>nzilbb/annotator/orthography/</package.path>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.0.4,)</version>
+      <version>[1.0.7,)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -52,6 +52,7 @@
               <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
             </manifestEntries>
           </archive>
+          <outputDirectory>../../bin</outputDirectory>
         </configuration>
       </plugin>
     </plugins>
