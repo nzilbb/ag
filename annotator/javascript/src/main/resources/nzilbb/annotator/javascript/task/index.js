@@ -11,7 +11,8 @@ var editor = CodeMirror.fromTextArea(document.getElementById("script"), { lineNu
 editor.setSize(800, 600); // TODO can this be dynamic?
 
 // default new layer name
-document.getElementById("newLayerId").value = window.location.search.substring(1);
+var taskId = window.location.search.substring(1);
+document.getElementById("newLayerId").value = taskId;
 
 // first, get the layer schema
 var schema = null;
@@ -24,8 +25,12 @@ getSchema(s => {
     sourceLayerId.value = schema.wordLayerId;
 
     var destinationLayerId = document.getElementById("destinationLayerId");
-    destinationLayerId.selectedIndex = 0;
-
+    if (taskId) {
+        destinationLayerId.value = taskId;
+    } else {
+        destinationLayerId.selectedIndex = 0;
+    }
+    
     // populate the language layers...
     
     var transcriptLanguageLayerId = document.getElementById("transcriptLanguageLayerId");
@@ -64,6 +69,18 @@ getSchema(s => {
 		          +"    log(\"Tagged word \" + word.label + \" with \" + tag.label);\n"
 		          +"  } // next word\n"
 		          +"} // next turn");
+                changeSourceLayer();
+                if (taskId) {
+                    // if there's no option for that layer, add one
+                    if (destinationLayerId.value != taskId) {
+                        var layerOption = document.createElement("option");
+                        layerOption.appendChild(
+                            document.createTextNode(taskId));
+                        destinationLayerId.appendChild(layerOption);
+                        destinationLayerId.value = taskId;
+                    }
+                    destinationLayerId.value = taskId;
+                }
             } else {
                 
                 // set initial values of properties in the form
