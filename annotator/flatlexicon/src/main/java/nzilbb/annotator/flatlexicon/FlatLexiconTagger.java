@@ -655,7 +655,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @see #getCaseSensitive()
    * @see #setCaseSensitive(Boolean)
    */
-  protected Boolean caseSensitive;
+  protected Boolean caseSensitive = Boolean.FALSE;
   /**
    * Getter for {@link #caseSensitive}: Whether dictionary lookups are case sensitive or
    * not. By default, lookups are case-insensitive. 
@@ -1119,7 +1119,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
      throws DictionaryException {
      try {
        return new FlatLexicon(this, newConnection(), sqlx, lexicon, keyField, valueField)
-         .setCaseSensitive(caseSensitive);
+         .setCaseSensitive(caseSensitive == null?Boolean.FALSE:caseSensitive);
      } catch(SQLException sqlX) {
        throw new DictionaryException(null, sqlX);
      }
