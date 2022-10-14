@@ -40,6 +40,12 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>nzilbb</groupId>
+      <artifactId>nzilbb.labbcat</artifactId>
+      <version>[1.0.0,)</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-csv</artifactId>
       <version>1.8</version>
@@ -95,6 +101,12 @@
                   <groupId>nzilbb</groupId>
                   <artifactId>nzilbb.ag</artifactId>
                   <version>1.0.7</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>nzilbb</groupId>
+                  <artifactId>nzilbb.labbcat</artifactId>
+                  <version>1.0.0</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

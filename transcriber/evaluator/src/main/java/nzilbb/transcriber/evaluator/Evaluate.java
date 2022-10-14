@@ -26,7 +26,9 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import nzilbb.ag.Annotation;
@@ -43,7 +45,9 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.annotator.orthography.OrthographyStandardizer;
 import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.*;
+import nzilbb.editpath.MinimumEditPathString;
 import nzilbb.formatter.text.PlainTextSerialization;
+import nzilbb.labbcat.LabbcatView;
 import nzilbb.util.CommandLineProgram;
 import nzilbb.util.IO;
 import nzilbb.util.ProgramDescription;
@@ -58,7 +62,7 @@ import org.apache.commons.csv.CSVPrinter;
  * <br> <tt>java -jar nzilbb.transcriber.evaluate.jar nzilbb.transcriber.whisper.jar /path/to/recordings/and/transcripts </tt>
  */
 @ProgramDescription(value="Utility for automated evaluation of automatic Transcriber modules",
-                    arguments="nzilbb.transcriber.mytranscriber.jar /path/to/wav/and/txt/files")
+                    arguments="nzilbb.transcriber.mytranscriber.jar [/path/to/wav/and/txt/files]")
 public class Evaluate extends CommandLineProgram {
    
   public static void main(String argv[]) {
@@ -85,7 +89,111 @@ public class Evaluate extends CommandLineProgram {
    */
   @Switch("Whether to print debug tracing")
   public Evaluate setVerbose(boolean newVerbose) { verbose = newVerbose; return this; }   
+  
+  /**
+   * URL to LaBB-CAT instance from which transcripts/audio should be downloaded.
+   * @see #getLabbcat()
+   * @see #setLabbcat(String)
+   */
+  protected String labbcat;
+  /**
+   * Getter for {@link #labbcat}: URL to LaBB-CAT instance from which transcripts/audio
+   * should be downloaded. 
+   * @return URL to LaBB-CAT instance from which transcripts/audio should be downloaded.
+   */
+  public String getLabbcat() { return labbcat; }
+  /**
+   * Setter for {@link #labbcat}: URL to LaBB-CAT instance from which transcripts/audio
+   * should be downloaded. 
+   * @param newLabbcat URL to LaBB-CAT instance from which transcripts/audio should be downloaded.
+   */
+  @Switch("URL to LaBB-CAT instance to download data from")
+  public Evaluate setLabbcat(String newLabbcat) { labbcat = newLabbcat; return this; }
 
+  /**
+   * LaBB-CAT username.
+   * @see #getUsername()
+   * @see #setUsername(String)
+   * @see #getLabbcat()
+   */
+  protected String username;
+  /**
+   * Getter for {@link #username}: LaBB-CAT username.
+   * @return LaBB-CAT username.
+   */
+  public String getUsername() { return username; }
+  /**
+   * Setter for {@link #username}: LaBB-CAT username.
+   * @param newUsername LaBB-CAT username.
+   */
+  @Switch("LaBB-CAT username")
+  public Evaluate setUsername(String newUsername) { username = newUsername; return this; }
+  
+  /**
+   * LaBB-CAT password.
+   * @see #getPassword()
+   * @see #setPassword(String)
+   * @see #getLabbcat()
+   */
+  protected String password;
+  /**
+   * Getter for {@link #password}: LaBB-CAT password.
+   * @return LaBB-CAT password.
+   */
+  public String getPassword() { return password; }
+  /**
+   * Setter for {@link #password}: LaBB-CAT password.
+   * @param newPassword LaBB-CAT password.
+   */
+  @Switch("LaBB-CAT password")
+  public Evaluate setPassword(String newPassword) { password = newPassword; return this; }
+  
+  /**
+   * Expression identifying LaBB-CAT transcripts to download.
+   * e.g. "first('corpus').label = 'CC'"
+   * @see #getTranscripts()
+   * @see #setTranscripts(String)
+   * @see #getLabbcat()
+   * @see https://nzilbb.github.io/labbcat-java/apidocs/nzilbb/labbcat/LabbcatView.html#getMatchingTranscriptIds(java.lang.String,java.lang.Integer,java.lang.Integer,java.lang.String)
+   */
+  protected String transcripts;
+  /**
+   * Getter for {@link #transcripts}: Expression identifying LaBB-CAT transcripts to download.
+   * @return Expression identifying LaBB-CAT transcripts to download.
+   */
+  public String getTranscripts() { return transcripts; }
+  /**
+   * Setter for {@link #transcripts}: Expression identifying LaBB-CAT transcripts to download.
+   * e.g. "first('corpus').label = 'CC'"
+   * @param newTranscripts Expression identifying LaBB-CAT transcripts to download.
+   */
+  @Switch("LaBB-CAT transcripts to download, e.g. first('corpus').label = 'CC'")
+  public Evaluate setTranscripts(String newTranscripts) { transcripts = newTranscripts; return this; }
+
+  /**
+   * How many transcripts to download from LaBB-CAT at once. 0 means download all at
+   * once. Default is 10.
+   * <p> When downloading from LaBB-CAT, transcripts are processed in batches to moderate
+   * computing resources such as storage, and ensure that if the process is interrupted by
+   * networking issues, at least partial results will be available.
+   * @see #getBatchSize()
+   * @see #setBatchSize(int)
+   */
+  protected int batchSize = 10;
+  /**
+   * Getter for {@link # batchSize}: How many transcripts to download from LaBB-CAT at
+   * once. 0 means download all at once.
+   * @return How many transcripts to download from LaBB-CAT at once.
+   */
+   public int getBatchSize() { return batchSize; }
+   /**
+    * Setter for {@link # batchSize}: How many transcripts to download from LaBB-CAT at once.
+    * @param new batchSize How many transcripts to download from LaBB-CAT at once. 0 means
+    * download all at once.
+    */
+  @Switch("How many transcripts to download from LaBB-CAT at once. 0 = all at once, default is 10.")
+   public Evaluate setBatchSize(int newBatchSize) { batchSize = newBatchSize; return this; }
+  
   /**
    * Parameter string for configuring OrthographyStandardizer.
    * @see #getOrthographyParameters()
@@ -245,13 +353,12 @@ public class Evaluate extends CommandLineProgram {
       System.err.println("No transcriber .jar file specified.");
       return;
     }
-    if (arguments.size() == 1) {
-      System.err.println("No directory for wav/txt files specified.");
+    if (arguments.size() == 1 && labbcat == null) {
+      System.err.println("No directory for wav/txt files specified, nor LaBB-CAT URL.");
       return;
     }
     setTranscriberJar(arguments.elementAt(0));
-    setFiles(arguments.elementAt(1));
-    
+
     // is the name a jar file name or a class name
     try { // try as a jar file
       descriptor = new AnnotatorDescriptor(new File(transcriberJar));
@@ -298,6 +405,29 @@ public class Evaluate extends CommandLineProgram {
     
     if (verbose) transcriber.getStatusObservers().add(s->System.err.println(s));
 
+    // standardize orthography
+    setStandardizer(new OrthographyStandardizer());
+    standardizer.setSchema(transcriber.getSchema());
+    try {
+      standardizer.setTaskParameters(orthographyParameters);
+    } catch(InvalidConfigurationException x) {
+      System.err.println("Invalid orthography parameters \""+orthographyParameters+"\": " + x);
+      return;
+    }    
+    
+    if (arguments.size() >= 2) {
+      setFiles(arguments.elementAt(1));
+      evaluateFromFileSystem();
+    } else {
+      evaluateFromLabbcat();
+    }
+  }
+  
+  /**
+   * Evaluate transcription of recordings in the local directory specified by {@link #files}.
+   */
+  protected void evaluateFromFileSystem() {
+    
     File dir = new File(files);
     if (!dir.exists()) {
       System.err.println("Input files directory doesn't exist: " + files);
@@ -319,23 +449,13 @@ public class Evaluate extends CommandLineProgram {
       return;
     }
 
-    // standardize orthography
-    setStandardizer(new OrthographyStandardizer());
-    standardizer.setSchema(transcriber.getSchema());
-    try {
-      standardizer.setTaskParameters(orthographyParameters);
-    } catch(InvalidConfigurationException x) {
-      System.err.println("Invalid orthography parameters \""+orthographyParameters+"\": " + x);
-      return;
-    }
-    
     // serializer for parsing reference transcripts
     setDeserializer(new PlainTextSerialization());
     ParameterSet configuration = serializer.configure(
       new ParameterSet(), transcriber.getSchema());
 
     CSVPrinter out = null; // stdout will be tab-separated values too
-    File csvFile = new File(dir, "paths.tsv");
+    File csvFile = new File(dir, "paths-"+transcriber.getAnnotatorId()+".tsv");
     try {
       setCsv(new CSVPrinter(
                new OutputStreamWriter(new FileOutputStream(csvFile), "UTF-8"),
@@ -363,6 +483,7 @@ public class Evaluate extends CommandLineProgram {
         csv.println();
 
         out.print("wav");
+        out.print("wordCount");
         out.print("WER");
         out.println();
       } catch (Exception x) {
@@ -370,7 +491,7 @@ public class Evaluate extends CommandLineProgram {
         return;
       }
 
-      // transcribe recordings
+      // transcribe recordings batch
       transcriber.transcribeFragments(Arrays.stream(wavs), transcribed -> { 
           try {
             // ensure the schema has everything we expect
@@ -381,7 +502,18 @@ public class Evaluate extends CommandLineProgram {
             File txt = new File(wav.getParentFile(), IO.WithoutExtension(wav) + ".txt");
             finalOut.print(wav.getName());
             finalOut.flush();
-            double WER = evaluate(wav, txt, transcribed);
+
+            // load reference transcript
+            NamedStream[] streams = { new NamedStream(txt) };
+            // use default parameters for loading this file
+            serializer.setParameters(
+              serializer.load(streams, transcriber.getSchema()));
+            // deserialize
+            Graph[] graphs = serializer.deserialize();
+            Graph reference = graphs[0];
+            finalOut.print(reference.all("word").length);
+            
+            double WER = evaluate(wav, reference, transcribed);
             finalOut.print(WER);
             finalOut.println();
             finalOut.flush();
@@ -401,8 +533,158 @@ public class Evaluate extends CommandLineProgram {
       } catch (Exception x) {
       }
     }
-  } // end of start()
+  } // end of evaluateFromFileSystem()
   
+  /**
+   * Evaluate transcription of recordings in the remote corpus specified by {@link #labbcat}.
+   */
+  public void evaluateFromLabbcat() {
+    if (transcripts == null) {
+      System.err.println("No 'transcripts' matching expression specified.");
+      System.err.println("You must specify an expression to match transcripts from LaBB-CAT");
+      System.err.println("e.g. \"transcripts=first('corpus').label = 'CC'\"");
+      System.err.println("e.g. \"transcripts=labels('participant').includes('mop03-2b')\"");
+      System.err.println("For more information, see:");
+      System.err.println("https://nzilbb.github.io/labbcat-java/apidocs/nzilbb/labbcat/LabbcatView.html#getMatchingTranscriptIds(java.lang.String,java.lang.Integer,java.lang.Integer,java.lang.String)");
+      return;
+    }
+    CSVPrinter out = null; // stdout will be tab-separated values too
+    File csvFile = new File(
+      "paths-"
+      +labbcat.replaceFirst("https?://","").replaceAll("\\W+","-")+"-"
+      +transcriber.getAnnotatorId()+".tsv");
+    try {
+      setCsv(new CSVPrinter(
+               new OutputStreamWriter(new FileOutputStream(csvFile), "UTF-8"),
+               CSVFormat.EXCEL.withDelimiter('\t')));
+      out = new CSVPrinter(
+        new OutputStreamWriter(System.out, "UTF-8"),
+        CSVFormat.EXCEL.withDelimiter('\t'));
+    } catch (Exception x) {
+      System.err.println("Could not write to \""+csvFile.getPath()+"\": " + x);
+      return;
+    }
+    final CSVPrinter finalOut = out;
+    File dir = null;
+    try {
+      try {
+        // add CSV headers
+        csv.print("step");
+        csv.print("txt");
+        csv.print("rawReference");
+        csv.print("reference");
+        csv.print("wav");
+        csv.print("rawWord");
+        csv.print("word");
+        csv.print("operation");
+        csv.print("distance");
+        csv.println();
+        csv.flush();
+
+        out.print("wav");
+        out.print("wordCount");
+        out.print("WER");
+        out.println();
+        out.flush();
+      } catch (Exception x) {
+        System.err.println("Could not write headers to \""+csvFile.getPath()+"\": " + x);
+        return;
+      }
+
+      dir = Files.createTempDirectory("Evaluate").toFile();
+      if (verbose) System.err.println("Downloading media to: " + dir.getPath());
+      String[] layers = { "utterance", "word" };
+
+      // connect to LaBB-CAT
+      LabbcatView corpus = new LabbcatView(labbcat, username, password);
+      int transcriptCount = corpus.countMatchingTranscriptIds​(transcripts);
+      if (verbose) System.err.println("Transcript count: " + transcriptCount);
+      // get a list of transcript IDs
+      Integer pageLength = null;
+      int pageNumber = 0;
+      if (batchSize > 0) pageLength = batchSize;
+      String[] ids = corpus.getMatchingTranscriptIds​(transcripts, pageLength, pageNumber, null);
+      int soFar = 0;
+      while (ids.length > 0) { // for all the pages of results
+        if (verbose) System.err.println("Batch " + pageNumber + "...");
+
+        final HashMap<String,File> idToWav = new HashMap<String,File>();
+        final HashMap<String,Graph> idToReference = new HashMap<String,Graph>();
+
+        try {
+          // for each transcript
+          for (String id : ids) {
+            try {
+              
+              // get speech recording
+              File wav = corpus.getMediaFile​(id, "", "audio/wav", dir);
+              if (!wav.exists()) {
+                System.err.println("No recording for " + id);
+                continue;
+              }
+              wav.deleteOnExit();
+              
+              // get reference transcript
+              Graph reference = corpus.getTranscript(id, layers);
+              if (verbose) System.err.println(reference.getId() + "\t" + wav.getName());
+              
+              idToWav.put(IO.WithoutExtension(wav), wav);
+              idToReference.put(IO.WithoutExtension(wav), reference);
+            } catch(Exception exception) {
+              System.err.println();
+              System.err.println("Error transcribing " + id + ": " + exception);
+              exception.printStackTrace(System.err);
+            }
+          } // next id
+          
+          // transcribe recordings batch
+          transcriber.transcribeFragments(idToWav.values().stream(), transcribed -> { 
+              try {
+                // ensure the schema has everything we expect
+                transcribed.setSchema(transcriber.getSchema());
+                // standarize orthography
+                standardizer.transform(transcribed);
+                
+                File wav = idToWav.get(IO.WithoutExtension(transcribed.getId()));
+                finalOut.print(wav.getName());
+                Graph reference = idToReference.get(IO.WithoutExtension(transcribed.getId()));
+                finalOut.print(reference.all("word").length);
+                
+                // compare reference with transcription
+                double WER = evaluate(wav, reference, transcribed);
+                finalOut.print(WER);
+                finalOut.println();
+                finalOut.flush();
+              } catch(Exception exception) {
+                System.err.println();
+                System.err.println("Error transcribing " + transcribed.getId() + ": " + exception);
+                exception.printStackTrace(System.err);
+              }
+            }); 
+          soFar += ids.length;
+          if (verbose) System.err.println("Transcribed " + soFar + " of " + transcriptCount);
+        } finally {
+          // delete downloaded files
+          for (File wav : idToWav.values()) wav.delete();
+        }
+        
+        // fetch next page
+        ids = corpus.getMatchingTranscriptIds​(transcripts, pageLength, ++pageNumber, null);
+      } // next page
+      
+    } catch (Exception x) {
+      System.err.println();
+      System.err.println("Error: " + x);
+      x.printStackTrace(System.err);
+    } finally {
+      if (dir != null) dir.delete();
+      try {
+        csv.close();
+      } catch (Exception x) {
+      }
+    }
+  } // end of evaluateFromLabbcat()
+
   /**
    * Evaluate a single audio/reference-transcript pair.
    * @param wav The recording of speech.
@@ -411,28 +693,34 @@ public class Evaluate extends CommandLineProgram {
    * @return The word error rate (WER) of the pair.
    * @throws Exception
    */
-  public double evaluate(File wav, File txt, Graph transcribed) throws Exception {
+  public double evaluate(File wav, Graph reference, Graph transcribed) throws Exception {
       
-    // load reference transcript
-    NamedStream[] streams = { new NamedStream(txt) };
-    // use default parameters for loading this file
-    serializer.setParameters(
-      serializer.load(streams, transcriber.getSchema()));
-    // deserialize
-    Graph[] graphs = serializer.deserialize();
-    Graph reference = graphs[0];
-    // ensure orthorgraphy layer is present
-    reference.setSchema((Schema)transcriber.getSchema().clone());
+    // ensure orthography layer is present
+    reference.getSchema().addLayer(
+      (Layer)transcriber.getSchema().getLayer("orthography").clone());
     // standarize orthography
     standardizer.transform(reference);
-
+    
     // get minimum edit path
     MinimumEditPath<Annotation> mapper = new MinimumEditPath<Annotation>(
-      new DefaultEditComparator<Annotation>(new EqualsComparator<Annotation>() {
-          public int compare(Annotation a1, Annotation a2) {
-            return a1.getLabel().compareTo(a2.getLabel());
+      new DefaultEditComparator<Annotation>(100) {
+        // compare each label using minimum edit path, using character error rate as
+        // distance, to ensure similar labels are more likely to be matched than
+        // dissimilar labels        
+        public EditStep<Annotation> compare​(Annotation from, Annotation to) {
+          MinimumEditPathString pathFinder = new MinimumEditPathString();
+          List<EditStep<Character>> path = pathFinder.minimumEditPath(
+            from.getLabel(), to.getLabel());          
+          EditStep<Annotation> step = new EditStep<Annotation>(
+            from, to,
+            // distance is an integer, so multiply by 100 to get better granularity than 0/1
+            (int)(pathFinder.errorRate(path) * 100),
+            EditStep.StepOperation.NONE);
+          if (step.getStepDistance() > 0) {
+            step.setOperation(EditStep.StepOperation.CHANGE);
           }
-        }));
+          return step;
+        }});
     List<EditStep<Annotation>> path = mapper.minimumEditPath(
       Arrays.asList(reference.all("orthography")),
       Arrays.asList(transcribed.all("orthography")));
@@ -440,12 +728,12 @@ public class Evaluate extends CommandLineProgram {
     path = mapper.collapse(path);
 
     if (verbose) { // output edit path
-      System.err.println("\t"+txt.getName() + "\t\t" + wav.getName());
+      System.err.println("\t"+reference.getId() + "\t\t" + wav.getName());
       System.err.println(path.stream().map(s->s.toString()).collect(Collectors.joining("\n")));
     }
 
     // write the path to the csv file
-    int i = 1;
+    int i = 0;
     // for calculating WER:
     int C = 0; // number of correct words
     int S = 0; // number of substitutions
@@ -453,7 +741,7 @@ public class Evaluate extends CommandLineProgram {
     int I = 0; // number of insertions
     for (EditStep<Annotation> step : path) {
       csv.print(""+(++i));
-      csv.print(txt.getName());
+      csv.print(reference.getId());
       if (step.getFrom() == null) {
         csv.print("");
         csv.print("");
@@ -470,7 +758,7 @@ public class Evaluate extends CommandLineProgram {
         csv.print(step.getTo().getLabel());
       }
       csv.print(operation(step.getOperation()));
-      csv.print(step.getStepDistance());
+      csv.print(step.getStepDistance()/100); // was multiplied by 100, so divide for normal ER 
       csv.println();
       switch(step.getOperation()) {
         case CHANGE: S++; break;

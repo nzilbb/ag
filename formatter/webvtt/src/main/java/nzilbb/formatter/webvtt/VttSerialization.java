@@ -765,7 +765,9 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     // set end anchors of graph tags
     for (Annotation a : graph.all(getParticipantLayer().getId())) {
       a.setStartId(graphStart.getId());
-      a.setEndId(currentUtterance.getEnd().getId());
+      if (currentUtterance != null && currentUtterance.getEnd() != null) {
+        a.setEndId(currentUtterance.getEnd().getId());
+      }
     }
     graph.commit();
 

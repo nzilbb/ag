@@ -595,7 +595,7 @@ public class WhisperTranscriber extends Transcriber {
     whisper.arg("--output_dir").arg(dir.toString());
     // specify audio files last
     for (File wav : wavs) whisper.arg(wav.getPath());
-    setStatus("Running whisper on " + wavs.size() + " files ...");
+    setStatus("Running whisper on " + wavs.size() + " file"+(wavs.size()==1?"":"s")+" ...");
     whisper.getStderrObservers().add(err->setStatus(err));
     setPercentComplete(1);
     whisper.run();

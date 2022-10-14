@@ -270,5 +270,35 @@ public class MinimumEditPath<T> {
     }
     return path;
   } // end of Collapse()
+  
+  /**
+   * Return the error rate for the given path.
+   * <p> Error rate = (S+D+I)/(S+D+C)
+   * <br> Where:
+   * <ul>
+   *  <li> C = number of correct elements </li>
+   *  <li> S = number of substitutions </li>
+   *  <li> D = number of deletions </li>
+   *  <li> I = number of insertions </li>
+   * </ul>
+   * @param path
+   * @return The error rate.
+   */
+  public double errorRate(List<EditStep<T>> path) {
+    int C = 0; // number of correct elements
+    int S = 0; // number of substitutions
+    int D = 0; // number of deletions 
+    int I = 0; // number of insertions
+    for (EditStep<T> step : path) {
+      switch(step.getOperation()) {
+        case CHANGE: S++; break;
+        case DELETE: D++; break;
+        case INSERT: I++; break;
+        default: C++; break;
+      }
+    }
+    // return error rate
+    return ((double)(S+D+I))/((double)(S+D+C));
+  } // end of errorRate()
    
 } // end of class MinimumEditPath
