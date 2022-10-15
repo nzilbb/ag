@@ -475,10 +475,10 @@ public class Evaluate extends CommandLineProgram {
         csv.print("txt");
         csv.print("rawReference");
         csv.print("reference");
-        csv.print("wav");
-        csv.print("rawWord");
-        csv.print("word");
         csv.print("operation");
+        csv.print("word");
+        csv.print("rawWord");
+        csv.print("wav");
         csv.print("distance");
         csv.println();
 
@@ -573,10 +573,10 @@ public class Evaluate extends CommandLineProgram {
         csv.print("txt");
         csv.print("rawReference");
         csv.print("reference");
-        csv.print("wav");
-        csv.print("rawWord");
-        csv.print("word");
         csv.print("operation");
+        csv.print("word");
+        csv.print("rawWord");
+        csv.print("wav");
         csv.print("distance");
         csv.println();
         csv.flush();
@@ -724,8 +724,6 @@ public class Evaluate extends CommandLineProgram {
     List<EditStep<Annotation>> path = mapper.minimumEditPath(
       Arrays.asList(reference.all("orthography")),
       Arrays.asList(transcribed.all("orthography")));
-    // collapse subsequent delete/create steps into a single change step
-    path = mapper.collapse(path);
 
     if (verbose) { // output edit path
       System.err.println("\t"+reference.getId() + "\t\t" + wav.getName());
@@ -749,16 +747,16 @@ public class Evaluate extends CommandLineProgram {
         csv.print(step.getFrom().getParent().getLabel());
         csv.print(step.getFrom().getLabel());
       }
-      csv.print(wav.getName());
+      csv.print(operation(step.getOperation()));
       if (step.getTo() == null) {
         csv.print("");
         csv.print("");
       } else {
-        csv.print(step.getTo().getParent().getLabel());
         csv.print(step.getTo().getLabel());
+        csv.print(step.getTo().getParent().getLabel());
       }
-      csv.print(operation(step.getOperation()));
-      csv.print(step.getStepDistance()/100); // was multiplied by 100, so divide for normal ER 
+      csv.print(wav.getName());
+      csv.print(step.getStepDistance()/100.0); // was * by 100, so / for normalish distance
       csv.println();
       switch(step.getOperation()) {
         case CHANGE: S++; break;
@@ -767,6 +765,7 @@ public class Evaluate extends CommandLineProgram {
         default: C++; break;
       }
     }
+    csv.flush();
 
     // return word error rate
     return ((double)(S+D+I))/((double)(S+D+C));
@@ -780,9 +779,9 @@ public class Evaluate extends CommandLineProgram {
   protected String operation(EditStep.StepOperation operation) {
     switch(operation) {
       case DELETE: return "-";
-      case CHANGE: return "!";
+      case CHANGE: return "~";
       case INSERT: return "+";
-      default: return " ";
+      default: return "";
     }
   } // end of operation()
 

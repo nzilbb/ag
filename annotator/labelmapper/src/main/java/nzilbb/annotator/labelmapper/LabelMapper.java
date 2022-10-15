@@ -1094,9 +1094,9 @@ public class LabelMapper extends Annotator {
   protected String operation(EditStep.StepOperation operation) {
     switch(operation) {
       case DELETE: return "-";
-      case CHANGE: return "!";
+      case CHANGE: return "~";
       case INSERT: return "+";
-      default: return " ";
+      default: return "";
     }
   } // end of operation()
   
