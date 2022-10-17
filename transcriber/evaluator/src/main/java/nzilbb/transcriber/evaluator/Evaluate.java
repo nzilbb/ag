@@ -57,9 +57,26 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 /**
- * Command line utility for automated evaluation of automatic Transcriber modules.
+ * A command line utility for automated evaluation of automatic Transcriber modules.
  * <p> This can be invoked from the command line something like this:
- * <br> <tt>java -jar nzilbb.transcriber.evaluate.jar nzilbb.transcriber.whisper.jar /path/to/recordings/and/transcripts </tt>
+ * <br> <tt>java -jar nzilbb.transcriber.evaluate.jar nzilbb.transcriber.whisper.jar
+ * /path/to/recordings/and/transcripts </tt>
+ * <p>It can also compare automatic transcripts of transcribed recordings stored in a
+ * LaBB-CAT instance, like this: 
+ * <br> <tt> java -jar nzilbb.transcriber.evaluate.jar  nzilbb.transcriber.whisper.jar
+ * --Labbcat=https://labbcat.canterbury.ac.nz/demo/
+ * --transcripts=first('corpus').label == 'UC'</tt> 
+ * <p> Either way, the utility produces two tab-separated outputs:
+ * <ul>
+ *  <li> To std out, a list of recordings with a word count and Word Error Rate (WER)</li>
+ *  <li> To a `path....tsv` file, minimum edit paths for all words, including:
+ *  <ul>
+ *   <li> the word from the reference transcript </li>
+ *   <li> the word from the automatic transcriber </li>
+ *   <li> what the step does (insert +, delete -, change ~, or no change) </li>
+ *   <li> the edit distance represented by the step</li>
+ *  </ul></li>    
+ * </ul>
  */
 @ProgramDescription(value="Utility for automated evaluation of automatic Transcriber modules",
                     arguments="nzilbb.transcriber.mytranscriber.jar [/path/to/wav/and/txt/files]")
@@ -703,19 +720,16 @@ public class Evaluate extends CommandLineProgram {
     
     // get minimum edit path
     MinimumEditPath<Annotation> mapper = new MinimumEditPath<Annotation>(
-      new DefaultEditComparator<Annotation>(100) {
+      new DefaultEditComparator<Annotation>() {
         // compare each label using minimum edit path, using character error rate as
         // distance, to ensure similar labels are more likely to be matched than
         // dissimilar labels        
+        MinimumEditPathString pathFinder = new MinimumEditPathString();
         public EditStep<Annotation> compare​(Annotation from, Annotation to) {
-          MinimumEditPathString pathFinder = new MinimumEditPathString();
           List<EditStep<Character>> path = pathFinder.minimumEditPath(
             from.getLabel(), to.getLabel());          
           EditStep<Annotation> step = new EditStep<Annotation>(
-            from, to,
-            // distance is an integer, so multiply by 100 to get better granularity than 0/1
-            (int)(pathFinder.errorRate(path) * 100),
-            EditStep.StepOperation.NONE);
+            from, to, pathFinder.errorRate(path), EditStep.StepOperation.NONE);
           if (step.getStepDistance() > 0) {
             step.setOperation(EditStep.StepOperation.CHANGE);
           }
@@ -756,7 +770,7 @@ public class Evaluate extends CommandLineProgram {
         csv.print(step.getTo().getParent().getLabel());
       }
       csv.print(wav.getName());
-      csv.print(step.getStepDistance()/100.0); // was * by 100, so / for normalish distance
+      csv.print(step.getStepDistance());
       csv.println();
       switch(step.getOperation()) {
         case CHANGE: S++; break;
