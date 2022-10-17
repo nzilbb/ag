@@ -214,7 +214,7 @@ public class MinimumEditPath<T> {
    * @param to The destination (final) sequence.
    * @return The minimum edit distance between the two sequences.
    */
-  public int minimumEditDistance(List<T> from, List<T> to) {
+  public double minimumEditDistance(List<T> from, List<T> to) {
     List<EditStep<T>> path = minimumEditPath(from, to);
     return path.get(path.size() - 1).totalDistance();
   } // end of minimumDistance()

@@ -358,7 +358,7 @@ public class LabelMapper extends Annotator {
             +" COMMENT 'End offset of the target annotation',"
             +" operation CHAR(1) NOT NULL"
             +" COMMENT 'The edit operation: + for insert, - for delete, ! for change, = for no change',"
-            +" distance INTEGER NOT NULL"
+            +" distance DOUBLE NOT NULL"
             +" COMMENT 'Distance (cost) for this edit step',"
             +" hierarchy VARCHAR(6)"
             +" COMMENT 'This mappings position in the sub-mapping hierarchy: parent, child, or none',"
@@ -832,7 +832,7 @@ public class LabelMapper extends Annotator {
                   insertEditStep.setDouble(16, to.getStart().getOffset()); // targetStart
                   insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
                   insertEditStep.setString(18, operation(step.getOperation())); // operation
-                  insertEditStep.setInt(19, step.getStepDistance()); // distance
+                  insertEditStep.setDouble(19, step.getStepDistance()); // distance
                   insertEditStep.setString(20, hierarchy); // hierarchy
                   insertEditStep.setDouble(21, OverlapRate(from, to)); // overlapRate
                   insertEditStep.executeUpdate();
@@ -876,7 +876,7 @@ public class LabelMapper extends Annotator {
                   insertEditStep.setNull(16, Types.DOUBLE); // targetStart
                   insertEditStep.setNull(17, Types.DOUBLE); // targetEnd
                   insertEditStep.setString(18, operation(step.getOperation())); // operation
-                  insertEditStep.setInt(19, step.getStepDistance()); // distance
+                  insertEditStep.setDouble(19, step.getStepDistance()); // distance
                   insertEditStep.setNull(20, Types.VARCHAR); // hierarchy
                   insertEditStep.setNull(21, Types.DOUBLE); // overlapRate
                   insertEditStep.executeUpdate();
@@ -905,7 +905,7 @@ public class LabelMapper extends Annotator {
                   insertEditStep.setDouble(16, to.getStart().getOffset()); // targetStart
                   insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
                   insertEditStep.setString(18, operation(step.getOperation())); // operation
-                  insertEditStep.setInt(19, step.getStepDistance()); // distance
+                  insertEditStep.setDouble(19, step.getStepDistance()); // distance
                   insertEditStep.setNull(20, Types.VARCHAR); // hierarchy
                   insertEditStep.setNull(21, Types.DOUBLE); // overlapRate
                   insertEditStep.executeUpdate();
@@ -1012,7 +1012,7 @@ public class LabelMapper extends Annotator {
               insertEditStep.setDouble(16, to.getStart().getOffset()); // targetStart
               insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
               insertEditStep.setString(18, operation(step.getOperation())); // operation
-              insertEditStep.setInt(19, step.getStepDistance()); // distance
+              insertEditStep.setDouble(19, step.getStepDistance()); // distance
               insertEditStep.setString(20, "child"); // hierarchy
               insertEditStep.setDouble(21, OverlapRate(from, to)); // overlapRate
               insertEditStep.executeUpdate();
@@ -1042,7 +1042,7 @@ public class LabelMapper extends Annotator {
               insertEditStep.setNull(16, Types.DOUBLE); // targetStart
               insertEditStep.setNull(17, Types.DOUBLE); // targetEnd
               insertEditStep.setString(18, operation(step.getOperation())); // operation
-              insertEditStep.setInt(19, step.getStepDistance()); // distance
+              insertEditStep.setDouble(19, step.getStepDistance()); // distance
               insertEditStep.setString(20, "child"); // hierarchy
               insertEditStep.setNull(21, Types.DOUBLE); // overlapRate
               insertEditStep.executeUpdate();
@@ -1072,7 +1072,7 @@ public class LabelMapper extends Annotator {
               insertEditStep.setDouble(16, to.getStart().getOffset()); // targetStart
               insertEditStep.setDouble(17, to.getEnd().getOffset()); // targetEnd
               insertEditStep.setString(18, operation(step.getOperation())); // operation
-              insertEditStep.setInt(19, step.getStepDistance()); // distance
+              insertEditStep.setDouble(19, step.getStepDistance()); // distance
               insertEditStep.setString(20, "child"); // hierarchy
               insertEditStep.setNull(21, Types.DOUBLE); // overlapRate
               insertEditStep.executeUpdate();

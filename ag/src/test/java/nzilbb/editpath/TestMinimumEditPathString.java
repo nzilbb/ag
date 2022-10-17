@@ -31,11 +31,8 @@ import nzilbb.editpath.*;
  * These tests ensure that basic string paths can easily be worked with, 
  * but also test the general beahviour of MinimumEditPath
  */
-public class TestMinimumEditPathString
-{
-   @Test 
-   public void stringEqual()
-   {
+public class TestMinimumEditPathString {
+   @Test public void stringEqual() {
       MinimumEditPathString mp = new MinimumEditPathString();
 
       List<EditStep<Character>> path = mp.minimumEditPath("this", "this");
@@ -63,16 +60,16 @@ public class TestMinimumEditPathString
       assertEquals(Character.valueOf('s'), path.get(3).getTo());
 
       // distances set
-      assertEquals(0, path.get(0).getStepDistance());
-      assertEquals(0, path.get(1).getStepDistance());
-      assertEquals(0, path.get(2).getStepDistance());
-      assertEquals(0, path.get(3).getStepDistance());
+      assertEquals(0, path.get(0).getStepDistance(), 0.0);
+      assertEquals(0, path.get(1).getStepDistance(), 0.0);
+      assertEquals(0, path.get(2).getStepDistance(), 0.0);
+      assertEquals(0, path.get(3).getStepDistance(), 0.0);
 
       // total distances set
-      assertEquals(0, path.get(0).totalDistance());
-      assertEquals(0, path.get(1).totalDistance());
-      assertEquals(0, path.get(2).totalDistance());
-      assertEquals(0, path.get(3).totalDistance());
+      assertEquals(0, path.get(0).totalDistance(), 0.0);
+      assertEquals(0, path.get(1).totalDistance(), 0.0);
+      assertEquals(0, path.get(2).totalDistance(), 0.0);
+      assertEquals(0, path.get(3).totalDistance(), 0.0);
 
       // backtraces set
       assertNull(path.get(0).getBackTrace());
@@ -93,12 +90,10 @@ public class TestMinimumEditPathString
       assertEquals(3, path.get(3).getToIndex());
 
       // edit distance
-      assertEquals(0, mp.minimumEditDistance("this", "this"));
+      assertEquals(0, mp.minimumEditDistance("this", "this"), 0.0);
    }
 
-   @Test 
-   public void thisToThat()
-   {
+   @Test public void thisToThat() {
       MinimumEditPathString mp = new MinimumEditPathString();
 
       List<EditStep<Character>> path = mp.minimumEditPath("this", "that");
@@ -126,16 +121,16 @@ public class TestMinimumEditPathString
       assertEquals(Character.valueOf('t'), path.get(3).getTo());
 
       // distances set
-      assertEquals(0, path.get(0).getStepDistance());
-      assertEquals(0, path.get(1).getStepDistance());
-      assertEquals(1, path.get(2).getStepDistance());
-      assertEquals(1, path.get(3).getStepDistance());
+      assertEquals(0, path.get(0).getStepDistance(), 0.0);
+      assertEquals(0, path.get(1).getStepDistance(), 0.0);
+      assertEquals(1, path.get(2).getStepDistance(), 0.0);
+      assertEquals(1, path.get(3).getStepDistance(), 0.0);
 
       // total distances set
-      assertEquals(0, path.get(0).totalDistance());
-      assertEquals(0, path.get(1).totalDistance());
-      assertEquals(1, path.get(2).totalDistance());
-      assertEquals(2, path.get(3).totalDistance());
+      assertEquals(0, path.get(0).totalDistance(), 0.0);
+      assertEquals(0, path.get(1).totalDistance(), 0.0);
+      assertEquals(1, path.get(2).totalDistance(), 0.0);
+      assertEquals(2, path.get(3).totalDistance(), 0.0);
 
       // backtraces set
       assertNull(path.get(0).getBackTrace());
@@ -156,12 +151,10 @@ public class TestMinimumEditPathString
       assertEquals(3, path.get(3).getToIndex());
 
       // edit distance
-      assertEquals(2, mp.minimumEditDistance("this", "that"));
+      assertEquals(2, mp.minimumEditDistance("this", "that"), 0.0);
    }
 
-   @Test 
-   public void emptyToThat()
-   {
+   @Test public void emptyToThat() {
       MinimumEditPathString mp = new MinimumEditPathString();
 
       List<EditStep<Character>> path = mp.minimumEditPath("", "that");
@@ -189,16 +182,16 @@ public class TestMinimumEditPathString
       assertEquals(Character.valueOf('t'), path.get(3).getTo());
 
       // distances set
-      assertEquals(1, path.get(0).getStepDistance());
-      assertEquals(1, path.get(1).getStepDistance());
-      assertEquals(1, path.get(2).getStepDistance());
-      assertEquals(1, path.get(3).getStepDistance());
+      assertEquals(1, path.get(0).getStepDistance(), 0.0);
+      assertEquals(1, path.get(1).getStepDistance(), 0.0);
+      assertEquals(1, path.get(2).getStepDistance(), 0.0);
+      assertEquals(1, path.get(3).getStepDistance(), 0.0);
 
       // total distances set
-      assertEquals(1, path.get(0).totalDistance());
-      assertEquals(2, path.get(1).totalDistance());
-      assertEquals(3, path.get(2).totalDistance());
-      assertEquals(4, path.get(3).totalDistance());
+      assertEquals(1, path.get(0).totalDistance(), 0.0);
+      assertEquals(2, path.get(1).totalDistance(), 0.0);
+      assertEquals(3, path.get(2).totalDistance(), 0.0);
+      assertEquals(4, path.get(3).totalDistance(), 0.0);
 
       // backtraces set
       assertNull(path.get(0).getBackTrace());
@@ -219,12 +212,10 @@ public class TestMinimumEditPathString
       assertEquals(3, path.get(3).getToIndex());
 
       // edit distance
-      assertEquals(4, mp.minimumEditDistance("", "that"));
+      assertEquals(4, mp.minimumEditDistance("", "that"), 0.0);
    }
 
-   @Test 
-   public void thisToEmpty()
-   {
+   @Test public void thisToEmpty() {
       MinimumEditPathString mp = new MinimumEditPathString();
 
       List<EditStep<Character>> path = mp.minimumEditPath("this", "");
@@ -252,16 +243,16 @@ public class TestMinimumEditPathString
       assertNull(path.get(3).getTo());
 
       // distances set
-      assertEquals(1, path.get(0).getStepDistance());
-      assertEquals(1, path.get(1).getStepDistance());
-      assertEquals(1, path.get(2).getStepDistance());
-      assertEquals(1, path.get(3).getStepDistance());
+      assertEquals(1, path.get(0).getStepDistance(), 0.0);
+      assertEquals(1, path.get(1).getStepDistance(), 0.0);
+      assertEquals(1, path.get(2).getStepDistance(), 0.0);
+      assertEquals(1, path.get(3).getStepDistance(), 0.0);
 
       // total distances set
-      assertEquals(1, path.get(0).totalDistance());
-      assertEquals(2, path.get(1).totalDistance());
-      assertEquals(3, path.get(2).totalDistance());
-      assertEquals(4, path.get(3).totalDistance());
+      assertEquals(1, path.get(0).totalDistance(), 0.0);
+      assertEquals(2, path.get(1).totalDistance(), 0.0);
+      assertEquals(3, path.get(2).totalDistance(), 0.0);
+      assertEquals(4, path.get(3).totalDistance(), 0.0);
 
       // backtraces set
       assertNull(path.get(0).getBackTrace());
@@ -282,12 +273,10 @@ public class TestMinimumEditPathString
       assertEquals(0, path.get(3).getToIndex());
 
       // edit distance
-      assertEquals(4, mp.minimumEditDistance("this", ""));
+      assertEquals(4, mp.minimumEditDistance("this", ""), 0.0);
    }
 
-   @Test 
-   public void emptyToEmpty()
-   {
+   @Test public void emptyToEmpty() {
       MinimumEditPathString mp = new MinimumEditPathString();
 
       List<EditStep<Character>> path = mp.minimumEditPath("", "");
@@ -297,12 +286,10 @@ public class TestMinimumEditPathString
       assertEquals(0, path.size());
 
       // edit distance
-      assertEquals(0, mp.minimumEditDistance("", ""));
+      assertEquals(0, mp.minimumEditDistance("", ""), 0.0);
    }
 
-   @Test 
-   public void defaultCosts()
-   {
+   @Test public void defaultCosts() {
       MinimumEditPathString mp = new MinimumEditPathString();
 
       List<EditStep<Character>> path = mp.minimumEditPath("plomo", "oro");
@@ -333,18 +320,18 @@ public class TestMinimumEditPathString
       assertEquals(Character.valueOf('o'), path.get(4).getTo());
 
       // distances set
-      assertEquals(1, path.get(0).getStepDistance());
-      assertEquals(1, path.get(1).getStepDistance());
-      assertEquals(0, path.get(2).getStepDistance());
-      assertEquals(1, path.get(3).getStepDistance());
-      assertEquals(0, path.get(4).getStepDistance());
+      assertEquals(1, path.get(0).getStepDistance(), 0.0);
+      assertEquals(1, path.get(1).getStepDistance(), 0.0);
+      assertEquals(0, path.get(2).getStepDistance(), 0.0);
+      assertEquals(1, path.get(3).getStepDistance(), 0.0);
+      assertEquals(0, path.get(4).getStepDistance(), 0.0);
 
       // total distances set
-      assertEquals(1, path.get(0).totalDistance());
-      assertEquals(2, path.get(1).totalDistance());
-      assertEquals(2, path.get(2).totalDistance());
-      assertEquals(3, path.get(3).totalDistance());
-      assertEquals(3, path.get(4).totalDistance());
+      assertEquals(1, path.get(0).totalDistance(), 0.0);
+      assertEquals(2, path.get(1).totalDistance(), 0.0);
+      assertEquals(2, path.get(2).totalDistance(), 0.0);
+      assertEquals(3, path.get(3).totalDistance(), 0.0);
+      assertEquals(3, path.get(4).totalDistance(), 0.0);
 
       // backtraces set
       assertNull(path.get(0).getBackTrace());
@@ -369,9 +356,7 @@ public class TestMinimumEditPathString
 
    }
 
-   @Test 
-   public void defaultExpensiveChange()
-   {
+   @Test public void defaultExpensiveChange() {
       MinimumEditPathString mp = new MinimumEditPathString(new DefaultEditComparator<Character>(1,1,2));
 
       List<EditStep<Character>> path = mp.minimumEditPath("plomo", "oro");
@@ -405,20 +390,20 @@ public class TestMinimumEditPathString
       assertEquals(Character.valueOf('o'), path.get(5).getTo());
 
       // distances set
-      assertEquals(1, path.get(0).getStepDistance()); // delete p
-      assertEquals(1, path.get(1).getStepDistance()); // delete l
-      assertEquals(0, path.get(2).getStepDistance());
-      assertEquals(1, path.get(3).getStepDistance()); // insert r
-      assertEquals(1, path.get(4).getStepDistance()); // delete m
-      assertEquals(0, path.get(5).getStepDistance());
+      assertEquals(1, path.get(0).getStepDistance(), 0.0); // delete p
+      assertEquals(1, path.get(1).getStepDistance(), 0.0); // delete l
+      assertEquals(0, path.get(2).getStepDistance(), 0.0);
+      assertEquals(1, path.get(3).getStepDistance(), 0.0); // insert r
+      assertEquals(1, path.get(4).getStepDistance(), 0.0); // delete m
+      assertEquals(0, path.get(5).getStepDistance(), 0.0);
 
       // total distances set
-      assertEquals(1, path.get(0).totalDistance()); // delete p
-      assertEquals(2, path.get(1).totalDistance()); // delete l
-      assertEquals(2, path.get(2).totalDistance());
-      assertEquals(3, path.get(3).totalDistance()); // insert r
-      assertEquals(4, path.get(4).totalDistance()); // delete m
-      assertEquals(4, path.get(5).totalDistance());
+      assertEquals(1, path.get(0).totalDistance(), 0.0); // delete p
+      assertEquals(2, path.get(1).totalDistance(), 0.0); // delete l
+      assertEquals(2, path.get(2).totalDistance(), 0.0);
+      assertEquals(3, path.get(3).totalDistance(), 0.0); // insert r
+      assertEquals(4, path.get(4).totalDistance(), 0.0); // delete m
+      assertEquals(4, path.get(5).totalDistance(), 0.0);
 
       // backtraces set
       assertNull(path.get(0).getBackTrace());
@@ -472,24 +457,22 @@ public class TestMinimumEditPathString
       assertEquals(Character.valueOf('o'), path.get(4).getTo());
 
       // distances set
-      assertEquals(1, path.get(0).getStepDistance()); // delete p
-      assertEquals(1, path.get(1).getStepDistance()); // delete l
-      assertEquals(0, path.get(2).getStepDistance());
-      assertEquals(2, path.get(3).getStepDistance()); // change m to r
-      assertEquals(0, path.get(4).getStepDistance());
+      assertEquals(1, path.get(0).getStepDistance(), 0.0); // delete p
+      assertEquals(1, path.get(1).getStepDistance(), 0.0); // delete l
+      assertEquals(0, path.get(2).getStepDistance(), 0.0);
+      assertEquals(2, path.get(3).getStepDistance(), 0.0); // change m to r
+      assertEquals(0, path.get(4).getStepDistance(), 0.0);
 
       // total distances set
-      assertEquals(1, path.get(0).totalDistance()); // delete p
-      assertEquals(2, path.get(1).totalDistance()); // delete l
-      assertEquals(2, path.get(2).totalDistance());
-      assertEquals(4, path.get(3).totalDistance()); // chaneg m to r
-      assertEquals(4, path.get(4).totalDistance());
+      assertEquals(1, path.get(0).totalDistance(), 0.0); // delete p
+      assertEquals(2, path.get(1).totalDistance(), 0.0); // delete l
+      assertEquals(2, path.get(2).totalDistance(), 0.0);
+      assertEquals(4, path.get(3).totalDistance(), 0.0); // chaneg m to r
+      assertEquals(4, path.get(4).totalDistance(), 0.0);
 
    }
 
-   @Test 
-   public void customCosts()
-   {
+   @Test public void customCosts() {
       MinimumEditPathString mp = new MinimumEditPathString(new DefaultEditComparator<Character>(10));
 
       List<EditStep<Character>> path = mp.minimumEditPath("plomo", "oro");
@@ -520,18 +503,18 @@ public class TestMinimumEditPathString
       assertEquals(Character.valueOf('o'), path.get(4).getTo());
 
       // distances set
-      assertEquals(10, path.get(0).getStepDistance());
-      assertEquals(10, path.get(1).getStepDistance());
-      assertEquals(0, path.get(2).getStepDistance());
-      assertEquals(10, path.get(3).getStepDistance());
-      assertEquals(0, path.get(4).getStepDistance());
+      assertEquals(10, path.get(0).getStepDistance(), 0.0);
+      assertEquals(10, path.get(1).getStepDistance(), 0.0);
+      assertEquals(0, path.get(2).getStepDistance(), 0.0);
+      assertEquals(10, path.get(3).getStepDistance(), 0.0);
+      assertEquals(0, path.get(4).getStepDistance(), 0.0);
 
       // total distances set
-      assertEquals(10, path.get(0).totalDistance());
-      assertEquals(20, path.get(1).totalDistance());
-      assertEquals(20, path.get(2).totalDistance());
-      assertEquals(30, path.get(3).totalDistance());
-      assertEquals(30, path.get(4).totalDistance());
+      assertEquals(10, path.get(0).totalDistance(), 0.0);
+      assertEquals(20, path.get(1).totalDistance(), 0.0);
+      assertEquals(20, path.get(2).totalDistance(), 0.0);
+      assertEquals(30, path.get(3).totalDistance(), 0.0);
+      assertEquals(30, path.get(4).totalDistance(), 0.0);
 
       // backtraces set
       assertNull(path.get(0).getBackTrace());
@@ -541,7 +524,7 @@ public class TestMinimumEditPathString
       assertEquals(path.get(3), path.get(4).getBackTrace());
 
       // edit distance
-      assertEquals(30, mp.minimumEditDistance("plomo", "oro"));
+      assertEquals(30, mp.minimumEditDistance("plomo", "oro"), 0.0);
    }
 
    /**
@@ -560,9 +543,7 @@ public class TestMinimumEditPathString
     * </ul>
     * Also, deletes and inserts are both 10.
     */
-   @Test 
-   public void customComparator()
-   {
+   @Test public void customComparator() {
       MinimumEditPathString mp = new MinimumEditPathString(
 	 new EditComparator<Character>()
 	 {
@@ -676,30 +657,30 @@ public class TestMinimumEditPathString
       assertEquals(Character.valueOf('2'), path.get(10).getTo());
 
       // distances set
-      assertEquals(10, path.get(0).getStepDistance()); // space
-      assertEquals(1, path.get(1).getStepDistance());  // p/P
-      assertEquals(4, path.get(2).getStepDistance());  // l/r
-      assertEquals(4, path.get(3).getStepDistance());  // o/i
-      assertEquals(4, path.get(4).getStepDistance());  // m/n
-      assertEquals(10, path.get(5).getStepDistance()); //  /c
-      assertEquals(4, path.get(6).getStepDistance());  // o/i
-      assertEquals(10, path.get(7).getStepDistance()); //  /p
-      assertEquals(10, path.get(8).getStepDistance()); //  /e
-      assertEquals(10, path.get(9).getStepDistance()); // space
-      assertEquals(4, path.get(10).getStepDistance()); // 1/2
+      assertEquals(10, path.get(0).getStepDistance(), 0.0); // space
+      assertEquals(1, path.get(1).getStepDistance(), 0.0);  // p/P
+      assertEquals(4, path.get(2).getStepDistance(), 0.0);  // l/r
+      assertEquals(4, path.get(3).getStepDistance(), 0.0);  // o/i
+      assertEquals(4, path.get(4).getStepDistance(), 0.0);  // m/n
+      assertEquals(10, path.get(5).getStepDistance(), 0.0); //  /c
+      assertEquals(4, path.get(6).getStepDistance(), 0.0);  // o/i
+      assertEquals(10, path.get(7).getStepDistance(), 0.0); //  /p
+      assertEquals(10, path.get(8).getStepDistance(), 0.0); //  /e
+      assertEquals(10, path.get(9).getStepDistance(), 0.0); // space
+      assertEquals(4, path.get(10).getStepDistance(), 0.0); // 1/2
 
       // total distances set
-      assertEquals(10, path.get(0).totalDistance());
-      assertEquals(11, path.get(1).totalDistance());
-      assertEquals(15, path.get(2).totalDistance());
-      assertEquals(19, path.get(3).totalDistance());
-      assertEquals(23, path.get(4).totalDistance());
-      assertEquals(33, path.get(5).totalDistance());
-      assertEquals(37, path.get(6).totalDistance());
-      assertEquals(47, path.get(7).totalDistance());
-      assertEquals(57, path.get(8).totalDistance());
-      assertEquals(67, path.get(9).totalDistance());
-      assertEquals(71, path.get(10).totalDistance());
+      assertEquals(10, path.get(0).totalDistance(), 0.0);
+      assertEquals(11, path.get(1).totalDistance(), 0.0);
+      assertEquals(15, path.get(2).totalDistance(), 0.0);
+      assertEquals(19, path.get(3).totalDistance(), 0.0);
+      assertEquals(23, path.get(4).totalDistance(), 0.0);
+      assertEquals(33, path.get(5).totalDistance(), 0.0);
+      assertEquals(37, path.get(6).totalDistance(), 0.0);
+      assertEquals(47, path.get(7).totalDistance(), 0.0);
+      assertEquals(57, path.get(8).totalDistance(), 0.0);
+      assertEquals(67, path.get(9).totalDistance(), 0.0);
+      assertEquals(71, path.get(10).totalDistance(), 0.0);
 
       // backtraces set
       assertNull(path.get(0).getBackTrace());
@@ -761,23 +742,22 @@ public class TestMinimumEditPathString
       assertEquals(Character.valueOf('2'), path.get(8).getTo());
       
       // distances
-      assertEquals(10, path.get(0).getStepDistance()); //  /P
-      assertEquals(10, path.get(1).getStepDistance()); // p/r
-      assertEquals(10, path.get(2).getStepDistance()); // l/i
-      assertEquals(10, path.get(3).getStepDistance()); // o/n
-      assertEquals(10, path.get(4).getStepDistance()); // m/c
-      assertEquals(10, path.get(5).getStepDistance()); // o/i
-      assertEquals(10, path.get(6).getStepDistance()); //  /p
-      assertEquals(10, path.get(7).getStepDistance()); // 1/e
-      assertEquals(10, path.get(8).getStepDistance()); //  /2
+      assertEquals(10, path.get(0).getStepDistance(), 0.0); //  /P
+      assertEquals(10, path.get(1).getStepDistance(), 0.0); // p/r
+      assertEquals(10, path.get(2).getStepDistance(), 0.0); // l/i
+      assertEquals(10, path.get(3).getStepDistance(), 0.0); // o/n
+      assertEquals(10, path.get(4).getStepDistance(), 0.0); // m/c
+      assertEquals(10, path.get(5).getStepDistance(), 0.0); // o/i
+      assertEquals(10, path.get(6).getStepDistance(), 0.0); //  /p
+      assertEquals(10, path.get(7).getStepDistance(), 0.0); // 1/e
+      assertEquals(10, path.get(8).getStepDistance(), 0.0); //  /2
 
       // total distance
-      assertEquals(90, path.get(8).totalDistance());
+      assertEquals(90, path.get(8).totalDistance(), 0.0);
 
    }
    
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nz.ac.canterbury.ling.util.TestMinimumEditPath");
    }
 }

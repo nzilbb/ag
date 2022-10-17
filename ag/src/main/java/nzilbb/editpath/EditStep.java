@@ -1,5 +1,5 @@
 //
-// Copyright 2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -27,8 +27,7 @@ package nzilbb.editpath;
  * @author Robert Fromont robert@fromont.net.nz
  */
 
-public class EditStep<T>
-{
+public class EditStep<T> {
 
    /**
     * Enumeration for representing the operation represented by a step 
@@ -37,7 +36,6 @@ public class EditStep<T>
    public enum StepOperation { NONE, DELETE, CHANGE, INSERT }; // TODO Add the possiblity of merge? i.e. two subsequent symbols converting to one symbol
 
    // Attributes:
-
    
    /**
     * The operation represented by this step.
@@ -57,7 +55,6 @@ public class EditStep<T>
     */
    public EditStep<T> setOperation(StepOperation enNewOperation) { enOperation = enNewOperation; return this; }
 
-
    /**
     * The element in the start sequence.
     * @see #getFrom()
@@ -76,7 +73,6 @@ public class EditStep<T>
     */
    public EditStep<T> setFrom(T oNewFrom) { oFrom = oNewFrom; return this; }
 
-
    /**
     * The index of "from".
     * @see #getFromIndex()
@@ -93,7 +89,6 @@ public class EditStep<T>
     * @param newFromIndex The index of "from".
     */
    public void setFromIndex(int newFromIndex) { fromIndex = newFromIndex; }
-   
    
    /**
     * The element in the end sequence.
@@ -146,16 +141,12 @@ public class EditStep<T>
     * @param eNewBackTrace Backtrace to the previous (minimum) edit in the sequence.
     * @return this.
     */
-   public EditStep<T> setBackTrace(EditStep<T> eNewBackTrace) 
-   { 
+   public EditStep<T> setBackTrace(EditStep<T> eNewBackTrace) { 
       eBackTrace = eNewBackTrace; 
-      if (eBackTrace != null) 
-      {
-	 iBackTraceTotalDistance = eBackTrace.totalDistance();
-      }
-      else
-      {
-	 iBackTraceTotalDistance = 0;
+      if (eBackTrace != null) {
+	 backTraceTotalDistance = eBackTrace.totalDistance();
+      } else {
+	 backTraceTotalDistance = 0;
       }
       return this;
    }
@@ -164,27 +155,25 @@ public class EditStep<T>
     * The total distance to the previous step. This is cached to avoid repeatedly following the
     * edit path back every time {@link #totalDistance()} is invoked.
     */
-   protected int iBackTraceTotalDistance = 0;
-
+   protected double backTraceTotalDistance = 0;
    
    /**
     * The distance represented by this single step.
     * @see #getStepDistance()
     * @see #setStepDistance(int)
     */
-   protected int iStepDistance; // TODO make distances Double
+   protected double stepDistance;
    /**
     * Getter for {@link #iStepDistance}: The distance represented by this single step.
     * @return The distance represented by this single step.
     */
-   public int getStepDistance() { return iStepDistance; }
+   public double getStepDistance() { return stepDistance; }
    /**
     * Setter for {@link #iStepDistance}: The distance represented by this single step.
-    * @param iNewStepDistance The distance represented by this single step.
+    * @param newStepDistance The distance represented by this single step.
     * @return this.
     */
-   public EditStep<T> setStepDistance(int iNewStepDistance) { iStepDistance = iNewStepDistance; return this; }
-
+   public EditStep<T> setStepDistance(double newStepDistance) { stepDistance = newStepDistance; return this; }
    
    // Methods:
    
@@ -202,8 +191,7 @@ public class EditStep<T>
     * @param stepDistance The distance represented by this single step.
     * @param operation The operation represented by this step.
     */
-   public EditStep(T from, T to, int stepDistance, StepOperation operation)
-   {
+   public EditStep(T from, T to, double stepDistance, StepOperation operation) {
       setFrom(from);
       setTo(to);
       setOperation(operation);
@@ -218,80 +206,61 @@ public class EditStep<T>
     * @param operation The operation represented by this step.
     * @param backtrace The previous (minimum) edit in the sequence.
     */
-   public EditStep(T from, T to, int stepDistance, StepOperation operation, EditStep<T> backtrace)
-   {
+   public EditStep(T from, T to, double stepDistance, StepOperation operation, EditStep<T> backtrace) {
       setFrom(from);
       setTo(to);
       setOperation(operation);
       setStepDistance(stepDistance);
       setBackTrace(backtrace);
    } // end of constructor
-
    
    /**
     * The total distance up to and including this edit.
     * @return The total distance up to and including this edit.
     */
-   public int totalDistance()
-   {
-      return iBackTraceTotalDistance + iStepDistance;
+   public double totalDistance() {
+      return backTraceTotalDistance + stepDistance;
    } // end of totalDistance()
-
    
    /**
     * Sets both fromIndex and toIndex.
     * @param fromIndex Value for {@link #fromIndex}
     * @param toIndex Value for {@link #toIndex}
     */
-   public void setFromToIndices(int fromIndex, int toIndex)
-   {
+   public void setFromToIndices(int fromIndex, int toIndex) {
       setFromIndex(fromIndex);
       setToIndex(toIndex);
    } // end of setFromToIndices()
-
    
    /**
     * Representation of the step as a string.
     * @return Representation of the step as a string.
     */
-   public String toString()
-   {
+   public String toString() {
       StringBuilder s = new StringBuilder();
       s.append(enOperation);
       s.append("\t");
-      if (oFrom != null)
-      {
+      if (oFrom != null) {
 	 s.append(oFrom.toString());
-      }
-      else
-      {
-	 if (enOperation == EditStep.StepOperation.INSERT)
-	 {
+      } else {
+	 if (enOperation == EditStep.StepOperation.INSERT) {
 	    s.append("·");
-	 }
-	 else
-	 {
+	 } else {
 	    s.append("<null>");
 	 }
       }
       s.append("\t→\t");
-      if (oTo != null)
-      {
+      if (oTo != null) {
 	 s.append(oTo.toString());
-      }
-      else
-      {
+      } else {
 	 if (enOperation == EditStep.StepOperation.DELETE)
 	 {
 	    s.append("·");
-	 }
-	 else
-	 {
+	 } else {
 	    s.append("<null>");
 	 }
       }
       return s.toString();
-   } // end of toString()
-
+   } // end of toString
 
 } // end of class EditStep

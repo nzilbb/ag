@@ -90,22 +90,22 @@ public class TestMinimumEditPath
       assertNull(path.get(6).getTo());
 
       // distances set
-      assertEquals(1, path.get(0).getStepDistance());
-      assertEquals(0, path.get(1).getStepDistance());
-      assertEquals(1, path.get(2).getStepDistance());
-      assertEquals(0, path.get(3).getStepDistance());
-      assertEquals(1, path.get(4).getStepDistance());
-      assertEquals(0, path.get(5).getStepDistance());
-      assertEquals(1, path.get(6).getStepDistance());
+      assertEquals(1, path.get(0).getStepDistance(), 0.0);
+      assertEquals(0, path.get(1).getStepDistance(), 0.0);
+      assertEquals(1, path.get(2).getStepDistance(), 0.0);
+      assertEquals(0, path.get(3).getStepDistance(), 0.0);
+      assertEquals(1, path.get(4).getStepDistance(), 0.0);
+      assertEquals(0, path.get(5).getStepDistance(), 0.0);
+      assertEquals(1, path.get(6).getStepDistance(), 0.0);
 
       // total distances set
-      assertEquals(1, path.get(0).totalDistance());
-      assertEquals(1, path.get(1).totalDistance());
-      assertEquals(2, path.get(2).totalDistance());
-      assertEquals(2, path.get(3).totalDistance());
-      assertEquals(3, path.get(4).totalDistance());
-      assertEquals(3, path.get(5).totalDistance());
-      assertEquals(4, path.get(6).totalDistance());
+      assertEquals(1, path.get(0).totalDistance(), 0.0);
+      assertEquals(1, path.get(1).totalDistance(), 0.0);
+      assertEquals(2, path.get(2).totalDistance(), 0.0);
+      assertEquals(2, path.get(3).totalDistance(), 0.0);
+      assertEquals(3, path.get(4).totalDistance(), 0.0);
+      assertEquals(3, path.get(5).totalDistance(), 0.0);
+      assertEquals(4, path.get(6).totalDistance(), 0.0);
 
       // backtraces set
       assertNull(path.get(0).getBackTrace());
@@ -135,7 +135,7 @@ public class TestMinimumEditPath
       assertEquals(4, path.get(6).getToIndex());
 
       // edit distance
-      assertEquals(4, mp.minimumEditDistance(vFrom, vTo));
+      assertEquals(4, mp.minimumEditDistance(vFrom, vTo), 0.0);
    }
 
    public static void main(String args[]) 

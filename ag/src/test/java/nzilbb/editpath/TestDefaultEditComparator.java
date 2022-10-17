@@ -27,11 +27,8 @@ import java.util.*;
 
 import nzilbb.editpath.*;
 
-public class TestDefaultEditComparator
-{
-   @Test 
-   public void basicCompare()
-   {
+public class TestDefaultEditComparator {
+   @Test public void basicCompare() {
       // default constructor
       DefaultEditComparator<Integer> c = new DefaultEditComparator<Integer>();
 
@@ -43,26 +40,26 @@ public class TestDefaultEditComparator
       EditStep<Integer> step = c.compare(1,1);
       assertEquals(Integer.valueOf(1), step.getFrom());
       assertEquals(Integer.valueOf(1), step.getTo());
-      assertEquals(0, step.getStepDistance());
+      assertEquals(0, step.getStepDistance(), 0.0);
       assertEquals(EditStep.StepOperation.NONE, step.getOperation());
       
       // change
       step = c.compare(1,2);
       assertEquals(Integer.valueOf(1), step.getFrom());
       assertEquals(Integer.valueOf(2), step.getTo());
-      assertEquals(1, step.getStepDistance());
+      assertEquals(1, step.getStepDistance(), 0.0);
       assertEquals(EditStep.StepOperation.CHANGE, step.getOperation());
 
       // delete
       step = c.delete(1);
-      assertEquals(1, step.getStepDistance());
+      assertEquals(1, step.getStepDistance(), 0.0);
       assertEquals(Integer.valueOf(1), step.getFrom());
       assertNull(step.getTo());
       assertEquals(EditStep.StepOperation.DELETE, step.getOperation());
 
       // insert
       step = c.insert(1);
-      assertEquals(1, step.getStepDistance());
+      assertEquals(1, step.getStepDistance(), 0.0);
       assertEquals(Integer.valueOf(1), step.getTo());
       assertNull(step.getFrom());
       assertEquals(EditStep.StepOperation.INSERT, step.getOperation());
@@ -72,26 +69,25 @@ public class TestDefaultEditComparator
       step = c.compare(1,2);
       assertEquals(Integer.valueOf(1), step.getFrom());
       assertEquals(Integer.valueOf(2), step.getTo());
-      assertEquals(10, step.getStepDistance());
+      assertEquals(10, step.getStepDistance(), 0.0);
       assertEquals(EditStep.StepOperation.CHANGE, step.getOperation());
 
       // delete
-      assertEquals(10, c.delete(1).getStepDistance());
+      assertEquals(10, c.delete(1).getStepDistance(), 0.0);
 
       // insert
-      assertEquals(10, c.insert(1).getStepDistance());
+      assertEquals(10, c.insert(1).getStepDistance(), 0.0);
 
       // different distances
       c = new DefaultEditComparator<Integer>(10, 20, 30);
       step = c.compare(1,2);
-      assertEquals(30, step.getStepDistance());
+      assertEquals(30, step.getStepDistance(), 0.0);
 
       // delete
-      assertEquals(20, c.delete(1).getStepDistance());
+      assertEquals(20, c.delete(1).getStepDistance(), 0.0);
 
       // insert
-      assertEquals(10, c.insert(1).getStepDistance());
-
+      assertEquals(10, c.insert(1).getStepDistance(), 0.0);
       
    }
 
@@ -102,9 +98,7 @@ public class TestDefaultEditComparator
     * If this is the case, then the result operation isn't INSERT or DELETE, but rather CHANGE
     * i.e. you CHANGE an element from something to null, or from null to something.
     */ 
-   @Test 
-   public void compareIncludingNull()
-   {
+   @Test public void compareIncludingNull() {
       // default constructor
       DefaultEditComparator<Integer> c = new DefaultEditComparator<Integer>();
 
@@ -112,14 +106,14 @@ public class TestDefaultEditComparator
       EditStep<Integer> step = c.compare(1,null);
       assertEquals(Integer.valueOf(1), step.getFrom());
       assertNull(step.getTo());
-      assertEquals(1, step.getStepDistance());
+      assertEquals(1, step.getStepDistance(), 0.0);
       assertEquals(EditStep.StepOperation.CHANGE, step.getOperation());
       
       // no from
       step = c.compare(null,2);
       assertNull(step.getFrom());
       assertEquals(Integer.valueOf(2), step.getTo());
-      assertEquals(1, step.getStepDistance());
+      assertEquals(1, step.getStepDistance(), 0.0);
       assertEquals(EditStep.StepOperation.CHANGE, step.getOperation());
 
       // neither from nor to
@@ -127,34 +121,30 @@ public class TestDefaultEditComparator
       step = c.compare(null,null);
       assertNull(step.getFrom());
       assertNull(step.getTo());
-      assertEquals(0, step.getStepDistance());
+      assertEquals(0, step.getStepDistance(), 0.0);
       assertEquals(EditStep.StepOperation.NONE, step.getOperation());
 
       // delete
       step = c.delete(null);
-      assertEquals(10, step.getStepDistance());
+      assertEquals(10, step.getStepDistance(), 0.0);
       assertNull(step.getFrom());
       assertNull(step.getTo());
       assertEquals(EditStep.StepOperation.DELETE, step.getOperation());
 
       // insert
       step = c.insert(null);
-      assertEquals(10, step.getStepDistance());
+      assertEquals(10, step.getStepDistance(), 0.0);
       assertNull(step.getFrom());
       assertNull(step.getTo());
       assertEquals(EditStep.StepOperation.INSERT, step.getOperation());
    }
 
-   @Test 
-   public void customisedEquals()
-   {
+   @Test public void customisedEquals() {
       // default constructor
       DefaultEditComparator<String> c = new DefaultEditComparator<String>(
-	 new EqualsComparator<String>()
-	 {
+	 new EqualsComparator<String>() {
 	    // case-insensitive comparison
-	    public int compare(String o1, String o2)
-	    {
+	    public int compare(String o1, String o2) {
 	       return o1.toLowerCase().compareTo(o2.toLowerCase());
 
 
@@ -171,20 +161,19 @@ public class TestDefaultEditComparator
       EditStep<String> step = c.compare("this","This");
       assertEquals("this", step.getFrom());
       assertEquals("This", step.getTo());
-      assertEquals(0, step.getStepDistance());
+      assertEquals(0, step.getStepDistance(), 0.0);
       assertEquals(EditStep.StepOperation.NONE, step.getOperation());
       
       // change
       step = c.compare("this","that");
       assertEquals("this", step.getFrom());
       assertEquals("that", step.getTo());
-      assertEquals(1, step.getStepDistance());
+      assertEquals(1, step.getStepDistance(), 0.0);
       assertEquals(EditStep.StepOperation.CHANGE, step.getOperation());
       
    }
 
-   public static void main(String args[]) 
-   {
+   public static void main(String args[]) {
       org.junit.runner.JUnitCore.main("nz.ac.canterbury.ling.util.TestDefaultEditComparator");
    }
 }

@@ -71,7 +71,7 @@ public class MinimumEditPathString
     * @param sTo The destination (final) string.
     * @return The minimum edit distance between the two sequences.
     */
-   public int minimumEditDistance(String sFrom, String sTo)
+   public double minimumEditDistance(String sFrom, String sTo)
    {
       List<EditStep<Character>> path = minimumEditPath(sFrom, sTo);
       if (path.size() > 0)
@@ -91,7 +91,7 @@ public class MinimumEditPathString
     * @param sTo The destination (final) string.
     * @return The minimum edit distance between the two sequences.
     */
-   public int levenshteinDistance(String sFrom, String sTo)
+   public double levenshteinDistance(String sFrom, String sTo)
    {
       return minimumEditDistance(sFrom, sTo);
    } // end of minimumDistance()
@@ -102,7 +102,7 @@ public class MinimumEditPathString
     * @param sTo The destination (final) string.
     * @return The minimum edit distance between the two strings.
     */
-   public static int LevenshteinDistance(String sFrom, String sTo)
+   public static double LevenshteinDistance(String sFrom, String sTo)
    {
       return new MinimumEditPathString().levenshteinDistance(sFrom, sTo);
    } // end of minimumDistance()   
