@@ -356,7 +356,7 @@ public class LabelMapper extends Annotator {
             +" COMMENT 'Start offset of the target annotation',"
             +" targetEnd DOUBLE"
             +" COMMENT 'End offset of the target annotation',"
-            +" operation CHAR(1) NOT NULL"
+            +" operation VARCHAR(1) NOT NULL"
             +" COMMENT 'The edit operation: + for insert, - for delete, ! for change, = for no change',"
             +" distance DOUBLE NOT NULL"
             +" COMMENT 'Distance (cost) for this edit step',"

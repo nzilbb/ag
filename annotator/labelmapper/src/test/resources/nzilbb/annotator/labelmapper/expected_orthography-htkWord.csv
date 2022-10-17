@@ -1,4 +1,4 @@
 transcript,scope,URL,step,sourceLayer,sourceParentId,sourceParentLabel,sourceId,sourceLabel,sourceStart,sourceEnd,targetLayer,targetParentId,targetParentLabel,targetId,targetLabel,targetStart,targetEnd,operation,distance,hierarchy,overlapRate
-TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,1,orthography,,,d,a,10.0,20.0,htkWord,,,1g,A,11.5,21.5,"!",1,parent,0.7391304347826086
-TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,2,orthography,,,e,different,20.0,30.0,htkWord,,,1j,DIFFERENT,21.5,31.5,"!",1,parent,0.7391304347826086
-TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,3,orthography,,,f,firefighter,30.0,40.0,htkWord,,,1z,FIREFIGHTER,31.5,41.5,"!",1,parent,0.7391304347826086
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,1,orthography,,,d,a,10.0,20.0,htkWord,,,1g,A,11.5,21.5,~,1.0,parent,0.7391304347826086
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,2,orthography,,,e,different,20.0,30.0,htkWord,,,1j,DIFFERENT,21.5,31.5,~,1.0,parent,0.7391304347826086
+TestLabelMapper,5,http://TestLabelMapper/transcript?id=TestLabelMapper#5,3,orthography,,,f,firefighter,30.0,40.0,htkWord,,,1z,FIREFIGHTER,31.5,41.5,~,1.0,parent,0.7391304347826086
