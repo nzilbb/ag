@@ -351,15 +351,15 @@ public class Merger extends Transform implements GraphTransformer {
                 s1 = a1.getLabel();
                 s2 = a2.getLabel(); // for all-punctuation annotations
               }
-              int iDistance = s1.length() <= 2 || s2.length() <= 2?
+              double distance = s1.length() <= 2.0 || s2.length() <= 2.0?
                 // really short strings don't as easily allow subsitutions
                 stringComparatorAvoidSubstitution.levenshteinDistance(s1, s2)
                 // but longer strings use standard edit costs
                 :stringComparator.levenshteinDistance(s1, s2);
-              int iMagnifier = 1; // magnify this because anchor offsets also contribute
+              double magnifier = 1.0; // magnify this because anchor offsets also contribute
               // really short words have to be really similar
-              if (s1.length() <= 2 || s2.length() <= 2) iMagnifier = 3; 
-              iWeight += (iDistance * iMagnifier);
+              if (s1.length() <= 2.0 || s2.length() <= 2.0) magnifier = 3.0; 
+              iWeight += (distance * magnifier);
             } // check labels
 
             // don't compare anchors for graph tag layers (i.e. unaligned children of graph)

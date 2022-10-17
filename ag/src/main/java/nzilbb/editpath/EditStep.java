@@ -144,9 +144,9 @@ public class EditStep<T> {
    public EditStep<T> setBackTrace(EditStep<T> eNewBackTrace) { 
       eBackTrace = eNewBackTrace; 
       if (eBackTrace != null) {
-	 iBackTraceTotalDistance = eBackTrace.totalDistance();
+	 backTraceTotalDistance = eBackTrace.totalDistance();
       } else {
-	 iBackTraceTotalDistance = 0;
+	 backTraceTotalDistance = 0;
       }
       return this;
    }
@@ -155,25 +155,25 @@ public class EditStep<T> {
     * The total distance to the previous step. This is cached to avoid repeatedly following the
     * edit path back every time {@link #totalDistance()} is invoked.
     */
-   protected int iBackTraceTotalDistance = 0;
+   protected double backTraceTotalDistance = 0;
    
    /**
     * The distance represented by this single step.
     * @see #getStepDistance()
     * @see #setStepDistance(int)
     */
-   protected int iStepDistance; // TODO make distances Double
+   protected double stepDistance;
    /**
     * Getter for {@link #iStepDistance}: The distance represented by this single step.
     * @return The distance represented by this single step.
     */
-   public int getStepDistance() { return iStepDistance; }
+   public double getStepDistance() { return stepDistance; }
    /**
     * Setter for {@link #iStepDistance}: The distance represented by this single step.
-    * @param iNewStepDistance The distance represented by this single step.
+    * @param newStepDistance The distance represented by this single step.
     * @return this.
     */
-   public EditStep<T> setStepDistance(int iNewStepDistance) { iStepDistance = iNewStepDistance; return this; }
+   public EditStep<T> setStepDistance(double newStepDistance) { stepDistance = newStepDistance; return this; }
    
    // Methods:
    
@@ -191,7 +191,7 @@ public class EditStep<T> {
     * @param stepDistance The distance represented by this single step.
     * @param operation The operation represented by this step.
     */
-   public EditStep(T from, T to, int stepDistance, StepOperation operation) {
+   public EditStep(T from, T to, double stepDistance, StepOperation operation) {
       setFrom(from);
       setTo(to);
       setOperation(operation);
@@ -206,7 +206,7 @@ public class EditStep<T> {
     * @param operation The operation represented by this step.
     * @param backtrace The previous (minimum) edit in the sequence.
     */
-   public EditStep(T from, T to, int stepDistance, StepOperation operation, EditStep<T> backtrace) {
+   public EditStep(T from, T to, double stepDistance, StepOperation operation, EditStep<T> backtrace) {
       setFrom(from);
       setTo(to);
       setOperation(operation);
@@ -218,10 +218,9 @@ public class EditStep<T> {
     * The total distance up to and including this edit.
     * @return The total distance up to and including this edit.
     */
-   public int totalDistance() {
-      return iBackTraceTotalDistance + iStepDistance;
+   public double totalDistance() {
+      return backTraceTotalDistance + stepDistance;
    } // end of totalDistance()
-
    
    /**
     * Sets both fromIndex and toIndex.
