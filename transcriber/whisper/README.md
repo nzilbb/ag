@@ -12,6 +12,4 @@ For our purposes, there are two interesting things about this system:
 1. The reported performance is on par with cloud-based systems like [Google STT](https://cloud.google.com/speech-to-text/), and
 2. it's not cloud-based - the models are downloaded and STT happens on the local machine.
 
-This means that Whisper could be a candidate for initial transcription of our sociolinguistic recordings that can't be uploaded to cloud-based services.
-
-This is a Transcriber implementation that uses Whisper for non-cloud-based transcription.
+This is a [Transcriber](https://nzilbb.github.io/ag/apidocs/nzilbb/ag/automation/Transcriber.html) implementation that uses Whisper for non-cloud-based transcription.
