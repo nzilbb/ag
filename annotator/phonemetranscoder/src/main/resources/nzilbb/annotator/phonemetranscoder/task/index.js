@@ -45,7 +45,8 @@ getSchema(s => {
     var destinationLayerId = document.getElementById("destinationLayerId");
     addLayerOptions(
         destinationLayerId, schema,
-        layer => layer.parentId == schema.wordLayerId && layer.alignment == 0);
+        layer => (layer.parentId == schema.wordLayerId || layer.parentId == 'segment')
+            && layer.alignment == 0);
     destinationLayerId.selectedIndex = 0;
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
@@ -99,6 +100,7 @@ getSchema(s => {
                     } // next mapping
                 }
             }
+            changedLayer(destinationLayerId);
             changeTranslation();
         } finally {
             // hide spinner
@@ -107,7 +109,7 @@ getSchema(s => {
     });
 });
 
-// this function detects when the user selects [add new layer]
+// destination layer changed
 function changedLayer(select) {
     if (select.value == "[add layer]") {
         var newLayer = prompt( //  default is the task ID
@@ -129,6 +131,27 @@ function changedLayer(select) {
             // select it
             select.selectedIndex = select.children.length - 1;
         }
+    } else {
+        // ensure the source layer is in the same scope as the destination layer
+        var sourceLayerId = document.getElementById("sourceLayerId");
+        var previousValue = sourceLayerId.value;
+        var destinationLayer = schema.layers[select.value];
+        // clear existing options (except the first)
+        while (sourceLayerId.options.length > 1) sourceLayerId.options.remove(1);
+        if (destinationLayer.parentId == "segment") {
+            addLayerOptions(
+                sourceLayerId, schema,
+                layer => (layer.id == "segment" || layer.parentId == "segment")
+                    && layer.id != destinationLayer.id);
+        } else { // word layer
+            addLayerOptions(
+                sourceLayerId, schema,
+                layer => (layer.id == schema.wordLayerId
+                          || (layer.parentId == schema.wordLayerId && layer.id != "segment"))
+                    && layer.id != destinationLayer.id);
+        }
+        sourceLayerId.value = previousValue;
+        
     }
 }
 
