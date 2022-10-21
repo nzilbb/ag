@@ -24,6 +24,9 @@ package nzilbb.annotator.orthography;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
@@ -132,7 +135,7 @@ public class OrthographyStandardizer extends Annotator {
       lowerCase = true;
          
     } else {
-      beanPropertiesFromQueryString(parameters);
+      JsonObject json = beanPropertiesFromJSON(parameters);
 
       // validate removalPattern
       try {

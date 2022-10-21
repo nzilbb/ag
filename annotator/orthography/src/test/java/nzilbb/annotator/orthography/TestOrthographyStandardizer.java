@@ -49,7 +49,7 @@ public class TestOrthographyStandardizer {
     annotator.setSchema(schema);
       
     // stem to a new layer
-    annotator.setTaskParameters("tokenLayerId=word&orthographyLayerId=orth");
+    annotator.setTaskParameters("{\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orth\"}");
       
     assertTrue("lowerCase true",
                annotator.getLowerCase());
@@ -151,7 +151,8 @@ public class TestOrthographyStandardizer {
     annotator.setSchema(schema);
       
     // stem to a new layer
-    annotator.setTaskParameters("tokenLayerId=word&orthographyLayerId=orth&lowerCase=false");
+    annotator.setTaskParameters(
+      "{\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orth\",\"lowerCase\":\"false\"}");
       
     assertFalse("lowerCase false",
                 annotator.getLowerCase());
@@ -305,7 +306,7 @@ public class TestOrthographyStandardizer {
       
     // use specific configuration
     annotator.setTaskParameters(
-      "tokenLayerId=word&orthographyLayerId=orthography&removalPattern=");
+      "{\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orthography\",\"removalPattern\":\"\"}");
       
     assertTrue("lowerCase true",
                annotator.getLowerCase());
