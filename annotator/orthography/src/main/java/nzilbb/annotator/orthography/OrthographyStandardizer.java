@@ -129,6 +129,7 @@ public class OrthographyStandardizer extends Annotator {
       // remove non-word characters (but leave '~', '-', ''', and ':' in)
       removalPattern = "[\\p{Punct}&&[^~\\-:']]";
       orthographyLayerId = "orthography";
+      lowerCase = true;
          
     } else {
       beanPropertiesFromQueryString(parameters);
