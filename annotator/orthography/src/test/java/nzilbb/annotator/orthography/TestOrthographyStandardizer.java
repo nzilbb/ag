@@ -39,7 +39,8 @@ import nzilbb.ag.Schema;
 import nzilbb.annotator.orthography.OrthographyStandardizer;
 
 public class TestOrthographyStandardizer {
-   
+
+  /** Test normal configuration works. */
   @Test public void transform() throws Exception {
 
     Graph g = graph();
@@ -50,6 +51,8 @@ public class TestOrthographyStandardizer {
     // stem to a new layer
     annotator.setTaskParameters("tokenLayerId=word&orthographyLayerId=orth");
       
+    assertTrue("lowerCase true",
+               annotator.getLowerCase());
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
     assertEquals("orthography layer",
@@ -139,6 +142,81 @@ public class TestOrthographyStandardizer {
 
   }
 
+  /** Test lowerCase=false works. */
+  @Test public void noCaseChange() throws Exception {
+
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    OrthographyStandardizer annotator = new OrthographyStandardizer();
+    annotator.setSchema(schema);
+      
+    // stem to a new layer
+    annotator.setTaskParameters("tokenLayerId=word&orthographyLayerId=orth&lowerCase=false");
+      
+    assertFalse("lowerCase false",
+                annotator.getLowerCase());
+    assertEquals("token layer",
+                 "word", annotator.getTokenLayerId());
+    assertEquals("orthography layer",
+                 "orth", annotator.getOrthographyLayerId());
+    assertNotNull("orthography layer was created",
+                  schema.getLayer(annotator.getOrthographyLayerId()));
+    assertEquals("orthography layer child of word",
+                 "word", schema.getLayer(annotator.getOrthographyLayerId()).getParentId());
+    assertEquals("orthography layer not aligned",
+                 Constants.ALIGNMENT_NONE,
+                 schema.getLayer(annotator.getOrthographyLayerId()).getAlignment());
+    assertEquals("orthography layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getOrthographyLayerId()).getType());
+    String[] layers = annotator.getRequiredLayers();
+    assertEquals("1 required layer: "+Arrays.asList(layers),
+                 1, layers.length);
+    assertEquals("required layer correct "+Arrays.asList(layers),
+                 "word", layers[0]);
+    layers = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(layers),
+                 1, layers.length);
+    assertEquals("output layer correct "+Arrays.asList(layers),
+                 "orth", layers[0]);
+      
+    Annotation firstWord = g.first("word");
+    assertEquals("double check the first word is what we think it is: "+firstWord,
+                 "“'Why", firstWord.getLabel());
+      
+    assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                 10, g.all("word").length);
+    assertEquals("double check there are no orthographies: "+Arrays.asList(g.all("orth")),
+                 0, g.all("ortho").length);
+   
+    // run the annotator
+    annotator.transform(g);
+    List<String> orthographyLabels = Arrays.stream(g.all("orth"))
+      .map(annotation->annotation.getLabel()).collect(Collectors.toList());
+    assertEquals("one orthography per token: "+orthographyLabels,
+                 9, orthographyLabels.size());
+    Iterator<String> orthographies = orthographyLabels.iterator();
+    assertEquals("down-case",
+                 "Why", orthographies.next());
+    assertEquals("internal apostrophes",
+                 "hasn't", orthographies.next());
+    assertEquals("accented characters",
+                 "Inés", orthographies.next());
+    assertEquals("hesitations are retained",
+                 "d~", orthographies.next());
+    assertEquals("dashes removed",
+                 "got", orthographies.next());
+    assertEquals("her", orthographies.next());
+    assertEquals("internal hyphens retained",
+                 "X-ray", orthographies.next());
+    assertEquals("punctuation stripped",
+                 "yet", orthographies.next());
+    assertEquals("Hyphen-only omitted, Emoji conserved",
+                 "😉", orthographies.next());
+
+  }
+
+  /** Test default (null) paramters work. */
   @Test public void defaultParameters() throws Exception {
       
     Graph g = graph();
@@ -149,6 +227,8 @@ public class TestOrthographyStandardizer {
     // use default configuration
     annotator.setTaskParameters(null);
       
+    assertTrue("lowerCase true",
+               annotator.getLowerCase());
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
     assertEquals("orthography layer",
@@ -214,7 +294,8 @@ public class TestOrthographyStandardizer {
                     .setParent(g.first("turn")));
 
   }
-   
+
+  /** Test blank removalPattern works. */
   @Test public void noRemovalPattern() throws Exception {
       
     Graph g = graph();
@@ -222,10 +303,12 @@ public class TestOrthographyStandardizer {
     OrthographyStandardizer annotator = new OrthographyStandardizer();
     annotator.setSchema(schema);
       
-    // use default configuration
+    // use specific configuration
     annotator.setTaskParameters(
       "tokenLayerId=word&orthographyLayerId=orthography&removalPattern=");
       
+    assertTrue("lowerCase true",
+               annotator.getLowerCase());
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
     assertEquals("orthography layer",

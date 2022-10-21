@@ -56,6 +56,23 @@ public class OrthographyStandardizer extends Annotator {
    */
   public OrthographyStandardizer setTokenLayerId(String newTokenLayerId) {
     tokenLayerId = newTokenLayerId; return this; }
+  
+  /**
+   * Convert tokens to lower-case.
+   * @see #getLowerCase()
+   * @see #setLowerCase(boolean)
+   */
+  protected boolean lowerCase = true;
+  /**
+   * Getter for {@link #lowerCase}: Convert tokens to lower-case.
+   * @return Convert tokens to lower-case.
+   */
+  public boolean getLowerCase() { return lowerCase; }
+  /**
+   * Setter for {@link #lowerCase}: Convert tokens to lower-case.
+   * @param newLowerCase Convert tokens to lower-case.
+   */
+  public OrthographyStandardizer setLowerCase(boolean newLowerCase) { lowerCase = newLowerCase; return this; }
 
   /**
    * Regular expression for identifying characters to remove. 
@@ -211,8 +228,9 @@ public class OrthographyStandardizer extends Annotator {
    * @return The orthography of the given string.
    */
   public String orthography(String word, String removalPattern) {
-    String orth =  word
-      .toLowerCase()
+    String orth = word;
+    if (lowerCase) orth = orth.toLowerCase();
+    orth = orth
       // collapse all space (there could be space because of appended non-words)
       .replaceAll("\\s","")
       // might be spaces left after stripping
