@@ -6,37 +6,7 @@ getText("getVersion", function(e) {
     document.getElementById("version").innerHTML = this.responseText;
 });
 
-function testRemovalPattern() {
-    var removalPattern = document.getElementById("removalPattern");
-
-    var textOrthography = document.getElementById("textOrthography");
-    try {
-        
-        // test regular expression is valid
-        new RegExp(removalPattern.value, "g");
-        // pattern is valid, so don't mark it as an error
-        removalPattern.className = "";
-        removalPattern.removeAttribute("title");
-        textOrthography.className = "";
-        textOrthography.removeAttribute("title");
-        
-        var textTranscript = document.getElementById("textTranscript");
-
-        // show the test word transformation by using the annotator's orthography function        
-        getText(
-            resourceForFunction("orthography?", textTranscript.value, removalPattern.value),
-            text => { textOrthography.value = text; });
-        
-    } catch(error) {
-        // pattern is invalid, so don't mark it as an error
-        removalPattern.className = "error";
-        removalPattern.title = error;
-        textOrthography.className = "error";
-        textOrthography.value = error;
-        textOrthography.title = error;
-    }
-
-}
+var taskId = window.location.search.substring(1);
 
 // first, get the layer schema
 var schema = null;
@@ -53,10 +23,6 @@ getSchema(s => {
     // default value:
     tokenLayerId.value = schema.wordLayerId;
 
-    // default value for removalPattern
-    var removalPattern = document.getElementById("removalPattern");
-    removalPattern.value = "[\\p{Punct}&&[^~\\-:']]";
-    
     // populate layer output select options...          
     var orthographyLayerId = document.getElementById("orthographyLayerId");
     addLayerOptions(
@@ -67,19 +33,58 @@ getSchema(s => {
     } else {
         orthographyLayerId.selectedIndex = 0;
     }
+
+    var lowerCase = document.getElementById("lowerCase");
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
-    getText("getTaskParameters", function(e) {
+    getJSON("getTaskParameters", parameters => {
         try {
-            var parameters = new URLSearchParams(this.responseText);
-            
-            // set initial values of properties in the form above
-            // (this assumes bean property names match input id's in the form above)
-            for (const [key, value] of parameters) {
-                document.getElementById(key).value = value;
-            }
-            
-            testRemovalPattern();
+            if (parameters == null) { // no parameters
+                // create default replacements
+                newReplacement("\\s",""); // collapse all space (there could be space because of appended non-words)
+                newReplacement("’","'"); // 'smart' apostrophes to normal ones
+                newReplacement("[“”]","\""); // 'smart' quotes to normal ones
+                newReplacement("—","-"); // 'em-dash' to hyphen
+                newReplacement("[\\p{Punct}&&[^-~:']]",""); // remove all punctuation except ~, -, ', and :
+                newReplacement("^[-']+",""); // remove leading hyphens/apostrophes
+                newReplacement("[-']+$",""); // remove trailing hyphens/apostrophes
+                
+                lowerCase.checked = true;
+                
+                if (schema.layers[taskId]) { // there's a layer named after the task
+                    // select it
+                    orthographyLayerId.value = taskId;
+                } else if (/.+:.+/.test(taskId)) { // might be an 'auxiliary'?
+                    var layerId = taskId.replace(/:.+/,"");
+                    if (schema.layers[layerId]) { // there's a layer named after the task
+                        // select it
+                        orthographyLayerId.value = layerId;
+                    }
+                }
+                // if there's no option for the output layer, add one
+                if (orthographyLayerId.value != taskId) {
+                    var layerOption = document.createElement("option");
+                    layerOption.appendChild(document.createTextNode(taskId));
+                    orthographyLayerId.appendChild(layerOption);
+                    orthographyLayerId.value = taskId;
+                }
+            } else {
+
+                // set initial values of properties in the form
+                tokenLayerId.value = parameters.tokenLayerId;
+                lowerCase.checked = parameters.lowerCase;
+                orthographyLayerId.value = parameters.orthographyLayerId;
+                for (var replacement in parameters.replacements) {
+                    newReplacement(replacement, parameters.replacements[replacement]);
+                } // next mapping
+                // if there's no option for the output layer, add one
+                if (orthographyLayerId.value != parameters.orthographyLayerId) {
+                    var layerOption = document.createElement("option");
+                    layerOption.appendChild(document.createTextNode(parameters.orthographyLayerId));
+                    orthographyLayerId.appendChild(layerOption);
+                    orthographyLayerId.value = parameters.orthographyLayerId;
+                }
+            }            
         } finally {
             // hide spinner
             finishedLoading();
@@ -90,7 +95,7 @@ getSchema(s => {
 // this function detects when the user selects [add new layer]:
 function changedLayer(select) {
     if (select.value == "[add new layer]") {
-        var newLayer = prompt("Please enter the new layer ID", "orthography");
+        var newLayer = prompt("Please enter the new layer ID", taskId);
         if (newLayer) { // they didn't cancel
             // check there's not already a layer with that name
             for (var l in schema.layers) {
@@ -110,4 +115,139 @@ function changedLayer(select) {
         }
     }
 }
+
+var lastReplacement = null;
+
+// Manage replacements
+
+function newReplacement(pattern, label) {
+    
+    var divReplacement = document.createElement("div");
+    
+    var patternInput = document.createElement("input");
+    patternInput.type = "text";
+    patternInput.dataset.role = "pattern";
+    patternInput.value = pattern;
+    patternInput.title = "Regular-expression pattern to replace";
+    patternInput.placeholder = "Pattern";
+    patternInput.style.width = "25%";
+    patternInput.style.textAlign = "center";
+    patternInput.onfocus = function() { lastReplacement = this.parentNode; };
+    patternInput.onkeyup = function() { validateRegularExpression(patternInput); };
+    
+    var labelInput = document.createElement("input");
+    labelInput.type = "text";
+    labelInput.dataset.role = "label";
+    labelInput.title = "What to replace the pattern with."
+	+"\nLeaving this blank removes the pattern from the label.";
+    labelInput.placeholder = "Replace with nothing";
+    labelInput.value = label;
+    labelInput.style.width = "25%";
+    labelInput.style.textAlign = "center";
+    labelInput.onfocus = function() { lastReplacement = this.parentNode; };
+    
+    var arrow = document.createElement("span");
+    arrow.innerHTML = " → ";
+    
+    divReplacement.appendChild(patternInput);
+    divReplacement.patternInput = patternInput;
+    divReplacement.appendChild(arrow);
+    divReplacement.appendChild(labelInput);
+    divReplacement.labelInput = labelInput;
+
+    document.getElementById("replacements").appendChild(divReplacement);
+    patternInput.focus();
+    
+    enableRemoveButton();
+    
+    return false; // so form doesn't submit
+}
+
+function enableRemoveButton() {
+    document.getElementById("removeButton").disabled = 
+        document.getElementById("replacements").childElementCount <= 1;
+}
+
+function removeReplacement() {
+    if (lastReplacement) { 
+        document.getElementById("replacements").removeChild(lastReplacement);
+        lastReplacement = null;
+        enableRemoveButton();
+    }
+    return false; // so form doesn't submit
+}
+
+function moveReplacementUp() {
+    if (lastReplacement) { 
+        var replacements = document.getElementById("replacements");
+        var previousReplacement = lastReplacement.previousSibling;
+        if (previousReplacement) {
+            replacements.removeChild(lastReplacement);
+            replacements.insertBefore(lastReplacement, previousReplacement);
+        }
+    }
+    return false; // so form doesn't submit
+}
+
+function moveReplacementDown() {
+    if (lastReplacement) { 
+        var replacements = document.getElementById("replacements");
+        var nextReplacement = lastReplacement.nextSibling;
+        if (nextReplacement) {
+            var nextNextReplacement = nextReplacement.nextSibling;
+            replacements.removeChild(lastReplacement);
+            if (nextNextReplacement) {
+                replacements.insertBefore(lastReplacement, nextNextReplacement);
+            } else {
+                replacements.appendChild(lastReplacement);
+            }
+        }
+    }
+    return false; // so form doesn't submit
+}
+
+function validateRegularExpression(input) {
+    if (input.value.length == 0) {
+        input.className = "";
+        input.title = "";
+    } else {
+        try {        
+            // test regular expression is valid
+            new RegExp(input.value);
+            // pattern is valid, so don't mark it as an error
+            input.className = "";
+            input.title = "";
+        } catch(error) {
+            // pattern is invalid, so don't mark it as an error
+            input.className = "error";
+            input.title = error;
+        }
+    }
+}
+
+function setTaskParameters(form) {
+
+    // we use the convertFormBodyToJSON from util.js to send the form as JSON, but we want to
+    // to add the replacements as an array of objects, so we add them to the parameters 
+    // (convertFormBodyToJSON will take care of the rest of the form inputs)
+    var parameters = {
+        replacements: {}
+    };
+    var replacementDivs = document.getElementById("replacements").children;
+    for (var m = 0; m < replacementDivs.length; m++) {
+        var div = replacementDivs[m];
+        parameters.replacements[div.patternInput.value] = div.labelInput.value;
+    }
+    
+    return convertFormBodyToJSON(form, parameters);
+}
+
+// add event handlers
+document.getElementById("addButton").onclick = e=>newReplacement('','');
+document.getElementById("upButton").onclick = e=>moveReplacementUp();
+document.getElementById("downButton").onclick = e=>moveReplacementDown();
+document.getElementById("removeButton").onclick = e=>removeReplacement();
+document.getElementById("orthographyLayerId").onchange = function(e) { changedLayer(this); };
+document.getElementById("form").onsubmit = function(e) { setTaskParameters(this); };
+
 

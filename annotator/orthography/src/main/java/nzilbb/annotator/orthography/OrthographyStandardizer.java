@@ -21,6 +21,7 @@
 //
 package nzilbb.annotator.orthography;
 
+import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -78,25 +79,53 @@ public class OrthographyStandardizer extends Annotator {
   public OrthographyStandardizer setLowerCase(boolean newLowerCase) { lowerCase = newLowerCase; return this; }
 
   /**
-   * Regular expression for identifying characters to remove. 
-   * Default value is <q>[\\p{Punct}&amp;&amp;[^~\\-:']]</q>
-   * - all punctuation except <q>~</q>, <q>-</q>, <q>'</q>, and <q>:</q>
-   * @see #getRemovalPattern()
-   * @see #setRemovalPattern(String)
+   * Ordered list of patterns to replacements to make.
+   * <p> Default replacements are:
+   * <ol>
+   *  <li>\s → (collapse all space (there could be space because of appended non-words))</li>
+   *  <li>’ → ' ('smart' apostrophes to normal ones)</li>
+   *  <li>“ → " ('smart' quotes to normal ones)</li>
+   *  <li>” → " ('smart' quotes to normal ones)</li>
+   *  <li>— → - ('em-dash' to hyphen)</li>
+   *  <li>[\p{Punct}&amp;&amp;[^-~:']] →
+   *                 (all punctuation except <q>~</q>, <q>-</q>, <q>'</q>, and <q>:</q>)</li>
+   *  <li>^[-']+ → (remove leading hyphens/apostrophes)</li>
+   *  <li>[-']+$ → (remove trailing hyphens/apostrophes)</li>
+   * </ol>
+   * @see #getReplacements()
+   * @see #setReplacements(LinkedHashMap)
    */
-  protected String removalPattern = "[\\p{Punct}&&[^~\\-:']]";
+  protected LinkedHashMap<String,String> replacements = new LinkedHashMap<String,String>() {{
+      put("\\s",""); // collapse all space (there could be space because of appended non-words)
+      put("’","'"); // 'smart' apostrophes to normal ones
+      put("[“”]","\""); // 'smart' quotes to normal ones
+      put("—","-"); // 'em-dash' to hyphen
+      put("[\\p{Punct}&&[^-~:']]",""); // remove all punctuation except ~, -, ', and :
+      put("^[-']+",""); // remove leading hyphens/apostrophes
+      put("[-']+$",""); // remove trailing hyphens/apostrophes
+    }};
   /**
-   * Getter for {@link #removalPattern}: Regular expression for identifying characters to
-   * remove. Default value is <q>[\\p{Punct}&amp;&amp;[^~\\-:']]</q>
-   * - all punctuation except <q>~</q>, <q>-</q>, <q>'</q>, and <q>:</q>
-   * @return Regular expression for identifying characters to remove.
+   * Getter for {@link #replacements}: Ordered list of patterns to replacements to make.
+   * <p> Default replacements are:
+   * <ol>
+   *  <li>\s → (collapse all space (there could be space because of appended non-words))</li>
+   *  <li>’ → ' ('smart' apostrophes to normal ones)</li>
+   *  <li>“ → " ('smart' quotes to normal ones)</li>
+   *  <li>” → " ('smart' quotes to normal ones)</li>
+   *  <li>— → - ('em-dash' to hyphen)</li>
+   *  <li>[\p{Punct}&amp;&amp;[^-~:']] →
+   *                 (all punctuation except <q>~</q>, <q>-</q>, <q>'</q>, and <q>:</q>)</li>
+   *  <li>^[-']+ → (remove leading hyphens/apostrophes)</li>
+   *  <li>[-']+$ → (remove trailing hyphens/apostrophes)</li>
+   * </ol>
+   * @return Ordered list of patterns to replacements to make.
    */
-  public String getRemovalPattern() { return removalPattern; }
+  public LinkedHashMap<String,String> getReplacements() { return replacements; }
   /**
-   * Setter for {@link #removalPattern}: Regular expression for identifying characters to remove.
-   * @param newRemovalPattern Regular expression for identifying characters to remove.
+   * Setter for {@link #replacements}: Ordered list of patterns to replacements to make.
+   * @param newReplacements Ordered list of patterns to replacements to make.
    */
-  public OrthographyStandardizer setRemovalPattern(String newRemovalPattern) { removalPattern = newRemovalPattern; return this; }
+  public OrthographyStandardizer setReplacements(LinkedHashMap<String,String> newReplacements) { replacements = newReplacements; return this; }
 
   /**
    * ID of the output layer containing standardized orthography layers.
@@ -129,21 +158,29 @@ public class OrthographyStandardizer extends Annotator {
     if (parameters == null) { // apply default configuration
          
       tokenLayerId = schema.getWordLayerId();
-      // remove non-word characters (but leave '~', '-', ''', and ':' in)
-      removalPattern = "[\\p{Punct}&&[^~\\-:']]";
       orthographyLayerId = "orthography";
       lowerCase = true;
          
     } else {
       JsonObject json = beanPropertiesFromJSON(parameters);
 
-      // validate removalPattern
-      try {
-        Pattern.compile(removalPattern);
-      } catch(PatternSyntaxException exception) {
-        throw new InvalidConfigurationException(
-          this, "Removal pattern is not a valid regular expression: "
-          + exception.getMessage());
+      JsonObject jsonReplacements = json.getJsonObject("replacements");
+      if (jsonReplacements != null) {
+        replacements.clear();
+        for (String key : jsonReplacements.keySet()) {
+          replacements.put(key, jsonReplacements.getString(key));
+        }
+      }
+
+      // validate removalPatterns
+      for (String pattern : replacements.keySet()) {
+        try {
+          Pattern.compile(pattern);
+        } catch(PatternSyntaxException exception) {
+          throw new InvalidConfigurationException(
+            this, "Pattern \""+pattern+"\" is not a valid regular expression: "
+            + exception.getMessage());
+        }
       }
     }
       
@@ -212,7 +249,7 @@ public class OrthographyStandardizer extends Annotator {
     for (Annotation token : graph.all(tokenLayerId)) {
       // tag only tokens that are not already tagged
       if (token.first(orthographyLayerId) == null) { // not tagged yet
-        String orthography = orthography(token.getLabel(), removalPattern);
+        String orthography = orthography(token.getLabel(), lowerCase, replacements);
         // only add an annotation if there's actually a label
         if (orthography.length() > 0) {
           token.createTag(orthographyLayerId, orthography)
@@ -224,43 +261,24 @@ public class OrthographyStandardizer extends Annotator {
     setRunning(false);
     return graph;
   }
-   
+  
   /**
    * Returns the orthography of the given string, using the given removal pattern.
    * @param word
-   * @param removalPattern
+   * @param lowerCase
+   * @param replacements
    * @return The orthography of the given string.
    */
-  public String orthography(String word, String removalPattern) {
+  public String orthography(
+    String word, boolean lowerCase, LinkedHashMap<String,String> replacements) {
     String orth = word;
     if (lowerCase) orth = orth.toLowerCase();
-    orth = orth
-      // collapse all space (there could be space because of appended non-words)
-      .replaceAll("\\s","")
-      // might be spaces left after stripping
-      .trim()
-      // TODO would be nice to have a configurable lise of conversions like ’->'
-      // 'smart' apostrophes to normal ones
-      .replace('’','\'')
-      // 'smart' quotes to normal ones
-      .replace('“','"').replace('”','"')
-      // 'em-dash' to hyphen
-      .replace('—','-')
-      // remove leading hyphens/apostrophes
-      .replaceAll("^[\\-']*", "");
-    if (removalPattern.length() > 0) {
-      // remove characters identified by removalPattern
-      orth = orth.replaceAll(removalPattern,"");
+    // make each replacement
+    for (String pattern : replacements.keySet()) {
+      orth = orth
+        .replaceAll(pattern, replacements.get(pattern))
+        .trim();
     }
-    orth = orth
-      // might be spaces left after stripping
-      .trim()
-      // remove trailing hyphens/apostrophes
-      .replaceAll("[\\-']*$", "")
-      // remove leading hyphens/apostrophes
-      .replaceAll("^[\\-']*", "")
-      // might be spaces left after stripping
-      .trim();
     return orth;
   } // end of orthography()
    

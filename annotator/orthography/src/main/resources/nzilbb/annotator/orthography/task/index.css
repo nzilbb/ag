@@ -64,8 +64,22 @@ progress {
     width: 20%;
     margin: auto;
 }
-#arrow:before {
-    content: "→";
+button img {
+    height: 20px;
+}
+
+.label-processing {
+    max-width: 40%;
+}
+#replacements, #controls {
+    display: inline-block;
+    vertical-align: top;
+}
+#replacements {
+    width: 85%;
+}
+#controls {
+    height: 100%;
 }
 
 /* Layout on narrower screens */

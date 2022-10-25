@@ -1,0 +1,32 @@
+<h3>Orthography Standardizer</h3>
+
+<p> The Orthography Standardizer annotator takes tokens from the word layer and
+  'cleans up' their labels, creating tags on a new layer with standardized labels,
+  which should be optimal for looking up lexicons, frequency computation,
+  etc. </p>
+
+<p> Configuration parameters are encoded as a JSON string, e.g. <br>
+  <pre>{
+    "tokenLayerId":"word",
+    "lowerCase":"true",
+    "replacements":{
+      "\\s" : "",
+      "’" : "'",
+      "[“”]" : "\"",
+      "—" : "-",
+      "[\\p{Punct}&&[^-~:']]" : "",
+      "^[-']+" : "",
+      "[-']+$" : ""
+    },
+    "orthographyLayerId":"orthography"
+}</pre>
+</p>
+
+<p> The parameters are: </p>
+<dl>
+  <dt> tokenLayerId </dt> <dd> Input layer from which raw word tokens are selected. </dd>
+  <dt> lowerCase </dt> <dd> "true" or "on" for conversion to lowercase, absent otherwise. </dd>
+  <dt> orthographyLayerId </dt> <dd> Output layer on which new annotations are added. </dd>
+  <dt> replacements </dt> <dd> An object in which the keys are regular expressions to
+    match and the values are what to replace the corresponding matches with. </dd>
+</dl>

@@ -306,7 +306,16 @@ public class TestOrthographyStandardizer {
       
     // use specific configuration
     annotator.setTaskParameters(
-      "{\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orthography\",\"removalPattern\":\"\"}");
+      "{\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orthography\","
+      +"\"replacements\":{"
+      +"\"\\\\s\":\"\","
+      +"\"’\":\"'\","
+      +"\"“\":\"\\\"\","
+      +"\"”\":\"\\\"\","
+      +"\"—\":\"-\","
+      +"\"^[-']+\":\"\","
+      +"\"[-']+$\":\"\""
+      +"}}");
       
     assertTrue("lowerCase true",
                annotator.getLowerCase());
