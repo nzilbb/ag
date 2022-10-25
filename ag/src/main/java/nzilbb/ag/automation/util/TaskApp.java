@@ -119,12 +119,20 @@ public class TaskApp extends AnnotatorWebApp {
                if (f.exists()) {
                   try {
                      parameters = IO.InputStreamToString(new FileInputStream(f));
-                  } catch(IOException exception) {}
+                  } catch(IOException exception) {
+                    System.err.println(exception.toString());
+                  }
                }
                echoContentType(x);
-               x.sendResponseHeaders(200, parameters.length());
+               byte[] data = parameters.getBytes();
+               x.sendResponseHeaders(200, data.length);
                OutputStream os = x.getResponseBody();
-               os.write(parameters.getBytes());
+               try {
+                 os.write(data);
+               } catch(IOException exception) {
+                 System.err.println(exception.toString());
+               }
+               os.flush();
                os.close();
             }});      
       

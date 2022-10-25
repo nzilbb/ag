@@ -172,9 +172,10 @@ public class AnnotatorWebApp extends StandAloneWebApp {
             public void handle(HttpExchange x) throws IOException {
                String json = annotator.getSchema().toJson().toString();
                x.getResponseHeaders().add("Content-Type", "application/json");
-               x.sendResponseHeaders(200, json.length());
+               byte[] data = json.getBytes();
+               x.sendResponseHeaders(200, data.length);
                OutputStream os = x.getResponseBody();
-               os.write(json.getBytes());
+               os.write(data);
                os.close();
             }});      
       
