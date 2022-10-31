@@ -68,36 +68,28 @@ public class TestMerger {
     originalGraph.trackChanges();
     Merger m = new Merger();
 
-    try
-    {
+    try {
       m.transform(originalGraph);
       Set<Change> changes = originalGraph.getTracker().getChanges();
       fail("Doesn't throw exception when editedGraph is unset: " + changes);
-    }
-    catch(TransformationException exception)
-    {  // TransformationException should be thrown
+    } catch(TransformationException exception) {  // TransformationException should be thrown
     }
       
     m.setEditedGraph(loadGraphFromJSON(f, schema));
     //m.setDebug(true);
 
-    try
-    {
+    try {
       m.transform(originalGraph);
       Set<Change> changes = originalGraph.getTracker().getChanges();
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       assertEquals("No changes - " + changes, 0, changes.size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(" " + exception.toString());
     }
 
   }
 
-  @Test public void identityMergeFragment() 
-    throws Exception
-  {
+  @Test public void identityMergeFragment() throws Exception {
     Schema schema = defaultSchema();
 
     File f = new File(getDir(), "identity__10.000-70.000.json");
@@ -108,22 +100,18 @@ public class TestMerger {
     Graph originalGraph = loadGraphFromJSON(f, schema);
     originalGraph.trackChanges();
 
-    try
-    {
+    try {
       m.transform(originalGraph);
       Set<Change> changes = originalGraph.getTracker().getChanges();
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       assertEquals("No changes - " + changes, 0, changes.size());
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       fail(" " + exception.toString());
     }
 
   }
 
-  @Test public void selectiveMerge()
-  {
+  @Test public void selectiveMerge() {
     Graph g = new Graph();
     g.setSchema(new Schema(
                   "who", "turn", "utterance", "word",
@@ -277,8 +265,7 @@ public class TestMerger {
     // m.setDebug(true);
     m.getNoChangeLayers().add("who");
     m.getNoChangeLayers().add("word");
-    try
-    {
+    try {
       m.transform(g);
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       g.commit();
@@ -311,9 +298,7 @@ public class TestMerger {
       assertEquals("word alignments updated", Double.valueOf(4.0), words[3].getStart().getOffset());
       assertEquals("word alignments updated", Double.valueOf(5.0), words[3].getEnd().getOffset());
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);
       exception.printStackTrace(pw);
@@ -324,8 +309,7 @@ public class TestMerger {
     }
   }
 
-  @Test public void extractedFragmentMerge()
-  {
+  @Test public void extractedFragmentMerge() {
     Graph g = new Graph();
     g.setSchema(new Schema(
                   "who", "turn", "utterance", "word",
@@ -460,8 +444,7 @@ public class TestMerger {
     
     Merger m = new Merger(editedFragment);
     // m.setDebug(true);
-    try
-    {
+    try {
       m.transform(originalFragment);
       if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
       g.commit();
@@ -482,9 +465,9 @@ public class TestMerger {
       assertNull("Turn start not in fragment",
                  originalFragment.getAnnotation("turn1").getStart());
       assertEquals("Turn end ID in fragment",
-                 "turnEnd", originalFragment.getAnnotation("turn1").getEndId());
+                   "turnEnd", originalFragment.getAnnotation("turn1").getEndId());
       assertNotNull("Turn end is in fragment",
-                 originalFragment.getAnnotation("turn1").getEnd());
+                    originalFragment.getAnnotation("turn1").getEnd());
 
       // ordinals are unchanged
       assertEquals("Utterance ordinal in fragmant",
@@ -494,9 +477,7 @@ public class TestMerger {
       assertEquals("Word 4 ordinal in fragmant",
                    4, originalFragment.getAnnotation("word4").getOrdinal());
       
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);
       exception.printStackTrace(pw);
@@ -507,10 +488,8 @@ public class TestMerger {
     }
   }
 
-    /*@Test*/ public void mergeNormalizeValidate()
-  {
-    try
-    {
+  /*@Test*/ public void mergeNormalizeValidate() {
+    try {
       File f = new File(getDir(), "complex-graph.json");
       assertTrue(f.exists());
       Graph graph = loadGraphFromJSON(f, defaultSchema());
@@ -527,24 +506,19 @@ public class TestMerger {
       m.transform(graph);
       
       // destroy any unreferenced anchors
-      for (Anchor a : new Vector<Anchor>(graph.getAnchors().values()))
-      {
+      for (Anchor a : new Vector<Anchor>(graph.getAnchors().values())) {
         // we should just be able to check that the size of the collections is zero
         // but there may be disconnect between tag layer anchor Id attributes and 
         // the parents' anchors
         boolean destroy = true;
-        for (Annotation an : a.getStartingAnnotations())
-        {
-          if (an.getChange() != Change.Operation.Destroy)
-          {
+        for (Annotation an : a.getStartingAnnotations()) {
+          if (an.getChange() != Change.Operation.Destroy) {
             destroy = false;
             break;
           }
         }
-        for (Annotation an : a.getEndingAnnotations())
-        {
-          if (an.getChange() != Change.Operation.Destroy)
-          {
+        for (Annotation an : a.getEndingAnnotations()) {
+          if (an.getChange() != Change.Operation.Destroy) {
             destroy = false;
             break;
           }
@@ -569,9 +543,7 @@ public class TestMerger {
       // v.setDebug(true);
       // v.transform(graph);
 
-    }
-    catch(TransformationException exception)
-    {
+    } catch(TransformationException exception) {
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);
       exception.printStackTrace(pw);
@@ -579,9 +551,7 @@ public class TestMerger {
       catch(IOException x) {}
       pw.close();	
       fail("merge() failed" + exception.toString() + "\n" + sw);
-    }
-    catch(Exception exception)
-    {
+    } catch(Exception exception) {
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);
       exception.printStackTrace(pw);
@@ -664,14 +634,14 @@ public class TestMerger {
    *  <li>unaligned word edits to aligned words with aligned segments</li>
    *  <li>unaligned word/language edits to aligned words with aligned segments</li>
    *  <li>move unaligned word to another utterance, with previously aligned words</li>
-   *  <li>change utterance alignments, with previously aligned words, to create mid-word utterance boundary</li>
+   *  <li>change utterance alignments, with previously aligned words, to create mid-word
+   * utterance boundary</li> 
    *  <li>merge utterances</li>
    *  <li>split utterances</li>
    * </ol>
    * Then test merge of graphs with mismatched granularities, to simulate exporting to TextGrid and then re-importing.
    */
-  @Test public void fragmentTests()
-  {
+  @Test public void fragmentTests() {
     tests("frag", null);
   }
 
@@ -687,38 +657,33 @@ public class TestMerger {
    *  <li>Changing parents - split a turn in two (insert intervening other-speaker turn)</li>
    * </ol>
    */
-  @Test public void graphTests()
-  {
+  @Test public void graphTests() {
     tests("graph", null);
   }
 
   /**
    * Standardised method for running graph fragment tests based on files in the test directory.
    * @param sDir Subdirectory name
-   * @param log null, or a filename substring like "001" to identify a test for which to switch on debug logging.
+   * @param log null, or a filename substring like "001" to identify a test for which to
+   * switch on debug logging.
    */ 
-  public void tests(String sDir, String log)
-  {
+  public void tests(String sDir, String log) {
     // get a sorted list of tests
     File dir = getDir();
     File subdir = new File(dir, sDir);
-    File[] afTests = subdir.listFiles(new FilenameFilter()
-      {
-        public boolean accept(File dir, String name)
-        {
+    File[] afTests = subdir.listFiles(new FilenameFilter() {
+        public boolean accept(File dir, String name) {
           return name.matches("^\\d+-.*\\.json$");
         }
       });
     TreeSet<String> fragments = new TreeSet<String>();
     for (File fTest : afTests) fragments.add(fTest.getName().replace(".json",""));
     // run the tests
-    for (String fragmentName : fragments)
-    {
+    for (String fragmentName : fragments) {
       System.out.println("Test "+sDir+": " + fragmentName);
       Schema schema = defaultSchema();
       File fOriginal = new File(subdir, fragmentName + ".json");
-      try
-      {
+      try {
         Graph originalGraph = loadGraphFromJSON(fOriginal, schema);
         // ensure fragments know they are fragments
         if (sDir.equals("frag")) originalGraph.setGraph(new Graph());
@@ -727,12 +692,9 @@ public class TestMerger {
         Graph editedGraph = loadGraphFromJSON(fEdited, schema);
         Merger m = new Merger(editedGraph);
         m.setDebug(log != null && fragmentName.indexOf(log) >= 0);
-        try
-        {
+        try {
           m.transform(originalGraph);
-        }
-        catch(TransformationException exception)
-        {
+        } catch(TransformationException exception) {
           StringWriter sw = new StringWriter();
           PrintWriter pw = new PrintWriter(sw);
           exception.printStackTrace(pw);
@@ -745,24 +707,19 @@ public class TestMerger {
         for (String message : m.getErrors()) System.out.println("ERROR: " + message);
 
         // destroy any unreferenced anchors
-        for (Anchor a : new Vector<Anchor>(originalGraph.getAnchors().values()))
-        {
+        for (Anchor a : new Vector<Anchor>(originalGraph.getAnchors().values())) {
           // we should just be able to check that the size of the collections is zero
           // but there may be disconnect between tag layer anchor Id attributes and 
           // the parents' anchors
           boolean destroy = true;
-          for (Annotation an : a.getStartingAnnotations())
-          {
-            if (an.getChange() != Change.Operation.Destroy)
-            {
+          for (Annotation an : a.getStartingAnnotations()) {
+            if (an.getChange() != Change.Operation.Destroy) {
               destroy = false;
               break;
             }
           }
-          for (Annotation an : a.getEndingAnnotations())
-          {
-            if (an.getChange() != Change.Operation.Destroy)
-            {
+          for (Annotation an : a.getEndingAnnotations()) {
+            if (an.getChange() != Change.Operation.Destroy) {
               destroy = false;
               break;
             }
@@ -780,8 +737,7 @@ public class TestMerger {
         Vector<String> actualLines = new Vector<String>();
         BufferedReader reader = new BufferedReader(new FileReader(fActual));
         String line = reader.readLine();
-        while (line != null)
-        {
+        while (line != null) {
           actualLines.add(line);
           line = reader.readLine();
         }
@@ -789,18 +745,15 @@ public class TestMerger {
         Vector<String> expectedLines = new Vector<String>();
         reader = new BufferedReader(new FileReader(fExpected));
         line = reader.readLine();
-        while (line != null)
-        {
+        while (line != null) {
           expectedLines.add(line);
           line = reader.readLine();
         }
         MinimumEditPath<String> comparator = new MinimumEditPath<String>();
         List<EditStep<String>> path = comparator.minimumEditPath(expectedLines, actualLines);
         String differences = "";
-        for (EditStep<String> step : path)
-        {
-          switch (step.getOperation())
-          {
+        for (EditStep<String> step : path) {
+          switch (step.getOperation()) {
             case CHANGE:
               differences += "\n"+fExpected.getPath()+":"+(step.getFromIndex()+1)+": Expected:\n" 
                 + step.getFrom() 
@@ -822,9 +775,7 @@ public class TestMerger {
         if (m.getErrors().size() > 0) fail(m.getErrors().toString());
 
         fActual.delete();
-      }
-      catch(Exception exception)
-      {
+      } catch(Exception exception) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         exception.printStackTrace(pw);
@@ -840,8 +791,7 @@ public class TestMerger {
    * Returns the default schema for testing.
    * @return A test schema that matches the test files.
    */
-  public Schema defaultSchema()
-  {
+  public Schema defaultSchema() {
     return new Schema(
       "who", "turn", "utterance", "word",
       new Layer("topic", "topic", Constants.ALIGNMENT_INTERVAL, 
@@ -901,18 +851,13 @@ public class TestMerger {
    * Getter for {@link #fDir}: Directory for text files.
    * @return Directory for text files.
    */
-  public File getDir() 
-  { 
-    if (fDir == null)
-    {
-      try
-      {
+  public File getDir() { 
+    if (fDir == null) {
+      try {
         URL urlThisClass = getClass().getResource(getClass().getSimpleName() + ".class");
         File fThisClass = new File(urlThisClass.toURI());
         fDir = fThisClass.getParentFile();
-      }
-      catch(Throwable t)
-      {
+      } catch(Throwable t) {
         System.out.println("" + t);
       }
     }
@@ -936,8 +881,8 @@ public class TestMerger {
    * @throws FileNotFoundException If <var>file</var> doesn't exist.
    */
   public Graph loadGraphFromJSON(File file, Schema schema)
-    throws FileNotFoundException, IOException, SerializationException, SerializationParametersMissingException, SerializerNotConfiguredException
-  {
+    throws FileNotFoundException, IOException, SerializationException,
+    SerializationParametersMissingException, SerializerNotConfiguredException {
     // create deserializer
     JSONSerialization s = new JSONSerialization();
     // configure it with its default options
@@ -959,8 +904,7 @@ public class TestMerger {
    * @throws IOException On IO error.
    */
   public void saveGraphToJSON(File file, Graph graph)
-    throws IOException, SerializationException, SerializerNotConfiguredException
-  {
+    throws IOException, SerializationException, SerializerNotConfiguredException {
     // create deserializer
     JSONSerialization s = new JSONSerialization();
     s.setSortAnchors(true);
@@ -978,8 +922,7 @@ public class TestMerger {
 
   } // end of loadGraphFromJSON()
 
-  public static void main(String args[]) 
-  {
+  public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.ag.util.TestMerger");
   }
 }
