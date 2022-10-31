@@ -1051,6 +1051,7 @@ public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
                   // find the correct anchors
                   Annotation[] overlapping = graph.overlappingAnnotations(startChar, endChar, wordLayer.getId());
                   if (overlapping.length == 0) {
+                    if (errors == null) errors = new SerializationException();
                     errors.addError(
                       SerializationException.ErrorType.Tokenization,
                       "Transcript " + d + " label "+l+" \""+annotation+"\""
@@ -1070,6 +1071,7 @@ public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
               } // parameter for the layer
               
             } catch (ParseException exception) {
+              if (errors == null) errors = new SerializationException();
               errors.addError(
                 SerializationException.ErrorType.Tokenization,
                 "Transcript " + d + " label "+e
@@ -1107,6 +1109,7 @@ public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
                 Annotation utt = utterances.elementAt(u);
                 JsonArray uttStartEnd = utteranceAnchors.getJsonArray(u);
                 if (uttStartEnd.size() < 2) {
+                  if (errors == null) errors = new SerializationException();
                   errors.addError(SerializationException.ErrorType.InvalidDocument,
                                   "Too few anchor offsets for utterance " + u);
                 } else {
