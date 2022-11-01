@@ -2,8 +2,8 @@
 startLoading();
 
 // show annotator version
-getText("getVersion", function(e) {
-    document.getElementById("version").innerHTML = this.responseText;
+getText("getVersion", version => {
+    document.getElementById("version").innerHTML = version;
 });
 
 var taskId = window.location.search.substring(1);
