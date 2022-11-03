@@ -33,7 +33,8 @@ import javax.json.JsonObject;
 import nzilbb.ag.MediaFile;
 
 public class TestMediaFile {
-  
+
+  /** Ensure deserialization from JSON works. */
   @Test public void fromJson() {
     MediaFile a = new MediaFile(
       Json.createObjectBuilder()
@@ -49,6 +50,7 @@ public class TestMediaFile {
       assertEquals("Audio", a.getName());
   }
   
+  /** Ensure serialization to JSON works. */
   @Test public void toJson() {
     MediaFile a = new MediaFile()
       .setTrackSuffix("_mic")
@@ -61,7 +63,35 @@ public class TestMediaFile {
     assertEquals("https://somewhere/something.wav", json.getString("url"));
     assertEquals("Audio", json.getString("name"));
   }
-  
+
+
+  /** Ensure MIME type inference works for all file types, include unknown types. */
+  @Test public void mimeTypeInference() {
+    
+    // test known types
+    assertEquals("audio/wav", new MediaFile().setName("something.wav").getMimeType());
+    assertEquals("audio/mpeg", new MediaFile().setName("something.mp3").getMimeType());
+    assertEquals("audio/aiff", new MediaFile().setName("something.aif").getMimeType());
+    assertEquals("audio/basic", new MediaFile().setName("something.au").getMimeType());
+    assertEquals("audio/ogg", new MediaFile().setName("something.oga").getMimeType());
+    assertEquals("audio/flac", new MediaFile().setName("something.flac").getMimeType());
+    assertEquals("video/mp4", new MediaFile().setName("something.mp4").getMimeType());
+    assertEquals("video/mpeg", new MediaFile().setName("something.mpg").getMimeType());
+    assertEquals("video/avi", new MediaFile().setName("something.avi").getMimeType());
+    assertEquals("video/quicktime", new MediaFile().setName("something.mov").getMimeType());
+    assertEquals("audio/x-ms-wma", new MediaFile().setName("something.wma").getMimeType());
+    assertEquals("video/x-ms-wmv", new MediaFile().setName("something.wmv").getMimeType());
+    assertEquals("video/ogg", new MediaFile().setName("something.ogv").getMimeType());
+    assertEquals("video/webm", new MediaFile().setName("something.webm").getMimeType());
+    assertEquals("image/jpeg", new MediaFile().setName("something.jpg").getMimeType());
+    assertEquals("image/gif", new MediaFile().setName("something.gif").getMimeType());
+    assertEquals("image/png", new MediaFile().setName("something.png").getMimeType());
+
+    // unknown types
+    assertEquals("application/json", new MediaFile().setName("something.json").getMimeType());
+    assertEquals("application/pm", new MediaFile().setName("something.pm").getMimeType());
+  }
+
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.ag.TestMediaFile");
   }

@@ -242,7 +242,12 @@ public class MediaFile implements CloneableBean {
    */
   protected void inferType() {
     String extension = getExtension().toLowerCase();
-    if (SuffixToMimeType().containsKey(extension)) setMimeType(SuffixToMimeType().get(extension));
+    if (SuffixToMimeType().containsKey(extension)) {
+      setMimeType(SuffixToMimeType().get(extension));
+    } else {
+      // to ensure all files have a MIME type, just set it to "application/" + ext
+      setMimeType("application/"+extension);
+    }
   } // end of inferType()
    
   /**
