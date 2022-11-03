@@ -32,37 +32,37 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import nzilbb.ag.MediaFile;
 
-public class TestMediaFile
-{      
-   @Test public void fromJson() {
-      MediaFile a = new MediaFile(
-         Json.createObjectBuilder()
-         .add("mimeType", "audio/wav")
-         .add("url", "https://somewhere/something.wav")
-         .add("name", "Audio")
-         .add("somethingElse", 100)
-         .build());
-      
+public class TestMediaFile {
+  
+  @Test public void fromJson() {
+    MediaFile a = new MediaFile(
+      Json.createObjectBuilder()
+      .add("mimeType", "audio/wav")
+      .add("url", "https://somewhere/something.wav")
+      .add("name", "Audio")
+      .add("somethingElse", 100)
+      .build());
+    
       assertNull(a.getTrackSuffix());
       assertEquals("audio/wav", a.getMimeType());
       assertEquals("https://somewhere/something.wav", a.getUrl());
       assertEquals("Audio", a.getName());
-   }
-   
-   @Test public void toJson() {
-      MediaFile a = new MediaFile()
-         .setTrackSuffix("_mic")
-         .setMimeType("audio/wav")
-         .setUrl("https://somewhere/something.wav")
-         .setName("Audio");
-      JsonObject json = a.toJson();
-      assertEquals("_mic", json.getString("trackSuffix"));
-      assertEquals("audio/wav", json.getString("mimeType"));
-      assertEquals("https://somewhere/something.wav", json.getString("url"));
-      assertEquals("Audio", json.getString("name"));
-   }
-
-   public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.ag.TestMediaFile");
-   }
+  }
+  
+  @Test public void toJson() {
+    MediaFile a = new MediaFile()
+      .setTrackSuffix("_mic")
+      .setMimeType("audio/wav")
+      .setUrl("https://somewhere/something.wav")
+      .setName("Audio");
+    JsonObject json = a.toJson();
+    assertEquals("_mic", json.getString("trackSuffix"));
+    assertEquals("audio/wav", json.getString("mimeType"));
+    assertEquals("https://somewhere/something.wav", json.getString("url"));
+    assertEquals("Audio", json.getString("name"));
+  }
+  
+  public static void main(String args[]) {
+    org.junit.runner.JUnitCore.main("nzilbb.ag.TestMediaFile");
+  }
 }
