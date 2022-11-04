@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.doccano</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 
   <name>nzilbb.formatter.doccano</name>
   <description>JSONL format for export/import with doccano</description>
@@ -45,7 +45,10 @@
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
-            <manifest addDefaultImplementationEntries="true" />
+            <manifest addDefaultImplementationEntries="true">
+              <addClasspath>true</addClasspath>
+              <mainClass>${formatter.class}</mainClass>
+            </manifest>
             <manifestEntries>
               <nzilbb-ag-serialize-GraphSerializer>${formatter.class}</nzilbb-ag-serialize-GraphSerializer>
               <nzilbb-ag-serialize-GraphDeserializer>${formatter.class}</nzilbb-ag-serialize-GraphDeserializer>

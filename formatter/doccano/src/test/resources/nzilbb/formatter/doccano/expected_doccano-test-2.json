@@ -79,10 +79,6 @@
             "offset": 45.0,
             "confidence": 100
         },
-        "e": {
-            "offset": null,
-            "confidence": 10
-        },
         "g": {
             "offset": null,
             "confidence": 10
@@ -95,15 +91,19 @@
             "offset": null,
             "confidence": 10
         },
-        "r": {
-            "offset": null,
-            "confidence": 10
-        },
-        "t": {
+        "m": {
             "offset": null,
             "confidence": 10
         },
         "v": {
+            "offset": null,
+            "confidence": 10
+        },
+        "x": {
+            "offset": null,
+            "confidence": 10
+        },
+        "z": {
             "offset": null,
             "confidence": 10
         }
@@ -111,29 +111,29 @@
     "who": [
         {
             "id": "4",
-            "label": "speaker1",
+            "label": "speakr 1",
             "startId": null,
             "endId": null,
             "confidence": 100,
             "turn": [
                 {
                     "id": "2",
-                    "label": "speaker1",
+                    "label": "speakr 1",
                     "startId": "1",
                     "endId": "5",
                     "confidence": 100,
                     "role": [
                         {
-                            "id": "12",
+                            "id": "16",
                             "label": "subject",
-                            "startId": "i",
-                            "endId": "k"
+                            "startId": "k",
+                            "endId": "m"
                         }
                     ],
                     "utterance": [
                         {
                             "id": "6",
-                            "label": "speaker1:\tThe 'quick brown' fox jumps -",
+                            "label": "speakr 1:\tThe 'quick brown' fox jumps -",
                             "startId": "1",
                             "endId": "5",
                             "confidence": 100
@@ -141,60 +141,60 @@
                     ],
                     "word": [
                         {
-                            "id": "f",
+                            "id": "h",
                             "label": "The",
                             "startId": "1",
-                            "endId": "e",
-                            "confidence": 100
-                        },
-                        {
-                            "id": "h",
-                            "label": "'quick",
-                            "startId": "e",
                             "endId": "g",
-                            "confidence": 100,
-                            "pos": [
-                                {
-                                    "id": "10",
-                                    "label": "ADJ",
-                                    "startId": "e",
-                                    "endId": "g"
-                                }
-                            ]
+                            "confidence": 100
                         },
                         {
                             "id": "j",
-                            "label": "brown'",
+                            "label": "'quick",
                             "startId": "g",
                             "endId": "i",
-                            "confidence": 100
-                        },
-                        {
-                            "id": "l",
-                            "label": "fox",
-                            "startId": "i",
-                            "endId": "k",
                             "confidence": 100,
                             "pos": [
                                 {
-                                    "id": "11",
-                                    "label": "N",
-                                    "startId": "i",
-                                    "endId": "k"
+                                    "id": "14",
+                                    "label": "ADJ",
+                                    "startId": "g",
+                                    "endId": "i"
                                 }
                             ]
                         },
                         {
+                            "id": "l",
+                            "label": "brown'",
+                            "startId": "i",
+                            "endId": "k",
+                            "confidence": 100
+                        },
+                        {
                             "id": "n",
-                            "label": "jumps -",
+                            "label": "fox",
                             "startId": "k",
+                            "endId": "m",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "15",
+                                    "label": "N",
+                                    "startId": "k",
+                                    "endId": "m"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "p",
+                            "label": "jumps -",
+                            "startId": "m",
                             "endId": "5",
                             "confidence": 100,
                             "pos": [
                                 {
-                                    "id": "13",
+                                    "id": "17",
                                     "label": "V",
-                                    "startId": "k",
+                                    "startId": "m",
                                     "endId": "5"
                                 }
                             ]
@@ -205,29 +205,29 @@
         },
         {
             "id": "7",
-            "label": "speaker2",
+            "label": "speakr 2",
             "startId": null,
             "endId": null,
             "confidence": 100,
             "turn": [
                 {
                     "id": "8",
-                    "label": "speaker2",
+                    "label": "speakr 2",
                     "startId": "5",
                     "endId": "a",
                     "confidence": 100,
                     "role": [
                         {
-                            "id": "16",
+                            "id": "1a",
                             "label": "object",
-                            "startId": "v",
+                            "startId": "z",
                             "endId": "a"
                         }
                     ],
                     "utterance": [
                         {
                             "id": "b",
-                            "label": "speaker2:\tover the lazy \"dog\" .",
+                            "label": "speakr 2:\tover the lazy \"dog\" .",
                             "startId": "5",
                             "endId": "a",
                             "confidence": 100
@@ -235,45 +235,45 @@
                     ],
                     "word": [
                         {
-                            "id": "s",
+                            "id": "w",
                             "label": "over",
                             "startId": "5",
-                            "endId": "r",
-                            "confidence": 100
-                        },
-                        {
-                            "id": "u",
-                            "label": "the",
-                            "startId": "r",
-                            "endId": "t",
-                            "confidence": 100
-                        },
-                        {
-                            "id": "w",
-                            "label": "lazy",
-                            "startId": "t",
                             "endId": "v",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "y",
+                            "label": "the",
+                            "startId": "v",
+                            "endId": "x",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "10",
+                            "label": "lazy",
+                            "startId": "x",
+                            "endId": "z",
                             "confidence": 100,
                             "pos": [
                                 {
-                                    "id": "14",
+                                    "id": "18",
                                     "label": "ADJ",
-                                    "startId": "t",
-                                    "endId": "v"
+                                    "startId": "x",
+                                    "endId": "z"
                                 }
                             ]
                         },
                         {
-                            "id": "y",
+                            "id": "12",
                             "label": "\"dog\" .",
-                            "startId": "v",
+                            "startId": "z",
                             "endId": "a",
                             "confidence": 100,
                             "pos": [
                                 {
-                                    "id": "15",
+                                    "id": "19",
                                     "label": "N",
-                                    "startId": "v",
+                                    "startId": "z",
                                     "endId": "a"
                                 }
                             ]

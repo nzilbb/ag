@@ -58,6 +58,7 @@ import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
 import nzilbb.ag.*;
+import nzilbb.ag.cli.Deserialize;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
@@ -105,7 +106,7 @@ import nzilbb.util.Timers;
  * new layers, not for editing existing layers.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
+public class JSONLSerialization extends Deserialize implements GraphDeserializer, GraphSerializer {
 
   protected Vector<String> warnings;
    
@@ -997,18 +998,21 @@ public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
         
         // delete tokens that are turn-start markers
         for (Annotation t : graph.all(turnLayer.getId())) {
-          Annotation firstWord = t.first(wordLayer.getId());
-          if (firstWord != null && firstWord.getLabel().equals(t.getLabel() + ":")) {
-            Annotation second = firstWord.getNext();
-            if (second != null // there is a second word
+          // turn-start markers can be multiple words
+          int wordsToDelete = t.getLabel().split(" ").length;
+          Annotation[] words = t.all(wordLayer.getId());
+          for (int w = 0; w < wordsToDelete && w < words.length; w++) {            
+            Annotation word = words[w];
+            Annotation nextWord = word.getNext();
+            if (nextWord != null // there is a next word
                 // and it's not the start of a second utterance
-                && second.getStart().startOf(schema.getUtteranceLayer().getId()).size() == 0) {
-              // join the second word (and any annotations) back to the start of the first word
-              for (Annotation startsHere : second.getStart().getStartingAnnotations()) {
-                startsHere.setStart(firstWord.getStart());
+                && nextWord.getStart().startOf(schema.getUtteranceLayer().getId()).size() == 0) {
+              // join the next word (and any annotations) back to the start of the first word
+              for (Annotation startsHere : nextWord.getStart().getStartingAnnotations()) {
+                startsHere.setStart(word.getStart());
               }
             }
-            firstWord.destroy();
+            word.destroy();
           }
         } // next turn
         graph.commit();
@@ -1182,4 +1186,54 @@ public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
     return warnings.toArray(new String[0]);
   }
 
+  /** Command line interface, which takes transcript file names, and outputs JSON-encoded
+   * annotation graphs. */
+  public static void main(String argv[]) {
+    JSONLSerialization application = new JSONLSerialization();
+    if (application.processArguments(argv)) {
+      application.start();
+    }
+  }
+  /**
+   * Specify the schema to used by  {@link Deserialize#convert(File)}.
+   * @return The schema.
+   */
+  @Override protected Schema getDefaultSchema() {
+    Schema schema = super.getDefaultSchema();
+    schema.addLayer(
+      new Layer("transcript_author", "Transcript Author")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("transcript_date", "Date of recording")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("transcript_language", "Transcript Language")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("language", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false).setParentId("turn"));
+    schema.addLayer(
+      new Layer("topic", "Topic")         
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false));
+    schema.addLayer(
+      new Layer("noise", "Noises")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false));
+    schema.addLayer(
+      new Layer("comment", "Comments").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(true).setSaturated(false));
+    schema.addLayer(
+      new Layer("pronounce", "Pronunciation tags").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("lexical", "Lexical tags").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    return schema;
+  }
 } // end of class JSONLSerialization
