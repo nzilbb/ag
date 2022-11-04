@@ -1049,7 +1049,10 @@ public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
                 if (l != null && l.getId() != null) {
 
                   // find the correct anchors
-                  Annotation[] overlapping = graph.overlappingAnnotations(startChar, endChar, wordLayer.getId());
+                  // (word end offsets include the space after the word, so we add 1 to startChar
+                  //  to ensure we skip words just before the start of the annotation)
+                  Annotation[] overlapping = graph.overlappingAnnotations(
+                    startChar + 1.0, endChar, wordLayer.getId());
                   if (overlapping.length == 0) {
                     if (errors == null) errors = new SerializationException();
                     errors.addError(
@@ -1075,7 +1078,7 @@ public class JSONLSerialization implements GraphDeserializer, GraphSerializer {
               errors.addError(
                 SerializationException.ErrorType.Tokenization,
                 "Transcript " + d + " label "+e
-                +": Could not parse 'layerId:label' from \""+annotation+"\" : "
+                +": Could not parse 'layerId:label' from \""+annotation+"\" : " // TODO just assume label:label instead?
                 + exception.getMessage());
             }
             e++;
