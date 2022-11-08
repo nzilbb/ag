@@ -1109,6 +1109,19 @@ public class JSONLSerialization extends Deserialize implements GraphDeserializer
               } else {
                 graph.setOffsetUnits(Constants.UNIT_SECONDS);
               }
+
+              // unset word anchors first, so there can't be accidental confusion between
+              // word character offsets and utterance time offsets
+              for (Annotation word : graph.all(wordLayer.getId())) {
+                if (word.getStart().startOf(utteranceLayer.getId()).size() == 0
+                    && word.getStart().endOf(utteranceLayer.getId()).size() == 0) {
+                  word.getStart().setOffset(null);
+                }
+                if (word.getEnd().endOf(utteranceLayer.getId()).size() == 0
+                    && word.getEnd().startOf(utteranceLayer.getId()).size() == 0) {
+                  word.getEnd().setOffset(null);
+                }
+              } // next utterance              
               
               // update offsets
               double lastEndOffset = 0.0;
@@ -1144,16 +1157,6 @@ public class JSONLSerialization extends Deserialize implements GraphDeserializer
                   lastEndOffset = endOffset;
                 } // there are two anchors
               } // next utterance
-              
-              // unset word anchor offsets
-              for (Annotation word : graph.all(wordLayer.getId())) {
-                if (word.getStart().startOf(utteranceLayer.getId()).size() == 0) {
-                  word.getStart().setOffset(null);
-                }
-                if (word.getEnd().endOf(utteranceLayer.getId()).size() == 0) {
-                  word.getEnd().setOffset(null);
-                }
-              } // next word
               
             } // number of anchors ok
           } // utterance anchors exist
