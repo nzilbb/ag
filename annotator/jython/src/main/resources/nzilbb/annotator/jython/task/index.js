@@ -29,7 +29,7 @@ getSchema(s => {
             if (parameters == null || parameters == "") {
                 setScript("# for each turn in the transcript\n"
 		          +"for turn in transcript.all(\""+schema.turnLayerId+"\"):\n"
-		          +"  if annotator.cancelling: break; # cancelled by the user\n"
+		          +"  if annotator.cancelling: break # cancelled by the user\n"
 		          +"  # for each word\n"
 		          +"  for word in turn.all(\""+schema.wordLayerId+"\"):\n"
 		          +"    # change the following line to tag the word as desired \n"
