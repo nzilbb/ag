@@ -36,10 +36,10 @@
         length:</p> 
       <pre>
 <span style="color:#8b4513;"># for each turn in the transcript</span>
-<span style="color:#800080;">for</span> turn <span style="color:#800080;">in</span> transcript.all(&quot;turns&quot;):
+<span style="color:#800080;">for</span> turn <span style="color:#800080;">in</span> transcript.all(&quot;turn&quot;):
 &nbsp; <span style="color:#800080;">if</span> annotator.cancelling <span style="color:#800080;">break</span> <span style="color:#8b4513;"># cancelled by the user</span>
 &nbsp; <span style="color:#8b4513;"># for each word</span>
-&nbsp; <span style="color:#800080;">for</span> word <span style="color:#800080;">in</span> turn.all(&quot;transcript&quot;):
+&nbsp; <span style="color:#800080;">for</span> word <span style="color:#800080;">in</span> turn.all(&quot;word&quot;):
 &nbsp;&nbsp;&nbsp; <span style="color:#8b4513;"># tag the word with it's length</span>
 &nbsp;&nbsp;&nbsp; word.createTag("length", &quot;length: &quot; + str(len(word.label))
 &nbsp;&nbsp;&nbsp; log("Tagged word: " + word.label)
