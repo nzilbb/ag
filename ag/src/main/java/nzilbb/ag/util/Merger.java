@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -30,10 +30,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -67,7 +69,7 @@ import nzilbb.util.Switch;
 @ProgramDescription(value="Merges changes from one JSON-encoded annotation graph into another")
 public class Merger extends Transform implements GraphTransformer {
   // Attributes:
-   
+  
   /**
    * Fatal errors raised during the last {@link #transform(Graph)}.
    * @see #getErrors()
@@ -312,9 +314,9 @@ public class Merger extends Transform implements GraphTransformer {
        * @param from The element from the source sequence, which may be null,
        * @param to The element from the destination sequence, which may be null.
        * @return An edit step between the two elements. {@link EditStep#getFrom()} is set to
-       * <var>from</var>, {@link EditStep#getTo()} is set to <var>to</var>, {@link
-       * EditStep#getDistance()} is set to the computed edit distance between these two elements,
-       * and {@link EditStep#getOperation()} is set to either
+       * <var>from</var>, {@link EditStep#getTo()} is set to <var>to</var>,
+       * {@link EditStep#getDistance()} is set to the computed edit distance between these two 
+       * elements,and {@link EditStep#getOperation()} is set to either
        * <var>EditStep.StepOperation.NONE</var> or <var>EditStep.StepOperation.CHANGE</var>. 
        */
       public EditStep<Annotation> compare(Annotation a1, Annotation a2) {
@@ -347,7 +349,7 @@ public class Merger extends Transform implements GraphTransformer {
               String s2 = a2.getLabel().replaceAll("[^\\p{javaLetter}\\p{javaDigit}]","").toLowerCase();
               if (s1.length() <= 0 || s2.length() <= 0 
                   || (layer.containsKey("@type") 
-                      && layer.get("@type").equals("D"))) { // phonological layer TODO formalise layer types
+                      && layer.getType().equals("ipa"))) { // phonological layer TODO formalise layer types
                 s1 = a1.getLabel();
                 s2 = a2.getLabel(); // for all-punctuation annotations
               }
@@ -405,7 +407,7 @@ public class Merger extends Transform implements GraphTransformer {
                       // or (probably) phone layer
                       || (layer.getParentId().equals(schema.getWordLayerId())
                           && layer.getAlignment() == Constants.ALIGNMENT_INTERVAL)) {
-                    dImportance = 0.01;
+                    dImportance = 0.0;
                   }			
                   // instantaneous annotations need to have more similar offsets than intervals
                   if (a1.getInstantaneous()) { // && a2.getInstantaneous(), but we know it must be
@@ -449,7 +451,7 @@ public class Merger extends Transform implements GraphTransformer {
               } // neither an instant, or both an instant
             } // not a graph tag
           } // not already mapped
-
+          
           step.setStepDistance(iWeight);
           if (!a1.getLabel().equals(a2.getLabel())) { // label would actually change
             step.setOperation(EditStep.StepOperation.CHANGE);
@@ -503,11 +505,10 @@ public class Merger extends Transform implements GraphTransformer {
    
   /**
    * Merges {@link #editedGraph} into the given graph.  
-   * The changes are detected and applied to the <var>graph</var>, and returned in a vector of 
-   * {@link Change} objects.
+   * The changes are detected and applied to the <var>graph</var>, which is returned.
    * <p>Assumptions:
    * <ul>
-   *  <li> <var>editedGraph</var> represents a possibly partial 
+   *  <li> {@link #editedGraph} represents a possibly partial 
    *       (i.e. with a subset of layers) version <var>graph</var> with some changes
    *       applied to it.</li> 
    *  <li> {@link #editedGraph} is valid and has a valid layer hierarchy (e.g. no orphaned
@@ -605,20 +606,173 @@ public class Merger extends Transform implements GraphTransformer {
 
     // phase 1. - map annotations in graph to annotations in editedGraph horizontally
     log("phase 1: map annotations");
+    String rootLayerId = graph.getSchema().getRoot().getId();
 
     // map graphs together manually, to help top-level parent determination
-    setCounterparts(graph, editedGraph); 
+    setCounterparts(graph, editedGraph);
+
+    // if participant/turn/utterance layers match perfectly, probably it's just a graph
+    // reloaded after annotation of some other layer, so we map word tokens by utterance
+    // instead of graph-wide, which saves resources and time, and reduces the risk of
+    // weird mappings
+    HashSet<String> alreadyMapped = new HashSet<String>();
+    if (schema.getParticipantLayerId() != null
+        && schema.getTurnLayerId() != null
+        && schema.getUtteranceLayerId() != null
+        && schema.getWordLayerId() != null) { // participant/turn/utterance layers are set
+
+      // this doesn't work if  all words are unanchored
+      Optional<Annotation> semiachoredUneditedWord = Arrays.stream(
+        graph.all(schema.getWordLayerId()))
+        .filter(w -> w.getStart().getOffset() != null || w.getEnd().getOffset() != null)
+        .findAny();
+      Optional<Annotation> semiachoredEditedWord = Arrays.stream(
+        editedGraph.all(schema.getWordLayerId()))
+        .filter(w -> w.getStart().getOffset() != null || w.getEnd().getOffset() != null)
+        .findAny();
+      if (semiachoredUneditedWord.isPresent() && semiachoredEditedWord.isPresent()) {
+
+        // map participants
+        mapByParents(schema.getParticipantLayer(), graph);
+        alreadyMapped.add(schema.getParticipantLayerId());
+        Optional<Annotation> unmappedUneditedParticipant = Arrays.stream(
+          graph.all(schema.getParticipantLayerId()))
+          .filter(t -> !t.containsKey("@other"))
+          .findAny();
+        Optional<Annotation> unmappedEditedParticipant = Arrays.stream(
+          editedGraph.all(schema.getParticipantLayerId()))
+          .filter(t -> !t.containsKey("@other"))
+          .findAny();
+        // are participants perfectly mapped?
+        if (!unmappedUneditedParticipant.isPresent() && !unmappedEditedParticipant.isPresent()) {
+        
+          // map turns
+          mapByParents(schema.getTurnLayer(), graph);
+          alreadyMapped.add(schema.getTurnLayerId());
+          Optional<Annotation> unmappedUneditedTurn = Arrays.stream(
+            graph.all(schema.getTurnLayerId()))
+            .filter(t -> !t.containsKey("@other"))
+            .findAny();
+          Optional<Annotation> unmappedEditedTurn = Arrays.stream(
+            editedGraph.all(schema.getTurnLayerId()))
+            .filter(t -> !t.containsKey("@other"))
+            .findAny();
+          // are turns perfectly mapped?
+          if (!unmappedUneditedTurn.isPresent() && !unmappedEditedTurn.isPresent()) {
+          
+            // map utterances
+            mapByParents(schema.getUtteranceLayer(), graph);
+            alreadyMapped.add(schema.getUtteranceLayerId());
+            Optional<Annotation> unmappedUneditedUtterance = Arrays.stream(
+              graph.all(schema.getUtteranceLayerId()))
+              .filter(t -> !t.containsKey("@other"))
+              .findAny();
+            Optional<Annotation> unmappedEditedUtterance = Arrays.stream(
+              editedGraph.all(schema.getUtteranceLayerId()))
+              .filter(t -> !t.containsKey("@other"))
+              .findAny();
+            // are utterances perfectly mapped?
+            if (!unmappedUneditedUtterance.isPresent() && !unmappedEditedUtterance.isPresent()) {
+
+              // // map words by turn, which allows words to move utterances
+              // mapByParents(schema.getWordLayer(), graph);
+              // alreadyMapped.add(schema.getWordLayerId());
+              // System.err.println("WORDS MAPPED BY TURN " + graph.getId()); // TODO remove this
+
+              // there's no re-partitioning of utterances in the edited graph - it probably
+              // just contains new/adjusted annotations on other layers, so we map words by
+              // utterance instead of by turn, saving time and memory
+
+              // link utterances to their words
+              graph.assignWordsToUtterances();
+              editedGraph.assignWordsToUtterances();
+
+              // all words have null offsets, this doesn't work
+
+              // map words by utterance
+              boolean thereWereUtteranceWords = false;
+              for (Annotation utterance : graph.all(schema.getUtteranceLayerId())) {
+                TreeSet<Annotation> uneditedWords 
+                  = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
+                List<Annotation> words = (List<Annotation>)utterance.get("@words");
+                if (words != null) {
+                  uneditedWords.addAll(words);
+              
+                  Annotation editedUtterance = (Annotation)utterance.get("@other");
+                  TreeSet<Annotation> editedWords 
+                    = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
+                  words = (List<Annotation>)editedUtterance.get("@words");
+                  if (words != null) {
+                    editedWords.addAll(words);
+                  
+                    mapAnnotationsForMerge(
+                      schema.getWordLayer(), uneditedWords, editedWords, rootLayerId);
+                    thereWereUtteranceWords = true;
+                  } // there were edited words
+                
+                  // don't need utterance/word assignment any more
+                  editedUtterance.remove("@words");
+                } // there were unedited words
+
+                // don't need utterance/word assignment any more
+                utterance.remove("@words");
+              } // next parent
+              if (thereWereUtteranceWords) {
+                alreadyMapped.add(schema.getWordLayerId());
+                log("words mapped by utterance");
+                // patch up cases where words migrated from one utterance to the next/previous
+                Arrays.stream(
+                  graph.all(schema.getWordLayerId()))
+                  .filter(t -> !t.containsKey("@other"))
+                  .forEach(word -> {
+                      // has the word migrated to the previous utterance?
+                      Annotation previousWord = word.getPrevious();
+                      if (previousWord != null && previousWord.containsKey("@other")) {
+                        Annotation previousEditedWord = (Annotation)previousWord.get("@other");
+                        Annotation nextEditedWord = previousEditedWord.getNext();
+                        if (nextEditedWord != null // the previous edited word has a next
+                            && nextEditedWord.getLabel().equals(word.getLabel())) { // labels match
+                          setCounterparts(word, nextEditedWord);
+                          return;
+                        }
+                      } // there's a previous word
+                      // has the word migrated to the next utterances?
+                      Annotation nextWord = word.getNext();
+                      if (nextWord != null && nextWord.containsKey("@other")) {
+                        Annotation nextEditedWord = (Annotation)nextWord.get("@other");
+                        Annotation previousEditedWord = nextEditedWord.getPrevious();
+                        if (previousEditedWord != null // the next edited word has a previous
+                            && previousEditedWord.getLabel().equals(word.getLabel())) { //labels match
+                          setCounterparts(word, previousEditedWord);
+                        }
+                      } // there's a next word
+                    });
+                // // do a final pass mapping by turn, to allow words to migrate to neighboring utterances
+                // mapByParents(schema.getWordLayer(), graph);
+
+              }
+            
+            } // utterances are perfectly mapped
+          } // turns are perfectly mapped
+        } // participants are perfectly mapped
+      } // at least one word has an anchor with an offset
+    } // participant/turn/utterance/word layers are set
+    
     for (Layer layer : topDownLayersInEditedGraph) {
 
+      // we may have already mapped this layer above
+      if (alreadyMapped.contains(layer.getId())) continue;
+      
+      // if turn/utterance/word have not already been mapped above then
       // for direct descendents of 'turn' (i.e. 'utterance' and 'word')
       // allow mapping across the the whole graph, so that if the edits involve partitioning
       // turns differently, utterances/words can migrate to a neighboring turn
-      // TODO disabling this might be a good idea, and also would also be generally less resource hungry
+      
       if ((schema.getTurnLayerId() != null
            && schema.getTurnLayerId().equals(layer.getParentId()))
           // (or it's a top level layer)
           || layer.getParentId() == null) {
-        
+
         TreeSet<Annotation> uneditedAnnotations 
           = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
         uneditedAnnotations.addAll(Arrays.asList(graph.all(layer.getId())));
@@ -627,22 +781,9 @@ public class Merger extends Transform implements GraphTransformer {
           = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
         editedAnnotations.addAll(Arrays.asList(editedGraph.all(layer.getId())));
 	 
-        mapAnnotationsForMerge(layer, uneditedAnnotations, editedAnnotations);
+        mapAnnotationsForMerge(layer, uneditedAnnotations, editedAnnotations, rootLayerId);
       } else { // otherwise, only allow peers to map - i.e. annotations with the mapped parents
-        for (Annotation parent : graph.all(layer.getParentId())) {
-          if (parent.containsKey("@other")) {
-            TreeSet<Annotation> uneditedAnnotations 
-              = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
-            uneditedAnnotations.addAll(parent.getAnnotations(layer.getId()));
-
-            Annotation editedParent = (Annotation)parent.get("@other");
-            TreeSet<Annotation> editedAnnotations 
-              = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
-            editedAnnotations.addAll(editedParent.getAnnotations(layer.getId()));
-            
-            mapAnnotationsForMerge(layer, uneditedAnnotations, editedAnnotations);
-          } // the parent has a counterpart in the edited graph
-        } // next parent
+        mapByParents(layer, graph);
       } // not a turn child layer (utterance or word)
     } // next layer
 
@@ -739,6 +880,7 @@ public class Merger extends Transform implements GraphTransformer {
       } catch (TransformationException x) {
         // record details before passing exception up the stack...
         log("validation failed: " + x);
+        if (log != null) log.addAll(validator.getLog());
         errors.addAll(validator.getErrors());
         throw x;
       }
@@ -786,6 +928,37 @@ public class Merger extends Transform implements GraphTransformer {
     }
     return graph;
   }
+  
+  /**
+   * Convenience function that maps together unedited and edited annotations on a give
+   * layer, by parent annotation. 
+   * @param layer The layer to map
+   * @param graph The graph the unedited parents come from (edited parents are the
+   * "@other" attribute of each parent)
+   */
+  public void mapByParents(Layer layer, Graph graph) throws TransformationException {
+    for (Annotation parent : graph.all(layer.getParentId())) {
+      if (parent.containsKey("@other")) {
+        TreeSet<Annotation> uneditedAnnotations 
+          = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
+        SortedSet<Annotation> annotations = parent.getAnnotations(layer.getId());
+        if (annotations != null) {
+          uneditedAnnotations.addAll(annotations);
+        
+          Annotation editedParent = (Annotation)parent.get("@other");
+          TreeSet<Annotation> editedAnnotations 
+            = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
+          annotations = editedParent.getAnnotations(layer.getId());
+          if (annotations != null) {
+            editedAnnotations.addAll(annotations);
+        
+            mapAnnotationsForMerge(
+              layer, uneditedAnnotations, editedAnnotations, graph.getSchema().getRoot().getId());
+          } // there were edited children
+        } // there were unedited children
+      } // the parent has a counterpart in the edited graph
+    } // next parent
+  } // end of mapByParents()
    
   /**
    * PHASE 1: Maps annotations from another fragment to annotations in this fragment, in order to
@@ -795,10 +968,11 @@ public class Merger extends Transform implements GraphTransformer {
    * @param layer Layer definition to use.
    * @param these Annotations from one layer in the graph to be merged into.
    * @param those Annotations from the same layer in {@link #editedGraph}.
+   * @param rootLayerId The layer ID of the root layer - e.g. "transcript"
    * @throws TransformationException On error.
    */
   public void mapAnnotationsForMerge(
-    Layer layer, SortedSet<Annotation> these, SortedSet<Annotation> those)
+    Layer layer, SortedSet<Annotation> these, SortedSet<Annotation> those, String rootLayerId)
     throws TransformationException {
     HashMap<String,Vector<Annotation>> theseByParticipant
       = new HashMap<String,Vector<Annotation>>();
@@ -867,7 +1041,7 @@ public class Merger extends Transform implements GraphTransformer {
 
       // if it's a graph tag layer, sort annotations by label
       // this ensures, e.g., that mapping the "who" layer lines the speakers up by name
-      if (layer.getParentId().equals("transcript") // TODO schema.root.id
+      if ((layer.getParentId() == null || rootLayerId.equals(layer.getParentId()))
           && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
         AnnotationComparatorByOrdinal byLabel = new AnnotationComparatorByOrdinal() {
             public int compare(Annotation o1, Annotation o2) {
@@ -933,14 +1107,14 @@ public class Merger extends Transform implements GraphTransformer {
         // introduce mapped annotations to each other
         if (layer.containsKey("@noChange")) {
           log("Collapsing edit path for " + layer);
-          mp.collapse(path);
+          mp.collapse(path, false);
         }
         log("PATH " + layer);
         for (EditStep<Annotation> step : path) {
           if (step.getFrom() != null && step.getTo() != null) {
             setCounterparts(step.getFrom(), step.getTo());
           }
-          log(step.getFrom(), " ", step.getOperation(), " ", step.getTo());
+          log(step.getFrom(), " ", step.getOperation(), " ", step.getTo(), " - ", step.getStepDistance());
         }
       } // next chunk pair
     } // next who

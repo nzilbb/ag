@@ -267,45 +267,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
       // first spread words evenly through utterances...
 
       // assign words to each utterance
-      for (Annotation turn : graph.list(graph.getSchema().getTurnLayerId())) {
-        if (turn.getChange() == Change.Operation.Destroy) continue;
-        log("turn ", turn);
-        Iterator<Annotation> utterances
-          = new AnnotationsByAnchor(turn.getAnnotations(graph.getSchema().getUtteranceLayerId()))
-          .stream()
-          .filter(u -> u.getChange() != Change.Operation.Destroy)
-          .filter(u -> u.getStart().getOffset() != null)
-          .iterator();
-        if (!utterances.hasNext()) continue;
-        Annotation currentUtterance = utterances.next();
-        currentUtterance.put("@words", new Vector<Annotation>());
-        Annotation nextUtterance = utterances.hasNext()?utterances.next():null;
-        for (Annotation word : turn.getAnnotations(graph.getSchema().getWordLayerId())) {
-          if (word.getChange() == Change.Operation.Destroy) continue;
-          if (word.getStart() == null) continue; // ?!
-          if (// the start is inside the next utterance...
-            (word.getStart().getOffsetMin() != null 
-             && nextUtterance != null
-             && word.getStart().getOffsetMin() >= nextUtterance.getStart().getOffset())
-            || // ...or the start offset is null and the end is inside the next utterance
-            (word.getStart().getOffset() == null
-             && word.getEnd().getOffsetMax() != null
-             && nextUtterance != null
-             && word.getEnd().getOffsetMax() > nextUtterance.getStart().getOffset())) {
-            // check it's not an empty utterance
-            do {
-              // next utterance
-              currentUtterance = nextUtterance;
-              nextUtterance = utterances.hasNext()?utterances.next():null;
-            } while (word.getStart().getOffsetMin() != null 
-                     && nextUtterance != null
-                     && word.getStart().getOffsetMin() >= nextUtterance.getStart().getOffset());
-            currentUtterance.put("@words", new Vector<Annotation>());
-          } // next utterance
-          log("utt ", currentUtterance, " word ", word);
-          ((Vector<Annotation>)currentUtterance.get("@words")).add(word);
-        } // next word
-      } // next turn
+      graph.assignWordsToUtterances();
         
       for (Annotation utterance : graph.list(graph.getSchema().getUtteranceLayerId())) {
         if (utterance.getStart() == null

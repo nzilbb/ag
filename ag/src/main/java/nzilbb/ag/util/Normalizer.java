@@ -42,7 +42,7 @@ import nzilbb.util.Switch;
  *  <li> words do not share anchors with turns nor utterances </li>
  *  <li> turn and utterance labels are the participant names </li>
  *  <li> optionally, if the graph has a single un-named speaker, then the speaker renamed
- *       to be the same as the espisode name </li> 
+ *       to be the same as the episode name </li> 
  *  <li> ensures that utterances within a turn are chained together </li>
  *  <li> ensure that words don't overflow their utterance </li>
  *  <li> ensure words aren't linked to subsequent words in a different utterance </li>
@@ -55,6 +55,7 @@ import nzilbb.util.Switch;
 @ProgramDescription(value="Normalizes JSON-encoded annotation graphs from stdin")
 public class Normalizer extends Transform implements GraphTransformer {
 
+  // TODO widen turns/utterances with no duration
   /**
    * The maximum length of a label, or null if there's no limit. Default is 255.
    * @see #getMaxLabelLength()

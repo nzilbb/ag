@@ -1023,6 +1023,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
    */
   public Annotation[] all(final String layerId) { // TODO first simply look for a chain from start to end?
     // is it our own layer?
+    assert layerId != null : "Annotation.all: layerId != null";
     if (layerId.equals(getLayerId())) {
       // for now, return ourself - this is true of "transcript", and is probably generally true
       // whether it's true of, say "possible-pos" is debatable,
@@ -1661,7 +1662,6 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
    * @return true if #getStartId() equals #getEndId(), false otherwise.
    */
   public boolean getInstantaneous() {
-    assert getStartId() != null : "getStartId() != null - " + getLayerId() + " " + getLabel();    
     return getStartId() != null && getStartId().equals(getEndId());
   } // end of getInstantaneous()
 

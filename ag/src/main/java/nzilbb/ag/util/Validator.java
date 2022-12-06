@@ -614,7 +614,7 @@ public class Validator extends Transform implements GraphTransformer {
               while (anchorIterator.hasPrevious()) {
                 Anchor other = anchorIterator.previous();
                 if (other.getOffset() != null) {
-                  if (other.getOffset() < anchor.getOffset()) { // gone far enough back
+                  if (other.getOffset() <= anchor.getOffset()) { // gone far enough back
                     break;
                   }
                   if (layer.getId().equals(graph.getSchema().getTurnLayerId())
@@ -646,7 +646,7 @@ public class Validator extends Transform implements GraphTransformer {
               while (anchorIterator.hasNext()) {
                 Anchor other = anchorIterator.next();
                 if (other.getOffset() != null) {
-                  if (other.getOffset() > lastOffsetAnchors.peek().getOffset()) {
+                  if (other.getOffset() >= lastOffsetAnchors.peek().getOffset()) {
                     // gone far enough back
                     break;
                   }
