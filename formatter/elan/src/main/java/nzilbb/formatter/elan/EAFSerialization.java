@@ -2183,6 +2183,14 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     for (Annotation utterance : graph.all(utteranceLayer.getId())) {
       // find the speaker's tier
       Element tier = mSpeakerTiers.get(utterance.getLabel());
+      if (tier == null) { // tier not found by utterance label
+        // maybe the utterance label isn't the participant name
+        // so look for their participant instead
+        Annotation participant = utterance.first(participantLayer.getId());
+        if (participant != null) { // participant found
+          tier = mSpeakerTiers.get(participant.getLabel());
+        }
+      }
       if (tier == null) continue;
          
       // add an annotation to it
