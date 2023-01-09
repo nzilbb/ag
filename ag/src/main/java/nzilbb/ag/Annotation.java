@@ -1429,11 +1429,16 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
    * @return A list of annotations on the given layer that include this annotation. This
    * uses {@link #includes(Annotation)} to determine inclusion. 
    */
-  public Annotation[] includingAnnotationsOn(String layerId) { // TODO find a way to do this without enumerating all annotations on layerId 
-  
+  public Annotation[] includingAnnotationsOn(String layerId) {
+
     Vector<Annotation> includingAnnotations = new Vector<Annotation>();
     if (graph != null && getAnchored()) {
-      for (Annotation other : graph.all(layerId)) {
+      
+      // only check annotations that are new this annototation's boundaries
+      Set<Annotation> candidates = graph.listNear(layerId, getStart().getOffset());
+      candidates.addAll(graph.listNear(layerId, getEnd().getOffset()));
+    
+      for (Annotation other : candidates) {
         if (other.getChange() == Change.Operation.Destroy) continue;
         if (other == this) continue; // exclude ourselves
         if (other.includes(this)) {
