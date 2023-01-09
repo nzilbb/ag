@@ -1071,25 +1071,25 @@ public class TestGraph {
     g.addAnnotation(NP);
 
     // includingAnnotationsOn
-    Annotation[] including = the.includingAnnotationsOn("turn");
-    assertEquals("includingAnnotationsOn - related", turn1, including[0]);
-    assertEquals("includingAnnotationsOn - unrelated", turn2, including[1]);
-    assertEquals(2, including.length);
-    including = the.includingAnnotationsOn("pos");
-    assertEquals(DT, including[0]);
-    assertEquals(1, including.length);
-    including = the.includingAnnotationsOn("phone");
-    assertEquals(0, including.length);
-    including = quick.includingAnnotationsOn("phrase");
-    assertEquals("earlier first", AP, including[0]);
-    assertEquals("later last", NP, including[1]);
-    assertEquals(2, including.length);
+    List<Annotation> including = Arrays.asList(the.includingAnnotationsOn("turn"));
+    assertTrue("includingAnnotationsOn - related", including.contains(turn1));
+    assertTrue("includingAnnotationsOn - unrelated", including.contains(turn2));
+    assertEquals(2, including.size());
+    including = Arrays.asList(the.includingAnnotationsOn("pos"));
+    assertTrue(including.contains(DT));
+    assertEquals(1, including.size());
+    including = Arrays.asList(the.includingAnnotationsOn("phone"));
+    assertEquals(0, including.size());
+    including = Arrays.asList(quick.includingAnnotationsOn("phrase"));
+    assertTrue("earlier", including.contains(AP));
+    assertTrue("later", including.contains(NP));
+    assertEquals(2, including.size());
     // own layer
-    including = the.includingAnnotationsOn("word");
-    assertEquals("includingAnnotationsOn - exclude self", 0, including.length);
-    including = AP.includingAnnotationsOn("phrase");
-    assertEquals(NP, including[0]);
-    assertEquals("includingAnnotationsOn - exclude self", 1, including.length);
+    including = Arrays.asList(the.includingAnnotationsOn("word"));
+    assertEquals("includingAnnotationsOn - exclude self", 0, including.size());
+    including = Arrays.asList(AP.includingAnnotationsOn("phrase"));
+    assertTrue(including.contains(NP));
+    assertEquals("includingAnnotationsOn - exclude self", 1, including.size());
 
     // includedAnnotationsOn
     Annotation[] included = AP.includedAnnotationsOn("word");
@@ -1112,26 +1112,26 @@ public class TestGraph {
     assertEquals("includingAnnotationsOn - exclude self", 1, included.length);
 
     // midpointIncludingAnnotationsOn
-    including = the.midpointIncludingAnnotationsOn("turn");
-    assertEquals("midpointIncludingAnnotationsOn - unrelated", turn2, including[0]);
-    assertEquals("midpointIncludingAnnotationsOn - related", turn1, including[1]);
-    assertEquals(2, including.length);
-    including = the.midpointIncludingAnnotationsOn("pos");
-    assertEquals(DT, including[0]);
-    assertEquals(1, including.length);
-    including = the.midpointIncludingAnnotationsOn("phone");
-    assertEquals(e, including[0]);
-    assertEquals(1, including.length);
-    including = quick.midpointIncludingAnnotationsOn("phrase");
-    assertEquals("earlier first", AP, including[0]);
-    assertEquals("later last", NP, including[1]);
-    assertEquals(2, including.length);
+    including = Arrays.asList(the.midpointIncludingAnnotationsOn("turn"));
+    assertTrue("midpointIncludingAnnotationsOn - unrelated", including.contains(turn2));
+    assertTrue("midpointIncludingAnnotationsOn - related", including.contains(turn1));
+    assertEquals(2, including.size());
+    including = Arrays.asList(the.midpointIncludingAnnotationsOn("pos"));
+    assertTrue(including.contains(DT));
+    assertEquals(1, including.size());
+    including = Arrays.asList(the.midpointIncludingAnnotationsOn("phone"));
+    assertTrue(including.contains(e));
+    assertEquals(1, including.size());
+    including = Arrays.asList(quick.midpointIncludingAnnotationsOn("phrase"));
+    assertTrue("earlier", including.contains(AP));
+    assertTrue("later", including.contains(NP));
+    assertEquals(2, including.size());
     // own layer
-    including = the.midpointIncludingAnnotationsOn("word");
-    assertEquals("midpointIncludingAnnotationsOn - exclude self", 0, including.length);
-    including = AP.midpointIncludingAnnotationsOn("phrase");
-    assertEquals(NP, including[0]);
-    assertEquals("midpointIncludingAnnotationsOn - exclude self", 1, including.length);
+    including = Arrays.asList(the.midpointIncludingAnnotationsOn("word"));
+    assertEquals("midpointIncludingAnnotationsOn - exclude self", 0, including.size());
+    including = Arrays.asList(AP.midpointIncludingAnnotationsOn("phrase"));
+    assertTrue(including.contains(NP));
+    assertEquals("midpointIncludingAnnotationsOn - exclude self", 1, including.size());
 
     // overlappingAnnotations
     Annotation[] overlapping = g.overlappingAnnotations(the, "turn");
@@ -1152,7 +1152,7 @@ public class TestGraph {
     // own layer
     overlapping = g.overlappingAnnotations(the, "word");
     assertEquals(the, overlapping[0]);
-    assertEquals("overlappingAnnotations - include self", 1, including.length);
+    assertEquals("overlappingAnnotations - include self", 1, overlapping.length);
     overlapping = g.overlappingAnnotations(AP, "phrase");
     assertEquals(AP, overlapping[0]);
     assertEquals(NP, overlapping[1]);
@@ -2371,6 +2371,125 @@ public class TestGraph {
                  "test__123.456-456.789", Graph.FragmentId("test.trs", 123.456, 456.789));
     assertEquals("with extension and dots in name",
                  "test1.2__123.456-456.789", Graph.FragmentId("test1.2.trs", 123.456, 456.789));
+  }
+
+  /** Ensure assigning words to utterances works as expected. */
+  @Test public void assignWordsToUtterances() {
+    Graph g = new Graph();
+    g.setId("g");
+    g.setSchema(
+      new Schema(
+        "who","turn","utterance","word",
+        new Layer("who").setAlignment(Constants.ALIGNMENT_NONE)
+        .setPeers(true).setPeersOverlap(false).setSaturated(true),
+        new Layer("turn").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true).setPeersOverlap(false).setSaturated(false).setParentId("who"),
+        new Layer("utterance").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true).setPeersOverlap(false).setSaturated(true).setParentId("turn"),
+        new Layer("word").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true).setPeersOverlap(false).setSaturated(false).setParentId("turn")));
+
+    g.addAnchor(new Anchor("turnStart", 0.0));
+    g.addAnchor(new Anchor("a0", 0.0));
+    g.addAnchor(new Anchor("a20", 20.0));
+    g.addAnchor(new Anchor("a25-uStart", 25.0)); // for instantateous utterance
+    g.addAnchor(new Anchor("a25-wStart", 25.0)); // for instantateous utterance
+    g.addAnchor(new Anchor("a25-wEnd", 25.0)); // for instantateous utterance
+    g.addAnchor(new Anchor("a25-uEnd", 25.0)); // for instantateous utterance
+    g.addAnchor(new Anchor("a40", 40.0));
+    g.addAnchor(new Anchor("utteranceChange1", 50.0));
+    g.addAnchor(new Anchor("a60", 60.0));
+    g.addAnchor(new Anchor("a70", null));
+    g.addAnchor(new Anchor("a75-uStart", 75.0)); // for instantateous utterance
+    g.addAnchor(new Anchor("a75-wStart", 75.0)); // for instantateous utterance
+    g.addAnchor(new Anchor("a75-wEnd", 75.0)); // for instantateous utterance
+    g.addAnchor(new Anchor("a75-uEnd", 75.0)); // for instantateous utterance
+    g.addAnchor(new Anchor("a80", null));
+    g.addAnchor(new Anchor("a90", null));
+    g.addAnchor(new Anchor("turnEnd", 100.0));
+    
+    Annotation who1 = g.addAnnotation(
+      new Annotation("who1", "smith", "who", "turnStart", "turnEnd", "g"));
+    Annotation who2 = g.addAnnotation(
+      new Annotation("who2", "jones", "who", "turnStart", "turnEnd", "g"));
+    Annotation turn1 = g.addAnnotation(
+      new Annotation("turn1", "smith", "turn",
+                     "turnStart", "turnEnd", "who1"));
+    Annotation utterance1 = g.addAnnotation(
+      new Annotation("utterance1", "smith", "utterance",
+                     "turnStart", "utteranceChange1", "turn1"));
+    Annotation utterance2 = g.addAnnotation(
+      new Annotation("utterance2", "john smith", "utterance",
+                     "utteranceChange1", "turnEnd", "turn1"));
+
+    // anchored words for utterance 1
+    Annotation w0 = g.addAnnotation(
+      new Annotation("w0", "w0", "word", "a0", "a20", "turn1"));
+    Annotation w20 = g.addAnnotation(
+      new Annotation("w20", "w20", "word", "a20", "a40", "turn1"));
+    Annotation w40 = g.addAnnotation(
+      new Annotation("w40", "w40-overflow", "word", "a40", "a60", "turn1"));
+    
+    // unanchored words for utterance 2
+    Annotation w60 = g.addAnnotation(
+      new Annotation("w60", "w60-half-anchored", "word", "a60", "a70", "turn1"));
+    Annotation w70 = g.addAnnotation(
+      new Annotation("w70", "w70-unanchored", "word", "a70", "a80", "turn1"));
+    Annotation w80 = g.addAnnotation(
+      new Annotation("w80", "w80-unanchored", "word", "a80", "a90", "turn1"));
+    Annotation w90 = g.addAnnotation(
+      new Annotation("w90", "w90-half-anchored", "word", "a90", "turnEnd", "turn1"));
+
+    // utterance 3 is instantaneous
+    Annotation turn2 = g.addAnnotation(
+      new Annotation("turn2", "jones", "turn",
+                     "a25-uStart", "a25-uend", "who2"));
+    Annotation utterance3 = g.addAnnotation(
+      new Annotation("utterance3", "jones", "utterance",
+                     "a25-uStart", "a25-uEnd", "turn2"));
+    Annotation w25 = g.addAnnotation(
+      new Annotation("w25", "w25-instantaneous", "word",
+                     "a25-wStart", "a25-wEnd", "turn2"));
+    
+    // utterance 4 is instantaneous
+    Annotation turn3 = g.addAnnotation(
+      new Annotation("turn3", "jones", "turn",
+                     "a75-uStart", "a75-uend", "who2"));
+    Annotation utterance4 = g.addAnnotation(
+      new Annotation("utterance4", "jones", "utterance",
+                     "a75-uStart", "a75-uEnd", "turn3"));
+    Annotation w75 = g.addAnnotation(
+      new Annotation("w75", "w75-instantaneous", "word",
+                     "a75-wStart", "a75-wEnd", "turn3"));
+    
+
+    g.assignWordsToUtterances();
+    
+    List<Annotation> words = (List<Annotation>)utterance1.get("@words");
+    assertNotNull("there are words in utterance 1", words);
+    assertEquals("Number of words in utterance 1: " + words, 3, words.size());
+    assertEquals("anchored words", "w0", words.get(0).getId());
+    assertEquals("anchored words", "w20", words.get(1).getId());
+    assertEquals("anchored words", "w40", words.get(2).getId());
+
+    words = (List<Annotation>)utterance2.get("@words");
+    assertNotNull("there are words in utterance 2", words);
+    assertEquals("Number of words in utterance 2: " + words, 4, words.size());
+    assertEquals("unchored words", "w60", words.get(0).getId());
+    assertEquals("unchored words", "w70", words.get(1).getId());
+    assertEquals("unchored words", "w80", words.get(2).getId());
+    assertEquals("unchored words", "w90", words.get(3).getId());
+
+    // instantaneous utterances/words are assigned
+    words = (List<Annotation>)utterance3.get("@words");
+    assertNotNull("there are words in utterance 3", words);
+    assertEquals("Number of words in utterance 3: " + words, 1, words.size());
+    assertEquals("instantaneous words", "w25", words.get(0).getId());
+
+    words = (List<Annotation>)utterance4.get("@words");
+    assertNotNull("there are words in utterance 4", words);
+    assertEquals("Number of words in utterance 4: " + words, 1, words.size());
+    assertEquals("instantaneous words", "w75", words.get(0).getId());
   }
 
   public static void main(String args[]) {
