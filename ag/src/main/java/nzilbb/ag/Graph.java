@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -41,6 +41,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import nzilbb.ag.util.AnchorComparatorWithStructure;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
+import nzilbb.ag.util.AnnotationsByAnchor;
 import nzilbb.ag.util.LayerHierarchyTraversal;
 import nzilbb.ag.util.LayerTraversal;
 import nzilbb.util.ClonedProperty;
@@ -1682,7 +1683,69 @@ public class Graph extends Annotation {
     if (index.containsKey((int)offset)) nearby.addAll(index.get((int)offset));
     return nearby;
   } // end of listNear()
-
+  
+  /**
+   * Convenience function that links each utterance to the words contained in it, via the
+   * "@words" attribute.
+   * <p> By default, the utterance and word layers are 'peers' - i.e. the parent of both
+   * is the turn layer. This is so words easily and naturally link to each other across
+   * utterance boundaries.
+   * <p> However, there are circumstances where it's convenient to process words by
+   * utterance instead of by turn. Under such circumstances, this method can be used to
+   * efficiently link all utterances to the word that contain them.
+   * <p>Each utterance is assigned a new "@words" key, which is a List&lt;Annotation&gt;,
+   * which contains the words that start within the bounds of the utterance, or at the end
+   * is not within the bounds of the next utterance.
+   */
+  public void assignWordsToUtterances() {
+    if (schema.getTurnLayerId() == null
+        || schema.getUtteranceLayerId() == null
+        || schema.getWordLayerId() == null) { // not all the reuired layers are there
+      return;
+    }
+    // assign words to each utterance
+    for (Annotation turn : all(getSchema().getTurnLayerId())) {
+      if (turn.getChange() == Change.Operation.Destroy) continue;
+      Iterator<Annotation> utterances
+        = new AnnotationsByAnchor(turn.getAnnotations(getSchema().getUtteranceLayerId()))
+        .stream()
+        .filter(u -> u.getChange() != Change.Operation.Destroy)
+        .filter(u -> u.getStart().getOffset() != null)
+        .iterator();
+      if (!utterances.hasNext()) continue;
+      Annotation currentUtterance = utterances.next();
+      currentUtterance.put("@words", new Vector<Annotation>());
+      Annotation nextUtterance = utterances.hasNext()?utterances.next():null;
+      SortedSet<Annotation> words = turn.getAnnotations(getSchema().getWordLayerId());
+      if (words != null) {
+        for (Annotation word : words) {
+          if (word.getChange() == Change.Operation.Destroy) continue;
+          if (word.getStart() == null) continue; // ?!
+          if (// the start is inside the next utterance...
+            (word.getStart().getOffsetMin() != null 
+             && nextUtterance != null
+             && word.getStart().getOffsetMin() >= nextUtterance.getStart().getOffset())
+            || // ...or the start offset is null and the end is inside the next utterance
+            (word.getStart().getOffset() == null
+             && word.getEnd().getOffsetMax() != null
+             && nextUtterance != null
+             && word.getEnd().getOffsetMax() > nextUtterance.getStart().getOffset())) {
+            // check it's not an empty utterance
+            do {
+              // next utterance
+              currentUtterance = nextUtterance;
+              nextUtterance = utterances.hasNext()?utterances.next():null;
+            } while (word.getStart().getOffsetMin() != null 
+                     && nextUtterance != null
+                     && word.getStart().getOffsetMin() >= nextUtterance.getStart().getOffset());
+            currentUtterance.put("@words", new Vector<Annotation>());
+          } // next utterance
+          ((Vector<Annotation>)currentUtterance.get("@words")).add(word);
+        } // next word
+      } // there are words
+    } // next turn
+  } // end of assignWordsToUtterances()
+  
   /**
    * Getter for <i>layer</i>: The graph's layer definition, which is by definition the
    * root of its schema. 
