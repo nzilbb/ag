@@ -4,3 +4,4 @@ derby
 derby.log
 # maven target directory
 target
+annotator/jython/src/main/resources/nzilbb/annotator/jython/task/index.js
