@@ -440,7 +440,6 @@ public class Schema implements Cloneable, CloneableBean {
       Vector<Layer> layers = new Vector<Layer>();
       ScriptEngineManager manager = new ScriptEngineManager();
       ScriptEngine engine = manager.getEngineByMimeType("application/javascript");
-      System.out.println("engine " + engine);
       //ScriptEngineFactory factory = engine.getFactory();
       ScriptContext context = engine.getContext();
       context.setAttribute("schema", this, ScriptContext.ENGINE_SCOPE);
