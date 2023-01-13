@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -50,14 +50,14 @@ import nzilbb.ag.serialize.SerializerNotConfiguredException;
 import nzilbb.ag.serialize.json.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
-import nzilbb.ag.util.*;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.EditStep;
 import nzilbb.editpath.MinimumEditPath;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class TestMerger {      
+public class TestMerger {
+  /** Ensures that a graph merged with a copy of itself results in no changes. */
   @Test public void identityMerge() throws Exception {
     Schema schema = defaultSchema();
 
@@ -89,6 +89,7 @@ public class TestMerger {
 
   }
 
+  /** Ensures that a graph fragment merged with a copy of itself results in no changes. */
   @Test public void identityMergeFragment() throws Exception {
     Schema schema = defaultSchema();
 
@@ -309,6 +310,7 @@ public class TestMerger {
     }
   }
 
+  /** Ensure a fragment extracted from a full graph can be merged with an edited fragment. */
   @Test public void extractedFragmentMerge() {
     Graph g = new Graph();
     g.setSchema(new Schema(
