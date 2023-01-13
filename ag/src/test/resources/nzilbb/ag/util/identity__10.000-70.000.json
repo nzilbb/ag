@@ -4,7 +4,7 @@
     "participantLayerId":"who",
     "turnLayerId":"turns",
     "utteranceLayerId":"utterances",
-    "wordutteranceLayerId":"transcript",
+    "wordLayerId":"transcript",
 
     "transcript":{"description":"The graph as a whole",
       "children":{
