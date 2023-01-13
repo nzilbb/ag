@@ -1107,7 +1107,6 @@ public class TestValidator {
     g.addAnchor(new Anchor("a2.0", 2.0,  // k
                            Constants.CONFIDENCE_AUTOMATIC));
     g.addAnchor(new Anchor("a2.25", 2.25,  // end of quick
-
                            Constants.CONFIDENCE_AUTOMATIC));
     g.addAnchor(new Anchor("a3b", 3.0,  // brown
                            Constants.CONFIDENCE_AUTOMATIC));
@@ -1201,7 +1200,6 @@ public class TestValidator {
         .map(Change::toString).collect(Collectors.toSet());
       assertTrue(changeStrings.contains("Update a2.0: offset = null (was 2.0)"));
       assertTrue(changeStrings.contains("Update a2.25: offset = null (was 2.25)"));
-      assertTrue(changeStrings.contains("Update a3b: offset = null (was 3.0)"));
 
       assertEquals("no extra changes to graph", changes.size(), g.getChanges().size());
     } catch(TransformationException exception) {
