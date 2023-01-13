@@ -221,11 +221,25 @@ public class MinimumEditPath<T> {
    
   /**
    * Collapses edit path so that subsequent delete/create steps are collapsed into a
-   * single change step. 
+   * single change step, except those that would result in a change more than 3 times more
+   * costly than a delete and insert.
    * @param path The path to collapse
    * @return The given path, with possibly fewer steps.
    */
   public List<EditStep<T>> collapse(List<EditStep<T>> path) {
+    return collapse(path, true);
+  }
+  
+  /**
+   * Collapses edit path so that subsequent delete/create steps are collapsed into a
+   * single change step. 
+   * @param path The path to collapse
+   * @param ifChangeIsReasonable If true, then any collapsing that would result in a
+   * change more than 3 times more costly than a delete and insert will <b>not</b> be
+   * collapsed. If false, all insert/delete pairs will be collapsed regardless of cost.
+   * @return The given path, with possibly fewer steps.
+   */
+  public List<EditStep<T>> collapse(List<EditStep<T>> path, boolean ifChangeIsReasonable) {
     Iterator<EditStep<T>> steps = path.iterator();
     EditStep<T> lastStep = null;
     while (steps.hasNext()) {
@@ -234,7 +248,8 @@ public class MinimumEditPath<T> {
         if (lastStep.getOperation() == EditStep.StepOperation.DELETE
             && thisStep.getOperation() == EditStep.StepOperation.INSERT) {
           EditStep<T> change = comparator.compare(lastStep.getFrom(), thisStep.getTo());
-          if (change.getStepDistance() <=
+          if (!ifChangeIsReasonable
+              || change.getStepDistance() <=
               3 * (lastStep.getStepDistance() + thisStep.getStepDistance())) {
             lastStep.setOperation(EditStep.StepOperation.CHANGE);
             lastStep.setTo(thisStep.getTo());
@@ -242,16 +257,13 @@ public class MinimumEditPath<T> {
             lastStep.setStepDistance(lastStep.getStepDistance() + thisStep.getStepDistance());
             steps.remove();
             thisStep = lastStep;
-          } else {
-            System.out.println(
-              "change " + change.getStepDistance()
-              + " delete/insert " + (lastStep.getStepDistance() + thisStep.getStepDistance()));
           }
         }
         else if (lastStep.getOperation() == EditStep.StepOperation.INSERT
                  && thisStep.getOperation() == EditStep.StepOperation.DELETE) {
           EditStep<T> change = comparator.compare(thisStep.getFrom(), lastStep.getTo());
-          if (change.getStepDistance() <=
+          if (!ifChangeIsReasonable
+              || change.getStepDistance() <=
               3 * (lastStep.getStepDistance() + thisStep.getStepDistance())) {
             lastStep.setOperation(EditStep.StepOperation.CHANGE);
             lastStep.setFrom(thisStep.getFrom());
@@ -259,10 +271,6 @@ public class MinimumEditPath<T> {
             lastStep.setStepDistance(lastStep.getStepDistance() + thisStep.getStepDistance());
             steps.remove();
             thisStep = lastStep;
-          } else {
-            System.out.println(
-              "change " + change.getStepDistance()
-              + " insert/delete " + (lastStep.getStepDistance() + thisStep.getStepDistance()));
           }
         }
       }
