@@ -456,93 +456,99 @@ public class WhisperTranscriber extends Transcriber {
   @Override
   public Graph transcribe(File speech, Graph transcript) throws Exception {
 
-    setPercentComplete(0);
-    if (whisperExe == null) throw new Exception("Whisper is not installed.");
-
-    // TODO check whether diarization is already done
-    // TODO if so, transcribe each utterance separately
-    
-    // run deepspeech recognizer
-    Execution whisper = new Execution()
-      .setExe(whisperExe)
-      .arg("--model").arg(model);
-    if (language != null) {
-      whisper.arg("--language").arg(language);
-    } else if (model.endsWith(".en")) {
-      whisper.arg("--language").arg("en");
-    }
-    if (temperature != null) whisper.arg("--temperature").arg(""+temperature);
-    if (bestOf != null) whisper.arg("--best_of").arg(""+bestOf);
-    if (beamSize != null) whisper.arg("--beam_size").arg(""+beamSize);
-    if (patience != null) whisper.arg("--patience").arg(""+patience);
-    if (lengthPenalty != null) whisper.arg("--length_penalty").arg(""+lengthPenalty);
-    if (suppressTokens != null && suppressTokens.trim().length() > 0)
-      whisper.arg("--suppress_tokens").arg(suppressTokens);
-    if (fp16 != null) whisper.arg("--fp16").arg(""+fp16);
-    if (temperatureIncrementOnFallback != null)
-      whisper.arg("--temperature_increment_on_fallback").arg(""+temperatureIncrementOnFallback);
-    if (compressionRatioThreshold != null)
-      whisper.arg("--compression_ratio_threshold").arg(""+compressionRatioThreshold);
-    if (logprobThreshold != null) whisper.arg("--logprob_threshold").arg(""+logprobThreshold);
-    if (noSpeechThreshold != null) whisper.arg("--no_speeech_threshold").arg(""+noSpeechThreshold);
-    // output files to temporary directory so they can't overwrite anything important
-    Path dir = Files.createTempDirectory("WhisperTranscriber");
-    whisper.arg("--output_dir").arg(dir.toString());
-    // specify audio last
-    whisper.arg(speech.getPath());
-    setStatus("Running whisper on " + speech.getName() + " ...");
-    whisper.getStderrObservers().add(err->setStatus(err));
-    whisper.run();
-    setStatus("Execution of whisper finished.");
-    setPercentComplete(50);
-
-    // parse transcript file
-    File txt = new File(dir.toFile(), speech.getName() + ".txt");
-    if (txt.exists()) txt.delete();
-    File srt = new File(dir.toFile(), speech.getName() + ".srt");
-    if (srt.exists()) srt.delete();
-    File vtt = new File(dir.toFile(), speech.getName() + ".vtt");
-    if (vtt.exists()) {
-      setStatus("Parsing " + vtt.getName());
-      try {
-        VttSerialization deserializer = new VttSerialization();
-        // default configuration
-        deserializer.configure(new ParameterSet(), transcript.getSchema());
-        // load transcript
-        ParameterSet parameters = deserializer.load(
-          Utility.OneNamedStreamArray​(vtt), transcript.getSchema());
-        // default parameters
-        deserializer.setParameters(parameters);
-        // parse transcript
-        Graph[] graphs = deserializer.deserialize();
-        setPercentComplete(90);
-        Graph graphFromVtt = graphs[0];        
-        graphFromVtt.setId(transcript.getId());
-        // if we already had a speaker...
-        String participantLayerId = transcript.getSchema().getParticipantLayerId();
-        Annotation participant = transcript.first(participantLayerId);
-        String speakerName = IO.WithoutExtension(speech);
-        if (participant != null) speakerName = participant.getLabel();
-        graphFromVtt.first(participantLayerId).setLabel(speakerName);
-        
-        // ensure turn labels are correspondingly changed
-        for (Annotation t : graphFromVtt.all(transcript.getSchema().getTurnLayerId())) {
-          t.setLabel(speakerName);
-        }
-        // utterance labels should be the transcript, not the speaker name, so leave them as is
-        
-        // merge into given transcript
-        Merger merger = new Merger(graphFromVtt);
-        merger.transform(transcript);
-        setPercentComplete(100);
-        
-      } finally {
-        vtt.delete();
-        dir.toFile().delete();
+    setRunning(true);
+    try {
+      setPercentComplete(0);
+      if (whisperExe == null) throw new Exception("Whisper is not installed.");
+      
+      // TODO check whether diarization is already done
+      // TODO if so, transcribe each utterance separately
+      
+      // run deepspeech recognizer
+      Execution whisper = new Execution()
+        .setExe(whisperExe)
+        .env("HOME", getWorkingDirectory().getPath()) // for ~/.cache/whisper/...
+        .arg("--model").arg(model);
+      if (language != null) {
+        whisper.arg("--language").arg(language);
+      } else if (model.endsWith(".en")) {
+        whisper.arg("--language").arg("en");
       }
-    } else {
-      setStatus("VTT transcript not found: " + vtt.getName());
-      throw new TransformationException(this, "VTT transcript not found: " + vtt.getName());
+      if (temperature != null) whisper.arg("--temperature").arg(""+temperature);
+      if (bestOf != null) whisper.arg("--best_of").arg(""+bestOf);
+      if (beamSize != null) whisper.arg("--beam_size").arg(""+beamSize);
+      if (patience != null) whisper.arg("--patience").arg(""+patience);
+      if (lengthPenalty != null) whisper.arg("--length_penalty").arg(""+lengthPenalty);
+      if (suppressTokens != null && suppressTokens.trim().length() > 0)
+        whisper.arg("--suppress_tokens").arg(suppressTokens);
+      if (fp16 != null) whisper.arg("--fp16").arg(""+fp16);
+      if (temperatureIncrementOnFallback != null)
+        whisper.arg("--temperature_increment_on_fallback").arg(""+temperatureIncrementOnFallback);
+      if (compressionRatioThreshold != null)
+        whisper.arg("--compression_ratio_threshold").arg(""+compressionRatioThreshold);
+      if (logprobThreshold != null) whisper.arg("--logprob_threshold").arg(""+logprobThreshold);
+      if (noSpeechThreshold != null) whisper.arg("--no_speeech_threshold").arg(""+noSpeechThreshold);
+      // output files to temporary directory so they can't overwrite anything important
+      Path dir = Files.createTempDirectory("WhisperTranscriber");
+      whisper.arg("--output_dir").arg(dir.toString());
+      // specify audio last
+      whisper.arg(speech.getPath());
+      setStatus("Running whisper on " + speech.getName() + " ...");
+      whisper.getStderrObservers().add(err->setStatus(err));
+      whisper.run();
+      setStatus("Execution of whisper finished.");
+      setPercentComplete(50);
+      
+      // parse transcript file
+      File txt = new File(dir.toFile(), speech.getName() + ".txt");
+      if (txt.exists()) txt.delete();
+      File srt = new File(dir.toFile(), speech.getName() + ".srt");
+      if (srt.exists()) srt.delete();
+      File vtt = new File(dir.toFile(), speech.getName() + ".vtt");
+      if (vtt.exists()) {
+        setStatus("Parsing " + vtt.getName());
+        try {
+          VttSerialization deserializer = new VttSerialization();
+          // default configuration
+          deserializer.configure(new ParameterSet(), transcript.getSchema());
+          // load transcript
+          ParameterSet parameters = deserializer.load(
+            Utility.OneNamedStreamArray​(vtt), transcript.getSchema());
+          // default parameters
+          deserializer.setParameters(parameters);
+          // parse transcript
+          Graph[] graphs = deserializer.deserialize();
+          setPercentComplete(90);
+          Graph graphFromVtt = graphs[0];        
+          graphFromVtt.setId(transcript.getId());
+          // if we already had a speaker...
+          String participantLayerId = transcript.getSchema().getParticipantLayerId();
+          Annotation participant = transcript.first(participantLayerId);
+          String speakerName = IO.WithoutExtension(speech);
+          if (participant != null) speakerName = participant.getLabel();
+          graphFromVtt.first(participantLayerId).setLabel(speakerName);
+          
+          // ensure turn labels are correspondingly changed
+          for (Annotation t : graphFromVtt.all(transcript.getSchema().getTurnLayerId())) {
+            t.setLabel(speakerName);
+          }
+          // utterance labels should be the transcript, not the speaker name, so leave them as is
+          
+          // merge into given transcript
+          Merger merger = new Merger(graphFromVtt);
+          merger.transform(transcript);
+          setPercentComplete(100);
+          
+        } finally {
+          vtt.delete();
+          dir.toFile().delete();
+        }
+      } else {
+        setStatus("VTT transcript not found: " + vtt.getName());
+        throw new TransformationException(this, "VTT transcript not found: " + vtt.getName());
+      }
+    } finally {
+      setRunning(false);
     }
 
     return transcript;
@@ -562,80 +568,86 @@ public class WhisperTranscriber extends Transcriber {
   public void transcribeFragments(Stream<File> speech, Consumer<Graph> consumer)
     throws Exception {
 
-    setPercentComplete(0);
-    if (whisperExe == null) throw new Exception("Whisper is not installed.");
-    
-    List<File> wavs = speech.collect(Collectors.toList());
-    
-    // run deepspeech recognizer
-    Execution whisper = new Execution()
-      .setExe(whisperExe)
-      .arg("--model").arg(model);
-    if (language != null) {
-      whisper.arg("--language").arg(language);
-    } else if (model.endsWith(".en")) {
-      whisper.arg("--language").arg("en");
-    }
-    if (temperature != null) whisper.arg("--temperature").arg(""+temperature);
-    if (bestOf != null) whisper.arg("--best_of").arg(""+bestOf);
-    if (beamSize != null) whisper.arg("--beam_size").arg(""+beamSize);
-    if (patience != null) whisper.arg("--patience").arg(""+patience);
-    if (lengthPenalty != null) whisper.arg("--length_penalty").arg(""+lengthPenalty);
-    if (suppressTokens != null && suppressTokens.trim().length() > 0)
-      whisper.arg("--suppress_tokens").arg(suppressTokens);
-    if (fp16 != null) whisper.arg("--fp16").arg(""+fp16);
-    if (temperatureIncrementOnFallback != null)
-      whisper.arg("--temperature_increment_on_fallback").arg(""+temperatureIncrementOnFallback);
-    if (compressionRatioThreshold != null)
-      whisper.arg("--compression_ratio_threshold").arg(""+compressionRatioThreshold);
-    if (logprobThreshold != null) whisper.arg("--logprob_threshold").arg(""+logprobThreshold);
-    if (noSpeechThreshold != null) whisper.arg("--no_speeech_threshold").arg(""+noSpeechThreshold);
-    // output files to temporary directory so they can't overwrite anything important
-    Path dir = Files.createTempDirectory("WhisperTranscriber");
-    whisper.arg("--output_dir").arg(dir.toString());
-    // specify audio files last
-    for (File wav : wavs) whisper.arg(wav.getPath());
-    setStatus("Running whisper on " + wavs.size() + " file"+(wavs.size()==1?"":"s")+" ...");
-    whisper.getStderrObservers().add(err->setStatus(err));
-    setPercentComplete(1);
-    whisper.run();
-    setStatus("Execution of whisper finished.");
-    setPercentComplete(50);
-    
-    VttSerialization deserializer = new VttSerialization();
-    // default configuration
-    deserializer.configure(new ParameterSet(), getSchema());
-
-    int w = 0;
-    for (File wav : wavs) {      
-      // parse transcript file
-      File txt = new File(dir.toFile(), wav.getName() + ".txt");
-      if (txt.exists()) txt.delete();
-      File srt = new File(dir.toFile(), wav.getName() + ".srt");
-      if (srt.exists()) srt.delete();
-      File vtt = new File(dir.toFile(), wav.getName() + ".vtt");
-      if (vtt.exists()) {
-        setStatus("Parsing " + vtt.getName());
-        try {
-          // load transcript
-          ParameterSet parameters = deserializer.load(
-            Utility.OneNamedStreamArray​(vtt), getSchema());
-          // default parameters
-          deserializer.setParameters(parameters);
-          // parse transcript
-          Graph[] graphs = deserializer.deserialize();
-          setPercentComplete(90);
-          Graph graphFromVtt = graphs[0];        
-          graphFromVtt.setId(wav.getName());
-          consumer.accept(graphFromVtt);
-        } finally {
-          vtt.delete();
-        }
-        setPercentComplete(50 + w * 50 / wavs.size());
-      } else {
-        setStatus("VTT transcript not found: " + vtt.getName());
+    setRunning(true);
+    try {
+      setPercentComplete(0);
+      if (whisperExe == null) throw new Exception("Whisper is not installed.");
+      
+      List<File> wavs = speech.collect(Collectors.toList());
+      
+      // run deepspeech recognizer
+      Execution whisper = new Execution()
+        .setExe(whisperExe)
+        .arg("--model").arg(model);
+      if (language != null) {
+        whisper.arg("--language").arg(language);
+      } else if (model.endsWith(".en")) {
+        whisper.arg("--language").arg("en");
       }
-      dir.toFile().delete();
-    } // next wav file
-  }    
+      if (temperature != null) whisper.arg("--temperature").arg(""+temperature);
+      if (bestOf != null) whisper.arg("--best_of").arg(""+bestOf);
+      if (beamSize != null) whisper.arg("--beam_size").arg(""+beamSize);
+      if (patience != null) whisper.arg("--patience").arg(""+patience);
+      if (lengthPenalty != null) whisper.arg("--length_penalty").arg(""+lengthPenalty);
+      if (suppressTokens != null && suppressTokens.trim().length() > 0)
+        whisper.arg("--suppress_tokens").arg(suppressTokens);
+      if (fp16 != null) whisper.arg("--fp16").arg(""+fp16);
+      if (temperatureIncrementOnFallback != null)
+        whisper.arg("--temperature_increment_on_fallback").arg(""+temperatureIncrementOnFallback);
+      if (compressionRatioThreshold != null)
+        whisper.arg("--compression_ratio_threshold").arg(""+compressionRatioThreshold);
+      if (logprobThreshold != null) whisper.arg("--logprob_threshold").arg(""+logprobThreshold);
+      if (noSpeechThreshold != null) whisper.arg("--no_speeech_threshold").arg(""+noSpeechThreshold);
+      // output files to temporary directory so they can't overwrite anything important
+      Path dir = Files.createTempDirectory("WhisperTranscriber");
+      whisper.arg("--output_dir").arg(dir.toString());
+      // specify audio files last
+      for (File wav : wavs) whisper.arg(wav.getPath());
+      setStatus("Running whisper on " + wavs.size() + " file"+(wavs.size()==1?"":"s")+" ...");
+      whisper.getStderrObservers().add(err->setStatus(err));
+      setPercentComplete(1);
+      whisper.run();
+      setStatus("Execution of whisper finished.");
+      setPercentComplete(50);
+      
+      VttSerialization deserializer = new VttSerialization();
+      // default configuration
+      deserializer.configure(new ParameterSet(), getSchema());
+      
+      int w = 0;
+      for (File wav : wavs) {      
+        // parse transcript file
+        File txt = new File(dir.toFile(), wav.getName() + ".txt");
+        if (txt.exists()) txt.delete();
+        File srt = new File(dir.toFile(), wav.getName() + ".srt");
+        if (srt.exists()) srt.delete();
+        File vtt = new File(dir.toFile(), wav.getName() + ".vtt");
+        if (vtt.exists()) {
+          setStatus("Parsing " + vtt.getName());
+          try {
+            // load transcript
+            ParameterSet parameters = deserializer.load(
+              Utility.OneNamedStreamArray​(vtt), getSchema());
+            // default parameters
+            deserializer.setParameters(parameters);
+            // parse transcript
+            Graph[] graphs = deserializer.deserialize();
+            setPercentComplete(90);
+            Graph graphFromVtt = graphs[0];        
+            graphFromVtt.setId(wav.getName());
+            consumer.accept(graphFromVtt);
+          } finally {
+            vtt.delete();
+          }
+          setPercentComplete(50 + w * 50 / wavs.size());
+        } else {
+          setStatus("VTT transcript not found: " + vtt.getName());
+        }
+        dir.toFile().delete();
+      } // next wav file
+    } finally {
+      setRunning(false);
+    }    
+  }
+    
 } // end of class WhisperTranscriber
