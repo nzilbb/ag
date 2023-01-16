@@ -3350,6 +3350,8 @@ public class HTKAligner extends Annotator {
           merger.setIgnoreOffsetConfidence(ignoreAlignmentStatuses);
           fragment.trackChanges();
           // merge changes
+          // merger.setDebug(true);
+          // merger.getLogObservers().add(l->System.out.println(l));
           merger.transform(fragment);
           // ensure the utterance boundaries are unchanged (e.g. even by rounding)
           utterance.getStart().rollback();

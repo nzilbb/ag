@@ -319,6 +319,7 @@ public class TestHTKAligner {
                  "Not Aligned", annotator.getOtherUtteranceGrouping());
 
     final Vector<Graph> results = new Vector<Graph>();
+    // annotator.getStatusObservers().add(s -> System.out.println(s));
     annotator.transformFragments(
       Arrays.stream(new Graph[] { f }), graph -> { results.add(graph); });
 
@@ -524,7 +525,7 @@ public class TestHTKAligner {
     Graph g = graph();
     Schema schema = g.getSchema();
     Graph f = g.getFragment(
-      10.0, 14.0, (String[])schema.getLayers().keySet().toArray(new String[0]));
+      10.0, 15.0, (String[])schema.getLayers().keySet().toArray(new String[0]));
     return f;
   }
   
@@ -561,7 +562,7 @@ public class TestHTKAligner {
       .setSchema(schema);
     g.setId("BREY00538.TextGrid");
     Anchor start = g.getOrCreateAnchorAt(10, Constants.CONFIDENCE_MANUAL);
-    Anchor end = g.getOrCreateAnchorAt(14, Constants.CONFIDENCE_MANUAL);
+    Anchor end = g.getOrCreateAnchorAt(15, Constants.CONFIDENCE_MANUAL);
     g.addAnnotation(
       new Annotation().setLayerId("participant").setLabel("someone")
       .setStart(start).setEnd(end));
