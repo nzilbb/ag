@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -750,7 +750,7 @@ public class TestTextGridSerialization {
     for (String warning : deserializer.getWarnings()) {
       System.out.println(warning);
     }
-    assertEquals("No warnings",
+    assertEquals("No warnings: " + Arrays.asList(deserializer.getWarnings()),
                  0, deserializer.getWarnings().length);
       
     assertEquals("test_utterance_word.TextGrid", g.getId());
@@ -1607,7 +1607,7 @@ public class TestTextGridSerialization {
     }
   }
 
-  /*@Test*/ public void performance()  throws Exception {
+  @Test public void performance()  throws Exception {
     Schema schema = new Schema(
       "participant", "turn", "utterance", "word",
       new Layer("participant", "Participants", 0, true, true, true),
@@ -1652,7 +1652,8 @@ public class TestTextGridSerialization {
     assertEquals("performance.TextGrid", g.getId());
 
     assertTrue("Deserialization too slow:\n" + deserializer.getTimers().toString(),
-               60000 /* TODO we want this to be around 2s*/ > deserializer.getTimers().getTotals().get("deserialize"));
+               2000 > deserializer.getTimers().getTotals().get("deserialize"));
+    //System.out.println("Timers: " + deserializer.getTimers());
       
     // check all annotations have 'manual' confidence
     for (Annotation a : g.getAnnotationsById().values()) {
@@ -1660,7 +1661,7 @@ public class TestTextGridSerialization {
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
   }
-
+  
   @Test public void serialize_utterance_word()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
