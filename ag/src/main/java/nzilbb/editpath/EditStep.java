@@ -164,12 +164,12 @@ public class EditStep<T> {
     */
    protected double stepDistance;
    /**
-    * Getter for {@link #iStepDistance}: The distance represented by this single step.
+    * Getter for {@link #stepDistance}: The distance represented by this single step.
     * @return The distance represented by this single step.
     */
    public double getStepDistance() { return stepDistance; }
    /**
-    * Setter for {@link #iStepDistance}: The distance represented by this single step.
+    * Setter for {@link #stepDistance}: The distance represented by this single step.
     * @param newStepDistance The distance represented by this single step.
     * @return this.
     */
