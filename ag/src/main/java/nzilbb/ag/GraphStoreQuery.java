@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -496,7 +496,26 @@ public interface GraphStoreQuery {
    * @throws PermissionException If the operation is not permitted.
    * @throws GraphNotFoundException If the transcript was not found in the store.
    */
-  public long countAnnotations(String id, String layerId)
+  default public long countAnnotations(String id, String layerId)
+    throws StoreException, PermissionException, GraphNotFoundException {
+    return countAnnotations(id, layerId, null);
+  }
+
+  /**
+   * Gets the number of annotations on the given layer of the given transcript, but only
+   * those with an ordinal less than or equal to the given maximum. 
+   * @param id The ID of the transcript.
+   * @param layerId The ID of the layer.
+   * @param maxOrdinal The maximum ordinal for the counted annotations.
+   * e.g. a <var>maxOrdinal</var> of 1 will ensure that only the first annotation for each
+   * parent is counted. If <var>maxOrdinal</var> is null, then all annotations are
+   * counted, regardless of their ordinal.
+   * @return A (possibly empty) array of annotations.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   * @throws GraphNotFoundException If the transcript was not found in the store.
+   */
+  public long countAnnotations(String id, String layerId, Integer maxOrdinal)
     throws StoreException, PermissionException, GraphNotFoundException;
 
   /**
@@ -547,7 +566,26 @@ public interface GraphStoreQuery {
    */
   default public Annotation[] getAnnotations(String id, String layerId)
     throws StoreException, PermissionException, GraphNotFoundException {
-    return getAnnotations(id, layerId, null, null);
+    return getAnnotations(id, layerId, null, null, null);
+  }
+
+  /**
+   * Gets the annotations on the given layer of the given transcript, but only those with
+   * an ordinal less than or equal to the given maximum.
+   * @param id The ID of the transcript.
+   * @param layerId The ID of the layer.
+   * @param maxOrdinal The maximum ordinal for the returned annotations.
+   * e.g. a <var>maxOrdinal</var> of 1 will ensure that only the first annotation for each
+   * parent is returned. If <var>maxOrdinal</var> is null, then all annotations are
+   * returned, regardless of their ordinal.
+   * @return A (possibly empty) array of annotations.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   * @throws GraphNotFoundException If the transcript was not found in the store.
+   */
+  default public Annotation[] getAnnotations(String id, String layerId, Integer maxOrdinal)
+    throws StoreException, PermissionException, GraphNotFoundException {
+    return getAnnotations(id, layerId, maxOrdinal, null, null);
   }
 
   /**
@@ -561,8 +599,30 @@ public interface GraphStoreQuery {
    * @throws PermissionException If the operation is not permitted.
    * @throws GraphNotFoundException If the transcript was not found in the store.
    */
-  public Annotation[] getAnnotations(
+  default public Annotation[] getAnnotations(
     String id, String layerId, Integer pageLength, Integer pageNumber)
+    throws StoreException, PermissionException, GraphNotFoundException {
+    return getAnnotations(id, layerId, null, pageLength, pageNumber);
+  }
+   
+  /**
+   * Gets the annotations on the given layer of the given transcript, but only those with
+   * an ordinal less than or equal to the given maximum.
+   * @param id The ID of the transcript.
+   * @param layerId The ID of the layer.
+   * @param maxOrdinal The maximum ordinal for the returned annotations.
+   * e.g. a <var>maxOrdinal</var> of 1 will ensure that only the first annotation for each
+   * parent is returned. If <var>maxOrdinal</var> is null, then all annotations are
+   * returned, regardless of their ordinal.
+   * @param pageLength The maximum number of IDs to return, or null to return all.
+   * @param pageNumber The zero-based page number to return, or null to return the first page.
+   * @return A (possibly empty) array of annotations.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   * @throws GraphNotFoundException If the transcript was not found in the store.
+   */
+  public Annotation[] getAnnotations(
+    String id, String layerId, Integer maxOrdinal, Integer pageLength, Integer pageNumber)
     throws StoreException, PermissionException, GraphNotFoundException;
    
   /**
