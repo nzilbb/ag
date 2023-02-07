@@ -53,7 +53,7 @@ public class TextGridSerialization
   // Attributes:     
   protected Vector<String> warnings;
   /**
-   * Returns any warnings that may have arisen during the last execution of {@link #deserialize()} or  {@link #serialize(Graph[],String[])}.
+   * Returns any warnings that may have arisen during the last execution of {@link #deserialize()} or  {@link #serialize(Spliterator,String[],Consumer,Consumer,Consumer)}.
    * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
    * @return A possibly empty list of warnings.
    */
@@ -230,7 +230,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #bUseConventions}: Whether to use text conventions for comment,
    * noise, lexical, and pronounce annotations. 
-   * @param bNewTranscriptOnly Whether to use text conventions for comment, noise,
+   * @param bNewUseConventions Whether to use text conventions for comment, noise,
    * lexical, and pronounce annotations. 
    */
   public TextGridSerialization setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; return this; }
@@ -376,9 +376,9 @@ public class TextGridSerialization
    * @param configuration The configuration for the deserializer. 
    * @param schema The layer schema, definining layers and the way they interrelate.
    * @return A list of configuration parameters (still) must be set before
-   * {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list,
-   * {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list,
-   * this method must be invoked again with the returned parameters' values set. 
+   * {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty 
+   * list, {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not 
+   * an empty list, this method must be invoked again with the returned parameters' values set. 
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema) {
     setSchema(schema);
@@ -1315,7 +1315,6 @@ public class TextGridSerialization
    * deletion. 
    * @param preceding The preceding, surviving turn.
    * @param following The following turn, which will be deleted.
-   * @return The changes for this merge.
    */
   public void mergeTurns(Annotation preceding, Annotation following) {
     // set anchor
@@ -1362,7 +1361,7 @@ public class TextGridSerialization
 
   /**
    * Determines the cardinality between graphs and serialized streams.
-   * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NtoN as there is one
+   * @return {@link nzilbb.ag.serialize.GraphSerializer.Cardinality}.NtoN as there is one
    * stream produced for each graph to serialize.
    */
   public Cardinality getCardinality() {
@@ -1381,7 +1380,6 @@ public class TextGridSerialization
    * @param layerIds The IDs of the layers to include, or null for all layers.
    * @param consumer The object receiving the streams.
    * @param warnings The object receiving warning messages.
-   * @return A list of named streams that contain the serialization in the given format. 
    * @throws SerializerNotConfiguredException if the object has not been configured.
    */
   public void serialize(
