@@ -202,7 +202,7 @@ public class Deserialize extends CommandLineProgram {
   }
 
   /**
-   * Specify the schema to used by  {@link #convert(File)}.
+   * Specify the schema to used.
    * @return The schema.
    */
   protected Schema getDefaultSchema() {

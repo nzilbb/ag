@@ -121,8 +121,8 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
   public EAFSerialization setTierMessages(HashMap<String,String> mNewTierMessages) { mTierMessages = mNewTierMessages; return this; }
 
   /**
-   * Whether 'utterance' intervals (those which map to either {@link Labbcat#LAYER_TURN}
-   * or {@link Labbcat#LAYER_UTTERANCE}) contain the name of the speaker (true) or the
+   * Whether 'utterance' intervals (those which map to either {@link Schema#turnLayerId}
+   * or {@link Schema#utteranceLayerId}) contain the name of the speaker (true) or the
    * words spoken (false - in which case the tier name is assumed to be the speaker name)
    * @see #getUtterancesAreSpeakerNames()
    * @see #setUtterancesAreSpeakerNames(boolean)
@@ -130,22 +130,22 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
   protected boolean utterancesAreSpeakerNames = false;
   /**
    * Getter for {@link #utterancesAreSpeakerNames}: Whether 'utterance' intervals (those
-   * which map to either {@link Labbcat#LAYER_TURN} or {@link Labbcat#LAYER_UTTERANCE})
+   * which map to either {@link Schema#turnLayerId} or {@link Schema#utteranceLayerId})
    * contain the name of the speaker (true) or the words spoken (false - in which case
    * the tier name is assumed to be the speaker name)
-   * @return Whether 'utterance' intervals (those which map to either {@link
-   * Labbcat#LAYER_TURN} or {@link Labbcat#LAYER_UTTERANCE}) contain the name of the
+   * @return Whether 'utterance' intervals (those which map to either
+   * {@link Schema#turnLayerId} or {@link Schema#utteranceLayerId}) contain the name of the
    * speaker (true) or the words spoken (false - in which case the tier name is assumed
    * to be the speaker name)
    */
   public boolean getUtterancesAreSpeakerNames() { return utterancesAreSpeakerNames; }
   /**
    * Setter for {@link #utterancesAreSpeakerNames}: Whether 'utterance' intervals (those
-   * which map to either {@link Labbcat#LAYER_TURN} or {@link Labbcat#LAYER_UTTERANCE})
+   * which map to either {@link Schema#turnLayerId} or {@link Schema#utteranceLayerId})
    * contain the name of the speaker (true) or the words spoken (false - in which case
    * the tier name is assumed to be the speaker name)
-   * @param bNewUtterancesAreSpeakerNames Whether 'utterance' intervals (those which map
-   * to either {@link Labbcat#LAYER_TURN} or {@link Labbcat#LAYER_UTTERANCE}) contain the
+   * @param newUtterancesAreSpeakerNames Whether 'utterance' intervals (those which map
+   * to either {@link Schema#turnLayerId} or {@link Schema#utteranceLayerId}) contain the
    * name of the speaker (true) or the words spoken (false - in which case the tier name
    * is assumed to be the speaker name)
    */
@@ -311,12 +311,12 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
    */
   protected Layer authorLayer;
   /**
-   * Getter for {@link #AuthorLayer}: Layer for the author/transcriber.
+   * Getter for {@link #authorLayer}: Layer for the author/transcriber.
    * @return Layer for the author/transcriber.
    */
   public Layer getAuthorLayer() { return authorLayer; }
   /**
-   * Setter for {@link #AuthorLayer}: Layer for the author/transcriber.
+   * Setter for {@link #authorLayer}: Layer for the author/transcriber.
    * @param newAuthorLayer Layer for the author/transcriber.
    */
   public EAFSerialization setAuthorLayer(Layer newAuthorLayer) { authorLayer = newAuthorLayer; return this; }
@@ -328,12 +328,12 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
    */
   protected Layer dateLayer;
   /**
-   * Getter for {@link #DateLayer}: Layer for the document date.
+   * Getter for {@link #dateLayer}: Layer for the document date.
    * @return Layer for the document date.
    */
   public Layer getDateLayer() { return dateLayer; }
   /**
-   * Setter for {@link #DateLayer}: Layer for the document date.
+   * Setter for {@link #dateLayer}: Layer for the document date.
    * @param newDateLayer Layer for the document date.
    */
   public EAFSerialization setDateLayer(Layer newDateLayer) { dateLayer = newDateLayer; return this; }
@@ -345,12 +345,12 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
    */
   protected Layer languageLayer;
   /**
-   * Getter for {@link #LanguageLayer}: Layer for the document language.
+   * Getter for {@link #languageLayer}: Layer for the document language.
    * @return Layer for the document language.
    */
   public Layer getLanguageLayer() { return languageLayer; }
   /**
-   * Setter for {@link #LanguageLayer}: Layer for the document language.
+   * Setter for {@link #languageLayer}: Layer for the document language.
    * @param newLanguageLayer Layer for the document language.
    */
   public EAFSerialization setLanguageLayer(Layer newLanguageLayer) { languageLayer = newLanguageLayer; return this; }
@@ -385,7 +385,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
   public Boolean getUseConventions() { return bUseConventions; }
   /**
    * Setter for {@link #bUseConventions}: Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
-   * @param bNewTranscriptOnly Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
+   * @param bNewUseConventions Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
    */
   @Switch("Use text conventions for comment, noise, lexical, and pronounce annotations")
   public EAFSerialization setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; return this; }
@@ -565,9 +565,9 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
    * @param configuration The configuration for the deserializer. 
    * @param schema The layer schema, definining layers and the way they interrelate.
    * @return A list of configuration parameters (still) must be set before 
-   * {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list,
-   * {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list,
-   * this method must be invoked again with the returned parameters' values set. 
+   * {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty
+   * list, {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an
+   * empty list, this method must be invoked again with the returned parameters' values set. 
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema) {
     setSchema(schema);
@@ -1897,7 +1897,6 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
    * deletion. 
    * @param preceding The preceding, surviving turn.
    * @param following The following turn, which will be deleted.
-   * @return The changes for this merge.
    */
   public void mergeTurns(Annotation preceding, Annotation following) {
     // set anchor
@@ -1947,7 +1946,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
 
   /**
    * Determines the cardinality between graphs and serialized streams.
-   * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NtoN as there is one
+   * @return {@link nzilbb.ag.serialize.GraphSerializer.Cardinality}.NtoN as there is one
    * stream produced for each graph to serialize.
    */
   public Cardinality getCardinality() {
@@ -1966,7 +1965,6 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
    * @param layerIds The IDs of the layers to include, or null for all layers.
    * @param consumer The object receiving the streams.
    * @param warnings The object receiving warning messages.
-   * @return A list of named streams that contain the serialization in the given format. 
    * @throws SerializerNotConfiguredException if the object has not been configured.
    */
   public void serialize(
@@ -2658,7 +2656,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     }
   }
   /**
-   * Specify the schema to used by  {@link Deserialize#convert(File)}.
+   * Specify the schema to used by  {@link Deserialize}.
    * @return The schema.
    */
   @Override protected Schema getDefaultSchema() {
