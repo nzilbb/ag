@@ -160,11 +160,9 @@ To release another module (e.g. formatters, annotators, etc.)
 These commands should be executed from the *top* directory (i.e. ag) not the module's
 subdirectory. 
 
-1. Ensure the `version` in pom.xml *isn't* suffixed with `-SNAPSHOT` e.g. use something
-   like the following command from within the ag directory:  
-   ```
-   mvn versions:set -DnewVersion=1.1.0 -pl :nzilbb.formatter.praat
-   ```
+1. Ensure the `version` in pom.xml *isn't* suffixed with `-SNAPSHOT`  
+   *NB* Don't use `mvn versions:set` for this if the module is a nzilbb.formatter, because it
+   will fix versions in nzilbb.converter projects, which are manually set in their pom.xml
 2. Execute the command:  
    ```
    mvn clean deploy -P release -pl :nzilbb.formatter.praat
@@ -178,7 +176,6 @@ subdirectory.
    mvn nexus-staging:drop -pl :nzilbb.formatter.praat
    ```
    ...and start again.
-4. Start a new .SNAPSHOT version with something like:
-   ```
-   mvn versions:set -DnewVersion=1.1.1-SNAPSHOT -pl :nzilbb.formatter.praat
-   ```
+4. Start a new .SNAPSHOT version.  
+   *NB* Don't use `mvn versions:set` for this if the module is a nzilbb.formatter, because it
+   will fix versions in nzilbb.converter projects, which are manually set in their pom.xml
