@@ -672,7 +672,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * Sets the configuration for a given annotation task.
    * @param parameters The configuration of the annotator; a value of <tt> null </tt>
    * will apply the default task parameters, with {@link #tokenLayerId} set to the
-   * {@link Schema#wordLayerId} and {@link #stemLayerId} set to <q>stem</q>.
+   * {@link Schema#wordLayerId} and {@link #tokenLayerId} set to <q>phonemes</q>.
    * @throws InvalidConfigurationException
    */
   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
@@ -946,8 +946,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
   
   /**
    * Registers a token for annotation.
-   * @param annotation
-   * @param 
+   * @param token
    * @param toAnnotate
    */
   protected void registorForAnnotation(
@@ -1020,7 +1019,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    *  <li> {@link Annotator#setSchema(Schema)} </li>
    *  <li> {@link Annotator#setTaskParameters(String)} </li>
    *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
-   *  <li> {@link Annotator#rdbConnectionFactory(String,String,String)}
+   *  <li> {@link Annotator#setRdbConnectionFactory(ConnectionFactory)}
    *       (if applicable) </li>
    * </ul>
    * @return A (possibly empty) list of IDs of dictionaries.
@@ -1081,7 +1080,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * <ul>
    *  <li> {@link Annotator#setSchema(Schema)} </li>
    *  <li> {@link Annotator#setTaskParameters(String)} </li>
-   *  <li> {@link Annotator#rdbConnectionFactory(ConnectionFactory)} </li>
+   *  <li> {@link Annotator#setRdbConnectionFactory(ConnectionFactory)} </li>
    * </ul>
    * @return The identified dictionary.
    * @throws DictionaryException If the given dictionary doesn't exist.

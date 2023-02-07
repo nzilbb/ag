@@ -494,7 +494,7 @@ public class HTKAligner extends Annotator {
   /**
    * Percentage of overlap with other speech, above which the utterance is ignored.
    * @see #getOverlapThreshold()
-   * @see #setOverlapThreshold(Double)
+   * @see #setOverlapThreshold(Integer)
    */
   protected Integer overlapThreshold = Integer.valueOf(5);
   /**
@@ -856,8 +856,7 @@ public class HTKAligner extends Annotator {
   /**
    * Sets the configuration for a given annotation task.
    * @param parameters The configuration of the annotator; a value of <tt> null </tt>
-   * will apply the default task parameters, with {@link #tokenLayerId} set to the
-   * {@link Schema#wordLayerId} and {@link #stemLayerId} set to <q>stem</q>.
+   * is not valid.
    * @throws InvalidConfigurationException
    */
   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
@@ -2011,7 +2010,6 @@ public class HTKAligner extends Annotator {
    * @param utteranceOrthography
    * @param bJustAddedNoise
    * @param orthography
-   * @param pauseMarkers
    * @return true if a noise annotation was the last thing added, false otherwise.
    */
   public boolean addWordToUtterance(

@@ -499,7 +499,7 @@ public class CMUDictionaryTagger extends Annotator
    * Sets the configuration for a given annotation task.
    * @param parameters The configuration of the annotator; a value of <tt> null </tt>
    * will apply the default task parameters, with {@link #tokenLayerId} set to the
-   * {@link Schema#wordLayerId} and {@link #stemLayerId} set to <q>stem</q>.
+   * {@link Schema#wordLayerId} and {@link #pronunciationLayerId} set to <q>phonemes</q>.
    * @throws InvalidConfigurationException
    */
   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
@@ -753,7 +753,7 @@ public class CMUDictionaryTagger extends Annotator
    *  <li> {@link Annotator#setSchema(Schema)} </li>
    *  <li> {@link Annotator#setTaskParameters(String)} </li>
    *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
-   *  <li> {@link Annotator#rdbConnectionFactory(String,String,String)}
+   *  <li> {@link Annotator#setRdbConnectionFactory(ConnectionFactory)}
    *       (if applicable) </li>
    * </ul>
    * @return A (possibly empty) list of IDs of dictionaries.
@@ -769,7 +769,7 @@ public class CMUDictionaryTagger extends Annotator
    *  <li> {@link Annotator#setSchema(Schema)} </li>
    *  <li> {@link Annotator#setTaskParameters(String)} </li>
    *  <li> {@link Annotator#setWorkingDirectory(File)} (if applicable) </li>
-   *  <li> {@link Annotator#rdbConnectionFactory(ConnectionFactory)}
+   *  <li> {@link Annotator#setRdbConnectionFactory(ConnectionFactory)}
    *       (if applicable) </li>
    * </ul>
    * @return The identified dictionary.

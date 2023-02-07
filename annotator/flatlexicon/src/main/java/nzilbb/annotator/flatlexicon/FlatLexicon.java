@@ -121,7 +121,6 @@ public class FlatLexicon implements Dictionary {
   /**
    * The FlatLexiconTagger annotator that created this dictionary.
    * @see #getAnnotator()
-   * @see #setAnnotator(Annotator)
    */
   protected Annotator annotator;
   /**

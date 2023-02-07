@@ -14,7 +14,7 @@
   <description>Annotator that integrates with the Montreal Forced Aligner (MFA)</description>
 
   <properties>
-    <nzilbb.formatter.praat.version>2.6.3</nzilbb.formatter.praat.version>
+    <nzilbb.formatter.praat.version>2.6.4</nzilbb.formatter.praat.version>
     <package.path>nzilbb/annotator/mfa/</package.path>
     <annotator.class>nzilbb.annotator.mfa.MFA</annotator.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

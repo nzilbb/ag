@@ -648,7 +648,7 @@ public class MFA extends Annotator {
    * <p> This is only likely to work inside a Docker container, where the current user has
    * superuser privileges.
    * <p> This method starts the installation process in a new thread, and returns
-   * immediately. In order to follow progress, use {@link Annotator#isRunning()}, 
+   * immediately. In order to follow progress, use {@link Annotator#getRunning()}, 
    * {@link Annotator#getPercentComplete()}, and {@link Annotator#getStatus()}.
    */
   public void installMfa() {
@@ -798,8 +798,7 @@ public class MFA extends Annotator {
   /**
    * Sets the configuration for a given annotation task.
    * @param parameters The configuration of the annotator; a value of <tt> null </tt>
-   * will apply the default task parameters, with {@link #tokenLayerId} set to the
-   * {@link Schema#wordLayerId} and {@link #stemLayerId} set to <q>stem</q>.
+   * is invalid.
    * @throws InvalidConfigurationException
    */
   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
@@ -1591,8 +1590,6 @@ public class MFA extends Annotator {
    * Reads the alignments from the files output by MFA, and merges the changes into the
    * original fragments.
    * @param mfaToPhonemes Phoneme label converter to use.
-   * @param useP2FACorrection Whether to use the P2FA alignment correction.
-   * process is allocated to this step. 
    * @param originalFragments The original utterances that should be updated
    * @param consumer Where the aligned fragments are sent.
    */

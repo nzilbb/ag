@@ -223,9 +223,7 @@ public class JavascriptAnnotator extends Annotator {
 
   /**
    * Sets the configuration for a given annotation task.
-   * @param parameters The configuration of the annotator; a value of <tt> null </tt>
-   * will apply the default task parameters, with {@link #tokenLayerId} set to the
-   * {@link Schema#wordLayerId} and {@link #stemLayerId} set to <q>stem</q>.
+   * @param parameters The configuration of the annotator.
    * @throws InvalidConfigurationException
    */
   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
