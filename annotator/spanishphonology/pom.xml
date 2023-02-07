@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>nzilbb</groupId>
+    <groupId>nz.ilbb.ag</groupId>
     <artifactId>nzilbb.annotator</artifactId>
     <version>[1.0.0,)</version>
   </parent>
 
-  <groupId>nzilbb</groupId>
+  <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.spanishphonology</artifactId>
   <name>nzilbb.annotator.spanishphonology</name>
   <version>0.6.0</version>
@@ -22,7 +22,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
       <version>[1.0.4,)</version>
       <scope>compile</scope>

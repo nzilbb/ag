@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>nzilbb.annotator</artifactId>
-    <groupId>nzilbb</groupId>
+    <groupId>nz.ilbb.ag</groupId>
     <version>1.0.0</version>
   </parent>
 
-  <groupId>nzilbb</groupId>
+  <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.basservices</artifactId>
   <version>1.0.2</version>
 
@@ -26,18 +26,18 @@
 
   <dependencies>
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.formatter.praat</artifactId>
       <version>[${nzilbb.formatter.praat.version},)</version>
     </dependency>
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
       <version>[1.0.7,)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.bas</artifactId>
       <version>[${nzilbb.bas.version},)</version>
       <scope>compile</scope>
@@ -85,13 +85,13 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>nzilbb</groupId>
+                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>nzilbb.formatter.praat</artifactId>
                   <version>${nzilbb.formatter.praat.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>nzilbb</groupId>
+                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>nzilbb.bas</artifactId>
                   <version>${nzilbb.bas.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>

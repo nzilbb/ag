@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>nzilbb.converter</artifactId>
-    <groupId>nzilbb</groupId>
+    <groupId>nz.ilbb.ag</groupId>
     <version>1.0.0</version>
   </parent>
 
-  <groupId>nzilbb</groupId>
+  <groupId>nz.ilbb.ag</groupId>
   <artifactId>trs-to-cha</artifactId>
   <version>0.1.1</version>
   <name>nzilbb.converter.trstocha</name>
@@ -30,17 +30,17 @@
 
   <dependencies>
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>converter-base</artifactId>
       <version>[1.0.3,)</version>
     </dependency>
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>${input.package}</artifactId>
       <version>[${input.version},)</version>
     </dependency>
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>${output.package}</artifactId>
       <version>[${output.version},)</version>
     </dependency>
@@ -107,25 +107,25 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>nzilbb</groupId>
+                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>${input.package}</artifactId>
                   <version>${input.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>nzilbb</groupId>
+                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>${output.package}</artifactId>
                   <version>${output.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>nzilbb</groupId>
+                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>converter-base</artifactId>
                   <version>1.0.3</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>nzilbb</groupId>
+                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>nzilbb.ag</artifactId>
                   <version>1.0.2</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>

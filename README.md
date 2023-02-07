@@ -105,3 +105,35 @@ mvn test
 cd ag
 mvn site
 ```
+
+## Deploying to OSSRH
+
+OSSRH is the central Maven repository where nzilbb.ag modules are deployed (published).
+
+There are two type of deployment:
+
+- *snapshot*: a transient deployment that can be updated during development/testing
+- *release*: an official published version that cannot be changed once it's deployed
+
+A *snapshot* deployment is done when the module version (`version` tag in pom.xml) ends with
+`-SNAPSHOT`. Otherwise, any deployment is a *release*.
+
+### Snapshot Deployment
+
+To perform a snapshot deployment:
+
+1. Ensure the `version` in pom.xml *is* suffixed with `-SNAPSHOT`
+2. Execute the command:  
+   ```
+   mvn clean deploy
+   ```
+
+### Release Deployment
+
+To perform a snapshot deployment:
+
+1. Ensure the `version` in pom.xml *isn't* suffixed with `-SNAPSHOT`
+2. Execute the command:  
+   ```
+   mvn clean deploy
+   ```

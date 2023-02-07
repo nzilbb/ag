@@ -4,10 +4,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>nzilbb</groupId>
+  <groupId>nz.ilbb.ag</groupId>
   <artifactId>annotation-graphs</artifactId>
-  <name>annotation-graphs</name>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
+  <name>Annotation Graphs and Related Tools</name>
   <packaging>pom</packaging>
   <description>
     Implementation of an Annotation Graph API for linguistic annotations, and related modules.
@@ -21,7 +21,11 @@
       <distribution>manual</distribution><!-- change to repo once it's in there -->
     </license>
   </licenses>
-
+  <scm>
+    <connection>scm:git:git://github.com/nzilbb/ag.git</connection>
+    <developerConnection>scm:git:ssh://github.com:nzilbb/ag.git</developerConnection>
+    <url>https://github.com/nzilbb/ag/tree/main</url>
+  </scm>
   <developers>
     <developer>
       <id>robert</id>
@@ -37,7 +41,17 @@
       <timezone>America/Buenos_Aires</timezone>
     </developer>
   </developers>
-
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

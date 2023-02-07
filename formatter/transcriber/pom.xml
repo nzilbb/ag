@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>nzilbb.formatter</artifactId>
-    <groupId>nzilbb</groupId>
+    <groupId>nz.ilbb.ag</groupId>
     <version>1.0.0</version>
   </parent>
 
-  <groupId>nzilbb</groupId>
+  <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.transcriber</artifactId>
   <name>nzilbb.formatter.transcriber</name>
   <version>2.0.5</version>
@@ -22,7 +22,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
       <version>[1.0.5,)</version>
       <scope>compile</scope>

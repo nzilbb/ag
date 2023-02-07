@@ -4,10 +4,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>nzilbb</groupId>
+  <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.ag</artifactId>
-  <name>nzilbb.ag</name>
-  <version>1.1.0</version>
+  <version>1.1.0-SNAPSHOT</version>
+  <name>Annotation Graphs</name>
   <packaging>jar</packaging>
   <description>Implementation of an Annotation Graph API for linguistic annotations.</description>
   <url>https://github.com/nzilbb/ag/</url>
@@ -19,6 +19,11 @@
       <distribution>manual</distribution><!-- change to repo once it's in there -->
     </license>
   </licenses>
+  <scm>
+    <connection>scm:git:git://github.com/nzilbb/ag.git</connection>
+    <developerConnection>scm:git:ssh://github.com:nzilbb/ag.git</developerConnection>
+    <url>https://github.com/nzilbb/ag/tree/main</url>
+  </scm>
   <developers>
     <developer>
       <id>robert</id>
@@ -34,6 +39,16 @@
       <timezone>America/Buenos_Aires</timezone>
     </developer>
   </developers>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 
   <properties>
     <package.path>nzilbb/ag/</package.path>
@@ -156,6 +171,17 @@
           <outputDirectory>../docs</outputDirectory>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.7</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>false</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
     </plugins>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
@@ -206,6 +232,62 @@
       </plugins>
     </pluginManagement>
   </build>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>2.2.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.2.0</version>
+	    <configuration>
+              <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+              <show>public</show>
+              <overview>overview.html</overview>
+	      <bottom>&lt;a rel='license' href='http://creativecommons.org/licenses/by-sa/2.0/'&gt;&lt;img alt='CC-BY-SA Creative Commons Licence ' src='/ag/images/cc-by-sa.svg' title='This work is licensed under a Creative Commons Attribution-ShareAlike 2.0 Generic License' /&gt;&lt;/a&gt;&lt;a rel='author' href='https://www.canterbury.ac.nz/nzilbb/'&gt;&lt;img src='/ag/images/nzilbb.svg' alt='Te Kāhui Roro Reo | The New Zealand Institute of Language, Brain and Behaviour' title='🄯 ${maven.build.timestamp} NZILBB'&gt;&lt;/a&gt;</bottom>
+              <stylesheetfile>javadoc.css</stylesheetfile>
+	    </configuration>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
   <reporting>
     <plugins>
       <plugin>
@@ -241,6 +323,7 @@
 	<artifactId>maven-javadoc-plugin</artifactId>
         <version>3.2.0</version>
 	<configuration>
+          <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
           <show>public</show>
           <overview>overview.html</overview>
 	  <bottom>&lt;a rel='license' href='http://creativecommons.org/licenses/by-sa/2.0/'&gt;&lt;img alt='CC-BY-SA Creative Commons Licence ' src='/ag/images/cc-by-sa.svg' title='This work is licensed under a Creative Commons Attribution-ShareAlike 2.0 Generic License' /&gt;&lt;/a&gt;&lt;a rel='author' href='https://www.canterbury.ac.nz/nzilbb/'&gt;&lt;img src='/ag/images/nzilbb.svg' alt='Te Kāhui Roro Reo | The New Zealand Institute of Language, Brain and Behaviour' title='🄯 ${maven.build.timestamp} NZILBB'&gt;&lt;/a&gt;</bottom>
