@@ -143,11 +143,11 @@ To perform a release deployment:
    ```
 3. Happy with everything? Complete the release with:
    ```
-   mvn nexus-staging:release
+   mvn nexus-staging:release -P release
    ```
    Otherwise:
    ```
-   mvn nexus-staging:drop
+   mvn nexus-staging:drop -P release
    ```
    ...and start again.
 4. Start a new .SNAPSHOT version with something like:
@@ -169,11 +169,11 @@ subdirectory.
    ```
 3. Happy with everything? Complete the release with:
    ```
-   mvn nexus-staging:release -pl :nzilbb.formatter.praat
+   mvn nexus-staging:release -P release -pl :nzilbb.formatter.praat
    ```
    Otherwise:
    ```
-   mvn nexus-staging:drop -pl :nzilbb.formatter.praat
+   mvn nexus-staging:drop -P release -pl :nzilbb.formatter.praat
    ```
    ...and start again.
 4. Start a new .SNAPSHOT version.  
