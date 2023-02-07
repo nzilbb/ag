@@ -5,3 +5,5 @@ derby.log
 # maven target directory
 target
 annotator/jython/src/main/resources/nzilbb/annotator/jython/task/index.js
+# maven versions:set backup files
+*.versionsBackup

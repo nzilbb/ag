@@ -132,8 +132,25 @@ To perform a snapshot deployment:
 
 To perform a snapshot deployment:
 
-1. Ensure the `version` in pom.xml *isn't* suffixed with `-SNAPSHOT`
+1. Ensure the `version` in pom.xml *isn't* suffixed with `-SNAPSHOT` e.g. use something
+   like the following command from within the project directory:  
+   ```
+   mvn versions:set -DnewVersion=1.1.0
+   ```
 2. Execute the command:  
    ```
-   mvn clean deploy
+   mvn clean deploy -P release
+   ```
+3. Happy with everything? Complete the release with:
+   ```
+   mvn nexus-staging:release
+   ```
+   Otherwise:
+   ```
+   mvn nexus-staging:drop
+   ```
+   ...and start again.
+4. Start a new .SNAPSHOT version with something like:
+   ```
+   mvn versions:set -DnewVersion=1.1.1-SNAPSHOT
    ```

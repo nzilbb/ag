@@ -6,7 +6,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>annotation-graphs</artifactId>
-  <version>1.1.0</version>
+  <version>1.0.0</version>
   <name>Annotation Graphs and Related Tools</name>
   <packaging>pom</packaging>
   <description>
@@ -58,9 +58,6 @@
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
-  <scm>        
-    <connection>scm:git:ssh://github.com/nzilbb/ag</connection>
-  </scm>
   <modules>
     <module>ag</module>
     <module>transcriber</module>
