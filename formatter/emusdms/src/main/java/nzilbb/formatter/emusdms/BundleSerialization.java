@@ -985,7 +985,7 @@ public class BundleSerialization implements GraphSerializer, SchemaSerializer, G
    protected Vector<String> warnings = new Vector<String>();
    /**
     * Returns any warnings that may have arisen during the last execution of 
-    * {@link #serialize(Graph[],String[])}.
+    * {@link #serialize(Spliterator,String[],Consumer,Consumer,Consumer)}.
     * @return A possibly empty list of warnings.
     */
    public String[] getWarnings() {
@@ -1006,7 +1006,7 @@ public class BundleSerialization implements GraphSerializer, SchemaSerializer, G
   
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * @return {@link GraphSerializer#Cardinality}.NtoN as there is one stream produced per graph.
+    * @return {@link GraphSerializer.Cardinality}.NtoN as there is one stream produced per graph.
     * regardless of  how many graphs are serialized.
     */
    public Cardinality getCardinality() {
@@ -1024,7 +1024,6 @@ public class BundleSerialization implements GraphSerializer, SchemaSerializer, G
     * @param layerIds The IDs of the layers to include, or null for all layers.
     * @param consumer The object receiving the streams.
     * @param warnings The object receiving warning messages.
-    * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
    public void serialize(

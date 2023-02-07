@@ -68,8 +68,9 @@ public class CsvSerializer implements GraphSerializer {
    
    protected Vector<String> warnings;
    /**
-    * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
-    * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
+    * Returns any warnings that may have arisen during the last execution of
+    * {@link #serialize(Spliterator,String[],Consumer,Consumer,Consumer)}.
+    * <p>{@link GraphSerializer} method.
     * @return A possibly empty list of warnings.
     */
    public String[] getWarnings() {
@@ -170,9 +171,9 @@ public class CsvSerializer implements GraphSerializer {
    } // end of constructor
 
    /**
-    * Returns the deserializer's descriptor.
-    * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
-    * @return The deserializer's descriptor
+    * Returns the serializer's descriptor.
+    * <p>{@link GraphSerializer} method.
+    * @return The serializer's descriptor
     */
    public SerializationDescriptor getDescriptor() {
       return new SerializationDescriptor(
@@ -185,10 +186,10 @@ public class CsvSerializer implements GraphSerializer {
     *  set, to discover what (if any) general configuration is required. If parameters are
     *  returned, and user interaction is possible, then the user may be presented with an
     *  interface for setting/confirming these parameters.
-    * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
+    * <p>{@link GraphSerializer} method.
     * @param configuration The configuration for the deserializer. 
     * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of configuration parameters (still) must be set before {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list, {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
+    * @return A list of configuration parameters (still) must be set before {@link GraphSerializer#getRequiredLayers()} can be invoked. If this is an empty list, {@link GraphSerializer#getRequiredLayers()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
     */
    public ParameterSet configure(ParameterSet configuration, Schema schema) {
       setSchema(schema);
@@ -208,7 +209,7 @@ public class CsvSerializer implements GraphSerializer {
 
    /**
     * Determines the cardinality between graphs and serialized streams.
-    * @return {@link GraphSerializer#Cardinality}.NtoOne as there is one stream produced
+    * @return {@link GraphSerializer.Cardinality}.NtoOne as there is one stream produced
     * regardless of  how many graphs are serialized.
     */
    public Cardinality getCardinality() {
@@ -228,7 +229,6 @@ public class CsvSerializer implements GraphSerializer {
     * @param layerIds The IDs of the layers to include, or null for all layers.
     * @param consumer The object receiving the streams.
     * @param warnings The object receiving warning messages.
-    * @return A list of named streams that contain the serialization in the given format. 
     * @throws SerializerNotConfiguredException if the object has not been configured.
     */
    public void serialize(

@@ -52,7 +52,7 @@ public class DeserializeTranscript extends Deserialize {
     }
   }
   /**
-   * Specify the schema to used by  {@link Deserialize#convert(File)}.
+   * Specify the schema to used by  {@link Deserialize}.
    * @return The schema.
    */
   @Override protected Schema getDefaultSchema() {

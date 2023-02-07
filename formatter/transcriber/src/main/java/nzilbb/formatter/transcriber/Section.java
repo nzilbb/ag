@@ -143,17 +143,17 @@ public class Section
    public void setTranscript(Transcript tNewTranscript) { tTranscript = tNewTranscript; }
    
    /**
-    * Turns in this Section (A list of {@link nz.ac.canterbury.ling.transcriber.Turn} objects)
+    * Turns in this Section (A list of {@link Turn} objects)
     */
    protected Vector<Turn> vTurns = new Vector<Turn>();
    /**
     * Turns accessor
-    * @return Turns in this Section (A list of {@link nz.ac.canterbury.ling.transcriber.Turn} objects)
+    * @return Turns in this Section (A list of {@link Turn} objects)
     */
    public Vector<Turn> getTurns() { return vTurns; }
    /**
     * Turns mutator
-    * @param vNewTurns Turns in this Section (A list of {@link nz.ac.canterbury.ling.transcriber.Turn} objects)
+    * @param vNewTurns Turns in this Section (A list of {@link Turn} objects)
     */
    public void setTurns(Vector<Turn> vNewTurns) { if (vNewTurns != null) vTurns = vNewTurns; }
    

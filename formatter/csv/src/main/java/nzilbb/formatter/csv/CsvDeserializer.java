@@ -227,7 +227,7 @@ public class CsvDeserializer implements GraphDeserializer {
    /**
     * Map of header names to column indices.
     * @see #getHeaderMap()
-    * @see #setHeaderMap(Map<String,Integer>)
+    * @see #setHeaderMap(Map)
     */
    protected Map<String,Integer> headerMap;
    /**

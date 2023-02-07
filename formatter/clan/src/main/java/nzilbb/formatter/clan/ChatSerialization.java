@@ -633,7 +633,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    * Split MOR word groups into separate annotations. This is only supported when
    * {@link #getSplitMorTagGroups()} is true.
    * @see #getSplitMorWordGroups()
-   * @see #setSplitMorWordGroups(Booelan)
+   * @see #setSplitMorWordGroups(Boolean)
    */
   protected Boolean splitMorWordGroups = Boolean.TRUE;
   /**
@@ -2398,7 +2398,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
   /**
    * Determines the cardinality between graphs and serialized streams.
    * <p>The cardinality of this deseerializer is NToN.
-   * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToN.
+   * @return {@link nzilbb.ag.serialize.GraphSerializer.Cardinality}.NToN.
    */
   public Cardinality getCardinality() {
     return Cardinality.NToN;

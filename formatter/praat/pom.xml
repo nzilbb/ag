@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.praat</artifactId>
   <name>nzilbb.formatter.praat</name>
-  <version>2.6.5-SNAPSHOT</version>
+  <version>2.6.4</version>
 
   <properties>
     <package.path>nzilbb/formatter/praat/</package.path>

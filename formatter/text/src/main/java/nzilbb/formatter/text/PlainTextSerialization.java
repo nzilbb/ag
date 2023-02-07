@@ -93,7 +93,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
   /**
    * Lines of the header, if any.
    * @see #getHeaderLines()
-   * @see #setHeaderLines(Vector<String>)
+   * @see #setHeaderLines(Vector)
    */
   protected Vector<String> headerLines;
   /**
@@ -110,7 +110,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
   /**
    * Lines of the main text.
    * @see #getLines()
-   * @see #setLines(Vector<String>)
+   * @see #setLines(Vector)
    */
   protected Vector<String> lines;
   /**
@@ -144,7 +144,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
   /**
    * Whether the text includes timestamps or not.
    * @see #getHasTimestamps()
-   * @see #setHasTimestamps(booelan)
+   * @see #setHasTimestamps(boolean)
    */
   protected boolean hasTimestamps;
   /**
@@ -182,7 +182,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
    */
   protected Layer episodeLayer;
   /**
-   * Getter for {@link #episodeayer}: Episode information layer.
+   * Getter for {@link #episodeLayer}: Episode information layer.
    * @return Episode information layer.
    */
   public Layer getEpisodeLayer() { return episodeLayer; }
@@ -647,7 +647,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
     
   /**
    * Log a debug message, if #debug == true.
-   * @param message
+   * @param messages
    */
   protected void log(Object ... messages) {
     if (debug) {
@@ -1660,7 +1660,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
   /**
    * Determines the cardinality between graphs and serialized streams.
    * <p>The cardinality of this deseerializer is NToN.
-   * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToN.
+   * @return {@link nzilbb.ag.serialize.GraphSerializer.Cardinality}.NToN.
    */
   public Cardinality getCardinality() {
     return Cardinality.NToN;

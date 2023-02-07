@@ -202,7 +202,7 @@ public class PdfSerializer implements GraphSerializer {
   /**
    * An image file for a head logo to insert at the beginning of the PDF.
    * @see #getLogoFile()
-   * @see #setLogoFile(File)
+   * @see #setLogoFile(String)
    */
   protected String logoFile;
   /**
@@ -492,7 +492,7 @@ public class PdfSerializer implements GraphSerializer {
   /**
    * Determines the cardinality between graphs and serialized streams.
    * <p>The cardinatlity of this deseerializer is NToN.
-   * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToN.
+   * @return {@link nzilbb.ag.serialize.GraphSerializer.Cardinality}.NToN.
    */
   public Cardinality getCardinality() {
     return Cardinality.NToN;

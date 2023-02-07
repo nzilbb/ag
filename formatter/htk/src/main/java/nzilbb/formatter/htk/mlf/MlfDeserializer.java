@@ -227,7 +227,7 @@ public class MlfDeserializer implements GraphDeserializer {
    * {@link #noiseLayer} is <em>not</em> set. Otherwise, the noise intervals will be
    * taken as words.
    * @see #getNoiseIdentifiers()
-   * @see #setNoiseIdentifiers(Set<String>)
+   * @see #setNoiseIdentifiers(Set)
    */
   protected Set<String> noiseIdentifiers = new HashSet<String>();
   /**

@@ -506,7 +506,7 @@ public class LatexSerializer implements GraphSerializer {
   /**
    * Determines the cardinality between graphs and serialized streams.
    * <p>The cardinatlity of this deseerializer is NToN.
-   * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToN.
+   * @return {@link nzilbb.ag.serialize.GraphSerializer.Cardinality}.NToN.
    */
   public Cardinality getCardinality() {
     return Cardinality.NToN;

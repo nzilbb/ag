@@ -87,17 +87,17 @@ public class Sync
    // for simultaneous speech, keep a collection of SimultaneousSync objs
    
    /**
-    * A collection of {@link nz.ac.canterbury.ling.transcriber.SimultaneousSync} objects, if this Sync represents simultaneous speech (i.e. more than one speaker at once)
+    * A collection of {@link SimultaneousSync} objects, if this Sync represents simultaneous speech (i.e. more than one speaker at once)
     */
    private Vector<SimultaneousSync> vSimultaneousSyncs = new Vector<SimultaneousSync>();
    /**
-    * SimultaneousSyncs accessor - A collection of {@link nz.ac.canterbury.ling.transcriber.SimultaneousSync} objects, if this Sync represents simultaneous speech (i.e. more than one speaker at once)
+    * SimultaneousSyncs accessor - A collection of {@link SimultaneousSync} objects, if this Sync represents simultaneous speech (i.e. more than one speaker at once)
     * @return A collection of SimultaneousSync objects, if this Sync represents simultaneous speech (i.e. more than one speaker at once)
     */
    public Vector<SimultaneousSync> getSimultaneousSyncs() { return vSimultaneousSyncs; }
    /**
-    * SimultaneousSyncs mutator - A collection of {@link nz.ac.canterbury.ling.transcriber.SimultaneousSync} objects, if this Sync represents simultaneous speech (i.e. more than one speaker at once)
-    * @param vNewSimultaneousSyncs A collection of {@link nz.ac.canterbury.ling.transcriber.SimultaneousSync} objects, if this Sync represents simultaneous speech (i.e. more than one speaker at once)
+    * SimultaneousSyncs mutator - A collection of {@link SimultaneousSync} objects, if this Sync represents simultaneous speech (i.e. more than one speaker at once)
+    * @param vNewSimultaneousSyncs A collection of {@link SimultaneousSync} objects, if this Sync represents simultaneous speech (i.e. more than one speaker at once)
     */
    public void setSimultaneousSyncs(Vector<SimultaneousSync> vNewSimultaneousSyncs) { vSimultaneousSyncs = vNewSimultaneousSyncs; }
    
@@ -107,16 +107,16 @@ public class Sync
    private SimultaneousSync currentSimultaneousSync = null; 
    
    /**
-    * Non-speech events that occur during the sync (which include comments, pronunciations, background noises, etc.) - a list of {@link nz.ac.canterbury.ling.transcriber.Event} objects
+    * Non-speech events that occur during the sync (which include comments, pronunciations, background noises, etc.) - a list of {@link Event} objects
     */
    protected Vector<Event> vEvents = new Vector<Event>();
    /**
-    * Events accessor - Non-speech events that occur during the sync (which include comments, pronunciations, background noises, etc.) - a list of {@link nz.ac.canterbury.ling.transcriber.Event} objects
+    * Events accessor - Non-speech events that occur during the sync (which include comments, pronunciations, background noises, etc.) - a list of {@link Event} objects
     * @return Non-speech events that occur during the sync (which include comments, pronunciations, background noises, etc.)
     */
    public Vector<Event> getEvents() { return vEvents; }
    /**
-    * Events mutator - Non-speech events that occur during the sync (which include comments, pronunciations, background noises, etc.) - a list {@link nz.ac.canterbury.ling.transcriber.Event} objects
+    * Events mutator - Non-speech events that occur during the sync (which include comments, pronunciations, background noises, etc.) - a list {@link Event} objects
     * @param vNewEvents Non-speech events that occur during the sync (which include comments, pronunciations, background noises, etc.)
     */
    public void setEvents(Vector<Event> vNewEvents) { vEvents = vNewEvents; }
@@ -143,7 +143,7 @@ public class Sync
    public String getWho() { return tTurn.getSpeakerId(); }
    
    /**
-    * A list of {@link nz.ac.canterbury.ling.transcriber.Word}s that appear in the text
+    * A list of {@link Word}s that appear in the text
     */
    protected Vector<Word> vWords = null;
    
@@ -329,7 +329,7 @@ public class Sync
    } // end of isSimultaneousSpeech()
    
    /**
-    * Breaks the text into words, and returns a Vector of {@link nz.ac.canterbury.ling.transcriber.Word} objects.  If this object represents simultaneous speech, then the words are returned in sequential order by speaker - i.e. all the words of one speaker are returned, then all the words of another speaker, etc...
+    * Breaks the text into words, and returns a Vector of {@link Word} objects.  If this object represents simultaneous speech, then the words are returned in sequential order by speaker - i.e. all the words of one speaker are returned, then all the words of another speaker, etc...
     * @return ordered collection of Word objects
     */
    public Vector<Word> getWords()

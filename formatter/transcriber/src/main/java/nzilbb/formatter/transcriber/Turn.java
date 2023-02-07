@@ -139,17 +139,17 @@ public class Turn
    }
    
    /**
-    * Ordered list of syncronized transcript parts (A list of {@link nz.ac.canterbury.ling.transcriber.Sync} objects)
+    * Ordered list of syncronized transcript parts (A list of {@link Sync} objects)
     */
    private Vector<Sync> vSyncs = new Vector<Sync>();
    /**
     * Syncs accessor - Ordered list of syncronized transcript parts (Sync objects)
-    * @return Ordered list of syncronized transcript parts (A list of {@link nz.ac.canterbury.ling.transcriber.Sync} objects)
+    * @return Ordered list of syncronized transcript parts (A list of {@link Sync} objects)
     */
    public Vector<Sync> getSyncs() { return vSyncs; }
    /**
-    * Syncs mutator - Ordered list of syncronized transcript parts (A list of {@link nz.ac.canterbury.ling.transcriber.Sync} objects)
-    * @param vNewSyncs Ordered list of syncronized transcript parts (A list of {@link nz.ac.canterbury.ling.transcriber.Sync} objects)
+    * Syncs mutator - Ordered list of syncronized transcript parts (A list of {@link Sync} objects)
+    * @param vNewSyncs Ordered list of syncronized transcript parts (A list of {@link Sync} objects)
     */
    public void setSyncs(Vector<Sync> vNewSyncs) { vSyncs = vNewSyncs; }
    

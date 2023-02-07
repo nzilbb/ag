@@ -519,9 +519,9 @@ public class TranscriptSerialization
    * @param configuration The configuration for the deserializer. 
    * @param schema The layer schema, definining layers and the way they interrelate.
    * @return A list of configuration parameters (still) must be set before 
-   * {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list, 
-   * {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list, this
-   * method must be invoked again with the returned parameters' values set. 
+   * {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty 
+   * list, {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an 
+   * empty list, this method must be invoked again with the returned parameters' values set. 
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema) {
     setSchema(schema);
@@ -1229,8 +1229,7 @@ public class TranscriptSerialization
 
   /**
    * Validates the input and returns a list of errors that would
-   * prevent the input from being converted into an {@link AnnotationGraph}
-   * when {@link #toAnnotationGraphs(LinkedHashMap)} is called.
+   * prevent the input from being converted into a {@link Graph}.
    * <p>This implementation checks for simultaneous speaker turns that have the same
    * speaker mentioned more than once, speakers that have the same name, and mismatched
    * start/end events.  
@@ -1366,7 +1365,7 @@ public class TranscriptSerialization
 
   /**
    * Determines the cardinality between graphs and serialized streams.
-   * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NtoN as there is one
+   * @return {@link GraphSerializer.Cardinality}.NtoN as there is one
    * stream produced for each graph to serialize.
    */
   public Cardinality getCardinality() {
@@ -1385,7 +1384,6 @@ public class TranscriptSerialization
    * @param layerIds The IDs of the layers to include, or null for all layers.
    * @param consumer The object receiving the streams.
    * @param warnings The object receiving warning messages.
-   * @return A list of named streams that contain the serialization in the given format. 
    * @throws SerializerNotConfiguredException if the object has not been configured.
    */
   public void serialize(

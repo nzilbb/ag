@@ -238,7 +238,7 @@ public class Transcript {
   public Vector<Section> getSections() { return vSections; }
   /**
    * Sections mutator
-   * @param vNewSections Sections of this transcript (A list of {@link nz.ac.canterbury.ling.transcriber.Section} objects)
+   * @param vNewSections Sections of this transcript (A list of {@link Section} objects)
    */
   public void setSections(Vector<Section> vNewSections) { if (vNewSections != null) vSections = vNewSections; }
    

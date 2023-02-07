@@ -2334,7 +2334,7 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
   /**
    * Determines the cardinality between graphs and serialized streams.
    * <p>The cardinality of this deseerializer is NToN.
-   * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToN.
+   * @return {@link GraphSerializer.Cardinality}.NToN.
    */
   public Cardinality getCardinality() {
     return Cardinality.NToN;
@@ -3006,7 +3006,7 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
    * @param anchor The anchor whose offset should perhaps be printed.
    * @param writer Where to print the time stamp.
    * @param lastOffset The last offset that was printed.
-   * @param graph The annotato graph, so that {@link Graph#compareOffsets(douebl,double)}
+   * @param graph The annotato graph, so that {@link Graph#compareOffsets(double,double)}
    * can be invoked to compare the offets correctly.
    * @return The new value of lastOffset.
    */
@@ -3038,7 +3038,7 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
     }
   }
   /**
-   * Specify the schema to used by  {@link Deserialize#convert(File)}.
+   * Specify the schema to used by  {@link Deserialize}.
    * @return The schema.
    */
   @Override protected Schema getDefaultSchema() {

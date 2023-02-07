@@ -467,7 +467,7 @@ public class JSONLSerialization extends Deserialize implements GraphDeserializer
    * Determines the cardinality between graphs and serialized streams.
    * <p>The cardinality of this deserializer is NToOne as there is one stream produced
    * regardless of how many graphs are serialized.
-   * @return {@link nzilbb.ag.serialize.GraphSerializer#Cardinality}.NToOne.
+   * @return {@link GraphSerializer.Cardinality}.NToOne.
    */
   public Cardinality getCardinality() {
     return Cardinality.NToOne;
@@ -535,7 +535,6 @@ public class JSONLSerialization extends Deserialize implements GraphDeserializer
    * @param layerIds The IDs of the layers to include in the serializaton.
    * @param jsonlFile The file to serialize to. This method will append one JSON-encoded
    * line to this file, followed by a new-line.
-   * @return A named stream that contains the PDF. 
    * @throws SerializationException if errors occur during deserialization.
    */
   protected void serializeGraph(Graph graph, String[] layerIds, File jsonlFile)
@@ -1198,7 +1197,7 @@ public class JSONLSerialization extends Deserialize implements GraphDeserializer
     }
   }
   /**
-   * Specify the schema to used by  {@link Deserialize#convert(File)}.
+   * Specify the schema to used by  {@link Deserialize}.
    * @return The schema.
    */
   @Override protected Schema getDefaultSchema() {

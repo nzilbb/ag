@@ -296,9 +296,9 @@ public class WhisperDeserializer implements GraphDeserializer {
    * @param configuration The configuration for the deserializer. 
    * @param schema The layer schema, definining layers and the way they interrelate.
    * @return A list of configuration parameters (still) must be set before
-   * {@link GraphDeserializer#setParameters()} can be invoked. If this is an empty list,
-   * {@link GraphDeserializer#setParameters()} can be invoked. If it's not an empty list, this
-   * method must be invoked again with the returned parameters' values set. 
+   * {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty 
+   * list, {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an 
+   * empty list, this method must be invoked again with the returned parameters' values set. 
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema) {
     setSchema(schema);
