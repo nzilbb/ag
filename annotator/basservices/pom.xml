@@ -15,7 +15,7 @@
   <description>Uses CLARIN-D's BAS web services for various annotation tasks.</description>
 
   <properties>
-    <nzilbb.formatter.praat.version>2.6.3</nzilbb.formatter.praat.version>
+    <nzilbb.formatter.praat.version>2.6.4</nzilbb.formatter.praat.version>
     <nzilbb.bas.version>0.1.1</nzilbb.bas.version>
     <package.path>nzilbb/annotator/basservices/</package.path>
     <annotator.class>nzilbb.annotator.basservices.BASAnnotator</annotator.class>
@@ -37,7 +37,7 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>nz.ilbb.ag</groupId>
+      <groupId>nz.ilbb.bas</groupId>
       <artifactId>nzilbb.bas</artifactId>
       <version>[${nzilbb.bas.version},)</version>
       <scope>compile</scope>
@@ -91,7 +91,7 @@
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>nz.ilbb.ag</groupId>
+                  <groupId>nz.ilbb.bas</groupId>
                   <artifactId>nzilbb.bas</artifactId>
                   <version>${nzilbb.bas.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
