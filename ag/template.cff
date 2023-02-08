@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: nzilbb.ag
+message: 'If you use this software, please cite it as below.'
+type: software
+authors:
+  - given-names: Robert
+    family-names: Fromont
+    email: robert.fromont@canterbury.ac.nz
+    affiliation: 'NZILBB, University of Canterbury'
+    orcid: 'https://orcid.org/0000-0001-5271-5487'
+repository-code: 'https://github.com/nzilbb/ag/'
+url: 'https://github.com/nzilbb/ag/'
+repository-artifact: 'https://search.maven.org/artifact/nz.ilbb.ag/nzilbb.ag'
+abstract: >-
+  Implementations of an Annotation Graph API for linguistic
+  annotations.
+keywords:
+  - Annotation Graph
+  - Linguistic Annotation
+license: AGPL-3.0-or-later

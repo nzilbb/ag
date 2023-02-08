@@ -150,10 +150,11 @@ To perform a release deployment:
    mvn nexus-staging:drop -P release -pl :nzilbb.ag
    ```
    ...and start again.
-4. Start a new .SNAPSHOT version with something like:
+4. Regenerate the citation file:
    ```
-   mvn versions:set -DnewVersion=1.1.1-SNAPSHOT -pl :nzilbb.ag
+   mvn cff:create -pl :nzilbb.ag
    ```
+5. Commit/push all changes and create a release in GitHub
 
 To release another module (e.g. formatters, annotators, etc.)
 

@@ -1,0 +1,130 @@
+cff-version: 1.2.0
+type: software
+title: nzilbb.ag
+message: If you use this software, please cite it as below.
+authors:
+- given-names: Robert
+  family-names: Fromont
+  email: robert.fromont@canterbury.ac.nz
+  affiliation: NZILBB, University of Canterbury
+  orcid: https://orcid.org/0000-0001-5271-5487
+repository-code: https://github.com/nzilbb/ag/
+url: https://github.com/nzilbb/ag/
+repository-artifact: https://search.maven.org/artifact/nz.ilbb.ag/nzilbb.ag
+abstract: Implementations of an Annotation Graph API for linguistic annotations.
+keywords:
+- Annotation Graph
+- Linguistic Annotation
+license: AGPL-3.0-or-later
+version: 1.1.0
+date-released: 2023-02-08
+references:
+- type: software
+  title: ANTLR 4 Runtime
+  version: 4.7.2
+  abbreviation: org.antlr:antlr4-runtime
+  license: BSD-3-Clause
+  notes: More license information can be found in the ag/THIRD-PARTY/ANTLR_4_Runtime
+    directory.
+  authors:
+  - name: Terence Parr
+  - name: Sam Harwell
+  - name: Eric Vergnaud
+  - name: Peter Boyer
+  - name: Jim Idle
+    email: jimi@idle.ws
+  - name: Mike Lischke
+  - name: Tom Everett
+  repository-code: https://github.com/antlr/antlr4/tree/master/antlr4-runtime
+- type: software
+  title: Apache Commons FileUpload
+  version: '1.4'
+  abbreviation: commons-fileupload:commons-fileupload
+  license: Apache-2.0
+  notes: More license information can be found in the ag/THIRD-PARTY/Apache_Commons_FileUpload
+    directory.
+  authors:
+  - name: Martin Cooper
+    email: martinc@apache.org
+  - name: dIon Gillard
+    email: dion@apache.org
+  - name: John McNally
+    email: jmcnally@collab.net
+  - name: Daniel Rall
+    email: dlr@finemaltcoding.com
+  - name: Jason van Zyl
+    email: jason@zenplex.com
+  - name: Robert Burrell Donkin
+    email: rdonkin@apache.org
+  - name: Sean C. Sullivan
+    email: sean |at| seansullivan |dot| com
+  - name: Jochen Wiedmann
+    email: jochen.wiedmann@gmail.com
+  - name: Simone Tripodi
+    email: simonetripodi@apache.org
+  - name: Gary Gregory
+    email: ggregory@apache.org
+  - name: Rob Tompkins
+    email: chtompki@apache.org
+  repository-code: https://git-wip-us.apache.org/repos/asf?p=commons-fileupload.git
+- type: software
+  title: Apache Derby Database Engine and Embedded JDBC Driver
+  version: 10.15.2.0
+  abbreviation: org.apache.derby:derby
+  license: Apache-2.0
+  notes: More license information can be found in the ag/THIRD-PARTY/Apache_Derby_Database_Engine_and_Embedded_JDBC_Driver
+    directory.
+  authors:
+  - name: The Apache Derby Database Engine and Embedded JDBC Driver 10.15.2.0 Team
+  repository-code: http://svn.apache.org/viewcvs.cgi/db/derby/code/trunk/?root=Apache-SVN/derby
+- type: software
+  title: Apache Derby Shared Code
+  version: 10.15.2.0
+  abbreviation: org.apache.derby:derbyshared
+  license: Apache-2.0
+  notes: More license information can be found in the ag/THIRD-PARTY/Apache_Derby_Shared_Code
+    directory.
+  authors:
+  - name: The Apache Derby Shared Code 10.15.2.0 Team
+  repository-code: http://svn.apache.org/viewcvs.cgi/db/derby/code/trunk/?root=Apache-SVN/derbyshared
+- type: software
+  title: Commons IO
+  version: '2.2'
+  abbreviation: commons-io:commons-io
+  license: Apache-2.0
+  notes: More license information can be found in the ag/THIRD-PARTY/Commons_IO directory.
+  authors:
+  - name: Scott Sanders
+    email: sanders@apache.org
+  - name: dIon Gillard
+    email: dion@apache.org
+  - name: Nicola Ken Barozzi
+    email: nicolaken@apache.org
+  - name: Henri Yandell
+    email: bayard@apache.org
+  - name: Stephen Colebourne
+  - name: Jeremias Maerki
+    email: jeremias@apache.org
+  - name: Matthew Hawthorne
+    email: matth@apache.org
+  - name: Martin Cooper
+    email: martinc@apache.org
+  - name: Rob Oxspring
+    email: roxspring@apache.org
+  - name: Jochen Wiedmann
+    email: jochen.wiedmann@gmail.com
+  - name: Niall Pemberton
+  - name: Jukka Zitting
+  - name: Gary Gregory
+    email: ggregory@apache.org
+  repository-code: http://svn.apache.org/viewvc/commons/proper/io/trunk
+- type: software
+  title: JSR 374 (JSON Processing) Default Provider
+  version: 1.1.4
+  abbreviation: org.glassfish:javax.json
+  license: CDDL-1.1 OR GPL-2.0-only WITH Classpath-exception-2.0
+  notes: More license information can be found in the ag/THIRD-PARTY/JSR_374_JSON_Processing_Default_Provider
+    directory.
+  authors:
+  - name: Lukas Jungmann
+  repository-code: https://github.com/javaee/jsonp/javax.json
