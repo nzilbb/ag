@@ -82,13 +82,13 @@ mvn package -pl :nzilbb.ag
 ### Build all transcriber modules only
 
 ```
-mvn package -pl :nzilbb.stt
+mvn package -pl :nzilbb.transcriber
 ```
 
 ### Build a specific transcriber module
 
 ```
-mvn package -pl :nzilbb.stt.deepspeech
+mvn package -pl :nzilbb.transcriber.deepspeech
 ```
 
 etc...
@@ -125,7 +125,7 @@ To perform a snapshot deployment:
 1. Ensure the `version` in pom.xml *is* suffixed with `-SNAPSHOT`
 2. Execute the command:  
    ```
-   mvn clean deploy
+   mvn clean deploy -pl :nzilbb.ag
    ```
 
 ### Release Deployment
@@ -135,30 +135,27 @@ To perform a release deployment:
 1. Ensure the `version` in pom.xml *isn't* suffixed with `-SNAPSHOT` e.g. use something
    like the following command from within the ag directory:  
    ```
-   mvn versions:set -DnewVersion=1.1.0
+   mvn versions:set -DnewVersion=1.1.0 -pl :nzilbb.ag
    ```
 2. Execute the command:  
    ```
-   mvn clean deploy -P release
+   mvn clean deploy -P release -pl :nzilbb.ag
    ```
 3. Happy with everything? Complete the release with:
    ```
-   mvn nexus-staging:release -P release
+   mvn nexus-staging:release -P release -pl :nzilbb.ag
    ```
    Otherwise:
    ```
-   mvn nexus-staging:drop -P release
+   mvn nexus-staging:drop -P release -pl :nzilbb.ag
    ```
    ...and start again.
 4. Start a new .SNAPSHOT version with something like:
    ```
-   mvn versions:set -DnewVersion=1.1.1-SNAPSHOT
+   mvn versions:set -DnewVersion=1.1.1-SNAPSHOT -pl :nzilbb.ag
    ```
 
 To release another module (e.g. formatters, annotators, etc.)
-
-These commands should be executed from the *top* directory (i.e. ag) not the module's
-subdirectory. 
 
 1. Ensure the `version` in pom.xml *isn't* suffixed with `-SNAPSHOT`  
    *NB* Don't use `mvn versions:set` for this if the module is a nzilbb.formatter, because it
