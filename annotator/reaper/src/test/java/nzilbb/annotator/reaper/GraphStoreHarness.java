@@ -426,7 +426,7 @@ public class GraphStoreHarness implements GraphStore {
    * @throws PermissionException If the operation is not permitted.
    * @throws GraphNotFoundException If the transcript was not found in the store.
    */
-  public long countAnnotations(String id, String layerId)
+  public long countAnnotations(String id, String layerId, Integer maxOrdinal)
     throws StoreException, PermissionException, GraphNotFoundException {
     throw new StoreException("Not implemented");
   }
@@ -443,7 +443,7 @@ public class GraphStoreHarness implements GraphStore {
    * @throws GraphNotFoundException If the transcript was not found in the store.
    */
   public Annotation[] getAnnotations(
-    String id, String layerId, Integer pageLength, Integer pageNumber)
+    String id, String layerId, Integer maxOrdinal, Integer pageLength, Integer pageNumber)
     throws StoreException, PermissionException, GraphNotFoundException {
     throw new StoreException("Not implemented");
   }

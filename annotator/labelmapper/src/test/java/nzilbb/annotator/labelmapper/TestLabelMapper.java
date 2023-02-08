@@ -1118,12 +1118,12 @@ public class TestLabelMapper {
           throws StoreException, PermissionException  {
           throw new StoreException();
         }
-        public long countAnnotations(String id, String layerId)
+        public long countAnnotations(String id, String layerId, Integer maxOrdinal)
           throws StoreException, PermissionException, GraphNotFoundException {
           throw new StoreException();
         }
         public Annotation[] getAnnotations(
-          String id, String layerId, Integer pageLength, Integer pageNumber)
+          String id, String layerId, Integer maxOrdinal, Integer pageLength, Integer pageNumber)
           throws StoreException, PermissionException, GraphNotFoundException {
           throw new StoreException();
         }
