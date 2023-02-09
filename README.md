@@ -27,10 +27,10 @@ More API documentation is available [here](https://nzilbb.github.io/ag/)
 
 Apart from use within LaBB-CAT, the object model can be used for other purposes like
 format conversion, e.g. 
- * [vtt-to-textgrid](https://github.com/nzilbb/ag/blob/master/bin/vtt-to-textgrid.jar?raw=true) -
+ * [vtt-to-textgrid](https://github.com/nzilbb/ag/blob/main/bin/vtt-to-textgrid.jar?raw=true) -
  a utility for converting subtitles downloaded from YouTube to
  [Praat](http://praat.org) TextGrids 
- * [trs-to-eaf](https://github.com/nzilbb/ag/blob/master/bin/trs-to-textgrid.jar?raw=true) -
+ * [trs-to-eaf](https://github.com/nzilbb/ag/blob/main/bin/trs-to-textgrid.jar?raw=true) -
  a utility for converting
  [Transcriber](http://trans.sourceforge.net/en/presentation.php) files to
  [ELAN](https://tla.mpi.nl/tools/tla-tools/elan/) files 
@@ -52,7 +52,7 @@ graph models of the linguistic data are ephemeral, existing in memory only for t
 conversion.
 
 More format conversions are available
-[here](https://github.com/nzilbb/ag/blob/master/bin/README.md#standalone-format-converters)
+[here](https://github.com/nzilbb/ag/blob/main/bin/README.md#standalone-format-converters)
 
 ## Building from source
 
