@@ -159,6 +159,8 @@ function getTaskParameters() {
                     = parameters.get("ignoreAlignmentStatuses");
                 document.getElementById("multilingualIPA").checked
                     = parameters.get("multilingualIPA");
+                document.getElementById("noSpeakerAdaptation").checked
+                    = parameters.get("noSpeakerAdaptation");
                 // either pronunciationLayerId or dictionaryName
                 document.getElementById("pronunciationLayerId").disabled
                     = document.getElementById("multilingualIPA").disabled

@@ -388,6 +388,30 @@ public class MFA extends Annotator {
   public MFA setPhoneSet(String newPhoneSet) { phoneSet = newPhoneSet; return this; }
   
   /**
+   * Whether to adapt acoustic model per speaker (false) or not (true). Influences the
+   * "--uses_speaker_adaptation" command line parameter. 
+   * @see #getNoSpeakerAdaptation()
+   * @see #setNoSpeakerAdaptation(boolean)
+   */
+  protected boolean noSpeakerAdaptation = false;
+  /**
+   * Getter for {@link #noSpeakerAdaptation}: Whether to adapt acoustic model per speaker
+   * (false) or not (true). Influences the "--uses_speaker_adaptation" command line
+   * parameter. 
+   * @return Whether to adapt acoustic model per speaker (false) or not (true). Influences
+   * the "--uses_speaker_adaptation" command line parameter. 
+   */
+  public boolean getNoSpeakerAdaptation() { return noSpeakerAdaptation; }
+  /**
+   * Setter for {@link #noSpeakerAdaptation}: Whether to adapt acoustic model per speaker
+   * (false) or not (true). Influences the "--uses_speaker_adaptation" command line
+   * parameter. 
+   * @param newNoSpeakerAdaptation Whether to adapt acoustic model per speaker (false) or
+   * not (true). Influences the "--uses_speaker_adaptation" command line parameter. 
+   */
+   public MFA setNoSpeakerAdaptation(boolean newNoSpeakerAdaptation) { noSpeakerAdaptation = newNoSpeakerAdaptation; return this; }
+  
+  /**
    * Default constructor.
    */
   public MFA() {
@@ -1148,6 +1172,8 @@ public class MFA extends Annotator {
               parameters.add(""+beam);
               parameters.add("--retry-beam");
               parameters.add(""+retryBeam);
+              parameters.add("--uses_speaker_adaptation");
+              parameters.add(noSpeakerAdaptation?"False":"True");
               String[] paramatersArray = parameters.toArray(new String[0]);
               mfa(false, paramatersArray);
               setPercentComplete(80); // (up to 5 phases of 10% each arrives at 80%)
@@ -1167,7 +1193,8 @@ public class MFA extends Annotator {
                       "--output_format", "long_textgrid",
                       corpusDir.getPath(), dictionary, modelsName,
                       alignedDir.getPath(),
-                      "--beam", ""+beam, "--retry-beam", ""+retryBeam);
+                      "--beam", ""+beam, "--retry-beam", ""+retryBeam,
+                      "--uses_speaker_adaptation", noSpeakerAdaptation?"False":"True");
                   // log contents of ${tempDir}/corpus/align.log
                   copyLog(new File(new File(tempDir, "corpus"), "align.log"));
                 } // not cancelling

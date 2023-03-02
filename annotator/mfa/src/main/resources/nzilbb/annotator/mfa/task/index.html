@@ -65,6 +65,11 @@
         <label for="retryBeam"> Retry Beam </label>
         <span><input id="retryBeam" name="retryBeam" type="number" min="0" step="10" value="40"></span>
       </div>
+      <div class="field" title="Whether trained acoustic models are adapted for each speaker before alignment (unticked) or not (ticked).">
+        <label for="noSpeakerAdaptation"> No Speaker Adaptation </label>
+        <span><input id="noSpeakerAdaptation"
+                     name="noSpeakerAdaptation" type="checkbox"></span>
+      </div>
       <div class="field" title="Whether manual alignments should be overwritten or not.">
         <label for="ignoreAlignmentStatuses"> Replace Manual Alignments </label>
         <span><input id="ignoreAlignmentStatuses"

@@ -15,7 +15,7 @@
   <dt> pronunciationLayerId </dt> <dd> Input layer from which word pronunciations
     come. If you don't select this layer, you must specify a value for <tt>dictionaryName</tt>. </dd>
   <dt> multilingualIPA </dt> <dd> Set any non-empty value for this parameter to use
-    the <tt>--multilingual</tt>_ipa switch, omit the parameter otherwise</dd> 
+    the <tt>--multilingual_ipa</tt> switch, omit the parameter otherwise</dd> 
   <dt> dictionaryName </dt> <dd> If you wish to use one of the available language
     dictionaries instead of specifying a Pronunciation Layer, specify the name with
     this parameter. Available dictionaries are listed at
@@ -28,6 +28,9 @@
   </dd>
   <dt> beam </dt> <dd> This is the value for the <tt>--beam</tt> mfa parameter.</dd>  
   <dt> retryBeam </dt> <dd> This is the value for the <tt>--retry-beam</tt> mfa parameter.</dd>   
+  <dt> noSpeakerAdaptation </dt> <dd> Whether trained acoustic models are adapted for each
+    speaker before alignment or not. Set any non-empty value for this parameter to use
+    the <tt>--uses_speaker_adaptation False</tt> switch, omit the parameter otherwise</dd> 
   <dt> ignoreAlignmentStatuses </dt> <dd> Set any non-empty value of this parameter to
     overwrite manual alignments, otherwise omit this parameter.  </dd>
   <dt> wordAlignmentLayerId </dt> <dd> Output layer on which word alignments are

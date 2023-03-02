@@ -115,13 +115,13 @@ public class TestMFA {
   }   
 
   /** Ensure mfaVersion method works. */
-  /*@Test*/ public void mfaVersion() throws Exception {
+  @Test public void mfaVersion() throws Exception {
     String version = annotator.mfaVersion();
     assertTrue("MFA version is 2...: " + version, version.startsWith("2"));
   }   
 
   /** Ensure default (null) task parameters return an error. */
-  /*@Test*/ public void defaultParameters() throws Exception {
+  @Test public void defaultParameters() throws Exception {
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -136,7 +136,7 @@ public class TestMFA {
   }   
 
   /** Ensure valid task parameters don't raise errors, and change the schema when appropriate. */
-  /*@Test*/ public void setValidParameters() throws Exception {
+  @Test public void setValidParameters() throws Exception {
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -153,6 +153,7 @@ public class TestMFA {
       +"&participantTagLayerId="
       +"&wordAlignmentLayerId=word"
       +"&phoneAlignmentLayerId=segment");
+    assertFalse("noSpeakerAdaptation=false is default", annotator.getNoSpeakerAdaptation());
     
     annotator.setTaskParameters(
       "orthographyLayerId=word"
@@ -163,6 +164,30 @@ public class TestMFA {
       +"&participantTagLayerId="
       +"&wordAlignmentLayerId=word"
       +"&phoneAlignmentLayerId=segment");
+    
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&pronunciationLayerId="
+      +"&dictionaryName=english_us_arpa"
+      +"&modelsName=english"
+      +"&noSpeakerAdaptation=true" // no speaker adaptation
+      +"&utteranceTagLayerId=mfa"
+      +"&participantTagLayerId="
+      +"&wordAlignmentLayerId=word"
+      +"&phoneAlignmentLayerId=segment");
+    assertTrue("noSpeakerAdaptation=true sets attribute", annotator.getNoSpeakerAdaptation());
+    
+    annotator.setTaskParameters(
+      "orthographyLayerId=word"
+      +"&pronunciationLayerId="
+      +"&dictionaryName=english_us_arpa"
+      +"&modelsName=english"
+      +"&noSpeakerAdaptation=false" // speaker adaptation
+      +"&utteranceTagLayerId=mfa"
+      +"&participantTagLayerId="
+      +"&wordAlignmentLayerId=word"
+      +"&phoneAlignmentLayerId=segment");
+    assertFalse("noSpeakerAdaptation=false sets attribute", annotator.getNoSpeakerAdaptation());
     
     // layers are created as required
     annotator.setTaskParameters(
@@ -185,7 +210,7 @@ public class TestMFA {
   }   
 
   /** Ensure that invalid task parameters generate errors. */
-  /*@Test*/ public void setInvalidTaskParameters() throws Exception {
+  @Test public void setInvalidTaskParameters() throws Exception {
     
     try {
       annotator.setTaskParameters(
