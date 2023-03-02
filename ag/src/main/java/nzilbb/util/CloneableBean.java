@@ -25,6 +25,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +77,6 @@ public interface CloneableBean {
    default public JsonObject toJson() {
       
       JsonObjectBuilder json = Json.createObjectBuilder();
-
       
       // first add the bean property
       for (String key : getClonedAttributes()) {
@@ -101,6 +103,9 @@ public interface CloneableBean {
                   json.add(key, (Boolean)value);
                } else if (parameterClass.equals(boolean.class)) {
                   json.add(key, (boolean)value);
+               } else if (parameterClass.equals(Date.class)) {
+                 json.add(key, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+                          .format((Date)value));
                } else if (parameterClass.equals(URL.class)) {
                   json = json.add(key, value.toString());
                } else if (value instanceof CloneableBean) {
@@ -249,6 +254,13 @@ public interface CloneableBean {
                         } catch(MalformedURLException exception) {
                            value = ((JsonString)value).getString();
                         }
+                     } else if (parameterClass.equals(Date.class)) {
+                       try {
+                         value = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+                           .parse(((JsonString)value).getString());
+                       } catch(ParseException exception) {
+                         value = ((JsonString)value).getString();
+                       }
                      } else {
                         value = ((JsonString)value).getString();
                      }
@@ -340,18 +352,22 @@ public interface CloneableBean {
                   return getClass().getMethod(setterName, Integer.class); // confidence
                } catch(NoSuchMethodException x3) {
                   try {
-                     return getClass().getMethod(setterName, boolean.class); // Layer.peers, etc...
+                    return getClass().getMethod(setterName, Date.class); // when
                   } catch(NoSuchMethodException x4) {
                      try {
-                        return getClass().getMethod(setterName, LinkedHashMap.class); // Layer.validLabels
+                       return getClass().getMethod(setterName, boolean.class); // Layer.peers, etc...
                      } catch(NoSuchMethodException x5) {
                         try {
-                           return getClass().getMethod(setterName, Vector.class); // SerializationDescriptor.fileSuffixes
+                          return getClass().getMethod(setterName, LinkedHashMap.class); // Layer.validLabels
                         } catch(NoSuchMethodException x6) {
                            try {
-                              return getClass().getMethod(setterName, URL.class); // SerializationDescriptor.icon
+                             return getClass().getMethod(setterName, Vector.class); // SerializationDescriptor.fileSuffixes
                            } catch(NoSuchMethodException x7) {
-                              return getClass().getMethod(setterName, Double.class); // Anchor.offset
+                             try {
+                               return getClass().getMethod(setterName, URL.class); // SerializationDescriptor.icon
+                             } catch(NoSuchMethodException x8) {
+                               return getClass().getMethod(setterName, Double.class); // Anchor.offset
+                             }
                            }
                         }
                      }

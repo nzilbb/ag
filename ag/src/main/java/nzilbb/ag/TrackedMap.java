@@ -24,6 +24,8 @@ package nzilbb.ag;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -246,7 +248,16 @@ public class TrackedMap
                { // simple value
                   Class parameterClass = setter.getParameterTypes()[0];
                   if (value instanceof JsonString) {
-                     value = ((JsonString)value).getString();
+                    if (parameterClass.equals(Date.class)) {
+                      try {
+                        value = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+                          .parse(((JsonString)value).getString());
+                      } catch(ParseException exception) {
+                        value = ((JsonString)value).getString();
+                      }
+                    } else {
+                      value = ((JsonString)value).getString();
+                    }
                   } else if (value instanceof JsonNumber) {
                      if (parameterClass.equals(Integer.class)) {
                         value = Integer.valueOf(((JsonNumber)value).intValue());
@@ -398,6 +409,7 @@ public class TrackedMap
     * this entity. 
     * @return Name of the person or system that created or changed this entity.
     */
+   @ClonedProperty
    public String getAnnotator() { return annotator; }
    /**
     * Setter for {@link #annotator}: Name of the person or system that created or changed this entity.
@@ -415,6 +427,7 @@ public class TrackedMap
     * Getter for {@link #when}: Date/time this entity was created or changed.
     * @return Date/time this entity was created or changed.
     */
+   @ClonedProperty
    public Date getWhen() { return when; }
    /**
     * Setter for {@link #when}: Date/time this entity was created or changed.

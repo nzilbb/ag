@@ -300,6 +300,8 @@ public class TestTrackedMap
          .add("startId", "value1")
          .add("endId", "value2")
          .add("confidence", 100)
+         .add("annotator", "TestTrackedMap")
+         .add("when", "1972-09-26T12:00:00.000")
          .add("notTracked", "value4")
          .build()));
       
@@ -307,6 +309,8 @@ public class TestTrackedMap
       assertEquals("copy tracked values", "value1", a.getStartId());
       assertEquals("copy tracked values", "value2", a.getEndId());
       assertEquals("copy tracked values", Integer.valueOf(100), a.getConfidence());
+      assertEquals("copy annotator", "TestTrackedMap", a.getAnnotator());
+      assertEquals("copy timestamp", new java.util.Date(72, 8, 26, 12, 0, 0), a.getWhen());
       assertNull("don't copy nonexistent tracked values", a.getLabel());
       assertTrue("copy non-tracked values", a.containsKey("notTracked"));      
    }
@@ -316,13 +320,17 @@ public class TestTrackedMap
       Annotation a = new Annotation("123", null, "layer", "value1", "value2");
       a.put("a-tag", "yes");
       a.put("@transient", "no");
+      a.setAnnotator("TestTrackedMap");
+      a.setWhen(new java.util.Date(72, 8, 26, 12, 0, 0));
       assertEquals("{"
                    // alphabetical order for bean properties
-                   +"\"endId\":\"value2\""
+                   +"\"annotator\":\"TestTrackedMap\""
+                   +",\"endId\":\"value2\""
                    +",\"id\":\"123\""
                    +",\"layerId\":\"layer\""
                    +",\"ordinal\":0" // not explicitly set
                    +",\"startId\":\"value1\""
+                   +",\"when\":\"1972-09-26T12:00:00.000\""
                    // map entries have unpredictable order
                    +",\"a-tag\":\"yes\"}", a.toJsonString());
    }
