@@ -29,6 +29,8 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -80,6 +82,7 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
   private DecimalFormat fmtOffset = new DecimalFormat(
     // force the locale to something with . as the decimal separator
     "0.0#########", new DecimalFormatSymbols(Locale.UK));
+  private SimpleDateFormat fmtISODate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
    
   protected Vector<String> warnings;
   private Schema schema;
@@ -216,7 +219,7 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
 
     jsons = new LinkedHashMap<String, JsonObject>();
     for (NamedStream stream : streams) {	 
-      if (stream.getName().endsWith(".json")
+      if ((stream.getName() != null && stream.getName().endsWith(".json"))
           || "application/json".equals(stream.getMimeType())) {
         boolean arrayInput = false;
         if (stream.getStream().markSupported()) {
@@ -347,24 +350,28 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
   protected Schema jsonToSchema(JsonObject json) throws SerializationException {
     try {
       Schema s = new Schema();
-      if (json.containsKey("participantLayerId")) 
+      if (json.containsKey("participantLayerId") && !json.isNull("participantLayerId")) 
         s.setParticipantLayerId(json.getString("participantLayerId"));
-      if (json.containsKey("turnLayerId")) 
+      if (json.containsKey("turnLayerId") && !json.isNull("turnLayerId")) 
         s.setTurnLayerId(json.getString("turnLayerId"));
-      if (json.containsKey("utteranceLayerId")) 
+      if (json.containsKey("utteranceLayerId") && !json.isNull("utteranceLayerId")) 
         s.setUtteranceLayerId(json.getString("utteranceLayerId"));
-      if (json.containsKey("wordLayerId")) 
+      if (json.containsKey("wordLayerId") && !json.isNull("wordLayerId")) 
         s.setWordLayerId(json.getString("wordLayerId"));
-      if (json.containsKey("episodeLayerId")) 
+      if (json.containsKey("episodeLayerId") && !json.isNull("episodeLayerId")) 
         s.setEpisodeLayerId(json.getString("episodeLayerId"));
-      if (json.containsKey("corpusLayerId")) 
+      if (json.containsKey("corpusLayerId") && !json.isNull("corpusLayerId")) 
         s.setCorpusLayerId(json.getString("corpusLayerId"));
 
       JsonObject root = json.getJsonObject("transcript");
-      JsonObject topLevel = root.getJsonObject("children");
-      for (String childId : topLevel.keySet()) {
-        jsonToLayer(s, "transcript", childId, topLevel.getJsonObject(childId));
-      } // next child
+      if (root != null) {
+        JsonObject topLevel = root.getJsonObject("children");
+        if (topLevel != null) {
+          for (String childId : topLevel.keySet()) {
+            jsonToLayer(s, "transcript", childId, topLevel.getJsonObject(childId));
+          } // next child
+        }
+      }
       return s;
     } catch (JsonException x) {
       throw new SerializationException(x);
@@ -419,9 +426,17 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
       a.setId(anchorId);
       if (json.containsKey("offset") && !json.isNull("offset")) 
         a.setOffset(json.getJsonNumber("offset").doubleValue());
-      if (json.containsKey("confidence")) 
+      if (json.containsKey("confidence") && !json.isNull("confidence")) 
         a.setConfidence(json.getInt("confidence"));
-      if (json.containsKey(Constants.COMMENT)) 
+      if (json.containsKey("annotator") && !json.isNull("annotator")) 
+        a.setAnnotator(json.getString("annotator"));
+      try {
+        if (json.containsKey("when") && !json.isNull("when")) 
+          a.setWhen(fmtISODate.parse(json.getString("when")));
+      } catch (ParseException x) {
+        throw new SerializationException(x);
+      }
+      if (json.containsKey(Constants.COMMENT) && !json.isNull(Constants.COMMENT)) 
         a.put(Constants.COMMENT, json.getString(Constants.COMMENT));
       return a;
     } catch (JsonException x) {
@@ -466,17 +481,25 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
       a.setLayerId(layerId);
       a.setParentId(parentId);
       a.setOrdinal(ordinal);
-      if (json.containsKey("id")) 
+      if (json.containsKey("id") && !json.isNull("id")) 
         a.setId(json.getString("id"));
-      if (json.containsKey("label")) 
+      if (json.containsKey("label") && !json.isNull("label")) 
         a.setLabel(json.getString("label"));
-      if (json.containsKey("startId")) 
+      if (json.containsKey("startId") && !json.isNull("startId")) 
         a.setStartId(json.getString("startId"));
-      if (json.containsKey("endId")) 
+      if (json.containsKey("endId") && !json.isNull("endId")) 
         a.setEndId(json.getString("endId"));
-      if (json.containsKey("confidence")) 
+      if (json.containsKey("confidence") && !json.isNull("confidence")) 
         a.setConfidence(json.getInt("confidence"));
-      if (json.containsKey(Constants.COMMENT)) 
+      if (json.containsKey("annotator") && !json.isNull("annotator")) 
+        a.setAnnotator(json.getString("annotator"));
+      try {
+        if (json.containsKey("when") && !json.isNull("when")) 
+          a.setWhen(fmtISODate.parse(json.getString("when")));
+      } catch (ParseException x) {
+        throw new SerializationException(x);
+      }
+      if (json.containsKey(Constants.COMMENT) && !json.isNull(Constants.COMMENT)) 
         a.put(Constants.COMMENT, json.getString(Constants.COMMENT));
       graph.addAnnotation(a);
 
@@ -641,6 +664,12 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
       if (anchor.getConfidence() != null) {
         json.write("confidence", anchor.getConfidence());
       }
+      if (anchor.getAnnotator() != null) {
+        json.write("annotator", anchor.getAnnotator());
+      }
+      if (anchor.getWhen() != null) {
+        json.write("when", fmtISODate.format(anchor.getWhen()));
+      }
       if (anchor.containsKey("comment")) {
         json.write("comment", anchor.get("comment").toString());
       }
@@ -696,6 +725,12 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
     }
     if (annotation.getConfidence() != null) {
       json.write("confidence", annotation.getConfidence());
+    }
+    if (annotation.getAnnotator() != null) {
+      json.write("annotator", annotation.getAnnotator());
+    }
+    if (annotation.getWhen() != null) {
+      json.write("when", fmtISODate.format(annotation.getWhen()));
     }
     if (annotation.containsKey("comment")) {
       json.write("comment", annotation.get("comment").toString());

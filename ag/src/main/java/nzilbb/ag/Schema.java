@@ -462,7 +462,7 @@ public class Schema implements Cloneable, CloneableBean {
     * @param predicate A predicate that returns true for the desired layers.
     * @return A list of matching layers, which may be empty.
     */
-   public Layer[] getMatchingLayers(Predicate<Layer> predicate) throws ScriptException {
+   public Layer[] getMatchingLayers(Predicate<Layer> predicate) {
       return layers.values().stream()
          .filter(predicate)
          .collect(Collectors.toList())

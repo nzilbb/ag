@@ -497,7 +497,8 @@ public class Merger extends Transform implements GraphTransformer {
   /**
    * Constructor with edited graph.
    * @param editedGraph The edited version of the graph.
-   */ public Merger(Graph editedGraph) {
+   */
+  public Merger(Graph editedGraph) {
     setEditedGraph(editedGraph);
   } // end of constructor
    

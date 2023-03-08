@@ -299,8 +299,26 @@ public class TrackedMap
                // any map key that doesn's start with an alphanumeric is assumed to be transient
                // and thuse not copied
                if (Character.isLetterOrDigit(key.charAt(0))) {
-                  // key starts with alphanumeric, so is copied into the map
-                  put(key, value);
+                 // key starts with alphanumeric, so is copied into the map,
+                 // converting JSON types to Java types as we go
+                 if (value instanceof JsonString) {
+                   value = ((JsonString)value).getString();
+                 } else if (value instanceof JsonNumber) {
+                   if (((JsonNumber)value).isIntegral()) {
+                     value = Integer.valueOf(((JsonNumber)value).intValue());
+                   } else {
+                     value = Double.valueOf(((JsonNumber)value).doubleValue());
+                   }
+                 } else if (value instanceof JsonValue) {
+                   if (value.equals(JsonValue.TRUE)) {
+                     value = true;
+                   } else if (value.equals(JsonValue.FALSE)) {
+                     value = false;
+                   } else if (value.equals(JsonValue.NULL)) {
+                     value = null;
+                   } 
+                 }
+                 put(key, value);
                }
             } // not a bean attribute
          } // value is not null
