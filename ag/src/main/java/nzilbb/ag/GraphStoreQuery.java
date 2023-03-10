@@ -552,8 +552,10 @@ public interface GraphStoreQuery {
    * @throws StoreException If an error occurs.
    * @throws PermissionException If the operation is not permitted.
    */
-//TODO  public String[] aggregateMatchingAnnotations(String operation, String expression)
-//    throws StoreException, PermissionException;
+  default public String[] aggregateMatchingAnnotations(String operation, String expression)
+    throws StoreException, PermissionException {
+    throw new StoreException("aggregateMatchingAnnotations not implemented");
+  }
   
   /**
    * Gets the annotations on the given layer of the given transcript.
