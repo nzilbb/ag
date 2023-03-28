@@ -679,7 +679,11 @@ public class TestMerger {
         }
       });
     TreeSet<String> fragments = new TreeSet<String>();
-    for (File fTest : afTests) fragments.add(fTest.getName().replace(".json",""));
+    for (File fTest : afTests) {
+      if (log == null || fTest.getName().indexOf(log) >= 0) {
+        fragments.add(fTest.getName().replace(".json",""));
+      }
+    }
     // run the tests
     for (String fragmentName : fragments) {
       System.out.println("Test "+sDir+": " + fragmentName);

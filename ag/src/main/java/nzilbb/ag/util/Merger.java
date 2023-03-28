@@ -1106,7 +1106,9 @@ public class Merger extends Transform implements GraphTransformer {
         MinimumEditPath<Annotation> mp = new MinimumEditPath<Annotation>(defaultComparator);
         List<EditStep<Annotation>> path = mp.minimumEditPath(theseAnnotations, thoseAnnotations);
         // introduce mapped annotations to each other
-        if (layer.containsKey("@noChange")) {
+        if (layer.containsKey("@noChange") // no change layer
+            || (layer.getParentId() != null // or word child layer - segments resist deletion
+                && layer.getParentId().equals(schema.getWordLayerId()))) {
           log("Collapsing edit path for " + layer);
           mp.collapse(path, false);
         }
@@ -1182,7 +1184,7 @@ public class Merger extends Transform implements GraphTransformer {
         } else { // annotation with duration
           // don't look for links for instants, because unlinking them from unlinked annotations later is tricky
 
-          // is the start anchor shared in the edited structure
+          // is the start anchor shared in the edited structure?
           for (Annotation anParallel : anEdited.getStart().getStartingAnnotations()) {
             if (anParallel == anEdited) continue;
             if (anParallel.getStartId() != anParallel.getOriginalStartId()) continue; // isn't the same anchor any more
