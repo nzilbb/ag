@@ -93,9 +93,9 @@ public class TestMFA {
   }
 
   /** Ensure validDictionaryNames method works. */
-  /*@Test*/ public void validDictionaryNames() throws Exception {
+  /* @Test */ public void validDictionaryNames() throws Exception {
     Collection<String> names = annotator.validDictionaryNames();
-    assertTrue("validDictionaryNames contains english " + names,
+    assertTrue("validDictionaryNames contains english_mfa " + names,
                names.contains("english_mfa")); // 2.0.0rc3 was "english"
     assertTrue("validDictionaryNames contains german_prosodylab " + names,
                names.contains("german_prosodylab"));
@@ -104,9 +104,9 @@ public class TestMFA {
   }   
 
   /** Ensure validDictionaryNames method works. */
-  /*@Test*/ public void validAcousticModels() throws Exception {
+  /* @Test */ public void validAcousticModels() throws Exception {
     Collection<String> names = annotator.validAcousticModels();
-    assertTrue("validAcousticModels contains english " + names,
+    assertTrue("validAcousticModels contains english_mfa " + names,
                names.contains("english_mfa")); // 2.0.0rc3 was "english"
     assertTrue("validAcousticModels contains spanish " + names,
                names.contains("spanish_mfa")); // 2.0.0rc3 was "spanish"
@@ -394,9 +394,9 @@ public class TestMFA {
   }   
   
   /** Test alignment of full graph works. */
-  /*@Test*/ public void graphTransform() throws Exception {
+  /* @Test */ public void graphTransform() throws Exception {
     annotator.setSessionName("graphTransform");
-    //annotator.getStatusObservers().add(status->System.out.println(status));
+    annotator.getStatusObservers().add(status->System.out.println(status));
     
     Graph g = graph();
     Schema schema = g.getSchema();

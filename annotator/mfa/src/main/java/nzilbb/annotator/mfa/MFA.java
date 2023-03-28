@@ -512,9 +512,16 @@ public class MFA extends Annotator {
     String dictionariesRaw = mfa(true, "model", "download", "dictionary");
     String[] dictionaryLines = dictionariesRaw.split("\n");
     List<String> dictionaries = Arrays.stream(dictionaryLines)
-      .map(s->s.trim().replaceAll("^-","").trim())
+      .map(
+        s->s.trim()
+        .replaceAll("^[-│]","") // remove possible list item prefixes
+        .replaceAll("^ *'","")  // remove leading quote
+        .replaceAll("',$","")   // remove trailing quote
+        .trim())
       .filter(s->s.length() > 0) // no blank lines
       .filter(s->s.indexOf(":") < 0) // not the list header
+      .filter(s->!s.equals("[")) // not just an open-bracket
+      .filter(s->!s.equals("]")) // not just a close-bracket
       .sorted()
       .collect(Collectors.toList());
     return dictionaries;
@@ -529,9 +536,16 @@ public class MFA extends Annotator {
     String acousticModelsRaw = mfa(true, "model", "download", "acoustic");
     String[] acousticModelLines = acousticModelsRaw.split("\n");
     List<String> acousticModels = Arrays.stream(acousticModelLines)
-      .map(s->s.trim().replaceAll("^-","").trim())
+      .map(
+        s->s.trim()
+        .replaceAll("^[-│]","") // remove possible list item prefixes
+        .replaceAll("^ *'","")  // remove leading quote
+        .replaceAll("',$","")   // remove trailing quote
+        .trim())
       .filter(s->s.length() > 0) // no blank lines
       .filter(s->s.indexOf(":") < 0) // not the list header
+      .filter(s->!s.equals("[")) // not just an open-bracket
+      .filter(s->!s.equals("]")) // not just a close-bracket
       .sorted()
       .collect(Collectors.toList());
     return acousticModels;
@@ -1135,7 +1149,8 @@ public class MFA extends Annotator {
           }
         } else { // pretrained
           if (discOutput) {
-            if (dictionaryName.indexOf("_arpa") > 0) {
+            if (dictionaryName.equals("english") // mfa 2.0.0rc3
+                || dictionaryName.indexOf("_arpa") > 0) { // later versions
               // some pretrained models use ARPAbet
               mfaToPhonemes = new CMU2DISC();
             }
@@ -1150,56 +1165,88 @@ public class MFA extends Annotator {
         if (fragments.size() > 0) {
           
           if (!isCancelling()) {
-            if (dictionaryName == null && modelsName == null) { // train & align          
-              //mfa("validate", corpusDir.getPath(), dictionaryFile.getPath());
-              setPercentComplete(30); // (up to 5 phases of 10% each arrives at 80%)
-              Vector<String> parameters = new Vector<String>();
-              parameters.add("train");
-              parameters.add("--clean");
-              if (multilingualIPA) {
-                parameters.add("--multilingual_ipa");
-              }
-              if (phoneSet != null && phoneSet.length() > 0) {
-                parameters.add("--phone_set");
-                parameters.add(phoneSet);
-              }
-              parameters.add("--output_format");
-              parameters.add("long_textgrid");
-              parameters.add(corpusDir.getPath());
-              parameters.add(dictionaryFile.getPath());
-              parameters.add(alignedDir.getPath());
-              parameters.add("--beam");
-              parameters.add(""+beam);
-              parameters.add("--retry-beam");
-              parameters.add(""+retryBeam);
-              parameters.add("--uses_speaker_adaptation");
-              parameters.add(noSpeakerAdaptation?"False":"True");
-              String[] paramatersArray = parameters.toArray(new String[0]);
-              mfa(false, paramatersArray);
-              setPercentComplete(80); // (up to 5 phases of 10% each arrives at 80%)
-              // log contents of ${tempDir}/corpus/train_acoustic_model.log
-              copyLog(new File(new File(tempDir, "corpus"), "train_acoustic_model.log"));
-            } else { // pretrained
-              mfa(false, "model","download","acoustic", modelsName);
-              setPercentComplete(25);
-              if (!isCancelling()) {
-                if (dictionaryName != null) {
-                  mfa(false, "model","download","dictionary", dictionaryName);
-                  setPercentComplete(30);
+
+            // as of around version 2.2, mfa uses a PostGres database, and needs to
+            // start/stop the server
+            // this is invisible and automatic when run by humans on the command line
+            // but when automated, causes errors, so we need to disable automatic server
+            // management, and explicitly start/stop the server
+            // https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/server/index.html
+            boolean dbServer = false;
+            try {
+              setStatus("Setting up database...");
+              // ensure other commands don't start/stop database server
+              mfa(false, "configure", "--disable_auto_server");
+              // start db server
+              mfa(false, "server", "start");
+              dbServer = true;
+            } catch (TransformationException x) {
+              setStatus("DB setup failed: " + x);
+            }
+
+            try {
+            
+              if (dictionaryName == null && modelsName == null) { // train & align          
+                //mfa("validate", corpusDir.getPath(), dictionaryFile.getPath());
+                setPercentComplete(30); // (up to 5 phases of 10% each arrives at 80%)
+                Vector<String> parameters = new Vector<String>();
+                parameters.add("train");
+                parameters.add("--clean");
+                if (multilingualIPA) {
+                  parameters.add("--multilingual_ipa");
                 }
-                String dictionary = dictionaryFile != null?dictionaryFile.getPath():dictionaryName;
+                if (phoneSet != null && phoneSet.length() > 0) {
+                  parameters.add("--phone_set");
+                  parameters.add(phoneSet);
+                }
+                parameters.add("--output_format");
+                parameters.add("long_textgrid");
+                parameters.add(corpusDir.getPath());
+                parameters.add(dictionaryFile.getPath());
+                parameters.add(alignedDir.getPath());
+                parameters.add("--beam");
+                parameters.add(""+beam);
+                parameters.add("--retry-beam");
+                parameters.add(""+retryBeam);
+                parameters.add("--uses_speaker_adaptation");
+                parameters.add(noSpeakerAdaptation?"False":"True");
+                String[] paramatersArray = parameters.toArray(new String[0]);
+                mfa(false, paramatersArray);
+                setPercentComplete(80); // (up to 5 phases of 10% each arrives at 80%)
+                // log contents of ${tempDir}/corpus/train_acoustic_model.log
+                copyLog(new File(new File(tempDir, "corpus"), "train_acoustic_model.log"));
+              } else { // pretrained
+                mfa(false, "model","download","acoustic", modelsName);
+                setPercentComplete(25);
                 if (!isCancelling()) {
-                  mfa(false, "align", "--clean",
-                      "--output_format", "long_textgrid",
-                      corpusDir.getPath(), dictionary, modelsName,
-                      alignedDir.getPath(),
-                      "--beam", ""+beam, "--retry-beam", ""+retryBeam,
-                      "--uses_speaker_adaptation", noSpeakerAdaptation?"False":"True");
-                  // log contents of ${tempDir}/corpus/align.log
-                  copyLog(new File(new File(tempDir, "corpus"), "align.log"));
+                  if (dictionaryName != null) {
+                    mfa(false, "model","download","dictionary", dictionaryName);
+                    setPercentComplete(30);
+                  }
+                  String dictionary = dictionaryFile != null?dictionaryFile.getPath():dictionaryName;
+                  if (!isCancelling()) {
+                    mfa(false, "align", "--clean",
+                        "--output_format", "long_textgrid",
+                        corpusDir.getPath(), dictionary, modelsName,
+                        alignedDir.getPath(),
+                        "--beam", ""+beam, "--retry-beam", ""+retryBeam,
+                        "--uses_speaker_adaptation", noSpeakerAdaptation?"False":"True");
+                    // log contents of ${tempDir}/corpus/align.log
+                    copyLog(new File(new File(tempDir, "corpus"), "align.log"));
+                  } // not cancelling
                 } // not cancelling
-              } // not cancelling
-            } // pretrained
+              } // pretrained
+              
+            } finally {
+              if (dbServer) {
+                try {
+                  setStatus("Shutting down database server...");
+                  mfa(false, "server", "stop", "--mode", "smart");
+                } catch (TransformationException x) {
+                  setStatus("DB shutdown failed: " + x);
+                }
+              }
+            }
           } // not cancelling
         } // there are valid fragments
         
@@ -1282,7 +1329,7 @@ public class MFA extends Annotator {
       sessionName = prefix + "-" + hashCode();
     }
     setStatus("Session " + sessionName);
-    File parentDir = getWorkingDirectory();
+    File parentDir = new File(System.getProperty("java.io.tmpdir"));
     if (System.getProperty("os.name").startsWith("Windows") && parentDir.getPath().contains(" ")) {
       // MFA doesn't handle paths with spaces well, so we try to use a path with no spaces
       // like C:\WINDOWS\TEMP
@@ -1291,7 +1338,7 @@ public class MFA extends Annotator {
     sessionWorkingDir = new File(
       parentDir,
       sessionName + "-"
-      + new SimpleDateFormat("yyyy-MM-dd-kk-mm-ss").format(new java.util.Date()));
+      + new SimpleDateFormat("yyyyMMdd-kkmmss").format(new java.util.Date()));
     if (!sessionWorkingDir.mkdirs()) {
       throw new TransformationException(
         this, "Failed to create working directory: " + sessionWorkingDir.getPath());
@@ -1504,7 +1551,7 @@ public class MFA extends Annotator {
     String prefix = "mfa";
     if (utteranceTagLayerId != null) prefix = utteranceTagLayerId;
     else if (phoneAlignmentLayerId != null) prefix = phoneAlignmentLayerId;
-    File parentDir = getWorkingDirectory();
+    File parentDir = new File(System.getProperty("java.io.tmpdir"));
     if (System.getProperty("os.name").startsWith("Windows") && parentDir.getPath().contains(" ")) {
       // MFA doesn't handle paths with spaces well, so we try to use a path with no spaces
       // like C:\WINDOWS\TEMP
@@ -1513,7 +1560,7 @@ public class MFA extends Annotator {
     File newSessionWorkingDirectory = new File(
       parentDir,
       prefix + "-" + newName
-      +"-"+new SimpleDateFormat("yyyy-MM-dd-kk-mm-ss").format(new java.util.Date()));
+      +"-"+new SimpleDateFormat("yyyyMMdd-kkmmss").format(new java.util.Date()));
     if (sessionWorkingDir.renameTo(newSessionWorkingDirectory)) {
       sessionWorkingDir = newSessionWorkingDirectory;
       sessionName = newName;
