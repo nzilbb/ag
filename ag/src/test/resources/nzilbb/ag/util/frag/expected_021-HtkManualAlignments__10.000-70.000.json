@@ -97,11 +97,11 @@
             "confidence": 50,
             "comment": "BECOMES SHARED BETWEEN 86-1-1 and 86-1-2, BUT WITH A PRIOR SOFTER ALIGNMENT, SO SEPARATION AND ORIGINAL OFFSETS ARE KEPT"
         },
-        "4": {
+        "3": {
             "offset": 30.0,
             "confidence": 50
         },
-        "2": {
+        "1": {
             "offset": 30.5,
             "confidence": 50
         },
@@ -129,7 +129,7 @@
             "offset": 40.2,
             "confidence": 100
         },
-        "5": {
+        "4": {
             "offset": 40.2,
             "confidence": 50,
             "comment": "WILL CREATE INSTANTANEOUS ANNOTATION, WHICH WE ALLOW"
@@ -150,7 +150,7 @@
             "offset": 52.0,
             "confidence": 100
         },
-        "8": {
+        "7": {
             "offset": 53.0,
             "confidence": 50,
             "comment": "WILL CREATE INSTANTANEOUS ANNOTATION, WHICH WE ALLOW"
@@ -233,54 +233,55 @@
                             "id": "ew_0_2",
                             "label": "86-1-2",
                             "startId": "n_200",
-                            "endId": "4",
+                            "endId": "3",
                             "confidence": 100,
                             "lexical": [
                                 {
                                     "id": "ew_22_2",
                                     "label": "l-1-2",
                                     "startId": "n_200",
-                                    "endId": "4",
+                                    "endId": "3",
                                     "confidence": 100
                                 }
                             ],
                             "segments": [
                                 {
-                                    "id": "1",
+                                    "id": "es_1_21",
                                     "label": "86-1-2-1-changed",
                                     "startId": "n_200",
-                                    "endId": "4",
-                                    "confidence": 100
+                                    "endId": "3",
+                                    "confidence": 100,
+                                    "comment": "CHANGE THIS"
                                 }
                             ]
                         },
                         {
                             "id": "ew_0_3",
                             "label": "86-1-3",
-                            "startId": "4",
+                            "startId": "3",
                             "endId": "n_399",
                             "confidence": 100,
                             "lexical": [
                                 {
                                     "id": "ew_22_3",
                                     "label": "l-1-3",
-                                    "startId": "4",
+                                    "startId": "3",
                                     "endId": "n_399",
                                     "confidence": 100
                                 }
                             ],
                             "segments": [
                                 {
-                                    "id": "3",
+                                    "id": "2",
                                     "label": "86-1-3-0-new",
-                                    "startId": "4",
-                                    "endId": "2",
+                                    "startId": "3",
+                                    "endId": "1",
                                     "confidence": 50
                                 },
                                 {
                                     "id": "es_1_31",
                                     "label": "86-1-3-1",
-                                    "startId": "2",
+                                    "startId": "1",
                                     "endId": "n_325",
                                     "confidence": 50,
                                     "comment": "PREPEND ANOTHER"
@@ -326,14 +327,14 @@
                                     "id": "es_1_42",
                                     "label": "86-1-4-2",
                                     "startId": "n_402",
-                                    "endId": "5",
+                                    "endId": "4",
                                     "confidence": 50,
                                     "comment": "INSERT ANOTHER"
                                 },
                                 {
-                                    "id": "7",
+                                    "id": "6",
                                     "label": "86-1-4-2.5-new",
-                                    "startId": "5",
+                                    "startId": "4",
                                     "endId": "n_403",
                                     "confidence": 50
                                 },
@@ -380,14 +381,14 @@
                                     "id": "es_1_52",
                                     "label": "86-1-5-2",
                                     "startId": "n_520",
-                                    "endId": "8",
+                                    "endId": "7",
                                     "confidence": 50,
                                     "comment": "APPEND ANOTHER"
                                 },
                                 {
-                                    "id": "9",
+                                    "id": "8",
                                     "label": "86-1-5-3-new",
-                                    "startId": "8",
+                                    "startId": "7",
                                     "endId": "n_530",
                                     "confidence": 50
                                 }

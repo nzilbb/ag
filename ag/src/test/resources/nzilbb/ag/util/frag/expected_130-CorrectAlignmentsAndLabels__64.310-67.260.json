@@ -1,0 +1,487 @@
+
+{
+    "id": "130-CorrectAlignmentsAndLabels__64.310-67.260.TextGrid",
+    "offsetGranularity": 0.001,
+    "schema": {
+        "participantLayerId": "participant",
+        "turnLayerId": "turn",
+        "utteranceLayerId": "utterance",
+        "wordLayerId": "word",
+        "transcript": {
+            "description": "The annotation graph as a whole",
+            "children": {
+                "participant": {
+                    "description": "Participants",
+                    "alignment": 0,
+                    "peers": true,
+                    "peersOverlap": true,
+                    "parentIncludes": true,
+                    "saturated": true,
+                    "children": {
+                        "turn": {
+                            "description": "Speaker turns",
+                            "alignment": 2,
+                            "peers": true,
+                            "peersOverlap": false,
+                            "parentIncludes": true,
+                            "saturated": false,
+                            "children": {
+                                "utterance": {
+                                    "description": "Utterances",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": true
+                                },
+                                "word": {
+                                    "description": "Words",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false,
+                                    "children": {
+                                        "segment": {
+                                            "description": "Segments",
+                                            "alignment": 2,
+                                            "peers": true,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "anchors": {
+        "1": {
+            "offset": 0.0,
+            "confidence": 100
+        },
+        "4": {
+            "offset": 0.09999999999999432,
+            "confidence": 50
+        },
+        "5": {
+            "offset": 0.20000000000000284,
+            "confidence": 50
+        },
+        "p": {
+            "offset": 0.23999999999999488,
+            "confidence": 100
+        },
+        "r": {
+            "offset": 0.3199999999999932,
+            "confidence": 100
+        },
+        "t": {
+            "offset": 0.4200000000000017,
+            "confidence": 100
+        },
+        "7": {
+            "offset": 0.5100000000000051,
+            "confidence": 50
+        },
+        "9": {
+            "offset": 0.5600000000000023,
+            "confidence": 100
+        },
+        "x": {
+            "offset": 0.7312196048632273,
+            "confidence": 100
+        },
+        "z": {
+            "offset": 0.8199999999999932,
+            "confidence": 50
+        },
+        "b": {
+            "offset": 0.8599999999999994,
+            "confidence": 100
+        },
+        "12": {
+            "offset": 0.9000000000000057,
+            "confidence": 100
+        },
+        "14": {
+            "offset": 0.9300000000000068,
+            "confidence": 100
+        },
+        "d": {
+            "offset": 1.0999999999999943,
+            "confidence": 100
+        },
+        "1w": {
+            "offset": 1.1500000000000057,
+            "confidence": 100
+        },
+        "17": {
+            "offset": 1.1800000000000068,
+            "confidence": 100
+        },
+        "f": {
+            "offset": 1.2800000000000011,
+            "confidence": 100
+        },
+        "1a": {
+            "offset": 1.3799999999999955,
+            "confidence": 100
+        },
+        "h": {
+            "offset": 1.4099999999999966,
+            "confidence": 100
+        },
+        "1d": {
+            "offset": 1.4599999999999937,
+            "confidence": 100
+        },
+        "1v": {
+            "offset": 1.9699999999999989,
+            "confidence": 100
+        },
+        "j": {
+            "offset": 2.010000000000005,
+            "confidence": 100
+        },
+        "1g": {
+            "offset": 2.0799999999999983,
+            "confidence": 50
+        },
+        "1i": {
+            "offset": 2.1457712765957524,
+            "confidence": 100
+        },
+        "1k": {
+            "offset": 2.239999999999995,
+            "confidence": 100
+        },
+        "l": {
+            "offset": 2.3400000000000034,
+            "confidence": 100
+        },
+        "1n": {
+            "offset": 2.510000000000005,
+            "confidence": 100
+        },
+        "1p": {
+            "offset": 2.549999999999997,
+            "confidence": 50
+        },
+        "1r": {
+            "offset": 2.5799999999999983,
+            "confidence": 50
+        },
+        "n": {
+            "offset": 2.930000000000007,
+            "confidence": 100
+        },
+        "2": {
+            "offset": 2.950000000000003,
+            "confidence": 100
+        }
+    },
+    "participant": [
+        {
+            "id": "2k",
+            "label": "WE3NU3LF-Child",
+            "startId": "1",
+            "endId": "2",
+            "confidence": 100,
+            "turn": [
+                {
+                    "id": "1u",
+                    "label": "WE3NU3LF-Child",
+                    "startId": "1",
+                    "endId": "2",
+                    "confidence": 100,
+                    "utterance": [
+                        {
+                            "id": "3",
+                            "label": "= Takes a long time for me to think stuff.",
+                            "startId": "1",
+                            "endId": "2",
+                            "confidence": 100
+                        }
+                    ],
+                    "word": [
+                        {
+                            "id": "6",
+                            "label": "=",
+                            "startId": "4",
+                            "endId": "5",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "8",
+                            "label": "Takes",
+                            "startId": "5",
+                            "endId": "7",
+                            "confidence": 100,
+                            "segment": [
+                                {
+                                    "id": "q",
+                                    "label": "t",
+                                    "startId": "5",
+                                    "endId": "p",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "s",
+                                    "label": "1",
+                                    "startId": "p",
+                                    "endId": "r",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "u",
+                                    "label": "k",
+                                    "startId": "r",
+                                    "endId": "t",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "v",
+                                    "label": "s",
+                                    "startId": "t",
+                                    "endId": "7",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "a",
+                            "label": "a",
+                            "startId": "7",
+                            "endId": "9",
+                            "confidence": 100,
+                            "segment": [
+                                {
+                                    "id": "w",
+                                    "label": "@",
+                                    "startId": "7",
+                                    "endId": "9",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "c",
+                            "label": "long",
+                            "startId": "9",
+                            "endId": "b",
+                            "confidence": 100,
+                            "segment": [
+                                {
+                                    "id": "y",
+                                    "label": "l",
+                                    "startId": "9",
+                                    "endId": "x",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "10",
+                                    "label": "Q",
+                                    "startId": "x",
+                                    "endId": "z",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "11",
+                                    "label": "N",
+                                    "startId": "z",
+                                    "endId": "b",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "e",
+                            "label": "time",
+                            "startId": "b",
+                            "endId": "d",
+                            "confidence": 100,
+                            "segment": [
+                                {
+                                    "id": "13",
+                                    "label": "t",
+                                    "startId": "b",
+                                    "endId": "12",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "15",
+                                    "label": "2",
+                                    "startId": "12",
+                                    "endId": "14",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "16",
+                                    "label": "m",
+                                    "startId": "14",
+                                    "endId": "d",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "g",
+                            "label": "for",
+                            "startId": "d",
+                            "endId": "f",
+                            "confidence": 100,
+                            "segment": [
+                                {
+                                    "id": "18",
+                                    "label": "f",
+                                    "startId": "d",
+                                    "endId": "1w",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "1y",
+                                    "label": "r",
+                                    "startId": "1w",
+                                    "endId": "17",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "19",
+                                    "label": "@",
+                                    "startId": "17",
+                                    "endId": "f",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "i",
+                            "label": "me",
+                            "startId": "f",
+                            "endId": "h",
+                            "confidence": 100,
+                            "segment": [
+                                {
+                                    "id": "1b",
+                                    "label": "m",
+                                    "startId": "f",
+                                    "endId": "1a",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "1c",
+                                    "label": "i",
+                                    "startId": "1a",
+                                    "endId": "h",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "k",
+                            "label": "to",
+                            "startId": "h",
+                            "endId": "1v",
+                            "confidence": 100,
+                            "segment": [
+                                {
+                                    "id": "1e",
+                                    "label": "t",
+                                    "startId": "h",
+                                    "endId": "1d",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "1f",
+                                    "label": "@",
+                                    "startId": "1d",
+                                    "endId": "1v",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "m",
+                            "label": "think",
+                            "startId": "j",
+                            "endId": "l",
+                            "confidence": 100,
+                            "segment": [
+                                {
+                                    "id": "1h",
+                                    "label": "T",
+                                    "startId": "j",
+                                    "endId": "1g",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "1j",
+                                    "label": "I",
+                                    "startId": "1g",
+                                    "endId": "1i",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "1l",
+                                    "label": "N",
+                                    "startId": "1i",
+                                    "endId": "1k",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "1m",
+                                    "label": "k",
+                                    "startId": "1k",
+                                    "endId": "l",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "o",
+                            "label": "stuff.",
+                            "startId": "l",
+                            "endId": "n",
+                            "confidence": 100,
+                            "segment": [
+                                {
+                                    "id": "1o",
+                                    "label": "s",
+                                    "startId": "l",
+                                    "endId": "1n",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "1q",
+                                    "label": "t",
+                                    "startId": "1n",
+                                    "endId": "1p",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "1s",
+                                    "label": "V",
+                                    "startId": "1p",
+                                    "endId": "1r",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "1t",
+                                    "label": "f",
+                                    "startId": "1r",
+                                    "endId": "n",
+                                    "confidence": 100
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
