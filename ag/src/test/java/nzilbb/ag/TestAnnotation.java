@@ -131,6 +131,7 @@ public class TestAnnotation
    @Test public void changeTracking() 
    {
       Annotation a = new Annotation("123", "LABEL", "word", "start", "end", "parent", 99);
+      a.setConfidence(Constants.CONFIDENCE_DEFAULT);
       a.setTracker(new ChangeTracker());
       assertEquals("LABEL", a.getLabel());
       assertEquals("Offset and original are the same", a.getLabel(), a.getOriginalLabel());
@@ -139,6 +140,11 @@ public class TestAnnotation
 
       a.put("foo", "foo");
       assertEquals("Non-tracked keys don't affect change:", Change.Operation.NoChange, a.getChange());
+
+      a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      assertEquals("Updating only confidence is tracked", Change.Operation.Update, a.getChange());
+      assertEquals("Original confidence remembers first offset:",
+                   Constants.CONFIDENCE_DEFAULT, a.getOriginal("confidence").get());
 
       a.setId("differentId");
       assertEquals("differentId", a.getId());

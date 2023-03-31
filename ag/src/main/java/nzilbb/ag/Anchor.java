@@ -38,7 +38,7 @@ import nzilbb.util.ClonedProperty;
 @SuppressWarnings("serial")
 public class Anchor extends TrackedMap implements Comparable<Anchor> {
   // NB if this is updated, please also update the @return javadoc attribute on getTrackedAttributes()
-  private static String[] aTrackedAttributes = {"offset"};
+  private static String[] aTrackedAttributes = {"offset", "confidence"};
   /**
    * Keys for attributes that are change-tracked - i.e. when a new value is set for any
    * of these attributes, and {@link TrackedMap#getTracker()} is set, the change is registered.
@@ -50,7 +50,7 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
   /**
    * Keys for attributes that are change-tracked - i.e. when a new value is set for any
    * of these attributes, and {@link TrackedMap#getTracker()} is set, the change is registered.
-   * @return "offset"
+   * @return "offset", "confidence"
    */
   public Set<String> getTrackedAttributes() {
     return trackedAttributes;

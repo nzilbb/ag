@@ -79,35 +79,35 @@
         },
         "n_110": {
             "offset": 0.11,
-            "confidence": 50
+            "confidence": 100
         },
         "n_120": {
             "offset": 0.12,
-            "confidence": 50
+            "confidence": 100
         },
         "n_200": {
             "offset": 0.2,
-            "confidence": 50
+            "confidence": 100
         },
         "n_270": {
             "offset": 0.27,
-            "confidence": 50
+            "confidence": 100
         },
         "n_300": {
             "offset": 0.3,
-            "confidence": 50
+            "confidence": 100
         },
         "n_325": {
             "offset": 0.325,
-            "confidence": 10
+            "confidence": 100
         },
         "n_350": {
             "offset": 0.35,
-            "confidence": 10
+            "confidence": 100
         },
         "n_375": {
             "offset": 0.375,
-            "confidence": 10
+            "confidence": 100
         },
         "n_399": {
             "offset": 0.4,
@@ -123,7 +123,7 @@
         },
         "n_420": {
             "offset": 0.42,
-            "confidence": 50
+            "confidence": 100
         },
         "3": {
             "offset": 0.48,
@@ -135,23 +135,23 @@
         },
         "n_550": {
             "offset": 0.55,
-            "confidence": 10
+            "confidence": 100
         },
         "n_600": {
             "offset": 0.6,
-            "confidence": 50
+            "confidence": 100
         },
         "n_610": {
             "offset": 0.61,
-            "confidence": 50
+            "confidence": 100
         },
         "n_620": {
             "offset": 0.62,
-            "confidence": 50
+            "confidence": 100
         },
         "n_630": {
             "offset": 0.63,
-            "confidence": 50
+            "confidence": 100
         },
         "n_699": {
             "offset": 0.7,

@@ -403,7 +403,7 @@ public class TrackedMap
     * obtained by automatic annotation).
     * @return Confidence rating.
     */
-   @ClonedProperty
+   @ClonedProperty @TrackedProperty
    public Integer getConfidence() { return confidence; }
    /**
     * Setter for {@link #confidence}: Confidence rating.
@@ -414,7 +414,10 @@ public class TrackedMap
     * obtained by automatic annotation).
     * @param newConfidence Confidence rating.
     */
-   public void setConfidence(Integer newConfidence) { confidence = newConfidence; }
+   public void setConfidence(Integer newConfidence) {
+     Change change = registerChange("confidence", newConfidence);
+     confidence = newConfidence;
+   }
 
    /**
     * Name of the person or system that created or changed this entity.

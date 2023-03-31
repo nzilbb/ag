@@ -85,7 +85,7 @@
         "n_1011": {
             "offset": 11.1,
             "confidence": 50,
-            "comment": "Updated to manual confidence, but no offset change, so confidence isn't updated"
+            "comment": "no offset change, but updated to manual confidence, so confidence set to manual"
         },
         "n_1012": {
             "offset": 11.2,

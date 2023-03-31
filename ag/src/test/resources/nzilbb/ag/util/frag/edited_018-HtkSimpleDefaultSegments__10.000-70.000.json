@@ -144,7 +144,7 @@
         "n_650": {
             "offset": 65.0,
             "confidence": 50,
-            "comment": "TODO: UPDATE STATUS ONLY MEANS RE-COMPUTATION OF DEFAULT STATUS TO 64.95 - WOULD BE BETTER IF IT SOMEHOW UPDATED THE STATUS, OR AT LEAST DIDN'T CHANGE THE OFFSET"
+            "comment": "2023-03-30: UPDATE STATUS ONLY NOT LONGER MEANS RE-COMPUTATION OF DEFAULT STATUS TO 64.95 - now the status is updated and the offset remains the same"
         },
         "n_699": {
             "offset": 69.0,

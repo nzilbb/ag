@@ -153,9 +153,9 @@
             "confidence": 50
         },
         "n_650": {
-            "offset": 64.95,
-            "confidence": 10,
-            "comment": "EDITED VERSION UPDATES STATUS ONLY, WHICH DOESN'T COUNT AS A CHANGED - TODO: fix this"
+            "offset": 65.0,
+            "confidence": 50,
+            "comment": "FIXED: this now updates status only and the offset is kept instead of being interpolated"
         },
         "n_699": {
             "offset": 69.0,

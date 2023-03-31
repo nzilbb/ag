@@ -1827,11 +1827,16 @@ public class Merger extends Transform implements GraphTransformer {
           } // next parallel
         } // !bChanged
         Anchor delta = null;
-        // are the offsets different?
-        if (bCheckStartAnchorOffset
-            && compare(anEdited.getStart(), anOriginal.getStart()) != 0) {
+        // are the offsets/confidences different?
+        if (bCheckStartAnchorOffset) {
+          boolean differentOffset
+            = compare(anEdited.getStart(), anOriginal.getStart()) != 0;
+          boolean higherConfidence
+            = getConfidence(anEdited.getStart()) > getConfidence(anOriginal.getStart());
+          boolean sameOrHigherConfidence
+            = getConfidence(anEdited.getStart()) >= getConfidence(anOriginal.getStart());
           if (ignoreOffsetConfidence
-              || getConfidence(anEdited.getStart()) >= getConfidence(anOriginal.getStart())) {
+              || higherConfidence || (differentOffset && sameOrHigherConfidence)) {
             // theirs is more trustworthy
             // look in the edited graph for a new start-anchor canditate
             // by looking at the end-anchor of previous annotations on this layer
@@ -1973,13 +1978,18 @@ public class Merger extends Transform implements GraphTransformer {
             } 
             // are we changing this anchor?
             if (delta != null) {
-              anOriginal.getStart().setOffset(delta.getOffset());
               setConfidence(anOriginal.getStart(), getConfidence(delta));
-              log(layerId, ": Different start anchor for ", anOriginal,
-                  ": changing offset to ", delta.getOffset());
+              if (differentOffset) {
+                anOriginal.getStart().setOffset(delta.getOffset());
+                log(layerId, ": Different start anchor for ", anOriginal,
+                    ": changing offset to ", delta.getOffset());
+              } else {
+                log(layerId, ": Same start anchor but higher confidence for ", anOriginal,
+                    ": changing confidence to ", delta.getConfidence());
+              }
             } // there is a delta to apply
           } // theirs is more trustworthy
-        } // offsets are different
+        } // bCheckStartAnchorOffset
 	    
         // is there a previous annotation?
         if (anLastOriginal != null
@@ -2076,8 +2086,7 @@ public class Merger extends Transform implements GraphTransformer {
               }
             } // their-parallel has a counterpart
           } // next parallel their-annotation
-          if (!bChanged)
-          {
+          if (!bChanged) {
             // or maybe its shared for us but *not* shared for them
             for (Annotation anParallel : removeDeleted(anOriginal.getEnd().getEndingAnnotations())) {
               if (anParallel == anOriginal) continue;		  
@@ -2126,14 +2135,18 @@ public class Merger extends Transform implements GraphTransformer {
           }	    
 	       
           Anchor delta = null;
-          if (bCheckEndAnchorOffset
-              && compare(anEdited.getEnd(), anOriginal.getEnd()) != 0) {
+          if (bCheckEndAnchorOffset) {
+            boolean differentOffset
+              = compare(anEdited.getEnd(), anOriginal.getEnd()) != 0;
+            boolean higherConfidence
+              = getConfidence(anEdited.getEnd()) > getConfidence(anOriginal.getEnd());
+            boolean sameOrHigherConfidence
+              = getConfidence(anEdited.getEnd()) >= getConfidence(anOriginal.getEnd());
             if (ignoreOffsetConfidence
-                || getConfidence(anEdited.getEnd()) 
-                >= getConfidence(anOriginal.getEnd())) {
+                || higherConfidence || (differentOffset && sameOrHigherConfidence)) {
               Anchor matchingMergedAnchor = null;
               // try for parallel annotations on another layer
-              for (Annotation anEditedParallel : anEdited.getEnd().getEndingAnnotations()) {		     
+              for (Annotation anEditedParallel : anEdited.getEnd().getEndingAnnotations()) {
                 if (anEditedParallel == anEdited) continue; // skip ourselves
                 if (anEditedParallel.getLayerId() == anEdited.getLayerId()) continue; // on our own layer
                 Annotation anOriginalParallel = getCounterpart(anEditedParallel);
@@ -2201,14 +2214,19 @@ public class Merger extends Transform implements GraphTransformer {
             // applying change to anchor?
             if (delta != null) {
               if (delta.getChange() != Change.Operation.Create) {
-                anOriginal.getEnd().setOffset(delta.getOffset());
                 setConfidence(anOriginal.getEnd(), getConfidence(delta));
-                log(layerId, ": Different end anchor for ", anOriginal,
-                    ": changing offset to  ", delta.getOffset());
+                if (differentOffset) {
+                  anOriginal.getEnd().setOffset(delta.getOffset());
+                  log(layerId, ": Different end anchor for ", anOriginal,
+                      ": changing offset to  ", delta.getOffset());
+                } else {
+                  log(layerId, ": Same end anchor but higher confidence for ", anOriginal,
+                      ": changing confidence to  ", delta.getConfidence());
+                }
               } else {
                 Anchor newAnchor = delta;
                 graph.addAnchor(newAnchor);
-			
+		
                 Set<String> excludeLayers = new HashSet<String>();
                 if (layer.getSaturated()) excludeLayers.add(layerId);
                 changeEndWithRelatedAnnotations(anOriginal, newAnchor, excludeLayers);
@@ -2216,7 +2234,7 @@ public class Merger extends Transform implements GraphTransformer {
                     ": new anchor at ", delta.getOffset());
               }
             } // there's a delta
-          } // offsets are different
+          } // bCheckEndAnchorOffset
 	       
           // check for reversed anchors
           if (anOriginal.getEnd().getOffset() != null && anOriginal.getStart().getOffset() != null

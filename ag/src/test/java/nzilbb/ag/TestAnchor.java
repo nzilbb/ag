@@ -124,6 +124,7 @@ public class TestAnchor
       Anchor a = new Anchor();
       a.setId("changeTracking");
       a.setOffset(456.789);
+      a.setConfidence(Constants.CONFIDENCE_DEFAULT);
       a.put("foo", "bar");
       a.setTracker(new ChangeTracker()); // after initialization 
       assertEquals(Double.valueOf(456.789), a.getOffset());
@@ -131,7 +132,13 @@ public class TestAnchor
       assertEquals(Change.Operation.NoChange, a.getChange());
 
       a.put("foo", "foo");
-      assertEquals("Only offset affects change:", Change.Operation.NoChange, a.getChange());
+      assertEquals("Only offset/confidence affects change",
+                   Change.Operation.NoChange, a.getChange());
+
+      a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      assertEquals("Updating only confidence is tracked", Change.Operation.Update, a.getChange());
+      assertEquals("Original confidence remembers first offset:",
+                   Constants.CONFIDENCE_DEFAULT, a.getOriginal("confidence").get());
 
       a.setOffset(123.456);
       assertEquals(Double.valueOf(123.456), a.getOffset());

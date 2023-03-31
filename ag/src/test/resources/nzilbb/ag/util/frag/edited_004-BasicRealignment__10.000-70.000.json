@@ -89,7 +89,7 @@
         "n_350": {
             "offset": 35.0,
             "confidence": 50,
-            "comment": "STATUS CHANGED, WHICH WILL BE IGNORED BECAUSE OFFSET IS THE SAME, AND THEN INTERPOLATED TO BE 35.5! But the alternative is that all imported textgrids are always at alignmentStatus=100, which means that things people don't change will be set in stone.  Maybe that's not that bad?"
+            "comment": "CONFIDENCE CHANGED ONLY - so all imported textgrids are always at alignmentStatus=100, which means that things people don't change will be set in stone. THIS BEHAVIOUR HAS CHANGED (2023-03-30) - before this was ignored because offset is the same, and then interpolated to be 35.5. This means that often words whose starts coincide with the utterance start are never set to high confidence."
         },
         "n_375": {
             "offset": 38.0,

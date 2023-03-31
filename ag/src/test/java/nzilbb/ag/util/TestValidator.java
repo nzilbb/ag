@@ -1953,7 +1953,7 @@ public class TestValidator {
       assertNull("reset", g.getAnchor("a0").getOffset());
       assertNull("reset", g.getAnchor("a34").getOffset());
 
-      assertEquals("two changes: " + changes, 2, changes.size());
+      assertEquals("four changes (2x offset, 2x confidence): " + changes, 4, changes.size());
     } catch(TransformationException exception) {
       fail(exception.toString());
     }

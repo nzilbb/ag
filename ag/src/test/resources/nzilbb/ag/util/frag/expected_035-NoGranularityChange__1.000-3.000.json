@@ -55,7 +55,7 @@
         },
         "n_101": {
             "offset": 1.0,
-            "confidence": 10
+            "confidence": 100
         },
         "n_200": {
             "offset": 1.333,
@@ -67,7 +67,7 @@
         },
         "n_399": {
             "offset": 2.0,
-            "confidence": 10
+            "confidence": 100
         },
         "n_400": {
             "offset": 2.0,
@@ -75,7 +75,7 @@
         },
         "n_401": {
             "offset": 2.0,
-            "confidence": 10
+            "confidence": 100
         },
         "n_500": {
             "offset": 2.333,
@@ -87,7 +87,7 @@
         },
         "n_699": {
             "offset": 3.0,
-            "confidence": 10
+            "confidence": 100
         },
         "n_700": {
             "offset": 3.0,

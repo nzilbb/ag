@@ -51,7 +51,7 @@ import nzilbb.util.ClonedProperty;
 @SuppressWarnings("serial")
 public class Annotation extends TrackedMap implements Comparable<Annotation> {
   // NB if this is updated, please also update the @return javadoc attribute on getTrackedAttributes()
-  private static String[] aTrackedAttributes = {"label", "startId", "endId", "parentId", "ordinal"};
+  private static String[] aTrackedAttributes = {"label", "startId", "endId", "parentId", "ordinal", "confidence"};
   /**
    * Keys for attributes that are change-tracked. i.e. when a new value is set for any
    * of these attributes, and {@link TrackedMap#getTracker()} is set, the change is registered. 
@@ -64,7 +64,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
   /**
    * Keys for attributes that are change-tracked. i.e. when a new value is set for any
    * of these attributes, and {@link TrackedMap#getTracker()} is set, the change is registered. 
-   * @return "label", "startId", "endId", "parentId", "ordinal"
+   * @return "label", "startId", "endId", "parentId", "ordinal", "confidence"
    */
   public Set<String> getTrackedAttributes() { return trackedAttributes; }
 
