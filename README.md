@@ -21,7 +21,7 @@ includes extra features that allow tier hierarchies and parent/child constraints
 More details on extra features are available in
 [http://dx.doi.org/10.1016/j.csl.2017.01.004](http://dx.doi.org/10.1016/j.csl.2017.01.004)
 
-**[API documentation](https://nzilbb.github.io/ag/)**
+**API documentation is available at https://nzilbb.github.io/ag/**
 
 ## Format Conversion
 
