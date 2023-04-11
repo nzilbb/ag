@@ -409,6 +409,7 @@ public class KaldiSerializer implements GraphSerializer {
       final SortedSet<String> wavs = new TreeSet<String>();
 
       StringBuffer lastMediaName = new StringBuffer();
+      if (wavBasePath == null) wavBasePath = "";
       graphs.forEachRemaining(graph -> {
           if (getCancelling()) return;
           String transcriptName = graph.getId().replaceAll("__[0-9.]+-[0-9.]+$","");
@@ -423,7 +424,9 @@ public class KaldiSerializer implements GraphSerializer {
             if (!graph.isFragment()) {
               utteranceId = (prefixUtteranceId?speakerId + "-":"")
                 // TODO format start/end times 
-                + Graph.FragmentId(graph.getId(), utterance.getStart().getOffset(), utterance.getEnd().getOffset());
+                + Graph.FragmentId(
+                  graph.getId(),
+                  utterance.getStart().getOffset(), utterance.getEnd().getOffset());
             }
             StringBuilder line = new StringBuilder();
             Annotation[] tokens = utterance.all(orthography);
