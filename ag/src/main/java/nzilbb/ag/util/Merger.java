@@ -1371,12 +1371,22 @@ public class Merger extends Transform implements GraphTransformer {
                       dNewOffset, " to avoid non-positive length for ", anLastOriginal);
                   anLastOriginal.getStart().setOffset(dNewOffset);
                   setConfidence(anLastOriginal.getStart(), Constants.CONFIDENCE_NONE);
-                } else {
+                } else if (getConfidence(anLastOriginal.getStart()) // TODO should be original confidence, but we don't track that!
+                           > getConfidence(anOriginal.getStart())
+                           // keeping offsets is important only for anchors that have been aligned
+                           || getConfidence(anOriginal.getStart()) <= Constants.CONFIDENCE_DEFAULT) {
                   double dNewOffset = anOriginal.getStart().getOffset() + smidgin;
                   log(layerId, ": Moving start of : ", anOriginal, " to ",
-                      dNewOffset, " to avoid non-positive length for ", anLastOriginal);
+                      dNewOffset, " (",
+                      getConfidence(anLastOriginal.getStart()), "vs",
+                      getConfidence(anOriginal.getStart()), ") to avoid non-positive length for ", anLastOriginal);
                   anOriginal.getStart().setOffset(dNewOffset);
                   setConfidence(anOriginal.getStart(), Constants.CONFIDENCE_NONE);
+                } else {
+                  log(layerId, ": Creating non-positive length for ", anLastOriginal,
+                      " because both anchors are high confidence: ",
+                      getConfidence(anLastOriginal.getStart()), "vs",
+                      getConfidence(anOriginal.getStart()));
                 }
               }
 
