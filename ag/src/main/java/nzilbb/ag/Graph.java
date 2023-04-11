@@ -331,9 +331,15 @@ public class Graph extends Annotation {
    * <var>graphId-without-extension</var>__<var>startOffset</var>-<var>endOffset</var> 
    */
   public static String FragmentId(String graphId, Double startOffset, Double endOffset) {
-    return IO.WithoutExtension(graphId)
-      + "__" + offsetFormat.format(startOffset) 
-      + "-" + offsetFormat.format(endOffset);
+    try {
+      return IO.WithoutExtension(graphId)
+        + "__" + offsetFormat.format(startOffset) 
+        + "-" + offsetFormat.format(endOffset);
+    } catch (Throwable t) {
+      return IO.WithoutExtension(graphId)
+        + "__" + startOffset
+        + "-" + endOffset;
+    }
   } // end of FragmentId()
   
   /**
@@ -345,9 +351,15 @@ public class Graph extends Annotation {
    * <var>graphId-without-extension</var>__<var>startOffset</var>-<var>endOffset</var> 
    */
   public static String FragmentId(Graph graph, Double startOffset, Double endOffset) {
-    return IO.WithoutExtension(graph.getId())
-      + "__" + offsetFormat.format(startOffset) 
-      + "-" + offsetFormat.format(endOffset);
+    try {
+      return IO.WithoutExtension(graph.getId())
+        + "__" + offsetFormat.format(startOffset) 
+        + "-" + offsetFormat.format(endOffset);
+    } catch (Throwable t) {
+      return IO.WithoutExtension(graph.getId())
+        + "__" + startOffset
+        + "-" + endOffset;
+    }
   } // end of FragmentId()
    
   /**
