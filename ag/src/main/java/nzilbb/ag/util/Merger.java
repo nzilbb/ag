@@ -1857,7 +1857,17 @@ public class Merger extends Transform implements GraphTransformer {
               Annotation anOriginalPrevious = getCounterpart(anEditedPrevious);
               // skip unmerged annotations from a neighboring fragments
               // (TODO not sure there can be any)
-              if (anOriginalPrevious == null) continue; 
+              if (anOriginalPrevious == null) continue;
+              // skip it if there's an intervening annotation on this layer (e.g. "unclear")
+              Annotation anOriginalPreviousNext = anOriginalPrevious.getNext();
+              if (anOriginalPreviousNext != null
+                  && anOriginalPreviousNext.getChange() != Change.Operation.Destroy
+                  && anOriginalPreviousNext.equals(anOriginal.getPrevious())) {
+                log("Don't link: ", anOriginalPrevious,
+                    " across intervening: ", anOriginalPreviousNext,
+                    " to: ", anOriginal);
+                continue;
+              }
               assert anOriginalPrevious.getEnd() != null 
                 : "anOriginalPrevious.getEnd() != null - " + anOriginalPrevious;
               // is the new original end anchor offset the same time as the edited start anchor?
@@ -2008,9 +2018,36 @@ public class Merger extends Transform implements GraphTransformer {
           // previous annotation ending where this one starts
           // do they share anchors in the edited version of the graph?
           Annotation anLastEdited = getCounterpart(anLastOriginal);
+          // skip it if there's an intervening annotation on this layer (e.g. "unclear")
+          boolean interveningOriginal = false;
+          Annotation anOriginalPreviousNext = anLastOriginal.getNext();
+          if (anOriginalPreviousNext != null
+              && anOriginalPreviousNext.getChange() != Change.Operation.Destroy
+              && anOriginalPreviousNext.equals(anOriginal.getPrevious())) {
+            log("Don't link last: ", anLastOriginal,
+                " across intervening: ", anOriginalPreviousNext,
+                " to: ", anOriginal);
+            interveningOriginal = true;
+          }
+          // the intervening original might be on the parent layer
+          if (anOriginal.getParent() != null && anLastOriginal.getParent() != null
+              && !anOriginal.getParent().equals(anLastOriginal.getParent())) {
+            // we're crossing from one parent to another
+            anOriginalPreviousNext = anLastOriginal.getParent().getNext();
+            if (anOriginalPreviousNext != null
+                && anOriginalPreviousNext.getChange() != Change.Operation.Destroy
+                && anOriginalPreviousNext.equals(anOriginal.getParent().getPrevious())) {
+              log("Don't link last: ", anLastOriginal,
+                  " across intervening parent: ", anOriginalPreviousNext,
+                  " to: ", anOriginal);
+              interveningOriginal = true;
+            }
+          }
           if (anLastEdited.getEnd() == anEdited.getStart()
               // are they currently two separate anchors?
-              && anLastOriginal.getEnd() != anOriginal.getStart()) {
+              && anLastOriginal.getEnd() != anOriginal.getStart()
+              // no reason not to link them?
+              && !interveningOriginal) {
             log(layerId, ": Share anchors between ", anLastOriginal, " and ", anOriginal);
             // ensure that the end anchor for the last annotation is updated
             changeEndWithRelatedAnnotations(anLastOriginal, anOriginal.getStart());

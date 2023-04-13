@@ -1,6 +1,5 @@
-
 {
-    "id": "018-HtkSimpleDefaultSegments__10.000-70.000",
+    "id": "131-HtkCloseGaps__10.000-70.000",
     "schema": {
         "participantLayerId": "who",
         "turnLayerId": "turns",
@@ -25,14 +24,6 @@
                             "parentIncludes": true,
                             "saturated": false,
                             "children": {
-                                "language": {
-                                    "description": "Language",
-                                    "alignment": 2,
-                                    "peers": true,
-                                    "peersOverlap": false,
-                                    "parentIncludes": true,
-                                    "saturated": false
-                                },
                                 "token": {
                                     "description": "transcript",
                                     "alignment": 2,
@@ -41,22 +32,13 @@
                                     "parentIncludes": true,
                                     "saturated": false,
                                     "children": {
-                                        "lexical": {
-                                            "description": "lexical",
-                                            "alignment": 0,
-                                            "peers": false,
-                                            "peersOverlap": false,
-                                            "parentIncludes": true,
-                                            "saturated": true
-                                        },
                                         "segments": {
                                             "description": "segments",
                                             "alignment": 2,
                                             "peers": true,
                                             "peersOverlap": false,
                                             "parentIncludes": true,
-                                            "saturated": true
-                                        }
+                                            "saturated": true}
                                     }
                                 },
                                 "utterances": {
@@ -65,8 +47,7 @@
                                     "peers": true,
                                     "peersOverlap": false,
                                     "parentIncludes": true,
-                                    "saturated": true
-                                }
+                                    "saturated": true}
                             }
                         }
                     }
@@ -81,8 +62,7 @@
         },
         "n_101": {
             "offset": 10.5,
-            "confidence": 50,
-            "comment": "ALL DEFAULT ALIGNMENTS"
+            "confidence": 50
         },
         "n_110": {
             "offset": 11.0,
@@ -92,35 +72,28 @@
             "offset": 12.0,
             "confidence": 50
         },
-        "1": {
-            "offset": 15.0,
-            "confidence": 50
-        },
-        "n_200": {
-            "offset": 20.1,
-            "confidence": 50
-        },
-        "n_300": {
-            "offset": 30.1,
-            "confidence": 50
+        "n_250": {
+            "offset": 25.0,
+            "confidence": 50,
+            "comment": "This bridges the gap between ew_0_1 and ew_0_3, which actually contains ew_0_2, which is absent in this graph"
         },
         "n_325": {
-            "offset": 32.6,
+            "offset": 32.5,
             "confidence": 50
         },
         "n_350": {
-            "offset": 35.1,
+            "offset": 35.0,
             "confidence": 50
         },
         "n_375": {
-            "offset": 37.6,
+            "offset": 37.5,
             "confidence": 50
         },
-        "2": {
+        "n_399": {
             "offset": 39.9,
             "confidence": 50
         },
-        "n_400": {
+        "n_401": {
             "offset": 40.1,
             "confidence": 50
         },
@@ -144,19 +117,17 @@
             "offset": 52.0,
             "confidence": 50
         },
-        "9": {
+        "n_530": {
             "offset": 53.0,
-            "confidence": 50,
-            "comment": "CREATE GAP..."
+            "confidence": 50
         },
-        "8": {
+        "n_600": {
             "offset": 60.9,
             "confidence": 50
         },
         "n_650": {
             "offset": 65.0,
-            "confidence": 50,
-            "comment": "FIXED: this now updates status only and the offset is kept instead of being interpolated"
+            "confidence": 50
         },
         "n_699": {
             "offset": 69.0,
@@ -180,32 +151,13 @@
                     "startId": "n_100",
                     "endId": "n_700",
                     "confidence": 100,
-                    "language": [
-                        {
-                            "id": "em_20_1",
-                            "label": "es",
-                            "startId": "n_200",
-                            "endId": "n_500",
-                            "confidence": 100,
-                            "comment": "SPANISH"
-                        }
-                    ],
                     "token": [
                         {
                             "id": "ew_0_1",
                             "label": "86-1-1",
                             "startId": "n_101",
-                            "endId": "1",
+                            "endId": "n_250",
                             "confidence": 100,
-                            "lexical": [
-                                {
-                                    "id": "ew_22_1",
-                                    "label": "l-1-1",
-                                    "startId": "n_101",
-                                    "endId": "1",
-                                    "confidence": 100
-                                }
-                            ],
                             "segments": [
                                 {
                                     "id": "es_1_11",
@@ -225,33 +177,7 @@
                                     "id": "es_1_13",
                                     "label": "86-1-1-3",
                                     "startId": "n_120",
-                                    "endId": "1",
-                                    "confidence": 100
-                                }
-                            ]
-                        },
-                        {
-                            "id": "ew_0_2",
-                            "label": "86-1-2",
-                            "startId": "n_200",
-                            "endId": "n_300",
-                            "confidence": 100,
-                            "comment": "SPANISH",
-                            "lexical": [
-                                {
-                                    "id": "ew_22_2",
-                                    "label": "l-1-2",
-                                    "startId": "n_200",
-                                    "endId": "n_300",
-                                    "confidence": 100
-                                }
-                            ],
-                            "segments": [
-                                {
-                                    "id": "es_1_21",
-                                    "label": "86-1-2-1",
-                                    "startId": "n_200",
-                                    "endId": "n_300",
+                                    "endId": "n_250",
                                     "confidence": 100
                                 }
                             ]
@@ -259,24 +185,14 @@
                         {
                             "id": "ew_0_3",
                             "label": "86-1-3",
-                            "startId": "n_300",
-                            "endId": "2",
+                            "startId": "n_250",
+                            "endId": "n_399",
                             "confidence": 100,
-                            "comment": "SPANISH",
-                            "lexical": [
-                                {
-                                    "id": "ew_22_3",
-                                    "label": "l-1-3",
-                                    "startId": "n_300",
-                                    "endId": "2",
-                                    "confidence": 100
-                                }
-                            ],
                             "segments": [
                                 {
                                     "id": "es_1_31",
                                     "label": "86-1-3-1",
-                                    "startId": "n_300",
+                                    "startId": "n_250",
                                     "endId": "n_325",
                                     "confidence": 50
                                 },
@@ -298,7 +214,7 @@
                                     "id": "es_1_34",
                                     "label": "86-1-3-4",
                                     "startId": "n_375",
-                                    "endId": "2",
+                                    "endId": "n_399",
                                     "confidence": 50
                                 }
                             ]
@@ -306,15 +222,14 @@
                         {
                             "id": "ew_0_4",
                             "label": "86-1-4",
-                            "startId": "n_400",
+                            "startId": "n_401",
                             "endId": "n_500",
                             "confidence": 100,
-                            "comment": "SPANISH",
                             "segments": [
                                 {
                                     "id": "es_1_41",
                                     "label": "86-1-4-1",
-                                    "startId": "n_400",
+                                    "startId": "n_401",
                                     "endId": "n_402",
                                     "confidence": 50
                                 },
@@ -345,17 +260,8 @@
                             "id": "ew_0_5",
                             "label": "86-1-5",
                             "startId": "n_500",
-                            "endId": "9",
+                            "endId": "n_530",
                             "confidence": 100,
-                            "lexical": [
-                                {
-                                    "id": "ew_22_5",
-                                    "label": "l-1-5",
-                                    "startId": "n_500",
-                                    "endId": "9",
-                                    "confidence": 100
-                                }
-                            ],
                             "segments": [
                                 {
                                     "id": "es_1_51",
@@ -368,7 +274,7 @@
                                     "id": "es_1_52",
                                     "label": "86-1-5-2",
                                     "startId": "n_520",
-                                    "endId": "9",
+                                    "endId": "n_530",
                                     "confidence": 50
                                 }
                             ]
@@ -376,23 +282,14 @@
                         {
                             "id": "ew_0_6",
                             "label": "86-1-6",
-                            "startId": "8",
+                            "startId": "n_600",
                             "endId": "n_699",
                             "confidence": 100,
-                            "lexical": [
-                                {
-                                    "id": "ew_22_6",
-                                    "label": "l-1-6",
-                                    "startId": "8",
-                                    "endId": "n_699",
-                                    "confidence": 100
-                                }
-                            ],
                             "segments": [
                                 {
                                     "id": "es_1_61",
                                     "label": "86-1-6-1",
-                                    "startId": "8",
+                                    "startId": "n_600",
                                     "endId": "n_650",
                                     "confidence": 50
                                 },

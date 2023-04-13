@@ -1,6 +1,6 @@
 
 {
-    "id": "018-HtkSimpleDefaultSegments__10.000-70.000",
+    "id": "131-HtkCloseGaps__10.000-70.000",
     "schema": {
         "participantLayerId": "who",
         "turnLayerId": "turns",
@@ -25,14 +25,6 @@
                             "parentIncludes": true,
                             "saturated": false,
                             "children": {
-                                "language": {
-                                    "description": "Language",
-                                    "alignment": 2,
-                                    "peers": true,
-                                    "peersOverlap": false,
-                                    "parentIncludes": true,
-                                    "saturated": false
-                                },
                                 "token": {
                                     "description": "transcript",
                                     "alignment": 2,
@@ -41,14 +33,6 @@
                                     "parentIncludes": true,
                                     "saturated": false,
                                     "children": {
-                                        "lexical": {
-                                            "description": "lexical",
-                                            "alignment": 0,
-                                            "peers": false,
-                                            "peersOverlap": false,
-                                            "parentIncludes": true,
-                                            "saturated": true
-                                        },
                                         "segments": {
                                             "description": "segments",
                                             "alignment": 2,
@@ -81,58 +65,53 @@
         },
         "n_101": {
             "offset": 10.5,
-            "confidence": 50,
-            "comment": "ALL DEFAULT ALIGNMENTS"
+            "confidence": 50
         },
-        "n_110": {
+        "3": {
             "offset": 11.0,
             "confidence": 50
         },
-        "n_120": {
+        "6": {
             "offset": 12.0,
             "confidence": 50
         },
-        "1": {
-            "offset": 15.0,
-            "confidence": 50
-        },
         "n_200": {
-            "offset": 20.1,
+            "offset": 25.0,
             "confidence": 50
         },
         "n_300": {
-            "offset": 30.1,
+            "offset": 25.0,
             "confidence": 50
         },
-        "n_325": {
-            "offset": 32.6,
+        "a": {
+            "offset": 32.5,
             "confidence": 50
         },
-        "n_350": {
-            "offset": 35.1,
+        "d": {
+            "offset": 35.0,
             "confidence": 50
         },
-        "n_375": {
-            "offset": 37.6,
+        "g": {
+            "offset": 37.5,
             "confidence": 50
         },
-        "2": {
+        "18": {
             "offset": 39.9,
             "confidence": 50
         },
-        "n_400": {
+        "14": {
             "offset": 40.1,
             "confidence": 50
         },
-        "n_402": {
+        "k": {
             "offset": 40.2,
             "confidence": 50
         },
-        "n_403": {
+        "n": {
             "offset": 40.3,
             "confidence": 50
         },
-        "n_480": {
+        "q": {
             "offset": 48.0,
             "confidence": 50
         },
@@ -140,23 +119,21 @@
             "offset": 50.1,
             "confidence": 50
         },
-        "n_520": {
+        "u": {
             "offset": 52.0,
             "confidence": 50
         },
-        "9": {
+        "19": {
             "offset": 53.0,
-            "confidence": 50,
-            "comment": "CREATE GAP..."
+            "confidence": 50
         },
-        "8": {
+        "17": {
             "offset": 60.9,
             "confidence": 50
         },
-        "n_650": {
+        "y": {
             "offset": 65.0,
-            "confidence": 50,
-            "comment": "FIXED: this now updates status only and the offset is kept instead of being interpolated"
+            "confidence": 50
         },
         "n_699": {
             "offset": 69.0,
@@ -180,125 +157,78 @@
                     "startId": "n_100",
                     "endId": "n_700",
                     "confidence": 100,
-                    "language": [
-                        {
-                            "id": "em_20_1",
-                            "label": "es",
-                            "startId": "n_200",
-                            "endId": "n_500",
-                            "confidence": 100,
-                            "comment": "SPANISH"
-                        }
-                    ],
                     "token": [
                         {
                             "id": "ew_0_1",
                             "label": "86-1-1",
                             "startId": "n_101",
-                            "endId": "1",
+                            "endId": "n_200",
                             "confidence": 100,
-                            "lexical": [
-                                {
-                                    "id": "ew_22_1",
-                                    "label": "l-1-1",
-                                    "startId": "n_101",
-                                    "endId": "1",
-                                    "confidence": 100
-                                }
-                            ],
                             "segments": [
                                 {
-                                    "id": "es_1_11",
+                                    "id": "2",
                                     "label": "86-1-1-1",
                                     "startId": "n_101",
-                                    "endId": "n_110",
+                                    "endId": "3",
                                     "confidence": 100
                                 },
                                 {
-                                    "id": "es_1_12",
+                                    "id": "5",
                                     "label": "86-1-1-2",
-                                    "startId": "n_110",
-                                    "endId": "n_120",
+                                    "startId": "3",
+                                    "endId": "6",
                                     "confidence": 100
                                 },
                                 {
-                                    "id": "es_1_13",
+                                    "id": "7",
                                     "label": "86-1-1-3",
-                                    "startId": "n_120",
-                                    "endId": "1",
+                                    "startId": "6",
+                                    "endId": "n_200",
                                     "confidence": 100
                                 }
                             ]
                         },
                         {
                             "id": "ew_0_2",
-                            "label": "86-1-2",
+                            "label": "86-1-2-non-word",
                             "startId": "n_200",
                             "endId": "n_300",
                             "confidence": 100,
-                            "comment": "SPANISH",
-                            "lexical": [
-                                {
-                                    "id": "ew_22_2",
-                                    "label": "l-1-2",
-                                    "startId": "n_200",
-                                    "endId": "n_300",
-                                    "confidence": 100
-                                }
-                            ],
-                            "segments": [
-                                {
-                                    "id": "es_1_21",
-                                    "label": "86-1-2-1",
-                                    "startId": "n_200",
-                                    "endId": "n_300",
-                                    "confidence": 100
-                                }
-                            ]
+                            "comment": "Something with no orthography nor pronunciation, e.g. unintelligible, which will become instantaneous"
                         },
                         {
                             "id": "ew_0_3",
                             "label": "86-1-3",
                             "startId": "n_300",
-                            "endId": "2",
+                            "endId": "18",
                             "confidence": 100,
-                            "comment": "SPANISH",
-                            "lexical": [
-                                {
-                                    "id": "ew_22_3",
-                                    "label": "l-1-3",
-                                    "startId": "n_300",
-                                    "endId": "2",
-                                    "confidence": 100
-                                }
-                            ],
                             "segments": [
                                 {
-                                    "id": "es_1_31",
+                                    "id": "9",
                                     "label": "86-1-3-1",
                                     "startId": "n_300",
-                                    "endId": "n_325",
+                                    "endId": "a",
                                     "confidence": 50
                                 },
                                 {
-                                    "id": "es_1_32",
+                                    "id": "c",
                                     "label": "86-1-3-2",
-                                    "startId": "n_325",
-                                    "endId": "n_350",
+                                    "startId": "a",
+                                    "endId": "d",
                                     "confidence": 50
                                 },
                                 {
-                                    "id": "es_1_33",
+                                    "id": "f",
                                     "label": "86-1-3-3",
-                                    "startId": "n_350",
-                                    "endId": "n_375",
+                                    "startId": "d",
+                                    "endId": "g",
                                     "confidence": 50
                                 },
                                 {
-                                    "id": "es_1_34",
+                                    "id": "h",
                                     "label": "86-1-3-4",
-                                    "startId": "n_375",
-                                    "endId": "2",
+                                    "startId": "g",
+                                    "endId": "18",
                                     "confidence": 50
                                 }
                             ]
@@ -306,36 +236,35 @@
                         {
                             "id": "ew_0_4",
                             "label": "86-1-4",
-                            "startId": "n_400",
+                            "startId": "14",
                             "endId": "n_500",
                             "confidence": 100,
-                            "comment": "SPANISH",
                             "segments": [
                                 {
-                                    "id": "es_1_41",
+                                    "id": "j",
                                     "label": "86-1-4-1",
-                                    "startId": "n_400",
-                                    "endId": "n_402",
+                                    "startId": "14",
+                                    "endId": "k",
                                     "confidence": 50
                                 },
                                 {
-                                    "id": "es_1_42",
+                                    "id": "m",
                                     "label": "86-1-4-2",
-                                    "startId": "n_402",
-                                    "endId": "n_403",
+                                    "startId": "k",
+                                    "endId": "n",
                                     "confidence": 50
                                 },
                                 {
-                                    "id": "es_1_43",
+                                    "id": "p",
                                     "label": "86-1-4-3",
-                                    "startId": "n_403",
-                                    "endId": "n_480",
+                                    "startId": "n",
+                                    "endId": "q",
                                     "confidence": 50
                                 },
                                 {
-                                    "id": "es_1_44",
+                                    "id": "r",
                                     "label": "86-1-4-4",
-                                    "startId": "n_480",
+                                    "startId": "q",
                                     "endId": "n_500",
                                     "confidence": 50
                                 }
@@ -345,30 +274,21 @@
                             "id": "ew_0_5",
                             "label": "86-1-5",
                             "startId": "n_500",
-                            "endId": "9",
+                            "endId": "19",
                             "confidence": 100,
-                            "lexical": [
-                                {
-                                    "id": "ew_22_5",
-                                    "label": "l-1-5",
-                                    "startId": "n_500",
-                                    "endId": "9",
-                                    "confidence": 100
-                                }
-                            ],
                             "segments": [
                                 {
-                                    "id": "es_1_51",
+                                    "id": "t",
                                     "label": "86-1-5-1",
                                     "startId": "n_500",
-                                    "endId": "n_520",
+                                    "endId": "u",
                                     "confidence": 50
                                 },
                                 {
-                                    "id": "es_1_52",
+                                    "id": "v",
                                     "label": "86-1-5-2",
-                                    "startId": "n_520",
-                                    "endId": "9",
+                                    "startId": "u",
+                                    "endId": "19",
                                     "confidence": 50
                                 }
                             ]
@@ -376,30 +296,21 @@
                         {
                             "id": "ew_0_6",
                             "label": "86-1-6",
-                            "startId": "8",
+                            "startId": "17",
                             "endId": "n_699",
                             "confidence": 100,
-                            "lexical": [
-                                {
-                                    "id": "ew_22_6",
-                                    "label": "l-1-6",
-                                    "startId": "8",
-                                    "endId": "n_699",
-                                    "confidence": 100
-                                }
-                            ],
                             "segments": [
                                 {
-                                    "id": "es_1_61",
+                                    "id": "x",
                                     "label": "86-1-6-1",
-                                    "startId": "8",
-                                    "endId": "n_650",
+                                    "startId": "17",
+                                    "endId": "y",
                                     "confidence": 50
                                 },
                                 {
-                                    "id": "es_1_62",
+                                    "id": "z",
                                     "label": "86-1-6-2",
-                                    "startId": "n_650",
+                                    "startId": "y",
                                     "endId": "n_699",
                                     "confidence": 50
                                 }

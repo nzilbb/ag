@@ -697,6 +697,13 @@ public class TestMerger {
         File fEdited = new File(subdir, "edited_" + fragmentName + ".json");
         Graph editedGraph = loadGraphFromJSON(fEdited, schema);
         Merger m = new Merger(editedGraph);
+        if (fragmentName.indexOf("Htk") >= 0) { // forced alignment simulation
+          // in practice, these have some layers marked as unchangeable
+          m.getNoChangeLayers().add(schema.getParticipantLayerId());
+          m.getNoChangeLayers().add(schema.getTurnLayerId());
+          m.getNoChangeLayers().add(schema.getUtteranceLayerId());
+          m.getNoChangeLayers().add(schema.getWordLayerId());
+        }
         m.setDebug(log != null && fragmentName.indexOf(log) >= 0);
         try {
           m.transform(originalGraph);
@@ -799,7 +806,7 @@ public class TestMerger {
    */
   public Schema defaultSchema() {
     return new Schema(
-      "who", "turn", "utterance", "word",
+      "who", "turns", "utterances", "token",
       new Layer("topic", "topic", Constants.ALIGNMENT_INTERVAL, 
                 true, // peers
                 false, // peersOverlap
@@ -826,7 +833,7 @@ public class TestMerger {
                 false, // saturated
                 "turn", // parentId
                 true), // parentIncludes
-      new Layer("transcript", "Words", Constants.ALIGNMENT_INTERVAL,
+      new Layer("token", "Words", Constants.ALIGNMENT_INTERVAL,
                 true, // peers
                 false, // peersOverlap
                 false, // saturated
