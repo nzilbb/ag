@@ -649,6 +649,14 @@ public class TrackedMap
     return t.getChange() != Change.Operation.Destroy;
   }
 
+  /**
+   * Predicate for filtering for deleted objects.
+   * @param The object that may be marked for deletion.
+   * @return true if {@link #getChange()} == Change.Operation.Destroy, false otherwise
+   */
+  public static boolean Destroyed(TrackedMap t) {
+    return t.getChange() == Change.Operation.Destroy;
+  }
    
    /**
     * Produces a list of individual changes for the object.

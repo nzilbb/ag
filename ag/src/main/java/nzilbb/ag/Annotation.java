@@ -21,6 +21,7 @@
 //
 package nzilbb.ag;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,6 +33,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -1117,6 +1119,43 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
     }
     return new Annotation[0];
   } // end of all()
+
+  /**
+   * Gets a stream of related annotations on the given layer. This is the same as 
+   * {@link #all(String)} but returns a stream instead of an array.
+   * <p>"Related" means that <var>layerId</var> identifies the parent layer, an ancestor layer,
+   * a child of an ancestor, a child layer, or a desdendant layer.
+   * <p>This utility method makes navigating the layer hierarchy easier and with less prior
+   * knowledge of it. e.g.:
+   * <ul>
+   *  <li><code>word.every("turn").findAny()</code> for the (parent) turn</li>
+   *  <li><code>phone.every("turn").findAny()</code> for the (grandparent) turn</li>
+   *  <li><code>word.every("POS")</code> for all (child) part of speech annotations</li>
+   *  <li><code>word.every("phone")</code> for all (child) phones in a word</li>
+   *  <li><code>turn.every("phone")</code> for all (grandchild) phones in a turn</li>
+   *  <li><code>phone.every("POS")</code> for the all (peer) part of speech annotation,
+   * which are neither ancestors nor descendants, but rather children of an ancestor
+   * (<code>phone.first("word")</code>)</li> 
+   *  <li><code>word.every("who").findAny()</code> for the (grandparent) speaker</li>
+   *  <li><code>word.every("transcript").findAny()</code> for the (great-grandparent) transcript</li>
+   *  <li><code>word.every("utterance").findAny()</code> for the (peer) utterance, which is
+   * neither an ancestor nor descendant, but rather is a child of an ancestor
+   * (<code>word.first("turn")</code>)</li> 
+   *  <li><code>utterace.every("word")</code> for the utterance's (peer) words, which are
+   * neither an ancestors nor descendants, but rather are children of an ancestor
+   * (<code>utterance.my"turn")</code>)</li> 
+   *  <li><code>word.every("corpus").findAny()</code> for the graph's (child of grandparent)
+   * corpus, which is neither an ancestor nor descendant, but rather is a child of an
+   * ancestor (<code>word.first("transcript")</code>)</li> 
+   * </ul>
+   * <p>{@link #setGraph(Graph)} must have been previously called, and the graph must have a
+   * correct layer hierarchy for this method to work correctly.
+   * @param layerId The layer of the desired annotations.
+   * @return A stream of the related annotations.
+   */
+  public Stream<Annotation> every(String layerId) {
+    return Arrays.stream(all(layerId));
+  }
 
   /**
    * Gets a single related annotation on the given layer; the last among peers.

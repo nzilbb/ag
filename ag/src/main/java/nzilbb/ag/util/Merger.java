@@ -42,6 +42,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.cli.Transform;
@@ -625,12 +626,10 @@ public class Merger extends Transform implements GraphTransformer {
         && schema.getWordLayerId() != null) { // participant/turn/utterance layers are set
 
       // this doesn't work if  all words are unanchored
-      Optional<Annotation> semiachoredUneditedWord = Arrays.stream(
-        graph.all(schema.getWordLayerId()))
+      Optional<Annotation> semiachoredUneditedWord = graph.every(schema.getWordLayerId())
         .filter(w -> w.getStart().getOffset() != null || w.getEnd().getOffset() != null)
         .findAny();
-      Optional<Annotation> semiachoredEditedWord = Arrays.stream(
-        editedGraph.all(schema.getWordLayerId()))
+      Optional<Annotation> semiachoredEditedWord = editedGraph.every(schema.getWordLayerId())
         .filter(w -> w.getStart().getOffset() != null || w.getEnd().getOffset() != null)
         .findAny();
       if (semiachoredUneditedWord.isPresent() && semiachoredEditedWord.isPresent()) {
@@ -638,12 +637,12 @@ public class Merger extends Transform implements GraphTransformer {
         // map participants
         mapByParents(schema.getParticipantLayer(), graph);
         alreadyMapped.add(schema.getParticipantLayerId());
-        Optional<Annotation> unmappedUneditedParticipant = Arrays.stream(
-          graph.all(schema.getParticipantLayerId()))
+        Optional<Annotation> unmappedUneditedParticipant
+          = graph.every(schema.getParticipantLayerId())
           .filter(t -> !t.containsKey("@other"))
           .findAny();
-        Optional<Annotation> unmappedEditedParticipant = Arrays.stream(
-          editedGraph.all(schema.getParticipantLayerId()))
+        Optional<Annotation> unmappedEditedParticipant
+          = editedGraph.every(schema.getParticipantLayerId())
           .filter(t -> !t.containsKey("@other"))
           .findAny();
         // are participants perfectly mapped?
@@ -652,12 +651,10 @@ public class Merger extends Transform implements GraphTransformer {
           // map turns
           mapByParents(schema.getTurnLayer(), graph);
           alreadyMapped.add(schema.getTurnLayerId());
-          Optional<Annotation> unmappedUneditedTurn = Arrays.stream(
-            graph.all(schema.getTurnLayerId()))
+          Optional<Annotation> unmappedUneditedTurn = graph.every(schema.getTurnLayerId())
             .filter(t -> !t.containsKey("@other"))
             .findAny();
-          Optional<Annotation> unmappedEditedTurn = Arrays.stream(
-            editedGraph.all(schema.getTurnLayerId()))
+          Optional<Annotation> unmappedEditedTurn = editedGraph.every(schema.getTurnLayerId())
             .filter(t -> !t.containsKey("@other"))
             .findAny();
           // are turns perfectly mapped?
@@ -666,12 +663,12 @@ public class Merger extends Transform implements GraphTransformer {
             // map utterances
             mapByParents(schema.getUtteranceLayer(), graph);
             alreadyMapped.add(schema.getUtteranceLayerId());
-            Optional<Annotation> unmappedUneditedUtterance = Arrays.stream(
-              graph.all(schema.getUtteranceLayerId()))
+            Optional<Annotation> unmappedUneditedUtterance
+              = graph.every(schema.getUtteranceLayerId())
               .filter(t -> !t.containsKey("@other"))
               .findAny();
-            Optional<Annotation> unmappedEditedUtterance = Arrays.stream(
-              editedGraph.all(schema.getUtteranceLayerId()))
+            Optional<Annotation> unmappedEditedUtterance
+              = editedGraph.every(schema.getUtteranceLayerId())
               .filter(t -> !t.containsKey("@other"))
               .findAny();
             // are utterances perfectly mapped?
@@ -724,8 +721,7 @@ public class Merger extends Transform implements GraphTransformer {
                 alreadyMapped.add(schema.getWordLayerId());
                 log("words mapped by utterance");
                 // patch up cases where words migrated from one utterance to the next/previous
-                Arrays.stream(
-                  graph.all(schema.getWordLayerId()))
+                graph.every(schema.getWordLayerId())
                   .filter(t -> !t.containsKey("@other"))
                   .forEach(word -> {
                       // has the word migrated to the previous utterance?
@@ -752,7 +748,7 @@ public class Merger extends Transform implements GraphTransformer {
                     });
                 // // do a final pass mapping by turn, to allow words to migrate to neighboring utterances
                 // mapByParents(schema.getWordLayer(), graph);
-
+                
               }
             
             } // utterances are perfectly mapped
@@ -852,7 +848,9 @@ public class Merger extends Transform implements GraphTransformer {
       }
     } // next layer
     // untag annotations tagged during this phase
-    for (Annotation a : graph.getAnnotationsById().values()) a.remove("@computeAnchorDeltasForMerge");
+    for (Annotation a : graph.getAnnotationsById().values()) {
+      a.remove("@computeAnchorDeltasForMerge");
+    }
 
     // phase 5. - check new order by offset, and check new containment
     log("phase 5: check hierarchy");
@@ -1141,12 +1139,12 @@ public class Merger extends Transform implements GraphTransformer {
     throws TransformationException {
     String layerId = layer.getId();
     // unmapped annotations in graph are for deletion
-    for (Annotation an : graph.all(layer.getId())) {
-      if (!HasCounterpart(an)) {
-        log(layerId, ": Deleting ", an);
-        an.destroy();
-      }
-    } // next annotation
+    graph.every(layer.getId())
+      .filter(((Predicate<Annotation>)(Merger::HasCounterpart)).negate())
+      .forEach(an -> {
+          log(layerId, ": Deleting ", an);
+          an.destroy();
+        }); // next annotation
 
     // might need these later:
     String saturatedParentLayerId = layer.getSaturated()?layer.getParentId():null;
@@ -1230,12 +1228,12 @@ public class Merger extends Transform implements GraphTransformer {
           // for turns, look for the participant with the same label
           if (layerId.equals(schema.getTurnLayerId()) 
               && schema.getParticipantLayerId() != null) {
-            for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
-              if (participant.getLabel().equals(newAnnotation.getLabel())) {
-                newAnnotation.setParentId(participant.getId());
-                break;
-              }
-            } // next participant
+            Optional<Annotation> participant = graph.every(schema.getParticipantLayerId())
+              .filter(p -> p.getLabel().equals(newAnnotation.getLabel()))
+              .findAny();
+            if (participant.isPresent()) {
+              newAnnotation.setParentId(participant.get().getId());
+            }
           }
         } // counterpart parent not set
 	    
@@ -1711,14 +1709,15 @@ public class Merger extends Transform implements GraphTransformer {
    */
   protected void computeLabelDeltasForMerge(Layer layer, Graph graph)
     throws TransformationException {
-    for (Annotation an : graph.all(layer.getId())) {
-      Annotation anEdited = GetCounterpart(an);
-      if (anEdited == null) continue;
-      // check for label change
-      if (GetConfidence(anEdited) >= GetConfidence(an)) {
-         an.setLabel(anEdited.getLabel());
-      }
-    }
+    graph.every(layer.getId())
+      .filter(Merger::HasCounterpart)
+      .forEach(an -> {
+          Annotation anEdited = GetCounterpart(an);
+          // check for label change
+          if (GetConfidence(anEdited) >= GetConfidence(an)) {
+            an.setLabel(anEdited.getLabel());
+          }
+        });
   } // end of computeLabelDeltasForMerge()
 
   /**
@@ -2418,21 +2417,22 @@ public class Merger extends Transform implements GraphTransformer {
         && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
       // edited graph has both parent and child layer
       // detect parent changes
-      for (Annotation child : graph.all(layerId)) {
-        Annotation editedChild = GetCounterpart(child);
-        if (editedChild == null) continue;
-        Annotation editedParent = editedChild.getParent();
-        if (editedParent == null) continue;
-        Annotation editedParentCounterpart = GetCounterpart(editedParent);
-        if (editedParentCounterpart == null) continue;
-        Annotation originalParent = child.getParent();
-        if (originalParent == null || originalParent.getId() == null
-            || !originalParent.getId().equals(editedParentCounterpart.getId())) {
-          // parent has changed
-          log(layerId, ": Parent ", originalParent, " changed to ", editedParentCounterpart);
-          child.setParent(editedParentCounterpart);
-        } // parent has changed
-      } // next child
+      graph.every(layerId)
+        .filter(Merger::HasCounterpart)
+        .filter(child -> GetCounterpart(child).getParent() != null)
+        .filter(child -> HasCounterpart(GetCounterpart(child).getParent()))
+        .forEach(child -> {
+            Annotation editedChild = GetCounterpart(child);
+            Annotation editedParent = editedChild.getParent();
+            Annotation editedParentCounterpart = GetCounterpart(editedParent);
+            Annotation originalParent = child.getParent();
+            if (originalParent == null || originalParent.getId() == null
+                || !originalParent.getId().equals(editedParentCounterpart.getId())) {
+              // parent has changed
+              log(layerId, ": Parent ", originalParent, " changed to ", editedParentCounterpart);
+              child.setParent(editedParentCounterpart);
+            } // parent has changed
+          }); // next child
     } // edited graph has both parent and child layer
     
     // check anchors between children and parents
@@ -2507,8 +2507,8 @@ public class Merger extends Transform implements GraphTransformer {
             // set current partition
             currentPartition.put(partitionLayerId, i.next());
           }
-        } // next partition layer	    
-
+        } // next partition layer
+        
         SortedSet<Annotation> children = byOrdinalOrOffset;
         // special case:
         // if the child layer is in the original only
