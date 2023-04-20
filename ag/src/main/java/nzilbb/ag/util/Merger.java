@@ -1664,36 +1664,41 @@ public class Merger extends Transform implements GraphTransformer {
       boolean bRelatedAnnotations = aOriginalEnd.startingAnnotations(annotation.getLayerId())
         .filter(Annotation::NotDestroyed)
         .findAny().isPresent();
-      aOriginalEnd.startingAnnotations(annotation.getLayerId())
-        .filter(Annotation::NotDestroyed)
-        .filter(anNext -> anNext.getStartId().equals(aOriginalEnd.getId()))
-        .filter(anNext -> {
-            if (!anNext.getStartId().equals(anNext.getEndId())
-                && newEndAnchor.getId().equals(anNext.getEndId())) {
-              log("Not changing end of related annotation ",
-                  anNext, " to avoid creating new instant");
-              return false; // if not shared in the other graph, not shared here
-            }
-            return true;
-          })
-        .forEach(anNext -> {
-            log("Changing start of next linked annotation ", anNext, " to ", newEndAnchor);
-            changeStartWithRelatedAnnotations(anNext, newEndAnchor, layerIdsToExclude);
-          });
-	    
-        // if (vRelatedAnnotations.size() == 0) { // TODO!! this cannot be true, given that the above previously included this in if (vRelatedAnnotations.size() > 0) {
-        //   // all the 'next' annotations on the same layer are deleted
-        //   // ensure that annotations that start here on *other* layers come with us
-        //   // find one related annotation on another layer
-        //   vRelatedAnnotations.addAll(aOriginalEnd.getStartingAnnotations());
-        //   for (Annotation anNext : vRelatedAnnotations) {
-        //     if (layerIdsToExclude.contains(anNext.getLayerId())) continue;
-        //     log("Next has been deleted, using ", anNext, " to bring starting annotations too");
-        //     changeStartWithRelatedAnnotations(anNext, newEndAnchor, layerIdsToExclude);
-        //     break; // one should be sufficient to bring the rest along
-        //   } // next starting annotation	       
-        // }  // all the 'next' annotations on the same layer are deleted
-      // } // there are 'next' starting annotations
+      if (bRelatedAnnotations) {
+        aOriginalEnd.startingAnnotations(annotation.getLayerId())
+          .filter(Annotation::NotDestroyed)
+          .filter(anNext -> {
+              if (!anNext.getStartId().equals(anNext.getEndId())
+                  && newEndAnchor.getId().equals(anNext.getEndId())) {
+                log("Not changing end of related annotation ",
+                    anNext, " to avoid creating new instant");
+                return false; // if not shared in the other graph, not shared here
+              }
+              return true;
+            })
+          .forEach(anNext -> {
+              log("Changing start of next linked annotation ", anNext, " to ", newEndAnchor);
+              changeStartWithRelatedAnnotations(anNext, newEndAnchor, layerIdsToExclude);
+            });
+      } else {
+        boolean bDeletedRelatedAnnotations
+          = aOriginalEnd.startingAnnotations(annotation.getLayerId())
+          .filter(Annotation::Destroyed)
+          .findAny().isPresent();
+        if (bDeletedRelatedAnnotations) {
+          // all the 'next' annotations on the same layer are deleted
+          // ensure that annotations that start here on *other* layers come with us
+          // find one related annotation on another layer
+          Optional<Annotation> anNext = aOriginalEnd.startingAnnotations()
+            .filter(a -> !layerIdsToExclude.contains(a.getLayerId()))
+            .findAny(); // one should be sufficient to bring the rest along
+          if (anNext.isPresent()) {
+            log("Next has been deleted, using ",
+                anNext.get(), " to bring starting annotations too");
+            changeStartWithRelatedAnnotations(anNext.get(), newEndAnchor, layerIdsToExclude);
+          }
+        }
+      } // there are no 'next' starting annotations
     }
   } // end of changeStartWithRelatedAnnotations()
 
