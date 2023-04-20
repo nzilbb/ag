@@ -28,6 +28,8 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.json.JsonObject;
 import nzilbb.util.ClonedProperty;
 
@@ -282,16 +284,17 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
   }
       
   /**
-   * Accesses a list of annotations on a given layer that start with this anchor.
+   * Accesses the mutable set of annotations on a given layer that start with this anchor.
    * <p> This may include annotations that have been marked for destruction.
+   * <p> If {@link #startOf} doesn't contain a set, one is created.
    * @param layerId The given layer ID.
    * @return A list of annotations on the given layer that start here.
    */
   public LinkedHashSet<Annotation> startOf(String layerId) {
-    if (!getStartOf().containsKey(layerId)) {
-      getStartOf().put(layerId, new LinkedHashSet<Annotation>());
+    if (!startOf.containsKey(layerId)) {
+      startOf.put(layerId, new LinkedHashSet<Annotation>());
     }
-    LinkedHashSet<Annotation> annotations = getStartOf().get(layerId);
+    LinkedHashSet<Annotation> annotations = startOf.get(layerId);
     // check they still really are linked
     Iterator<Annotation> iAnnotations = annotations.iterator();
     LinkedHashSet<Annotation> startsToSet = new LinkedHashSet<Annotation>();
@@ -317,14 +320,24 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
   } // end of startOf()
 
   /**
+   * Accesses a stream of annotations on a given layer that start with this anchor.
+   * <p> This may include annotations that have been marked for destruction.
+   * @param layerId The given layer ID.
+   * @return A stream of annotations on the given layer that start here.
+   */
+  public Stream<Annotation> startAnnotations(String layerId) {    
+    return startOf(layerId).stream();
+  } // start of startOf()
+
+  /**
    * Determines whether the anchor is the start of an annotation on the given layer.
    * @param layerId The ID of the layer to test for.
    * @return true if the anchor is the start of an annotation on the given layer, and
    * false otherwise. 
    */
   public boolean isStartOn(String layerId) {
-    if (!getStartOf().containsKey(layerId)) return false;
-    return getStartOf().get(layerId).size() > 0;
+    if (!startOf.containsKey(layerId)) return false;
+    return startOf.get(layerId).size() > 0;
   } // end of isStartOn()
 
   /**
@@ -334,9 +347,39 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
    * false otherwise. 
    */
   public boolean isEndOn(String layerId) {
-    if (!getEndOf().containsKey(layerId)) return false;
-    return getEndOf().get(layerId).size() > 0;
+    if (!endOf.containsKey(layerId)) return false;
+    return endOf.get(layerId).size() > 0;
   } // end of isEndOn()
+
+  /**
+   * Accesses a stream of annotations on a given layer that start with this anchor.
+   * <p> This may include annotations that have been marked for destruction.
+   * @param layerId The given layer ID.
+   * @return A stream of annotations on the given layer that start here.
+   */
+  public Stream<Annotation> startingAnnotations(String layerId) {
+    if (!startOf.containsKey(layerId)) {
+      return Stream.empty();
+    }
+    // filter out those that are not really linked are linked
+    return startOf.get(layerId).stream()
+      .filter(a -> a instanceof Graph
+              || a.getStartId() == null
+              || a.getStartId().equals(id));
+  } // start of startingAnnotations()
+
+  /**
+   * Accesses a stream of annotations on any layer that start with this anchor.
+   * <p> This may include annotations that have been marked for destruction.
+   * @return A stream of annotations that start here.
+   */
+  public Stream<Annotation> startingAnnotations() {
+    Stream<Annotation> streams = Stream.empty();
+    for (String layerId : startOf.keySet()) {
+      streams = Stream.concat(streams, startingAnnotations(layerId));
+    }
+    return streams;
+  } // start of startingAnnotations()
 
   /**
    * Accesses a list of annotations on all layers that start with this anchor.
@@ -344,24 +387,21 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
    * @return A list of annotations that start here.
    */
   public LinkedHashSet<Annotation> getStartingAnnotations() {
-    LinkedHashSet<Annotation> startingHere = new LinkedHashSet<Annotation>();      
-    for (String layerId : getStartOf().keySet()) {
-      startingHere.addAll(startOf(layerId));
-    }
-    return startingHere;
+    return new LinkedHashSet<Annotation>(startingAnnotations().collect(Collectors.toList()));
   } // end of getStartingAnnotations()
 
   /**
-   * Accesses a list of annotations on a given layer that end with this anchor.
+   * Accesses the mutable set of annotations on a given layer that end with this anchor.
    * <p> This may include annotations that have been marked for destruction.
+   * <p> If {@link #endOf} doesn't contain a set, one is created.
    * @param layerId The given layer ID.
    * @return A list of annotations on the given layer that end here.
    */
   public LinkedHashSet<Annotation> endOf(String layerId) {
-    if (!getEndOf().containsKey(layerId)) {
-      getEndOf().put(layerId, new LinkedHashSet<Annotation>());
+    if (!endOf.containsKey(layerId)) {
+      endOf.put(layerId, new LinkedHashSet<Annotation>());
     }
-    LinkedHashSet<Annotation> annotations = getEndOf().get(layerId);
+    LinkedHashSet<Annotation> annotations = endOf.get(layerId);
     // check they still really are linked
     Iterator<Annotation> iAnnotations = annotations.iterator();
     String id = getId();
@@ -385,6 +425,36 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
     }
     return annotations;
   } // end of endOf()
+  
+  /**
+   * Accesses a stream of annotations on a given layer that end with this anchor.
+   * <p> This may include annotations that have been marked for destruction.
+   * @param layerId The given layer ID.
+   * @return A stream of annotations on the given layer that end here.
+   */
+  public Stream<Annotation> endingAnnotations(String layerId) {
+    if (!endOf.containsKey(layerId)) {
+      return Stream.empty();
+    }
+    // filter out those that are not really linked are linked
+    return endOf.get(layerId).stream()
+      .filter(a -> a instanceof Graph
+              || a.getEndId() == null
+              || a.getEndId().equals(id));
+  } // end of endingAnnotations()
+
+  /**
+   * Accesses a stream of annotations on any layer that end with this anchor.
+   * <p> This may include annotations that have been marked for destruction.
+   * @return A stream of annotations that end here.
+   */
+  public Stream<Annotation> endingAnnotations() {
+    Stream<Annotation> streams = Stream.empty();
+    for (String layerId : endOf.keySet()) {
+      streams = Stream.concat(streams, endingAnnotations(layerId));
+    }
+    return streams;
+  } // end of endingAnnotations()
 
   /**
    * Accesses a list of annotations on all layers that end with this anchor.
@@ -392,11 +462,7 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
    * @return A list of annotations that end here.
    */
   public LinkedHashSet<Annotation> getEndingAnnotations() {
-    LinkedHashSet<Annotation> endingHere = new LinkedHashSet<Annotation>();      
-    for (String layerId : getEndOf().keySet()) {
-      endingHere.addAll(endOf(layerId));
-    }
-    return endingHere;
+    return new LinkedHashSet<Annotation>(endingAnnotations().collect(Collectors.toList()));
   } // end of getEndingAnnotations()
 
   /**
@@ -408,7 +474,7 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
       starting.setStart(newStart);
     } // next annotion ending here
   } // end of moveStartingAnnotations()
-   
+
   /**
    * Sets the end of all annotations that end here, to the given anchor.
    * @param newEnd The new end anchor
@@ -424,25 +490,16 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
    * @return true if the anchor is the start or end of any annotation not marked for destruction.
    */
   public boolean isLinked() {
-    for (String layerId : getStartOf().keySet()) {
-      for (Annotation a : startOf(layerId)) {
-        if (a.getChange() != Change.Operation.Destroy
-            && a.getStart() == this) {
-          return true;
-        }
-      }
-    }
-    for (String layerId : getEndOf().keySet()) {
-      for (Annotation a : endOf(layerId)) {
-        if (a.getChange() != Change.Operation.Destroy
-            && a.getEnd() == this) {
-          return true;
-        }
-      }
-    }
-    return false;
+    return startingAnnotations()
+      .filter(Annotation::NotDestroyed)
+      .filter(a -> a.getStart() == this)
+      .findAny().isPresent()
+      || endingAnnotations()
+      .filter(Annotation::NotDestroyed)
+      .filter(a -> a.getEnd() == this)
+      .findAny().isPresent();
   } // end of isLinked()
-
+  
   /**
    * Returns the minimum possible offset for this anchor.  If the offset is set,
    * the minimum possible offset is the same as {@link #getOffset()}. Otherwise
@@ -615,14 +672,9 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
    * end anchor, or null if no such annotation exists. 
    */
   public Annotation annotationTo(Anchor end, String layerId) {
-    if (startOf.get(layerId) == null) return null;
-    // for each annotation for this layer
-    for (Annotation a : startOf.get(layerId)) {
-      // is the end anchor the same as endAnchor?
-      if (a.getEnd() != null && a.getEnd().equals(end)) return a;
-    } // next annotation
-	 
-    return null;
+    return startingAnnotations(layerId)
+      .filter(a -> a.getEnd() != null && a.getEnd().equals(end))
+      .findAny().orElse(null);
   } // end of annotationTo()
 
   // java.lang.Object overrides:

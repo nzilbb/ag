@@ -35,12 +35,14 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
 import nzilbb.ag.cli.Transform;
 import nzilbb.ag.serialize.SerializationException;
@@ -241,8 +243,8 @@ public class Merger extends Transform implements GraphTransformer {
    * Wether to ignore offset confidence and force offset changes (true), or only change offsets
    * when the edited offset is equal to or higher than the original confidence (false).  The
    * default is false. 
-   * @see #getIgnoreOffsetConfidence()
-   * @see #setIgnoreOffsetConfidence(boolean)
+   * @see #getIgnoreOffSetConfidence()
+   * @see #setIgnoreOffSetConfidence(boolean)
    */
   protected boolean ignoreOffsetConfidence = false;
   /**
@@ -253,7 +255,7 @@ public class Merger extends Transform implements GraphTransformer {
    * offsets when the edited offset is equal to or higher than the original confidence (false).
    * The default is false. 
    */
-  public boolean getIgnoreOffsetConfidence() { return ignoreOffsetConfidence; }
+  public boolean getIgnoreOffSetConfidence() { return ignoreOffsetConfidence; }
   /**
    * Setter for {@link #ignoreOffsetConfidence}: Wether to ignore offset confidence and force
    * offset changes (true), or only change offsets when the edited offset is equal to or higher
@@ -262,7 +264,7 @@ public class Merger extends Transform implements GraphTransformer {
    * (true), or only change offsets when the edited offset is equal to or higher than the
    * original confidence (false). 
    */
-  public Merger setIgnoreOffsetConfidence(boolean newIgnoreOffsetConfidence) { ignoreOffsetConfidence = newIgnoreOffsetConfidence; return this; }
+  public Merger setIgnoreOffSetConfidence(boolean newIgnoreOffsetConfidence) { ignoreOffsetConfidence = newIgnoreOffsetConfidence; return this; }
 
   /**
    * Set of IDs of layers for which annotations may not be added, changed, or deleted.
@@ -334,8 +336,8 @@ public class Merger extends Transform implements GraphTransformer {
         } else { // two annotations to compare
           int iWeight = 0;
 
-          if (hasCounterpart(a1) || hasCounterpart(a2)) { // already mapped
-            if (!hasCounterpart(a1) || !hasCounterpart(a2) || getCounterpart(a1) != a2) {
+          if (HasCounterpart(a1) || HasCounterpart(a2)) { // already mapped
+            if (!HasCounterpart(a1) || !HasCounterpart(a2) || GetCounterpart(a1) != a2) {
               // not mapped to each other
               iWeight += NO_WAY; // definitely don't want to map them
             }
@@ -396,8 +398,8 @@ public class Merger extends Transform implements GraphTransformer {
                   // weight will be higher
                   // TODO for word layer, instead of comparing anchor offsets, penalize cases where the words' utterances don't overlap. That way, offset differences don't matter much within the utterance
                   double dImportance = Math.min(
-                    (double)(getConfidence(a1.getStart()) + getConfidence(a1.getEnd())),
-                    (double)(getConfidence(a2.getStart()) + getConfidence(a2.getEnd())))
+                    (double)(GetConfidence(a1.getStart()) + GetConfidence(a1.getEnd())),
+                    (double)(GetConfidence(a2.getStart()) + GetConfidence(a2.getEnd())))
                     // divided by CONFIDENCE_MANUAL, to make it near 1
                     / (double)(Constants.CONFIDENCE_MANUAL * 2);
                   // however, for "word" and "phone", which are frequently merged between aligned
@@ -610,7 +612,7 @@ public class Merger extends Transform implements GraphTransformer {
     String rootLayerId = graph.getSchema().getRoot().getId();
 
     // map graphs together manually, to help top-level parent determination
-    setCounterparts(graph, editedGraph);
+    SetCounterparts(graph, editedGraph);
 
     // if participant/turn/utterance layers match perfectly, probably it's just a graph
     // reloaded after annotation of some other layer, so we map word tokens by utterance
@@ -733,7 +735,7 @@ public class Merger extends Transform implements GraphTransformer {
                         Annotation nextEditedWord = previousEditedWord.getNext();
                         if (nextEditedWord != null // the previous edited word has a next
                             && nextEditedWord.getLabel().equals(word.getLabel())) { // labels match
-                          setCounterparts(word, nextEditedWord);
+                          SetCounterparts(word, nextEditedWord);
                           return;
                         }
                       } // there's a previous word
@@ -744,7 +746,7 @@ public class Merger extends Transform implements GraphTransformer {
                         Annotation previousEditedWord = nextEditedWord.getPrevious();
                         if (previousEditedWord != null // the next edited word has a previous
                             && previousEditedWord.getLabel().equals(word.getLabel())) { //labels match
-                          setCounterparts(word, previousEditedWord);
+                          SetCounterparts(word, previousEditedWord);
                         }
                       } // there's a next word
                     });
@@ -903,7 +905,7 @@ public class Merger extends Transform implements GraphTransformer {
     } // next anchor
 
     // unlink counterparts, so that either graph can be garbage-collected with the other still referenced
-    for (Annotation a : graph.getAnnotationsById().values()) unsetCounterparts(a);
+    for (Annotation a : graph.getAnnotationsById().values()) UnsetCounterparts(a);
 
     // remove layer tags
     for (String layerId : getNoChangeLayers()) {
@@ -1115,7 +1117,7 @@ public class Merger extends Transform implements GraphTransformer {
         log("PATH " + layer);
         for (EditStep<Annotation> step : path) {
           if (step.getFrom() != null && step.getTo() != null) {
-            setCounterparts(step.getFrom(), step.getTo());
+            SetCounterparts(step.getFrom(), step.getTo());
           }
           log(step.getFrom(), " ", step.getOperation(), " ", step.getTo(), " - ", step.getStepDistance());
         }
@@ -1140,7 +1142,7 @@ public class Merger extends Transform implements GraphTransformer {
     String layerId = layer.getId();
     // unmapped annotations in graph are for deletion
     for (Annotation an : graph.all(layer.getId())) {
-      if (!hasCounterpart(an)) {
+      if (!HasCounterpart(an)) {
         log(layerId, ": Deleting ", an);
         an.destroy();
       }
@@ -1157,7 +1159,7 @@ public class Merger extends Transform implements GraphTransformer {
     // unmapped annotations of theirs are for addition 
     Annotation anLastOriginal = null;
     for (Annotation anEdited : editedGraph.all(layerId)) {
-      if (!hasCounterpart(anEdited)) {
+      if (!HasCounterpart(anEdited)) {
         // create a new annotation
         Annotation newAnnotation = new Annotation(null, anEdited.getLabel(), layerId);
         newAnnotation.setConfidence(anEdited.getConfidence());
@@ -1168,16 +1170,16 @@ public class Merger extends Transform implements GraphTransformer {
         Anchor start = new Anchor(anEdited.getStart());
 
         start.create();
-        if (getConfidence(anEdited.getStart()) < Constants.CONFIDENCE_AUTOMATIC) {
+        if (GetConfidence(anEdited.getStart()) < Constants.CONFIDENCE_AUTOMATIC) {
           // mark for realignment
-          setConfidence(start, Constants.CONFIDENCE_NONE);
+          SetConfidence(start, Constants.CONFIDENCE_NONE);
         }
 
         Anchor end = new Anchor(anEdited.getEnd());
         end.create();
-        if (getConfidence(anEdited.getEnd()) < Constants.CONFIDENCE_AUTOMATIC) {
+        if (GetConfidence(anEdited.getEnd()) < Constants.CONFIDENCE_AUTOMATIC) {
           // mark for realignment
-          setConfidence(end, Constants.CONFIDENCE_NONE);
+          SetConfidence(end, Constants.CONFIDENCE_NONE);
         }
         if (anEdited.getInstantaneous()) { // instantaneous annotation
           end = start;
@@ -1185,30 +1187,30 @@ public class Merger extends Transform implements GraphTransformer {
           // don't look for links for instants, because unlinking them from unlinked annotations later is tricky
 
           // is the start anchor shared in the edited structure?
-          for (Annotation anParallel : anEdited.getStart().getStartingAnnotations()) {
-            if (anParallel == anEdited) continue;
-            if (anParallel.getStartId() != anParallel.getOriginalStartId()) continue; // isn't the same anchor any more
-            if (hasCounterpart(anParallel)) {
-              Annotation otherParallel = getCounterpart(anParallel);
-              start = otherParallel.getStart();
-              log(layerId, ": ", newAnnotation.getLabel(), 
-                  " sharing start with linked ", otherParallel);
-              break;
-            }
+          Optional<Annotation> otherParallel = anEdited.getStart().startingAnnotations()
+            .filter(a -> a != anEdited)
+            .filter(a -> a.getStartId().equals(a.getOriginalStartId())) // isn't the same any more
+            .filter(Merger::HasCounterpart)
+            .map(a -> GetCounterpart(a))
+            .findAny();
+          if (otherParallel.isPresent()) {
+            start = otherParallel.get().getStart();
+            log(layerId, ": ", newAnnotation.getLabel(), 
+                " sharing start with linked ", otherParallel.get());
           }
 
           // is the end anchor shared in the edited structure
-          for (Annotation anParallel : anEdited.getEnd().getEndingAnnotations()) {
-            if (anParallel == anEdited) continue;	       
-            if (anParallel.getEndId() != anParallel.getOriginalEndId()) continue; // isn't the same anchor any more
-            if (hasCounterpart(anParallel)) {
-              Annotation otherParallel = getCounterpart(anParallel);
-              end = otherParallel.getEnd();
-              log(layerId, ":", newAnnotation.getLabel(),
-                  " sharing end with linked ", otherParallel);
-              break;
-            }
-          } // next ending annotation
+          otherParallel = anEdited.getEnd().endingAnnotations()
+            .filter(a -> a != anEdited)
+            .filter(a -> a.getEndId().equals(a.getOriginalEndId())) // isn't the same any more
+            .filter(Merger::HasCounterpart)
+            .map(a -> GetCounterpart(a))
+            .findAny();
+          if (otherParallel.isPresent()) {
+            end = otherParallel.get().getEnd();
+            log(layerId, ":", newAnnotation.getLabel(),
+                " sharing end with linked ", otherParallel.get());
+          }
         } // annotation with duration
         if (start.getId() == null) {
           graph.addAnchor(start);
@@ -1221,8 +1223,8 @@ public class Merger extends Transform implements GraphTransformer {
 
         // set parent/peer annotations
         Annotation editedParent = anEdited.getParent();
-        if (editedParent != null && hasCounterpart(editedParent)) { // counterpart parent set
-          Annotation otherParent = getCounterpart(editedParent);
+        if (editedParent != null && HasCounterpart(editedParent)) { // counterpart parent set
+          Annotation otherParent = GetCounterpart(editedParent);
           newAnnotation.setParentId(otherParent.getId());
         } else { // counterpart parent not set
           // for turns, look for the participant with the same label
@@ -1242,102 +1244,86 @@ public class Merger extends Transform implements GraphTransformer {
         // does this annotation share an anchor with some prior annotation?	    
         if (layer.getAlignment() == Constants.ALIGNMENT_INTERVAL) {
           // look for one that's not necessarily the very last one
-          for (Annotation anPreviousEdited : anEdited.getStart().endOf(layerId)) {
-            if (anPreviousEdited == anEdited) continue;
-            if (hasCounterpart(anPreviousEdited)) {
-              Annotation anPreviousEditedOther = getCounterpart(anPreviousEdited);
-              if (getConfidence(anPreviousEditedOther.getEnd()) > getConfidence(start)
-                  && anPreviousEditedOther.getEnd().getOffset() != null
-                  && (start.getOffset() == null
-                      || anPreviousEditedOther.getEnd().getOffset().doubleValue()
-                      != start.getOffset().doubleValue())) {
-                log(layerId, ": Use offset of end of prior: ", anLastOriginal,
-                    " (end ", anPreviousEditedOther.getEnd(), ")",
-                    " for start of new: ", newAnnotation,
-                    " (start ", newAnnotation.getStart(), ")");
-                int newStatus = Math.min(
-                  getConfidence(graph.getAnchor(anPreviousEditedOther.getOriginalEndId())),
-                  getConfidence(start));
-                if (newStatus <= Constants.CONFIDENCE_DEFAULT) {
-                  newStatus = Math.max(
-                    getConfidence(graph.getAnchor(anPreviousEditedOther.getOriginalEndId())),
-                    getConfidence(start));
-                }
-                if (getConfidence(end) > Constants.CONFIDENCE_DEFAULT 
-                    && end.getOffset() <= anPreviousEditedOther.getEnd().getOffset()) {
-                  newStatus = Constants.CONFIDENCE_NONE;
-                }
-                if (start.getChange() == Change.Operation.Create
-                    && newStatus > Constants.CONFIDENCE_AUTOMATIC) {
-                  // using a new anchor, and replacing a manual anchor
-                  // set the original attributes instead of a delta
-                  // this is so it can't later be reverted to its 'new' values
-                  // TODO was this necessary? start.commit();
-                  start.create();
-                }
-                start.setOffset(anPreviousEditedOther.getEnd().getOffset());
-                setConfidence(start, newStatus);
-              } // previous more reliable
-              if (anPreviousEditedOther.getEnd() != start) {			
-                log(layerId, ": Share anchor with prior: ", anLastOriginal,
-                    " and new: ", newAnnotation, " using ", start);
-                changeEndWithRelatedAnnotations(
-                  anPreviousEditedOther, start,
-                  // we don't re-link a related parent annotation - we might be inserting a new child
-                  thisAndsaturatedParentLayerId);
-                break;
+          Optional<Annotation> anPreviousOriginal = anEdited.getStart()
+            .endingAnnotations(layerId)
+            .filter(a -> a != anEdited)
+            .filter(Merger::HasCounterpart)
+            .map(Merger::GetCounterpart) // now annotation in original graph
+            .findAny();
+          if (anPreviousOriginal.isPresent()) {
+            Annotation anPreviousEditedOther = anPreviousOriginal.get();
+            if (GetConfidence(anPreviousEditedOther.getEnd()) > GetConfidence(start)
+                && anPreviousEditedOther.getEnd().getOffset() != null
+                && (start.getOffset() == null
+                    || anPreviousEditedOther.getEnd().getOffset().doubleValue()
+                    != start.getOffset().doubleValue())) {
+              log(layerId, ": Use offset of end of prior: ", anLastOriginal,
+                  " (end ", anPreviousEditedOther.getEnd(), ")",
+                  " for start of new: ", newAnnotation,
+                  " (start ", newAnnotation.getStart(), ")");
+              int newStatus = Math.min(
+                GetConfidence(graph.getAnchor(anPreviousEditedOther.getOriginalEndId())),
+                GetConfidence(start));
+              if (newStatus <= Constants.CONFIDENCE_DEFAULT) {
+                newStatus = Math.max(
+                  GetConfidence(graph.getAnchor(anPreviousEditedOther.getOriginalEndId())),
+                  GetConfidence(start));
               }
-            } // has counterpart
-          } // next previous edited annotation
-        } // interval layer
-	    
+              if (GetConfidence(end) > Constants.CONFIDENCE_DEFAULT 
+                  && end.getOffset() <= anPreviousEditedOther.getEnd().getOffset()) {
+                newStatus = Constants.CONFIDENCE_NONE;
+              }
+              if (start.getChange() == Change.Operation.Create
+                  && newStatus > Constants.CONFIDENCE_AUTOMATIC) {
+                // using a new anchor, and replacing a manual anchor
+                // set the original attributes instead of a delta
+                // this is so it can't later be reverted to its 'new' values
+                // TODO was this necessary? start.commit();
+                start.create();
+              }
+              start.setOffset(anPreviousEditedOther.getEnd().getOffset());
+              SetConfidence(start, newStatus);
+            } // previous more reliable
+            if (anPreviousEditedOther.getEnd() != start) {			
+              log(layerId, ": Share anchor with prior: ", anLastOriginal,
+                  " and new: ", newAnnotation, " using ", start);
+              changeEndWithRelatedAnnotations(
+                anPreviousEditedOther, start,
+                // we don't re-link a related parent annotation - we might be inserting a new child
+                thisAndsaturatedParentLayerId);
+            }
+          } // anPreviousOriginal.isPresent()
+        } // interval layer  
         graph.addAnnotation(newAnnotation);
         log(layerId, ": Adding ", newAnnotation);
-        setCounterparts(newAnnotation, anEdited);
+        SetCounterparts(newAnnotation, anEdited);
       } else { // existing annotation
         // check whether this anchor should be unlinked from prior ones that are not linked
         // in the edited graph
-        Annotation anOriginal = getCounterpart(anEdited);
-        // copy the vector so that we don't get concurrent modification problems
-        Vector<Annotation> vEndAnnotations = new Vector<Annotation>(anOriginal.getStart().endOf(layerId)); 
-        for (Annotation anOriginalLinkedPrior : vEndAnnotations) {
-          // no edited counterpart?
-          if (!hasCounterpart(anOriginalLinkedPrior)) continue;
+        Annotation anOriginal = GetCounterpart(anEdited);
+        anOriginal.getStart().endingAnnotations(layerId)
+          .filter(Annotation::NotDestroyed)
+          .filter(Merger::HasCounterpart)
           // linked in the edited graph?
-          if (getCounterpart(anOriginalLinkedPrior).getEnd() == anEdited.getStart()) continue;
-          // unlink the prior annotation from this one
-          final Anchor originalStart = anOriginal.getStart();
-          Anchor newPriorEndAnchor = new Anchor(anOriginal.getStart());
-          newPriorEndAnchor.create();
-          graph.addAnchor(newPriorEndAnchor);
-          log(layerId, ": Unsharing end of prior: ", 
-              anOriginalLinkedPrior, " and start of ", anOriginal);
-          // identify which annotations we DON'T want to change the anchor of
-          // LayerTraversal<Vector<Annotation>> revert = new LayerTraversal<Vector<Annotation>>(
-          // 	  new Vector<Annotation>(), anOriginal)
-          // {
-          // 	  protected void pre(Annotation annotation)
-          // 	  {
-          // 	     if (annotation.getStart().equals(originalStart)) result.add(annotation);
-          // 	  }
-          // };
-          changeEndWithRelatedAnnotations(anOriginalLinkedPrior, newPriorEndAnchor, thisLayerId);
-          // for (Annotation a : revert.getResult())
-          // {
-          // 	  log(
-          // 	     layerId+": Keeping original start anchor for: " 
-          // 	     + logAnnotation(a) + " - " + logAnchor(originalStart));
-          // 	     a.setStart(originalStart);
-          // } // next annotation to revert
+          .filter(a -> GetCounterpart(a).getEnd() != anEdited.getStart())
+          .forEach(anOriginalLinkedPrior -> {
+              // unlink the prior annotation from this one
+              final Anchor originalStart = anOriginal.getStart();
+              Anchor newPriorEndAnchor = new Anchor(anOriginal.getStart());
+              newPriorEndAnchor.create();
+              graph.addAnchor(newPriorEndAnchor);
+              log(layerId, ": Unsharing end of prior: ", 
+                  anOriginalLinkedPrior, " and start of ", anOriginal);
+              changeEndWithRelatedAnnotations(anOriginalLinkedPrior, newPriorEndAnchor, thisLayerId);
 	       
-        } // next prior linked annotation
+            });
 	    
         if (anLastOriginal != null && anLastOriginal.getChange() == Change.Operation.Create) {
           // mapped to an original annotation, and the last one was new
           // relink this annotation to new anchor?
           // in the edited version of the graph,
           // does this annotation share an anchor with the last annotation?	    
-          if (getCounterpart(anLastOriginal).getEnd() == anEdited.getStart()
+          if (GetCounterpart(anLastOriginal).getEnd() == anEdited.getStart()
               && anLastOriginal.getEnd() != anOriginal.getStart()) {
             // we prefer to use an original anchor (i.e. anOriginal.start)
 
@@ -1356,8 +1342,8 @@ public class Merger extends Transform implements GraphTransformer {
                   && anLastOriginal.getStart().getOriginalOffset()
                   >= anOriginal.getStart().getOriginalOffset()
                   && !bLastIsAnInstant) {
-                if (getConfidence(anLastOriginal.getStart()) // TODO should be original confidence, but we don't track that!
-                    < getConfidence(anOriginal.getStart())
+                if (GetConfidence(anLastOriginal.getStart()) // TODO should be original confidence, but we don't track that!
+                    < GetConfidence(anOriginal.getStart())
                     // don't go back before parent start
                     && anLastOriginal.getParent().getStart() != null
                     && anLastOriginal.getParent().getStart().getOffset() != null
@@ -1366,27 +1352,27 @@ public class Merger extends Transform implements GraphTransformer {
                   double dNewOffset = anOriginal.getStart().getOffset() - smidgin;
                   log(layerId, ": Moving start of : ", 
                       anLastOriginal, " (",
-                      getConfidence(anLastOriginal.getStart()), "vs",
-                      getConfidence(anOriginal.getStart()), ") to ",
+                      GetConfidence(anLastOriginal.getStart()), "vs",
+                      GetConfidence(anOriginal.getStart()), ") to ",
                       dNewOffset, " to avoid non-positive length for ", anLastOriginal);
                   anLastOriginal.getStart().setOffset(dNewOffset);
-                  setConfidence(anLastOriginal.getStart(), Constants.CONFIDENCE_NONE);
-                } else if (getConfidence(anLastOriginal.getStart()) // TODO should be original confidence, but we don't track that!
-                           > getConfidence(anOriginal.getStart())
+                  SetConfidence(anLastOriginal.getStart(), Constants.CONFIDENCE_NONE);
+                } else if (GetConfidence(anLastOriginal.getStart()) // TODO should be original confidence, but we don't track that!
+                           > GetConfidence(anOriginal.getStart())
                            // keeping offsets is important only for anchors that have been aligned
-                           || getConfidence(anOriginal.getStart()) <= Constants.CONFIDENCE_DEFAULT) {
+                           || GetConfidence(anOriginal.getStart()) <= Constants.CONFIDENCE_DEFAULT) {
                   double dNewOffset = anOriginal.getStart().getOffset() + smidgin;
                   log(layerId, ": Moving start of : ", anOriginal, " to ",
                       dNewOffset, " (",
-                      getConfidence(anLastOriginal.getStart()), "vs",
-                      getConfidence(anOriginal.getStart()), ") to avoid non-positive length for ", anLastOriginal);
+                      GetConfidence(anLastOriginal.getStart()), "vs",
+                      GetConfidence(anOriginal.getStart()), ") to avoid non-positive length for ", anLastOriginal);
                   anOriginal.getStart().setOffset(dNewOffset);
-                  setConfidence(anOriginal.getStart(), Constants.CONFIDENCE_NONE);
+                  SetConfidence(anOriginal.getStart(), Constants.CONFIDENCE_NONE);
                 } else {
                   log(layerId, ": Creating non-positive length for ", anLastOriginal,
                       " because both anchors are high confidence: ",
-                      getConfidence(anLastOriginal.getStart()), "vs",
-                      getConfidence(anOriginal.getStart()));
+                      GetConfidence(anLastOriginal.getStart()), "vs",
+                      GetConfidence(anOriginal.getStart()));
                 }
               }
 
@@ -1414,9 +1400,8 @@ public class Merger extends Transform implements GraphTransformer {
       // copy ordinals - these will be updated later, but this ensures that annotations
       // come out in order for following operations, despite crazy anchor values
       // TODO test case for this - insert Anew before Aold, they have same ordinals but Anew.start > original Aold.start
-      Annotation anOriginal = getCounterpart(anEdited);
-      if (anOriginal.getOrdinal() != anEdited.getOrdinal())
-      {
+      Annotation anOriginal = GetCounterpart(anEdited);
+      if (anOriginal.getOrdinal() != anEdited.getOrdinal()) {
         log(layerId, ": changing ordinal of: ", anOriginal,
             " from ", anOriginal.getOrdinal(), " to ", anEdited.getOrdinal());
         anOriginal.setOrdinal(anEdited.getOrdinal());
@@ -1433,8 +1418,7 @@ public class Merger extends Transform implements GraphTransformer {
    * @return A list of chunks
    */
   protected Vector<Vector<Annotation>> breakIntoOverlappingChunks(
-    Vector<Annotation> list, int iNumberOfDiscreteChunks)
-  {
+    Vector<Annotation> list, int iNumberOfDiscreteChunks) {
     Vector<Vector<Annotation>> vv = new Vector<Vector<Annotation>>();
     Vector<Annotation> va = new Vector<Annotation>();
     vv.add(va);
@@ -1478,7 +1462,7 @@ public class Merger extends Transform implements GraphTransformer {
 
     // go backwards until a mapped annotation is found
     while (iAnnotations.hasPrevious()) {
-      if (hasCounterpart(iAnnotations.previous())) {
+      if (HasCounterpart(iAnnotations.previous())) {
         iAnnotations.remove();
         break;
       }
@@ -1534,67 +1518,71 @@ public class Merger extends Transform implements GraphTransformer {
       annotation.setEnd(newStartAnchor);
     }
       
-    Layer layer = annotation.getGraph().getLayer(annotation.getLayerId());
+    final Layer layer = annotation.getGraph().getLayer(annotation.getLayerId());
       
     // change parallel annotations
-    for (Annotation anOther : aOriginalStart.getStartingAnnotations()) {
-      if (anOther == annotation) continue;
-      if (anOther.getLayerId() == annotation.getLayerId()) continue;
-      if (layerIdsToExclude.contains(anOther.getLayerId())) continue;
-      if (!aOriginalStart.getId().equals(anOther.getStartId())) continue;
-      // do they have a relationship that would actually preclude sharing?
-      Layer otherLayer = annotation.getGraph().getLayer(anOther.getLayerId());
-      if (layer != null && otherLayer != null) {
-        if (layer.getParentId().equals(otherLayer.getId())) { // other is parent layer to this
-          if (!layer.getSaturated()) continue; // sparse
-
-          // this belongs to another parent
-          if (!anOther.getId().equals(annotation.getParentId())) continue;
-        } else if (otherLayer.getParentId().equals(layer.getId())) {
-          // this is parent layer to other
-          if (!otherLayer.getSaturated()) continue; // sparse
+    aOriginalStart.startingAnnotations()
+      .filter(a -> a != annotation)
+      .filter(a -> !a.getLayerId().equals(annotation.getLayerId()))
+      .filter(a -> !layerIdsToExclude.contains(a.getLayerId()))
+      .filter(a -> aOriginalStart.getId().equals(a.getStartId()))
+      .filter(a -> {
+          // do they have a relationship that would actually preclude sharing?
+          Layer otherLayer = annotation.getGraph().getLayer(a.getLayerId());
+          if (layer != null && otherLayer != null) {
+            if (layer.getParentId().equals(otherLayer.getId())) { // other is parent layer to this
+              if (!layer.getSaturated()) return false; // sparse
+              
+              // this belongs to another parent
+              if (!a.getId().equals(annotation.getParentId())) return false;
+            } else if (otherLayer.getParentId().equals(layer.getId())) {
+              // this is parent layer to other
+              if (!otherLayer.getSaturated()) return false; // sparse
 	       
-          // this belongs to another parent
-          if (!annotation.getId().equals(anOther.getParentId())) continue;
-        }
-      }
-      boolean bInstant = anOther.getInstantaneous();
-      log("Changing start", (bInstant?" and end":""), " of related annotation ", anOther, 
-          " to ", newStartAnchor);
-      anOther.setStart(newStartAnchor);
-      if (bInstant) {
-         anOther.setEnd(newStartAnchor);
-      }
-    } // next parallel anchor starting here
+              // this belongs to another parent
+              if (!annotation.getId().equals(a.getParentId())) return false;              
+            }
+          }
+          return true;
+        })
+      .forEach(a -> {
+          boolean bInstant = a.getInstantaneous();
+          log("Changing start", (bInstant?" and end":""), " of related annotation ", a, 
+              " to ", newStartAnchor);
+          a.setStart(newStartAnchor);
+          if (bInstant) {
+            a.setEnd(newStartAnchor);
+          }
+        });
 
     if (!layerIdsToExclude.contains(annotation.getLayerId())) {
       // also change end anchor of annotations on the same layer
       layerIdsToExclude.add(annotation.getLayerId()); // prevents infinite recursion
-      Vector<Annotation> vRelatedAnnotations = removeDeleted(
-        aOriginalStart.endOf(annotation.getLayerId()));
-      for (Annotation anPrevious : vRelatedAnnotations) {
-        // only if it really still follows
-        if (!anPrevious.getEndId().equals(aOriginalStart.getId())) continue;
-
-        if (!anPrevious.getStartId().equals(anPrevious.getEndId())
-            && newStartAnchor.getId().equals(anPrevious.getStartId())) {
-          log("Not changing end of related annotation ", anPrevious,
-              " to avoid creating new instant");
-          continue;
-        }
-        if (anPrevious.getParentId() == null
-            || !anPrevious.getParentId().equals(annotation.getParentId())) {
-          log("Not changing end of related annotation ", anPrevious,
-              " - different parents");
-          continue;
-        }
-        log("Changing end of previous linked annotation ", anPrevious,
-            " to ", newStartAnchor);
-        changeEndWithRelatedAnnotations(anPrevious, newStartAnchor);
-      } // next ending annotation
+      aOriginalStart.endingAnnotations(annotation.getLayerId())
+        .filter(Annotation::NotDestroyed)
+        .filter(a -> a.getEndId().equals(aOriginalStart.getId()))
+        .filter(a -> {
+            if (!a.getStartId().equals(a.getEndId())
+                && newStartAnchor.getId().equals(a.getStartId())) {
+              log("Not changing end of related annotation ", a, " to avoid creating new instant");
+              return false;
+            }
+            return true;})
+        .filter(a -> {
+            if (a.getParentId() == null
+                || !a.getParentId().equals(annotation.getParentId())) {
+              log("Not changing end of related annotation ", a, " - different parents");
+              return false;
+            }
+            return true;
+          })
+        .forEach(a -> {
+            log("Changing end of previous linked annotation ", a, " to ", newStartAnchor);
+            changeEndWithRelatedAnnotations(a, newStartAnchor);
+          });
     } // not excluding annotation's own layer
   } // end of changeStartWithRelatedAnnotations()
-
+  
   /**
    * Sets the End Anchor of the given annotation, and also the end anchors of related annotations
    * that end in the same place. 
@@ -1638,68 +1626,74 @@ public class Merger extends Transform implements GraphTransformer {
 
     Layer layer = annotation.getGraph().getLayer(annotation.getLayerId());
 
-    for (Annotation anOther : aOriginalEnd.getEndingAnnotations()) {
-      if (anOther == annotation) continue;
-      if (anOther.getLayerId().equals(annotation.getLayerId())) continue;
-      if (layerIdsToExclude.contains(anOther.getLayerId())) continue;
-
-      // do they have a relationship that would actually preclude sharing?
-      Layer otherLayer = annotation.getGraph().getLayer(anOther.getLayerId());
-      if (layer != null && otherLayer != null) {
-        if (layer.getParentId().equals(otherLayer.getId())) { // other is parent layer to this
-          if (!layer.getSaturated()) continue; // sparse
-
-          // this belongs to another parent
-          if (!anOther.getId().equals(annotation.getParentId())) continue;
-        } else if (otherLayer.getParentId().equals(layer.getId())) {
-          // this is parent layer to other
-          if (!otherLayer.getSaturated()) continue; // sparse
-	       
-          // this belongs to another parent
-          if (!annotation.getId().equals(anOther.getParentId())) continue;
-        }
-      }
-      boolean bInstant = anOther.getInstantaneous();
-      log("Changing end", (bInstant?" and start":""), " of related annotation ", anOther,
-          " to ", newEndAnchor);
-      anOther.setEnd(newEndAnchor);
-      if (bInstant) {
-         anOther.setStart(newEndAnchor);
-      }
-    } // next parallel anchor starting here
+    aOriginalEnd.endingAnnotations()
+      .filter(a -> a != annotation)
+      .filter(a -> !a.getLayerId().equals(annotation.getLayerId()))
+      .filter(a -> !layerIdsToExclude.contains(a.getLayerId()))
+      .filter(a -> {
+          // do they have a relationship that would actually preclude sharing?
+          Layer otherLayer = annotation.getGraph().getLayer(a.getLayerId());
+          if (layer != null && otherLayer != null) {
+            if (layer.getParentId().equals(otherLayer.getId())) { // other is parent layer to this
+              if (!layer.getSaturated()) return false; // sparse
+              
+              // this belongs to another parent
+              if (!a.getId().equals(annotation.getParentId())) return false;
+            } else if (otherLayer.getParentId().equals(layer.getId())) {
+              // this is parent layer to other
+              if (!otherLayer.getSaturated()) return false; // sparse
+              
+              // this belongs to another parent
+              if (!annotation.getId().equals(a.getParentId())) return false;
+            }
+          }
+          return true;
+        })
+      .forEach(a -> {
+          boolean bInstant = a.getInstantaneous();
+          log("Changing end", (bInstant?" and start":""), " of related annotation ", a,
+              " to ", newEndAnchor);
+          a.setEnd(newEndAnchor);
+          if (bInstant) {
+            a.setStart(newEndAnchor);
+          }
+        });
     if (!layerIdsToExclude.contains(annotation.getLayerId())) {
       // also change start anchor of annotations on the same layer
       layerIdsToExclude.add(annotation.getLayerId()); // prevents infinite recursion
-      Vector<Annotation> vRelatedAnnotations = removeDeleted(
-        aOriginalEnd.startOf(annotation.getLayerId()));
-      // vRelatedAnnotations.addAll(aOriginalEnd.getDeltaStartAnnotationsLayer(annotation.getLayerId()));
-      if (vRelatedAnnotations.size() > 0) {
-        for (Annotation anNext : vRelatedAnnotations) {
-          // only if it really still follows
-          if (!anNext.getStartId().equals(aOriginalEnd.getId())) continue;
-          if (!anNext.getStartId().equals(anNext.getEndId())
-              && newEndAnchor.getId().equals(anNext.getEndId())) {
-            log("Not changing end of related annotation ",
-                anNext, " to avoid creating new instant");
-            continue; // if not shared in the other graph, not shared here
-          }
-          log("Changing start of next linked annotation ", anNext, " to ", newEndAnchor);
-          changeStartWithRelatedAnnotations(anNext, newEndAnchor, layerIdsToExclude);
-        } // next starting annotation
-	    
-        if (vRelatedAnnotations.size() == 0) {
-          // all the 'next' annotations on the same layer are deleted
-          // ensure that annotations that start here on *other* layers come with us
-          // find one related annotation on another layer
-          vRelatedAnnotations.addAll(aOriginalEnd.getStartingAnnotations());
-          for (Annotation anNext : vRelatedAnnotations) {
-            if (layerIdsToExclude.contains(anNext.getLayerId())) continue;
-            log("Next has been deleted, using ", anNext, " to bring starting annotations too");
+      boolean bRelatedAnnotations = aOriginalEnd.startingAnnotations(annotation.getLayerId())
+        .filter(Annotation::NotDestroyed)
+        .findAny().isPresent();
+      aOriginalEnd.startingAnnotations(annotation.getLayerId())
+        .filter(Annotation::NotDestroyed)
+        .filter(anNext -> anNext.getStartId().equals(aOriginalEnd.getId()))
+        .filter(anNext -> {
+            if (!anNext.getStartId().equals(anNext.getEndId())
+                && newEndAnchor.getId().equals(anNext.getEndId())) {
+              log("Not changing end of related annotation ",
+                  anNext, " to avoid creating new instant");
+              return false; // if not shared in the other graph, not shared here
+            }
+            return true;
+          })
+        .forEach(anNext -> {
+            log("Changing start of next linked annotation ", anNext, " to ", newEndAnchor);
             changeStartWithRelatedAnnotations(anNext, newEndAnchor, layerIdsToExclude);
-            break; // one should be sufficient to bring the rest along
-          } // next starting annotation	       
-        }  // all the 'next' annotations on the same layer are deleted
-      } // there are 'next' starting annotations
+          });
+	    
+        // if (vRelatedAnnotations.size() == 0) { // TODO!! this cannot be true, given that the above previously included this in if (vRelatedAnnotations.size() > 0) {
+        //   // all the 'next' annotations on the same layer are deleted
+        //   // ensure that annotations that start here on *other* layers come with us
+        //   // find one related annotation on another layer
+        //   vRelatedAnnotations.addAll(aOriginalEnd.getStartingAnnotations());
+        //   for (Annotation anNext : vRelatedAnnotations) {
+        //     if (layerIdsToExclude.contains(anNext.getLayerId())) continue;
+        //     log("Next has been deleted, using ", anNext, " to bring starting annotations too");
+        //     changeStartWithRelatedAnnotations(anNext, newEndAnchor, layerIdsToExclude);
+        //     break; // one should be sufficient to bring the rest along
+        //   } // next starting annotation	       
+        // }  // all the 'next' annotations on the same layer are deleted
+      // } // there are 'next' starting annotations
     }
   } // end of changeStartWithRelatedAnnotations()
 
@@ -1713,10 +1707,10 @@ public class Merger extends Transform implements GraphTransformer {
   protected void computeLabelDeltasForMerge(Layer layer, Graph graph)
     throws TransformationException {
     for (Annotation an : graph.all(layer.getId())) {
-      Annotation anEdited = getCounterpart(an);
+      Annotation anEdited = GetCounterpart(an);
       if (anEdited == null) continue;
       // check for label change
-      if (getConfidence(anEdited) >= getConfidence(an)) {
+      if (GetConfidence(anEdited) >= GetConfidence(an)) {
          an.setLabel(anEdited.getLabel());
       }
     }
@@ -1740,7 +1734,7 @@ public class Merger extends Transform implements GraphTransformer {
     editedAnnotations.addAll(Arrays.asList(editedGraph.all(layer.getId())));
     for (Annotation anEdited : editedAnnotations) {
       // get our mapped annotation
-      Annotation anOriginal = getCounterpart(anEdited);
+      Annotation anOriginal = GetCounterpart(anEdited);
 
       // an original may not have been added because it was forbidden by noChangeLayers
       if (anOriginal == null) continue;
@@ -1756,84 +1750,84 @@ public class Merger extends Transform implements GraphTransformer {
 	    
         boolean bChanged = false;
         // change for linking to a parallel annotations
-        for (Annotation anParallel : removeDeleted(anEdited.getStart().getStartingAnnotations())) {
-          if (anParallel == anEdited) continue;		  
-          if (hasCounterpart(anParallel)) {
-            Annotation anLinkedOriginalParallel = getCounterpart(anParallel);
-            if (anLinkedOriginalParallel.getStart() == null) continue;
-            if (anOriginal.getStart() != anLinkedOriginalParallel.getStart()
-                && getConfidence(anOriginal.getStart()) 
-                <= getConfidence(anLinkedOriginalParallel.getStart())) {
-              // link this annotation to the parallel one
-              // only link to annotations that have been through this phase
-              if (!anLinkedOriginalParallel.containsKey("@computeAnchorDeltasForMerge")) continue;
-              // don't share this anchor if there's an annotation connected that we shouldn't share with
-              if (layer.getSaturated() 
-                  || anLinkedOriginalParallel.getStart().startOf(layer.getParentId()).size() == 0) {
-                log(layerId, ": Share start anchor of ", anOriginal, 
-                    " with parallel ", anLinkedOriginalParallel);
-                // ensure that the end anchor for the last annotation is updated
-                if (anEdited.getInstantaneous()) {
-                   anOriginal.setEnd(anLinkedOriginalParallel.getStart());
-                }
-                anOriginal.setStart(anLinkedOriginalParallel.getStart()); // TODO changeStartWithRelatedAnnotations()?
-                bChanged = true;
-                break;
-              } // bShare
-            } // link this annotation to the parallel one
-          } // their-parallel has a counterpart
-        } // next parallel their-annotation
-        if (!bChanged) {
+        Optional<Annotation> anLinkedOriginalParallel = anEdited.getStart().startingAnnotations()
+          .filter(Annotation::NotDestroyed)
+          .filter(a -> a != anEdited)
+          .filter(Merger::HasCounterpart)
+          .map(Merger::GetCounterpart) // now linked parallel in original graph
+          .filter(a -> a.getStart() != null)
+          .filter(a -> anOriginal.getStart() != a.getStart()
+                  && GetConfidence(anOriginal.getStart()) <= GetConfidence(a.getStart()))
+          // only annotations that have been through this phase
+          .filter(a -> a.containsKey("@computeAnchorDeltasForMerge"))
+          // don't share this anchor if there's an annotation connected
+          // that we shouldn't share with
+          .filter(a -> layer.getSaturated()
+                  || !a.getStart().startingAnnotations(layer.getParentId()).findAny().isPresent())
+          .findAny();
+        if (anLinkedOriginalParallel.isPresent()) { // link this annotation to the parallel one
+          log(layerId, ": Share start anchor of ", anOriginal, 
+              " with parallel ", anLinkedOriginalParallel.get());
+          // ensure that the end anchor for the last annotation is updated
+          if (anEdited.getInstantaneous()) {
+            anOriginal.setEnd(anLinkedOriginalParallel.get().getStart());
+          }
+          anOriginal.setStart(anLinkedOriginalParallel.get().getStart()); // TODO changeStartWithRelatedAnnotations()?
+          bChanged = true;
+        } // there is a linked original parallel annotation
+        if (!bChanged) {          
           // or maybe its shared for us but *not* shared for them
-          for (Annotation anParallel
-                 : removeDeleted(anOriginal.getStart().getStartingAnnotations())) {
-            if (anParallel == anOriginal) continue;
-            if (anParallel.getLayerId() == anOriginal.getLayerId()) continue;
-            if (anParallel.getStart() != anOriginal.getStart()) continue; // aready changed
-            if (hasCounterpart(anParallel)) {
-              Annotation anEditedParallel = getCounterpart(anParallel);
-              // not shared in the edite graph
-              if (anEdited.getStart() != anEditedParallel.getStart()
-                  // and there is some confidence in the edited anchors
-                  && getConfidence(anEdited.getStart()) > Constants.CONFIDENCE_NONE
-                  && getConfidence(anEditedParallel.getStart()) > Constants.CONFIDENCE_NONE) {
-                // SHOULD they share? Is there a saturated relationship between the layers (annotation in the child layer)
-                Layer parallelLayer = graph.getLayer(anEditedParallel.getLayerId());
-                if ((layer.getParentId().equals(anEditedParallel.getLayerId())
-                     && layer.getSaturated())
-                    || (parallelLayer != null && parallelLayer.getParentId().equals(layerId)
-                        && parallelLayer.getSaturated())) {
-                  if (!layer.getParentId().equals(anEditedParallel.getLayerId())) {// parent layer
-                    bCheckStartAnchorOffset = false;
-                    log(layerId, ": For ", anOriginal,
-                        " assuming that start of ", anParallel, " is correct");
-                    // i.e. if the edited graph has disconnection between words and segments
-                    // then the segment alignments trump the word aligments
-                  }
-                  // otherwise it's a child - simply don't unlink it, but allow it to change
-                  continue; // next parallel...
+          for (Annotation anParallel : anOriginal.getStart().startingAnnotations()
+                 .filter(Annotation::NotDestroyed)
+                 .filter(a -> a != anOriginal)
+                 .filter(a -> !a.getLayerId().equals(anOriginal.getLayerId()))
+                 .filter(a -> a.getStart() == anOriginal.getStart()) // not already changed
+                 .filter(Merger::HasCounterpart)
+                 .collect(Collectors.toList())) {
+            Annotation anEditedParallel = GetCounterpart(anParallel);
+            // not shared in the edite graph
+            if (anEdited.getStart() != anEditedParallel.getStart()
+                // and there is some confidence in the edited anchors
+                && GetConfidence(anEdited.getStart()) > Constants.CONFIDENCE_NONE
+                && GetConfidence(anEditedParallel.getStart()) > Constants.CONFIDENCE_NONE) {
+              // SHOULD they share? Is there a saturated relationship between the layers
+              // (annotation in the child layer)
+              Layer parallelLayer = graph.getLayer(anEditedParallel.getLayerId());
+              if ((layer.getParentId().equals(anEditedParallel.getLayerId())
+                   && layer.getSaturated())
+                  || (parallelLayer != null && parallelLayer.getParentId().equals(layerId)
+                      && parallelLayer.getSaturated())) {
+                if (!layer.getParentId().equals(anEditedParallel.getLayerId())) {// parent layer
+                  bCheckStartAnchorOffset = false;
+                  log(layerId, ": For ", anOriginal,
+                      " assuming that start of ", anParallel, " is correct");
+                  // i.e. if the edited graph has disconnection between words and segments
+                  // then the segment alignments trump the word aligments
+                  break; // stop looking
                 }
-                // new anchor - copy original, then below we might fix up the offset
-                Anchor newStart = new Anchor(anOriginal.getStart());
-                newStart.create();
-                graph.addAnchor(newStart);
-                // we change related annotations, but not those related to the parallel layer
-                HashSet<String> relatedToParallel = new HashSet<String>();
-                relatedToParallel.addAll(parallelLayer.getChildren().keySet());
-                relatedToParallel.add(parallelLayer.getParentId());
-                relatedToParallel.add(parallelLayer.getId());
-                // instant?
-                if (anEdited.getInstantaneous()) {
-                   changeEndWithRelatedAnnotations(anOriginal, newStart);
-                }
-                changeStartWithRelatedAnnotations(anOriginal, newStart, relatedToParallel);
-                log(layerId, ": Different start anchor for ", anOriginal,
-                    " unshared from ", anParallel, ": new anchor at ", newStart.getOffset());
-                bChanged = true;
-                bCheckStartAnchorOffset = true;
-                break;
-              } // edited and parallel are not linked
-            } // their-parallel has a counterpart
+                // otherwise it's a child - simply don't unlink it, but allow it to change
+                continue; // next parallel...
+              }
+              // new anchor - copy original, then below we might fix up the offset
+              Anchor newStart = new Anchor(anOriginal.getStart());
+              newStart.create();
+              graph.addAnchor(newStart);
+              // we change related annotations, but not those related to the parallel layer
+              HashSet<String> relatedToParallel = new HashSet<String>();
+              relatedToParallel.addAll(parallelLayer.getChildren().keySet());
+              relatedToParallel.add(parallelLayer.getParentId());
+              relatedToParallel.add(parallelLayer.getId());
+              // instant?
+              if (anEdited.getInstantaneous()) {
+                changeEndWithRelatedAnnotations(anOriginal, newStart);
+              }
+              changeStartWithRelatedAnnotations(anOriginal, newStart, relatedToParallel);
+              log(layerId, ": Different start anchor for ", anOriginal,
+                  " unshared from ", anParallel, ": new anchor at ", newStart.getOffset());
+              bChanged = true;
+              bCheckStartAnchorOffset = true;
+              break;
+            } // edited and parallel are not linked
           } // next parallel
         } // !bChanged
         Anchor delta = null;
@@ -1842,96 +1836,110 @@ public class Merger extends Transform implements GraphTransformer {
           boolean differentOffset
             = compare(anEdited.getStart(), anOriginal.getStart()) != 0;
           boolean higherConfidence
-            = getConfidence(anEdited.getStart()) > getConfidence(anOriginal.getStart());
+            = GetConfidence(anEdited.getStart()) > GetConfidence(anOriginal.getStart());
           boolean sameOrHigherConfidence
-            = getConfidence(anEdited.getStart()) >= getConfidence(anOriginal.getStart());
+            = GetConfidence(anEdited.getStart()) >= GetConfidence(anOriginal.getStart());
           if (ignoreOffsetConfidence
               || higherConfidence || (differentOffset && sameOrHigherConfidence)) {
             // theirs is more trustworthy
             // look in the edited graph for a new start-anchor canditate
             // by looking at the end-anchor of previous annotations on this layer
-            Anchor matchingMergedAnchor = null;
-            for (Annotation anEditedPrevious : anEdited.getStart().endOf(layer.getId())) {
+            Optional<Anchor> matchingMergedAnchor = anEdited.getStart()
+              .endingAnnotations(layer.getId())
               // skip instantaneous annotations
-              if (anEditedPrevious == anEdited) continue; 
-              Annotation anOriginalPrevious = getCounterpart(anEditedPrevious);
+              .filter(a -> a != anEdited)
               // skip unmerged annotations from a neighboring fragments
               // (TODO not sure there can be any)
-              if (anOriginalPrevious == null) continue;
+              .filter(Merger::HasCounterpart)
+              .map(Merger::GetCounterpart)
               // skip it if there's an intervening annotation on this layer (e.g. "unclear")
-              Annotation anOriginalPreviousNext = anOriginalPrevious.getNext();
-              if (anOriginalPreviousNext != null
-                  && anOriginalPreviousNext.getChange() != Change.Operation.Destroy
-                  && anOriginalPreviousNext.equals(anOriginal.getPrevious())) {
-                log("Don't link: ", anOriginalPrevious,
-                    " across intervening: ", anOriginalPreviousNext,
-                    " to: ", anOriginal);
-                continue;
-              }
-              assert anOriginalPrevious.getEnd() != null 
-                : "anOriginalPrevious.getEnd() != null - " + anOriginalPrevious;
-              // is the new original end anchor offset the same time as the edited start anchor?
-              // (we compare by offset because anchors don't have counterparts we can check)
-              if (compare(anOriginalPrevious.getEnd(), anEdited.getStart()) == 0) {
-                matchingMergedAnchor = anOriginalPrevious.getEnd();
-                log(layerId, ": Different start anchor for ", anOriginal,
-                    ": linking to shared end of ", anOriginalPrevious);
-                break;
-              }
-            } // next possible end anchor annotation
-            if (matchingMergedAnchor == null) {
+              .filter(anOriginalPrevious -> {
+                  Annotation anOriginalPreviousNext = anOriginalPrevious.getNext();
+                  if (anOriginalPreviousNext != null
+                      && anOriginalPreviousNext.getChange() != Change.Operation.Destroy
+                      && anOriginalPreviousNext.equals(anOriginal.getPrevious())) {
+                    log("Don't link: ", anOriginalPrevious,
+                        " across intervening: ", anOriginalPreviousNext,
+                        " to: ", anOriginal);
+                    return false;
+                  }
+                  return true;
+                })
+              .filter(anOriginalPrevious -> {
+                  // is the new original end anchor offset the same time as the edited start anchor?
+                  // (we compare by offset because anchors don't have counterparts we can check)
+                  if (compare(anOriginalPrevious.getEnd(), anEdited.getStart()) == 0) {
+                    log(layerId, ": Different start anchor for ", anOriginal,
+                        ": linking to shared end of ", anOriginalPrevious);
+                    return true;
+                  }
+                  return false;
+                })
+              .map(anOriginalPrevious -> anOriginalPrevious.getEnd())
+              .findAny();
+            if (!matchingMergedAnchor.isPresent()) {
               // try for parallel annotations on another layer
-              for (Annotation anEditedParallel : anEdited.getStart().getStartingAnnotations()) {
-                if (anEditedParallel == anEdited) continue; // skip ourselves
-                if (anEditedParallel.getLayerId() == anEdited.getLayerId()) continue; // on our own layer
-                Annotation anOriginalParallel = getCounterpart(anEditedParallel);
+              matchingMergedAnchor = anEdited.getStart().startingAnnotations()
+                .filter(a -> a != anEdited) // skip ourselves
+                .filter(a -> !a.getLayerId().equals(anEdited.getLayerId())) // not on our layer
                 // skip unmerged annotations from a neighboring fragments (TODO not sure there can be any)
-                if (anOriginalParallel == null) continue; 
-                assert anOriginalParallel.getStart() != null 
-                  : "anOriginalParallel.getStart() != null - " + anOriginalParallel;
-                if (anOriginalParallel.getStart() == null) continue;
+                .filter(Merger::HasCounterpart)
+                .map(Merger::GetCounterpart) // now parallel from original graph
+                .filter(a -> a.getStart() != null)
                 // no use linking to the very same anchor
-                if (anOriginalParallel.getStart() == anOriginal.getStart()) continue;
+                .filter(a -> a.getStart() != anOriginal.getStart())
                 // offset should be the same
-                if (compare(anOriginalParallel.getStart(), anEditedParallel.getStart()) != 0
-                    // unless our offset is less trustworthy than theirs
-                    && getConfidence(anEditedParallel.getStart()) >= Constants.CONFIDENCE_AUTOMATIC
-                    && getConfidence(anOriginalParallel.getStart()) <= getConfidence(anEditedParallel.getStart())) continue;
-                matchingMergedAnchor = anOriginalParallel.getStart();
-                log(layerId, ": Different start anchor for ", anOriginal,
-                    ": linking to shared start of ", anOriginalParallel);
-                break;
-              } // next possible start anchor annotation
+                .filter(a -> {
+                    Annotation anEditedParallel = GetCounterpart(a);
+                    if (compare(a.getStart(), anEditedParallel.getStart()) != 0
+                        // unless our offset is less trustworthy than theirs
+                        && GetConfidence(anEditedParallel.getStart())
+                        >= Constants.CONFIDENCE_AUTOMATIC
+                        && GetConfidence(a.getStart())
+                        <= GetConfidence(anEditedParallel.getStart())) {
+                      return false;
+                    }
+                    log(layerId, ": Different start anchor for ", anOriginal,
+                        ": linking to shared start of ", a);
+                    return true;
+                  })
+                .map(anOriginalParallel -> anOriginalParallel.getStart())
+                .findAny();
             } // matchingMergedAnchor == null
-            if (matchingMergedAnchor != null) { // use the existing anchor
+            if (matchingMergedAnchor.isPresent()) { // use the existing anchor
+              final Anchor finalMatchingMergedAnchor = matchingMergedAnchor.get();
               // this, and all parallel annotation on *unrelated* layers come with us
-              for (Annotation an : anOriginal.getStart().getStartingAnnotations()) {
-                if (an == anOriginal) continue;
+              anOriginal.getStart().startingAnnotations()
+                .filter(a -> a != anOriginal)
                 // unrelated layer?
-                Layer otherLayer = an.getLayer();
-                if (!layer.getParentId().equals(otherLayer.getId())
-                    && !otherLayer.getParentId().equals(layerId)) {
-                  // if the layer is known to the edited graph,
-                  // only re-link if they share anchors in the edited graph too
-                  if (editedGraph.getLayer(an.getLayerId()) != null) {
-                    Annotation anEditedParallel = getCounterpart(an);
-                    if (anEditedParallel == null
-                        || anEditedParallel.getStart() != anEdited.getStart()) 
-                      continue;
-                  } else { // non-edited layer
-                    // if it's already been changed, skip it
-                    if (an.getStart() != anOriginal.getStart()) continue;
-                  }
-                  log(layerId, ": Different start anchor for ", anOriginal,
-                      ": linking parallel ", an, " too");
-                  if (an.getInstantaneous()) {
-                     an.setEnd(matchingMergedAnchor); 
-                  }
-                  an.setStart(matchingMergedAnchor);
-                } // unrelated layer
-              } // next annotation starting here
-              anOriginal.setStart(matchingMergedAnchor);
-            } else {
+                .filter(a -> {
+                    Layer otherLayer = a.getLayer();
+                    if (!layer.getParentId().equals(otherLayer.getId())
+                        && !otherLayer.getParentId().equals(layerId)) {
+                      // if the layer is known to the edited graph,
+                      // only re-link if they share anchors in the edited graph too
+                      if (editedGraph.getLayer(a.getLayerId()) != null) {
+                        Annotation anEditedParallel = GetCounterpart(a);
+                        if (anEditedParallel == null
+                            || anEditedParallel.getStart() != anEdited.getStart()) 
+                          return false;
+                      } else { // non-edited layer
+                        // if it's already been changed, skip it
+                        if (a.getStart() != anOriginal.getStart()) return false;
+                      }
+                    }
+                    return true;
+                  })
+                .forEach(a -> {
+                    log(layerId, ": Different start anchor for ", anOriginal,
+                        ": linking parallel ", a, " too");
+                    if (a.getInstantaneous()) {
+                      a.setEnd(finalMatchingMergedAnchor); 
+                    }
+                    a.setStart(finalMatchingMergedAnchor);
+                  });
+              anOriginal.setStart(finalMatchingMergedAnchor);
+            } else { // no matchingMergedAnchor
               if (!dummyEditedAnchors.contains(anEdited.getStart())) {
                 delta = new Anchor(anEdited.getStart());
               }
@@ -1940,65 +1948,101 @@ public class Merger extends Transform implements GraphTransformer {
               Anchor newAnchor = new Anchor(anOriginal.getStart());
               newAnchor.create();
               graph.addAnchor(newAnchor);
-              for (Annotation previousAnnotation 
-                     : removeDeleted(anOriginal.getStart().getEndingAnnotations())) {
-                if (previousAnnotation == anOriginal) continue; // instantaneous
-                Layer otherLayer = previousAnnotation.getLayer();
-                // check for other possible end anchor, by following the edited graph structure
-                Annotation editedPreviousAnnotation = getCounterpart(previousAnnotation);
-                if (editedPreviousAnnotation != null) {
-                  // only if they're not linked in the edited graph
-                  if (editedPreviousAnnotation.getEnd() != anEdited.getStart()) {
-                    for (Annotation editedPrevious2
-                           : editedPreviousAnnotation.getEnd().getEndingAnnotations()) {
-                      if (!hasCounterpart(editedPrevious2)) continue;
-                      Annotation originalPrevious2 = getCounterpart(editedPrevious2);
-                      if (originalPrevious2.getEnd() != anOriginal.getStart()) {
+              newAnchor = anOriginal.getStart().endingAnnotations()
+                .filter(Annotation::NotDestroyed)
+                .filter(previousAnnotation -> previousAnnotation != anOriginal)
+                .filter(Merger::HasCounterpart)
+                .map(previousAnnotation ->  {
+                    Layer otherLayer = previousAnnotation.getLayer();
+                    Annotation editedPreviousAnnotation = GetCounterpart(previousAnnotation);
+                    // only if they're not linked in the edited graph
+                    if (editedPreviousAnnotation.getEnd() != anEdited.getStart()) {
+                      Optional<Annotation> originalPrevious2
+                        = editedPreviousAnnotation.getEnd().endingAnnotations()
+                        .filter(Merger::HasCounterpart)
+                        .map(Merger::GetCounterpart) // now annotation in original graph
+                        .filter(a -> a.getEnd() != anOriginal.getStart())
+                        .findAny();
+                      if (originalPrevious2.isPresent()) {
                         // found a different but linked anchor via the edited graph structure
-                        newAnchor = originalPrevious2.getEnd();
-                        log(layerId, ": Found end anchor linked via ", originalPrevious2);
-                        break;
+                        log(layerId, ": Found end anchor linked via ", originalPrevious2.get());
+                        return originalPrevious2.get();
                       }
-                    } // next annotation that's parallel to this parallel annotation
-                    log(layerId, ": Different start anchor for ", anOriginal, 
-                        ": new anchor for ending ", previousAnnotation, " - ", newAnchor);
-                    changeEndWithRelatedAnnotations(previousAnnotation, newAnchor);
-                  } // they shouldn't be linked
-                } // there is a corresponding edited parallel annotation
-              } // next anchor using this as an end anchor
-		     
+                    }
+                    return null;
+                  })
+                .filter(Objects::nonNull)
+                .map(originalPrevious2 -> originalPrevious2.getEnd())
+                .findAny().orElse(newAnchor);
+              
+              final Anchor finalNewAnchor = newAnchor;
+              // (endingAnnotations() can't be used because it causes concurrent mod issues...)
+              anOriginal.getStart().getEndingAnnotations().stream()
+                .filter(Annotation::NotDestroyed)
+                .filter(previousAnnotation -> previousAnnotation != anOriginal)
+                .forEach(previousAnnotation -> {
+                    // check for other possible end anchor, by following the edited graph structure
+                    Annotation editedPreviousAnnotation = GetCounterpart(previousAnnotation);
+                    if (editedPreviousAnnotation != null) {
+                      // only if they're not linked in the edited graph
+                      if (editedPreviousAnnotation.getEnd() != anEdited.getStart()) {
+                        // next annotation that's parallel to this parallel annotation
+                        log(layerId, ": Different start anchor for ", anOriginal, 
+                            ": new anchor for ending ", previousAnnotation, " - ", finalNewAnchor);
+                        changeEndWithRelatedAnnotations(previousAnnotation, finalNewAnchor);
+                      } // they shouldn't be linked
+                    } // there is a corresponding edited parallel annotation
+                  });
+
               // do the same for annotations that start here
-              for (Annotation parallelAnnotation
-                     : removeDeleted(anOriginal.getStart().getStartingAnnotations())) {
-                if (parallelAnnotation == anOriginal) continue; // not ourselves
-                if (parallelAnnotation == anOriginal.getParent()) continue; // not our parent
-                Layer otherLayer = parallelAnnotation.getLayer();
-                // check for other possible start anchor, by following the edited graph structure
-                Annotation editedParallelAnnotation = getCounterpart(parallelAnnotation);
-                if (editedParallelAnnotation != null) {
-                  // only if they're not linked in the edited graph
-                  if (editedParallelAnnotation.getStart() != anEdited.getStart()) {
-                    for (Annotation editedParallel2 
-                           : editedParallelAnnotation.getStart().getStartingAnnotations()) {
-                      Annotation originalParallel2 = getCounterpart(editedParallel2);
-                      if (originalParallel2 == null) continue;
-                      if (originalParallel2.getStart() != anOriginal.getStart())
-                      { // found a different but linked anchor via the edited graph structure
-                        newAnchor = originalParallel2.getStart();
-                        log(layerId, ": Found start anchor linked via ", originalParallel2);
-                        break;
-                      }
-                    } // next annotation that's parallel to this parallel annotation
-                    parallelAnnotation.setStart(newAnchor);
-                    log(layerId, ": Different start anchor for ", anOriginal,
-                        ": new anchor for starting ", parallelAnnotation);
-                  } // they shouldn't be linked
-                } // there is a corresponding edited parallel annotation
-              } // next anchor using this as an end anchor
-            } 
+              newAnchor = anOriginal.getStart().startingAnnotations()
+                .filter(Annotation::NotDestroyed)
+                .filter(parallelAnnotation -> parallelAnnotation != anOriginal) // not ourselves
+                .filter(parallelAnnotation -> parallelAnnotation != anOriginal.getParent()) // not our parent
+                .filter(Merger::HasCounterpart)
+                .map(parallelAnnotation -> {
+                    Annotation editedParallelAnnotation = GetCounterpart(parallelAnnotation);
+                    // only if they're not linked in the edited graph
+                    if (editedParallelAnnotation.getStart() != anEdited.getStart()) {
+                      for (Annotation editedParallel2 
+                             : editedParallelAnnotation.getStart().getStartingAnnotations()) {
+                        Annotation originalParallel2 = GetCounterpart(editedParallel2);
+                        if (originalParallel2 == null) continue;
+                        if (originalParallel2.getStart() != anOriginal.getStart())
+                        { // found a different but linked anchor via the edited graph structure
+                          log(layerId, ": Found start anchor linked via ", originalParallel2);
+                          return originalParallel2;
+                        }
+                      } // next annotation that's parallel to this parallel annotation
+                    } // they shouldn't be linked
+                    return null; 
+                  })
+                .filter(Objects::nonNull)
+                .map(originalParallel2 -> originalParallel2.getStart())
+                .findAny().orElse(newAnchor);
+              
+              final Anchor finalNewAnchor2 = newAnchor;
+              anOriginal.getStart().startingAnnotations()
+                .filter(Annotation::NotDestroyed)
+                .filter(parallelAnnotation -> parallelAnnotation != anOriginal) // not ourselves
+                .filter(parallelAnnotation -> parallelAnnotation != anOriginal.getParent()) // not our parent
+                .filter(Merger::HasCounterpart)
+                .forEach(parallelAnnotation -> {
+                    // check for other possible start anchor, by following the edited graph structure
+                    Annotation editedParallelAnnotation = GetCounterpart(parallelAnnotation);
+                    if (editedParallelAnnotation != null) {
+                      // only if they're not linked in the edited graph
+                      if (editedParallelAnnotation.getStart() != anEdited.getStart()) {
+                        parallelAnnotation.setStart(finalNewAnchor2);
+                        log(layerId, ": Different start anchor for ", anOriginal,
+                            ": new anchor for starting ", parallelAnnotation);
+                      } // they shouldn't be linked
+                    } // there is a corresponding edited parallel annotation
+                  });
+            } // no matchingMergedAnchor
             // are we changing this anchor?
             if (delta != null) {
-              setConfidence(anOriginal.getStart(), getConfidence(delta));
+              SetConfidence(anOriginal.getStart(), GetConfidence(delta));
               if (differentOffset) {
                 anOriginal.getStart().setOffset(delta.getOffset());
                 log(layerId, ": Different start anchor for ", anOriginal,
@@ -2017,7 +2061,7 @@ public class Merger extends Transform implements GraphTransformer {
             && compare(anLastOriginal.getEnd(), anOriginal.getStart()) == 0) {
           // previous annotation ending where this one starts
           // do they share anchors in the edited version of the graph?
-          Annotation anLastEdited = getCounterpart(anLastOriginal);
+          Annotation anLastEdited = GetCounterpart(anLastOriginal);
           // skip it if there's an intervening annotation on this layer (e.g. "unclear")
           boolean interveningOriginal = false;
           Annotation anOriginalPreviousNext = anLastOriginal.getNext();
@@ -2063,31 +2107,50 @@ public class Merger extends Transform implements GraphTransformer {
             Anchor newAnchor = new Anchor(anOriginal.getStart());
             newAnchor.create();
             graph.addAnchor(newAnchor);
-            for (Annotation previousAnnotation 
-                   : removeDeleted(anOriginal.getStart().getEndingAnnotations())) {
-              if (previousAnnotation == anOriginal) continue; // instantaneous
-              Layer otherLayer = previousAnnotation.getLayer();
-              // check for other possible end anchor, by following the edited graph structure
-              Annotation editedPreviousAnnotation = getCounterpart(previousAnnotation);
-              if (editedPreviousAnnotation != null) {
-                // only if they're not linked in the edited graph
-                if (editedPreviousAnnotation.getEnd() != anEdited.getStart()) {
-                  for (Annotation editedPrevious2 
-                         : editedPreviousAnnotation.getEnd().getEndingAnnotations()) {
-                    Annotation originalPrevious2 = getCounterpart(editedPrevious2);
-                    if (originalPrevious2.getEnd() != anOriginal.getStart()) {
+            newAnchor = anOriginal.getStart().endingAnnotations()
+              .filter(Annotation::NotDestroyed)
+              .filter(a -> a != anOriginal) // instantaneous
+              .filter(Merger::HasCounterpart)
+              .map(previousAnnotation -> {
+                  Layer otherLayer = previousAnnotation.getLayer();
+                  // check for other possible end anchor, by following the edited graph structure
+                  Annotation editedPreviousAnnotation = GetCounterpart(previousAnnotation);
+                  // only if they're not linked in the edited graph
+                  if (editedPreviousAnnotation.getEnd() != anEdited.getStart()) {
+                    Optional<Annotation> originalPrevious2 
+                      = editedPreviousAnnotation.getEnd().endingAnnotations()
+                      .filter(Merger::HasCounterpart)
+                      .map(Merger::GetCounterpart) // now annotation in original graph
+                      .filter(a -> a.getEnd() != anOriginal.getStart())
+                      .findAny();
+                    if (originalPrevious2.isPresent()) {
                       // found a different but linked anchor via the edited graph structure
-                      newAnchor = originalPrevious2.getEnd();
-                      log(layerId, ": Found end anchor linked via ", originalPrevious2);
-                      break;
+                      log(layerId, ": Found end anchor linked via ", originalPrevious2.get());
+                      return originalPrevious2.get();
                     }
-                  } // next annotation that's parallel to this parallel annotation
-                  log(layerId, ": Different start anchor for ", anOriginal,
-                      ": new anchor for ending ", previousAnnotation, " -- ", newAnchor);
-                  changeEndWithRelatedAnnotations(previousAnnotation, newAnchor);
-                } // they shouldn't be linked
-              } // there is a corresponding edited parallel annotation
-            } // next anchor using this as an end anchor	       
+                  }
+                  return null;
+                })
+              .filter(Objects::nonNull)
+              .map(originalPrevious2 -> originalPrevious2.getEnd())
+              .findAny().orElse(newAnchor);
+
+            final Anchor finalNewAnchor = newAnchor;
+            // (endingAnnotations() can't be used because it causes concurrent mod issues...)
+            anOriginal.getStart().getEndingAnnotations().stream()
+              .filter(Annotation::NotDestroyed)
+              .filter(a -> a != anOriginal) // instantaneous
+              .filter(Merger::HasCounterpart)
+              .forEach(previousAnnotation -> {
+                  // check for other possible end anchor, by following the edited graph structure
+                  Annotation editedPreviousAnnotation = GetCounterpart(previousAnnotation);
+                  // only if they're not linked in the edited graph
+                  if (editedPreviousAnnotation.getEnd() != anEdited.getStart()) {
+                    log(layerId, ": Different start anchor for ", anOriginal,
+                        ": new anchor for ending ", previousAnnotation, " -- ", finalNewAnchor);
+                    changeEndWithRelatedAnnotations(previousAnnotation, finalNewAnchor);
+                  }
+                });
           } // not sharing in editedGraph
         } // previous annotation ending where this one starts
 
@@ -2108,144 +2171,142 @@ public class Merger extends Transform implements GraphTransformer {
           // there may be reasons to relink the
           // annotation to another anchor - i.e. it's linked differently in the edited graph
           boolean bChanged = false;
-          for (Annotation anParallel : anEdited.getEnd().getEndingAnnotations()) {
-            if (anParallel == anEdited) continue;		  
-            if (hasCounterpart(anParallel)) {
-              Annotation anLinkedOriginalParallel = getCounterpart(anParallel);
-              if (anLinkedOriginalParallel.getEnd() == null) continue;
-              if (anOriginal.getEnd() != anLinkedOriginalParallel.getEnd()
-                  && getConfidence(anOriginal.getEnd())
-                  <= getConfidence(anLinkedOriginalParallel.getEnd())) {
-                // link this annotation to the parallel one
-                // only link to annotations that have been through this phase
-                if (!anLinkedOriginalParallel.containsKey("@computeAnchorDeltasForMerge")) continue;
-                // don't share this anchor if there's an annotation connected that we shouldn't share with
-                if (layer.getSaturated() 
-                    || anLinkedOriginalParallel.getEnd().endOf(layer.getParentId()).size() == 0) {
-                  log(layerId, ": Share end anchor of ", anOriginal, 
-                      " with parallel ", anLinkedOriginalParallel);
-                  // ensure that the end anchor for the last annotation is updated
-                  if (anEdited.getInstantaneous()) anOriginal.setStart(anLinkedOriginalParallel.getEnd());
-                  anOriginal.setEnd(anLinkedOriginalParallel.getEnd());
-                  bChanged = true;
-                  break;
-                } // bShare
-              }
-            } // their-parallel has a counterpart
-          } // next parallel their-annotation
+          Optional<Annotation> anLinkedOriginalParallel2 = anEdited.getEnd().endingAnnotations()
+            .filter(Annotation::NotDestroyed)
+            .filter(a -> a != anEdited)
+            .filter(Merger::HasCounterpart)
+            .map(Merger::GetCounterpart) // now linked parallel in original graph
+            .filter(a -> a.getEnd() != null)
+            .filter(a -> anOriginal.getEnd() != a.getEnd()
+                    && GetConfidence(anOriginal.getEnd()) <= GetConfidence(a.getEnd()))
+            // only link to annotations that have been through this phase
+            .filter(a -> a.containsKey("@computeAnchorDeltasForMerge"))
+            // don't share this anchor if there's an annotation connected that we
+            // shouldn't share with
+            .filter(a -> layer.getSaturated() 
+                    || !a.getEnd().endingAnnotations(layer.getParentId()).findAny().isPresent())
+            .findAny();
+          if (anLinkedOriginalParallel2.isPresent()) {
+            log(layerId, ": Share end anchor of ", anOriginal, 
+                " with parallel ", anLinkedOriginalParallel2.get());
+            // ensure that the end anchor for the last annotation is updated
+            if (anEdited.getInstantaneous()) {
+              anOriginal.setStart(anLinkedOriginalParallel2.get().getEnd());
+            }
+            anOriginal.setEnd(anLinkedOriginalParallel2.get().getEnd());
+            bChanged = true;
+          } // there is a linked original parallel annotation
           if (!bChanged) {
             // or maybe its shared for us but *not* shared for them
-            for (Annotation anParallel : removeDeleted(anOriginal.getEnd().getEndingAnnotations())) {
-              if (anParallel == anOriginal) continue;		  
-              if (anParallel.getLayerId() == anOriginal.getLayerId()) continue;		  
-              if (hasCounterpart(anParallel)) {
-                Annotation anEditedParallel = getCounterpart(anParallel);
-                if (anEdited.getEnd() != anEditedParallel.getEnd()
-                    && !dummyEditedAnchors.contains(anEdited.getEnd())) {
-                  // SHOULD they share? Is there a saturated relationship between the layers
-                  // (annotation in the child layer)
-                  Layer parallelLayer = graph.getLayer(anEditedParallel.getLayerId());
-                  if ((layer.getParentId().equals(anEditedParallel.getLayerId())
-                       && layer.getSaturated())
-                      || (parallelLayer != null && parallelLayer.getParentId().equals(layerId)
-                          && parallelLayer.getSaturated())) {
-                    if (!layer.getParentId().equals(anEditedParallel.getLayerId())) {
-                      // parent layer 
-                      bCheckEndAnchorOffset = false;
-                      log(layerId, ": For ", anOriginal,
-                          " assuming that end of ", anParallel, " is correct");
-                      // i.e. if the edited graph has disconnection between words and segments
-                      // then the segment alignments trump the word aligments
-                    }
-                    // otherwise it's a child - simply don't unlink it, but allow it to change
-                    continue; // next parallel...
+            for (Annotation anParallel : anOriginal.getEnd().endingAnnotations()
+                   .filter(Annotation::NotDestroyed)
+                   .filter(a -> a != anOriginal)
+                   .filter(a -> !a.getLayerId().equals(anOriginal.getLayerId()))
+                   .filter(Merger::HasCounterpart)
+                   .collect(Collectors.toList())) {
+              Annotation anEditedParallel = GetCounterpart(anParallel);
+              if (anEdited.getEnd() != anEditedParallel.getEnd()
+                  && !dummyEditedAnchors.contains(anEdited.getEnd())) {
+                // SHOULD they share? Is there a saturated relationship between the layers
+                // (annotation in the child layer)
+                Layer parallelLayer = graph.getLayer(anEditedParallel.getLayerId());
+                if ((layer.getParentId().equals(anEditedParallel.getLayerId())
+                     && layer.getSaturated())
+                    || (parallelLayer != null && parallelLayer.getParentId().equals(layerId)
+                        && parallelLayer.getSaturated())) {
+                  if (!layer.getParentId().equals(anEditedParallel.getLayerId())) {
+                    // parent layer 
+                    bCheckEndAnchorOffset = false;
+                    log(layerId, ": For ", anOriginal,
+                        " assuming that end of ", anParallel, " is correct");
+                    // i.e. if the edited graph has disconnection between words and segments
+                    // then the segment alignments trump the word aligments
                   }
-			   
-                  // new anchor - copy the original, then later we'll check the offset
-                  Anchor newAnchor = new Anchor(anOriginal.getEnd());
-                  newAnchor.create();
-                  graph.addAnchor(newAnchor);
-			   
-                  // we change related annotations, but not those related to the parallel layer
-                  HashSet<String> relatedToParallel = new HashSet<String>();
-                  relatedToParallel.addAll(parallelLayer.getChildren().keySet());
-                  relatedToParallel.add(parallelLayer.getParentId());
-                  changeEndWithRelatedAnnotations(anOriginal, newAnchor, relatedToParallel);
-                  log(layerId, ": Different end anchor for ", anOriginal,
-                      " unshared from ", anParallel, ": new anchor at ", newAnchor.getOffset());
-                  bChanged = true;
-                  bCheckEndAnchorOffset = true;
-                  break;
-                } // they don't share in the edited graph
-              } // their-parallel has a counterpart
+                  // otherwise it's a child - simply don't unlink it, but allow it to change
+                  continue; // next parallel...
+                }
+		
+                // new anchor - copy the original, then later we'll check the offset
+                Anchor newAnchor = new Anchor(anOriginal.getEnd());
+                newAnchor.create();
+                graph.addAnchor(newAnchor);
+		
+                // we change related annotations, but not those related to the parallel layer
+                HashSet<String> relatedToParallel = new HashSet<String>();
+                relatedToParallel.addAll(parallelLayer.getChildren().keySet());
+                relatedToParallel.add(parallelLayer.getParentId());
+                changeEndWithRelatedAnnotations(anOriginal, newAnchor, relatedToParallel);
+                log(layerId, ": Different end anchor for ", anOriginal,
+                    " unshared from ", anParallel, ": new anchor at ", newAnchor.getOffset());
+                bChanged = true;
+                bCheckEndAnchorOffset = true;
+                break;
+              } // they don't share in the edited graph
             } // next possible parallel
-          }	    
+          } // !bChanged
 	       
           Anchor delta = null;
           if (bCheckEndAnchorOffset) {
             boolean differentOffset
               = compare(anEdited.getEnd(), anOriginal.getEnd()) != 0;
             boolean higherConfidence
-              = getConfidence(anEdited.getEnd()) > getConfidence(anOriginal.getEnd());
+              = GetConfidence(anEdited.getEnd()) > GetConfidence(anOriginal.getEnd());
             boolean sameOrHigherConfidence
-              = getConfidence(anEdited.getEnd()) >= getConfidence(anOriginal.getEnd());
+              = GetConfidence(anEdited.getEnd()) >= GetConfidence(anOriginal.getEnd());
             if (ignoreOffsetConfidence
                 || higherConfidence || (differentOffset && sameOrHigherConfidence)) {
-              Anchor matchingMergedAnchor = null;
               // try for parallel annotations on another layer
-              for (Annotation anEditedParallel : anEdited.getEnd().getEndingAnnotations()) {
-                if (anEditedParallel == anEdited) continue; // skip ourselves
-                if (anEditedParallel.getLayerId() == anEdited.getLayerId()) continue; // on our own layer
-                Annotation anOriginalParallel = getCounterpart(anEditedParallel);
+              Optional<Anchor> matchingMergedAnchor = anEdited.getEnd().endingAnnotations()
+                .filter(a -> a != anEdited) // skip ourselves
+                .filter(a-> !a.getLayerId().equals(anEdited.getLayerId())) // not on our own layer
                 // skip unmerged annotations from a neighboring fragments
                 // (TODO not sure there can be any)
-                if (anOriginalParallel == null) continue; 
-                assert anOriginalParallel.getEnd() != null 
-                  : "anOriginalParallel.getEnd() != null - " + anOriginalParallel;
+                .filter(Merger::HasCounterpart)
+                .map(Merger::GetCounterpart) // now the parallel annotation in the original graph
                 // no use linking to the very same anchor
-                if (anOriginalParallel.getEnd() == anOriginal.getEnd()) continue;
+                .filter(a -> a.getEnd() != anOriginal.getEnd())
                 // offset should be the same
-                if (compare(anOriginalParallel.getEnd(), anEditedParallel.getEnd()) != 0
-                    // unless our offset is less trustworthy than theirs
-                    && getConfidence(anEditedParallel.getEnd()) >= Constants.CONFIDENCE_AUTOMATIC
-                    && getConfidence(anOriginalParallel.getEnd()) 
-                    <= getConfidence(anEditedParallel.getEnd())) continue;
-                matchingMergedAnchor = anOriginalParallel.getEnd();
-                log(layerId, ": Different end anchor for ", anOriginal,
-                    ": linking to shared end of ", anOriginalParallel);
-                break;
-              } // next possible start anchor annotation
-              if (matchingMergedAnchor != null) {
-                // this, and all parallel annotation on *unrelated* layers come with us
-                for (Annotation an : anOriginal.getEnd().getEndingAnnotations()) {
-                  if (an == anOriginal) continue;
-                  // unrelated layer?
-                  Layer otherLayer = an.getLayer();
-                  if (!layer.getParentId().equals(an.getLayerId())
-                      && otherLayer.getParentId().equals(layerId)) {
-                    log(layerId, ": Different end anchor for ", anOriginal,
-                        ": linking parallel ", an, " too");
-                    if (an.getInstantaneous()) { // instant
-                       an.setStart(matchingMergedAnchor);
+                .filter(a -> {
+                    Annotation anEditedParallel = GetCounterpart(a);
+                    if (compare(a.getEnd(), anEditedParallel.getEnd()) == 0
+                        // unless our offset is less trustworthy than theirs
+                        || GetConfidence(anEditedParallel.getEnd()) < Constants.CONFIDENCE_AUTOMATIC
+                        || GetConfidence(a.getEnd()) > GetConfidence(anEditedParallel.getEnd())) {
+                      log(layerId, ": Different end anchor for ", anOriginal,
+                          ": linking to shared end of ", a);
+                      return true;
                     }
-                    an.setEnd(matchingMergedAnchor);
-                  }
-                }
-                anOriginal.setEnd(matchingMergedAnchor);
+                    return false;                        
+                  })
+                .map(anOriginalParallel -> anOriginalParallel.getEnd())
+                .findAny();
+              
+              if (matchingMergedAnchor.isPresent()) {
+                // this, and all parallel annotation on *unrelated* layers come with us
+                anOriginal.getEnd().endingAnnotations()
+                  .filter(a -> a != anOriginal)
+                  // unrelated layer?
+                  .filter(a -> !layer.getParentId().equals(a.getLayerId())
+                          && a.getLayer().getParentId().equals(layerId))
+                  .forEach(an -> {
+                      log(layerId, ": Different end anchor for ", anOriginal,
+                          ": linking parallel ", an, " too");
+                      if (an.getInstantaneous()) { // instant
+                        an.setStart(matchingMergedAnchor.get());
+                      }
+                      an.setEnd(matchingMergedAnchor.get());
+                    });
+                anOriginal.setEnd(matchingMergedAnchor.get());
               } else { // no already-merged anchor we can use
                 // we might need a new anchor, if this is also the start anchor for
                 // another annotation with a different edited offset
-			
-                boolean bSplitFromFollowing = false;
-                for (Annotation anFollowing : anOriginal.getEnd().startOf(layerId)) {
-                  Annotation anEditedFollowing = getCounterpart(anFollowing);
-                  if (anEditedFollowing != null
-                      && anEditedFollowing.getStart() != anEdited.getEnd()) {
-                    bSplitFromFollowing = true;
-                    break;
-                  }
-                } // next following annotation
-			
+                
+                boolean bSplitFromFollowing = anOriginal.getEnd().startingAnnotations(layerId)
+                  .filter(Merger::HasCounterpart)
+                  .map(Merger::GetCounterpart) // now annotation in edite graph
+                  .filter(a -> a.getStart() != anEdited.getEnd())
+                  .findAny().isPresent();
+		
                 if (!dummyEditedAnchors.contains(anEdited.getEnd())) {
                   if (bSplitFromFollowing) {
                     delta = new Anchor(anEdited.getEnd());
@@ -2261,7 +2322,7 @@ public class Merger extends Transform implements GraphTransformer {
             // applying change to anchor?
             if (delta != null) {
               if (delta.getChange() != Change.Operation.Create) {
-                setConfidence(anOriginal.getEnd(), getConfidence(delta));
+                SetConfidence(anOriginal.getEnd(), GetConfidence(delta));
                 if (differentOffset) {
                   anOriginal.getEnd().setOffset(delta.getOffset());
                   log(layerId, ": Different end anchor for ", anOriginal,
@@ -2287,7 +2348,7 @@ public class Merger extends Transform implements GraphTransformer {
           if (anOriginal.getEnd().getOffset() != null && anOriginal.getStart().getOffset() != null
               && anOriginal.getEnd().getOffset() < anOriginal.getStart().getOffset()) {
             // is the start anchor for realignment anyway?
-            if (getConfidence(anOriginal.getStart()) == Constants.CONFIDENCE_NONE) {
+            if (GetConfidence(anOriginal.getStart()) == Constants.CONFIDENCE_NONE) {
               log(layerId, ": Reversed anchors: ", anOriginal,
                   ": start is soft, so moving before end");
               // reset the offset
@@ -2298,7 +2359,7 @@ public class Merger extends Transform implements GraphTransformer {
                       - anLastOriginal.getStart().getOffset())/2);
               }
               anOriginal.getStart().setOffset(dNewOffset);
-              setConfidence(anOriginal.getStart(), Constants.CONFIDENCE_NONE);
+              SetConfidence(anOriginal.getStart(), Constants.CONFIDENCE_NONE);
             }
           }
         } // not an instananeous annotation
@@ -2353,11 +2414,11 @@ public class Merger extends Transform implements GraphTransformer {
       // edited graph has both parent and child layer
       // detect parent changes
       for (Annotation child : graph.all(layerId)) {
-        Annotation editedChild = getCounterpart(child);
+        Annotation editedChild = GetCounterpart(child);
         if (editedChild == null) continue;
         Annotation editedParent = editedChild.getParent();
         if (editedParent == null) continue;
-        Annotation editedParentCounterpart = getCounterpart(editedParent);
+        Annotation editedParentCounterpart = GetCounterpart(editedParent);
         if (editedParentCounterpart == null) continue;
         Annotation originalParent = child.getParent();
         if (originalParent == null || originalParent.getId() == null
@@ -2412,7 +2473,7 @@ public class Merger extends Transform implements GraphTransformer {
       Annotation anLastOriginalParentsLastChild = null;
       // for each parent in the edited graph
       for (Annotation anParent : editedGraph.all(parentLayerId)) {
-        Annotation anOriginalParent = getCounterpart(anParent);
+        Annotation anOriginalParent = GetCounterpart(anParent);
         log(layerId, ": Parent ", anOriginalParent);
         // there may be no original parent because noChangeLayers forbade its addition
         if (anOriginalParent == null) continue;
@@ -2423,7 +2484,7 @@ public class Merger extends Transform implements GraphTransformer {
         if (editedGraphHasChildLayer) {
           // edited graph includes child layer, so use its annotations to get to the originals
           byOrdinalOrOffset.addAll(anParent.getAnnotations(layerId));
-          for (Annotation an : byOrdinalOrOffset) myChildren.add(getCounterpart(an));
+          for (Annotation an : byOrdinalOrOffset) myChildren.add(GetCounterpart(an));
         } else { // edited graph doesn't include child layer, so use the original graph directly
           byOrdinalOrOffset.addAll(anOriginalParent.getAnnotations(layerId));
           for (Annotation an : byOrdinalOrOffset) myChildren.add(an);
@@ -2462,7 +2523,7 @@ public class Merger extends Transform implements GraphTransformer {
           while (iMyChildren.hasNext()) {
             Annotation an = iMyChildren.next();
             if (!children.contains(an)) {
-              if (getConfidence(an) <= Constants.CONFIDENCE_AUTOMATIC) {
+              if (GetConfidence(an) <= Constants.CONFIDENCE_AUTOMATIC) {
                  an.destroy();
               }
               iMyChildren.remove();
@@ -2484,7 +2545,7 @@ public class Merger extends Transform implements GraphTransformer {
           Annotation anOriginalChild = anChild;
           if (editedGraphHasChildLayer) {
             // edited graph includes child layer, so use its annotations to get to the originals
-            anOriginalChild = getCounterpart(anChild);
+            anOriginalChild = GetCounterpart(anChild);
           }
           log(layerId, ": Child ", anOriginalChild); // TODO comment out
           // there may be no counterpart in the original graph
@@ -2500,7 +2561,7 @@ public class Merger extends Transform implements GraphTransformer {
               Iterator<Annotation> i = partitionIterators.get(partitionLayerId);
               if (i == null) continue;
               Annotation currentPartitionEdited = currentPartition.get(partitionLayerId);
-              Annotation currentPartitionOriginal = getCounterpart(currentPartitionEdited);
+              Annotation currentPartitionOriginal = GetCounterpart(currentPartitionEdited);
               assert currentPartitionOriginal != null : "currentPartitionOriginal != null: "
                  + currentPartitionEdited.getId() + " " + currentPartitionEdited.getLabel()
                  + " ("+partitionLayerId+")";
@@ -2567,24 +2628,25 @@ public class Merger extends Transform implements GraphTransformer {
                 sShareLastAnchorReason = "child shares anchor with multiple child annotation ends";
             } // not first child
             if (sNewAnchorReason == null && sShareLastAnchorReason == null) {
-              Vector<Annotation> parentsStartingHere 
-                = new Vector<Annotation>(anOriginalChild.getStart().startOf(parentLayerId));
-              Vector<Annotation> parentsEndingHere 
-                = new Vector<Annotation>(anOriginalChild.getStart().endOf(parentLayerId));
+              long parentsStartingHere = anOriginalChild.getStart()
+                .startingAnnotations(parentLayerId).count();
+              long parentsEndingHere  = anOriginalChild.getStart()
+                .endingAnnotations(parentLayerId).count();
               if (lastChild == null) { // first child
-                if (parentsStartingHere.size() == 1
-                    && parentsStartingHere.firstElement() != anOriginalParent)
+                if (parentsStartingHere == 1
+                    && anOriginalChild.getStart()
+                    .startingAnnotations(parentLayerId).findAny().get() != anOriginalParent)
                   sNewAnchorReason = "first child shares anchor with parent layer annotation but not parent";
-                else if (parentsStartingHere.size() > 2)
+                else if (parentsStartingHere > 2)
                   sNewAnchorReason = "first child shares start anchor with multiple parent layer annotation starts";
-                else if (parentsEndingHere.size() > 1)
+                else if (parentsEndingHere > 1)
                   sNewAnchorReason = "first child shares anchor with multiple parent layer annotation ends";
               } else { // not first child
                 // any parent-layer annotation starts here
-                if (parentsStartingHere.size() > 0)
+                if (parentsStartingHere > 0)
                   sShareLastAnchorReason = "child shares anchor with parent layer annotation start";
                 // any parent-layer annotation ends here
-                else if (parentsEndingHere.size() > 0)
+                else if (parentsEndingHere > 0)
                   sNewAnchorReason = "child shares anchor with parent layer annotation end";
               } // not first child
             } // sNewAnchorReason and sShareLastAnchorReason still null
@@ -2609,44 +2671,47 @@ public class Merger extends Transform implements GraphTransformer {
           // end anchor
           sNewAnchorReason = null;
           if (bNoInterSharingForChildren) {
-            Vector<Annotation> childrenStartingHere 
-              = removeDeleted(anOriginalChild.getEnd().startOf(layerId));
-            Vector<Annotation> childrenEndingHere 
-              = removeDeleted(anOriginalChild.getEnd().endOf(layerId));
+            long childrenStartingHere = anOriginalChild.getEnd().startingAnnotations(layerId)
+              .filter(Annotation::NotDestroyed)
+              .count();
+            long childrenEndingHere = anOriginalChild.getEnd().endingAnnotations(layerId)
+              .filter(Annotation::NotDestroyed)
+              .count();
             Annotation anLastOriginalChild = children.last();
             if (editedGraphHasChildLayer) {
               // edited graph includes child layer, children contains the edited version
-              anLastOriginalChild = getCounterpart(anLastOriginalChild);
+              anLastOriginalChild = GetCounterpart(anLastOriginalChild);
             }	       
             if (anOriginalChild != anLastOriginalChild) { // not last child
               // any parent-layer annotation starts here
-              if (childrenEndingHere.size() > 1) 
+              if (childrenEndingHere > 1) 
                 sNewAnchorReason = "child shares anchor with other child annotation end";
-              else if (childrenStartingHere.size() > 2) 
+              else if (childrenStartingHere > 2) 
                 sNewAnchorReason = "child shares anchor with multiple child annotation starts";
             } else { // last child
-              if (childrenEndingHere.size() > 1) 
+              if (childrenEndingHere > 1) 
                 sNewAnchorReason = "last child shares anchor with other child annotation end";
-              else if (childrenStartingHere.size() > 2) 
+              else if (childrenStartingHere > 2) 
                 sNewAnchorReason = "last child shares anchor with multiple child annotation starts";
             } // last child
             if (sNewAnchorReason == null) {
-              Vector<Annotation> parentsStartingHere 
-                = new Vector<Annotation>(anOriginalChild.getEnd().startOf(parentLayerId));
-              Vector<Annotation> parentsEndingHere
-                = new Vector<Annotation>(anOriginalChild.getEnd().endOf(parentLayerId));
+              long parentsStartingHere = anOriginalChild.getEnd()
+                .startingAnnotations(parentLayerId).count();
+              long parentsEndingHere = anOriginalChild.getEnd()
+                .endingAnnotations(parentLayerId).count();
               if (anOriginalChild != anLastOriginalChild) { // not last child
-                if (parentsEndingHere.size() > 0)
+                if (parentsEndingHere > 0)
                   sNewAnchorReason = "child shares anchor with parent layer annotation end";
-                if (parentsStartingHere.size() > 0)
+                if (parentsStartingHere > 0)
                   sNewAnchorReason = "child shares anchor with parent layer annotation start - " + anLastOriginalChild;
               } else { // last child
-                if (parentsEndingHere.size() == 1
-                    && parentsEndingHere.firstElement() != anOriginalParent)
+                if (parentsEndingHere == 1
+                    && anOriginalChild.getEnd()
+                    .endingAnnotations(parentLayerId).findAny().get() != anOriginalParent)
                   sNewAnchorReason = "last child shares anchor with parent layer annotation but not parent";
-                else if (parentsEndingHere.size() > 2)
+                else if (parentsEndingHere > 2)
                   sNewAnchorReason = "last child shares anchor with multiple parent layer annotation ends";
-                else if (parentsStartingHere.size() > 1)
+                else if (parentsStartingHere > 1)
                   sNewAnchorReason = "last child shares anchor with multiple parent layer annotation starts";
               } // last child
             } // sNewAnchorReason still null
@@ -2685,7 +2750,7 @@ public class Merger extends Transform implements GraphTransformer {
             if (anchor.getOffset() < predecessor.getOffset()) { // out of order
               log(layerId, ": Out of order: ", anchor, " (", predecessor, ")"); // TODO comment out
               // which has the higher status?
-              if (getConfidence(anchor) <= getConfidence(predecessor)
+              if (GetConfidence(anchor) <= GetConfidence(predecessor)
                   // but we also don't want to run past the end of the parent
                   && (!(layer.getParentIncludes() // ...if the layer is parentIncludes
                         && anOriginalParent.getEnd().getOffset() != null)
@@ -2703,23 +2768,23 @@ public class Merger extends Transform implements GraphTransformer {
                   double dOriginalOffset = anchor.getOffset();
                   double dNewOffset = predecessor.getOffset() + smidgin;
                   anchor.setOffset(dNewOffset);
-                  setConfidence(anchor, Constants.CONFIDENCE_NONE);
+                  SetConfidence(anchor, Constants.CONFIDENCE_NONE);
                   log(layerId, ": Out of order; changing offset: ", anchor, " (", predecessor, ")");
                   // the offset is moving forward, so ending child annotations will be reset
-                  for (Annotation anStartingHere : removeDeleted(anchor.startOf(layerId))) {
-                    if (!myChildren.contains(anStartingHere)) {
-                      continue; // ignore non-children
-                    }
-                    if (anStartingHere.getEnd().getOffset() != null
-                        && anStartingHere.getEnd().getOffset() < dNewOffset) {
-                      // if the end anchor is in the past, it will need moving too
-                       anStartingHere.getEnd().setOffset(dNewOffset + smidgin);
-                      setConfidence(anStartingHere.getEnd(), Constants.CONFIDENCE_NONE);
-                      log(layerId, ": Out of order, changing offset of end anchor: ",
-                          anStartingHere);
-                    }
-                    resetChildAnchorsBefore(anStartingHere, dNewOffset);
-                  } // next annotation that start here
+                  anchor.startingAnnotations(layerId)
+                    .filter(Annotation::NotDestroyed)
+                    .filter(a -> myChildren.contains(a)) // ignore non-children
+                    .forEach(anStartingHere -> {
+                        if (anStartingHere.getEnd().getOffset() != null
+                            && anStartingHere.getEnd().getOffset() < dNewOffset) {
+                          // if the end anchor is in the past, it will need moving too
+                          anStartingHere.getEnd().setOffset(dNewOffset + smidgin);
+                          SetConfidence(anStartingHere.getEnd(), Constants.CONFIDENCE_NONE);
+                          log(layerId, ": Out of order, changing offset of end anchor: ",
+                              anStartingHere);
+                        }
+                        resetChildAnchorsBefore(anStartingHere, dNewOffset);
+                      }); // next annotation that start here
                 }
               } else { // anchor.status > predecessor.status
                 // more tricky case, we have to go backwards, resetting anchors of lower status
@@ -2744,7 +2809,7 @@ public class Merger extends Transform implements GraphTransformer {
                   }
 
                   // if we get to anchor that has a higher confidence than anchor.confidence, we stop
-                  if (getConfidence(predecessor) > getConfidence(anchor)
+                  if (GetConfidence(predecessor) > GetConfidence(anchor)
                       && predecessor.getOriginalOffset() != null) {
                     if (predecessor.getOriginalOffset() > dFutureOriginalOffset)
                       bRevertWouldSolve = false;
@@ -2760,7 +2825,7 @@ public class Merger extends Transform implements GraphTransformer {
                     break;
                   } else {
                     // TODO check if simply reverting would fix
-                    if (getConfidence(predecessor) == getConfidence(anchor)
+                    if (GetConfidence(predecessor) == GetConfidence(anchor)
                         && predecessor != anchor) {
                       bChangeCurrentAnchor = false; // change anchor as well as those prior to it
                     }
@@ -2819,25 +2884,23 @@ public class Merger extends Transform implements GraphTransformer {
                       double dOriginalOffset = anchorToChange.getOffset();
                       double dNewOffset = dStartOffset + (iChange * dDuration / iChangeCount);
                       anchorToChange.setOffset(dNewOffset);
-                      setConfidence(anchorToChange, Constants.CONFIDENCE_NONE);
+                      SetConfidence(anchorToChange, Constants.CONFIDENCE_NONE);
 				 
                       if (resetChildrenBefore != null) {
                         // the last loop involved moving an offset forward.
                         // the offset is moving forward,
                         // so starting child annotations will be reset
-                        for (Annotation anStartingHere : resetChildrenBefore.startOf(layerId)) {
-                          if (!myChildren.contains(anStartingHere)) continue; // ignore non-children
-                          resetChildAnchorsBefore(
-                            anStartingHere, resetChildrenBefore.getOffset());
-                        } // next annotation that starts here
+                        final Anchor before = resetChildrenBefore;
+                        resetChildrenBefore.startingAnnotations(layerId)
+                          .filter(a -> myChildren.contains(a)) // ignore non-children
+                          .forEach(a -> resetChildAnchorsBefore(a, before.getOffset()));
                       }
                       resetChildrenBefore = null;
 
                       if (dOriginalOffset > dNewOffset) {
                         // the offset is moving back, so ending child annotations will be reset
-                        for (Annotation anEndingHere : anchorToChange.endOf(layerId)) {
-                           resetChildAnchorsAfter(anEndingHere, dNewOffset);
-                        } // next annotation that ends here
+                        anchorToChange.endingAnnotations(layerId)
+                          .forEach(a -> resetChildAnchorsAfter(a, dNewOffset));
                       } else if (dOriginalOffset < dNewOffset) {
                         resetChildrenBefore = anchorToChange;
                         // the offset is moving forward, so starting child annotations
@@ -2858,10 +2921,10 @@ public class Merger extends Transform implements GraphTransformer {
                 if (resetChildrenBefore != null) {
                   // the last loop involved moving an offset forward.
                   // the offset is moving forward, so starting child annotations will be reset
-                  for (Annotation anStartingHere : resetChildrenBefore.startOf(layerId)) {
-                    if (!myChildren.contains(anStartingHere)) continue; // ignore non-children
-                    resetChildAnchorsBefore(anStartingHere, resetChildrenBefore.getOffset());
-                  } // next annotation that starts here
+                  final Anchor before = resetChildrenBefore;
+                  resetChildrenBefore.startingAnnotations(layerId)
+                    .filter(a -> myChildren.contains(a)) // ignore non-children
+                    .forEach(a -> resetChildAnchorsBefore(a, before.getOffset()));
                 }
                 resetChildrenBefore = null;
                 // now predecessor is the anchor before anchor, 
@@ -2877,7 +2940,7 @@ public class Merger extends Transform implements GraphTransformer {
           Annotation anOriginalChild = children.first();
           if (editedGraphHasChildLayer) {
             // edited graph includes child layer, children contains the edited version
-            anOriginalChild = getCounterpart(anOriginalChild);
+            anOriginalChild = GetCounterpart(anOriginalChild);
           }
           if (anOriginalChild != null) {
             if (anOriginalParent.getStart() != anOriginalChild.getStart()
@@ -2893,7 +2956,7 @@ public class Merger extends Transform implements GraphTransformer {
           anOriginalChild = children.last();
           if (editedGraphHasChildLayer) {
             // edited graph includes child layer, children contains the edited version
-            anOriginalChild = getCounterpart(anOriginalChild);
+            anOriginalChild = GetCounterpart(anOriginalChild);
           }
           if (anOriginalChild != null) {
             if (anOriginalParent.getEnd() != anOriginalChild.getEnd()
@@ -3123,10 +3186,10 @@ public class Merger extends Transform implements GraphTransformer {
    * @return The confidence rating of a given object, or {@link Constants#CONFIDENCE_MANUAL} if
    * it could not be determined. 
    */
-  protected int getConfidence(Anchor o) {
+  protected static int GetConfidence(Anchor o) {
     if (o.getOffset() == null) return Constants.CONFIDENCE_NONE;
     return Utility.getConfidence(o);
-  } // end of getConfidence()
+  } // end of GetConfidence()
 
   /**
    * Gets the confidence rating of a given object.  If no Integer confidence attribute is
@@ -3135,9 +3198,9 @@ public class Merger extends Transform implements GraphTransformer {
    * @return The confidence rating of a given object, or {@link Constants#CONFIDENCE_MANUAL} if
    * it could not be determined. 
    */
-  protected int getConfidence(Annotation o) {
+  protected static int GetConfidence(Annotation o) {
     return Utility.getConfidence(o);
-  } // end of getConfidence()
+  } // end of GetConfidence()
    
   /**
    * Sets the confidence of a given object.
@@ -3145,9 +3208,9 @@ public class Merger extends Transform implements GraphTransformer {
    * {@link Anchor}) 
    * @param confidence The confidence rating of a given object.
    */
-  protected void setConfidence(TrackedMap o, int confidence) {
+  protected static void SetConfidence(TrackedMap o, int confidence) {
     o.setConfidence(confidence);
-  } // end of setConfidence()
+  } // end of SetConfidence()
 
    
   /**
@@ -3155,9 +3218,9 @@ public class Merger extends Transform implements GraphTransformer {
    * @param annotation The annotation to test.
    * @return true if the annotation has an "@other" attribute, false otherwise.
    */
-  protected boolean hasCounterpart(Annotation annotation) {
+  protected static boolean HasCounterpart(Annotation annotation) {
     return annotation.containsKey("@other");
-  } // end of hasCounterpart()
+  } // end of HasCounterpart()
 
   /**
    * Gets the given annotation's mapped counterpart in the other graph.
@@ -3165,30 +3228,30 @@ public class Merger extends Transform implements GraphTransformer {
    * @return The annotation in the other graph that has been mapped to the given annotation, or
    * null if no mapping has been made. 
    */
-  protected Annotation getCounterpart(Annotation annotation) {
+  protected static Annotation GetCounterpart(Annotation annotation) {
     return (Annotation)annotation.get("@other");
-  } // end of getCounterpart()
+  } // end of GetCounterpart()
 
   /**
    * Maps the given annotations to each other.
    * @param a1 An annotation.
    * @param a2 The mapped conterpart of <var>a1</var>.
    */
-  protected void setCounterparts(Annotation a1, Annotation a2) {
+  protected static void SetCounterparts(Annotation a1, Annotation a2) {
     a1.put("@other", a2);
     a2.put("@other", a1);
-  } // end of setCounterparts()
+  } // end of SetCounterparts()
 
   /**
    * Removes mapping between the given annotation and its counterpart.
-   * @param annotation One of the counterpart annotations ({@link #getCounterpart(Annotation)}
+   * @param annotation One of the counterpart annotations ({@link #GetCounterpart(Annotation)}
    * will be called to determine the other.). 
    */
-  protected void unsetCounterparts(Annotation annotation) {
-    Annotation other = getCounterpart(annotation);
+  protected static void UnsetCounterparts(Annotation annotation) {
+    Annotation other = GetCounterpart(annotation);
     if (other != null) other.remove("@other");
     annotation.remove("@other");
-  } // end of setCounterparts()
+  } // end of SetCounterparts()
 
   /**
    * Logs a debugging message.
@@ -3205,8 +3268,11 @@ public class Merger extends Transform implements GraphTransformer {
           s.append("[").append(annotation.getId()).append("]")
             .append(annotation.getOrdinal()).append("#")
             .append(annotation.getLabel())
-            .append("(").append(annotation.getStart())
-            .append("-").append(annotation.getEnd()).append(")");
+            .append("(")
+            .append(annotation.getStart()).append("[").append(annotation.getStartId()).append("]")
+            .append("-")
+            .append(annotation.getEnd()).append("[").append(annotation.getEndId()).append("]")
+            .append(")");
         } else if (m instanceof Anchor) {
           Anchor anchor = (Anchor)m;
           s.append("[").append(anchor.getId()).append("]").append(anchor.getOffset());

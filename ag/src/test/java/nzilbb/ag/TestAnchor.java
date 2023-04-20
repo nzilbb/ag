@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
 import nzilbb.ag.*;
@@ -331,6 +332,22 @@ public class TestAnchor
       assertTrue("starting", starting.contains(g.getAnnotation("toLatest")));
       assertTrue("starting", starting.contains(g.getAnnotation("middleInstant")));
       assertEquals("starting size", 3, starting.size());
+
+      // ending stream
+      ending.clear();
+      ending.addAll(a.endingAnnotations().collect(Collectors.toList()));
+      assertTrue("ending stream", ending.contains(g.getAnnotation("toEarly")));
+      assertTrue("ending stream", ending.contains(g.getAnnotation("toEarliest")));
+      assertTrue("ending stream", ending.contains(g.getAnnotation("middleInstant")));
+      assertEquals("ending stream size", 3, ending.size());
+
+      // starting stream
+      starting.clear();
+      starting.addAll(a.startingAnnotations().collect(Collectors.toList()));
+      assertTrue("starting stream", starting.contains(g.getAnnotation("toLate")));
+      assertTrue("starting stream", starting.contains(g.getAnnotation("toLatest")));
+      assertTrue("starting stream", starting.contains(g.getAnnotation("middleInstant")));
+      assertEquals("starting stream size", 3, starting.size());
 
       // linking
       assertNull("linking - none", a.annotationTo(g.getAnchor("later")));

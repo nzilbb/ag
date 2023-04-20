@@ -639,6 +639,16 @@ public class TrackedMap
          ?Change.Operation.NoChange
          :Change.Operation.Update;
    } // end of getChange()
+
+  /**
+   * Predicate for filtering deleted objects out of streams.
+   * @param The object that may be marked for deletion.
+   * @return false if {@link #getChange()} == Change.Operation.Destroy, true otherwise
+   */
+  public static boolean NotDestroyed(TrackedMap t) {
+    return t.getChange() != Change.Operation.Destroy;
+  }
+
    
    /**
     * Produces a list of individual changes for the object.
