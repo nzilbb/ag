@@ -807,50 +807,50 @@ public class TestMerger {
   public Schema defaultSchema() {
     return new Schema(
       "who", "turns", "utterances", "token",
-      new Layer("topic", "topic", Constants.ALIGNMENT_INTERVAL, 
-                true, // peers
-                false, // peersOverlap
-                false), // saturated
-      new Layer("who", "participants", Constants.ALIGNMENT_NONE, 
-                true, // peers
-                true, // peersOverlap
-                true), // saturated
-      new Layer("turns", "turns", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "who", // parentId
-                true), // parentIncludes
-      new Layer("utterances", "utterances", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("language", "language", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("token", "Words", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                false, // saturated
-                "turn", // parentId
-                true), // parentIncludes
-      new Layer("pos", "Part of speech", Constants.ALIGNMENT_NONE,
-                false, // peers
-                false, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true), // parentIncludes
-      new Layer("segments", "segments", Constants.ALIGNMENT_INTERVAL,
-                true, // peers
-                false, // peersOverlap
-                true, // saturated
-                "word", // parentId
-                true) // parentIncludes
+      new Layer("topic", "topic").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true)
+      .setPeersOverlap(false)
+      .setSaturated(false),
+      new Layer("who", "participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true)
+      .setPeersOverlap(true)
+      .setSaturated(true),
+      new Layer("turns", "turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true)
+      .setPeersOverlap(false)
+      .setSaturated(false)
+      .setParentId("who")
+      .setParentIncludes(true),
+      new Layer("utterances", "utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true)
+      .setPeersOverlap(false)
+      .setSaturated(true)
+      .setParentId("turn")
+      .setParentIncludes(true),
+      new Layer("language", "language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true)
+      .setPeersOverlap(false)
+      .setSaturated(false)
+      .setParentId("turn")
+      .setParentIncludes(true),
+      new Layer("token", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true)
+      .setPeersOverlap(false)
+      .setSaturated(false)
+      .setParentId("turn")
+      .setParentIncludes(true),
+      new Layer("pos", "Part of speech").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false)
+      .setPeersOverlap(false)
+      .setSaturated(true)
+      .setParentId("word")
+      .setParentIncludes(true),
+      new Layer("segments", "segments").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true)
+      .setPeersOverlap(false)
+      .setSaturated(true)
+      .setParentId("word")
+      .setParentIncludes(true)
       );
   } // end of defaultSchema()
 
