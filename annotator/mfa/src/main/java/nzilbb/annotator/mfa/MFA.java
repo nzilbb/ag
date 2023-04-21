@@ -1434,34 +1434,38 @@ public class MFA extends Annotator {
               
               // check for orth/pron
               Annotation orthography = word.first(orthographyLayerId);
-              if (orthography != null
-                  && orthography.getLabel() != null
-                  && orthography.getLabel().length() > 0) {
+              if (orthography == null
+                  || orthography.getLabel() == null
+                  || orthography.getLabel().length() == 0) { // no orthography
+                // but we want to ensure MFA gives us back a word here
+                // so that it doesn't link words across a gap that contains something,
+                // so give it a non-word
+                orthography = new Annotation(null, "spn", orthographyLayerId);
+              }
                 
-                // add word to the utterance
-                if (utteranceOrthography.length() > 0) utteranceOrthography.append(" ");
-                utteranceOrthography.append(orthography.getLabel());
-
-                if (pronunciationLayerId != null) { // train/align
-                  Annotation[] pronunciations = word.all(pronunciationLayerId);
-                  if(pronunciations.length > 0) { // there are pronunciations
-                    
-                    // is the word already in the dictionary?
-                    if (!dictionary.containsKey(orthography.getLabel())) {
-                      dictionary.put(orthography.getLabel(), new LinkedHashSet<String>());
+              // add word to the utterance
+              if (utteranceOrthography.length() > 0) utteranceOrthography.append(" ");
+              utteranceOrthography.append(orthography.getLabel());
+              
+              if (pronunciationLayerId != null) { // train/align
+                Annotation[] pronunciations = word.all(pronunciationLayerId);
+                if(pronunciations.length > 0) { // there are pronunciations
+                  
+                  // is the word already in the dictionary?
+                  if (!dictionary.containsKey(orthography.getLabel())) {
+                    dictionary.put(orthography.getLabel(), new LinkedHashSet<String>());
+                  }
+                  
+                  Set<String> prons = dictionary.get(orthography.getLabel());
+                  // for each pron
+                  for (Annotation pronunciation : pronunciations) {
+                    String sPhonology = pronunciation.getLabel();
+                    if (!prons.contains(sPhonology)) {
+                      prons.add(phonemesToIPA.apply(sPhonology));
                     }
-                    
-                    Set<String> prons = dictionary.get(orthography.getLabel());
-                    // for each pron
-                    for (Annotation pronunciation : pronunciations) {
-                      String sPhonology = pronunciation.getLabel();
-                      if (!prons.contains(sPhonology)) {
-                        prons.add(phonemesToIPA.apply(sPhonology));
-                      }
-                    } // next pronunciation
-                  } // pronunciation is present
-                } // train/align
-              } // orthography is present
+                  } // next pronunciation
+                } // pronunciation is present
+              } // train/align
             } // next word
             
             if (utteranceOrthography.toString().trim().length() == 0) {
@@ -1768,10 +1772,12 @@ public class MFA extends Annotator {
             phone.getEnd().setConfidence(Constants.CONFIDENCE_AUTOMATIC);
           }
 
-          // remove "spn" phones (for out of dictionary words)
+          // remove "spn" or empty phones (for out of dictionary words)
+          alignedFragment.trackChanges();
           for (Annotation phone : alignedFragment.all(phoneAlignmentLayerId)) {
-            if (phone.getLabel().equals("spn")) {
-              setStatus("Removing spn");
+            if (phone.getLabel().equals("spn")
+                || phone.getLabel().trim().length() == 0) {
+              setStatus("Removing spn " + phone.getStart() + "-" + phone.getEnd());
               phone.destroy();
             }
           } // next phone
@@ -1861,6 +1867,7 @@ public class MFA extends Annotator {
             fragment.trackChanges();
             // merge changes
             merger.transform(fragment);
+            merger.getLog().forEach(l -> setStatus(l));
            
             if (utteranceTagLayerId != null) {
               Annotation[] timestamps = fragment.tagsOn​(utteranceTagLayerId);
