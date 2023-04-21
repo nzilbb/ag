@@ -244,8 +244,8 @@ public class Merger extends Transform implements GraphTransformer {
    * Wether to ignore offset confidence and force offset changes (true), or only change offsets
    * when the edited offset is equal to or higher than the original confidence (false).  The
    * default is false. 
-   * @see #getIgnoreOffSetConfidence()
-   * @see #setIgnoreOffSetConfidence(boolean)
+   * @see #getIgnoreOffsetConfidence()
+   * @see #setIgnoreOffsetConfidence(boolean)
    */
   protected boolean ignoreOffsetConfidence = false;
   /**
@@ -256,7 +256,7 @@ public class Merger extends Transform implements GraphTransformer {
    * offsets when the edited offset is equal to or higher than the original confidence (false).
    * The default is false. 
    */
-  public boolean getIgnoreOffSetConfidence() { return ignoreOffsetConfidence; }
+  public boolean getIgnoreOffsetConfidence() { return ignoreOffsetConfidence; }
   /**
    * Setter for {@link #ignoreOffsetConfidence}: Wether to ignore offset confidence and force
    * offset changes (true), or only change offsets when the edited offset is equal to or higher
@@ -265,7 +265,7 @@ public class Merger extends Transform implements GraphTransformer {
    * (true), or only change offsets when the edited offset is equal to or higher than the
    * original confidence (false). 
    */
-  public Merger setIgnoreOffSetConfidence(boolean newIgnoreOffsetConfidence) { ignoreOffsetConfidence = newIgnoreOffsetConfidence; return this; }
+  public Merger setIgnoreOffsetConfidence(boolean newIgnoreOffsetConfidence) { ignoreOffsetConfidence = newIgnoreOffsetConfidence; return this; }
 
   /**
    * Set of IDs of layers for which annotations may not be added, changed, or deleted.
@@ -1247,6 +1247,27 @@ public class Merger extends Transform implements GraphTransformer {
             .filter(a -> a != anEdited)
             .filter(Merger::HasCounterpart)
             .map(Merger::GetCounterpart) // now annotation in original graph
+            // avoid bridging a gap across a parent annotation that's not being deleted
+            .filter(previousOriginal -> {
+                Annotation previousOriginalParent = previousOriginal.getParent();
+                if (previousOriginalParent != null
+                    && HasCounterpart(editedParent)) {
+                  Annotation originalParent = GetCounterpart(editedParent);
+                  if (previousOriginalParent != originalParent) { // not peers
+                    Annotation originalParentPrevious = originalParent.getPrevious();
+                    if (originalParentPrevious != null
+                        && previousOriginalParent != originalParentPrevious
+                        && Annotation.NotDestroyed(originalParentPrevious)) {
+                      // there is an intervening annotation on the parent layer
+                      log("Don't link previous: ", previousOriginal,
+                          " across intervening parent: ", originalParentPrevious,
+                          " to: ", anEdited);
+                      return false;
+                    }
+                  }
+                }
+                return true;
+              })
             .findAny();
           if (anPreviousOriginal.isPresent()) {
             Annotation anPreviousEditedOther = anPreviousOriginal.get();
@@ -1304,6 +1325,7 @@ public class Merger extends Transform implements GraphTransformer {
           .filter(Merger::HasCounterpart)
           // linked in the edited graph?
           .filter(a -> GetCounterpart(a).getEnd() != anEdited.getStart())
+          .collect(Collectors.toList()) // add to new collection to avoid concurrent modification
           .forEach(anOriginalLinkedPrior -> {
               // unlink the prior annotation from this one
               final Anchor originalStart = anOriginal.getStart();
@@ -1543,6 +1565,7 @@ public class Merger extends Transform implements GraphTransformer {
           }
           return true;
         })
+      .collect(Collectors.toList()) // add to new collection to avoid concurrent modification
       .forEach(a -> {
           boolean bInstant = a.getInstantaneous();
           log("Changing start", (bInstant?" and end":""), " of related annotation ", a, 
@@ -1574,6 +1597,7 @@ public class Merger extends Transform implements GraphTransformer {
             }
             return true;
           })
+        .collect(Collectors.toList()) // add to new collection to avoid concurrent modification
         .forEach(a -> {
             log("Changing end of previous linked annotation ", a, " to ", newStartAnchor);
             changeEndWithRelatedAnnotations(a, newStartAnchor);
@@ -1647,6 +1671,7 @@ public class Merger extends Transform implements GraphTransformer {
           }
           return true;
         })
+      .collect(Collectors.toList()) // add to new collection to avoid concurrent modification
       .forEach(a -> {
           boolean bInstant = a.getInstantaneous();
           log("Changing end", (bInstant?" and start":""), " of related annotation ", a,
@@ -1674,6 +1699,7 @@ public class Merger extends Transform implements GraphTransformer {
               }
               return true;
             })
+          .collect(Collectors.toList()) // add to new collection to avoid concurrent modification
           .forEach(anNext -> {
               log("Changing start of next linked annotation ", anNext, " to ", newEndAnchor);
               changeStartWithRelatedAnnotations(anNext, newEndAnchor, layerIdsToExclude);
@@ -1856,16 +1882,35 @@ public class Merger extends Transform implements GraphTransformer {
               // (TODO not sure there can be any)
               .filter(Merger::HasCounterpart)
               .map(Merger::GetCounterpart)
-              // skip it if there's an intervening annotation on this layer (e.g. "unclear")
+              // skip it if there's an intervening annotation on this layer 
+              // or the parent layer (e.g. "unclear")
               .filter(anOriginalPrevious -> {
                   Annotation anOriginalPreviousNext = anOriginalPrevious.getNext();
                   if (anOriginalPreviousNext != null
-                      && anOriginalPreviousNext.getChange() != Change.Operation.Destroy
+                      && Annotation.NotDestroyed(anOriginalPreviousNext)
                       && anOriginalPreviousNext.equals(anOriginal.getPrevious())) {
                     log("Don't link: ", anOriginalPrevious,
                         " across intervening: ", anOriginalPreviousNext,
                         " to: ", anOriginal);
                     return false;
+                  }
+                  return true;
+                })
+              // avoid bridging a gap across a parent annotation that's not being deleted
+              .filter(anOriginalPrevious -> {
+                  Annotation originalPreviousParent = anOriginalPrevious.getParent();
+                  Annotation originalParent = anOriginal.getParent();
+                  if (originalPreviousParent != originalParent) { // not peers
+                    Annotation originalParentPrevious = originalParent.getPrevious();
+                    if (originalParentPrevious != null
+                        && originalPreviousParent != originalParentPrevious
+                        && Annotation.NotDestroyed(originalParentPrevious)) {
+                      // there is an intervening annotation on the parent layer
+                      log("Don't link previous original: ", anOriginalPrevious,
+                          " across intervening parent: ", originalParentPrevious,
+                          " to: ", anOriginal);
+                      return false;
+                    }
                   }
                   return true;
                 })
@@ -1934,6 +1979,7 @@ public class Merger extends Transform implements GraphTransformer {
                     }
                     return true;
                   })
+                .collect(Collectors.toList()) // add to new collection to avoid concurrent mod.
                 .forEach(a -> {
                     log(layerId, ": Different start anchor for ", anOriginal,
                         ": linking parallel ", a, " too");
@@ -1984,6 +2030,7 @@ public class Merger extends Transform implements GraphTransformer {
               anOriginal.getStart().getEndingAnnotations().stream()
                 .filter(Annotation::NotDestroyed)
                 .filter(previousAnnotation -> previousAnnotation != anOriginal)
+                .collect(Collectors.toList()) // add to new collection to avoid concurrent mod.
                 .forEach(previousAnnotation -> {
                     // check for other possible end anchor, by following the edited graph structure
                     Annotation editedPreviousAnnotation = GetCounterpart(previousAnnotation);
@@ -2031,6 +2078,7 @@ public class Merger extends Transform implements GraphTransformer {
                 .filter(parallelAnnotation -> parallelAnnotation != anOriginal) // not ourselves
                 .filter(parallelAnnotation -> parallelAnnotation != anOriginal.getParent()) // not our parent
                 .filter(Merger::HasCounterpart)
+                .collect(Collectors.toList()) // add to new collection to avoid concurrent mod.
                 .forEach(parallelAnnotation -> {
                     // check for other possible start anchor, by following the edited graph structure
                     Annotation editedParallelAnnotation = GetCounterpart(parallelAnnotation);
@@ -2292,6 +2340,7 @@ public class Merger extends Transform implements GraphTransformer {
                   // unrelated layer?
                   .filter(a -> !layer.getParentId().equals(a.getLayerId())
                           && a.getLayer().getParentId().equals(layerId))
+                  .collect(Collectors.toList()) // add to new collection to avoid concurrent mod.
                   .forEach(an -> {
                       log(layerId, ": Different end anchor for ", anOriginal,
                           ": linking parallel ", an, " too");
@@ -3220,20 +3269,22 @@ public class Merger extends Transform implements GraphTransformer {
    
   /**
    * Determines whether the given annotation has a mapped counterpart in the other graph.
-   * @param annotation The annotation to test.
+   * @param annotation The annotation to test (or null).
    * @return true if the annotation has an "@other" attribute, false otherwise.
    */
   protected static boolean HasCounterpart(Annotation annotation) {
+    if (annotation == null) return false;
     return annotation.containsKey("@other");
   } // end of HasCounterpart()
 
   /**
    * Gets the given annotation's mapped counterpart in the other graph.
-   * @param annotation The annotation to get the counterpart of.
+   * @param annotation The annotation to get the counterpart of (or null).
    * @return The annotation in the other graph that has been mapped to the given annotation, or
    * null if no mapping has been made. 
    */
   protected static Annotation GetCounterpart(Annotation annotation) {
+    if (annotation == null) return null;
     return (Annotation)annotation.get("@other");
   } // end of GetCounterpart()
 
