@@ -94,9 +94,9 @@
             "comment": "WILL BE COPY OF ORIGINAL"
         },
         "n_300": {
-            "offset": 13.05,
-            "confidence": 10,
-            "comment": "NUDGED FORWARD"
+            "offset": 13.0,
+            "confidence": 50,
+            "comment": "SPLIT INTO TWO TO ACCOMMODATE A NEW ANNOTATION"
         },
         "n_325": {
             "offset": 13.1,
