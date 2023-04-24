@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -41,41 +41,47 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("pos", "Part of speech", Constants.ALIGNMENT_NONE,
-                         false, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phrase", "Phrase structure", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         true, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("pos", "Part of speech")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phrase", "Phrase structure")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    
     g.addAnchor(new Anchor("a0", 0.0)); // turn start
     g.addAnchor(new Anchor("a1", 1.0)); // the & DT & D & NP
     g.addAnchor(new Anchor("a1.5", 1.5)); // @
@@ -138,40 +144,46 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("pos", "Part of speech", Constants.ALIGNMENT_NONE,
-                         false, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phrase", "Phrase structure", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         true, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("pos", "Part of speech")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phrase", "Phrase structure")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
 
     g.addAnchor(new Anchor("a0", 0.0)); // turn1 start
     g.addAnchor(new Anchor("a1", 1.0)); // the & DT & D & NP
@@ -290,40 +302,46 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("pos", "Part of speech", Constants.ALIGNMENT_NONE,
-                         true, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phrase", "Phrase structure", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         true, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("pos", "Part of speech")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phrase", "Phrase structure")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
 
     g.addAnchor(new Anchor("a0", 0.0)); // turn start
     g.addAnchor(new Anchor("a1", 1.0)); // the & DT & D & NP
@@ -418,46 +436,53 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("pos", "Part of speech", Constants.ALIGNMENT_NONE,
-                         false, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phrase", "Phrase structure", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         true, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("role", "Role", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         true, // peersOverlap
-                         false, // saturated
-                         "word", // parentId
-                         false)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("pos", "Part of speech")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phrase", "Phrase structure")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("role", "Role")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(false)
+               .setParentId("word")
+               .setParentIncludes(false));
 
     g.addAnchor(new Anchor("a0", 0.0)); // turn start
     g.addAnchor(new Anchor("a1", 1.0)); // the & DT & NP
@@ -542,40 +567,46 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("pos", "Part of speech", Constants.ALIGNMENT_NONE,
-                         false, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phrase", "Phrase structure", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         true, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("pos", "Part of speech")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phrase", "Phrase structure")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
 
     g.addAnchor(new Anchor("a0", 0.0)); // turn1 start
     g.addAnchor(new Anchor("a1", 1.0)); // the & DT & D & NP
@@ -682,35 +713,40 @@ public class TestValidator {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
-
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("pos", "Part of speech", Constants.ALIGNMENT_NONE,
-                         false, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
+    
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("pos", "Part of speech")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
       
     g.addAnchor(new Anchor("a0", 0.0)); // turn start
     g.addAnchor(new Anchor("a1", 1.0)); // the & D
@@ -873,40 +909,46 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("pos", "Part of speech", Constants.ALIGNMENT_NONE,
-                         false, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phrase", "Phrase structure", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         true, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("pos", "Part of speech")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phrase", "Phrase structure")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
       
     g.addAnchor(new Anchor("a0", 0.0,  // turn start
                            Constants.CONFIDENCE_AUTOMATIC));
@@ -1052,40 +1094,46 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("pos", "Part of speech", Constants.ALIGNMENT_NONE,
-                         false, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phrase", "Phrase structure", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         true, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("pos", "Part of speech")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phrase", "Phrase structure")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
       
     g.addAnchor(new Anchor("a0", 0.0,  // turn start
                            Constants.CONFIDENCE_AUTOMATIC));
@@ -1213,30 +1261,33 @@ public class TestValidator {
     Graph g = new Graph();
     g.setId("my graph");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("pos", "Part of speech",
-                         Constants.ALIGNMENT_INTERVAL, // could subdivide words
-                         true, // peers
-                         true, // peersOverlap
-                         false, // not saturated, like MOR POS layers
-                         "word", // parentId
-                         true)); // parentIncludes
-
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("pos", "Part of speech")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL) // could subdivide words
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(false) // not saturated, like MOR POS layers
+               .setParentId("word")
+               .setParentIncludes(true));
+    
     g.addAnchor(new Anchor("a0", 0.0)); // turn1 start
     g.addAnchor(new Anchor("a1", 1.0)); // the
     g.addAnchor(new Anchor("a2", 2.0)); // quick
@@ -1316,28 +1367,32 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL, 
-                         true,  // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
 
     g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE_MANUAL));
     // than has out of sequence phones
@@ -1412,28 +1467,32 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL, 
-                         true,  // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
 
     g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE_MANUAL));
     // than has out of sequence phones
@@ -1507,28 +1566,32 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL, 
-                         true,  // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
 
     g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE_MANUAL));
     // than has out of sequence phones
@@ -1602,28 +1665,32 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL, 
-                         true,  // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
 
     g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE_MANUAL));
     // than has out of sequence phones
@@ -1684,28 +1751,32 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL, 
-                         true,  // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("phone", "Phones")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL) 
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
 
     g.addAnchor(new Anchor("turnStart", 120.0, Constants.CONFIDENCE_MANUAL));
     // than has out of sequence phones
@@ -1779,34 +1850,39 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("pos", "POS", Constants.ALIGNMENT_NONE,
-                         true, // peers
-                         true, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("utterance", "Utterance")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("pos", "POS")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
 
@@ -1877,28 +1953,32 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
 
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("utterance", "Utterance", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("utterance", "Utterance")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
 
@@ -1965,28 +2045,32 @@ public class TestValidator {
     g.setId("my graph");
     g.setCorpus("cc");
       
-    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                         true, // peers
-                         true, // peersOverlap
-                         true)); // saturated
-    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "who", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                         true, // peers
-                         false, // peersOverlap
-                         false, // saturated
-                         "turn", // parentId
-                         true)); // parentIncludes
-    g.addLayer(new Layer("orthography", "Orthography", Constants.ALIGNMENT_NONE,
-                         false, // peers
-                         false, // peersOverlap
-                         true, // saturated
-                         "word", // parentId
-                         true)); // parentIncludes
+    g.addLayer(new Layer("who", "Participants")
+               .setAlignment(Constants.ALIGNMENT_NONE) 
+               .setPeers(true)
+               .setPeersOverlap(true)
+               .setSaturated(true));
+    g.addLayer(new Layer("turn", "Speaker turns")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("who")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("word", "Words")
+               .setAlignment(Constants.ALIGNMENT_INTERVAL)
+               .setPeers(true)
+               .setPeersOverlap(false)
+               .setSaturated(false)
+               .setParentId("turn")
+               .setParentIncludes(true));
+    g.addLayer(new Layer("orthography", "Orthography")
+               .setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(false)
+               .setPeersOverlap(false)
+               .setSaturated(true)
+               .setParentId("word")
+               .setParentIncludes(true));
 
     g.addAnchor(new Anchor("a0", 0.0)); // turn start
     g.addAnchor(new Anchor("a1", 1.0)); // the & DT & D & NP
@@ -2312,24 +2396,24 @@ public class TestValidator {
     Graph g = new Graph();
     g.setId("my graph");
     g.setCorpus("cc");
-
-    g.setSchema(new Schema(
-                  "who", "turn", "utterance", "word",
-                  new Layer("who", "Participants")
-                  .setAlignment(Constants.ALIGNMENT_NONE)
-                  .setPeers(true).setPeersOverlap(true).setSaturated(true),
-                  new Layer("turn", "Speaker turns")
-                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
-                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
-                  .setParentId("who").setParentIncludes(true),
-                  new Layer("utterance", "Utterance")
-                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
-                  .setPeers(true).setPeersOverlap(false).setSaturated(true)
-                  .setParentId("turn").setParentIncludes(true),
-                  new Layer("word", "Words")
-                  .setAlignment(Constants.ALIGNMENT_INTERVAL)
-                  .setPeers(true).setPeersOverlap(false).setSaturated(false)
-                  .setParentId("turn").setParentIncludes(true)));
+    
+    g.setSchema(
+      new Schema("who", "turn", "utterance", "word",
+                 new Layer("who", "Participants")
+                 .setAlignment(Constants.ALIGNMENT_NONE)
+                 .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                 new Layer("turn", "Speaker turns")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("who").setParentIncludes(true),
+                 new Layer("utterance", "Utterance")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                 .setParentId("turn").setParentIncludes(true),
+                 new Layer("word", "Words")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("turn").setParentIncludes(true)));
     
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
 
