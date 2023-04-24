@@ -524,6 +524,7 @@ public class Validator extends Transform implements GraphTransformer {
                          + logAnnotation(danglingWord)
                          + " link through previous: " + logAnnotation(previousWord));
               previousWord.setEnd(danglingStart);
+              // (a later validation phase will bring child annotation ends along)
               danglingStart.setOffset(sharedEnd.getOffset())
                 .setConfidence(sharedEnd.getConfidence());
             }
