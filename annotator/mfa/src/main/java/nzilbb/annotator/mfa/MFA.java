@@ -1867,7 +1867,7 @@ public class MFA extends Annotator {
             fragment.trackChanges();
             // merge changes
             merger.transform(fragment);
-            merger.getLog().forEach(l -> setStatus(l));
+            if (merger.getLog() != null) merger.getLog().forEach(l -> setStatus(l));
            
             if (utteranceTagLayerId != null) {
               Annotation[] timestamps = fragment.tagsOn​(utteranceTagLayerId);
