@@ -2536,6 +2536,139 @@ public class TestValidator {
 
   }
 
+  /** Ensure that, if a forced aligner skips words and tries to link words across a gap
+   * that's  not empty, the validator chains the words correctly. */
+  @Test public void doubleWordEnd() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+    
+    g.setSchema(
+      new Schema("who", "turn", "utterance", "word",
+                 new Layer("who", "Participants")
+                 .setAlignment(Constants.ALIGNMENT_NONE)
+                 .setPeers(true).setPeersOverlap(true).setSaturated(true),
+                 new Layer("turn", "Speaker turns")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("who").setParentIncludes(true),
+                 new Layer("utterance", "Utterance")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                 .setParentId("turn").setParentIncludes(true),
+                 new Layer("word", "Words")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(false)
+                 .setParentId("turn").setParentIncludes(true),
+                 new Layer("segment", "Phones")
+                 .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                 .setPeers(true).setPeersOverlap(false).setSaturated(true)
+                 .setParentId("word").setParentIncludes(true)));
+    
+    g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
+    
+    g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_AUTOMATIC)); // the D
+    g.addAnchor(new Anchor("a015", 0.015, Constants.CONFIDENCE_AUTOMATIC)); // @
+    g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_AUTOMATIC)); // quick k
+    g.addAnchor(new Anchor("a011", 0.025, Constants.CONFIDENCE_AUTOMATIC)); // w
+    g.addAnchor(new Anchor("a012", 0.03, Constants.CONFIDENCE_AUTOMATIC)); // I
+    g.addAnchor(new Anchor("a013", 0.035, Constants.CONFIDENCE_AUTOMATIC)); // k
+    // word skipped by the forced aligner, start anchor with default confidence
+    g.addAnchor(new Anchor("a02", 0.022, Constants.CONFIDENCE_DEFAULT)); // xxx
+    g.addAnchor(new Anchor("a03", 0.03, Constants.CONFIDENCE_AUTOMATIC)); // k quick->fox f
+    g.addAnchor(new Anchor("a033", 0.033, Constants.CONFIDENCE_AUTOMATIC)); // o
+    g.addAnchor(new Anchor("a036", 0.036, Constants.CONFIDENCE_AUTOMATIC)); // k
+    g.addAnchor(new Anchor("a039", 0.039, Constants.CONFIDENCE_AUTOMATIC)); // s
+    g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_AUTOMATIC)); // s fox end
+
+    g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
+
+    g.addAnchor(new Anchor("a04b", 2.0, Constants.CONFIDENCE_AUTOMATIC)); // jumps
+    g.addAnchor(new Anchor("a14", 3.3, Constants.CONFIDENCE_AUTOMATIC)); // over
+    g.addAnchor(new Anchor("a24", 4.4, Constants.CONFIDENCE_AUTOMATIC)); // a
+    g.addAnchor(new Anchor("a34", 5.0, Constants.CONFIDENCE_AUTOMATIC)); // lazy
+    g.addAnchor(new Anchor("a44", 5.1, Constants.CONFIDENCE_AUTOMATIC)); // dog
+    g.addAnchor(new Anchor("a54", null)); // end of dog
+    
+    g.addAnchor(new Anchor("turnEnd", 5.4, Constants.CONFIDENCE_MANUAL)); // turn end
+    
+    g.addAnnotation(
+      new Annotation("participant1", "john smith", "who", "turnStart", "turnEnd", "my graph"));
+    
+    g.addAnnotation(
+      new Annotation("turn1", "john smith", "turn", "turnStart", "turnEnd", "participant1"));
+    
+    g.addAnnotation(
+      new Annotation(
+        "utterance1", "john smith", "utterance", "turnStart", "utteranceChange", "turn1"));
+    g.addAnnotation(
+      new Annotation(
+        "utterance2", "john smith", "utterance", "utteranceChange", "turnEnd", "turn1"));
+    
+    g.addAnnotation(new Annotation("the",   "the",   "word", "a0",  "a01", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a01", "a03", "turn1"));
+    g.addAnnotation(new Annotation("xxx", "xxx", "word", "a02",  "a03", "turn1"));
+    g.addAnnotation(new Annotation("fox",   "fox",   "word", "a03", "a04a", "turn1"));
+
+    g.addAnnotation(new Annotation("D",   "D",   "segment", "a0",  "a015", "the"));
+    g.addAnnotation(new Annotation("@",   "@",   "segment", "a15",  "a01", "the"));
+  
+    g.addAnnotation(new Annotation("k",   "k",   "segment", "a01",  "a011", "quick"));
+    g.addAnnotation(new Annotation("w",   "w",   "segment", "a011",  "a012", "quick"));
+    g.addAnnotation(new Annotation("I",   "I",   "segment", "a012",  "a013", "quick"));
+    g.addAnnotation(new Annotation("k2",   "k",   "segment", "a013",  "a03", "quick"));
+
+    g.addAnnotation(new Annotation("f",   "f",   "segment", "a03",  "a033", "fox"));
+    g.addAnnotation(new Annotation("o",   "o",   "segment", "a033",  "a036", "fox"));
+    g.addAnnotation(new Annotation("k3",   "k",   "segment", "a036",  "a039", "fox"));
+    g.addAnnotation(new Annotation("s",   "s",   "segment", "a039",  "a04a", "fox"));
+  
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a04b",  "a14", "turn1"));
+    g.addAnnotation(new Annotation("over",  "over",  "word", "a14",  "a24", "turn1"));
+    g.addAnnotation(new Annotation("a",     "a",     "word", "a24",  "a34", "turn1"));
+    g.addAnnotation(new Annotation("lazy",  "lazy",  "word", "a34",  "a44", "turn1"));
+    g.addAnnotation(new Annotation("dog",  "dog",    "word", "a44",  "a54", "turn1"));
+
+    g.getAnnotation("jumps").setLabel("test");
+
+    Validator v = new Validator();
+    v.setFullValidation(true);
+    //v.setDebug(true);
+    try { // valid version
+      v.transform(g);
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+    v.getErrors().forEach(e -> System.out.println(e));
+
+    // quick->xxx->brown
+    assertEquals("end of quick is a02",
+                 "a02", g.getAnnotation("quick").getEndId());
+    assertEquals("end of quick is start of xxx",
+                 g.getAnnotation("quick").getEndId(), g.getAnnotation("xxx").getStartId());
+    assertEquals("end of xxx is a03",
+                 "a03", g.getAnnotation("xxx").getEndId());
+    assertEquals("end of xxx is start of fox",
+                 g.getAnnotation("xxx").getEndId(), g.getAnnotation("fox").getStartId());
+
+    // k->xxx->b
+    assertEquals("end of k2 is a02",
+                 "a02", g.getAnnotation("k2").getEndId());
+    assertEquals("start of f is a03",
+                 "a03", g.getAnnotation("f").getStartId());
+
+    assertEquals("offset is correct",
+                 Double.valueOf(0.03), g.getAnchor("a02").getOffset());
+    assertEquals("offsets of xxx anchors are equal",
+                 g.getAnchor("a02").getOffset(), g.getAnchor("a03").getOffset());
+    assertEquals("confidence is correct",
+                 Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
+                 g.getAnchor("a02").getConfidence());
+    assertEquals("confidence of xxx anchors are equal",
+                 g.getAnchor("a02").getConfidence(), g.getAnchor("a03").getConfidence());
+
+  }
+
   /** saturated anchor sharing, and non-saturated by parent-including violations (TODO) */
   @Test public void validateHierarchyParentChildSynchronicity() {
   }

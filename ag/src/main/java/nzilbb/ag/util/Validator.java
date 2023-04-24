@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -31,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
@@ -287,6 +288,9 @@ public class Validator extends Transform implements GraphTransformer {
     // check label length
     checkLabels(graph);
 
+    // check for dangling words
+    checkInterWordLinks(graph);
+
     // check for reversed anchors
     correctReversedAnchors(graph);
 
@@ -455,7 +459,7 @@ public class Validator extends Transform implements GraphTransformer {
    * Check label length.
    * @param graph
    */
-  protected void checkLabels(Graph graph) { // TODO check/enforce validLabels
+  protected void checkLabels(Graph graph) {
     if (maxLabelLength != null) {
       Schema schema = graph.getSchema();
       for (Annotation annotation : graph.getAnnotationsById().values()) {
@@ -479,7 +483,54 @@ public class Validator extends Transform implements GraphTransformer {
       } // next annotation
     } // maxLabelLength set
   } // end of checkLabels()
-   
+
+  /**
+   * Check words don't overlap.
+   * <p> Specifically, if two words end at the same anchor, and one of them starts at an
+   * unlinked, low confidence anchor, then chain them together, copying the
+   * high-confidence offset/confidence, so the dangling word is instantaneous.
+   * <p> This can theoretically happen if a forced-aligner ignores some (unknown) words,
+   * and then merges back changes that chain together two words where there's really
+   * another intervening word between.
+   * @param graph
+   */
+  protected void checkInterWordLinks(Graph graph) {
+    String wordLayerId = graph.getSchema().getWordLayerId();
+    if (wordLayerId != null) {
+      Layer wordLayer = graph.getSchema().getLayer(wordLayerId);
+      graph.every(wordLayerId)
+        .filter(Annotation::NotDestroyed)
+        .filter(word -> word.getEnd() != null)
+        // multiple words end here:
+        .filter(word -> word.getEnd().endingAnnotations(wordLayerId).count() > 1)
+        .filter(overlappingWord -> overlappingWord.getStart() != null)
+        .filter(overlappingWord-> overlappingWord.getStart()
+                .getConfidence() <= Constants.CONFIDENCE_DEFAULT)
+        .filter(overlappingWord -> !overlappingWord.getStart()
+                .endingAnnotations(wordLayerId)
+                .filter(Annotation::NotDestroyed)
+                .findAny().isPresent())
+        .forEach(danglingWord -> {
+            Anchor danglingStart = danglingWord.getStart();
+            Anchor sharedEnd = danglingWord.getEnd();
+            Optional<Annotation> parallelWord = danglingWord.getEnd()
+              .endingAnnotations(wordLayerId)
+              .filter(a -> a != danglingWord)
+              .filter(Annotation::NotDestroyed)
+              .findAny();
+            if (parallelWord.isPresent()) { // it must be, but check anyway
+              Annotation previousWord = parallelWord.get();
+              errors.add("Word with dangling start and shared end: "
+                         + logAnnotation(danglingWord)
+                         + " link through previous: " + logAnnotation(previousWord));
+              previousWord.setEnd(danglingStart);
+              danglingStart.setOffset(sharedEnd.getOffset())
+                .setConfidence(sharedEnd.getConfidence());
+            }
+          });
+    } // wordLayerId != null
+  } // end of checkInterWordLinks()
+  
   /**
    * Correction of reversed anchors.
    * <p> In this phase, annotations with reversed anchors (i.e. start.offset after end.offset) 
