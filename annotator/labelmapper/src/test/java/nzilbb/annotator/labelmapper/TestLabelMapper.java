@@ -361,8 +361,9 @@ public class TestLabelMapper {
     
     Annotation[] phones = g.all("phone");
     assertEquals("Right number of phones " + Arrays.asList(phones), 15, phones.length);
-    String[] phoneLabels = { "@", "d","I","f","@", "r","H", "t",  "f","2","@","f","2","t","@" };
-    String[] discLabels = {  "1", "d","I","f",null,"r","@n","t",  "f","2","r","f","2","L","@r" };
+    String[] phoneLabels = { "@", "d","I","f","@", "r","H","t",  "f","2","@","f","2","t","@" };
+    // for "different", the shortest edit path is actually the second annotation: dIfrHt
+    String[] discLabels = {  "1", "d","I","f",null,"r","H","t",  "f","2","r","f","2","L","@r" };
     for (int p = 0; p < phones.length; p++) {
       assertEquals("Phone label " + p, phoneLabels[p], phones[p].getLabel());
       Annotation[] tags = phones[p].all("disc");
@@ -864,6 +865,11 @@ public class TestLabelMapper {
       g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("1")
                       .setParent(a));
       g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("dIfr@nt")
+                      .setParent(different));
+      // for DISCToDISC, the lowest cost edit path is actually the second annotation:
+      g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("dIfrHt")
+                      .setParent(different));
+      g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("dIf@r@nt")
                       .setParent(different));
       g.addAnnotation(new Annotation().setLayerId("phonemes").setLabel("f2rf2L@r")
                       .setParent(firefighter));

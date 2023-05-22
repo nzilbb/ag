@@ -98,10 +98,10 @@ public class LabelMapper extends Annotator {
    * <dl>
    *  <dt>""</dt>      <dd> Use all annotations in the scope, and do not split their labels. 
    *                        (e.g. phone alignments to other phone alignments) </dd>
-   *  <dt>"char"</dt>  <dd> Use the first annotation in the scope, split its label into
+   *  <dt>"char"</dt>  <dd> Use the most similar annotation in the scope, split its label into
    *                        characters, and map each to labels on the token layer. 
    *                        (e.g. DISC word transcriptions to phones) </dd> 
-   *  <dt>"space"</dt> <dd> Use the first annotation in the scope, split its label on
+   *  <dt>"space"</dt> <dd> Use the most similar annotation in the scope, split its label on
    *                        spaces, and map each to labels on the token layer. 
    *                        (e.g. ARPAbet word transcriptions to phones) </dd>  
    * </dl>
@@ -749,41 +749,60 @@ public class LabelMapper extends Annotator {
           }
           Vector<LabelElement> vTokens = new Vector<LabelElement>();
           for (Annotation src : tokens) vTokens.add(new LabelElement(src));
-          
-          // create destination element list
-          Vector<LabelElement> vLabels = new Vector<LabelElement>();
-          if (splitLabels.length() > 0) { // split the label of the first annotation
-            Annotation labels = scope.first(sourceLayerId);
-            if (labels == null) {
-              setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + sourceLayerId);
-              continue;
-            }
-            if (splitLabels.equals("char")) { // split label into chars (e.g. DISC transcription)
-              for (char c : labels.getLabel().toCharArray()) vLabels.add(new LabelElement(c));
-            } else { // split label on spaces (e.g. ARPAbet transcription)
-              for (String p : labels.getLabel().split(" ")) vLabels.add(new LabelElement(p));
-            }
+
+          // often there will be only one set of labels in the source layer to map
+          // but when there are multiple sets (i.e. splitLabels is set and the scope
+          // annotation has more than one annotation on sourceLayer) we try
+          // all edit paths, and pick the one with the lowest cost.
+          // so we need list of label sets so we can map all and keep the lowest cost one
+
+          // create a set of destination element lists
+          LinkedHashSet<Vector<LabelElement>> labelSets
+            = new LinkedHashSet<Vector<LabelElement>>();
+          if (splitLabels.length() > 0) { // split labels of all annotations on the source layer
+            for (Annotation labels : scope.all(sourceLayerId)) {
+              Vector<LabelElement> vLabels = new Vector<LabelElement>();
+              if (splitLabels.equals("char")) { // split into chars (e.g. DISC transcription)
+                for (char c : labels.getLabel().toCharArray()) vLabels.add(new LabelElement(c));
+              } else { // split label on spaces (e.g. ARPAbet transcription)
+                for (String p : labels.getLabel().split(" ")) vLabels.add(new LabelElement(p));
+              }
+              labelSets.add(vLabels);
+            } // next annotation on the source layer
           } else { // use full labels of all annotations
-            Annotation[] labels = scope.all(sourceLayerId);
-            if (labels.length == 0) {
-              setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + sourceLayerId);
-              continue;
+            Annotation[] labels = scope.all(sourceLayerId);            
+            if (labels.length > 0) {
+              Vector<LabelElement> vLabels = new Vector<LabelElement>();
+              for (Annotation l : labels) vLabels.add(new LabelElement(l));
+              labelSets.add(vLabels);
             }
-            for (Annotation l : labels) vLabels.add(new LabelElement(l));
           }
-          
-          // find the minimum edit path between them
-          List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
-          // collapse INSERT-then-DELETE into just CHANGE
-          path = mp.collapse(path);
-          setStatus(scope.getLabel() + " ("+scope.getStart()+") edit path: " + path.size());
+          if (labelSets.size() == 0) {
+            setStatus(scope.getLabel() + " ("+scope.getStart()+") no " + sourceLayerId);
+            continue;
+          }
+
+          List<EditStep<LabelElement>> bestPath = null;
+          // for each set of labels to map
+          for (Vector<LabelElement> vLabels : labelSets) {
+            // find the minimum edit path between them
+            List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
+            // collapse INSERT-then-DELETE into just CHANGE
+            path = mp.collapse(path);
+            if (bestPath == null // first one, or a shorter path
+                || path.get(path.size()-1).totalDistance()
+                < bestPath.get(bestPath.size()-1).totalDistance()) {
+              bestPath = path;
+            }
+          } // next label set
+          setStatus(scope.getLabel() + " ("+scope.getStart()+") edit path: " + bestPath.size());
           
           // create tags on the source layer from the path
           Annotation lastTag = null;
           String initialInserts = "";
           int s = 0;
           int subS = 0;
-          for (EditStep<LabelElement> step : path) {
+          for (EditStep<LabelElement> step : bestPath) {
             switch(step.getOperation()) {
               case NONE:
               case CHANGE: {
