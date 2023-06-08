@@ -9,14 +9,14 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.transcriber.evaluator</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
 
   <name>nzilbb.transcriber.evaluator</name>
   <description>Command line utility for evaluating transcriber modules</description>
 
   <properties>
     <nzilbb.formatter.text.version>1.5.1</nzilbb.formatter.text.version>
-    <nzilbb.annotator.orthography.version>0.1.0</nzilbb.annotator.orthography.version>
+    <nzilbb.annotator.orthography.version>0.1.1</nzilbb.annotator.orthography.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -36,13 +36,13 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.1.0,)</version>
+      <version>[1.1.1-SNAPSHOT,)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>nz.ilbb.ag</groupId>
+      <groupId>nz.ilbb.labbcat</groupId>
       <artifactId>nzilbb.labbcat</artifactId>
-      <version>[1.0.0,)</version>
+      <version>[1.1.1,)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -104,9 +104,9 @@
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>nz.ilbb.ag</groupId>
+                  <groupId>nz.ilbb.labbcat</groupId>
                   <artifactId>nzilbb.labbcat</artifactId>
-                  <version>1.0.0</version>
+                  <version>1.1.1</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

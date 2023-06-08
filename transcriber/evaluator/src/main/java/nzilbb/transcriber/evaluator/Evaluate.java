@@ -76,9 +76,15 @@ import org.apache.commons.csv.CSVPrinter;
  *   <li> what the step does (insert +, delete -, change ~, or no change) </li>
  *   <li> the edit distance represented by the step</li>
  *  </ul></li>    
+ *  <li> To a `utterance....tsv` file, utterance information including:
+ *  <ul>
+ *   <li> the start/end time of the utterance </li>
+ *   <li> how many words it contains </li>
+ *   <li> whether it's a reference or transcribed utterance ("ref" or "wav" respectively) </li>
+ *  </ul></li>    
  * </ul>
  */
-@ProgramDescription(value="Utility for automated evaluation of automatic Transcriber modules",
+@ProgramDescription(value="Utility for automated evaluation of automatic Transcriber modules, outputting a paths-...tsv file with word edit paths and utterances-...tsv with utterance partitioning info.",
                     arguments="nzilbb.transcriber.mytranscriber.jar [/path/to/wav/and/txt/files]")
 public class Evaluate extends CommandLineProgram {
    
@@ -360,6 +366,23 @@ public class Evaluate extends CommandLineProgram {
    * @param newCsv Printer for edit path data.
    */
   public Evaluate setCsv(CSVPrinter newCsv) { csv = newCsv; return this; }
+  
+  /**
+   * Printer for utterance data.
+   * @see #getUtteranceCsv()
+   * @see #setUtteranceCsv(CSVPrinter)
+   */
+  protected CSVPrinter utteranceCsv;
+  /**
+   * Getter for {@link #utteranceCsv}: Printer for utterance data.
+   * @return Printer for utterance data.
+   */
+  public CSVPrinter getUtteranceCsv() { return utteranceCsv; }
+  /**
+   * Setter for {@link #utteranceCsv}: Printer for utterance data.
+   * @param newUtteranceCsv Printer for utterance data.
+   */
+  public Evaluate setUtteranceCsv(CSVPrinter newUtteranceCsv) { utteranceCsv = newUtteranceCsv; return this; }
 
   /** Constructor */
   public Evaluate() {
@@ -471,7 +494,8 @@ public class Evaluate extends CommandLineProgram {
     ParameterSet configuration = serializer.configure(
       new ParameterSet(), transcriber.getSchema());
 
-    CSVPrinter out = null; // stdout will be tab-separated values too
+    CSVPrinter out = null; // stdout will be tab-separated values
+    // csv for word edit paths
     File csvFile = new File(dir, "paths-"+transcriber.getAnnotatorId()+".tsv");
     try {
       setCsv(new CSVPrinter(
@@ -482,6 +506,17 @@ public class Evaluate extends CommandLineProgram {
         CSVFormat.EXCEL.withDelimiter('\t'));
     } catch (Exception x) {
       System.err.println("Could not write to \""+csvFile.getPath()+"\": " + x);
+      return;
+    }
+    
+    // csv for utterance data
+    File utteranceCsvFile = new File(dir, "utterances-"+transcriber.getAnnotatorId()+".tsv");
+    try {
+      setUtteranceCsv(new CSVPrinter(
+                        new OutputStreamWriter(new FileOutputStream(utteranceCsvFile), "UTF-8"),
+                        CSVFormat.EXCEL.withDelimiter('\t')));
+    } catch (Exception x) {
+      System.err.println("Could not write to \""+utteranceCsvFile.getPath()+"\": " + x);
       return;
     }
     final CSVPrinter finalOut = out;
@@ -498,6 +533,14 @@ public class Evaluate extends CommandLineProgram {
         csv.print("wav");
         csv.print("distance");
         csv.println();
+
+        utteranceCsv.print("utt");
+        utteranceCsv.print("txt");
+        utteranceCsv.print("version"); // ref or wav
+        utteranceCsv.print("start");
+        utteranceCsv.print("end");
+        utteranceCsv.print("wordCount");
+        utteranceCsv.println();
 
         out.print("wav");
         out.print("wordCount");
@@ -549,6 +592,10 @@ public class Evaluate extends CommandLineProgram {
         csv.close();
       } catch (Exception x) {
       }
+      try {
+        utteranceCsv.close();
+      } catch (Exception x) {
+      }
     }
   } // end of evaluateFromFileSystem()
   
@@ -566,6 +613,7 @@ public class Evaluate extends CommandLineProgram {
       return;
     }
     CSVPrinter out = null; // stdout will be tab-separated values too
+    // csv for word edit paths
     File csvFile = new File(
       "paths-"
       +labbcat.replaceFirst("https?://","").replaceAll("\\W+","-")+"-"
@@ -579,6 +627,19 @@ public class Evaluate extends CommandLineProgram {
         CSVFormat.EXCEL.withDelimiter('\t'));
     } catch (Exception x) {
       System.err.println("Could not write to \""+csvFile.getPath()+"\": " + x);
+      return;
+    }    
+    // csv for utterance data
+    File utteranceCsvFile = new File(
+      "utterances-"
+      +labbcat.replaceFirst("https?://","").replaceAll("\\W+","-")+"-"
+      +transcriber.getAnnotatorId()+".tsv");
+    try {
+      setUtteranceCsv(new CSVPrinter(
+                        new OutputStreamWriter(new FileOutputStream(utteranceCsvFile), "UTF-8"),
+                        CSVFormat.EXCEL.withDelimiter('\t')));
+    } catch (Exception x) {
+      System.err.println("Could not write to \""+utteranceCsvFile.getPath()+"\": " + x);
       return;
     }
     final CSVPrinter finalOut = out;
@@ -598,7 +659,17 @@ public class Evaluate extends CommandLineProgram {
         csv.println();
         csv.flush();
 
+        utteranceCsv.print("utt");
+        utteranceCsv.print("txt");
+        utteranceCsv.print("version"); // ref or wav
+        utteranceCsv.print("start");
+        utteranceCsv.print("end");
+        utteranceCsv.print("wordCount");
+        utteranceCsv.println();
+        utteranceCsv.flush();
+
         out.print("wav");
+        out.print("duration");
         out.print("wordCount");
         out.print("WER");
         out.println();
@@ -635,7 +706,7 @@ public class Evaluate extends CommandLineProgram {
               
               // get speech recording
               File wav = corpus.getMediaFile​(id, "", "audio/wav", dir);
-              if (!wav.exists()) {
+              if (wav == null || !wav.exists()) {
                 System.err.println("No recording for " + id);
                 continue;
               }
@@ -699,9 +770,13 @@ public class Evaluate extends CommandLineProgram {
         csv.close();
       } catch (Exception x) {
       }
+      try {
+        utteranceCsv.close();
+      } catch (Exception x) {
+      }
     }
   } // end of evaluateFromLabbcat()
-
+  
   /**
    * Evaluate a single audio/reference-transcript pair.
    * @param wav The recording of speech.
@@ -781,6 +856,28 @@ public class Evaluate extends CommandLineProgram {
     }
     csv.flush();
 
+    // write the utterance data
+    int u = 1;
+    for (Annotation utterance : reference.all("utterance")) {
+      utteranceCsv.print(u++);
+      utteranceCsv.print(reference.getId());
+      utteranceCsv.print("ref"); // ref or wav
+      utteranceCsv.print(utterance.getStart().getOffset());
+      utteranceCsv.print(utterance.getEnd().getOffset());
+      utteranceCsv.print(utterance.all("orthography").length);
+      utteranceCsv.println();
+    } // next utterance
+    u = 1;
+    for (Annotation utterance : transcribed.all("utterance")) {
+      utteranceCsv.print(u++);
+      utteranceCsv.print(reference.getId());
+      utteranceCsv.print("wav"); // ref or wav
+      utteranceCsv.print(utterance.getStart().getOffset());
+      utteranceCsv.print(utterance.getEnd().getOffset());
+      utteranceCsv.print(utterance.all("orthography").length);
+      utteranceCsv.println();
+    } // next utterance
+      
     // return word error rate
     return ((double)(S+D+I))/((double)(S+D+C));
   } // end of evaluate()
