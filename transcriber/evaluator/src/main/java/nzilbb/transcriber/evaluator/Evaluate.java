@@ -31,6 +31,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
@@ -53,6 +56,7 @@ import nzilbb.util.IO;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.ProgramDescription;
 import nzilbb.util.Switch;
+import nzilbb.util.Timers;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
@@ -84,7 +88,7 @@ import org.apache.commons.csv.CSVPrinter;
  *  </ul></li>    
  * </ul>
  */
-@ProgramDescription(value="Utility for automated evaluation of automatic Transcriber modules, outputting a paths-...tsv file with word edit paths and utterances-...tsv with utterance partitioning info.",
+@ProgramDescription(value="Utility for automated evaluation of automatic Transcriber modules.\nOutputs:\n\tpaths-...tsv file with word edit paths\n\tutterances-...tsv file with utterance partitioning info.",
                     arguments="nzilbb.transcriber.mytranscriber.jar [/path/to/wav/and/txt/files]")
 public class Evaluate extends CommandLineProgram {
    
@@ -519,6 +523,7 @@ public class Evaluate extends CommandLineProgram {
       System.err.println("Could not write to \""+utteranceCsvFile.getPath()+"\": " + x);
       return;
     }
+    Timers timer = new Timers();
     final CSVPrinter finalOut = out;
     try {
       try {
@@ -543,6 +548,7 @@ public class Evaluate extends CommandLineProgram {
         utteranceCsv.println();
 
         out.print("wav");
+        out.print("duration");
         out.print("wordCount");
         out.print("WER");
         out.println();
@@ -552,7 +558,9 @@ public class Evaluate extends CommandLineProgram {
       }
 
       // transcribe recordings batch
+      timer.start("Time to transcribe");
       transcriber.transcribeFragments(Arrays.stream(wavs), transcribed -> { 
+          timer.end("Time to transcribe"); // stop timer while we evaluate...
           try {
             // ensure the schema has everything we expect
             transcribed.setSchema(transcriber.getSchema());
@@ -561,6 +569,7 @@ public class Evaluate extends CommandLineProgram {
             File wav = new File(dir, IO.WithoutExtension(transcribed.getId()) + ".wav");
             File txt = new File(wav.getParentFile(), IO.WithoutExtension(wav) + ".txt");
             finalOut.print(wav.getName());
+            finalOut.print(duration(wav));
             finalOut.flush();
 
             // load reference transcript
@@ -581,8 +590,11 @@ public class Evaluate extends CommandLineProgram {
             System.err.println();
             System.err.println("Error transcribing " + transcribed.getId() + ": " + exception);
             exception.printStackTrace(System.err);
+          } finally {
+            timer.start("Time to transcribe"); // start up timer again
           }
         });
+      timer.end("Time to transcribe");
     } catch(Exception exception) {
       System.err.println();
       System.err.println("Error: " + exception);
@@ -596,6 +608,8 @@ public class Evaluate extends CommandLineProgram {
         utteranceCsv.close();
       } catch (Exception x) {
       }
+      System.err.println(
+        "Time to transcribe: " + (((double)timer.getTotals().get("Time to transcribe")) / 1000.0));
     }
   } // end of evaluateFromFileSystem()
   
@@ -644,6 +658,7 @@ public class Evaluate extends CommandLineProgram {
     }
     final CSVPrinter finalOut = out;
     File dir = null;
+    Timers timer = new Timers();
     try {
       try {
         // add CSV headers
@@ -726,7 +741,9 @@ public class Evaluate extends CommandLineProgram {
           } // next id
           
           // transcribe recordings batch
+          timer.start("Time to transcribe"); // start timer
           transcriber.transcribeFragments(idToWav.values().stream(), transcribed -> { 
+              timer.end("Time to transcribe"); // stop timer while we evaluate
               try {
                 // ensure the schema has everything we expect
                 transcribed.setSchema(transcriber.getSchema());
@@ -735,6 +752,7 @@ public class Evaluate extends CommandLineProgram {
                 
                 File wav = idToWav.get(IO.WithoutExtension(transcribed.getId()));
                 finalOut.print(wav.getName());
+                finalOut.print(duration(wav));
                 Graph reference = idToReference.get(IO.WithoutExtension(transcribed.getId()));
                 finalOut.print(reference.all("word").length);
                 
@@ -747,8 +765,11 @@ public class Evaluate extends CommandLineProgram {
                 System.err.println();
                 System.err.println("Error transcribing " + transcribed.getId() + ": " + exception);
                 exception.printStackTrace(System.err);
+              } finally {
+                timer.start("Time to transcribe"); // start up timer again
               }
             }); 
+          timer.end("Time to transcribe"); // stop timer while we get next batch
           soFar += ids.length;
           if (verbose) System.err.println("Transcribed " + soFar + " of " + transcriptCount);
         } finally {
@@ -775,8 +796,34 @@ public class Evaluate extends CommandLineProgram {
       } catch (Exception x) {
       }
     }
+    System.err.println(
+      "Time to transcribe: " + (((double)timer.getTotals().get("Time to transcribe")) / 1000.0));
   } // end of evaluateFromLabbcat()
   
+  /**
+   * Determines the duration of a wav file.
+   * @param wav
+   * @return Duration of the given wav file in seconds (to nearest ms).
+   */
+  public double duration(File wav) {
+    if (wav != null && wav.exists()) {
+      try {
+        // determine the duration of the media file
+        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(wav);
+        AudioFormat format = audioInputStream.getFormat();
+        long frames = audioInputStream.getFrameLength();
+        if (frames > 0) {
+          double dur = ((double)frames) / format.getFrameRate();
+          // round to nearest ms
+          return (((int)(dur * 1000)+500))/1000.0;
+        }
+      } catch(Exception exception) {
+        System.err.println("Could not get duration of " + wav.getName() + " ERROR: " + exception);
+      }
+    }
+    return 0.0;
+  } // end of duration()
+
   /**
    * Evaluate a single audio/reference-transcript pair.
    * @param wav The recording of speech.
