@@ -196,6 +196,29 @@ public class Evaluate extends CommandLineProgram {
    */
   @Switch("LaBB-CAT transcripts to download, e.g. first('corpus').label = 'CC'")
   public Evaluate setTranscripts(String newTranscripts) { transcripts = newTranscripts; return this; }
+  
+  /**
+   * Layer ID for annotations to include as a column in the output edit paths.
+   * @see #getTag()
+   * @see #setTag(String)
+   */
+  protected String tag;
+  /**
+   * Getter for {@link #tag}: Layer ID for annotations to include as a column in the
+   * output edit paths. 
+   * @return Layer ID for annotations to include as a column in the output edit paths.
+   */
+  public String getTag() {
+    if (tag == null || tag.length() == 0) return null;
+    return tag;
+  }
+  /**
+   * Setter for {@link #tag}: Layer ID for annotations to include as a column in the
+   * output edit paths. 
+   * @param newTag Layer ID for annotations to include as a column in the output edit paths.
+   */
+  @Switch("LaBB-CAT layer to as a column in the output paths, e.g. language")
+  public Evaluate setTag(String newTag) { tag = newTag; return this; }
 
   /**
    * How many transcripts to download from LaBB-CAT at once. 0 means download all at
@@ -530,6 +553,8 @@ public class Evaluate extends CommandLineProgram {
         // add CSV headers
         csv.print("step");
         csv.print("txt");
+        // (tag is not valid if evaluating from filesystem)
+        tag = null;
         csv.print("rawReference");
         csv.print("reference");
         csv.print("operation");
@@ -664,6 +689,7 @@ public class Evaluate extends CommandLineProgram {
         // add CSV headers
         csv.print("step");
         csv.print("txt");
+        if (getTag() != null) csv.print("tag");
         csv.print("rawReference");
         csv.print("reference");
         csv.print("operation");
@@ -697,6 +723,10 @@ public class Evaluate extends CommandLineProgram {
       dir = Files.createTempDirectory("Evaluate").toFile();
       if (verbose) System.err.println("Downloading media to: " + dir.getPath());
       String[] layers = { "utterance", "word" };
+      if (getTag() != null) {
+        String[] layersWithTag = { "utterance", "word", getTag() };
+        layers = layersWithTag;
+      }
 
       // connect to LaBB-CAT
       LabbcatView corpus = new LabbcatView(labbcat, username, password);
@@ -730,6 +760,9 @@ public class Evaluate extends CommandLineProgram {
               // get reference transcript
               Graph reference = corpus.getTranscript(id, layers);
               if (verbose) System.err.println(reference.getId() + "\t" + wav.getName());
+
+              // TODO cut out bits of the wav file that weren't transcribed, so we don't get
+              // long periods of INSERT only from the transcriber.
               
               idToWav.put(IO.WithoutExtension(wav), wav);
               idToReference.put(IO.WithoutExtension(wav), reference);
@@ -877,9 +910,14 @@ public class Evaluate extends CommandLineProgram {
       csv.print(""+(++i));
       csv.print(reference.getId());
       if (step.getFrom() == null) {
+        if (getTag() != null) csv.print("");
         csv.print("");
         csv.print("");
       } else {
+        if (getTag() != null) {
+          Annotation tag = step.getFrom().first(getTag());
+          csv.print(tag == null?"":tag.getLabel());
+        }
         csv.print(step.getFrom().getParent().getLabel());
         csv.print(step.getFrom().getLabel());
       }
