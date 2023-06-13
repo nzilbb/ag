@@ -30,6 +30,9 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Vector;
 import java.util.stream.Collectors;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -45,12 +48,17 @@ import nzilbb.ag.automation.Transcriber;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.util.NamedStream;
+import nzilbb.ag.util.AnnotationComparatorByAnchor;
 import nzilbb.annotator.orthography.OrthographyStandardizer;
+import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.*;
 import nzilbb.editpath.MinimumEditPathString;
 import nzilbb.formatter.text.PlainTextSerialization;
 import nzilbb.labbcat.LabbcatView;
+import nzilbb.media.MediaCensor;
+import nzilbb.media.MediaThread;
+import nzilbb.media.ffmpeg.FfmpegCensor;
 import nzilbb.util.CommandLineProgram;
 import nzilbb.util.IO;
 import nzilbb.util.ProgramDescription;
@@ -270,6 +278,47 @@ public class Evaluate extends CommandLineProgram {
     }
     return this;
   }
+
+  /**
+   * Path to ffmpeg, for silencing non-transcribed portions of recordings.
+   * @see #getFfmpeg()
+   * @see #setFfmpeg(String)
+   */
+  protected String ffmpeg;
+  /**
+   * Getter for {@link #ffmpeg}: Path to ffmpeg, for silencing non-transcribed portions of
+   * recordings. 
+   * @return Path to ffmpeg, for silencing non-transcribed portions of recordings.
+   */
+  public String getFfmpeg() { return ffmpeg; }
+  /**
+   * Setter for {@link #ffmpeg}: Path to ffmpeg, for silencing non-transcribed portions of
+   * recordings. 
+   * @param newFfmpeg Path to ffmpeg, for silencing non-transcribed portions of recordings.
+   */
+  @Switch("Path to ffmpeg, for silencing non-transcribed portions of recordings, e.g. /usr/bin")
+  public Evaluate setFfmpeg(String newFfmpeg) { ffmpeg = newFfmpeg; return this; }
+  
+  /**
+   * Audio filter for ffmpeg to process untranscribed portions of the audio.
+   * @see #getUntranscribedFilter()
+   * @see #setUntranscribedFilter(String)
+   */
+  protected String untranscribedFilter = "lowpass=f=1";
+  /**
+   * Getter for {@link #untranscribedFilter}: Audio filter for ffmpeg to process
+   * untranscribed portions of the audio. 
+   * @return Audio filter for ffmpeg to process untranscribed portions of the audio.
+   */
+  public String getUntranscribedFilter() { return untranscribedFilter; }
+  /**
+   * Setter for {@link #untranscribedFilter}: Audio filter for ffmpeg to process
+   * untranscribed portions of the audio. 
+   * @param newUntranscribedFilter Audio filter for ffmpeg to process untranscribed
+   * portions of the audio. 
+   */
+  @Switch("Audio filter for ffmpeg to process untranscribed portions of the audio, e.g. lowpass=f=1")
+  public Evaluate setUntranscribedFilter(String newUntranscribedFilter) { untranscribedFilter = newUntranscribedFilter; return this; }
 
   /**
    * The name of a .jar file which implements the transcriber.
@@ -607,10 +656,22 @@ public class Evaluate extends CommandLineProgram {
             Graph reference = graphs[0];
             finalOut.print(reference.all("word").length);
             
-            double WER = evaluate(wav, reference, transcribed);
-            finalOut.print(WER);
-            finalOut.println();
-            finalOut.flush();
+            if (ffmpeg != null) {
+              // cut out bits of the wav file that weren't transcribed, so we don't get
+              // long periods of INSERT only from the transcriber.
+              wav = silenceUntranscribedAudio(wav, reference);
+              wav.deleteOnExit();
+            }
+            try {
+              double WER = evaluate(wav, reference, transcribed);
+              finalOut.print(WER);
+              finalOut.println();
+              finalOut.flush();
+            } finally {
+              if (ffmpeg != null) { // wav is an edited copy, so delete it
+                wav.delete();
+              }
+            }
           } catch(Exception exception) {
             System.err.println();
             System.err.println("Error transcribing " + transcribed.getId() + ": " + exception);
@@ -722,9 +783,9 @@ public class Evaluate extends CommandLineProgram {
 
       dir = Files.createTempDirectory("Evaluate").toFile();
       if (verbose) System.err.println("Downloading media to: " + dir.getPath());
-      String[] layers = { "utterance", "word" };
+      String[] layers = { "turn", "utterance", "word" };
       if (getTag() != null) {
-        String[] layersWithTag = { "utterance", "word", getTag() };
+        String[] layersWithTag = { "turn", "utterance", "word", getTag() };
         layers = layersWithTag;
       }
 
@@ -761,8 +822,16 @@ public class Evaluate extends CommandLineProgram {
               Graph reference = corpus.getTranscript(id, layers);
               if (verbose) System.err.println(reference.getId() + "\t" + wav.getName());
 
-              // TODO cut out bits of the wav file that weren't transcribed, so we don't get
-              // long periods of INSERT only from the transcriber.
+              if (ffmpeg != null) {
+                // cut out bits of the wav file that weren't transcribed, so we don't get
+                // long periods of INSERT only from the transcriber.
+                File newWav = silenceUntranscribedAudio(wav, reference);
+                wav.delete();
+                if (!newWav.renameTo(wav)) {
+                  throw new Exception(
+                    "Could not rename " + newWav.getPath() + " as " + wav.getPath());
+                }
+              }
               
               idToWav.put(IO.WithoutExtension(wav), wav);
               idToReference.put(IO.WithoutExtension(wav), reference);
@@ -856,6 +925,88 @@ public class Evaluate extends CommandLineProgram {
     }
     return 0.0;
   } // end of duration()
+  
+  /**
+   * Silences portions of the given audio file that are not transcribed, so that if the
+   * contain speech, the Transcriber will not transcribe it.
+   * <p> This prevents long runs of INSERTs in the path skewing the final WER.
+   * @param wav The recording to edit.
+   * @param transcript The reference transcript, which must have utterance annotations, which
+   * are used to discern which parts of the audio are transcribed.
+   * @return The edited version of the recording, which will be a different file
+   * from <var>wav</var>.
+   */
+  public File silenceUntranscribedAudio(File wav, Graph transcript) throws Exception {
+    if (verbose) {
+      System.err.println("Silencing untranscribed portions of " + transcript);
+    }
+    // find all transcribed portions of the recording, by annotating all spans
+    // during which there's at least one non-empty utterance
+    transcript.getSchema().addLayer(
+      new Layer("transcribed","transcribed")
+      .setParentId(transcript.getSchema().getRoot().getId()).setSaturated(false)
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false));
+    transcript.assignWordsToUtterances();
+    SortedSet<Annotation> utterancesByAnchor
+      = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+    for (Annotation utt : transcript.all(transcript.getSchema().getUtteranceLayerId())) {
+      utterancesByAnchor.add(utt);
+    }
+    Annotation currentSpan = null;
+    for (Annotation utt : Arrays.stream(
+           transcript.all(transcript.getSchema().getUtteranceLayerId()))
+           // anchors are set
+           .filter(utt -> utt.getAnchored())
+           // contains some words
+           .filter(utt -> utt.containsKey("@words"))
+           .filter(utt -> ((List<Annotation>)utt.get("@words")).size() > 0)
+           // in anchor order
+           .sorted(new AnnotationComparatorByAnchor())
+           .collect(Collectors.toList())) {      
+      if (currentSpan == null // the first one, or the current span ends before the utterance starts
+          || currentSpan.getEnd().getOffset() < utt.getStart().getOffset()) {
+        // start a new span
+        currentSpan = transcript.createSpan(utt, utt, "transcribed", "transcribed", transcript);
+      } else if (currentSpan.getEnd().getOffset() < utt.getEnd().getOffset()) {
+        // current span ends before the utterance ends, so extend the span
+        currentSpan.setEnd(utt.getEnd());
+      }
+    } // next utterance, by anchor
+    if (currentSpan == null) {
+      throw new Exception("There are no transcribed portions in " + transcript.getId());
+    }
+
+    // silence all the portions of the recording that aren't in a transcribed span
+    Vector<Double> boundaries = new Vector<Double>();
+    if (transcript.first("transcribed").getStart().getOffset() > 0.0) {
+      // first silence starts at zero
+      boundaries.add(0.0);
+    }
+    for (Annotation span : transcript.all("transcribed")) {
+      boundaries.add(span.getStart().getOffset());
+      boundaries.add(span.getEnd().getOffset());
+    }
+    ParameterSet config = new ParameterSet();
+    config.addParameter(new Parameter("ffmpegPath", new File(ffmpeg)));
+    config.addParameter(new Parameter("audioFilter", untranscribedFilter));
+    config.addParameter(new Parameter("deleteSource", Boolean.FALSE));
+    MediaCensor censor = new FfmpegCensor();
+    censor.configure(config);
+    
+    // run the censor
+    if (verbose) {
+      System.err.println("Silencing intervals " + boundaries);
+    }
+    File silencedWav = File.createTempFile(wav.getName()+"-", ".wav");
+    MediaThread thread
+      = censor.start("audio/wav", wav, boundaries, silencedWav);
+    thread.join();
+    if (!silencedWav.exists()) {
+      throw new Exception("Silencing file failed - ffmpeg output doesn't exist");
+    }
+    return silencedWav;
+  } // end of silenceUntranscribedAudio()
 
   /**
    * Evaluate a single audio/reference-transcript pair.
