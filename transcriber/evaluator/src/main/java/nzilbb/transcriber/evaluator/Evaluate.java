@@ -1,5 +1,5 @@
 //
-// Copyright 2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2022-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -45,6 +45,7 @@ import nzilbb.ag.Schema;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.Transcriber;
+import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.util.AnnotatorDescriptor;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -319,6 +320,24 @@ public class Evaluate extends CommandLineProgram {
    */
   @Switch("Audio filter for ffmpeg to process untranscribed portions of the audio, e.g. lowpass=f=1")
   public Evaluate setUntranscribedFilter(String newUntranscribedFilter) { untranscribedFilter = newUntranscribedFilter; return this; }
+  
+  /**
+   * Transcriber installation configuration, if any is required.
+   * @see #getConfig()
+   * @see #setConfig(String)
+   */
+  protected String config;
+  /**
+   * Getter for {@link #config}: Transcriber installation configuration, if any is required.
+   * @return Transcriber installation configuration, if any is required.
+   */
+  public String getConfig() { return config; }
+  /**
+   * Setter for {@link #config}: Transcriber installation configuration, if any is required.
+   * @param newConfig Transcriber installation configuration, if any is required.
+   */
+  @Switch("Transcriber installation configuration, if it requires any.")
+  public Evaluate setConfig(String newConfig) { config = newConfig; return this; }
 
   /**
    * The name of a .jar file which implements the transcriber.
@@ -520,6 +539,26 @@ public class Evaluate extends CommandLineProgram {
     }
     
     if (verbose) transcriber.getStatusObservers().add(s->System.err.println(s));
+
+    // setWorkingDirectory?
+    if (transcriber.getClass().isAnnotationPresent(UsesFileSystem.class)) {
+      File transcriberDir = new File(transcriber.getAnnotatorId());
+      if (!transcriberDir.exists()) transcriberDir.mkdir();
+      if (verbose) System.err.println("Working directory: " + transcriberDir.getPath());
+      transcriber.setWorkingDirectory(transcriberDir);
+    }
+
+    // config?
+    if (config != null && config.trim().length() > 0) {
+      if (verbose) System.err.println("Configuring transcriber: " + config);
+      try {
+        transcriber.setConfig(config);
+      } catch(InvalidConfigurationException exception) {
+        System.err.println(
+          "Configuring transcriber: \"" + config + "\" - ERROR: " + exception.getMessage());
+        return;
+      }
+    }    
 
     // standardize orthography
     setStandardizer(new OrthographyStandardizer());
