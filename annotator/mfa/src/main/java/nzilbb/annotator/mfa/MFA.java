@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -513,15 +513,13 @@ public class MFA extends Annotator {
     String[] dictionaryLines = dictionariesRaw.split("\n");
     List<String> dictionaries = Arrays.stream(dictionaryLines)
       .map(
-        s->s.trim()
-        .replaceAll("^[-│]","") // remove possible list item prefixes
-        .replaceAll("^ *'","")  // remove leading quote
-        .replaceAll("',$","")   // remove trailing quote
-        .trim())
-      .filter(s->s.length() > 0) // no blank lines
+        s->s.replace("\r","")     // remove carriage returns used on Windows systems
+        .replaceAll("^[^']*'","") // remove leading quote and anything before it
+        .replaceAll("',?$",""))   // remove trailing quote
+      .filter(s->s.length() > 0)  // no blank lines
       .filter(s->s.indexOf(":") < 0) // not the list header
-      .filter(s->!s.equals("[")) // not just an open-bracket
-      .filter(s->!s.equals("]")) // not just a close-bracket
+      .filter(s->!s.equals("["))  // not just an open-bracket
+      .filter(s->!s.equals("]"))  // not just a close-bracket
       .sorted()
       .collect(Collectors.toList());
     return dictionaries;
@@ -537,15 +535,13 @@ public class MFA extends Annotator {
     String[] acousticModelLines = acousticModelsRaw.split("\n");
     List<String> acousticModels = Arrays.stream(acousticModelLines)
       .map(
-        s->s.trim()
-        .replaceAll("^[-│]","") // remove possible list item prefixes
-        .replaceAll("^ *'","")  // remove leading quote
-        .replaceAll("',$","")   // remove trailing quote
-        .trim())
-      .filter(s->s.length() > 0) // no blank lines
+        s->s.replace("\r","")     // remove carriage returns used on Windows systems
+        .replaceAll("^[^']*'","") // remove leading quote and anything before it
+        .replaceAll("',?$",""))   // remove trailing quote
+      .filter(s->s.length() > 0)  // no blank lines
       .filter(s->s.indexOf(":") < 0) // not the list header
-      .filter(s->!s.equals("[")) // not just an open-bracket
-      .filter(s->!s.equals("]")) // not just a close-bracket
+      .filter(s->!s.equals("["))  // not just an open-bracket
+      .filter(s->!s.equals("]"))  // not just a close-bracket
       .sorted()
       .collect(Collectors.toList());
     return acousticModels;
@@ -633,7 +629,7 @@ public class MFA extends Annotator {
       if (System.getProperty("os.name").startsWith("Windows")) {
         return "condaPath=C:\\ProgramData\\Miniconda3";
       } else { // linux
-        return "condaPath=/opt/conda/bin"; // TODO defaults for Windows/OSX
+        return "condaPath=/opt/conda/bin"; // TODO defaults for OSX
       }
     }
   }
@@ -797,7 +793,7 @@ public class MFA extends Annotator {
         .arg("mfa").arg("version");
       // inherit current environment
       exe.getEnvironmentVariables().putAll(System.getenv());
-    } else { // non-Windows systems call mfa directlyr (conda rung doesn't work)
+    } else { // non-Windows systems call mfa directly (conda run doesn't work)
       if (!mfa.exists()) {
         throw new InvalidConfigurationException(this, "MFA CLI not found: " + mfa.getPath());
       }
@@ -1614,7 +1610,7 @@ public class MFA extends Annotator {
         .arg("mfa");
       // inherit current environment
       exe.getEnvironmentVariables().putAll(System.getenv());
-    } else { // non-Windows systems call mfa directlyr (conda rung doesn't work)
+    } else { // non-Windows systems call mfa directly (conda run doesn't work)
       exe.env("PATH", System.getenv("PATH")+pathVariableSuffix())
         .env("HOME", dir.getPath())
         .env("MFA_ROOT_DIR", dir.getPath())

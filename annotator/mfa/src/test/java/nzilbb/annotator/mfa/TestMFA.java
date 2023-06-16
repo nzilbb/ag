@@ -93,7 +93,7 @@ public class TestMFA {
   }
 
   /** Ensure validDictionaryNames method works. */
-  /* @Test */ public void validDictionaryNames() throws Exception {
+  @Test public void validDictionaryNames() throws Exception {
     Collection<String> names = annotator.validDictionaryNames();
     assertTrue("validDictionaryNames contains english_mfa " + names,
                names.contains("english_mfa")); // 2.0.0rc3 was "english"
