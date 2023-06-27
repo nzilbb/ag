@@ -93,16 +93,41 @@ public class Timers {
     runningTimers.remove(id);
     
     long duration = now - startTime;
-    if (totals.containsKey(id))
-    {
+    if (totals.containsKey(id)) {
       totals.put(id, totals.get(id) + duration);
-    }
-    else
-    {
+    } else {
       totals.put(id, duration);
     }
     return duration;
   } // end of end()
+
+  /**
+   * Get the duration of the given timer in milliseconds.
+   * @param id
+   * @return The duration of the given timer in milliseconds, or 0 if the timer is unknown.
+   */
+  public long durationMilliseconds(String id) {
+    long total = 0;
+    if (totals.containsKey(id)) {
+      total = totals.get(id);
+    }
+    if (runningTimers.containsKey(id)) {
+      long now = new Date().getTime();
+      Long startTime = runningTimers.get(id);    
+      long duration = now - startTime;
+      total += duration;
+    }
+    return total;
+  } // end of durationMilliseconds()
+  
+  /**
+   * Get the duration of the given timer in seconds.
+   * @param id
+   * @return The duration of the given timer in seconds, or 0.0 if the timer is unknown.
+   */
+  public double durationSeconds(String id) {
+    return ((double)durationMilliseconds(id))/1000.0;
+  } // end of durationSeconds()
   
   /**
    * String representation of the totals.
