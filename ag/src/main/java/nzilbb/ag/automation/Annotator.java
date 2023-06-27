@@ -32,6 +32,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.*;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Vector;
 import java.util.function.Consumer;
@@ -220,7 +221,13 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    * @param newStore The graph store, if the annotator is annotated with {@link UsesGraphStore}.
    */
   public Annotator setStore(GraphStore newStore) { store = newStore; return this; }
-  
+
+  /**
+   * Flag to indicate that {@link #percentComplete} and {@link #running} are being managed
+   * outside {@link #transform()}. 
+   */
+  protected boolean globalProgress = false;
+
   /**
    * Whether the annotator is currently annotating.
    * @see #getRunning()
@@ -237,8 +244,10 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    * @param running Whether the annotator is currently annotating.
    */
   protected Annotator setRunning(boolean running) {
-    this.running = running;
-    for (Consumer<Boolean> observer : runningObservers) observer.accept(running);
+    if (!globalProgress) {
+      this.running = running;
+      for (Consumer<Boolean> observer : runningObservers) observer.accept(running);
+    }
     return this;
   }
   
@@ -638,7 +647,6 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    */
   public abstract String[] getOutputLayers() throws InvalidConfigurationException;
   
-  protected boolean ignoreSetPercentComplete = false;
   protected Integer percentComplete;
   /**
    * Setter for {@link #percentComplete}: Progress indicator; set to 100 when processing
@@ -646,7 +654,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    * @param newPercentComplete Progress indicator; set to 100 when processing is complete.
    */
   protected Annotator setPercentComplete(Integer newPercentComplete) {
-    if (!ignoreSetPercentComplete) {
+    if (!globalProgress) {
       percentComplete = newPercentComplete;
       for (Consumer<Integer> observer : percentCompleteObservers) observer.accept(percentComplete);
     }
@@ -722,16 +730,40 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
   public void transformTranscripts(GraphStore store, String expression)
     throws TransformationException, InvalidConfigurationException, StoreException,
     PermissionException {
-    
-    Vector<String> layerIds = new Vector<String>();
-    for (String layerId : getRequiredLayers()) layerIds.add(layerId);
-    for (String layerId : getOutputLayers()) layerIds.add(layerId);
-    String[] ids = expression == null
-      ?store.getTranscriptIds()
-      :store.getMatchingTranscriptIds(expression);
-    ignoreSetPercentComplete = true; // global progress
-    percentComplete = 0;
-    try {
+    setRunning(true);
+    try {    
+      final LinkedHashSet<String> layerIds = new LinkedHashSet<String>();
+      for (String layerId : getRequiredLayers()) {
+        // we want this layer
+        layerIds.add(layerId);
+        // and all it's ancestors, in case they're affected by the transformation
+        Layer layer = schema.getLayer(layerId);
+        if (layer != null) {
+          layer.getAncestors().stream()
+            .map(l->l.getId())
+            .forEach(ancestorId -> layerIds.add(ancestorId));
+        }
+      } // next required layer
+      for (String layerId : getOutputLayers()) {
+        // we want this layer
+        layerIds.add(layerId);
+        Layer layer = schema.getLayer(layerId);
+        if (layer != null) {
+          // and all it's ancestors, in case they're affected by the transformation
+          layer.getAncestors().stream()
+            .map(l->l.getId())
+            .forEach(ancestorId -> layerIds.add(ancestorId));
+          // and all it's descendants, in case they're affected by the transformation
+          layer.getDescendants().stream()
+            .map(l->l.getId())
+            .forEach(descendantId -> layerIds.add(descendantId));
+        }
+        
+      } // next output layer
+      String[] ids = expression == null
+        ?store.getTranscriptIds()
+        :store.getMatchingTranscriptIds(expression);
+      percentComplete = 0; // TODO multithread this so it's faster
       StoreException transcriptException = null;
       int soFar = 0;
       for (String id : ids) {
@@ -739,10 +771,16 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
           if (cancelling) break;
           Graph graph = store.getTranscript(id, layerIds.toArray(new String[0]));
           if (cancelling) break;
-          transform(graph);
+          graph.trackChanges();
+          try {
+            globalProgress = true; // don't set transform set progress or running
+            transform(graph);
+          } finally {
+            globalProgress = false;
+          }
           if (cancelling) break;
           store.saveTranscript(graph);
-          percentComplete = (int)((double)(soFar * 100) / (double)ids.length);
+          setPercentComplete((++soFar * 100) / ids.length);
         } catch (StoreException storeX) {
           // we don't let a single transcript's problem stop all the others from
           // being annotated, but we save the exception for throwing later               
@@ -752,10 +790,10 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
           System.err.println("Annotator.transformTranscripts: " + extremelyUnlikely);
         }
       } // next transcript
-      percentComplete = 100;
+      setPercentComplete(100);
       if (transcriptException != null) throw transcriptException;
     } finally {
-      ignoreSetPercentComplete = false;
+      setRunning(false);
     }
   } // end of transformTranscripts()
   
@@ -772,22 +810,26 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    */
   public void transformFragments(Stream<Graph> fragments, Consumer<Graph> consumer)
     throws TransformationException, InvalidConfigurationException {
-    
-    List<Graph> transcripts = fragments.collect(Collectors.toList());
-    ignoreSetPercentComplete = true; // global progress
-    percentComplete = 0;
+    setRunning(true);
     try {
+      List<Graph> transcripts = fragments.collect(Collectors.toList());
+      percentComplete = 0;
       int soFar = 0;
       for (Graph transcript : transcripts) {
         if (cancelling) break;
-        transform(transcript);
+        try {
+          globalProgress = true; // don't let transform set percentComplete or running
+          transform(transcript);
+        } finally {
+          globalProgress = false;
+        }
         consumer.accept(transcript);
         if (cancelling) break;
-        percentComplete = (int)((double)(soFar * 100) / (double)transcripts.size());
+        setPercentComplete((++soFar * 100) / transcripts.size());
       } // next transcript
-      percentComplete = 100;
+      setPercentComplete(100);
     } finally {
-      ignoreSetPercentComplete = false;
+      setRunning(false);
     }
   } // end of transformFragments()
   

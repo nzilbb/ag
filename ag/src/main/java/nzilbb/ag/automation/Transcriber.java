@@ -150,10 +150,10 @@ public abstract class Transcriber extends Annotator {
    */
   public void transcribeFragments(Stream<File> speech, Consumer<Graph> consumer)
     throws Exception {
-    List<File> wavs = speech.collect(Collectors.toList());
-    ignoreSetPercentComplete = true; // global progress
-    percentComplete = 0;
+    setRunning(true);
     try {
+      List<File> wavs = speech.collect(Collectors.toList());
+      setPercentComplete(0);
       int soFar = 0;
       for (File wav : wavs) {
         if (isCancelling()) break;
@@ -163,11 +163,11 @@ public abstract class Transcriber extends Annotator {
         // transcribe the audio
         consumer.accept(transcribe(wav, transcript));
         if (isCancelling()) break;
-        percentComplete = (int)((double)(soFar * 100) / (double)wavs.size());
+        setPercentComplete((++soFar * 100) / wavs.size());
       } // next transcript
-      percentComplete = 100;
+      setPercentComplete(100);
     } finally {
-      ignoreSetPercentComplete = false;
+      setRunning(false);
     }
   } // end of transcribeFragments()
   
