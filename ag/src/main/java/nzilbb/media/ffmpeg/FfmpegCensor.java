@@ -95,6 +95,25 @@ public class FfmpegCensor implements MediaCensor {
   public void setDeleteSource(Boolean newDeleteSource) { deleteSource = newDeleteSource; }
    
   /**
+   * Whether to output intervals and ffmpeg command line arguments to stderr or not.
+   * @see #getVerbose()
+   * @see #setVerbose(Boolean)
+   */
+  protected Boolean verbose = Boolean.FALSE;
+  /**
+   * Getter for {@link #verbose}: Whether to output intervals and ffmpeg command line
+   * arguments to stderr or not. 
+   * @return Whether to output intervals and ffmpeg command line arguments to stderr or not.
+   */
+  public Boolean getVerbose() { return verbose; }
+  /**
+   * Setter for {@link #verbose}: Whether to output intervals and ffmpeg command line
+   * arguments to stderr or not. 
+   * @param newVerbose Whether to output intervals and ffmpeg command line arguments to
+   * stderr or not. 
+   */
+  public FfmpegCensor setVerbose(Boolean newVerbose) { verbose = newVerbose; return this; }
+  /**
    * Default constructor.
    */
   public FfmpegCensor() {
@@ -234,7 +253,7 @@ public class FfmpegCensor implements MediaCensor {
       } // not null boundary
       previousBoundary = boundary;
     } // next boundary
-    System.out.println("FfmpegCensor: " + boundaries);
+    if (verbose != null && verbose) System.err.println("FfmpegCensor: " + boundaries);
       
     final File finalSource = source;
     final File finalDestination = destination;
@@ -319,7 +338,7 @@ public class FfmpegCensor implements MediaCensor {
     vArguments.add("[outa]");
     vArguments.add(destination.getPath());
 
-    System.out.println("FfmpegCensor: " + vArguments);
+    if (verbose != null && verbose) System.err.println("FfmpegCensor: " + vArguments);
 
     // start ffmpeg
     MediaThread thread = new MediaThread(new Execution(getFfmpeg(), vArguments) {
