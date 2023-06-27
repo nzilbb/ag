@@ -710,8 +710,9 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    * implementation simply calls {@link IGraphStoreQuery#getMatchingTranscriptIds(String)}
    * and calls {@link IGraphStoreQuery#getGraph(String,String[])} and 
    * {@link GraphTransformer#transform(Graph)} serially for each returned ID.
-   * @param store
-   * @param expression
+   * @param store The graph store.
+   * @param expression An expression for identifying transcripts to update, or null to transform
+   * all transcripts in the store.
    * @throws TransformationException
    * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
    * {@link #setSchema(Schema)} have not yet been called.
@@ -725,7 +726,9 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
     Vector<String> layerIds = new Vector<String>();
     for (String layerId : getRequiredLayers()) layerIds.add(layerId);
     for (String layerId : getOutputLayers()) layerIds.add(layerId);
-    String[] ids = store.getMatchingTranscriptIds(expression);
+    String[] ids = expression == null
+      ?store.getTranscriptIds()
+      :store.getMatchingTranscriptIds(expression);
     ignoreSetPercentComplete = true; // global progress
     percentComplete = 0;
     try {
