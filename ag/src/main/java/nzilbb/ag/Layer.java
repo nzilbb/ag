@@ -528,6 +528,19 @@ public class Layer extends TrackedMap {
     } // next child
     return false;
   } // end of isDescendant()
+  
+  /**
+   * Gets all descendant layers.
+   * @return A (possibly empty) set of descendant layers.
+   */
+  public Set<Layer> getDescendants() {
+    LinkedHashSet<Layer> descendants = new LinkedHashSet<Layer>();
+    for (Layer child : getChildren().values()) {
+      descendants.add(child);
+      descendants.addAll(child.getDescendants());
+    } // next child
+    return descendants;
+  } // end of getDescendants()
 
   // java.lang.Object overrides:
 

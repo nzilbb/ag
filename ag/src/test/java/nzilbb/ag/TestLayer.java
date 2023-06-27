@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Set;
 import javax.json.JsonObject;
 import nzilbb.ag.*;
 
@@ -263,6 +264,15 @@ public class TestLayer
     assertFalse("isDescendant - peer", g.getLayer("word").isDescendant("utterance"));
     assertTrue("isDescendant - descendant", g.getLayer("word").isDescendant("phone"));
     assertFalse("isDescendant - reflexive", g.getLayer("word").isDescendant("word"));
+
+    Set<Layer> descendants = g.getLayer("turn").getDescendants();
+    assertTrue("descendants of turn: word", descendants.contains(g.getLayer("word")));
+    assertTrue("descendants of turn: phone", descendants.contains(g.getLayer("phone")));
+    assertTrue("descendants of turn: phone", descendants.contains(g.getLayer("utterance")));
+    assertFalse("descendants of turn: not itself", descendants.contains(g.getLayer("turn")));
+    assertFalse("descendants of turn: not who", descendants.contains(g.getLayer("who")));
+    assertFalse("descendants of turn: not topic", descendants.contains(g.getLayer("topic")));
+    assertFalse("descendants of turn: not graph", descendants.contains(g.getLayer("graph")));
   }
 
   @Test public void cloning() 
