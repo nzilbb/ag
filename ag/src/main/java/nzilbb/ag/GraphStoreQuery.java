@@ -267,7 +267,7 @@ public interface GraphStoreQuery {
    * <ul>
    *  <li><code>/Ada.+/.test(id)</code></li>
    *  <li><code>labels('who').includes('Robert')</code></li>
-   *  <li><code>('CC', 'IA', 'MU').includes(first('corpus').label)</code></li>
+   *  <li><code>['CC', 'IA', 'MU'].includes(first('corpus').label)</code></li>
    *  <li><code>first('episode').label == 'Ada Aitcheson'</code></li>
    *  <li><code>first('transcript_scribe').label == 'Robert'</code></li>
    *  <li><code>first('participant_languages').label == 'en'</code></li>
@@ -303,7 +303,7 @@ public interface GraphStoreQuery {
    * <ul>
    *  <li><code>/Ada.+/.test(id)</code></li>
    *  <li><code>labels('who').includes('Robert')</code></li>
-   *  <li><code>('CC', 'IA', 'MU').includes(first('corpus').label)</code></li>
+   *  <li><code>['CC', 'IA', 'MU'].includes(first('corpus').label)</code></li>
    *  <li><code>first('episode').label == 'Ada Aitcheson'</code></li>
    *  <li><code>first('transcript_scribe').label == 'Robert'</code></li>
    *  <li><code>first('participant_languages').label == 'en'</code></li>
@@ -342,7 +342,7 @@ public interface GraphStoreQuery {
    * <ul>
    *  <li><code>/Ada.+/.test(id)</code></li>
    *  <li><code>labels('who').includes('Robert')</code></li>
-   *  <li><code>('CC', 'IA', 'MU').includes(first('corpus').label)</code></li>
+   *  <li><code>['CC', 'IA', 'MU'].includes(first('corpus').label)</code></li>
    *  <li><code>first('episode').label == 'Ada Aitcheson'</code></li>
    *  <li><code>first('transcript_scribe').label == 'Robert'</code></li>
    *  <li><code>first('participant_languages').label == 'en'</code></li>
@@ -388,7 +388,7 @@ public interface GraphStoreQuery {
    * <ul>
    *  <li><code>/Ada.+/.test(id)</code></li>
    *  <li><code>labels('who').includes('Robert')</code></li>
-   *  <li><code>('CC', 'IA', 'MU').includes(first('corpus').label)</code></li>
+   *  <li><code>['CC', 'IA', 'MU'].includes(first('corpus').label)</code></li>
    *  <li><code>first('episode').label == 'Ada Aitcheson'</code></li>
    *  <li><code>first('transcript_scribe').label == 'Robert'</code></li>
    *  <li><code>first('participant_languages').label == 'en'</code></li>
