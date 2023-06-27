@@ -113,7 +113,11 @@ public interface CloneableBean {
           } else if (value instanceof List) {
             JsonArrayBuilder list = Json.createArrayBuilder();
             for (Object e : (List)value) {
-              list.add(e.toString());
+              if (e instanceof CloneableBean) {
+                list.add(((CloneableBean)e).toJson());
+              } else {
+                list.add(e.toString());
+              }
             }
             json.add(key, list);
           } else if (value instanceof Map) {
@@ -358,15 +362,19 @@ public interface CloneableBean {
                 return getClass().getMethod(setterName, boolean.class); // Layer.peers, etc...
               } catch(NoSuchMethodException x5) {
                 try {
-                  return getClass().getMethod(setterName, LinkedHashMap.class); // Layer.validLabels
-                } catch(NoSuchMethodException x6) {
+                  return getClass().getMethod(setterName, Boolean.class); 
+                } catch(NoSuchMethodException x5a) {
                   try {
-                    return getClass().getMethod(setterName, Vector.class); // SerializationDescriptor.fileSuffixes
-                  } catch(NoSuchMethodException x7) {
+                    return getClass().getMethod(setterName, LinkedHashMap.class); // Layer.validLabels
+                  } catch(NoSuchMethodException x6) {
                     try {
-                      return getClass().getMethod(setterName, URL.class); // SerializationDescriptor.icon
-                    } catch(NoSuchMethodException x8) {
-                      return getClass().getMethod(setterName, Double.class); // Anchor.offset
+                      return getClass().getMethod(setterName, Vector.class); // SerializationDescriptor.fileSuffixes
+                    } catch(NoSuchMethodException x7) {
+                      try {
+                        return getClass().getMethod(setterName, URL.class); // SerializationDescriptor.icon
+                      } catch(NoSuchMethodException x8) {
+                        return getClass().getMethod(setterName, Double.class); // Anchor.offset
+                      }
                     }
                   }
                 }
