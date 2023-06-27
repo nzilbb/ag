@@ -44,12 +44,22 @@ public class ParameterSet extends LinkedHashMap<String,Parameter> {
   /**
    * Adds a parameter to the set.
    * @param parameter The parameter to add.
-   * @return The parmeter added.
+   * @return The parameter added.
    */
   public Parameter addParameter(Parameter parameter) {
     put(parameter.getName(), parameter);
     return parameter;
   } // end of addParameter()
+  
+  /**
+   * Builder-pattern method for adding a parameter to the set.
+   * @param parameter The parameter to add.
+   * @return This ParameterSet.
+   */
+  public ParameterSet parameter(Parameter parameter) {
+    addParameter(parameter);
+    return this;
+  } // end of parameter()
   
   /**
    * Invokes {@link Parameter#apply(Object)} for all parameters in the collection.
