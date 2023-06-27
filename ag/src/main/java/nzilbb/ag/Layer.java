@@ -509,26 +509,26 @@ public class Layer
    } // end of getFirstCommonAncestor()
   
    /**
-    * Returns the maximum depth of the descendents of the layer. 
+    * Returns the maximum depth of the descendants of the layer. 
     * <p> e.g. 
     * <ul> 
-    *  <li>if the layer has no children descendent depth = 0</li>
+    *  <li>if the layer has no children descendant depth = 0</li>
     *  <li>if the layer has children, but no grandchildren (i.e. no child layers have children) 
-    *   descendent depth = 1</li>
+    *   descendant depth = 1</li>
     *  <li>if the layer has children, and some have grandchildren, but there are no 
-    *   great-granchildren (i.e. no grandchild layers have children) descendent depth = 2</li>
+    *   great-granchildren (i.e. no grandchild layers have children) descendant depth = 2</li>
     * </ul> 
-    * @return The maximum descendent depth.
+    * @return The maximum descendant depth.
     */
-   public int getDescendentDepth()
+   public int getDescendantDepth()
    {
       int depth = 0;
       for (Layer child : getChildren().values())
       {
-         depth = Math.max(depth, child.getDescendentDepth() + 1);
+         depth = Math.max(depth, child.getDescendantDepth() + 1);
       } // next child
       return depth;
-   } // end of getDescendentDepth()
+   } // end of getDescendantDepth()
 
    /**
     * Determines whether the given layer is a descendant of this layer.

@@ -245,12 +245,12 @@ public class TestLayer
     assertNull("FirstCommonAncestor with null", 
                g.getLayer("phone").getFirstCommonAncestor(null));
 
-    assertEquals("descendant depth - phone", 0, g.getLayer("phone").getDescendentDepth());
-    assertEquals("descendant depth - word", 1, g.getLayer("word").getDescendentDepth());
-    assertEquals("descendant depth - utterance", 0, g.getLayer("utterance").getDescendentDepth());
-    assertEquals("descendant depth - turn", 2, g.getLayer("turn").getDescendentDepth());
-    assertEquals("descendant depth - who", 3, g.getLayer("who").getDescendentDepth());
-    assertEquals("descendant depth - topic", 0, g.getLayer("topic").getDescendentDepth());
+    assertEquals("descendant depth - phone", 0, g.getLayer("phone").getDescendantDepth());
+    assertEquals("descendant depth - word", 1, g.getLayer("word").getDescendantDepth());
+    assertEquals("descendant depth - utterance", 0, g.getLayer("utterance").getDescendantDepth());
+    assertEquals("descendant depth - turn", 2, g.getLayer("turn").getDescendantDepth());
+    assertEquals("descendant depth - who", 3, g.getLayer("who").getDescendantDepth());
+    assertEquals("descendant depth - topic", 0, g.getLayer("topic").getDescendantDepth());
 
     assertTrue("isAncestor", g.getLayer("word").isAncestor("turn"));
     assertTrue("isAncestor", g.getLayer("word").isAncestor("transcript"));
