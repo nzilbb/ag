@@ -731,6 +731,9 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
     throws TransformationException, InvalidConfigurationException, StoreException,
     PermissionException {
     setRunning(true);
+    setStatus(
+      "Annotating"+(expression==null?" all":"")+" transcripts"
+      +(expression==null?"":" matching"+expression)+"...");
     try {    
       final LinkedHashSet<String> layerIds = new LinkedHashSet<String>();
       for (String layerId : getRequiredLayers()) {
@@ -769,6 +772,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
       for (String id : ids) {
         try {
           if (cancelling) break;
+          setStatus("Annotating " + id);
           Graph graph = store.getTranscript(id, layerIds.toArray(new String[0]));
           if (cancelling) break;
           graph.trackChanges();
@@ -790,6 +794,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
           System.err.println("Annotator.transformTranscripts: " + extremelyUnlikely);
         }
       } // next transcript
+      setStatus("Finished.");
       setPercentComplete(100);
       if (transcriptException != null) throw transcriptException;
     } finally {
