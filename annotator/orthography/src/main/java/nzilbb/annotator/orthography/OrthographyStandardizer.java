@@ -43,7 +43,7 @@ import nzilbb.ag.automation.InvalidConfigurationException;
 public class OrthographyStandardizer extends Annotator {
    
   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-  public String getMinimumApiVersion() { return "1.0.0"; }
+  public String getMinimumApiVersion() { return "1.1.1"; }
    
   /**
    * ID of the input layer containing word tokens.
