@@ -21,10 +21,12 @@
 //
 package nzilbb.annotator.orthography;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -223,6 +225,79 @@ public class OrthographyStandardizer extends Annotator {
     if (orthographyLayerId == null)
       throw new InvalidConfigurationException(this, "Orthography layer not set.");
     return new String[] { orthographyLayerId };
+  }
+
+  /**
+   * Transforms all graphs from the given graph store that match the given graph expression.
+   * <p> This implementation uses
+   * {@link GraphStoreQuery#aggregateMatchingAnnotations(String,String)}
+   * and {@link GraphStore#tagMatchingAnnotations​(String,String,String,Integer)}
+   * to optimize tagging transcripts en-masse.
+   * @param store The graph to store.
+   * @param expression An expression for identifying transcripts to update, or null to transform
+   * all transcripts in the store.
+   * @return The changes introduced by the tranformation.
+   * @throws TransformationException If the transformation cannot be completed.
+   */
+  public void transformTranscripts​(GraphStore store, String expression)
+    throws TransformationException, InvalidConfigurationException, StoreException,
+    PermissionException {
+    setRunning(true);
+    try {
+      setPercentComplete(0);
+      Layer tokenLayer = schema.getLayer(tokenLayerId);
+      if (tokenLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid input token layer: " + tokenLayerId);
+      }
+      Layer orthographyLayer = schema.getLayer(orthographyLayerId);
+      if (orthographyLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid output orthography layer: " + orthographyLayerId);
+      }    
+      
+      StringBuilder labelExpression = new StringBuilder();
+      labelExpression.append("layer.id == '");
+      labelExpression.append(tokenLayer.getId().replace("'", "\\'"));
+      labelExpression.append("'");
+      if (expression != null && expression.trim().length() > 0) {
+        labelExpression.append(" && [");
+        String[] ids = store.getMatchingTranscriptIds(expression);
+        if (ids.length == 0) {
+          setStatus("No matching transcripts");
+          setPercentComplete(100);
+          return;
+        } else {
+          labelExpression.append(
+            Arrays.stream(ids)
+            // quote and escape each ID
+            .map(id->"'"+id.replace("'", "\\'")+"'")
+            // make a comma-delimited list
+            .collect(Collectors.joining(",")));
+          labelExpression.append("].includes(graphId)");
+        }
+      }
+      setStatus("Getting distinct token labels: " + labelExpression);
+      String[] distinctWords = store.aggregateMatchingAnnotations(
+        "DISTINCT", labelExpression.toString());
+      setStatus("There are "+distinctWords.length+" distinct token labels");
+      int soFar = 0;
+      // for each label
+      for (String word : distinctWords) {
+        // get the orthography
+        String orthography = orthography(word, lowerCase, replacements);
+        setStatus("\""+word+"\" → \""+orthography+"\"");
+        // tag all tokens of this word with the orthography
+        store.tagMatchingAnnotations(
+          labelExpression + " && label == '"+word.replace("'", "\\'")+"'",
+          orthographyLayerId, orthography, Constants.CONFIDENCE_AUTOMATIC);
+        setPercentComplete((++soFar * 100) / distinctWords.length);
+      } // next word
+      setPercentComplete(100);
+      setStatus("Finished.");
+    } finally {
+      setRunning(false);
+    }
   }
    
   /**
