@@ -379,13 +379,63 @@ public class TestOrthographyStandardizer {
                  "😉", orthographies.next());
 
   }
+
+  /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly */
+  @Test public void transformTranscripts() {
+    GraphStoreHarness store = new GraphStoreHarness();
+    Schema schema = schema();
+    OrthographyStandardizer annotator = new OrthographyStandardizer();
+    annotator.setSchema(schema);
+    try {
+      annotator.setTaskParameters(null);
+
+      // call tagMatchingAnnotations
+      annotator.transformTranscripts(store, null);
+    } catch(Exception exception) {
+      fail(""+exception);
+    }
+
+    // check the right calls were made to the graph store
+    assertEquals("aggregateMatchingAnnotations operation",
+                 "DISTINCT", store.aggregateMatchingAnnotationsOperation);
+    assertEquals("aggregateMatchingAnnotations expression",
+                 "layer.id == 'word'", store.aggregateMatchingAnnotationsExpression);
+    
+    assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
+                 2, store.tagMatchingAnnotationsLabels.size());
+    assertEquals("tagMatchingAnnotations layerId foo",
+                 "foo", store.tagMatchingAnnotationsLabels.get(
+                   "layer.id == 'word' && label == 'Foo!'"));
+    assertEquals("tagMatchingAnnotations layerId bar",
+                 "bar", store.tagMatchingAnnotationsLabels.get(
+                   "layer.id == 'word' && label == ' \\'bar\\''"));
+    
+    assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
+                 2, store.tagMatchingAnnotationsLayerIds.size());
+    assertEquals("tagMatchingAnnotations layerId foo",
+                 "orthography", store.tagMatchingAnnotationsLayerIds.get(
+                   "layer.id == 'word' && label == 'Foo!'"));
+    assertEquals("tagMatchingAnnotations layerId bar",
+                 "orthography", store.tagMatchingAnnotationsLayerIds.get(
+                   "layer.id == 'word' && label == ' \\'bar\\''"));
+    
+    assertEquals("tagMatchingAnnotations num confidences: "
+                 + store.tagMatchingAnnotationsConfidences,
+                 2, store.tagMatchingAnnotationsConfidences.size());
+    assertEquals("tagMatchingAnnotations layerId foo",
+                 Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+                   "layer.id == 'word' && label == 'Foo!'"));
+    assertEquals("tagMatchingAnnotations layerId bar",
+                 Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+                   "layer.id == 'word' && label == ' \\'bar\\''"));    
+  }
    
   /**
-   * Returns a graph for annotating.
-   * @return The graph for testing with.
+   * Returns a layer schema for testing.
+   * @return A valid schema.
    */
-  public Graph graph() {
-    Schema schema = new Schema(
+  public Schema schema() {
+    return new Schema(
       "who", "turn", "utterance", "word",
       new Layer("transcript_language", "Overall Language")
       .setAlignment(Constants.ALIGNMENT_NONE)
@@ -404,6 +454,14 @@ public class TestOrthographyStandardizer {
       new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true));
+  }
+  
+  /**
+   * Returns a graph for annotating.
+   * @return The graph for testing with.
+   */
+  public Graph graph() {
+    Schema schema = schema();
     // annotate a graph
     Graph g = new Graph()
       .setSchema(schema);
@@ -452,7 +510,7 @@ public class TestOrthographyStandardizer {
                     .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(95))
                     .setParent(turn));
     return g;
-  } // end of graph()   
+  } // end of graph()
 
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.annotator.orthography.TestOrthographyStandardizer");
