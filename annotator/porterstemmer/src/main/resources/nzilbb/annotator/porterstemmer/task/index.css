@@ -9,6 +9,14 @@ body {
     max-width: 800px;
 }
 
+details>summary {
+    cursor: pointer;
+}
+body>details>summary {
+    cursor: help;
+    list-style-type: '🛈';
+}
+
 h1 { font-size: 17pt; color: #859044; text-align: center; }
 h2 { font-size: 16pt; color: #859044; text-align: center; }
 h3 { font-size: 15pt; color: #859044; font-style:italic; }
