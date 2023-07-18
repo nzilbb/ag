@@ -93,7 +93,7 @@ public class Transcribe extends CommandLineProgram {
    /**
     * Descriptor for the transcriber.
     * @see #getDescriptor()
-    * @see #setDescriptor(TranscriberDescriptor)
+    * @see #setDescriptor(AnnotatorDescriptor)
     */
    protected AnnotatorDescriptor descriptor;
    /**

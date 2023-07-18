@@ -1126,8 +1126,9 @@ public class Merger extends Transform implements GraphTransformer {
   /**
    * PHASE 2: Create new annotations we don't have that exist in the other graph, and mark
    * annotations that don't exist in the other graph for deletion.
-   * <p>This method assumes that {@link #mapAnnotationsForMerge(Layer,SortedSet,SortedSet)} has
-   * already been called and thus annotations have had their "@other" attributes set appropriately.
+   * <p>This method assumes that {@link #mapAnnotationsForMerge(Layer,SortedSet,SortedSet,String)}
+   * has already been called and thus annotations have had their "@other" attributes set
+   * appropriately.
    * <p>New annotations are also given new anchors, and if surrounding annotations (on the same
    * layer) share anchors in the edited version, then corresponding surrounding annotations in
    * the original will be linked to the new anchors.

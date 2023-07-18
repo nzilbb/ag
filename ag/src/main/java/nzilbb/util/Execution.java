@@ -217,7 +217,6 @@ public class Execution implements Runnable {
   /**
    * Listeners for strings coming from stderr.
    * @see #getStderrObservers()
-   * @see #setStderrObservers(List<Consumer<String>>)
    */
   protected List<Consumer<String>> stderrObservers = new Vector<Consumer<String>>();
   /**

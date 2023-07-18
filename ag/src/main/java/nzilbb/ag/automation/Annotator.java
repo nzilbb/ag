@@ -204,7 +204,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
   } // end of newConnection()
   
   /**
-   * The graph store, if the annotator is annotated with {@link UseseGraphStore}.
+   * The graph store, if the annotator is annotated with {@link UsesGraphStore}.
    * @see #getStore()
    * @see #setStore(GraphStore)
    */
@@ -224,7 +224,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
 
   /**
    * Flag to indicate that {@link #percentComplete} and {@link #running} are being managed
-   * outside {@link #transform()}. 
+   * outside {@link GraphTransformer#transform(Graph)}. 
    */
   protected boolean globalProgress = false;
 
@@ -254,7 +254,6 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
   /**
    * Listeners for run state.
    * @see #getRunningObservers()
-   * @see #setRunningObservers(List<Consumer<Boolean>>)
    */
   protected List<Consumer<Boolean>> runningObservers = new Vector<Consumer<Boolean>>();
   /**
@@ -697,7 +696,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
   /**
    * Listeners for cancellation.
    * @see #getCancellationObservers()
-   * @see #setCancellationObservers(List<Consumer<Boolean>>)
+   * @see #setCancellationObservers(List)
    */
   protected List<Consumer<Boolean>> cancellationObservers = new Vector<Consumer<Boolean>>();
   /**

@@ -160,7 +160,7 @@ public class EditStep<T> {
    /**
     * The distance represented by this single step.
     * @see #getStepDistance()
-    * @see #setStepDistance(int)
+    * @see #setStepDistance(double)
     */
    protected double stepDistance;
    /**
