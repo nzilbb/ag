@@ -642,7 +642,7 @@ public class TrackedMap
 
   /**
    * Predicate for filtering deleted objects out of streams.
-   * @param The object that may be marked for deletion.
+   * @param t The object that may be marked for deletion.
    * @return false if {@link #getChange()} == Change.Operation.Destroy, true otherwise
    */
   public static boolean NotDestroyed(TrackedMap t) {
@@ -651,7 +651,7 @@ public class TrackedMap
 
   /**
    * Predicate for filtering for deleted objects.
-   * @param The object that may be marked for deletion.
+   * @param t The object that may be marked for deletion.
    * @return true if {@link #getChange()} == Change.Operation.Destroy, false otherwise
    */
   public static boolean Destroyed(TrackedMap t) {
