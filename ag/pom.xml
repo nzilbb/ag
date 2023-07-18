@@ -6,7 +6,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.ag</artifactId>
-  <version>1.1.1-SNAPSHOT</version>
+  <version>1.1.1</version>
   <name>Annotation Graphs</name>
   <packaging>jar</packaging>
   <description>Implementation of an Annotation Graph API for linguistic annotations.</description>
@@ -123,7 +123,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <trimStackTrace>false</trimStackTrace>
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
       <plugin>
