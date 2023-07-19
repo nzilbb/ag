@@ -122,6 +122,13 @@ public class AnnotatorDescriptor implements CloneableBean {
   // Methods:
    
   /**
+   * Default constructor.
+   */
+  @SuppressWarnings("unchecked")
+  public AnnotatorDescriptor() {
+  }
+  
+  /**
    * Constructor.
    * @param annotatorClassName Fully-qualified annotator class name.
    * @param annotatorClassLoader Source of the class implementation.
