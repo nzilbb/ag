@@ -169,6 +169,13 @@ public class TestLabelMapper {
       +"&mappingLayerId=disc"); // nonexistent
     Layer layer = annotator.getSchema().getLayer("disc");
     assertNotNull("disc layer created", layer);
+    List<String> requiredLayers = Arrays.asList(annotator.getRequiredLayers());
+    assertTrue("requires sourceLayerId " + requiredLayers,
+               requiredLayers.contains("orthography"));
+    assertTrue("requires targetLayerId " + requiredLayers,
+               requiredLayers.contains("phone"));
+    assertTrue("requires scopeLayerId " + requiredLayers,
+               requiredLayers.contains("word"));
   }   
   
   /** Valid sub-mapping parameters are accepted. */
@@ -201,6 +208,18 @@ public class TestLabelMapper {
     assertEquals("phoneComparison type", Constants.TYPE_IPA, layer.getType());
     assertEquals("phoneComparison alignment", Constants.ALIGNMENT_INTERVAL, layer.getAlignment());
 
+    List<String> requiredLayers = Arrays.asList(annotator.getRequiredLayers());
+    assertTrue("requires sourceLayerId " + requiredLayers,
+               requiredLayers.contains("orthography"));
+    assertTrue("requires targetLayerId " + requiredLayers,
+               requiredLayers.contains("htkWord"));
+    assertTrue("requires scopeLayerId " + requiredLayers,
+               requiredLayers.contains("utterance"));
+    assertTrue("requires subSourceLayerId " + requiredLayers,
+               requiredLayers.contains("phone"));
+    assertTrue("requires subTargetLayerId " + requiredLayers,
+               requiredLayers.contains("htkPhone"));
+    
     // test that mapping layers are optional with sub-mapping
     
     annotator = newAnnotator();
