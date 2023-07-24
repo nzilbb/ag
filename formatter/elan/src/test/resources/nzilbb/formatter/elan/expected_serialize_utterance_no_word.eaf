@@ -144,7 +144,7 @@
     <TIME_SLOT TIME_SLOT_ID="ts139" TIME_VALUE="304334"/>
     <TIME_SLOT TIME_SLOT_ID="ts140" TIME_VALUE="306920"/>
   </TIME_ORDER>
-  <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="participant" TIER_ID="participant">
+  <TIER ANNOTATOR="Robert" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="participant" TIER_ID="participant">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a1" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts2">
         <ANNOTATION_VALUE>and ah . Cyril would arrive at the door</ANNOTATION_VALUE>
@@ -746,7 +746,7 @@
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
   </TIER>
-  <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="interviewer" TIER_ID="interviewer">
+  <TIER ANNOTATOR="Robert" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="interviewer" TIER_ID="interviewer">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a22" TIME_SLOT_REF1="ts22" TIME_SLOT_REF2="ts23">
         <ANNOTATION_VALUE>well inconsolable I imagine</ANNOTATION_VALUE>

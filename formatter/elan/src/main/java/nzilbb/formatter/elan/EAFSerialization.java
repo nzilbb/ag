@@ -2163,6 +2163,8 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       utterances.setAttribute("TIER_ID", participant.getLabel());
       utterances.setAttribute("PARTICIPANT", participant.getLabel());
       if (language != null) utterances.setAttribute("LANG_REF", language);
+      if (author != null) utterances.setAttribute("ANNOTATOR", author.getLabel());
+
       mSpeakerTiers.put(participant.getLabel(), utterances);
     } // next participant
       
