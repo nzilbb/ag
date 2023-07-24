@@ -1380,14 +1380,14 @@ public class TestEAFSerialization {
           MediaFile[] media = {
             new MediaFile()
             .setMimeType("audio/wav")
-            .setUrl("file://test.wav")
+            .setUrl("file:/some/path/test.wav")
             .setName("test.wav")
           };
           return media;
         }
         public String getMedia(String trackSuffix, String mimeType)
           throws StoreException, PermissionException
-        { return "file://test.wav"; }
+        { return "file:/some/path/test.wav"; }
         public GraphMediaProvider providerForGraph(Graph graph)
         { return this; }
       });  

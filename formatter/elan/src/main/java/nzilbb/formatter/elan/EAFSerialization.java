@@ -2081,16 +2081,21 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
           mediaDescriptor.setAttribute("MEDIA_URL", "");
           mediaDescriptor.setAttribute("MIME_TYPE", "");
           MediaFile firstFile = files[0];
-          if (firstFile.getUrl() != null && firstFile.getUrl().startsWith("http")) {
-            // http URLs are not supported by ELAN
-                  
-            // so we'll just mangle the file name so that it's probably right if they've
-            // downloaded media too
-            mediaDescriptor.setAttribute(
-              "MEDIA_URL",
-              IO.WithoutExtension(graph.getId()) + "." + firstFile.getExtension());
-          } else {
-            mediaDescriptor.setAttribute("MEDIA_URL", firstFile.getUrl());
+          if (firstFile.getUrl() != null) {
+            try {
+              URL url = new URL(firstFile.getUrl());
+              mediaDescriptor.setAttribute(
+                "MEDIA_URL", "file:/"+url.getFile()
+                // don't save original path
+                .replaceAll("^.*/",""));
+            } catch (Throwable t) {
+              warnings.accept(
+                "Could not interpret URL \""+firstFile.getUrl()+"\" : " + t.getMessage());
+              // we'll just mangle the file name so that it's probably right if they've
+              // downloaded media too
+              mediaDescriptor.setAttribute(
+                "MEDIA_URL", IO.WithoutExtension(graph.getId()) + "." + firstFile.getExtension());
+            }
           }
           mediaDescriptor.setAttribute("MIME_TYPE", firstFile.getMimeType());
           header.setAttribute("MEDIA_FILE",firstFile.getName());

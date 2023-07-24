@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><ANNOTATION_DOCUMENT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" AUTHOR="" DATE="" FORMAT="3.0" VERSION="3.0" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv3.0.xsd">
   <HEADER MEDIA_FILE="test.wav" TIME_UNITS="milliseconds">
-    <MEDIA_DESCRIPTOR MEDIA_URL="file://test.wav" MIME_TYPE="audio/wav"/>
+    <MEDIA_DESCRIPTOR MEDIA_URL="file:/test.wav" MIME_TYPE="audio/wav"/>
     <PROPERTY NAME="lastUnusedAnnotationId">16</PROPERTY>
     <PROPERTY NAME="metadata:location">Flores</PROPERTY>
     <PROPERTY NAME="metadata:gender:p1">gender1</PROPERTY>
