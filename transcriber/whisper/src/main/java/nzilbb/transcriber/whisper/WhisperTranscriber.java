@@ -464,7 +464,7 @@ public class WhisperTranscriber extends Transcriber {
       // TODO check whether diarization is already done
       // TODO if so, transcribe each utterance separately
       
-      // run deepspeech recognizer
+      // run whisper recognizer
       Execution whisper = new Execution()
         .setExe(whisperExe)
         .env("HOME", getWorkingDirectory().getPath()) // for ~/.cache/whisper/...
@@ -491,6 +491,7 @@ public class WhisperTranscriber extends Transcriber {
       // output files to temporary directory so they can't overwrite anything important
       Path dir = Files.createTempDirectory("WhisperTranscriber");
       whisper.arg("--output_dir").arg(dir.toString());
+      whisper.arg("--output_format").arg("vtt");
       // specify audio last
       whisper.arg(speech.getPath());
       setStatus("Running whisper on " + speech.getName() + " ...");
@@ -500,11 +501,8 @@ public class WhisperTranscriber extends Transcriber {
       setPercentComplete(50);
       
       // parse transcript file
-      File txt = new File(dir.toFile(), speech.getName() + ".txt");
-      if (txt.exists()) txt.delete();
-      File srt = new File(dir.toFile(), speech.getName() + ".srt");
-      if (srt.exists()) srt.delete();
-      File vtt = new File(dir.toFile(), speech.getName() + ".vtt");
+      File vtt = new File(dir.toFile(), IO.WithoutExtension(speech.getName()) + ".vtt"); // v2 name
+      if (!vtt.exists()) vtt = new File(dir.toFile(), speech.getName() + ".vtt"); // try v1 name
       if (vtt.exists()) {
         setStatus("Parsing " + vtt.getName());
         try {
@@ -575,7 +573,7 @@ public class WhisperTranscriber extends Transcriber {
       
       List<File> wavs = speech.collect(Collectors.toList());
       
-      // run deepspeech recognizer
+      // run whisper recognizer
       Execution whisper = new Execution()
         .setExe(whisperExe)
         .arg("--model").arg(model);
@@ -601,6 +599,7 @@ public class WhisperTranscriber extends Transcriber {
       // output files to temporary directory so they can't overwrite anything important
       Path dir = Files.createTempDirectory("WhisperTranscriber");
       whisper.arg("--output_dir").arg(dir.toString());
+      whisper.arg("--output_format").arg("vtt");
       // specify audio files last
       for (File wav : wavs) whisper.arg(wav.getPath());
       setStatus("Running whisper on " + wavs.size() + " file"+(wavs.size()==1?"":"s")+" ...");
@@ -617,11 +616,8 @@ public class WhisperTranscriber extends Transcriber {
       int w = 0;
       for (File wav : wavs) {      
         // parse transcript file
-        File txt = new File(dir.toFile(), wav.getName() + ".txt");
-        if (txt.exists()) txt.delete();
-        File srt = new File(dir.toFile(), wav.getName() + ".srt");
-        if (srt.exists()) srt.delete();
-        File vtt = new File(dir.toFile(), wav.getName() + ".vtt");
+        File vtt = new File(dir.toFile(), IO.WithoutExtension(wav.getName()) + ".vtt"); // v2 name
+        if (!vtt.exists()) vtt = new File(dir.toFile(), wav.getName() + ".vtt"); // try v1 name
         if (vtt.exists()) {
           setStatus("Parsing " + vtt.getName());
           try {
