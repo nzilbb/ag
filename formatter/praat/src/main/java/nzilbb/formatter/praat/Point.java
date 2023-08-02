@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -29,82 +29,79 @@ import java.io.IOException;
  * {@link TextTier} time-point.
  * @author Robert Fromont
  */
-
-public class Point
-   implements ITextEntity
-{
-   // Attributes:
-   private double dTime = 0.0;
-   /** Sets time point */
-   public void setTime(double time) { dTime = time; }
-   /** Gets time point */
-   public double getTime() { return dTime; }
+public class Point implements ITextEntity {
+  // Attributes:
+  private double dTime = 0.0;
+  /** Sets time point
+   * @param time The time in seconds.
+   */
+  public void setTime(double time) { dTime = time; }
+  /** Gets time point
+   * @return The time in seconds.
+   */
+  public double getTime() { return dTime; }
    
-   private String sMark = "";
-   /** Sets label */
-   public void setMark(String mark) { sMark = mark; }
-   /** Gets label */
-   public String getMark() { return sMark; }
+  private String sMark = "";
+  /** Sets label
+   * @param mark The label.
+   */
+  public void setMark(String mark) { sMark = mark; }
+  /** Gets label
+   * @return The label.*/
+  public String getMark() { return sMark; }
    
-   /**
-    * Constructor
-    */
-   public Point()
-   {
-   } // end of constructor
+  /**
+   * Constructor
+   */
+  public Point() {
+  } // end of constructor
    
-   /**
-    * Constructor
-    * @param mark
-    * @param time
-    */
-   public Point(String mark, double time)
-   {
-      setMark(mark);
-      setTime(time);
-   } // end of constructor
+  /**
+   * Constructor
+   * @param mark The label.
+   * @param time The time in seconds.
+   */
+  public Point(String mark, double time) {
+    setMark(mark);
+    setTime(time);
+  } // end of constructor
    
-   /**
-    * Copy constructor
-    */
-   public Point(Point otherPoint)
-   {
-      setMark(otherPoint.getMark());
-      setTime(otherPoint.getTime());
-   } // end of constructor
+  /**
+   * Copy constructor
+   * @param otherPoint The point to copy.
+   */
+  public Point(Point otherPoint) {
+    setMark(otherPoint.getMark());
+    setTime(otherPoint.getTime());
+  } // end of constructor
    
-   // ITextEntity methods
+  // ITextEntity methods
    
-   /**
-    * Text-file representation of the object.
-    */
-   public void writeText(Writer writer)
-      throws java.io.IOException
-   {
-      writer.write(
-	 "\n            time = " + getTime() +
-	 "\n            mark = \"" + getMark().replaceAll("\\\"", "\'") 
-	 + "\"");
-   }
+  /**
+   * Text-file representation of the object.
+   */
+  public void writeText(Writer writer) throws java.io.IOException {
+    writer.write(
+      "\n            time = " + getTime() +
+      "\n            mark = \"" + getMark().replace("\"", "\"\"") 
+      + "\"");
+  }
    
-   /**
-    * Reads the point text
-    * @param reader
-    * @throws Exception
-    */
-   public void readText(BufferedReader reader)
-      throws IOException
-   {
-      setTime(Double.parseDouble(TextGrid.readValue("((time)|(number))", reader)));
-      setMark(TextGrid.readValue("mark", reader));
-   }
+  /**
+   * Reads the point text
+   * @param reader The reader to deserialize from.
+   * @throws IOException If an IO error occurs.
+   */
+  public void readText(BufferedReader reader) throws IOException {
+    setTime(Double.parseDouble(TextGrid.readValue("((time)|(number))", reader)));
+    setMark(TextGrid.readValue("mark", reader));
+  }
    
-   /**
-    * Represents the point as a string.
-    */
-   public String toString()
-   {
-      return "" + getMark() + " (" + getTime() + ")";
-   } // end of toString()
+  /**
+   * Represents the point as a string.
+   */
+  public String toString() {
+    return "" + getMark() + " (" + getTime() + ")";
+  } // end of toString()
    
 } // end of class Point

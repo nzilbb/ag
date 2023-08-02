@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -50,8 +50,11 @@ import nzilbb.util.Timers;
 public class TextGridSerialization
   extends TextGrid implements GraphDeserializer, GraphSerializer {
   
-  // Attributes:     
+  // Attributes:
+
+  /** A list of warnings */
   protected Vector<String> warnings;
+  
   /**
    * Returns any warnings that may have arisen during the last execution of {@link #deserialize()} or  {@link #serialize(Spliterator,String[],Consumer,Consumer,Consumer)}.
    * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
@@ -75,6 +78,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #schema}: Layer schema.
    * @param newSchema Layer schema.
+   * @return This object.
    */
   public TextGridSerialization setSchema(Schema newSchema) { schema = newSchema; return this; }
 
@@ -92,6 +96,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #participantLayer}: Participant information layer.
    * @param newParticipantLayer Participant information layer.
+   * @return This object.
    */
   public TextGridSerialization setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; return this; }
 
@@ -109,6 +114,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #turnLayer}: Turn layer.
    * @param newTurnLayer Turn layer.
+   * @return This object.
    */
   public TextGridSerialization setTurnLayer(Layer newTurnLayer) { turnLayer = newTurnLayer; return this; }
 
@@ -126,6 +132,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #utteranceLayer}: Utterance layer.
    * @param newUtteranceLayer Utterance layer.
+   * @return This object.
    */
   public TextGridSerialization setUtteranceLayer(Layer newUtteranceLayer) { utteranceLayer = newUtteranceLayer; return this; }
 
@@ -143,6 +150,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #wordLayer}: Word token layer.
    * @param newWordLayer Word token layer.
+   * @return This object.
    */
   public TextGridSerialization setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; return this; }
 
@@ -160,6 +168,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #lexicalLayer}: Layer for lexical word tags.
    * @param newLexicalLayer Layer for lexical word tags.
+   * @return This object.
    */
   public TextGridSerialization setLexicalLayer(Layer newLexicalLayer) { lexicalLayer = newLexicalLayer; return this; }
 
@@ -177,6 +186,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #pronounceLayer}: Layer for pronounce events.
    * @param newPronounceLayer Layer for pronounce events.
+   * @return This object.
    */
   public TextGridSerialization setPronounceLayer(Layer newPronounceLayer) { pronounceLayer = newPronounceLayer; return this; }
 
@@ -194,6 +204,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #commentLayer}: Layer for commentary.
    * @param newCommentLayer Layer for commentary.
+   * @return This object.
    */
   public TextGridSerialization setCommentLayer(Layer newCommentLayer) { commentLayer = newCommentLayer; return this; }
 
@@ -211,6 +222,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #noiseLayer}: Layer for noise annotations.
    * @param newNoiseLayer Layer for noise annotations.
+   * @return This object.
    */
   public TextGridSerialization setNoiseLayer(Layer newNoiseLayer) { noiseLayer = newNoiseLayer; return this; }
 
@@ -232,6 +244,7 @@ public class TextGridSerialization
    * noise, lexical, and pronounce annotations. 
    * @param bNewUseConventions Whether to use text conventions for comment, noise,
    * lexical, and pronounce annotations. 
+   * @return This object.
    */
   public TextGridSerialization setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; return this; }
    
@@ -253,6 +266,7 @@ public class TextGridSerialization
    * be prefixed with the transcript name during import. 
    * @param newRenameShortNumericSpeakers Short speaker names like "S1" should be prefixed
    * with the transcript name during import. 
+   * @return This object.
    */
   public TextGridSerialization setRenameShortNumericSpeakers(Boolean newRenameShortNumericSpeakers) { renameShortNumericSpeakers = newRenameShortNumericSpeakers; return this; }
 
@@ -282,6 +296,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #id}: Graph ID.
    * @param newId Graph ID.
+   * @return This object.
    */
   public TextGridSerialization setId(String newId) { id = newId; return this; }
 
@@ -299,6 +314,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #tokenizer}: Utterance tokenizer.
    * @param newTokenizer Utterance tokenizer.
+   * @return This object.
    */
   public TextGridSerialization setTokenizer(GraphTransformer newTokenizer) { tokenizer = newTokenizer; return this; }
    
@@ -316,6 +332,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #timers}: Timers for measuring performance.
    * @param newTimers Timers for measuring performance.
+   * @return This object.
    */
   public TextGridSerialization setTimers(Timers newTimers) { timers = newTimers; return this; }
    
@@ -344,6 +361,7 @@ public class TextGridSerialization
   /**
    * Setter for {@link #cancelling}: Serialization marked for cancelling.
    * @param newCancelling Serialization marked for cancelling.
+   * @return This object.
    */
   public TextGridSerialization setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
   /**
@@ -363,6 +381,7 @@ public class TextGridSerialization
    
   // GraphDeserializer methods
 
+  /** Parameter mappings. */
   protected ParameterSet mappings;
 
   /**
@@ -1401,6 +1420,7 @@ public class TextGridSerialization
   /**
    * Serializes the given graph, generating a {@link NamedStream}.
    * @param graph The graph to serialize.
+   * @param layerIds a list of layers to include in the serialization.
    * @return A named stream that contains the TextGrid. 
    * @throws SerializationException if errors occur during deserialization.
    */

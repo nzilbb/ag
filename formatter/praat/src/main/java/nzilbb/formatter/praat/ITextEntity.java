@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -28,18 +28,19 @@ import java.io.BufferedReader;
  * Interface for objects that are saved to / loaded from text files.
  * @author Robert Fromont
  */
-public interface ITextEntity
-{
-   /**
-    * Write the text-file representation of the object.
-    */
-   public void writeText(Writer writer)
-      throws java.io.IOException;
+public interface ITextEntity {
+  /**
+   * Write the text-file representation of the object.
+   * @param writer The writer to write to.
+   * @throws java.io.IOException If an IO error occurs.
+   */
+  public void writeText(Writer writer) throws java.io.IOException;
    
-   /**
-    * Read the text-file representation of the object.
-    */
-   public void readText(BufferedReader reader)
-      throws Exception;
+  /**
+   * Read the text-file representation of the object.
+   * @param reader The reader to read from.
+   * @throws Exception If an error occurs.
+   */
+  public void readText(BufferedReader reader) throws Exception;
    
 } // end of interface ITextEntity

@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -30,132 +30,114 @@ import java.io.IOException;
  * {@link TextGrid} tier subclass representing a tier of labelled time points.
  * @author Robert Fromont
  */
-
-public class TextTier
-   extends Tier
-   implements ITextEntity
-{
-   // Attributes:
-   private Vector<Point> vPoints = new Vector<Point>();
-   /** Gets a list of time points - {@link Point} objects */
-   public Vector<Point> getPoints() { return vPoints; }
+public class TextTier extends Tier implements ITextEntity {
+  // Attributes:
+  private Vector<Point> vPoints = new Vector<Point>();
+  /** Gets a list of time points - {@link Point} objects
+   * @return A list of points.
+   */
+  public Vector<Point> getPoints() { return vPoints; }
    
-   /**
-    * Constructor
-    */
-   public TextTier()
-   {
-   } // end of constructor
+  /**
+   * Constructor
+   */
+  public TextTier() {
+  } // end of constructor
    
-   /**
-    * Constructor
-    * @param name Tier name
-    * @param xmin Start time
-    * @param xmax End time
-    */
-   public TextTier(String name, double xmin, double xmax)
-   {
-      super(name, xmin, xmax);
-   }
+  /**
+   * Constructor
+   * @param name Tier name
+   * @param xmin Start time
+   * @param xmax End time
+   */
+  public TextTier(String name, double xmin, double xmax) {
+    super(name, xmin, xmax);
+  }
    
-   /**
-    * Copy constructor (deep copy)
-    * @param other the tier to copy
-    */
-   public TextTier(TextTier other)
-   {
-      super(other.getName(), other.getXmin(), other.getXmax());
-      for (Object o: other.getPoints())
-      {
-	 addPoint(new Point((Point) o));
-      } // next point
-   } // end of copy()
+  /**
+   * Copy constructor (deep copy)
+   * @param other the tier to copy
+   */
+  public TextTier(TextTier other) {
+    super(other.getName(), other.getXmin(), other.getXmax());
+    for (Object o: other.getPoints()) {
+      addPoint(new Point((Point) o));
+    } // next point
+  } // end of copy()
    
-   /**
-    * Adds a Point object
-    * @param point
-    */
-   public void addPoint(Point point)
-   {
-      vPoints.add(point);
-   } // end of addTier()
+  /**
+   * Adds a Point object
+   * @param point The point to add.
+   */
+  public void addPoint(Point point) {
+    vPoints.add(point);
+  } // end of addTier()
    
-   /**
-    * Returns the first non-blank point in the tier
-    * @return The first point where {@link Point#getMark()} is not blank, or null if no such point exists
-    */
-   public Point firstNonBlankPoint()
-   {
-      for (Object o: vPoints)
-      {
-	 Point point = (Point) o;
-	 if (point.getMark() != null 
-	     && point.getMark().trim().length() > 0)
-	 {
-	    return point;
-	 }
-      } // next point
-      return null;
-   } // end of firstNonBlankPoint()
-   
-   /**
-    * Returns the first non-blank point in the tier after the given time
-    * @param dTime
-    * @return The first point where {@link Point#getMark()} is not blank and {@link Point#getTime()} greater than <em>dTime</em>, or null if no such point exists
-    */
-   public Point firstPointAfter(double dTime)
-   {
-      for (Object o: vPoints)
-      {
-	 Point point = (Point) o;
-	 if (point.getMark() != null 
-	     && point.getMark().trim().length() > 0
-	     && point.getTime() > dTime)
-	 {
-	    return point;
-	 }
-      } // next point
-      return null;
-   } // end of firstNonBlankPoint()
-   
-   // ITextEntity methods
-   
-   /**
-    * Text-file representation of the object
-    * @param writer
-    * @throws java.io.IOException
-    */
-   public void writeText(Writer writer)
-      throws java.io.IOException
-   {
-      super.writeText(writer);
-      writer.write("\n        points: size = " + vPoints.size());
-      for (int i = 0; i < vPoints.size(); i++)
-      {
-	 Point point = vPoints.elementAt(i);
-	 writer.write("\n        points [" + (i+1) + "]:"); // 1-based
-	 point.writeText(writer);
-      } // next tier
-   }
-   
-   /**
-    * Reads the tier text
-    * @param reader
-    * @throws Exception
-    */
-   public void readText(BufferedReader reader)
-      throws IOException
-   {
-      super.readText(reader);
-      // find tiers
-      int iPointCount 
-	 = Integer.parseInt(TextGrid.readValue("points: size", reader));
-      for (int i = 0; i < iPointCount; i++)
-      {
-	 Point point = new Point();
-	 point.readText(reader);
-	 addPoint(point);
+  /**
+   * Returns the first non-blank point in the tier
+   * @return The first point where {@link Point#getMark()} is not blank, or null if no such point exists
+   */
+  public Point firstNonBlankPoint() {
+    for (Object o: vPoints) {
+      Point point = (Point) o;
+      if (point.getMark() != null 
+          && point.getMark().trim().length() > 0) {
+        return point;
       }
+    } // next point
+    return null;
+  } // end of firstNonBlankPoint()
+   
+  /**
+   * Returns the first non-blank point in the tier after the given time
+   * @param dTime The minimum time.
+   * @return The first point where {@link Point#getMark()} is not blank and
+   * {@link Point#getTime()} greater than <em>dTime</em>, or null if no such point exists 
+   */
+  public Point firstPointAfter(double dTime) {
+    for (Object o: vPoints) {
+      Point point = (Point) o;
+      if (point.getMark() != null 
+          && point.getMark().trim().length() > 0
+          && point.getTime() > dTime) {
+        return point;
+      }
+    } // next point
+    return null;
+  } // end of firstNonBlankPoint()
+   
+  // ITextEntity methods
+   
+  /**
+   * Text-file representation of the object
+   * @param writer The writer to serialize to.
+   * @throws java.io.IOException If an IO error occurs.
+   */
+  public void writeText(Writer writer) throws java.io.IOException {
+    super.writeText(writer);
+    writer.write("\n        points: size = " + vPoints.size());
+    for (int i = 0; i < vPoints.size(); i++) {
+      Point point = vPoints.elementAt(i);
+      writer.write("\n        points [" + (i+1) + "]:"); // 1-based
+      point.writeText(writer);
+    } // next tier
+  }
+   
+  /**
+   * Reads the tier text
+   * @param reader The reader to deserialize from.
+   * @throws IOException If an IO error occurs.
+   */
+  public void readText(BufferedReader reader) throws IOException {
+    super.readText(reader);
+    // find tiers
+    int iPointCount 
+      = Integer.parseInt(TextGrid.readValue("points: size", reader));
+    for (int i = 0; i < iPointCount; i++) {
+      Point point = new Point();
+      point.readText(reader);
+      addPoint(point);
+    }
       
-   } // readText
+  } // readText
 } // end of class TextTier
