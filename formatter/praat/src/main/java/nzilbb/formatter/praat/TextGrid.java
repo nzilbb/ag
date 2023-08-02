@@ -47,20 +47,33 @@ public class TextGrid
       new DecimalFormatSymbols(Locale.UK));
    // Attributes:
    
+   /** The start time. */
    protected double dXmin = 0.0;
-   /** Sets start time */
+   /** Sets start time
+    * @param xmin Start tim in seconds.
+    */
    public void setXmin(double xmin) { dXmin = xmin; }
-   /** Gets start time */
+   /** Gets start time
+    * @return Start time in seconds.
+    */
    public double getXmin() { return dXmin; }
-   
+
+   /** The end time. */
    protected double dXmax = 0.0;
-   /** Sets end time */
+   /** Sets end time
+    * @param xmax End time in seconds.
+    */
    public void setXmax(double xmax) { dXmax = xmax; }
-   /** Gets start time */
+   /** Gets start time
+    * @return End time in seconds.
+    */
    public double getXmax() { return dXmax; }
-   
+
+   /** The list of tiers. */
    protected Vector<Tier> vTiers = new Vector<Tier>();
-   /** Gets list of {@link Tier} objects */
+   /** Gets list of {@link Tier} objects
+    * @return A list of tiers.
+    */
    public Vector<Tier> getTiers() { return vTiers; }
    
    /**
@@ -73,7 +86,10 @@ public class TextGrid
    /**
     * Constructor
     * @param f Textgrid file to read from
-    * @throws IOException
+    * @throws IOException If an IO error occurs
+    * @throws ClassNotFoundException If an unknown object is encountered.
+    * @throws InstantiationException If an object can't be instantiated.
+    * @throws Exception If any other error occurs.
     */
    public TextGrid(File f)
       throws IOException, ClassNotFoundException, InstantiationException, Exception
@@ -95,7 +111,7 @@ public class TextGrid
    
    /**
     * Adds a tier object.
-    * @param tier
+    * @param tier The tier to add.
     */
    public void addTier(Tier tier)
    {
@@ -146,7 +162,12 @@ public class TextGrid
    
    /**
     * Read text-file representation of the object.
-    * @param f
+    * @param f The file to read.
+    * @throws IOException If an IO error occurs
+    * @throws ClassNotFoundException If an unknown object is encountered.
+    * @throws InstantiationException If an object can't be instantiated.
+    * @throws IllegalAccessException If an object has a private constructor.
+    * @throws SerializationException If any other error occurs.
     */
    public void readText(File f)
       throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, SerializationException
@@ -165,7 +186,8 @@ public class TextGrid
    
    /**
     * Write text-file representation of the object.
-    * @param f
+    * @param f The file to serialize to.
+    * @throws IOException If an IO error occurs.
     */
    public void writeText(File f)
       throws IOException
@@ -179,7 +201,7 @@ public class TextGrid
    
    /**
     * Text-file representation of the object.
-    * @param writer
+    * @param writer The write to serialize to.
     */
    public void writeText(Writer writer)
       throws IOException
@@ -207,7 +229,12 @@ public class TextGrid
 
    /**
     * Read text-file representation of the object.
-    * @param reader
+    * @param reader The reader to deserialize from.
+    * @throws IOException If an IO error occurs
+    * @throws ClassNotFoundException If an unknown object is encountered.
+    * @throws InstantiationException If an object can't be instantiated.
+    * @throws IllegalAccessException If an object has a private constructor.
+    * @throws SerializationException If any other error occurs.
     */
    public void readText(BufferedReader reader)
       throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, SerializationException
@@ -243,6 +270,7 @@ public class TextGrid
     * @param sKey Key to search for - can be a regulare expression like "((time)|(number))"
     * @param reader Objectto read from
     * @return the value of the target key
+    * @throws IOException If an IO error occurs
     */
    public static String readValue(String sKey, BufferedReader reader)
       throws IOException
@@ -283,7 +311,7 @@ public class TextGrid
    
    /**
     * Utility method for extracting the local class name of a given object (i.e. the last word of the fully qualified class name).
-    * @param obj
+    * @param obj The object to name the class of.
     * @return all text after the last '.' in the classname of the object
     */
    public static String className(Object obj)

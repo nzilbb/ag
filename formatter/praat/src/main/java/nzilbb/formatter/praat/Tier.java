@@ -35,21 +35,33 @@ public class Tier
 {
    // Attributes
    private String sName = "";
-   /** Sets the tier name */
+   /** Sets the tier name
+    * @param name The name of the tier.
+    */
    public void setName(String name) { sName = name; if (sName == null) sName = ""; }
-   /** Gets the tier name */
+   /** Gets the tier name
+    * @return The name of the tier.
+   */
    public String getName() { return sName; }
    
    private double dXmin = 0.0;
-   /** Sets start time */
+   /** Sets start time
+    * @param xmin The start time in seconds.
+    */
    public void setXmin(double xmin) { dXmin = xmin; }
-   /** Gets start time */
+   /** Gets start time
+    * @return The start time in seconds.
+    */
    public double getXmin() { return dXmin; }
    
    private double dXmax = 0.0;
-   /** Sets end time */
+   /** Sets end time
+    * @param xmax The end time in seconds.
+    */
    public void setXmax(double xmax) { dXmax = xmax; }
-   /** Gets end time */
+   /** Gets end time
+    * @return The end time in seconds.
+    */
    public double getXmax() { return dXmax; }
    
    // Methods
@@ -78,8 +90,8 @@ public class Tier
    
    /**
     * Text-file representation of the object
-    * @param writer
-    * @throws java.io.IOException
+    * @param writer The writer to write to.
+    * @throws java.io.IOException If an IO error occurs.
     */
    public void writeText(Writer writer)
       throws java.io.IOException
@@ -93,8 +105,8 @@ public class Tier
    
    /**
     * Reads the tier text
-    * @param reader
-    * @throws Exception
+    * @param reader The reader to read from.
+    * @throws IOException If an IO error occurs.
     */
    public void readText(BufferedReader reader)
       throws IOException

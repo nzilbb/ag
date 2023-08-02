@@ -38,13 +38,23 @@ public class IntervalTier
 {
    // Attributes:
    private Vector<Interval> vIntervals = new Vector<Interval>();
-   /** Gets a list of time intervals - {@link Interval} objects */
+   /** Gets a list of time intervals - {@link Interval} objects.
+    * @return A list of intervals.
+    */
    public Vector<Interval> getIntervals() { return vIntervals; }
    
    private boolean bAutoPad = true;
-   /** Gets the auto-pad setting - whether the intervals are automatically padded with blank intervals if the end time of the last interval doesn't match the start time of a newly added interval */
+   /** Gets the auto-pad setting - whether the intervals are automatically padded with
+    * blank intervals if the end time of the last interval doesn't match the start time of
+    * a newly added interval.
+    * @return Whether audiomatic padding is on or not.
+    */ 
    public boolean getAutoPad() { return bAutoPad; }
-   /** Sets the auto-pad setting - whether the intervals are automatically padded with blank intervals if the end time of the last interval doesn't match the start time of a newly added interval */
+   /** Sets the auto-pad setting - whether the intervals are automatically padded with
+    * blank intervals if the end time of the last interval doesn't match the start time of
+    * a newly added interval.
+    * @param autoPad Whether to auto-pad or not.
+    */ 
    public void setAutoPad(boolean autoPad) { bAutoPad = autoPad; }
    
    /**
@@ -82,7 +92,7 @@ public class IntervalTier
     * Adds an interval object.  Automatically pads the tier out with an
     * intervening blank tier if this interval starts after the end of
     * the last one, and getAutoPad() is true.
-    * @param interval
+    * @param interval The interval to add.
     */
    public void addInterval(Interval interval)
    {
@@ -98,7 +108,7 @@ public class IntervalTier
    /**
     * If necessary, adds a blank interval after the last interval, up to the
     * given time, to ensure a contiguous collection of intervals.
-    * @param dEndTime
+    * @param dEndTime The time to pad to.
     */
    public void padTier(double dEndTime)
    {
@@ -126,8 +136,8 @@ public class IntervalTier
    
    /**
     * Text-file representation of the object.
-    * @param writer
-    * @throws java.io.IOException
+    * @param writer The writer to serialize to.
+    * @throws java.io.IOException If an IO error occurs.
     */
    public void writeText(Writer writer)
       throws java.io.IOException
@@ -144,8 +154,8 @@ public class IntervalTier
    
    /**
     * Reads the tier text
-    * @param reader
-    * @throws Exception
+    * @param reader The reader to deserialize from.
+    * @throws IOException If an IO error occurs.
     */
    public void readText(BufferedReader reader)
       throws IOException
@@ -182,8 +192,10 @@ public class IntervalTier
    
    /**
     * Returns the first non-blank interval in the tier that occurs after the given time
-    * @param dTime
-    * @return The first interval where {@link Interval#getText()} is not blank and {@link Interval#getXmin()} is greater than <em>dTime</em>, or null if no such interval exists
+    * @param dTime The minimum start time.
+    * @return The first interval where {@link Interval#getText()} is not blank and
+    * {@link Interval#getXmin()} is greater than <em>dTime</em>, or null if no such interval
+    * exists 
     */
    public Interval firstIntervalAfter(double dTime)
    {

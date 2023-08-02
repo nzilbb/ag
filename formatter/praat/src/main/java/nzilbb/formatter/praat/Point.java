@@ -35,15 +35,22 @@ public class Point
 {
    // Attributes:
    private double dTime = 0.0;
-   /** Sets time point */
+   /** Sets time point
+    * @param time The time in seconds.
+    */
    public void setTime(double time) { dTime = time; }
-   /** Gets time point */
+   /** Gets time point
+    * @return The time in seconds.
+    */
    public double getTime() { return dTime; }
    
    private String sMark = "";
-   /** Sets label */
+   /** Sets label
+    * @param mark The label.
+    */
    public void setMark(String mark) { sMark = mark; }
-   /** Gets label */
+   /** Gets label
+    * @return The label.*/
    public String getMark() { return sMark; }
    
    /**
@@ -55,8 +62,8 @@ public class Point
    
    /**
     * Constructor
-    * @param mark
-    * @param time
+    * @param mark The label.
+    * @param time The time in seconds.
     */
    public Point(String mark, double time)
    {
@@ -66,6 +73,7 @@ public class Point
    
    /**
     * Copy constructor
+    * @param otherPoint The point to copy.
     */
    public Point(Point otherPoint)
    {
@@ -89,8 +97,8 @@ public class Point
    
    /**
     * Reads the point text
-    * @param reader
-    * @throws Exception
+    * @param reader The reader to deserialize from.
+    * @throws IOException If an IO error occurs.
     */
    public void readText(BufferedReader reader)
       throws IOException

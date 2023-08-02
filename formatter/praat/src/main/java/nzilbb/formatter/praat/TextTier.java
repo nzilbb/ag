@@ -37,7 +37,9 @@ public class TextTier
 {
    // Attributes:
    private Vector<Point> vPoints = new Vector<Point>();
-   /** Gets a list of time points - {@link Point} objects */
+   /** Gets a list of time points - {@link Point} objects
+    * @return A list of points.
+    */
    public Vector<Point> getPoints() { return vPoints; }
    
    /**
@@ -73,7 +75,7 @@ public class TextTier
    
    /**
     * Adds a Point object
-    * @param point
+    * @param point The point to add.
     */
    public void addPoint(Point point)
    {
@@ -100,7 +102,7 @@ public class TextTier
    
    /**
     * Returns the first non-blank point in the tier after the given time
-    * @param dTime
+    * @param dTime The minimum time.
     * @return The first point where {@link Point#getMark()} is not blank and {@link Point#getTime()} greater than <em>dTime</em>, or null if no such point exists
     */
    public Point firstPointAfter(double dTime)
@@ -122,8 +124,8 @@ public class TextTier
    
    /**
     * Text-file representation of the object
-    * @param writer
-    * @throws java.io.IOException
+    * @param writer The writer to serialize to.
+    * @throws java.io.IOException If an IO error occurs.
     */
    public void writeText(Writer writer)
       throws java.io.IOException
@@ -140,8 +142,8 @@ public class TextTier
    
    /**
     * Reads the tier text
-    * @param reader
-    * @throws Exception
+    * @param reader The reader to deserialize from.
+    * @throws IOException If an IO error occurs.
     */
    public void readText(BufferedReader reader)
       throws IOException

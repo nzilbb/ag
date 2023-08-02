@@ -32,12 +32,16 @@ public interface ITextEntity
 {
    /**
     * Write the text-file representation of the object.
+    * @param writer The writer to write to.
+    * @throws java.io.IOException If an IO error occurs.
     */
    public void writeText(Writer writer)
       throws java.io.IOException;
    
    /**
     * Read the text-file representation of the object.
+    * @param reader The reader to read from.
+    * @throws Exception If an error occurs.
     */
    public void readText(BufferedReader reader)
       throws Exception;

@@ -35,21 +35,33 @@ public class Interval
 {
    // Attributes:
    private double dXmin = 0.0;
-   /** Sets start time */
+   /** Sets start time
+    * @param xmin The start time in seconds.
+    */
    public void setXmin(double xmin) { dXmin = xmin; }
-   /** Gets start time */
+   /** Gets start time
+    * @return The start time in seconds.
+    */
    public double getXmin() { return dXmin; }
    
    private double dXmax = 0.0;
-   /** Sets end time */
+   /** Sets end time
+    * @param xmax The end time in seconds.
+    */
    public void setXmax(double xmax) { dXmax = xmax; }
-   /** Gets end time */
+   /** Gets end time
+    * @return The end time in seconds.
+    */
    public double getXmax() { return dXmax; }
    
    private String sText = "";
-   /** Sets label */
+   /** Sets label
+    * @param text The label.
+    */
    public void setText(String text) { sText = text; }
-   /** Gets label */
+   /** Gets label
+    * @return The label.
+    */
    public String getText() { if (sText == null) return ""; else return sText; }
    
    /**
@@ -61,9 +73,9 @@ public class Interval
    
    /**
     * Constructor
-    * @param text
-    * @param xMin
-    * @param xMax
+    * @param text The label for the interval.
+    * @param xMin The start time in seconds.
+    * @param xMax The end time in seconds.
     */
    public Interval(String text, double xMin, double xMax)
    {
@@ -74,6 +86,7 @@ public class Interval
    
    /**
     * Copy constructor
+    * @param other The interval to copy.
     */
    public Interval(Interval other)
    {
@@ -106,9 +119,9 @@ public class Interval
    }
    
    /**
-    * Reads the tier text
-    * @param reader
-    * @throws Exception
+    * Deserializes the interval.
+    * @param reader The reader to read from.
+    * @throws IOException If an IO error occurs.
     */
    public void readText(BufferedReader reader)
       throws IOException
