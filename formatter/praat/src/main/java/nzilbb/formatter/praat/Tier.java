@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -29,108 +29,95 @@ import java.io.IOException;
  * {@link TextGrid} tier.
  * @author Robert Fromont
  */
-
-public class Tier
-   implements ITextEntity
-{
-   // Attributes
-   private String sName = "";
-   /** Sets the tier name
-    * @param name The name of the tier.
-    */
-   public void setName(String name) { sName = name; if (sName == null) sName = ""; }
-   /** Gets the tier name
-    * @return The name of the tier.
+public class Tier implements ITextEntity {
+  // Attributes
+  private String sName = "";
+  /** Sets the tier name
+   * @param name The name of the tier.
    */
-   public String getName() { return sName; }
+  public void setName(String name) { sName = name; if (sName == null) sName = ""; }
+  /** Gets the tier name
+   * @return The name of the tier.
+   */
+  public String getName() { return sName; }
    
-   private double dXmin = 0.0;
-   /** Sets start time
-    * @param xmin The start time in seconds.
-    */
-   public void setXmin(double xmin) { dXmin = xmin; }
-   /** Gets start time
-    * @return The start time in seconds.
-    */
-   public double getXmin() { return dXmin; }
+  private double dXmin = 0.0;
+  /** Sets start time
+   * @param xmin The start time in seconds.
+   */
+  public void setXmin(double xmin) { dXmin = xmin; }
+  /** Gets start time
+   * @return The start time in seconds.
+   */
+  public double getXmin() { return dXmin; }
    
-   private double dXmax = 0.0;
-   /** Sets end time
-    * @param xmax The end time in seconds.
-    */
-   public void setXmax(double xmax) { dXmax = xmax; }
-   /** Gets end time
-    * @return The end time in seconds.
-    */
-   public double getXmax() { return dXmax; }
+  private double dXmax = 0.0;
+  /** Sets end time
+   * @param xmax The end time in seconds.
+   */
+  public void setXmax(double xmax) { dXmax = xmax; }
+  /** Gets end time
+   * @return The end time in seconds.
+   */
+  public double getXmax() { return dXmax; }
    
-   // Methods
+  // Methods
    
-   /**
-    * Constructor
-    */
-   public Tier()
-   {
-   }
+  /**
+   * Constructor
+   */
+  public Tier() {
+  }
    
-   /**
-    * Constructor.
-    * @param name Tier name
-    * @param xmin Start time
-    * @param xmax End time
-    */
-   public Tier(String name, double xmin, double xmax)
-   {
-      setName(name);
-      setXmin(xmin);
-      setXmax(xmax);
-   }
+  /**
+   * Constructor.
+   * @param name Tier name
+   * @param xmin Start time
+   * @param xmax End time
+   */
+  public Tier(String name, double xmin, double xmax) {
+    setName(name);
+    setXmin(xmin);
+    setXmax(xmax);
+  }
    
-   // ITextEntity methods
+  // ITextEntity methods
    
-   /**
-    * Text-file representation of the object
-    * @param writer The writer to write to.
-    * @throws java.io.IOException If an IO error occurs.
-    */
-   public void writeText(Writer writer)
-      throws java.io.IOException
-   {
-      writer.write(
-	 "\n        class = \"" + TextGrid.className(this) + "\" " +
-	 "\n        name = \"" + getName() + "\" " + 
-	 "\n        xmin = " + TextGrid.OffsetFormat.format(getXmin()) + " " +
-	 "\n        xmax = " + TextGrid.OffsetFormat.format(getXmax()) + " "); 
-   }
+  /**
+   * Text-file representation of the object
+   * @param writer The writer to write to.
+   * @throws java.io.IOException If an IO error occurs.
+   */
+  public void writeText(Writer writer) throws java.io.IOException {
+    writer.write(
+      "\n        class = \"" + TextGrid.className(this) + "\" " +
+      "\n        name = \"" + getName() + "\" " + 
+      "\n        xmin = " + TextGrid.OffsetFormat.format(getXmin()) + " " +
+      "\n        xmax = " + TextGrid.OffsetFormat.format(getXmax()) + " "); 
+  }
    
-   /**
-    * Reads the tier text
-    * @param reader The reader to read from.
-    * @throws IOException If an IO error occurs.
-    */
-   public void readText(BufferedReader reader)
-      throws IOException
-   {
-      // class has already been read
-      setName(TextGrid.readValue("name", reader));
-      setXmin(Double.parseDouble(TextGrid.readValue("xmin", reader)));
-      setXmax(Double.parseDouble(TextGrid.readValue("xmax", reader)));
-   }
+  /**
+   * Reads the tier text
+   * @param reader The reader to read from.
+   * @throws IOException If an IO error occurs.
+   */
+  public void readText(BufferedReader reader) throws IOException {
+    // class has already been read
+    setName(TextGrid.readValue("name", reader));
+    setXmin(Double.parseDouble(TextGrid.readValue("xmin", reader)));
+    setXmax(Double.parseDouble(TextGrid.readValue("xmax", reader)));
+  }
    
-   /**
-    * String representation of the Tier
-    * @return The name of the Tier
-    */
-   public String toString()
-   {
-      if (getName().length() == 0)
-      {
-	 return "<unnamed tier>";
-      }
-      else
-      {
-	 return getName();
-      }
-   } // end of toString()
+  /**
+   * String representation of the Tier
+   * @return The name of the Tier
+   */
+  public String toString() {
+    if (getName().length() == 0) {
+      return "<unnamed tier>";
+    } else {
+      return getName();
+    }
+  } // end of toString()
    
 }

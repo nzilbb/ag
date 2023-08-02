@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -30,115 +30,104 @@ import java.io.IOException;
  * @author Robert Fromont
  */
 
-public class Interval
-   implements ITextEntity
-{
-   // Attributes:
-   private double dXmin = 0.0;
-   /** Sets start time
-    * @param xmin The start time in seconds.
-    */
-   public void setXmin(double xmin) { dXmin = xmin; }
-   /** Gets start time
-    * @return The start time in seconds.
-    */
-   public double getXmin() { return dXmin; }
+public class Interval implements ITextEntity {
+  // Attributes:
+  private double dXmin = 0.0;
+  /** Sets start time
+   * @param xmin The start time in seconds.
+   */
+  public void setXmin(double xmin) { dXmin = xmin; }
+  /** Gets start time
+   * @return The start time in seconds.
+   */
+  public double getXmin() { return dXmin; }
    
-   private double dXmax = 0.0;
-   /** Sets end time
-    * @param xmax The end time in seconds.
-    */
-   public void setXmax(double xmax) { dXmax = xmax; }
-   /** Gets end time
-    * @return The end time in seconds.
-    */
-   public double getXmax() { return dXmax; }
+  private double dXmax = 0.0;
+  /** Sets end time
+   * @param xmax The end time in seconds.
+   */
+  public void setXmax(double xmax) { dXmax = xmax; }
+  /** Gets end time
+   * @return The end time in seconds.
+   */
+  public double getXmax() { return dXmax; }
    
-   private String sText = "";
-   /** Sets label
-    * @param text The label.
-    */
-   public void setText(String text) { sText = text; }
-   /** Gets label
-    * @return The label.
-    */
-   public String getText() { if (sText == null) return ""; else return sText; }
+  private String sText = "";
+  /** Sets label
+   * @param text The label.
+   */
+  public void setText(String text) { sText = text; }
+  /** Gets label
+   * @return The label.
+   */
+  public String getText() { if (sText == null) return ""; else return sText; }
    
-   /**
-    * Constructor
-    */
-   public Interval()
-   {
-   } // end of constructor
+  /**
+   * Constructor
+   */
+  public Interval() {
+  } // end of constructor
    
-   /**
-    * Constructor
-    * @param text The label for the interval.
-    * @param xMin The start time in seconds.
-    * @param xMax The end time in seconds.
-    */
-   public Interval(String text, double xMin, double xMax)
-   {
-      setText(text);
-      setXmin(xMin);
-      setXmax(xMax);
-   } // end of constructor
+  /**
+   * Constructor
+   * @param text The label for the interval.
+   * @param xMin The start time in seconds.
+   * @param xMax The end time in seconds.
+   */
+  public Interval(String text, double xMin, double xMax) {
+    setText(text);
+    setXmin(xMin);
+    setXmax(xMax);
+  } // end of constructor
    
-   /**
-    * Copy constructor
-    * @param other The interval to copy.
-    */
-   public Interval(Interval other)
-   {
-      setText(other.getText());
-      setXmin(other.getXmin());
-      setXmax(other.getXmax());
-   } // end of constructor
+  /**
+   * Copy constructor
+   * @param other The interval to copy.
+   */
+  public Interval(Interval other) {
+    setText(other.getText());
+    setXmin(other.getXmin());
+    setXmax(other.getXmax());
+  } // end of constructor
    
-   /**
-    * Returns the halway point between Xmin and Xmax
-    * @return Xmin + ( (Xmax-Xmin) / 2 )
-    */
-   public double getMidPoint()
-   {
-      return getXmin() + ( (getXmax()-getXmin()) / 2.0 );
-   } // end of getMidPoint()
+  /**
+   * Returns the halway point between Xmin and Xmax
+   * @return Xmin + ( (Xmax-Xmin) / 2 )
+   */
+  public double getMidPoint() {
+    return getXmin() + ( (getXmax()-getXmin()) / 2.0 );
+  } // end of getMidPoint()
    
-   // ITextEntity methods
+  // ITextEntity methods
    
-   /**
-    * Text-file representation of the object.
-    */
-   public void writeText(Writer writer)
-      throws java.io.IOException
-   {
-      writer.write( 
-	 "\n            xmin = " + TextGrid.OffsetFormat.format(Math.min(getXmin(),getXmax())) + " " +
-	 "\n            xmax = " + TextGrid.OffsetFormat.format(Math.max(getXmin(),getXmax())) + " " +
-	 "\n            text = \"" + getText().replace("\"", "\"\"") + "\" ");
-   }
+  /**
+   * Text-file representation of the object.
+   */
+  public void writeText(Writer writer) throws java.io.IOException {
+    writer.write( 
+      "\n            xmin = " + TextGrid.OffsetFormat.format(Math.min(getXmin(),getXmax())) + " " +
+      "\n            xmax = " + TextGrid.OffsetFormat.format(Math.max(getXmin(),getXmax())) + " " +
+      "\n            text = \"" + getText().replace("\"", "\"\"") + "\" ");
+  }
    
-   /**
-    * Deserializes the interval.
-    * @param reader The reader to read from.
-    * @throws IOException If an IO error occurs.
-    */
-   public void readText(BufferedReader reader)
-      throws IOException
-   {
-      setXmin(Double.parseDouble(TextGrid.readValue("xmin", reader)));
-      setXmax(Double.parseDouble(TextGrid.readValue("xmax", reader)));
-      setText(TextGrid.readValue("text", reader));
-   }
+  /**
+   * Deserializes the interval.
+   * @param reader The reader to read from.
+   * @throws IOException If an IO error occurs.
+   */
+  public void readText(BufferedReader reader) throws IOException {
+    setXmin(Double.parseDouble(TextGrid.readValue("xmin", reader)));
+    setXmax(Double.parseDouble(TextGrid.readValue("xmax", reader)));
+    setText(TextGrid.readValue("text", reader));
+  }
    
-   /**
-    * String representation of the object
-    */
-   public String toString()
-   {
-      return "xmin = " + getXmin() +
-	 ", xmax = " + getXmax() +
-        ", text = \"" + getText().replace("\"", "\"\"")
-	 + "\"";
-   }
+  /**
+   * String representation of the object
+   */
+  public String toString() {
+    return "xmin = " + getXmin() +
+      ", xmax = " + getXmax() +
+      ", text = \"" + getText().replace("\"", "\"\"")
+      + "\"";
+  }
 } // end of class Interval
