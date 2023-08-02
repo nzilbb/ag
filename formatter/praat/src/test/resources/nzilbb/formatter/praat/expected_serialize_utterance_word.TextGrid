@@ -177,7 +177,7 @@ item []:
         intervals [10]:
             xmin = 20.423 
             xmax = 21.985 
-            text = "oh yeah yeah and we'll see you there" 
+            text = """oh yeah yeah and we'll see you there""" 
         intervals [11]:
             xmin = 21.985 
             xmax = 23.563 
@@ -1321,7 +1321,7 @@ item []:
         intervals [59]:
             xmin = 20.423 
             xmax = 20.61825 
-            text = "oh" 
+            text = """oh" 
         intervals [60]:
             xmin = 20.61825 
             xmax = 20.8135 
@@ -1349,7 +1349,7 @@ item []:
         intervals [66]:
             xmin = 21.78975 
             xmax = 21.985 
-            text = "there" 
+            text = "there""" 
         intervals [67]:
             xmin = 21.985 
             xmax = 22.3006 

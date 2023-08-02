@@ -83,7 +83,7 @@ public class Point
    {
       writer.write(
 	 "\n            time = " + getTime() +
-	 "\n            mark = \"" + getMark().replaceAll("\\\"", "\'") 
+	 "\n            mark = \"" + getMark().replace("\"", "\"\"") 
 	 + "\"");
    }
    

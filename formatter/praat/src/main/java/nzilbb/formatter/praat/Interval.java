@@ -102,7 +102,7 @@ public class Interval
       writer.write( 
 	 "\n            xmin = " + TextGrid.OffsetFormat.format(Math.min(getXmin(),getXmax())) + " " +
 	 "\n            xmax = " + TextGrid.OffsetFormat.format(Math.max(getXmin(),getXmax())) + " " +
-	 "\n            text = \"" + getText().replaceAll("\\\"", "\'") + "\" ");
+	 "\n            text = \"" + getText().replace("\"", "\"\"") + "\" ");
    }
    
    /**
@@ -125,7 +125,7 @@ public class Interval
    {
       return "xmin = " + getXmin() +
 	 ", xmax = " + getXmax() +
-	 ", text = \"" + getText().replaceAll("\\\"", "\'") 
+        ", text = \"" + getText().replace("\"", "\"\"")
 	 + "\"";
    }
 } // end of class Interval
