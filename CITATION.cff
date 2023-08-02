@@ -16,8 +16,8 @@ keywords:
 - Annotation Graph
 - Linguistic Annotation
 license: AGPL-3.0-or-later
-version: 1.1.0
-date-released: 2023-02-08
+version: 1.1.2
+date-released: 2023-07-19
 references:
 - type: software
   title: ANTLR 4 Runtime
@@ -38,7 +38,7 @@ references:
   repository-code: https://github.com/antlr/antlr4/tree/master/antlr4-runtime
 - type: software
   title: Apache Commons FileUpload
-  version: '1.4'
+  version: '1.5'
   abbreviation: commons-fileupload:commons-fileupload
   license: Apache-2.0
   notes: More license information can be found in the ag/THIRD-PARTY/Apache_Commons_FileUpload
@@ -66,33 +66,14 @@ references:
     email: ggregory@apache.org
   - name: Rob Tompkins
     email: chtompki@apache.org
-  repository-code: https://git-wip-us.apache.org/repos/asf?p=commons-fileupload.git
+  repository-code: https://gitbox.apache.org/repos/asf?p=commons-fileupload.git
 - type: software
-  title: Apache Derby Database Engine and Embedded JDBC Driver
-  version: 10.15.2.0
-  abbreviation: org.apache.derby:derby
-  license: Apache-2.0
-  notes: More license information can be found in the ag/THIRD-PARTY/Apache_Derby_Database_Engine_and_Embedded_JDBC_Driver
-    directory.
-  authors:
-  - name: The Apache Derby Database Engine and Embedded JDBC Driver 10.15.2.0 Team
-  repository-code: http://svn.apache.org/viewcvs.cgi/db/derby/code/trunk/?root=Apache-SVN/derby
-- type: software
-  title: Apache Derby Shared Code
-  version: 10.15.2.0
-  abbreviation: org.apache.derby:derbyshared
-  license: Apache-2.0
-  notes: More license information can be found in the ag/THIRD-PARTY/Apache_Derby_Shared_Code
-    directory.
-  authors:
-  - name: The Apache Derby Shared Code 10.15.2.0 Team
-  repository-code: http://svn.apache.org/viewcvs.cgi/db/derby/code/trunk/?root=Apache-SVN/derbyshared
-- type: software
-  title: Commons IO
-  version: '2.2'
+  title: Apache Commons IO
+  version: 2.11.0
   abbreviation: commons-io:commons-io
   license: Apache-2.0
-  notes: More license information can be found in the ag/THIRD-PARTY/Commons_IO directory.
+  notes: More license information can be found in the ag/THIRD-PARTY/Apache_Commons_IO
+    directory.
   authors:
   - name: Scott Sanders
     email: sanders@apache.org
@@ -116,8 +97,30 @@ references:
   - name: Niall Pemberton
   - name: Jukka Zitting
   - name: Gary Gregory
-    email: ggregory@apache.org
-  repository-code: http://svn.apache.org/viewvc/commons/proper/io/trunk
+    email: ggregory at apache.org
+  - name: Kristian Rosenvold
+    email: krosenvold@apache.org
+  repository-code: https://gitbox.apache.org/repos/asf?p=commons-io.git
+- type: software
+  title: Apache Derby Database Engine and Embedded JDBC Driver
+  version: 10.15.2.0
+  abbreviation: org.apache.derby:derby
+  license: Apache-2.0
+  notes: More license information can be found in the ag/THIRD-PARTY/Apache_Derby_Database_Engine_and_Embedded_JDBC_Driver
+    directory.
+  authors:
+  - name: The Apache Derby Database Engine and Embedded JDBC Driver 10.15.2.0 Team
+  repository-code: http://svn.apache.org/viewcvs.cgi/db/derby/code/trunk/?root=Apache-SVN/derby
+- type: software
+  title: Apache Derby Shared Code
+  version: 10.15.2.0
+  abbreviation: org.apache.derby:derbyshared
+  license: Apache-2.0
+  notes: More license information can be found in the ag/THIRD-PARTY/Apache_Derby_Shared_Code
+    directory.
+  authors:
+  - name: The Apache Derby Shared Code 10.15.2.0 Team
+  repository-code: http://svn.apache.org/viewcvs.cgi/db/derby/code/trunk/?root=Apache-SVN/derbyshared
 - type: software
   title: JSR 374 (JSON Processing) Default Provider
   version: 1.1.4

@@ -1126,8 +1126,9 @@ public class Merger extends Transform implements GraphTransformer {
   /**
    * PHASE 2: Create new annotations we don't have that exist in the other graph, and mark
    * annotations that don't exist in the other graph for deletion.
-   * <p>This method assumes that {@link #mapAnnotationsForMerge(Layer,SortedSet,SortedSet)} has
-   * already been called and thus annotations have had their "@other" attributes set appropriately.
+   * <p>This method assumes that {@link #mapAnnotationsForMerge(Layer,SortedSet,SortedSet,String)}
+   * has already been called and thus annotations have had their "@other" attributes set
+   * appropriately.
    * <p>New annotations are also given new anchors, and if surrounding annotations (on the same
    * layer) share anchors in the edited version, then corresponding surrounding annotations in
    * the original will be linked to the new anchors.
@@ -1757,10 +1758,19 @@ public class Merger extends Transform implements GraphTransformer {
     throws TransformationException {
     String layerId = layer.getId();
 
+    // if there are no anchor offset changes, then confidence-only changes are ignored
+    // but if there are any offset changes, all anchor confidences are upgraded where appropriate
+    // this ensures that forced alignment correction of an utterance sets all segment anchors
+    // to manual confidence, but if they're annotating segments rather than re-aligning them,
+    // the segment anchors keep their previous confidence level
+    boolean thereWereConfidentOffsetChanges = false;
+    Vector<Runnable> deferredConfidenceOnlyAnchorChanges = new Vector<Runnable>();
+
     // check for anchor changes between mapped annotations
     Annotation anLastOriginal = null;
     // traverse the edited version of the graph, to ensure we're all in the new order
-    TreeSet<Annotation> editedAnnotations = new TreeSet<Annotation>(new AnnotationComparatorByOrdinal());
+    TreeSet<Annotation> editedAnnotations = new TreeSet<Annotation>(
+      new AnnotationComparatorByOrdinal());
     editedAnnotations.addAll(Arrays.asList(editedGraph.all(layer.getId())));
     for (Annotation anEdited : editedAnnotations) {
       // get our mapped annotation
@@ -1769,7 +1779,8 @@ public class Merger extends Transform implements GraphTransformer {
       // an original may not have been added because it was forbidden by noChangeLayers
       if (anOriginal == null) continue;
 
-      assert anOriginal.getChange() != Change.Operation.Destroy : "anOriginal.getChange() != Change.Operation.Destroy - " + anOriginal;
+      assert anOriginal.getChange() != Change.Operation.Destroy
+        : "anOriginal.getChange() != Change.Operation.Destroy - " + anOriginal;
 	 
       // start anchor...
       if (!dummyAnchors.contains(anOriginal.getStart())) {
@@ -1861,6 +1872,7 @@ public class Merger extends Transform implements GraphTransformer {
           } // next parallel
         } // !bChanged
         Anchor delta = null;
+        Runnable relinkUnrelatedAnnotations = null;
         // are the offsets/confidences different?
         if (bCheckStartAnchorOffset) {
           boolean differentOffset
@@ -1869,6 +1881,7 @@ public class Merger extends Transform implements GraphTransformer {
             = GetConfidence(anEdited.getStart()) > GetConfidence(anOriginal.getStart());
           boolean sameOrHigherConfidence
             = GetConfidence(anEdited.getStart()) >= GetConfidence(anOriginal.getStart());
+          if (differentOffset && sameOrHigherConfidence) thereWereConfidentOffsetChanges = true;
           if (ignoreOffsetConfidence
               || higherConfidence || (differentOffset && sameOrHigherConfidence)) {
             // theirs is more trustworthy
@@ -1993,12 +2006,12 @@ public class Merger extends Transform implements GraphTransformer {
               if (!dummyEditedAnchors.contains(anEdited.getStart())) {
                 delta = new Anchor(anEdited.getStart());
               }
-		     
-              // create a new anchor for unrelated annotations that link to this one
-              Anchor newAnchor = new Anchor(anOriginal.getStart());
-              newAnchor.create();
-              graph.addAnchor(newAnchor);
-              newAnchor = anOriginal.getStart().endingAnnotations()
+              relinkUnrelatedAnnotations = () -> {
+                // create a new anchor for unrelated annotations that link to this one
+                Anchor newAnchor = new Anchor(anOriginal.getStart());
+                newAnchor.create();
+                graph.addAnchor(newAnchor);
+                newAnchor = anOriginal.getStart().endingAnnotations()
                 .filter(Annotation::NotDestroyed)
                 .filter(previousAnnotation -> previousAnnotation != anOriginal)
                 .filter(Merger::HasCounterpart)
@@ -2024,10 +2037,10 @@ public class Merger extends Transform implements GraphTransformer {
                 .filter(Objects::nonNull)
                 .map(originalPrevious2 -> originalPrevious2.getEnd())
                 .findAny().orElse(newAnchor);
-              
-              final Anchor finalNewAnchor = newAnchor;
-              // (endingAnnotations() can't be used because it causes concurrent mod issues...)
-              anOriginal.getStart().getEndingAnnotations().stream()
+                
+                final Anchor finalNewAnchor = newAnchor;
+                // (endingAnnotations() can't be used because it causes concurrent mod issues...)
+                anOriginal.getStart().getEndingAnnotations().stream()
                 .filter(Annotation::NotDestroyed)
                 .filter(previousAnnotation -> previousAnnotation != anOriginal)
                 .collect(Collectors.toList()) // add to new collection to avoid concurrent mod.
@@ -2044,9 +2057,9 @@ public class Merger extends Transform implements GraphTransformer {
                       } // they shouldn't be linked
                     } // there is a corresponding edited parallel annotation
                   });
-
-              // do the same for annotations that start here
-              newAnchor = anOriginal.getStart().startingAnnotations()
+                
+                // do the same for annotations that start here
+                newAnchor = anOriginal.getStart().startingAnnotations()
                 .filter(Annotation::NotDestroyed)
                 .filter(parallelAnnotation -> parallelAnnotation != anOriginal) // not ourselves
                 .filter(parallelAnnotation -> parallelAnnotation != anOriginal.getParent()) // not our parent
@@ -2071,16 +2084,19 @@ public class Merger extends Transform implements GraphTransformer {
                 .filter(Objects::nonNull)
                 .map(originalParallel2 -> originalParallel2.getStart())
                 .findAny().orElse(newAnchor);
-              
-              final Anchor finalNewAnchor2 = newAnchor;
-              anOriginal.getStart().startingAnnotations()
+                
+                final Anchor finalNewAnchor2 = newAnchor;
+                anOriginal.getStart().startingAnnotations()
                 .filter(Annotation::NotDestroyed)
-                .filter(parallelAnnotation -> parallelAnnotation != anOriginal) // not ourselves
-                .filter(parallelAnnotation -> parallelAnnotation != anOriginal.getParent()) // not our parent
+                // not ourselves
+                .filter(parallelAnnotation -> parallelAnnotation != anOriginal)
+                // not our parent
+                .filter(parallelAnnotation -> parallelAnnotation != anOriginal.getParent()) 
                 .filter(Merger::HasCounterpart)
                 .collect(Collectors.toList()) // add to new collection to avoid concurrent mod.
                 .forEach(parallelAnnotation -> {
-                    // check for other possible start anchor, by following the edited graph structure
+                    // check for other possible start anchor,
+                    // by following the edited graph structure
                     Annotation editedParallelAnnotation = GetCounterpart(parallelAnnotation);
                     if (editedParallelAnnotation != null) {
                       // only if they're not linked in the edited graph
@@ -2091,17 +2107,27 @@ public class Merger extends Transform implements GraphTransformer {
                       } // they shouldn't be linked
                     } // there is a corresponding edited parallel annotation
                   });
+              }; // change
             } // no matchingMergedAnchor
             // are we changing this anchor?
-            if (delta != null) {
-              SetConfidence(anOriginal.getStart(), GetConfidence(delta));
+            if (delta == null) {
+              if (relinkUnrelatedAnnotations != null) relinkUnrelatedAnnotations.run();
+            } else { // there is a delta to apply
               if (differentOffset) {
+                relinkUnrelatedAnnotations.run();
+                SetConfidence(anOriginal.getStart(), GetConfidence(delta));
                 anOriginal.getStart().setOffset(delta.getOffset());
                 log(layerId, ": Different start anchor for ", anOriginal,
                     ": changing offset to ", delta.getOffset());
               } else {
-                log(layerId, ": Same start anchor but higher confidence for ", anOriginal,
-                    ": changing confidence to ", delta.getConfidence());
+                final Runnable finalRelinkUnrelatedAnnotations = relinkUnrelatedAnnotations;
+                final Anchor finalDelta = delta;
+                deferredConfidenceOnlyAnchorChanges.add(() -> {
+                    finalRelinkUnrelatedAnnotations.run();
+                    SetConfidence(anOriginal.getStart(), GetConfidence(finalDelta));
+                    log(layerId, ": Same start anchor but higher confidence for ", anOriginal,
+                        ": changing confidence to ", finalDelta.getConfidence(), " (deferred)");
+                  });
               }
             } // there is a delta to apply
           } // theirs is more trustworthy
@@ -2305,12 +2331,15 @@ public class Merger extends Transform implements GraphTransformer {
               = GetConfidence(anEdited.getEnd()) > GetConfidence(anOriginal.getEnd());
             boolean sameOrHigherConfidence
               = GetConfidence(anEdited.getEnd()) >= GetConfidence(anOriginal.getEnd());
+            if (differentOffset && sameOrHigherConfidence) thereWereConfidentOffsetChanges = true;
             if (ignoreOffsetConfidence
                 || higherConfidence || (differentOffset && sameOrHigherConfidence)) {
               // try for parallel annotations on another layer
               Optional<Anchor> matchingMergedAnchor = anEdited.getEnd().endingAnnotations()
-                .filter(a -> a != anEdited) // skip ourselves
-                .filter(a-> !a.getLayerId().equals(anEdited.getLayerId())) // not on our own layer
+                // skip ourselves
+                .filter(a -> a != anEdited) 
+                // not on our own layer
+                .filter(a-> !a.getLayerId().equals(anEdited.getLayerId())) 
                 // skip unmerged annotations from a neighboring fragments
                 // (TODO not sure there can be any)
                 .filter(Merger::HasCounterpart)
@@ -2375,14 +2404,20 @@ public class Merger extends Transform implements GraphTransformer {
             // applying change to anchor?
             if (delta != null) {
               if (delta.getChange() != Change.Operation.Create) {
-                SetConfidence(anOriginal.getEnd(), GetConfidence(delta));
                 if (differentOffset) {
+                  SetConfidence(anOriginal.getEnd(), GetConfidence(delta));
                   anOriginal.getEnd().setOffset(delta.getOffset());
                   log(layerId, ": Different end anchor for ", anOriginal,
                       ": changing offset to  ", delta.getOffset());
                 } else {
-                  log(layerId, ": Same end anchor but higher confidence for ", anOriginal,
-                      ": changing confidence to  ", delta.getConfidence());
+                  final Anchor finalDelta = delta;
+                  deferredConfidenceOnlyAnchorChanges.add(() -> {
+                      SetConfidence(anOriginal.getEnd(), GetConfidence(finalDelta));
+                      
+                      log(layerId, ": Same end anchor but higher confidence for ", anOriginal,
+                          ": changing confidence to  ", finalDelta.getConfidence(),
+                          " (deferred)");
+                    });
                 }
               } else {
                 Anchor newAnchor = delta;
@@ -2421,6 +2456,14 @@ public class Merger extends Transform implements GraphTransformer {
       anOriginal.put("@computeAnchorDeltasForMerge", Boolean.TRUE);
       anLastOriginal = anOriginal;	 
     } // next edited annotation
+    
+    // if there were any offset changes
+    if (thereWereConfidentOffsetChanges) {
+      // update the confidences of anchors that have higher confidence but unchanged offset
+      for (Runnable confidenceOnlyChange : deferredConfidenceOnlyAnchorChanges) {
+        confidenceOnlyChange.run();
+      }
+    } 
   } // end of computeAnchorDeltasForMerge()
 
   /**

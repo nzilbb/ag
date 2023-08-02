@@ -68,7 +68,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
   /**
    * Whether a log of messages should be kept for reporting.
    * @see #getDebug()
-   * @see #setDebug(boolean)
+   * @see #setDebug(Boolean)
    * @see #getLog()
    * @see #log(Object...)
    */

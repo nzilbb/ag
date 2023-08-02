@@ -1,5 +1,8 @@
 # nzilbb.ag
 
+[![DOI](https://zenodo.org/badge/49908890.svg)](https://zenodo.org/badge/latestdoi/49908890)
+
+
 Implementations of an Annotation Graph API for linguistic annotations.
 
 Annotation Graphs are a data structure conceived by Steven Bird and Mark Liberman:

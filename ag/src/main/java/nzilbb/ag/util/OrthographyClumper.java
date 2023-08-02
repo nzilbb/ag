@@ -36,7 +36,7 @@ public class OrthographyClumper implements GraphTransformer {
    
   /**
    * A regular expression that identifies a non-orthographic character - the default is
-   * <code>"[\\p{Punct}&&[^_]]"</code> 
+   * <code>"[\\p{Punct}&amp;&amp;[^_]]"</code> 
    * @see #getNonOrthoCharacterPattern()
    * @see #setNonOrthoCharacterPattern(String)
    */

@@ -560,12 +560,34 @@ public class LabelMapper extends Annotator {
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
     if (sourceLayerId == null)
-      throw new InvalidConfigurationException(this, "No label layer set.");
+      throw new InvalidConfigurationException(this, "No source layer set.");
     if (targetLayerId == null)
-      throw new InvalidConfigurationException(this, "No token layer set.");
+      throw new InvalidConfigurationException(this, "No target layer set.");
+    if (subSourceLayerId == null && subTargetLayerId != null) 
+      throw new InvalidConfigurationException(this, "No sub-source layer set.");
+    if (subTargetLayerId == null && subSourceLayerId != null)
+      throw new InvalidConfigurationException(this, "No sub-target layer set.");
+    
     HashSet<String> requiredLayers = new HashSet<String>();
     requiredLayers.add(sourceLayerId);
+    Layer sourceLayer = schema.getLayer(sourceLayerId);
     requiredLayers.add(targetLayerId);
+    Layer targetLayer = schema.getLayer(targetLayerId);
+    if ((targetLayerId.equals(schema.getWordLayerId())
+         || (targetLayer != null && targetLayer.isAncestor(schema.getWordLayerId())))
+        && (sourceLayerId.equals(schema.getWordLayerId())
+            || (sourceLayer != null && sourceLayer.isAncestor(schema.getWordLayerId())))) { 
+      requiredLayers.add(schema.getWordLayerId());
+    } else {
+      requiredLayers.add(schema.getUtteranceLayerId());
+    }
+    if (subSourceLayerId != null && subSourceLayerId.length() > 0) {
+      requiredLayers.add(subSourceLayerId);
+    }
+    if (subTargetLayerId != null && subTargetLayerId.length() > 0) {
+      requiredLayers.add(subTargetLayerId);
+    }
+
     return requiredLayers.toArray(new String[0]);
   }
 
