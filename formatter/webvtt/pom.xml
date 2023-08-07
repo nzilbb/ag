@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.webvtt</artifactId>
   <name>nzilbb.formatter.webvtt</name>
-  <version>0.6.2</version>
+  <version>0.7.0</version>
 
   <properties>
     <package.path>nzilbb/formatter/webvtt/</package.path>
@@ -54,6 +54,12 @@
             </manifestEntries>
           </archive>
           <outputDirectory>../../bin</outputDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>

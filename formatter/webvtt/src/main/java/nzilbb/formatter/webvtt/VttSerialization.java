@@ -40,6 +40,8 @@ import java.util.Spliterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -57,6 +59,13 @@ import nzilbb.util.Timers;
 
 /**
  * (De)serializes VTT subtitle/caption files.
+ * <p> Whole-line voice spans, if present are parsed to identify participants, i.e.
+ * utterances formatted: <code>&lt;v.speaker1 John Smith&gt;The quick brown fox.</code>
+ * will result in an utterance "The quick brown fox." uttered by a participant called
+ * "John Smith".
+ * <p> Output captions include such voice spans which include the participant label, and each
+ * is identified with a class like "speaker1" to allow different speakers to be styled
+ * differently.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class VttSerialization implements GraphDeserializer, GraphSerializer {
@@ -527,8 +536,6 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
       line = vtt.readLine();
     } // next header line
 
-      // TODO scan whole file, for voice tags that identify speakers
-      
     if (timers != null) timers.end("load");
     ParameterSet parameters = new ParameterSet();
     // add parameters that aren't in the configuration yet, and set possibile/default values
@@ -622,20 +629,14 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     MessageFormat intervalFormatAbbr = new MessageFormat(
       "{0,number,integer}:{1,number,integer}.{2,number,integer} --> {3,number,integer}:{4,number,integer}.{5,number,integer}{6}");
 
-    for (Parameter cue : parameters.values()) {
-      Layer mappedLayer = (Layer)cue.getValue();
-      if (mappedLayer != null && mappedLayer.getId().equals(getUtteranceLayer().getId())) {
-        graph.addAnnotation(
-          new Annotation(null, cue.getName(), schema.getParticipantLayerId()))
-          .setConfidence(Constants.CONFIDENCE_MANUAL);
-      }
-    } // next cue/participant
-    if (graph.getAnnotations(schema.getParticipantLayerId()).size() == 0) {
-      // so use a default speaker
-      graph.addAnnotation(new Annotation(null, "speaker", schema.getParticipantLayerId()))
-        .setConfidence(Constants.CONFIDENCE_MANUAL);;
-    }
-    String currentSpeaker = graph.first(schema.getParticipantLayerId()).getLabel();
+    // speakers are specified by voice spans like <v.loud John Smith>Hello!
+    Pattern voiceSpan = Pattern.compile(
+      "^\\s*<v(?<class>\\.\\S+)? (?<voice>[^>]+)>(?<utterance>.*)$");
+
+    // create a default speaker
+    graph.addAnnotation(new Annotation(null, "", schema.getParticipantLayerId()));
+    // but we might find some named voices to keep track of
+    HashMap<String,Annotation> participantsByName = new HashMap<String,Annotation>();
     Annotation currentTurn = new Annotation(
       null, graph.first(schema.getParticipantLayerId()).getLabel(),
       schema.getTurnLayerId(),
@@ -649,6 +650,7 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
       graphStart.getId(), graphStart.getId(),
       currentTurn.getId());
     currentUtterance.setConfidence(Constants.CONFIDENCE_MANUAL);
+    Annotation lastUtterance = null;
     try {
       // For each line...
       String line = vtt.readLine();
@@ -703,11 +705,11 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
               
               currentUtterance.setLabel(
                 currentUtterance.getLabel()
-                // remove <...> tags TODO extract voice tags for speakers
+                // remove <...> tags
                 .replaceAll("<[^>]+>","")
                 // strip out newlines and multiple spaces
                 .replaceAll("[\r\n ]+", " ").replaceAll(" +", " ").trim());
-              graph.addAnnotation(currentUtterance);
+              lastUtterance = graph.addAnnotation(currentUtterance);
             }
             
             // start new utterance
@@ -733,7 +735,52 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
           } // this is an interval line
           
           // not an interval definition, so add the text to the utterance
-          // TODO looks for cue tags like: <c.colorE5E5E5>first question</c>
+
+          // look for voice span something like <v.load John Smith>Hello!
+          Matcher matchVoiceSpan = voiceSpan.matcher(line);
+          if (matchVoiceSpan.matches()) {
+            String voice = matchVoiceSpan.group("voice");
+            line = matchVoiceSpan.group("utterance")
+              // strip of closing tag if any
+              .trim().replaceAll("</v>$","");
+
+            // if the current participant isn't named
+            if (currentTurn.getLabel().length() == 0) { // no name
+              // set the current participant's label to this voice
+              currentTurn.setLabel(voice); // turn...
+              currentTurn.getParent().setLabel(voice); // ...and participant
+              participantsByName.put(voice, currentTurn.getParent());
+            } else { // current participant has a name
+              if (!currentTurn.getLabel().equals(voice)) { // different speaker?
+                // start a new turn here...
+
+                // is there an existing participant with this name?
+                Annotation participant = participantsByName.get(voice);
+                if (participant == null) { // haven't encounterd this voice before
+                  // create a new participant
+                  participant = graph.addAnnotation(
+                    new Annotation(null, voice, schema.getParticipantLayerId()));
+                }
+
+                // the last turn ends at the start of this utterance
+                if (lastUtterance != null) {
+                  currentTurn.setEndId(lastUtterance.getEndId());
+                }
+
+                // new turn
+                currentTurn = new Annotation(
+                  null, voice,
+                  schema.getTurnLayerId(),
+                  currentUtterance.getStartId(), currentUtterance.getEndId(),
+                  participant.getId());
+                graph.addAnnotation(currentTurn);
+                currentTurn.setConfidence(Constants.CONFIDENCE_MANUAL);
+                // utterance's parent is this turn
+                currentUtterance.setParent(currentTurn);
+              } // change of voice
+            } // current participant has a name
+          } // voice span
+          
           currentUtterance.setLabel(currentUtterance.getLabel() + " " + line);
         }
             
@@ -783,10 +830,23 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     }
 
     // set end anchors of graph tags
+    int unnamedSpeakersSoFar = 0;
     for (Annotation a : graph.all(getParticipantLayer().getId())) {
       a.setStartId(graphStart.getId());
       if (currentUtterance != null && currentUtterance.getEnd() != null) {
         a.setEndId(currentUtterance.getEnd().getId());
+      }
+      // ensure all participants have a name
+      if (a.getLabel().length() == 0) {
+        String speakerLabel = "speaker"
+          + (unnamedSpeakersSoFar == 0?"":"-"+(unnamedSpeakersSoFar+1));
+        a.setLabel(speakerLabel);
+        a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+        // ensure turns are similarly relabelled
+        for (Annotation turn : a.all(schema.getTurnLayerId())) turn.setLabel(speakerLabel);
+        unnamedSpeakersSoFar++;
+      } else { // had an explicit name
+        a.setConfidence(Constants.CONFIDENCE_MANUAL);
       }
     }
     graph.commit();

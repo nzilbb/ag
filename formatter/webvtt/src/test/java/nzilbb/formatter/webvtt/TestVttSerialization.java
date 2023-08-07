@@ -104,6 +104,7 @@ public class TestVttSerialization {
     Annotation[] authors = g.all("who"); 
     assertEquals(1, authors.length);
     assertEquals("speaker", authors[0].getLabel());
+    assertEquals(Constants.CONFIDENCE_AUTOMATIC, authors[0].getConfidence().byteValue());
 
     // turns
     Annotation[] turns = g.all("turn");
@@ -143,6 +144,8 @@ public class TestVttSerialization {
       
       // check all annotations have 'manual' confidence
     for (Annotation a : g.getAnnotationsById().values()) {
+      // except maybe participants, which we check independently
+      if (a.getLayerId().equals("who")) continue;
       assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
@@ -230,6 +233,8 @@ public class TestVttSerialization {
       
       // check all annotations have 'manual' confidence
     for (Annotation a : g.getAnnotationsById().values()) {
+      // except maybe participants, which we check independently
+      if (a.getLayerId().equals("who")) continue;
       assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
@@ -314,6 +319,8 @@ public class TestVttSerialization {
       
     // check all annotations have 'manual' confidence
     for (Annotation a : g.getAnnotationsById().values()) {
+      // except maybe participants, which we check independently
+      if (a.getLayerId().equals("who")) continue;
       assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
@@ -392,6 +399,8 @@ public class TestVttSerialization {
     
     // check all annotations have 'manual' confidence
     for (Annotation a : g.getAnnotationsById().values()) {
+      // except maybe participants, which we check independently
+      if (a.getLayerId().equals("who")) continue;
       assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
@@ -434,19 +443,19 @@ public class TestVttSerialization {
     graph.addAnchor(new Anchor("a15", 15.0));
     graph.addAnnotation(new Annotation("en", "en", "language", "a0", "a15"));
     // participants
-    graph.addAnnotation(new Annotation("p1", "p1", "who", "a0", "a15"));
-    graph.addAnnotation(new Annotation("p2", "p2", "who", "a0", "a15"));
+    graph.addAnnotation(new Annotation("p1", "Participant 1", "who", "a0", "a15"));
+    graph.addAnnotation(new Annotation("p2", "Participant 2", "who", "a0", "a15"));
     graph.addAnnotation(new Annotation("nb", "nb", "gender", "a0", "a15", "p2"));
     // turns
-    graph.addAnnotation(new Annotation("t1", "p1", "turn", "a0", "a15", "p1"));
+    graph.addAnnotation(new Annotation("t1", "Participant 1", "turn", "a0", "a15", "p1"));
     graph.addAnchor(new Anchor("a5", 5.0));
     graph.addAnchor(new Anchor("a10", 10.0));
     graph.addAnnotation(new Annotation("t2", "p2", "turn", "a5", "a10", "p2"));
     // utterances
-    graph.addAnnotation(new Annotation("u1-1", "p1", "utterance", "a0", "a5", "t1"));
-    graph.addAnnotation(new Annotation("u1-2", "p1", "utterance", "a5", "a10", "t1"));
-    graph.addAnnotation(new Annotation("u2-1", "p2", "utterance", "a5", "a10", "t2"));
-    graph.addAnnotation(new Annotation("u1-3", "p1", "utterance", "a10", "a15", "t1"));
+    graph.addAnnotation(new Annotation("u1-1", "Participant 1", "utterance", "a0", "a5", "t1"));
+    graph.addAnnotation(new Annotation("u1-2", "Participant 1", "utterance", "a5", "a10", "t1"));
+    graph.addAnnotation(new Annotation("u2-1", "Participant 2", "utterance", "a5", "a10", "t2"));
+    graph.addAnnotation(new Annotation("u1-3", "Participant 1", "utterance", "a10", "a15", "t1"));
 
     // words
     graph.addAnnotation(new Annotation("w1-1", "w1-1", "word", 
@@ -580,14 +589,26 @@ public class TestVttSerialization {
 
     // participants     
     Annotation[] authors = g.all("who"); 
-    assertEquals(1, authors.length);
-    assertEquals("speaker", authors[0].getLabel());
+    assertEquals("identify two voices: " + authors[0], 2, authors.length);
+    assertEquals("Speaker 1 ID", "Participant 1", authors[0].getLabel());
+    assertEquals("Speaker 1 high confidence",
+                 Constants.CONFIDENCE_MANUAL, authors[0].getConfidence().byteValue());
+    assertEquals("Speaker 2 ID", "Participant 2", authors[1].getLabel());
+    assertEquals("Speaker 2 high confidence",
+                 Constants.CONFIDENCE_MANUAL, authors[1].getConfidence().byteValue());
 
     // turns
     Annotation[] turns = g.all("turn");
-    assertEquals(1, turns.length);
+    assertEquals(3, turns.length);
+    assertEquals("Participant 1", turns[0].getLabel());
     assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
-    assertEquals(Double.valueOf(15.0), turns[0].getEnd().getOffset());
+    assertEquals(Double.valueOf(10.0), turns[0].getEnd().getOffset());
+    assertEquals("Participant 2", turns[1].getLabel());
+    assertEquals(Double.valueOf(5.0), turns[1].getStart().getOffset());
+    assertEquals(Double.valueOf(10.0), turns[1].getEnd().getOffset());
+    assertEquals("Participant 1", turns[2].getLabel());
+    assertEquals(Double.valueOf(10.0), turns[2].getStart().getOffset());
+    assertEquals(Double.valueOf(15.0), turns[2].getEnd().getOffset());
 
     // utterances
     Annotation[] utterances = g.all("utterance");
@@ -600,6 +621,19 @@ public class TestVttSerialization {
 
     assertEquals(Double.valueOf(10.0), utterances[utterances.length-1].getStart().getOffset());
     assertEquals(Double.valueOf(15.0), utterances[utterances.length-1].getEnd().getOffset());
+
+    // words
+    String[] expectedWords = {
+      "w1-1", "w1-2", "w1-3",
+      "w1-6", "w1-7", "w1-8",
+      "w2-6.5", "w2-7.5",
+      "w1-11", "w1-12", "w1-13"
+    };
+
+    String[] actualWords = g.labels("word");
+    for (int w = 0; w < expectedWords.length; w++) {
+      assertEquals("Word label " + w, expectedWords[w], actualWords[w]);
+    }
       
     // check all annotations have 'manual' confidence
     for (Annotation a : g.getAnnotationsById().values()) {
