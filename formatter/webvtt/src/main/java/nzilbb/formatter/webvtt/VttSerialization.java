@@ -248,7 +248,6 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
    * @param newTokenizer Utterance tokenizer.
    */
   public void setTokenizer(GraphTransformer newTokenizer) { tokenizer = newTokenizer; }
-
    
   /**
    * Meta-data values.
@@ -311,7 +310,6 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
 
   // GraphDeserializer methods
 
-
   /**
    * Sets parameters for deserializer as a whole.  This might include database connection
    * parameters, locations of supporting files, etc. 
@@ -339,8 +337,10 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
 
     // create a list of layers we need and possible matching layer names
-    LinkedHashMap<Parameter,List<String>> layerToPossibilities = new LinkedHashMap<Parameter,List<String>>();
-    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();
+    LinkedHashMap<Parameter,List<String>> layerToPossibilities
+      = new LinkedHashMap<Parameter,List<String>>();
+    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates
+      = new HashMap<String,LinkedHashMap<String,Layer>>();
 
     // do we need to ask for participant/turn/utterance/word layers?
     LinkedHashMap<String,Layer> possibleParticipantLayers = new LinkedHashMap<String,Layer>();
@@ -481,8 +481,10 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     setName(vttStream.getName());
     setVtt(new BufferedReader(new InputStreamReader(vttStream.getStream(), "UTF-8")));
 
-    LinkedHashMap<Parameter,List<String>> layerToPossibilities = new LinkedHashMap<Parameter,List<String>>();
-    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();	 
+    LinkedHashMap<Parameter,List<String>> layerToPossibilities
+      = new LinkedHashMap<Parameter,List<String>>();
+    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates
+      = new HashMap<String,LinkedHashMap<String,Layer>>();	 
 
     LinkedHashMap<String,Layer> metadataLayers = new LinkedHashMap<String,Layer>();
     for (Layer layer : schema.getRoot().getChildren().values()) {
@@ -635,11 +637,17 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     }
     String currentSpeaker = graph.first(schema.getParticipantLayerId()).getLabel();
     Annotation currentTurn = new Annotation(
-      null, graph.first(schema.getParticipantLayerId()).getLabel(), schema.getTurnLayerId(), graphStart.getId(), graphStart.getId(), graph.first(schema.getParticipantLayerId()).getId());
+      null, graph.first(schema.getParticipantLayerId()).getLabel(),
+      schema.getTurnLayerId(),
+      graphStart.getId(), graphStart.getId(),
+      graph.first(schema.getParticipantLayerId()).getId());
     graph.addAnnotation(currentTurn);
     currentTurn.setConfidence(Constants.CONFIDENCE_MANUAL);
     Annotation currentUtterance = new Annotation(
-      null, "", schema.getUtteranceLayerId(), graphStart.getId(), graphStart.getId(), currentTurn.getId());
+      null, "",
+      schema.getUtteranceLayerId(),
+      graphStart.getId(), graphStart.getId(),
+      currentTurn.getId());
     currentUtterance.setConfidence(Constants.CONFIDENCE_MANUAL);
     try {
       // For each line...
@@ -714,7 +722,9 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
               Constants.CONFIDENCE_MANUAL);
             
             currentUtterance = new Annotation(
-              null, "", schema.getUtteranceLayerId(), start.getId(), end.getId(), currentTurn.getId());
+              null, "",
+              schema.getUtteranceLayerId(),
+              start.getId(), end.getId(), currentTurn.getId());
             currentUtterance.setConfidence(Constants.CONFIDENCE_MANUAL);
             currentTurn.setEndId(end.getId());
             
@@ -751,7 +761,8 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
           errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
         }
 	    
-        OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId(), utteranceLayer.getId());
+        OrthographyClumper clumper
+          = new OrthographyClumper(wordLayer.getId(), utteranceLayer.getId());
         try {
           // clump non-orthographic 'words' with real words
           if (timers != null) timers.start("orthography clumping");
@@ -833,7 +844,9 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
    * @param errors A consumer for (fatal) error messages.
    * @throws SerializerNotConfiguredException if the object has not been configured.
    */
-  public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+  public void serialize(
+    Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
+    Consumer<String> warnings, Consumer<SerializationException> errors) 
     throws SerializerNotConfiguredException {
     graphCount = graphs.getExactSizeIfKnown();
     graphs.forEachRemaining(graph -> {
@@ -860,7 +873,8 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     try {
       // write the text to a temporary file
       File f = File.createTempFile(graph.getId(), ".txt");
-      PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"));
+      PrintWriter writer
+        = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"));
 
       writer.println("WEBVTT Kind: captions");
       writer.println("NOTE Generated by nzilbb.ag converter - " + getDescriptor());
