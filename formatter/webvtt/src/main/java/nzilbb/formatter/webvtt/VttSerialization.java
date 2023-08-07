@@ -884,7 +884,7 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
       }
       
       // number each participant
-      int s = 0;
+      int s = 1;
       for (Annotation participant : graph.all(participantLayer.getId())) {
         participant.put("@serial", Integer.valueOf(s++));
 
@@ -918,7 +918,11 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
 
         // is the participant changing?
         Annotation participant = utterance.first(participantLayer.getId());
-        writer.print("<v " + participant.get("@serial") + ">");
+        writer.print(
+          "<v"
+          + ".speaker"+participant.get("@serial")
+          + " "+participant.getLabel().replace(">", "&gt;") // replace '>'
+          +">");
 
         boolean firstWord = true;
         for (Annotation token : utterance.all(getWordLayer().getId())) {
