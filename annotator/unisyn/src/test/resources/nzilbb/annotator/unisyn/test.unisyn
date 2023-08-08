@@ -1,0 +1,12 @@
+a:1,stressed:DT/LS/NN/NNP: { * ei } :{a}:7536297
+a:2,unstressed:DT: { @ } :{a}:7536297
+a:3:FW: { * aa } :{a}:7536297
+brown::JJ/NNP/NN/VB/VBP: { b r * ow n } :{brown}:18347
+dog::NN/VBP/VB: { d * oo g } :{dog}:44393
+jumps::NNS/VBZ: { jh * uh m p }> s > :{jump}>s>:2025
+lazy::JJ: { l * ei z }.> ii > :{laze}>y>:3802
+over::IN/RP/RB/NN: { * ou . v @r r } :{over}:420898
+quick::JJ/NNP/NN/RB: { k w * i k } :{quick}:35052
+the:1,unstressed-and-before-consonant:DT: { dh @ } :{the}:16006650
+the:2,before-vowel:DT: { dh @ } :{the}:16006650
+the:3,stressed:DT: { dh * @ } :{the}:16006650
