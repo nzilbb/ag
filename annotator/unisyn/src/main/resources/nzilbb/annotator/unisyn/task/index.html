@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> Unisyn Tagger </title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <p>The Unisyn Tagger tags word tokens with data from
+      <a href="http://www.cstr.ed.ac.uk/projects/unisyn/" target="unisyn">Unisyn</a>,
+      a lexicon produced by the Centre for Speech Technology Research at the University of Edinburgh.</p> 
+    
+    <div><details id="uploadForm"><summary>Upload New Lexicon File</summary>
+
+        <p>The pronunciations in the lexicon can be converted into an accent-specific form
+          using perl scripts that are included with the lexicon. The commands to do this are
+          as follows (these generate a General American English lexicon, you can
+          substitute <code>gam</code> for any other code supported by Unisyn):</p>  
+
+        <ol>
+          <li><code>get-exceptions.pl -a gam -f unilex &gt; gam.1</code></li>
+          <li><code>post-lex-rules.pl -a gam -f gam.1 &gt; gam.2</code></li>
+          <li><code>map-unique.pl -a gam -f gam.2 &gt; gam.unisyn</code></li>
+        </ol>
+
+        <p>Once you've generated the accent-specific lexicon file (<samp>gam.unisyn</samp>
+          in the above example), you can upload it on this page.</p> 
+
+        <p> You can upload as many lexicons as you like.  Once you have at least one
+          lexicon, you can configure a word layer to tag word tokens.</p>
+        
+        <div class="field file-chooser" 
+             title="You can select a new lexicon file to upload">
+          <label for="file">New Lexicon File</label>
+          <input id="file" type="file">
+        </div>
+        <fieldset id="uploadSettings"><legend>Lexicon Settings</legend>
+          <div class="field" title="The name for the lexicon">
+            <label for="name"> Lexicon Name </label>
+            <span><input id="name" type="text"></span>
+          </div>
+          <div class="controls">
+            <button id="btnUploadLexicon" disabled>Upload Lexicon</button>
+          </div>
+          <div id="uploadProgress" style="display: none;">
+            <progress id="progress"></progress>
+            <div id="uploadResult"></div>
+          </div>
+        </fieldset>
+    </details></div>
+    
+    <form method="POST" action="setTaskParameters">
+      <div class="field" title="Input layer from which words come">
+        <label for="tokenLayerId"> Token Layer </label>
+        <span><select id="tokenLayerId" name="tokenLayerId" required></select></span>
+      </div>
+      <div class="field" title="Transcript attribute for overall language">
+        <label for="transcriptLanguageLayerId"> Transcript Language Attribute </label>
+        <span>
+          <select id="transcriptLanguageLayerId" name="transcriptLanguageLayerId">
+            <option value="">[none]</option>
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Layer for annotating phrases in a different language">
+        <label for="phraseLanguageLayerId"> Phrase Language Layer </label>
+        <span>
+          <select id="phraseLanguageLayerId" name="phraseLanguageLayerId">
+            <option value="">[none]</option>
+          </select>
+        </span>
+      </div>
+      <div class="field"
+           title="Regular expression for the ISO language codes of the languages to target, or blank for all">
+        <label for="targetLanguagePattern">Target Language Pattern</label>
+        <span><input id="targetLanguagePattern" name="targetLanguagePattern" type="text" placeholder=".*"></span>
+      </div>
+      <div class="field" title="Output layer to which looked up entries are added">
+        <label for="tagLayerId"> Tag Layer </label>
+        <span>
+          <select id="tagLayerId" name="tagLayerId" required>
+            <option disabled>[select layer]</option> <!-- force choice the first time -->
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Which lexicon to look up for tag labels">
+        <label for="lexicon"> Lexicon </label>
+        <span>
+          <select id="lexicon" name="lexicon">
+            <option disabled>[select lexicon]</option> <!-- force choice the first time -->
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Which lexicon column to use for tag labels">
+        <label for="field"> Field </label>
+        <span>
+          <select id="field" name="field">
+            <option value="pron_disc">Phonemes (DISC)</option>
+            <option value="pron_orig">Phonemes (original file)</option>
+            <option value="pos">Part of Speech</option>
+            <option value="frequency">Frequency</option>
+            <option value="enriched_orthography">Enriched Orthography</option>
+            <option value="syllable_count">Syllable Count</option>
+          </select>
+        </span>
+      </div>
+      <div class="field"
+           title="Whether to strip syllable/stress markings or not.">
+        <label for="stripSyllStress"> Strip syllabification/stress </label>
+        <span><input id="stripSyllStress" name="stripSyllStress" type="checkbox"></span>
+      </div>
+      <div class="field"
+           title="If there are multiple entries for the token, use only the first one.">
+        <label for="firstVariantOnly"> First variant only </label>
+        <span><input id="firstVariantOnly" name="firstVariantOnly" type="checkbox"></span>
+      </div>
+      <div class="controls"><input type="submit" value="Set Parameters"></div>
+    </form>
+    
+    <footer><div> Unisyn Tagger <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>

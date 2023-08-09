@@ -1,0 +1,37 @@
+<h3>Unisyn Tagger</h3>
+
+<p>The Unisyn Tagger tags word tokens with data from
+  <a href="http://www.cstr.ed.ac.uk/projects/unisyn/">Unisyn</a>,
+  a lexicon produced by the Centre for Speech Technology Research at the University of Edinburgh.</p> 
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>tokenLayerId=orthography&tagLayerId=phonemes&lexicon=gam.unisyn&field=pron_disc&stripSyllStress=on</samp></p>
+
+<p> Parameters are: </p>
+<dl>
+  <dt> tokenLayerId </dt> <dd> Input layer from which words come. </dd>
+  <dt> lexicon </dt> <dd> Which dictionary to lookup for tag
+    labels. Invoke <tt>getLexiconIds</tt> for a JSON-encoded list of valid
+    lexicons.</dd> 
+  <dt> field </dt> <dd> Which field to annotate the token with.
+    Valid values are: <dl>
+      <dt>pron_disc</dt> <dd> The DISC-encoded pronunciation. </dd>
+      <dt>pron_orig</dt> <dd> The original pronunciation from the uploaded lexicon file. </dd>
+      <dt>pos</dt> <dd> The possible parts of speech. </dd>
+      <dt>frequency</dt> <dd> The word frequency. </dd>
+      <dt>enriched_orthography</dt> <dd> Wordform enriched with morphological markup. </dd>
+      <dt>syllable_count</dt> <dd> The number of syllables. </dd>
+      <dt>wordform</dt> <dd> The plain orthography of the word. </dd></dl> 
+  <dt> tagLayerId </dt> <dd> Output layer to which looked up entries are added. </dd>
+  <dt> firstVariantOnly </dt> <dd> If there are multiple entries for the token, use
+    only the first one. Value should be "on" for <tt>true</tt>, and the parameter
+    should be absent to indicate <tt>false</tt>. </dd> 
+  <dt> stripSyllStress </dt> <dd> Whether to strip syllable/stress markings or not.
+    Value should be "on" for <tt>true</tt>, and the parameter
+    should be absent to indicate <tt>false</tt>. </dd> 
+  <dt> transcriptLanguageLayerId </dt> <dd> Transcript attribute for overall language. </dd>
+  <dt> phraseLanguageLayerId </dt> <dd> Layer for annotating phrases in a different
+    language. </dd> 
+  <dt> targetLanguagePattern </dt> <dd> Regular expression for the ISO language codes
+    of the languages to target, or blank for all. </dd> 
+</dl>

@@ -568,7 +568,10 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
                       setPercentComplete((sWordForm.charAt(0) - 'a') * 100/26);
                       
                     } catch (Throwable t) {
-                      setStatus("ERROR line "+iLine+" \""+sLine+"\": " + t);
+                      System.out.println(
+                        "UnisynTagger.loadLexicon "+tempFile.getName()+": ERROR line "+iLine+" \""+sLine+"\": "
+                        + Optional.of(t.getMessage()).orElse(t.toString()));
+                      setStatus("ERROR line "+iLine+" \""+sLine+"\": " + Optional.of(t.getMessage()).orElse(t.toString()));
                     }
                   } // not a comment
                   
@@ -752,6 +755,8 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         try { rdb.close(); } catch(SQLException x) {}
       }
     } catch (Exception x) {
+      System.err.println("UnisynTagger.loadLexicon: " + x);
+      x.printStackTrace(System.err);
       return x.toString();
     }
   } // end of loadLexicon()
@@ -1202,6 +1207,14 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
   
   /**
    * Which field to annotate the token with.
+   * <p> Valid values are: <dl>
+   * <dt>pron_disc</dt> <dd> The DISC-encoded pronunciation. </dd>
+   * <dt>pron_orig</dt> <dd> The original pronunciation from the uploaded lexicon file. </dd>
+   * <dt>pos</dt> <dd> The possible parts of speech. </dd>
+   * <dt>frequency</dt> <dd> The word frequency. </dd>
+   * <dt>enriched_orthography</dt> <dd> Wordform enriched with morphological markup. </dd>
+   * <dt>syllable_count</dt> <dd> The number of syllables. </dd>
+   * <dt>wordform</dt> <dd> The plain orthography of the word. </dd></dl> 
    * @see #getField()
    * @see #setField(String)
    */
@@ -1214,6 +1227,14 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
   /**
    * Setter for {@link #field}: Which field to annotate the token with.
    * @param newField Which field to annotate the token with.
+   * Valid values are: <dl>
+   * <dt>pron_disc</dt> <dd> The DISC-encoded pronunciation. </dd>
+   * <dt>pron_orig</dt> <dd> The original pronunciation from the uploaded lexicon file. </dd>
+   * <dt>pos</dt> <dd> The possible parts of speech. </dd>
+   * <dt>frequency</dt> <dd> The word frequency. </dd>
+   * <dt>enriched_orthography</dt> <dd> Wordform enriched with morphological markup. </dd>
+   * <dt>syllable_count</dt> <dd> The number of syllables. </dd>
+   * <dt>wordform</dt> <dd> The plain orthography of the word. </dd></dl> 
    */
   public UnisynTagger setField(String newField) { field = newField; return this; }
   
@@ -1332,7 +1353,6 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
     if (field == null) field = "pron_disc";
     // ensure field is valid
     if (!field.equals("wordform")
-        && !field.equals("wordform")
         && !field.equals("pos")
         && !field.equals("pron_orig")
         && !field.equals("pron_disc")
