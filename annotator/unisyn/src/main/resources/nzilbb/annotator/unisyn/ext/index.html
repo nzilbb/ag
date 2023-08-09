@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> Unisyn Tagger </title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <h1>Unisyn Tagger</h1>
+    
+    <p>The Unisyn Tagger tags word tokens with data from
+      <a href="http://www.cstr.ed.ac.uk/projects/unisyn/" target="unisyn">Unisyn</a>,
+      a lexicon produced by the Centre for Speech Technology Research at the University of Edinburgh.</p> 
+    
+    <p> On this page, you can add or delete lexicons. </p>
+    
+    <table>
+      <caption>Lexicons</caption>
+      <tbody id="lexicons"></tbody>
+    </table>
+    
+    <div><details id="uploadForm"><summary>Upload New Lexicon File</summary>
+        
+        <p>The pronunciations in the lexicon can be converted into an accent-specific form
+          using perl scripts that are included with the lexicon. The commands to do this are
+          as follows (these generate a General American English lexicon, you can
+          substitute <code>gam</code> for any other code supported by Unisyn):</p>  
+
+        <ol>
+          <li><code>get-exceptions.pl -a gam -f unilex &gt; gam.1</code></li>
+          <li><code>post-lex-rules.pl -a gam -f gam.1 &gt; gam.2</code></li>
+          <li><code>map-unique.pl -a gam -f gam.2 &gt; gam.unisyn</code></li>
+        </ol>
+
+        <p>Once you've generated the accent-specific lexicon file (<samp>gam.unisyn</samp>
+          in the above example), you can upload it on this page.</p> 
+
+        <p> You can upload as many lexicons as you like.  Once you have at least one
+          lexicon, you can configure a word layer to tag word tokens.</p>
+        
+        <div class="field file-chooser" 
+             title="You can select a new lexicon file to upload">
+          <label for="file">New Lexicon File</label>
+          <input id="file" type="file">
+        </div>
+        <fieldset id="uploadSettings"><legend>Lexicon Settings</legend>
+          <div class="field" title="The name for the lexicon">
+            <label for="lexicon"> Lexicon Name </label>
+            <span><input id="lexicon" type="text"></span>
+          </div>
+          <div class="controls">
+            <button id="btnUploadLexicon" disabled>Upload Lexicon</button>
+          </div>
+          <div id="uploadProgress" style="display: none;">
+            <progress id="progress"></progress>
+            <div id="uploadResult"></div>
+          </div>
+        </fieldset>
+    </details></div>
+    
+    <footer><div> Flat Lexicon Tagger <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>
