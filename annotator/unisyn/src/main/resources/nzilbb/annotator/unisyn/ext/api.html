@@ -1,0 +1,27 @@
+<h3>Unisyn Tagger</h3>
+
+<p>The Unisyn Tagger tags word tokens with data from
+  <a href="http://www.cstr.ed.ac.uk/projects/unisyn/" target="unisyn">Unisyn</a>,
+  a lexicon produced by the Centre for Speech Technology Research at the University of Edinburgh.</p> 
+
+<p> The extension API can be used to upload new lexicon files, by making a
+  multipart <tt>POST</tt> request to the <tt>loadLexicon</tt> endpoint. </p>
+
+<p> Parameters are: </p>
+<dl>
+  <dt> lexicon </dt> <dd> The name for the lexicon. </dd>
+  <dt> file </dt> <dd> The plain-text lexicon file. </dd> 
+</dl>
+
+<p> Once the file is uploaded, the annotator request returns immediately, before the
+  processing of the lexicon file has been completed. To monitor progress of the
+  import, make <tt>GET</tt> requests for the following endpoints: </p>
+<dl>
+  <dt>getRunning</dt><dd> <tt>true</tt> if the import is still running, <tt>false</tt>
+    otherwise. </dd>
+  <dt>getPercentComplete</dt><dd> How far through the file the import is. </dd>
+  <dt>getStatus</dt><dd> The last status message from the import. </dd>
+</dl>
+
+<p> Existing lexicons can be listed by making a <tt>GET</tt> request to the
+  <tt>listLexicons</tt> endpoint. The result is a JSON-encoded array of lexicon names. </p>
