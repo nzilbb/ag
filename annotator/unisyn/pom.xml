@@ -2,19 +2,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>nzilbb.formatter</artifactId>
+    <artifactId>nzilbb.annotator</artifactId>
     <groupId>nz.ilbb.ag</groupId>
     <version>1.0.0</version>
   </parent>
 
-  <groupId>nz.ilbb.ag</groupId>
-  <artifactId>nzilbb.formatter.webvtt</artifactId>
-  <name>nzilbb.formatter.webvtt</name>
-  <version>0.7.0</version>
+  <groupId>nzilbb</groupId>
+  <artifactId>nzilbb.annotator.unisyn</artifactId>
+  <version>2.0</version>
 
+  <name>nzilbb.annotator.unisyn</name>
+  <description>Looks up accent-specific versions of the Unisyn English lexicon to annotate English words with their pronunciations.</description>
+  
   <properties>
-    <package.path>nzilbb/formatter/webvtt/</package.path>
-    <formatter.class>nzilbb.formatter.webvtt.VttSerialization</formatter.class>
+    <package.path>nzilbb/annotator/unisyn/</package.path>
+    <annotator.class>nzilbb.annotator.unisyn.UnisynTagger</annotator.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -22,7 +24,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>nz.ilbb.ag</groupId>
+      <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
       <version>1.1.0</version>
       <scope>compile</scope>
@@ -30,14 +32,14 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
-      <!-- add manifest attributes required for identifying the formatter class -->
+      <!-- add manifest attributes required for identifying the annotator class -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -45,8 +47,7 @@
           <archive>
             <manifest addDefaultImplementationEntries="true" />
             <manifestEntries>
-              <nzilbb-ag-serialize-GraphSerializer>${formatter.class}</nzilbb-ag-serialize-GraphSerializer>
-              <nzilbb-ag-serialize-GraphDeserializer>${formatter.class}</nzilbb-ag-serialize-GraphDeserializer>
+              <nzilbb-ag-automation-Annotator>${annotator.class}</nzilbb-ag-automation-Annotator>
               <Name>${package.path}</Name>
               <Implementation-Title>${project.description}</Implementation-Title>
               <Implementation-Version>${project.version}</Implementation-Version>

@@ -1,5 +1,5 @@
 //
-// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -40,6 +40,8 @@ import java.util.Spliterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -57,6 +59,13 @@ import nzilbb.util.Timers;
 
 /**
  * (De)serializes VTT subtitle/caption files.
+ * <p> Whole-line voice spans, if present are parsed to identify participants, i.e.
+ * utterances formatted: <code>&lt;v.speaker1 John Smith&gt;The quick brown fox.</code>
+ * will result in an utterance "The quick brown fox." uttered by a participant called
+ * "John Smith".
+ * <p> Output captions include such voice spans which include the participant label, and each
+ * is identified with a class like "speaker1" to allow different speakers to be styled
+ * differently.
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class VttSerialization implements GraphDeserializer, GraphSerializer {
@@ -248,7 +257,6 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
    * @param newTokenizer Utterance tokenizer.
    */
   public void setTokenizer(GraphTransformer newTokenizer) { tokenizer = newTokenizer; }
-
    
   /**
    * Meta-data values.
@@ -311,9 +319,9 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
 
   // GraphDeserializer methods
 
-
   /**
-   * Sets parameters for deserializer as a whole.  This might include database connection parameters, locations of supporting files, etc.
+   * Sets parameters for deserializer as a whole.  This might include database connection
+   * parameters, locations of supporting files, etc. 
    * <p>When the deserializer is installed, this method should be invoked with an empty parameter
    *  set, to discover what (if any) general configuration is required. If parameters are
    *  returned, and user interaction is possible, then the user may be presented with an
@@ -321,7 +329,11 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
    * <p>{@link GraphDeserializer} method.
    * @param configuration The configuration for the deserializer. 
    * @param schema The layer schema, definining layers and the way they interrelate.
-   * @return A list of configuration parameters (still) must be set before {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an empty list, {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
+   * @return A list of configuration parameters (still) must be set before
+   * {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If this is an
+   * empty list, {@link GraphDeserializer#setParameters(ParameterSet)} can be invoked. If
+   * it's not an empty list, this method must be invoked again with the returned
+   * parameters' values set. 
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema) {
     setSchema(schema);
@@ -334,8 +346,10 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
 
     // create a list of layers we need and possible matching layer names
-    LinkedHashMap<Parameter,List<String>> layerToPossibilities = new LinkedHashMap<Parameter,List<String>>();
-    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();
+    LinkedHashMap<Parameter,List<String>> layerToPossibilities
+      = new LinkedHashMap<Parameter,List<String>>();
+    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates
+      = new HashMap<String,LinkedHashMap<String,Layer>>();
 
     // do we need to ask for participant/turn/utterance/word layers?
     LinkedHashMap<String,Layer> possibleParticipantLayers = new LinkedHashMap<String,Layer>();
@@ -455,11 +469,12 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
    * @param streams A list of named streams that contain all the
    *  transcription/annotation data required, and possibly (a) stream(s) for the media annotated.
    * @param schema The layer schema, definining layers and the way they interrelate.
-   * @return A list of parameters that require setting before {@link GraphDeserializer#deserialize()}
-   * can be invoked. This may be an empty list, and may include parameters with the value already
-   * set to a workable default. If there are parameters, and user interaction is possible, then
-   * the user may be presented with an interface for setting/confirming these parameters, before
-   * they are then passed to {@link GraphDeserializer#setParameters(ParameterSet)}.
+   * @return A list of parameters that require setting before
+   * {@link GraphDeserializer#deserialize()} can be invoked. This may be an empty list,
+   * and may include parameters with the value already set to a workable default. If there
+   * are parameters, and user interaction is possible, then the user may be presented with
+   * an interface for setting/confirming these parameters, before they are then passed to
+   * {@link GraphDeserializer#setParameters(ParameterSet)}.
    * @throws SerializationException If the graph could not be loaded.
    * @throws IOException On IO error.
    */
@@ -475,8 +490,10 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     setName(vttStream.getName());
     setVtt(new BufferedReader(new InputStreamReader(vttStream.getStream(), "UTF-8")));
 
-    LinkedHashMap<Parameter,List<String>> layerToPossibilities = new LinkedHashMap<Parameter,List<String>>();
-    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates = new HashMap<String,LinkedHashMap<String,Layer>>();	 
+    LinkedHashMap<Parameter,List<String>> layerToPossibilities
+      = new LinkedHashMap<Parameter,List<String>>();
+    HashMap<String,LinkedHashMap<String,Layer>> layerToCandidates
+      = new HashMap<String,LinkedHashMap<String,Layer>>();	 
 
     LinkedHashMap<String,Layer> metadataLayers = new LinkedHashMap<String,Layer>();
     for (Layer layer : schema.getRoot().getChildren().values()) {
@@ -519,8 +536,6 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
       line = vtt.readLine();
     } // next header line
 
-      // TODO scan whole file, for voice tags that identify speakers
-      
     if (timers != null) timers.end("load");
     ParameterSet parameters = new ParameterSet();
     // add parameters that aren't in the configuration yet, and set possibile/default values
@@ -535,7 +550,9 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
   }
 
   /**
-   * Sets parameters for a given deserialization operation, after loading the serialized form of the graph. This might include mappings from format-specific objects like tiers to graph layers, etc.
+   * Sets parameters for a given deserialization operation, after loading the serialized
+   * form of the graph. This might include mappings from format-specific objects like
+   * tiers to graph layers, etc. 
    * <p>{@link GraphDeserializer} method.
    * @param parameters The configuration for a given deserialization operation.
    * @throws SerializationParametersMissingException If not all required parameters have a value.
@@ -555,7 +572,8 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
    * <p>{@link GraphDeserializer} method.
    * @return A list of valid (if incomplete) {@link Graph}s. 
    * @throws SerializerNotConfiguredException if the object has not been configured.
-   * @throws SerializationParametersMissingException if the parameters for this particular graph have not been set.
+   * @throws SerializationParametersMissingException if the parameters for this particular
+   * graph have not been set. 
    * @throws SerializationException if errors occur during deserialization.
    */
   public Graph[] deserialize() 
@@ -611,27 +629,28 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     MessageFormat intervalFormatAbbr = new MessageFormat(
       "{0,number,integer}:{1,number,integer}.{2,number,integer} --> {3,number,integer}:{4,number,integer}.{5,number,integer}{6}");
 
-    for (Parameter cue : parameters.values()) {
-      Layer mappedLayer = (Layer)cue.getValue();
-      if (mappedLayer != null && mappedLayer.getId().equals(getUtteranceLayer().getId())) {
-        graph.addAnnotation(
-          new Annotation(null, cue.getName(), schema.getParticipantLayerId()))
-          .setConfidence(Constants.CONFIDENCE_MANUAL);
-      }
-    } // next cue/participant
-    if (graph.getAnnotations(schema.getParticipantLayerId()).size() == 0) {
-      // so use a default speaker
-      graph.addAnnotation(new Annotation(null, "speaker", schema.getParticipantLayerId()))
-        .setConfidence(Constants.CONFIDENCE_MANUAL);;
-    }
-    String currentSpeaker = graph.first(schema.getParticipantLayerId()).getLabel();
+    // speakers are specified by voice spans like <v.loud John Smith>Hello!
+    Pattern voiceSpan = Pattern.compile(
+      "^\\s*<v(?<class>\\.\\S+)? (?<voice>[^>]+)>(?<utterance>.*)$");
+
+    // create a default speaker
+    graph.addAnnotation(new Annotation(null, "", schema.getParticipantLayerId()));
+    // but we might find some named voices to keep track of
+    HashMap<String,Annotation> participantsByName = new HashMap<String,Annotation>();
     Annotation currentTurn = new Annotation(
-      null, graph.first(schema.getParticipantLayerId()).getLabel(), schema.getTurnLayerId(), graphStart.getId(), graphStart.getId(), graph.first(schema.getParticipantLayerId()).getId());
+      null, graph.first(schema.getParticipantLayerId()).getLabel(),
+      schema.getTurnLayerId(),
+      graphStart.getId(), graphStart.getId(),
+      graph.first(schema.getParticipantLayerId()).getId());
     graph.addAnnotation(currentTurn);
     currentTurn.setConfidence(Constants.CONFIDENCE_MANUAL);
     Annotation currentUtterance = new Annotation(
-      null, "", schema.getUtteranceLayerId(), graphStart.getId(), graphStart.getId(), currentTurn.getId());
+      null, "",
+      schema.getUtteranceLayerId(),
+      graphStart.getId(), graphStart.getId(),
+      currentTurn.getId());
     currentUtterance.setConfidence(Constants.CONFIDENCE_MANUAL);
+    Annotation lastUtterance = null;
     try {
       // For each line...
       String line = vtt.readLine();
@@ -686,11 +705,11 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
               
               currentUtterance.setLabel(
                 currentUtterance.getLabel()
-                // remove <...> tags TODO extract voice tags for speakers
+                // remove <...> tags
                 .replaceAll("<[^>]+>","")
                 // strip out newlines and multiple spaces
                 .replaceAll("[\r\n ]+", " ").replaceAll(" +", " ").trim());
-              graph.addAnnotation(currentUtterance);
+              lastUtterance = graph.addAnnotation(currentUtterance);
             }
             
             // start new utterance
@@ -705,7 +724,9 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
               Constants.CONFIDENCE_MANUAL);
             
             currentUtterance = new Annotation(
-              null, "", schema.getUtteranceLayerId(), start.getId(), end.getId(), currentTurn.getId());
+              null, "",
+              schema.getUtteranceLayerId(),
+              start.getId(), end.getId(), currentTurn.getId());
             currentUtterance.setConfidence(Constants.CONFIDENCE_MANUAL);
             currentTurn.setEndId(end.getId());
             
@@ -714,7 +735,52 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
           } // this is an interval line
           
           // not an interval definition, so add the text to the utterance
-          // TODO looks for cue tags like: <c.colorE5E5E5>first question</c>
+
+          // look for voice span something like <v.load John Smith>Hello!
+          Matcher matchVoiceSpan = voiceSpan.matcher(line);
+          if (matchVoiceSpan.matches()) {
+            String voice = matchVoiceSpan.group("voice");
+            line = matchVoiceSpan.group("utterance")
+              // strip of closing tag if any
+              .trim().replaceAll("</v>$","");
+
+            // if the current participant isn't named
+            if (currentTurn.getLabel().length() == 0) { // no name
+              // set the current participant's label to this voice
+              currentTurn.setLabel(voice); // turn...
+              currentTurn.getParent().setLabel(voice); // ...and participant
+              participantsByName.put(voice, currentTurn.getParent());
+            } else { // current participant has a name
+              if (!currentTurn.getLabel().equals(voice)) { // different speaker?
+                // start a new turn here...
+
+                // is there an existing participant with this name?
+                Annotation participant = participantsByName.get(voice);
+                if (participant == null) { // haven't encounterd this voice before
+                  // create a new participant
+                  participant = graph.addAnnotation(
+                    new Annotation(null, voice, schema.getParticipantLayerId()));
+                }
+
+                // the last turn ends at the start of this utterance
+                if (lastUtterance != null) {
+                  currentTurn.setEndId(lastUtterance.getEndId());
+                }
+
+                // new turn
+                currentTurn = new Annotation(
+                  null, voice,
+                  schema.getTurnLayerId(),
+                  currentUtterance.getStartId(), currentUtterance.getEndId(),
+                  participant.getId());
+                graph.addAnnotation(currentTurn);
+                currentTurn.setConfidence(Constants.CONFIDENCE_MANUAL);
+                // utterance's parent is this turn
+                currentUtterance.setParent(currentTurn);
+              } // change of voice
+            } // current participant has a name
+          } // voice span
+          
           currentUtterance.setLabel(currentUtterance.getLabel() + " " + line);
         }
             
@@ -742,7 +808,8 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
           errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
         }
 	    
-        OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId(), utteranceLayer.getId());
+        OrthographyClumper clumper
+          = new OrthographyClumper(wordLayer.getId(), utteranceLayer.getId());
         try {
           // clump non-orthographic 'words' with real words
           if (timers != null) timers.start("orthography clumping");
@@ -763,10 +830,23 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     }
 
     // set end anchors of graph tags
+    int unnamedSpeakersSoFar = 0;
     for (Annotation a : graph.all(getParticipantLayer().getId())) {
       a.setStartId(graphStart.getId());
       if (currentUtterance != null && currentUtterance.getEnd() != null) {
         a.setEndId(currentUtterance.getEnd().getId());
+      }
+      // ensure all participants have a name
+      if (a.getLabel().length() == 0) {
+        String speakerLabel = "speaker"
+          + (unnamedSpeakersSoFar == 0?"":"-"+(unnamedSpeakersSoFar+1));
+        a.setLabel(speakerLabel);
+        a.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+        // ensure turns are similarly relabelled
+        for (Annotation turn : a.all(schema.getTurnLayerId())) turn.setLabel(speakerLabel);
+        unnamedSpeakersSoFar++;
+      } else { // had an explicit name
+        a.setConfidence(Constants.CONFIDENCE_MANUAL);
       }
     }
     graph.commit();
@@ -824,7 +904,9 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
    * @param errors A consumer for (fatal) error messages.
    * @throws SerializerNotConfiguredException if the object has not been configured.
    */
-  public void serialize(Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer, Consumer<String> warnings, Consumer<SerializationException> errors) 
+  public void serialize(
+    Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
+    Consumer<String> warnings, Consumer<SerializationException> errors) 
     throws SerializerNotConfiguredException {
     graphCount = graphs.getExactSizeIfKnown();
     graphs.forEachRemaining(graph -> {
@@ -851,7 +933,8 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     try {
       // write the text to a temporary file
       File f = File.createTempFile(graph.getId(), ".txt");
-      PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"));
+      PrintWriter writer
+        = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"));
 
       writer.println("WEBVTT Kind: captions");
       writer.println("NOTE Generated by nzilbb.ag converter - " + getDescriptor());
@@ -884,7 +967,7 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
       }
       
       // number each participant
-      int s = 0;
+      int s = 1;
       for (Annotation participant : graph.all(participantLayer.getId())) {
         participant.put("@serial", Integer.valueOf(s++));
 
@@ -918,7 +1001,11 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
 
         // is the participant changing?
         Annotation participant = utterance.first(participantLayer.getId());
-        writer.print("<v " + participant.get("@serial") + ">");
+        writer.print(
+          "<v"
+          + ".speaker"+participant.get("@serial")
+          + " "+participant.getLabel().replace(">", "&gt;") // replace '>'
+          +">");
 
         boolean firstWord = true;
         for (Annotation token : utterance.all(getWordLayer().getId())) {
