@@ -39,11 +39,14 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -860,10 +863,177 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
     }
   } // end of deleteLexicon()
 
-  // TODO createMapping
-  // TODO readMappings
-  // TODO updateMapping
-  // TODO deleteMapping
+  /**
+   * Create a new phone mapping in a given lexicon.
+   * @param lexicon Lexicon name.
+   * @param phoneme_orig The new phoneme label to create.
+   * @param phoneme_disc The new DISC label for the phoneme.
+   * @param note The new note for the label.
+   * @return An error if any, or null if not.
+   */
+  public String createDiscMapping(String lexicon, String phoneme_orig, String phoneme_disc, String note) {
+    Vector<LinkedHashMap> mappings = new Vector<LinkedHashMap>();
+    try {
+      Connection rdb = newConnection();      
+      PreparedStatement sql = rdb.prepareStatement(
+        sqlx.apply("INSERT INTO "+getAnnotatorId()+"_phoneme_map"
+                   +" (lexicon_id, phoneme_orig, phoneme_disc, note) VALUES (?,?,?,?)"));
+      try {
+        sql.setInt(1, lexiconIdFromName(lexicon, rdb));
+        sql.setString(2, phoneme_orig);
+        sql.setString(3, phoneme_disc);
+        sql.setString(4, note);
+        sql.executeUpdate();
+        return null; // everything OK
+      } finally {
+        sql.close();
+        rdb.close();
+      }
+    } catch (Exception x) {
+      return Optional.of(x.getMessage()).orElse(x.toString());
+    }
+  }
+
+  /**
+   * Lists all phoneme mappings for the given lexicon.
+   * @param lexicon Lexicon name.
+   * @return List of Map object, the map keys are:
+   *  <dl>
+   *   <dt>phoneme_orig</dt> <dd> The phoneme label in the original encoding from the uploaded file. </dd>
+   *   <dt>phoneme_disc</dt> <dd> The DISC-encoded version of the phoneme label. </dd>
+   *   <dt>note</dt> <dd> A descriptive note about the phoneme label(s). </dd>
+   *  </dl>
+   */
+  public Collection<Map<String,String>> readDiscMappings(String lexicon) {
+    Vector<Map<String,String>> mappings = new Vector<Map<String,String>>();
+    try {
+      Connection rdb = newConnection();      
+      PreparedStatement sql = rdb.prepareStatement(
+        sqlx.apply("SELECT * FROM "+getAnnotatorId()+"_phoneme_map WHERE lexicon_id = ? ORDER BY phoneme_orig"));
+      sql.setInt(1, lexiconIdFromName(lexicon, rdb));
+      try {
+        ResultSet rs = sql.executeQuery();
+        try {
+          while (rs.next()) {
+            LinkedHashMap<String,String> m = new LinkedHashMap<String,String>();
+            m.put("phoneme_orig", rs.getString("phoneme_orig"));
+            m.put("phoneme_disc", rs.getString("phoneme_disc"));
+            m.put("note", rs.getString("note"));
+            mappings.add(m);
+          }
+        } finally {
+          rs.close();
+        }
+      } finally {
+        sql.close();
+        rdb.close();
+      }
+    } catch (Exception x) {
+      System.err.println("UnisynTagger.readDiscMappings(\""+lexicon+"\"): " + x);
+      LinkedHashMap<String,String> m = new LinkedHashMap<String,String>();
+      m.put("error", x.toString());
+      mappings.add(m);
+    }
+    return mappings;
+  }
+
+  /**
+   * Updates a given phone mapping in a given lexicon.
+   * @param lexicon Lexicon name.
+   * @param phoneme_orig The phoneme label to update.
+   * @param phoneme_disc The new DISC label for the phoneme.
+   * @param note The new note for the label.
+   * @return An error if any, or null if not.
+   */
+  public String updateDiscMapping(String lexicon, String phoneme_orig, String phoneme_disc, String note) {
+    Vector<LinkedHashMap> mappings = new Vector<LinkedHashMap>();
+    try {
+      Connection rdb = newConnection();      
+      PreparedStatement sql = rdb.prepareStatement(
+        sqlx.apply("UPDATE "+getAnnotatorId()+"_phoneme_map"
+                   +" SET phoneme_disc = ?, note = ? WHERE lexicon_id = ? AND phoneme_orig = ?"));
+      try {
+        sql.setString(1, phoneme_disc);
+        sql.setString(2, note);
+        sql.setInt(3, lexiconIdFromName(lexicon, rdb));
+        sql.setString(4, phoneme_orig);
+        int rowCount = sql.executeUpdate();
+        if (rowCount == 1) {
+          return null; // everything OK
+        } else {
+          return "" + rowCount + " mappings updated";
+        }
+      } finally {
+        sql.close();
+        rdb.close();
+      }
+    } catch (Exception x) {
+      System.err.println("UnisynTagger.updateDiscMappings(\""+lexicon+"\", \""+phoneme_orig+"\"): " + x);
+      return Optional.of(x.getMessage()).orElse(x.toString());
+    }
+  }
+
+  /**
+   * Deletes a given phone mapping from the given lexicon.
+   * @param lexicon Lexicon name.
+   * @param phoneme_orig The phoneme label to update.
+   * @return An error if any, or null if not.
+   */
+  public String deleteDiscMapping(String lexicon, String phoneme_orig) {
+    Vector<LinkedHashMap> mappings = new Vector<LinkedHashMap>();
+    try {
+      Connection rdb = newConnection();      
+      PreparedStatement sql = rdb.prepareStatement(
+        sqlx.apply("DELETE FROM "+getAnnotatorId()+"_phoneme_map WHERE lexicon_id = ? AND phoneme_orig = ?"));
+      try {
+        sql.setInt(1, lexiconIdFromName(lexicon, rdb));
+        sql.setString(2, phoneme_orig);
+        int rowCount = sql.executeUpdate();
+        if (rowCount == 1) {
+          return null; // everything OK
+        } else {
+          return "" + rowCount + " mappings deleted";
+        }
+      } finally {
+        sql.close();
+        rdb.close();
+      }
+    } catch (Exception x) {
+      System.err.println("UnisynTagger.deleteDiscMappings(\""+lexicon+"\", \""+phoneme_orig+"\"): " + x);
+      return Optional.of(x.getMessage()).orElse(x.toString());
+    }
+  }
+
+  /**
+   * Provides the lexicon_id private key of the given lexicon name
+   * @param lexicon Lexicon name.
+   * @param rdb An open database connection.
+   * @return lexicon_id database key, or -1 if there's no such lexicon, or -2 if an error occurs.
+   */
+  private int lexiconIdFromName(String lexicon, Connection rdb) {
+    try {
+      PreparedStatement sql = rdb.prepareStatement(
+        sqlx.apply("SELECT lexicon_id FROM "+getAnnotatorId()+"_lexicon WHERE name = ?"));
+      sql.setString(1, lexicon);
+      try {
+        ResultSet rs = sql.executeQuery();
+        try {
+          if (rs.next()) {
+            return rs.getInt(1);
+          } else {
+            return -1;
+          }
+        } finally {
+          rs.close();
+        }
+      } finally {
+        sql.close();
+      }
+    } catch (Exception x) {
+      System.err.println("UnisynTagger.lexiconId(\""+lexicon+"\"): " + x);
+      return -2;
+    }
+  }
 
   /**
    * ID of the input layer containing word tokens.
@@ -1085,41 +1255,38 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
       stripSyllStress = Boolean.TRUE;
       firstVariantOnly = Boolean.FALSE;
       recoverSyllables = Boolean.FALSE;
-         
-      try {
-        // default transcript language layer
-        Layer[] candidates = schema.getMatchingLayers(
-          layer -> schema.getRoot().getId().equals(layer.getParentId())
-          && layer.getAlignment() == Constants.ALIGNMENT_NONE // transcript attribute
-          && layer.getId().matches(".*lang.*")); // with 'lang' in the name
-        if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
+      
+      // default transcript language layer
+      Layer[] candidates = schema.getMatchingLayers(
+        layer -> schema.getRoot().getId().equals(layer.getParentId())
+        && layer.getAlignment() == Constants.ALIGNMENT_NONE // transcript attribute
+        && layer.getId().matches(".*lang.*")); // with 'lang' in the name
+      if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
             
-        // default phrase language layer
-        candidates = schema.getMatchingLayers(
-          layer -> schema.getTurnLayerId().equals(layer.getParentId()) // child of turn
-          && layer.getId().matches(".*lang.*")); // with 'lang' in the name
-        if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
+      // default phrase language layer
+      candidates = schema.getMatchingLayers(
+        layer -> schema.getTurnLayerId().equals(layer.getParentId()) // child of turn
+        && layer.getId().matches(".*lang.*")); // with 'lang' in the name
+      if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
 
-        // default output layer
-        candidates = schema.getMatchingLayers(
-          layer -> schema.getWordLayerId().equals(layer.getParentId())
-          && layer.getAlignment() == Constants.ALIGNMENT_NONE // word tag
-          && (layer.getId().matches(".*phoneme.*") || layer.getId().matches(".*pronunciation.*")));
-        if (candidates.length > 0) {
-          tagLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          tagLayerId = "phonemes";
-        }
-        // default lexicon if possible
-        List<String> dictionaries = getDictionaryIds();
-        if (dictionaries.size() > 0) { // there are dictionaries
-          // default to the first, which will be lexicon:wordform->pron_orig
-          lexicon = dictionaries.get(0).replaceAll(":.*","");
-        } // there are dictionaries
+      // default output layer
+      candidates = schema.getMatchingLayers(
+        layer -> schema.getWordLayerId().equals(layer.getParentId())
+        && layer.getAlignment() == Constants.ALIGNMENT_NONE // word tag
+        && (layer.getId().matches(".*phoneme.*") || layer.getId().matches(".*pronunciation.*")));
+      if (candidates.length > 0) {
+        tagLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        tagLayerId = "phonemes";
+      }
+      // default lexicon if possible
+      List<String> dictionaries = getDictionaryIds();
+      if (dictionaries.size() > 0) { // there are dictionaries
+        // default to the first, which will be lexicon:wordform->pron_orig
+        lexicon = dictionaries.get(0).replaceAll(":.*","");
+      } // there are dictionaries
         // default field - DISC
-        field = "pron_disc";
-      } catch(ScriptException impossible) {}
-         
+      field = "pron_disc";         
     } else {
       // start from unset state
       tokenLayerId = null;

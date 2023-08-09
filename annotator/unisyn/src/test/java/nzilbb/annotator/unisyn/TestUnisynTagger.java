@@ -28,8 +28,10 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nzilbb.ag.Anchor;
@@ -774,6 +776,110 @@ public class TestUnisynTagger {
     ids = annotator.getDictionaryIds();
     assertEquals("Lexicon (and its dictionaries) were deleted: " + ids,
                  6, ids.size());
+  }   
+
+  /** Test CRUD operations on lexicon phoneme mappings. */
+  @Test public void mappingManagement() throws Exception {
+
+    // ensure there's no leftover version of the extra lexicon
+    String error = annotator.deleteLexicon("temp");
+    if (error != null) System.out.println(error);
+
+    // add a lexicon, using first-space delimiter
+    File file = new File(dir(), "temp.sampa");
+    error = annotator.loadLexicon("temp", file);
+    assertEquals("loadLexicon returns no error", "", error);
+    // loading is in a separate thread
+    while (annotator.getRunning()) {
+      try {Thread.sleep(100);} catch(Exception exception) {}
+    }
+
+    try {
+      // check mappings were created
+      Collection<Map<String,String>> mappings = annotator.readDiscMappings("temp");
+      assertNotNull("mappings returned", mappings);
+      assertEquals("right number of default mappings: " + mappings,
+                   39, mappings.size());
+
+      // delete all mappings
+      String lastMapping = null;
+      for (Map<String,String> mapping : mappings) {
+        assertNull("Could delete mapping: " + mapping.get("phoneme_orig"),
+                   annotator.deleteDiscMapping("temp", mapping.get("phoneme_orig")));
+        lastMapping = mapping.get("phoneme_orig");
+      }
+      mappings = annotator.readDiscMappings("temp");
+      assertEquals("There are now no mappings - " + mappings,
+                   0, mappings.size());
+      assertNotNull("deleting nonexisting mapping returns error",
+                    annotator.deleteDiscMapping("temp", lastMapping));
+
+      // create a mapping
+      assertNull("mapping creation without error",
+                 annotator.createDiscMapping("temp", "orig", "disc", "testing"));
+      mappings = annotator.readDiscMappings("temp");
+      assertEquals("There is now one mapping", 1, mappings.size());
+      Map<String,String> mapping = mappings.iterator().next();
+      assertEquals("correct phoneme_orig", "orig", mapping.get("phoneme_orig"));
+      assertEquals("correct phoneme_disc", "disc", mapping.get("phoneme_disc"));
+      assertEquals("correct note", "testing", mapping.get("note"));
+
+      // cannot create the same mapping again
+      assertNotNull("cannot create mapping that already exists",
+                    annotator.createDiscMapping("temp", "orig", "disc2", "testing2"));
+
+      // update mapping
+      assertNull("can update existing mapping",
+                 annotator.updateDiscMapping("temp", "orig", "disc-u", "testing-updated"));
+      mappings = annotator.readDiscMappings("temp");
+      assertEquals("There is still one mapping", 1, mappings.size());
+      mapping = mappings.iterator().next();
+      assertEquals("correct phoneme_orig", "orig", mapping.get("phoneme_orig"));
+      assertEquals("correct phoneme_disc", "disc-u", mapping.get("phoneme_disc"));
+      assertEquals("correct note", "testing-updated", mapping.get("note"));
+
+      assertNotNull("cannot update nonexistent mapping",
+                    annotator.updateDiscMapping("temp", "orig2", "disc2", "testing2"));
+      
+      assertNull("second mapping creation without error",
+                 annotator.createDiscMapping("temp", "orig2", "disc2", "testing2"));
+      mappings = annotator.readDiscMappings("temp");
+      assertEquals("There are now two mappings", 2, mappings.size());
+      for (Map<String,String> m : mappings) {
+        String orig = m.get("phoneme_orig");
+        if (orig.equals("orig")) {
+          assertEquals("correct phoneme_disc 1", "disc-u", m.get("phoneme_disc"));
+          assertEquals("correct note 1", "testing-updated", m.get("note"));
+        } else { // orig2
+          assertEquals("correct phoneme_disc 2", "disc2", m.get("phoneme_disc"));
+          assertEquals("correct note 2", "testing2", m.get("note"));
+        }
+      } // next mapping
+
+      assertNull("can update existing mapping 2",
+                 annotator.updateDiscMapping("temp", "orig2", "disc2-u", "testing2-updated"));
+      mappings = annotator.readDiscMappings("temp");
+      assertEquals("There are still two mappings", 2, mappings.size());
+      for (Map<String,String> m : mappings) {
+        String orig = m.get("phoneme_orig");
+        if (orig.equals("orig")) {
+          assertEquals("correct phoneme_disc 1", "disc-u", m.get("phoneme_disc"));
+          assertEquals("correct note 1", "testing-updated", m.get("note"));
+        } else { // orig2
+          assertEquals("correct phoneme_disc 2", "disc2-u", m.get("phoneme_disc"));
+          assertEquals("correct note 2", "testing2-updated", m.get("note"));
+        }
+      } // next mapping
+      
+    } finally {
+      // remove lexicon
+      annotator.deleteLexicon("temp");
+    }
+
+    // no mapping now available
+    Collection<Map<String,String>> mappings = annotator.readDiscMappings("temp");
+    assertEquals("There are now no mappings - " + mappings,
+                 0, mappings.size());
   }   
 
   /**
