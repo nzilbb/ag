@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> Unisyn Tagger - Phoneme Map </title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <h1>Unisyn Tagger</h1>
+    <h1 id="lexiconId"></h1>
+
+    <details><summary><b>Phoneme Map</b></summary>
+      <p> Sometimes processing of phonological layers assumes that the annotations use the
+        DISC phoneme set designed for the CELEX phonemic transcriptions.  This set is used
+        because each phoneme is expressed by precisely one ASCII character, including
+        phonemes usually expressed using a digraph - e.g. affricates
+        like <code>/ʧ/</code> (which is <code>/J/</code> in DISC) and diphthongs
+        like <code>/aɪ/</code> (which is <code>/2/</code> in DISC) </p> 
+      
+      <p> Unisyn transcriptions use a set of phones that is greater that the set of phones
+      available in DISC, and the transcriptions are designed to be broad-phonetic, not
+      phonemic. </p> 
+      
+      <p> This means that using the DISC representation of the transcripts is imperfect,
+        as there is a certain amount of loss of information when mapping Unisyn phones to
+        DISC phonemes. </p>
+      
+      <p> You can use ths page to customise how the Unisyn phonemes are converted into
+        CELEX phonemes, by adding, removing, or changing phoneme mappings.  Any characters
+        in the original file which are not present in the <i>Original</i> column on this
+        page are passed through to the DISC version of the pronunciation unchanged. To
+        ignore (delete) a phoneme or character in the original representation, map it to
+        nothing. </p>
+      
+      <p> Some characters used in DISC for non-phonemes:</p>
+      <ul>
+	<li><i>syllable-boundary</i>&rarr;<tt>-</tt> </li>
+	<li><i>primary-stress</i>&rarr;<tt>'</tt> </li>
+	<li><i>secondary-stress</i>&rarr;<tt>&quot;</tt></li>
+      </ul>
+      <p> Some ASCII characters are not used by DISC - if you require more phonemes, you
+        could use these: </p>
+      <p><tt>e 
+	  G K M 
+	  ( [ ] ! % . </tt></p>
+
+      <h3><a name="DefaultMapping">Default Mapping</a></h3>
+      
+      <p> The default mapping that is used is shown below.</p>
+      
+      <table>
+        <tbody>
+          <tr>
+            <th>Unisyn</th> <th>&nbsp;</th> <th>DISC</th> <th>IPA</th> <th>Lexical set e.g.</th>
+          </tr>
+          
+          <tr><td><tt>ah</tt></td> <td>→</td> <td><tt>#</tt></td> <td><span class="IPA">ɑː</span></td> <td>BATH</td> </tr>
+          
+          <tr><td><tt>aa</tt></td> <td>→</td> <td><tt>Q</tt></td> <td><span class="IPA">ɒ</span></td> <td>PALM  → LOT</td> </tr>
+          <tr><td><tt>ar</tt></td> <td>→</td> <td><tt>Q</tt></td> <td><span class="IPA">ɒ</span></td> <td>start → PALM  → LOT</td> </tr>
+          <tr><td><tt>oa</tt></td> <td>→</td> <td><tt>{</tt></td> <td><span class="IPA">&aelig;</span></td> <td>BANANA  → TRAP</td> </tr>
+          <tr><td><tt>ao</tt></td> <td>→</td> <td><tt>#</tt></td> <td><span class="IPA">ɑː</span></td> <td>MAZDA  → BATH</td> </tr>
+
+          <tr><td><tt>e</tt></td> <td>→</td> <td><tt>E</tt></td> <td><span class="IPA">ɛ</span></td> <td>DRESS</td> </tr>
+          <tr><td><tt>er</tt></td> <td>→</td> <td><tt>E</tt></td> <td><span class="IPA">ɛ</span></td> <td>r-coloured DRESS in scots en</td> </tr>
+
+          <tr><td><tt>a</tt></td> <td>→</td> <td><tt>{</tt></td> <td><span class="IPA">&aelig;</span></td> <td>TRAP</td> </tr>
+          <tr><td><tt>eh</tt></td> <td>→</td> <td><tt>{</tt></td> <td><span class="IPA">&aelig;</span></td> <td>ann use TRAP</td> </tr>
+
+          <tr><td><tt>ou</tt></td> <td>→</td> <td><tt>5</tt></td> <td><span class="IPA">ǝʊ</span></td> <td>GOAT - but a monophthong for in some varieties</td> </tr>
+          <tr><td><tt>oul</tt></td> <td>→</td> <td><tt>5</tt></td> <td><span class="IPA">ǝʊ</span></td> <td>goal - post vocalic GOAT</td> </tr>
+          <tr><td><tt>ouw</tt></td> <td>→</td> <td><tt>5</tt></td> <td><span class="IPA">ǝʊ</span></td> <td>KNOW → GOAT (except for Abergave)</td> </tr>
+          <tr><td><tt>o</tt></td> <td>→</td> <td><tt>Q</tt></td> <td><span class="IPA">ɒ</span></td> <td>LOT</td> </tr>
+          <tr><td><tt>oou</tt></td> <td>→</td> <td><tt>Q</tt></td> <td><span class="IPA">ɒ</span></td> <td>adios → LOT</td> </tr>
+          <tr><td><tt>au</tt></td> <td>→</td> <td><tt>Q</tt></td> <td><span class="IPA">ɒ</span></td> <td>CLOTH → LOT (but a diphthong in some en-US)</td> </tr>
+
+          <tr><td><tt>oo</tt></td> <td>→</td> <td><tt>$</tt></td> <td><span class="IPA">ɔː</span></td> <td>THOUGHT (but a diphthong in some varieties)</td> </tr>
+          <tr><td><tt>or</tt></td> <td>→</td> <td><tt>$</tt></td> <td><span class="IPA">ɔː</span></td> <td>r-coloured THOUGHT</td> </tr>
+
+          <tr><td><tt>ii</tt></td> <td>→</td> <td><tt>i</tt></td> <td><span class="IPA">iː</span></td> <td>FLEECE</td> </tr>
+          <tr><td><tt>iy</tt></td> <td>→</td> <td><tt>i</tt></td> <td><span class="IPA">iː</span></td> <td>HAPPY - I for some varieties</td> </tr>
+          <tr><td><tt>ie</tt></td> <td>→</td> <td><tt>i</tt></td> <td><span class="IPA">iː</span></td> <td>HARRIET - Leeds only</td> </tr>
+          <tr><td><tt>ii;</tt></td> <td>→</td> <td><tt>i</tt></td> <td><span class="IPA">iː</span></td> <td>AGREED → FLEECE</td> </tr>
+          <tr><td><tt>ir</tt></td> <td>→</td> <td><tt>i</tt></td> <td><span class="IPA">iː</span></td> <td>NEARING - r-coloured NEAR → FLEECE</td> </tr>
+          <tr><td><tt>ir;</tt></td> <td>→</td> <td><tt>i</tt></td> <td><span class="IPA">iː</span></td> <td>near - scots-long NEAR → FLEECE</td> </tr>
+
+          <tr><td><tt>i</tt></td> <td>→</td> <td><tt>I</tt></td> <td><span class="IPA">ɪ</span></td> <td>KIT</td> </tr>
+          <tr><td><tt>@</tt></td> <td>→</td> <td><tt>@</tt></td> <td><span class="IPA">ǝ</span></td> <td>schwa</td> </tr>
+          <tr><td><tt>@r</tt></td> <td>→</td> <td><tt>@</tt></td> <td><span class="IPA">ǝ</span></td> <td>r-coloured schwa</td> </tr>
+
+          <tr><td><tt>uh</tt></td> <td>→</td> <td><tt>V</tt></td> <td><span class="IPA">ʌ</span></td> <td>STRUT</td> </tr>
+          <tr><td><tt>u</tt></td> <td>→</td> <td><tt>U</tt></td> <td><span class="IPA">ʊ</span></td> <td>FOOT</td> </tr>
+          <tr><td><tt>uu</tt></td> <td>→</td> <td><tt>u</tt></td> <td><span class="IPA">uː</span></td> <td>GOOSE</td> </tr>
+          <tr><td><tt>iu</tt></td> <td>→</td> <td><tt>u</tt></td> <td><span class="IPA">uː</span></td> <td>BLEW → GOOSE</td> </tr>
+          <tr><td><tt>uu;</tt></td> <td>→</td> <td><tt>u</tt></td> <td><span class="IPA">uː</span></td> <td>brewed → GOOSE</td> </tr>
+          <tr><td><tt>uw</tt></td> <td>→</td> <td><tt>u</tt></td> <td><span class="IPA">uː</span></td> <td>louise → GOOSE</td> </tr>
+          <tr><td><tt>uul</tt></td> <td>→</td> <td><tt>u</tt></td> <td><span class="IPA">uː</span></td> <td>goul - post-vocalic GOOSE</td> </tr>
+
+          <tr><td><tt>ei</tt></td> <td>→</td> <td><tt>1</tt></td> <td><span class="IPA">eɪ</span></td> <td>FACE</td> </tr>
+          <tr><td><tt>ee</tt></td> <td>→</td> <td><tt>1</tt></td> <td><span class="IPA">eɪ</span></td> <td>WASTE → FACE (except for abercrave)</td> </tr>
+
+          <tr><td><tt>ai</tt></td> <td>→</td> <td><tt>2</tt></td> <td><span class="IPA">aɪ</span></td> <td>PRICE</td> </tr>
+          <tr><td><tt>ae</tt></td> <td>→</td> <td><tt>2</tt></td> <td><span class="IPA">aɪ</span></td> <td>TIED → PRICE (except Edi and Aberdeen)</td> </tr>
+          <tr><td><tt>ae</tt></td> <td>→</td> <td><tt>2</tt></td> <td><span class="IPA">aɪ</span></td> <td>TIED → PRICE (except Edi and Aberdeen)</td> </tr>
+          <tr><td><tt>aer</tt></td> <td>→</td> <td><tt>2</tt></td> <td><span class="IPA">aɪ</span></td> <td>FIRE - r-coloured PRICE</td> </tr>
+          <tr><td><tt>aai</tt></td> <td>→</td> <td><tt>2</tt></td> <td><span class="IPA">aɪ</span></td> <td>TIME → PRICE (except S. Carolina)</td> </tr>
+          <tr><td><tt>oir</tt></td> <td>→</td> <td><tt>2</tt></td> <td><span class="IPA">aɪ</span></td> <td>COIR - r-coloured PRICE</td> </tr>
+
+          <tr><td><tt>@@r</tt></td> <td>→</td> <td><tt>3</tt></td> <td><span class="IPA">ɜː</span></td> <td>NURSE</td> </tr>
+
+          <tr><td><tt>oi</tt></td> <td>→</td> <td><tt>4</tt></td> <td><span class="IPA">ɔɪ</span></td> <td>CHOICE</td> </tr>
+          <tr><td><tt>ow</tt></td> <td>→</td> <td><tt>6</tt></td> <td><span class="IPA">aʊ</span></td> <td>MOUTH</td> </tr>
+          <tr><td><tt>owr</tt></td> <td>→</td> <td><tt>6</tt></td> <td><span class="IPA">aʊ</span></td> <td>HOUR - r-coloured MOUTH</td> </tr>
+          <tr><td><tt>oow</tt></td> <td>→</td> <td><tt>6</tt></td> <td><span class="IPA">aʊ</span></td> <td>HOUR → MOUTH (exception S. Carolina)</td> </tr>
+
+          <tr><td><tt>i@</tt></td> <td>→</td> <td><tt>7</tt></td> <td><span class="IPA">ɪǝ</span></td> <td>NEAR</td> </tr>
+          <tr><td><tt>iir</tt></td> <td>→</td> <td><tt>7</tt></td> <td><span class="IPA">ɪǝ</span></td> <td>beard → NEAR (except en-AU)</td> </tr>
+
+          <tr><td><tt>eir</tt></td> <td>→</td> <td><tt>8</tt></td> <td><span class="IPA">ɛǝ</span></td> <td>SQUARING (actually a monophthong in many varieties)</td> </tr>
+          <tr><td><tt>ur</tt></td> <td>→</td> <td><tt>9</tt></td> <td><span class="IPA">ʊǝ</span></td> <td>JURY</td> </tr>
+          <tr><td><tt>ur;</tt></td> <td>→</td> <td><tt>9</tt></td> <td><span class="IPA">ʊǝ</span></td> <td>CURE - scots-long JURY</td> </tr>
+          <tr><td><tt>iur</tt></td> <td>→</td> <td><tt>9</tt></td> <td><span class="IPA">ʊǝ</span></td> <td>curious - JURY exception in Cardiff &amp; Abercrave</td> </tr>
+
+          <tr><td><tt>p</tt></td> <td>→</td> <td><tt>p</tt></td> <td><span class="IPA">p</span></td> <td></td> </tr>
+          <tr><td><tt>t</tt></td> <td>→</td> <td><tt>t</tt></td> <td><span class="IPA">t</span></td> <td></td> </tr>
+          <tr><td><tt>?</tt></td> <td>→</td> <td><tt>?</tt></td> <td><span class="IPA">ʔ</span></td> <td>(glottal stop)</td> </tr>
+          <tr><td><tt>t^</tt></td> <td>→</td> <td><tt>L</tt></td> <td><span class="IPA">ɾ</span></td> <td>butter/merry tap</td> </tr>
+          <tr><td><tt>k</tt></td> <td>→</td> <td><tt>k</tt></td> <td><span class="IPA">k</span></td> <td></td> </tr>
+          <tr><td><tt>x</tt></td> <td>→</td> <td><tt>x</tt></td> <td><span class="IPA">x</span></td> <td>loch</td> </tr>
+          <tr><td><tt>b</tt></td> <td>→</td> <td><tt>b</tt></td> <td><span class="IPA">b</span></td> <td></td> </tr>
+          <tr><td><tt>d</tt></td> <td>→</td> <td><tt>d</tt></td> <td><span class="IPA">d</span></td> <td></td> </tr>
+          <tr><td><tt>g</tt></td> <td>→</td> <td><tt>g</tt></td> <td><span class="IPA">g</span></td> <td></td> </tr>
+          <tr><td><tt>ch</tt></td> <td>→</td> <td><tt>J</tt></td> <td><span class="IPA">ʧ</span></td> <td></td> </tr>
+          <tr><td><tt>jh</tt></td> <td>→</td> <td><tt>_</tt></td> <td><span class="IPA">ʤ</span></td> <td></td> </tr>
+          <tr><td><tt>s</tt></td> <td>→</td> <td><tt>s</tt></td> <td><span class="IPA">s</td> <td></td> </tr>
+          <tr><td><tt>z</tt></td> <td>→</td> <td><tt>z</tt></td> <td><span class="IPA">z</td> <td></td> </tr>
+          <tr><td><tt>sh</tt></td> <td>→</td> <td><tt>S</tt></td> <td><span class="IPA">ʃ</span></td> <td></td> </tr>
+          <tr><td><tt>zh</tt></td> <td>→</td> <td><tt>Z</tt></td> <td><span class="IPA">Ʒ</span></td> <td></td> </tr>
+          <tr><td><tt>f</tt></td> <td>→</td> <td><tt>f</tt></td> <td><span class="IPA">f</span></td> <td></td> </tr>
+          <tr><td><tt>v</tt></td> <td>→</td> <td><tt>v</tt></td> <td><span class="IPA">v</span></td> <td></td> </tr>
+          <tr><td><tt>th</tt></td> <td>→</td> <td><tt>T</tt></td> <td><span class="IPA">Ɵ</span></td> <td></td> </tr>
+          <tr><td><tt>dh</tt></td> <td>→</td> <td><tt>D</tt></td> <td><span class="IPA">&eth;</span></td> <td></td> </tr>
+          <tr><td><tt>h</tt></td> <td>→</td> <td><tt>m</tt></td> <td><span class="IPA">m</span></td> <td></td> </tr>
+          <tr><td><tt>m</tt></td> <td>→</td> <td><tt>m</tt></td> <td><span class="IPA">m</span></td> <td></td> </tr>
+          <tr><td><tt>m!</tt></td> <td>→</td> <td><tt>F</tt></td> <td><span class="IPA">m̩</span></td> <td>chasm</td> </tr>
+          <tr><td><tt>n</tt></td> <td>→</td> <td><tt>n</tt></td> <td><span class="IPA">n</span></td> <td></td> </tr>
+          <tr><td><tt>n!</tt></td> <td>→</td> <td><tt>H</tt></td> <td><span class="IPA">n̩</span></td> <td>mission</td> </tr>
+          <tr><td><tt>ng</tt></td> <td>→</td> <td><tt>N</tt></td> <td><span class="IPA">ŋ</span></td> <td></td> </tr>
+          <tr><td><tt>l</tt></td> <td>→</td> <td><tt>l</tt></td> <td><span class="IPA">l</span></td> <td></td> </tr>
+          <tr><td><tt>ll</tt></td> <td>→</td> <td><tt>l</tt></td> <td><span class="IPA">l</span></td> <td>llandudno (for Cardiff and Abercrave, this is different)</td> </tr>
+          <tr><td><tt>lw</tt></td> <td>→</td> <td><tt>l</tt></td> <td><span class="IPA">l</span></td> <td>feel - dark l</td> </tr>
+          <tr><td><tt>r</tt></td> <td>→</td> <td><tt>r</tt></td> <td><span class="IPA">ɹ</span></td> <td></td> </tr>
+          <tr><td><tt>y</tt></td> <td>→</td> <td><tt>j</tt></td> <td><span class="IPA">j</span></td> <td></td> </tr>
+          <tr><td><tt>w</tt></td> <td>→</td> <td><tt>w</tt></td> <td><span class="IPA">w</span></td> <td>which</td> </tr>
+          <tr><td><tt>hw</tt></td> <td>→</td> <td><tt>w</tt></td> <td><span class="IPA">w</span></td> <td>which</td> </tr>
+
+        </tbody>
+      </table>
+
+    </details>
+    
+    <table>
+      <thead><tr>
+          <th>Original</th>
+          <th>→</th>
+          <th>DISC</th>
+          <th>Note</th>
+          <td><button id="insert" title="Add new mapping">➕</button></td>
+      </tr></thead>
+      <tbody id="map"></tbody>
+      <tfoot><tr>
+          <td>Mappings:</td>
+          <td id="count"></td>
+          <td colspan="2"></td>
+          <td><button id="save" title="Save changes" style="display: none;">💾</button></td>
+      </tr></tfoot>
+    </table>
+    
+    <footer><div> Unisyn Tagger <small id="version"></small> </div></footer>
+    
+    <script src="map.js" type="text/javascript"></script>
+  </body>
+</html>
