@@ -39,6 +39,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -54,6 +55,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
@@ -1404,6 +1406,15 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
       throw new InvalidConfigurationException(this, "No input token layer set.");
     Vector<String> requiredLayers = new Vector<String>();
     requiredLayers.add(tokenLayerId);
+    if (recoverSyllables) { // token layer will be segment, need parent "word" layer too
+      Layer tokenLayer = schema.getLayer(tokenLayerId);
+      if (tokenLayer == null)
+        throw new InvalidConfigurationException(this, "No token layer invalid: " + tokenLayerId);
+      if (tokenLayer.getParentId() == null)
+        throw new InvalidConfigurationException(
+          this, "No token layer has no parent: " + tokenLayerId);
+      requiredLayers.add(tokenLayer.getParentId());
+    }
     if (transcriptLanguageLayerId != null) requiredLayers.add(transcriptLanguageLayerId);
     if (phraseLanguageLayerId != null) requiredLayers.add(phraseLanguageLayerId);
     return requiredLayers.toArray(new String[0]);
@@ -1440,6 +1451,9 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         throw new InvalidConfigurationException(
           this, "Invalid input token layer: " + tokenLayerId);
       }
+      String wordLayerId = recoverSyllables
+        ?tokenLayer.getParentId() // words are parents of phones/segments
+        :tokenLayerId; // words come from the token layer itself
       Layer tagLayer = graph.getSchema().getLayer(tagLayerId);
       if (tagLayer == null) {
         throw new InvalidConfigurationException(
@@ -1468,7 +1482,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
       // should we just tag everything?
       if (transcriptIsMainlyTargetLang && !thereArePhraseTags) {
         // process all tokens
-        for (Annotation token : graph.all(tokenLayerId)) {
+        for (Annotation token : graph.all(wordLayerId)) {
           // tag only tokens that are not already tagged
           if (token.first(tagLayerId) == null) { // not tagged yet
             registorForAnnotation(token, toAnnotate);
@@ -1480,14 +1494,14 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         // tag the exceptions
         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
           if (!phrase.getLabel().matches(targetLanguagePattern)) { // not TargetLang
-            for (Annotation token : phrase.all(tokenLayerId)) {
+            for (Annotation token : phrase.all(wordLayerId)) {
               // mark the token as an exception
               token.put("@notTargetLang", Boolean.TRUE);
             } // next token in the phrase
           } // non-TargetLang phrase
         } // next phrase
             
-        for (Annotation token : graph.all(tokenLayerId)) {
+        for (Annotation token : graph.all(wordLayerId)) {
           if (token.containsKey("@notTargetLang")) {
             // while we're here, we remove the @notTargetLang mark
             token.remove("@notTargetLang");
@@ -1502,7 +1516,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         // process only the tokens phrase-tagged as TargetLang
         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
           if (phrase.getLabel().matches(targetLanguagePattern)) {
-            for (Annotation token : phrase.all(tokenLayerId)) {
+            for (Annotation token : phrase.all(wordLayerId)) {
               // tag only tokens that are not already tagged
               if (token.first(tagLayerId) == null) { // not tagged yet
                 registorForAnnotation(token, toAnnotate);
@@ -1536,9 +1550,44 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
               }
               if (!soFar.contains(entry)) { // duplicates are possible if stripSyllStress
                 for (Annotation token : toAnnotate.get(type)) {
-                  token.createTag(tagLayerId, entry)
-                    .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                }
+                  if (!recoverSyllables) { // regular lookup/tag
+                    token.createTag(tagLayerId, entry)
+                      .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                  } else { // recovering syllables
+                    StringTokenizer stParts = new StringTokenizer(entry, "-.");
+                    // each token corresponds to one annotation, anchored to corresponding segments
+                    // e.g. if sDestination is "'ɪn-tə-vju",
+                    //  the delimiter is "-" and the segments are "ɪntəvju"
+                    // then we end up with three annotations, "'ɪn", "tə", and "vju",
+                    //  with anchors being those of the corresponding segments
+                    Annotation segments[] = token.all(tokenLayerId);
+                    int s = 0; // segments index
+                    int o = 1; // syllable ordinal
+                    if (stParts.hasMoreTokens()) {
+                      Annotation currentSegment = segments[s++];
+                      while (stParts.hasMoreTokens()) {
+                        String label = stParts.nextToken();
+                        Annotation firstSegment = currentSegment;
+                        Annotation lastSegment = currentSegment;
+                        
+                        // move through the chunk characters consuming segments
+                        for (int c = 0; c < entry.length(); c++) {
+                          lastSegment = currentSegment;
+                          // if the character matches the segment's label
+                          if (entry.charAt(c) == currentSegment.getLabel().charAt(0)) {
+                            // consume the segment
+                            if (s < segments.length - 1) currentSegment = segments[s++];
+                          } // matched segment
+                          // (non-matching characters, which are likely to be stress markers, are ignored)
+                        } // next character
+			
+                        // save the annotation
+                        graph.createSpan​(firstSegment, lastSegment, tagLayerId, label, token)
+                          .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                      } // next word chunk
+                    } // there are chunks                    
+                  } // recovering syllables
+                } // for each token
                 soFar.add(entry);
               }
               
@@ -1569,10 +1618,18 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    */
   protected void registorForAnnotation(
     Annotation token, TreeMap<String,Vector<Annotation>> toAnnotate) {
-    if (!toAnnotate.containsKey(token.getLabel())) {
-      toAnnotate.put(token.getLabel(), new Vector<Annotation>());
+    String lookup = token.getLabel();
+    if (recoverSyllables) { // token is a word, but we want to lookup the segments
+      lookup = Arrays.stream(token.all(tokenLayerId))
+        .map(annotation -> annotation.getLabel())
+        .collect(Collectors.joining());
     }
-    toAnnotate.get(token.getLabel()).add(token);
+    if (lookup.length() > 0) {
+      if (!toAnnotate.containsKey(lookup)) {
+        toAnnotate.put(lookup, new Vector<Annotation>());
+      }
+      toAnnotate.get(lookup).add(token);
+    }
   } // end of registorForAnnotation()
 
   /**

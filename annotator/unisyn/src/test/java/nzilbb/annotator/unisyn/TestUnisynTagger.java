@@ -690,7 +690,93 @@ public class TestUnisynTagger {
                  "VB", pos.next());
 
   }
+
+  /** Test syllable recovery. */
+  @Test public void syllableRecovery() throws Exception {
       
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    /* TODO no REPLACE function available for Derby so can't prepare Dictionart SQL
+    
+    // use specified configuration
+    annotator.setTaskParameters(
+      "tokenLayerId=phone"
+      +"&transcriptLanguageLayerId="   // no transcript language layer
+      +"&phraseLanguageLayerId="       // no phrase language layer
+      +"&tagLayerId=syllable"          // non-default layer
+      +"&lexicon=test.unisyn"
+      +"&field=pron_disc"
+      +"&recoverSyllables=on");
+    
+    assertEquals("token layer",
+                 "phone", annotator.getTokenLayerId());
+    assertNull("transcript language layer",
+               annotator.getTranscriptLanguageLayerId());
+    assertNull("phrase language layer",
+               annotator.getPhraseLanguageLayerId());
+    assertEquals("tag layer",
+                 "syllable", annotator.getTagLayerId());
+    assertNotNull("tag layer was created",
+                  schema.getLayer(annotator.getTagLayerId()));
+    assertEquals("tag layer child of word",
+                 "word", schema.getLayer(annotator.getTagLayerId()).getParentId());
+    assertEquals("tag layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 schema.getLayer(annotator.getTagLayerId()).getAlignment());
+    assertEquals("tag layer type correct",
+                 Constants.TYPE_IPA,
+                 schema.getLayer(annotator.getTagLayerId()).getType());
+    assertEquals("lexicon",
+                 "test.unisyn", annotator.getLexicon());
+    assertEquals("field",
+                 "pron_disc", annotator.getField());
+    assertTrue("tag layer allows peers",
+               schema.getLayer(annotator.getTagLayerId()).getPeers());
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("2 required layer: "+requiredLayers,
+                 2, requiredLayers.size());
+    assertTrue("phone required "+requiredLayers,
+               requiredLayers.contains("phone"));
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    String outputLayers[] = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                 1, outputLayers.length);
+    assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                 "syllable", outputLayers[0]);
+    
+    Annotation firstWord = g.first("word");
+    assertEquals("double check the first word is what we think it is: "+firstWord,
+                 "The", firstWord.getLabel());
+    
+    assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                 9, g.all("word").length);
+    assertEquals("double check there are no syllables: "+Arrays.asList(g.all("syllable")),
+                 0, g.all("freuency").length);
+    // run the annotator
+    annotator.transform(g);
+    List<Annotation> syllables = Arrays.stream(g.all("syllable")).collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+syllables,
+                 10, syllables.size());
+    Iterator<Annotation> syll = syllables.iterator();
+    assertEquals("monosyllabic", "D'@", syll.next().getLabel());
+    assertEquals("monosyllabic", "kw'Ik", syll.next().getLabel());
+    assertEquals("monosyllabic", "br'6n", syll.next().getLabel());
+    // no entry for fox
+    assertEquals("monosyllabic", "_'Vmps", syll.next().getLabel());
+    assertEquals("syllable 1", "'5", syll.next().getLabel());
+    assertEquals("syllable 2", "v@r", syll.next().getLabel());
+    assertEquals("monosyllabic", "D'@", syll.next().getLabel());
+    assertEquals("syllable 1", "l'1", syll.next().getLabel());
+    assertEquals("syllable 2", "zi", syll.next().getLabel());
+    assertEquals("monosyllabic", "d'$g", syll.next().getLabel());
+    */
+
+  }   
+
+
   /** Test that lexicons and corresponding dictionaries can be added and removed. */
   @Test public void lexiconManagement() throws Exception {
 
@@ -908,6 +994,9 @@ public class TestUnisynTagger {
       .setParentId("turn").setParentIncludes(true),
       new Layer("unisyn", "Pronunciation").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("phone", "Speech sounds").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
       .setParentId("word").setParentIncludes(true));
     // annotate a graph
     Graph g = new Graph()
@@ -927,33 +1016,150 @@ public class TestUnisynTagger {
       .setStart(start).setEnd(end)
       .setParent(turn));
       
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("The")
-                    .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("quick")
-                    .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("brown")
-                    .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("fox")
-                    .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(45))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("jumps")
-                    .setStart(g.getOrCreateAnchorAt(45)).setEnd(g.getOrCreateAnchorAt(50))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("over")
-                    .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(60))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("the")
-                    .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(70))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("lazy")
-                    .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(80))
-                    .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("dog")
-                    .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
-                    .setParent(turn));
+    Annotation the1 =
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("The")
+                      .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
+                      .setParent(turn));
+    Annotation quick =
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("quick")
+                      .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
+                      .setParent(turn));
+    Annotation brown =
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("brown")
+                      .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
+                      .setParent(turn));
+    Annotation fox =
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("fox")
+                      .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(45))
+                      .setParent(turn));
+    Annotation jumps =
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("jumps")
+                      .setStart(g.getOrCreateAnchorAt(45)).setEnd(g.getOrCreateAnchorAt(50))
+                      .setParent(turn));
+    Annotation over =
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("over")
+                      .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(60))
+                      .setParent(turn));
+    Annotation the2 =
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("the")
+                      .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(70))
+                      .setParent(turn));
+    Annotation lazy =
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("lazy")
+                      .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(80))
+                      .setParent(turn));
+    Annotation dog =
+      g.addAnnotation(new Annotation().setLayerId("word").setLabel("dog")
+                      .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
+                      .setParent(turn));
+
+    // phones for syllable recovery
+    
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("D")
+                    .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(15))
+                    .setParent(the1));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("@")
+                    .setStart(g.getOrCreateAnchorAt(15)).setEnd(g.getOrCreateAnchorAt(20))
+                    .setParent(the1));
+
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("k")
+                    .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(22))
+                    .setParent(quick));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("w")
+                    .setStart(g.getOrCreateAnchorAt(22)).setEnd(g.getOrCreateAnchorAt(25))
+                    .setParent(quick));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("I")
+                    .setStart(g.getOrCreateAnchorAt(25)).setEnd(g.getOrCreateAnchorAt(27))
+                    .setParent(quick));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("k")
+                    .setStart(g.getOrCreateAnchorAt(27)).setEnd(g.getOrCreateAnchorAt(30))
+                    .setParent(quick));
+
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("b")
+                    .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(32))
+                    .setParent(brown));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("r")
+                    .setStart(g.getOrCreateAnchorAt(32)).setEnd(g.getOrCreateAnchorAt(35))
+                    .setParent(brown));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("6")
+                    .setStart(g.getOrCreateAnchorAt(35)).setEnd(g.getOrCreateAnchorAt(37))
+                    .setParent(brown));
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("n")
+                    .setStart(g.getOrCreateAnchorAt(37)).setEnd(g.getOrCreateAnchorAt(40))
+                    .setParent(brown));
+    
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("f")
+                    .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(41))
+                    .setParent(fox));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("$")
+                    .setStart(g.getOrCreateAnchorAt(41)).setEnd(g.getOrCreateAnchorAt(42))
+                    .setParent(fox));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("k")
+                    .setStart(g.getOrCreateAnchorAt(42)).setEnd(g.getOrCreateAnchorAt(43))
+                    .setParent(fox));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("s")
+                    .setStart(g.getOrCreateAnchorAt(43)).setEnd(g.getOrCreateAnchorAt(45))
+                    .setParent(fox));
+    
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("_")
+                    .setStart(g.getOrCreateAnchorAt(45)).setEnd(g.getOrCreateAnchorAt(46))
+                    .setParent(jumps));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("V")
+                    .setStart(g.getOrCreateAnchorAt(46)).setEnd(g.getOrCreateAnchorAt(47))
+                    .setParent(jumps));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("m")
+                    .setStart(g.getOrCreateAnchorAt(47)).setEnd(g.getOrCreateAnchorAt(48))
+                    .setParent(jumps));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("p")
+                    .setStart(g.getOrCreateAnchorAt(48)).setEnd(g.getOrCreateAnchorAt(49))
+                    .setParent(jumps));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("s")
+                    .setStart(g.getOrCreateAnchorAt(49)).setEnd(g.getOrCreateAnchorAt(50))
+                    .setParent(jumps));
+
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("5")
+                    .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(52))
+                    .setParent(over));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("v")
+                    .setStart(g.getOrCreateAnchorAt(52)).setEnd(g.getOrCreateAnchorAt(55))
+                    .setParent(over));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("@")
+                    .setStart(g.getOrCreateAnchorAt(55)).setEnd(g.getOrCreateAnchorAt(57))
+                    .setParent(over));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("r")
+                    .setStart(g.getOrCreateAnchorAt(57)).setEnd(g.getOrCreateAnchorAt(60))
+                    .setParent(over));
+
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("D")
+                    .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(65))
+                    .setParent(the2));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("@")
+                    .setStart(g.getOrCreateAnchorAt(65)).setEnd(g.getOrCreateAnchorAt(70))
+                    .setParent(the2));
+
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("l")
+                    .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(72))
+                    .setParent(lazy));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("1")
+                    .setStart(g.getOrCreateAnchorAt(72)).setEnd(g.getOrCreateAnchorAt(75))
+                    .setParent(lazy));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("z")
+                    .setStart(g.getOrCreateAnchorAt(75)).setEnd(g.getOrCreateAnchorAt(77))
+                    .setParent(lazy));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("i")
+                    .setStart(g.getOrCreateAnchorAt(77)).setEnd(g.getOrCreateAnchorAt(80))
+                    .setParent(lazy));
+    
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("d")
+                    .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(83))
+                    .setParent(dog));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("$")
+                    .setStart(g.getOrCreateAnchorAt(83)).setEnd(g.getOrCreateAnchorAt(86))
+                    .setParent(dog));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("g")
+                    .setStart(g.getOrCreateAnchorAt(87)).setEnd(g.getOrCreateAnchorAt(90))
+                    .setParent(dog));
+
     return g;
   } // end of graph()
 

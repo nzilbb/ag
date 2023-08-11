@@ -190,13 +190,16 @@ public class UnisynDictionary implements Dictionary {
       rs.close();
       sql.close();
     }
-    sql = rdb.prepareStatement(
-      sqlx.apply(
-        "SELECT DISTINCT "+valueField+", supplemental, variant"
-        +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-        // use LOWER to remove case sensitivity
-        +" WHERE LOWER("+keyField+") = LOWER(?)"
-        +" ORDER BY variant"));
+    boolean syllableRecovery = keyField.equals("pron_disc") || keyField.equals("pron_orig");
+    String sSql = "SELECT DISTINCT "+valueField+", supplemental, variant"
+      +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
+      +(syllableRecovery
+        // recover syllables: parameter has Unisyn syllable/stress markers stripped
+        ?" WHERE REPLACE(REPLACE(REPLACE(pron_orig, '*', ''), '.', ''), '-', '') = ?"
+        // normal lookup: use LOWER to remove case sensitivity
+        :" WHERE LOWER("+keyField+") = LOWER(?)")
+      +" ORDER BY variant";
+    sql = rdb.prepareStatement(sqlx.apply(sSql));
     // ensure keyField/valueField are valid
     try {
       lookupEntries("test", false);
