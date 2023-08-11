@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -40,33 +40,33 @@ import nzilbb.sql.mysql.VanillaSQLTranslator;
  */
 public class DerbySQLTranslator extends VanillaSQLTranslator {
 
-   /** Default constructor */
-   public DerbySQLTranslator() {
-      rdbms = "derby";
-   }
-   
-   /** 
-    * Translate the given statement.
-    * <p> This first uses the general translations made by {@link VanillaSQLTranslator}, then
-    * converts MySQL-specific constructions to Derby-specific ones. 
+  /** Default constructor */
+  public DerbySQLTranslator() {
+    rdbms = "derby";
+  }
+  
+  /** 
+   * Translate the given statement.
+   * <p> This first uses the general translations made by {@link VanillaSQLTranslator}, then
+   * converts MySQL-specific constructions to Derby-specific ones. 
     * @param sql The SQL statement to translate
     * @return The translated version of the the SQL statement.
     */
-   public String apply(String sql) {
-      String translated = super.apply(sql);
-      translated = translated
-        .replaceAll("\\s+LIMIT\\s+([0-9]+)\\s*,\\s*([0-9]+)", " OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY")
-        .replaceAll("\\s+LIMIT\\s+([0-9]+)", " FETCH NEXT $1 ROWS ONLY")
-        .replaceAll("`([^`]+)`", "\"$1\"")
-        .replace(" = TRUE", " <> 0")
-        .replace(" = FALSE", " = 0")
-        .replaceAll("\\s+AUTO_INCREMENT",
-                    " GENERATED ALWAYS AS IDENTITY(Start with 1, Increment by 1)")
-        .replaceAll(",?\\s*INDEX\\s+\\w+\\s*\\([^)]+\\)","")
-        .replaceAll("\\s+BINARY\\s+"," ")
-        .replace("LAST_INSERT_ID()", "IDENTITY_VAL_LOCAL()");
-      if (trace) System.out.println("SQL after: " + translated);
-      return translated;
-   }
-   
-} // end of class VanillaSQLTranslator
+  public String apply(String sql) {
+    String translated = super.apply(sql);
+    translated = translated
+      .replaceAll("\\s+LIMIT\\s+([0-9]+)\\s*,\\s*([0-9]+)", " OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY")
+      .replaceAll("\\s+LIMIT\\s+([0-9]+)", " FETCH NEXT $1 ROWS ONLY")
+      .replaceAll("`([^`]+)`", "\"$1\"")
+      .replace(" = TRUE", " <> 0")
+      .replace(" = FALSE", " = 0")
+      .replaceAll("\\s+AUTO_INCREMENT",
+                  " GENERATED ALWAYS AS IDENTITY(Start with 1, Increment by 1)")
+      .replaceAll(",?\\s*INDEX\\s+\\w+\\s*\\([^)]+\\)","")
+      .replaceAll("\\s+BINARY\\s+"," ")
+      .replace("LAST_INSERT_ID()", "IDENTITY_VAL_LOCAL()");
+    if (trace) System.out.println("SQL after: " + translated);
+    return translated;
+  }
+  
+} // end of class DerbySQLTranslator
