@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -39,44 +39,44 @@ import java.util.function.UnaryOperator;
  */
 public class MySQLTranslator implements UnaryOperator<String> {
    
-   /**
-    * Name of the Relational Database Management System the translator is for.
-    * @see #getRdbms()
-    */
-   protected String rdbms = "MySQL";
-   /**
-    * Getter for {@link #rdbms}: Name of the Relational Database Management System the
-    * translator is for. 
-    * @return Name of the Relational Database Management System the translator is for.
-    */
-   public String getRdbms() { return rdbms; }
+  /**
+   * Name of the Relational Database Management System the translator is for.
+   * @see #getRdbms()
+   */
+  protected String rdbms = "MySQL";
+  /**
+   * Getter for {@link #rdbms}: Name of the Relational Database Management System the
+   * translator is for. 
+   * @return Name of the Relational Database Management System the translator is for.
+   */
+  public String getRdbms() { return rdbms; }
 
-   /**
-    * Whether to print statements passed to {@link #apply(String)}
-    * @see #getTrace()
-    * @see #setTrace(boolean)
-    */
-   protected boolean trace = false;
-   /**
-    * Getter for {@link #trace}: Whether to print statements passed to {@link #apply(String)}
-    * @return Whether to print statements passed to {@link #apply(String)}
-    */
-   public boolean getTrace() { return trace; }
-   /**
-    * Setter for {@link #trace}: Whether to print statements passed to {@link #apply(String)}
-    * @param newTrace Whether to print statements passed to {@link #apply(String)}
-    */
-   public MySQLTranslator setTrace(boolean newTrace) { trace = newTrace; return this; }
+  /**
+   * Whether to print statements passed to {@link #apply(String)}
+   * @see #getTrace()
+   * @see #setTrace(boolean)
+   */
+  protected boolean trace = false;
+  /**
+   * Getter for {@link #trace}: Whether to print statements passed to {@link #apply(String)}
+   * @return Whether to print statements passed to {@link #apply(String)}
+   */
+  public boolean getTrace() { return trace; }
+  /**
+   * Setter for {@link #trace}: Whether to print statements passed to {@link #apply(String)}
+   * @param newTrace Whether to print statements passed to {@link #apply(String)}
+   */
+  public MySQLTranslator setTrace(boolean newTrace) { trace = newTrace; return this; }
 
-   /** 
-    * Translate the given statement.
-    * <p> This implementation simply returns the given statement.
-    * @param sql The SQL statement to translate
-    * @return The translated version of the the SQL statement.
-    */
-   public String apply(String sql) {
-      if (trace) System.out.println(sql);
-      return sql;
-   }
+  /** 
+   * Translate the given statement.
+   * <p> This implementation simply returns the given statement.
+   * @param sql The SQL statement to translate
+   * @return The translated version of the the SQL statement.
+   */
+  public String apply(String sql) {
+    if (trace) System.out.println(sql);
+    return sql;
+  }
    
 } // end of class MySQLTranslator
