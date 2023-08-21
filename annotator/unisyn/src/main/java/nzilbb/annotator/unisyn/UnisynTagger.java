@@ -66,6 +66,9 @@ import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.sql.ConnectionFactory;
+import nzilbb.editpath.EditStep;
+import nzilbb.editpath.MinimumEditPathString;
+import nzilbb.encoding.comparator.DISC2DISCComparator;
 import nzilbb.util.IO;
 
 /**
@@ -1497,7 +1500,6 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
       }
 
       TreeMap<String,Vector<Annotation>> toAnnotate = new TreeMap<String,Vector<Annotation>>();
-      // TODO recoverSyllables
       // should we just tag everything?
       if (transcriptIsMainlyTargetLang && !thereArePhraseTags) {
         // process all tokens
@@ -1629,7 +1631,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
           .collect(Collectors.joining());
         final String stressMarkers = field.equals("pron_disc")?"['\",]":"[*~-]";
         final String syllableStressMarkers = field.equals("pron_disc")?"['\",-]":"[.*~-]";
-        final String syllableBoundary = field.equals("pron_disc")?"-":".";
+        final Character syllableBoundary = field.equals("pron_disc")?'-':'.';
         String firstPron = pronunciations.get(0);
         Optional<String> firstMatchingPron = pronunciations.stream()
           .filter(pron -> concatenatedSegments.equals(pron.replaceAll(syllableStressMarkers,"")))
@@ -1642,41 +1644,47 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
           .orElse(firstMatchingPron
                   .orElse(firstPron));
         setStatus("Token " + token + " -> " + bestPron);
-        
-        StringTokenizer stParts = new StringTokenizer(bestPron, syllableBoundary);
-        // each token corresponds to one annotation, anchored to corresponding segments
-        // e.g. if bestPron is "'In-t@-vju", syllableBoundary is "-" and the segments are "Int@vju"
-        // then we end up with three annotations, "'In", "t@", and "vju",
-        //  with anchors being those of the corresponding segments
-        
-        int s = 0; // phones index
+
+        // find an edit path between bestPron and the phone labels
+        MinimumEditPathString editPath  = new MinimumEditPathString(new DISC2DISCComparator());
+        List<EditStep<Character>> path = editPath.minimumEditPath(bestPron, concatenatedSegments);
+
+        // traverse the edit path looking for syllable boundaries, annotating as we go
+        int p = -1; // phones index
         int o = 1; // syllable ordinal
-        if (stParts.hasMoreTokens()) {
-          Annotation currentSegment = phones[s++];
-          while (stParts.hasMoreTokens()) {
-            String label = stParts.nextToken();
-            Annotation firstSegment = currentSegment;
-            Annotation lastSegment = currentSegment;
-            
-            // move through the chunk characters consuming segments
-            for (int c = 0; c < bestPron.length(); c++) {
-              lastSegment = currentSegment;
-              // if the character matches the segment's label
-              if (bestPron.charAt(c) == currentSegment.getLabel().charAt(0)) {
-                // consume the segment
-                if (s < phones.length - 1) currentSegment = phones[s++];
-              } // matched segment
-              // (non-matching characters, which are likely to be stress markers,
-              //  are ignored)
-            } // next character
-            
-            // save the annotation
-            graph.createSpan​(firstSegment, lastSegment, tagLayerId, label, token)
+        Annotation firstPhone = phones[0];
+        Annotation lastPhone = phones[0];
+        StringBuilder label = new StringBuilder();
+        for (EditStep<Character> step : path) {
+          Character syllableCharacter = step.getFrom();
+          Character phoneLabel = step.getTo();
+          // increment phone index if this step has one
+          if (phoneLabel != null) {
+            p++;
+            lastPhone = phones[p];
+            if (firstPhone == null) firstPhone = phones[p];
+          }
+          // have we hit a syllable boundary?
+          if (syllableBoundary.equals(syllableCharacter)) {
+            if (firstPhone == null) firstPhone = lastPhone;
+            // annotate the syllable
+            graph.createSpan​(firstPhone, lastPhone, tagLayerId, label.toString(), token)
               .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-          } // next word chunk
-        } // there are chunks
+            // next syllable should start on the next phone            
+            firstPhone = null;
+            label.setLength(0);
+          } else if (syllableCharacter != null) {
+            // accumulate label
+            label.append(syllableCharacter);
+          }
+        } // next edit step
         
-      } // this is the right pronunciation
+        // finish last syllable
+        if (firstPhone == null) firstPhone = lastPhone;
+        graph.createSpan​(firstPhone, lastPhone, tagLayerId, label.toString(), token)
+          .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                
+      } // there are phones
     } // token doesn't already have syllables
   } // end of recoverSyllables()
   

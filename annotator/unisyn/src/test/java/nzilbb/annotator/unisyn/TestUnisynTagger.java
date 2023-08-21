@@ -789,21 +789,176 @@ public class TestUnisynTagger {
     assertEquals("phone layer",
                  "phone", annotator.phoneLayerId);
     annotator.transform(g);
-    List<Annotation> syllables = Arrays.stream(g.all("syllable")).collect(Collectors.toList());
-    assertEquals("Correct number of tokens "+syllables,
-                 10, syllables.size());
-    Iterator<Annotation> syll = syllables.iterator();
-    assertEquals("monosyllabic", "D'@", syll.next().getLabel());
-    assertEquals("monosyllabic", "kw'Ik", syll.next().getLabel());
-    assertEquals("monosyllabic", "br'6n", syll.next().getLabel());
-    // no entry for fox
-    assertEquals("monosyllabic", "_'Vmps", syll.next().getLabel());
-    assertEquals("syllable 1", "'5", syll.next().getLabel());
-    assertEquals("syllable 2", "v@r", syll.next().getLabel());
-    assertEquals("monosyllabic", "D'@", syll.next().getLabel());
-    assertEquals("syllable 1", "l'1z", syll.next().getLabel());
-    assertEquals("syllable 2", "i", syll.next().getLabel());
-    assertEquals("monosyllabic", "d'$g", syll.next().getLabel());
+    Annotation[] syllables = g.all("syllable");
+    assertEquals("Correct number of tokens "+Arrays.asList(syllables),
+                 10, syllables.length);
+    String[] syllableLabels = {
+      "D'@", "kw'Ik", "br'6n",
+      // no entry for fox
+      "_'Vmps",
+      "'5", "v@r",
+      "D@",
+      "l'1z", "i",
+      "d'$g"
+    };
+    String[] parentLabels = {
+      "The", "quick", "brown",
+      // no entry for fox
+      "jumps",
+      "over", "over",
+      "the",
+      "lazy", "lazy",
+      "dog"
+    };
+    String[] startPhones = {
+      "D", "k", "b",
+      // no entry for fox
+      "_",
+      "5", "v",
+      "D",
+      "l", "I", // i->I
+      "d"
+    };
+    String[] endPhones = {
+      "@", "k", "n",
+      // no entry for fox
+      "s",
+      "5", "@", // non-rhotic endiing
+      "i", // @ -> i
+      "z", "I", // i->I
+      "g"
+    };
+    for (int i = 0; i < syllables.length; i++) {
+      assertEquals("label " + i, syllableLabels[i], syllables[i].getLabel());
+      assertEquals("parent " + i, parentLabels[i], syllables[i].getParent().getLabel());
+      assertEquals(
+        "start phone " + i,
+        startPhones[i],
+        syllables[i].getStart().startOf("phone").iterator().next().getLabel());
+    }
+  }   
+
+  /** Test syllable recovery to Unisyn labels from DISC phones. */
+  @Test public void syllableRecoveryMismatchedEncoding() throws Exception {
+      
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+
+    // annotator.getStatusObservers().add(s -> System.out.println(s));
+    
+    // use specified configuration
+    annotator.setTaskParameters(
+      "tokenLayerId=word"
+      +"&transcriptLanguageLayerId="   // no transcript language layer
+      +"&phraseLanguageLayerId="       // no phrase language layer
+      +"&tagLayerId=syllable"          // non-default layer
+      +"&lexicon=test.unisyn"
+      +"&field=pron_orig"
+      +"&phoneLayerId=phone");
+    
+    assertEquals("token layer",
+                 "word", annotator.getTokenLayerId());
+    assertNull("transcript language layer",
+               annotator.getTranscriptLanguageLayerId());
+    assertNull("phrase language layer",
+               annotator.getPhraseLanguageLayerId());
+    assertEquals("phone layer",
+                 "phone", annotator.getPhoneLayerId());
+    assertEquals("tag layer",
+                 "syllable", annotator.getTagLayerId());
+    assertFalse("stripSyllStress",
+                annotator.getStripSyllStress());
+    assertNotNull("tag layer was created",
+                  schema.getLayer(annotator.getTagLayerId()));
+    assertEquals("tag layer child of word",
+                 "word", schema.getLayer(annotator.getTagLayerId()).getParentId());
+    assertEquals("tag layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 schema.getLayer(annotator.getTagLayerId()).getAlignment());
+    assertEquals("tag layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getTagLayerId()).getType());
+    assertEquals("lexicon",
+                 "test.unisyn", annotator.getLexicon());
+    assertEquals("field",
+                 "pron_orig", annotator.getField());
+    assertTrue("tag layer allows peers",
+               schema.getLayer(annotator.getTagLayerId()).getPeers());
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("2 required layer: "+requiredLayers,
+                 2, requiredLayers.size());
+    assertTrue("phone required "+requiredLayers,
+               requiredLayers.contains("phone"));
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    String outputLayers[] = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                 1, outputLayers.length);
+    assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                 "syllable", outputLayers[0]);
+    
+    Annotation firstWord = g.first("word");
+    assertEquals("double check the first word is what we think it is: "+firstWord,
+                 "The", firstWord.getLabel());
+    
+    assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                 9, g.all("word").length);
+    assertEquals("double check there are no syllables: "+Arrays.asList(g.all("syllable")),
+                 0, g.all("freuency").length);
+    // run the annotator
+    assertEquals("phone layer",
+                 "phone", annotator.phoneLayerId);
+    annotator.transform(g);
+    Annotation[] syllables = g.all("syllable");
+    assertEquals("Correct number of tokens "+Arrays.asList(syllables),
+                 10, syllables.length);
+    String[] syllableLabels = {
+      "{ dh @ }", // uses the first pronunciation as the labels don't match
+      "{ k w * i k }", "{ b r * ow n }",
+      // no entry for fox
+      "{ jh * uh m p }> s >",
+      "{ * ou ", " v @r r }",
+      "{ dh @ }", // uses the first pronunciation as the labels don't match
+      "{ l * ei z }", "> ii >",
+      "{ d * oo g }"
+    };
+    String[] parentLabels = {
+      "The", "quick", "brown",
+      // no entry for fox
+      "jumps",
+      "over", "over",
+      "the",
+      "lazy", "lazy",
+      "dog"
+    };
+    String[] startPhones = {
+      "D", "k", "b",
+      // no entry for fox
+      "_",
+      "5", "v",
+      "D",
+      "l", "I", // i->I
+      "d"
+    };
+    String[] endPhones = {
+      "@", "k", "n",
+      // no entry for fox
+      "s",
+      "5", "@", // non-rhotic endiing
+      "i", // @ -> i
+      "z", "I", // i->I
+      "g"
+    };
+    for (int i = 0; i < syllables.length; i++) {
+      assertEquals("label " + i, syllableLabels[i], syllables[i].getLabel());
+      assertEquals("parent " + i, parentLabels[i], syllables[i].getParent().getLabel());
+      assertEquals(
+        "start phone " + i,
+        startPhones[i],
+        syllables[i].getStart().startOf("phone").iterator().next().getLabel());
+    }
   }   
 
   /** Test that lexicons and corresponding dictionaries can be added and removed. */
@@ -1147,35 +1302,32 @@ public class TestUnisynTagger {
                     .setParent(jumps));
 
     g.addAnnotation(new Annotation().setLayerId("phone").setLabel("5")
-                    .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(52))
+                    .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(53))
                     .setParent(over));
     g.addAnnotation(new Annotation().setLayerId("phone").setLabel("v")
-                    .setStart(g.getOrCreateAnchorAt(52)).setEnd(g.getOrCreateAnchorAt(55))
+                    .setStart(g.getOrCreateAnchorAt(53)).setEnd(g.getOrCreateAnchorAt(57))
                     .setParent(over));
     g.addAnnotation(new Annotation().setLayerId("phone").setLabel("@")
-                    .setStart(g.getOrCreateAnchorAt(55)).setEnd(g.getOrCreateAnchorAt(57))
-                    .setParent(over));
-    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("r")
                     .setStart(g.getOrCreateAnchorAt(57)).setEnd(g.getOrCreateAnchorAt(60))
                     .setParent(over));
 
     g.addAnnotation(new Annotation().setLayerId("phone").setLabel("D")
                     .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(65))
                     .setParent(the2));
-    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("@")
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("i") // not @
                     .setStart(g.getOrCreateAnchorAt(65)).setEnd(g.getOrCreateAnchorAt(70))
                     .setParent(the2));
 
     g.addAnnotation(new Annotation().setLayerId("phone").setLabel("l")
                     .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(72))
                     .setParent(lazy));
-    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("1")
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("4") // CHOICE not FACE
                     .setStart(g.getOrCreateAnchorAt(72)).setEnd(g.getOrCreateAnchorAt(75))
                     .setParent(lazy));
     g.addAnnotation(new Annotation().setLayerId("phone").setLabel("z")
                     .setStart(g.getOrCreateAnchorAt(75)).setEnd(g.getOrCreateAnchorAt(77))
                     .setParent(lazy));
-    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("i")
+    g.addAnnotation(new Annotation().setLayerId("phone").setLabel("I") // not i
                     .setStart(g.getOrCreateAnchorAt(77)).setEnd(g.getOrCreateAnchorAt(80))
                     .setParent(lazy));
     
