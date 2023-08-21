@@ -76,12 +76,10 @@ import nzilbb.util.IO;
  * <a href="https://www.cstr.ed.ac.uk/projects/unisyn/">
  *  https://www.cstr.ed.ac.uk/projects/unisyn/</a>
  */
-// TODO migration:
-// TODO rename tables Unisyn_ -> UnisynTagger_
 @UsesRelationalDatabase
 public class UnisynTagger extends Annotator implements ImplementsDictionaries {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.6"; }
+  public String getMinimumApiVersion() { return "1.1.3"; }
   
   /**
    * {@link UsesRelationalDatabase} method that sets the information required for
