@@ -43,6 +43,14 @@ getSchema(s => {
       && /.*lang.*/.test(layer.id));
   // select the first one by default
   phraseLanguageLayerId.selectedIndex = 1;
+
+  // populate syllable recovery phone layer options...
+  var phoneLayerId = document.getElementById("phoneLayerId");
+  addLayerOptions(
+    phoneLayerId, schema,
+    layer => layer.id != taskId
+      && ((layer.parentId == schema.wordLayerId && layer.alignment == 2) // segment
+          || (layer.parentId == "segment")); // or segment tags
   
   // populate layer output select options...          
   var tagLayerId = document.getElementById("tagLayerId");
@@ -230,4 +238,12 @@ function trackLexiconLoad() {
 document.getElementById("tagLayerId").onchange = function(e) {
     changedLayer(this); };
 document.getElementById("file").onchange = selectFile;
+document.getElementById("phoneLayerId").onchange = function(e) {
+  document.getElementById("firstVariantOnly").disabled
+    = document.getElementById("stripSyllStress").disabled
+    = this.selectedIndex > 0;
+  if (this.selectedIndex > 0) {
+    document.getElementById("field").value = "pron_disc";
+  }
+};
 document.getElementById("btnUploadLexicon").onclick = uploadLexicon;
