@@ -1247,7 +1247,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * <p> If set, the annotator looks up the stress/syllable-tagged pronunciation for each
    * token, and uses it to partition the phones on this layer into stress-marked syllables
    * - i.e. an annotation will be created for each syllable, with start/end anchors
-   * coinciding with the first/last phones on <var>syllableComponentLayerId</var>.
+   * coinciding with the first/last phones on <var>phoneLayerId</var>.
    * @see #getPhoneLayerId()
    * @see #setPhoneLayerId(String)
    */

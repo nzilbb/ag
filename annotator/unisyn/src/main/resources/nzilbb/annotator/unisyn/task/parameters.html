@@ -29,6 +29,12 @@
   <dt> stripSyllStress </dt> <dd> Whether to strip syllable/stress markings or not.
     Value should be "on" for <tt>true</tt>, and the parameter
     should be absent to indicate <tt>false</tt>. </dd> 
+  <dt> phoneLayerId </dt> <dd> LayerId containing phones for which syllable structure
+    should be recovered.
+    <p> If set, the annotator looks up the stress/syllable-tagged pronunciation for each
+      token, and uses it to partition the phones on this layer into stress-marked syllables
+      - i.e. an annotation will be created for each syllable, with start/end anchors
+      coinciding with the first/last phones on <var>phoneLayerId</var>.</dd> 
   <dt> transcriptLanguageLayerId </dt> <dd> Transcript attribute for overall language. </dd>
   <dt> phraseLanguageLayerId </dt> <dd> Layer for annotating phrases in a different
     language. </dd> 

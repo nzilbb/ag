@@ -50,7 +50,7 @@ getSchema(s => {
     phoneLayerId, schema,
     layer => layer.id != taskId
       && ((layer.parentId == schema.wordLayerId && layer.alignment == 2) // segment
-          || (layer.parentId == "segment")); // or segment tags
+          || (layer.parentId == "segment"))); // or segment tags
   
   // populate layer output select options...          
   var tagLayerId = document.getElementById("tagLayerId");
@@ -76,6 +76,8 @@ getSchema(s => {
           = parameters.get("firstVariantOnly");
         document.getElementById("stripSyllStress").checked
           = parameters.get("stripSyllStress");
+        // dis/enable checkboxes
+        changedPhoneLayer(document.getElementById("phoneLayerId"), true);
         // if there's no utterance tag layer defined
         if (tagLayerId.selectedIndex == 0
             // but there's a layer named after the task
@@ -235,15 +237,18 @@ function trackLexiconLoad() {
   });
 }
 
+function changedPhoneLayer(phoneLayerId, skipFieldUpdate) {
+  document.getElementById("firstVariantOnly").disabled
+    = document.getElementById("stripSyllStress").disabled
+    = phoneLayerId.selectedIndex > 0;
+  if (phoneLayerId.selectedIndex > 0 && !skipFieldUpdate) {
+    document.getElementById("field").value = "pron_disc";
+  }
+}
+
 document.getElementById("tagLayerId").onchange = function(e) {
     changedLayer(this); };
 document.getElementById("file").onchange = selectFile;
 document.getElementById("phoneLayerId").onchange = function(e) {
-  document.getElementById("firstVariantOnly").disabled
-    = document.getElementById("stripSyllStress").disabled
-    = this.selectedIndex > 0;
-  if (this.selectedIndex > 0) {
-    document.getElementById("field").value = "pron_disc";
-  }
-};
+  changedPhoneLayer(this); };
 document.getElementById("btnUploadLexicon").onclick = uploadLexicon;
