@@ -56,7 +56,7 @@ getSchema(s => {
   var tagLayerId = document.getElementById("tagLayerId");
   addLayerOptions(
     tagLayerId, schema,
-    layer => layer.parentId == schema.wordLayerId && layer.alignment == 0);
+    layer => layer.parentId == schema.wordLayerId);
   tagLayerId.selectedIndex = 0;
   
   loadLexiconOptions(() => {
