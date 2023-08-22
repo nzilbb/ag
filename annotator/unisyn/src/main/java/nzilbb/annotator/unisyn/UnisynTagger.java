@@ -1133,7 +1133,14 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * @param newTargetLanguagePattern Regular expression for specifying which language to
    * tag the tokens of. 
    */
-  public UnisynTagger setTargetLanguagePattern(String newTargetLanguagePattern) { targetLanguagePattern = newTargetLanguagePattern; return this; }
+  public UnisynTagger setTargetLanguagePattern(String newTargetLanguagePattern) {
+    if (newTargetLanguagePattern != null // empty string means null
+        && newTargetLanguagePattern.trim().length() == 0) {
+      newTargetLanguagePattern = null;
+    }
+    targetLanguagePattern = newTargetLanguagePattern;
+    return this;
+  }
   
   /**
    * The ID of the lexicon to use.
@@ -1482,7 +1489,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
          
       // what languages are in the transcript?
       boolean transcriptIsMainlyTargetLang = true;
-      if (transcriptLanguageLayerId != null) {
+      if (transcriptLanguageLayerId != null && targetLanguagePattern != null) {
         Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
         if (transcriptLanguage != null) {
           if (!transcriptLanguage.getLabel().matches(targetLanguagePattern)) { // not TargetLang
@@ -1491,7 +1498,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         }
       }
       boolean thereArePhraseTags = false;
-      if (phraseLanguageLayerId != null) {
+      if (phraseLanguageLayerId != null && targetLanguagePattern != null) {
         if (graph.first(phraseLanguageLayerId) != null) {
           thereArePhraseTags = true;
         }
@@ -1550,6 +1557,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         try {
           int t = 0;
           int typeCount = toAnnotate.size();
+          setStatus("Distinct words: " + typeCount);
           setPercentComplete(0);
           for (String type : toAnnotate.keySet()) { // for each type
             if (isCancelling()) break;
@@ -1569,7 +1577,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
                 if (stripSyllStress) {
                   entry = entry.replaceAll(
                     // replace characters in this class
-                    "['\",-]"
+                    "['\",-]" // TODO don't assume DISC
                     // also any trailing space in case phonemes are space-delimited,
                     // extra spaces aren't left behind
                     +" *","");
@@ -1687,9 +1695,11 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
   } // end of recoverSyllables()
   
   /**
-   * Registers a token for annotation.
-   * @param token
-   * @param toAnnotate
+   * Registers a token for annotation, by adding it to the list in the given map of labels
+   * to annotations with that label.
+   * @param token The token to annotate.
+   * @param toAnnotate A map of label→Annotations that may or may not contain an entry for
+   * this token's label
    */
   protected void registorForAnnotation(
     Annotation token, TreeMap<String,Vector<Annotation>> toAnnotate) {
@@ -1725,10 +1735,10 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
 
       String tokenExpression = "layerId = '"+esc(tokenLayerId)+"'"
         +" && label = '"+esc(sourceLabel)+"'";
-      if (transcriptLanguageLayerId != null
-          && (targetLanguagePattern != null && targetLanguagePattern.length() > 0)) {
+      if (transcriptLanguageLayerId != null && targetLanguagePattern != null) {
         tokenExpression += " && /"+targetLanguagePattern+"/.test(first('"
           +esc(transcriptLanguageLayerId)+"').label)";
+        // TODO take phraseLanguageLayerId into account
       }
       int count = 0;
       HashSet<String> soFar = new HashSet<String>(); // only unique entries
@@ -1736,7 +1746,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         if (stripSyllStress) {
           tag = tag.replaceAll(
             // replace characters in this class
-            "['\",-]"
+            "['\",-]" // TODO don't assume DISC
             // also any trailing space in case phonemes are space-delimited,
             // extra spaces aren't left behind
             +" *","");
@@ -1755,6 +1765,110 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
       throw new TransformationException(this, x);
     } finally {
       dictionary.close();
+    }
+  }
+  
+  /**
+   * Transforms all graphs from the given graph store that match the given graph expression.
+   * <p> This implementation uses
+   * {@link GraphStoreQuery#aggregateMatchingAnnotations(String,String)}
+   * and {@link GraphStore#tagMatchingAnnotations​(String,String,String,Integer)}
+   * to optimize tagging transcripts en-masse.
+   * @param store The graph to store.
+   * @param expression An expression for identifying transcripts to update, or null to transform
+   * all transcripts in the store.
+   * @return The changes introduced by the tranformation.
+   * @throws TransformationException If the transformation cannot be completed.
+   */
+  public void transformTranscripts​(GraphStore store, String expression)
+    throws TransformationException, InvalidConfigurationException, StoreException,
+    PermissionException {
+    if (phoneLayerId != null) { // syllable recovery should be done one transcript at a time
+      super.transformTranscripts​(store, expression);
+      return;
+    }
+    
+    setRunning(true);
+    try {
+      setPercentComplete(0);
+      Layer tokenLayer = schema.getLayer(tokenLayerId);
+      if (tokenLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid input token layer: " + tokenLayerId);
+      }
+      Layer tagLayer = schema.getLayer(tagLayerId);
+      if (tagLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid output tag layer: " + tagLayerId);
+      }    
+      
+      StringBuilder labelExpression = new StringBuilder();
+      labelExpression.append("layer.id == '").append(esc(tokenLayer.getId())).append("'");
+      if (transcriptLanguageLayerId != null && targetLanguagePattern != null) {
+        labelExpression.append(" && /").append(targetLanguagePattern).append("/.test(first('")
+          .append(esc(transcriptLanguageLayerId)).append("').label)");
+        // TODO take phraseLanguageLayerId into account
+      }
+      if (expression != null && expression.trim().length() > 0) {
+        labelExpression.append(" && [");
+        String[] ids = store.getMatchingTranscriptIds(expression);
+        if (ids.length == 0) {
+          setStatus("No matching transcripts");
+          setPercentComplete(100);
+          return;
+        } else {
+          labelExpression.append(
+            Arrays.stream(ids)
+            // quote and escape each ID
+            .map(id->"'"+id.replace("'", "\\'")+"'")
+            // make a comma-delimited list
+            .collect(Collectors.joining(",")));
+          labelExpression.append("].includes(graphId)");
+        }
+      }
+      setStatus("Getting distinct token labels: " + labelExpression);
+      String[] distinctWords = store.aggregateMatchingAnnotations(
+        "DISTINCT", labelExpression.toString());
+      setStatus("There are "+distinctWords.length+" distinct token labels");
+      int w = 0;
+      Dictionary dictionary = getDictionary();
+      // for each label
+      for (String word : distinctWords) {
+        if (isCancelling()) break;
+        HashSet<String> soFar = new HashSet<String>(); // only unique entries
+        for (String tag : dictionary.lookup(word)) {
+          if (isCancelling()) break;
+          if (stripSyllStress) {
+            tag = tag.replaceAll(
+              // replace characters in this class
+              "['\",-]" // TODO don't assume DISC
+              // also any trailing space in case phonemes are space-delimited,
+              // extra spaces aren't left behind
+              +" *","");
+          }
+          if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
+            StringBuilder tokenExpression = new StringBuilder(labelExpression);
+            tokenExpression.append(" && label = '").append(esc(word)).append("'");
+            setStatus(word+" → "+tag);
+            store.tagMatchingAnnotations(
+              tokenExpression.toString(), tagLayerId, tag, Constants.CONFIDENCE_AUTOMATIC);
+            soFar.add(tag);
+          }
+          // do we want the first entry only?
+          if (firstVariantOnly) break;        
+        } // next entry
+        setPercentComplete((++w * 100) / distinctWords.length);
+      } // next word
+      if (isCancelling()) {
+        setStatus("Cancelled.");
+      } else {
+        setPercentComplete(100);
+        setStatus("Finished.");
+      }
+    } catch(DictionaryException x) {
+      throw new TransformationException(this, x);
+    } finally {
+      setRunning(false);
     }
   }
   

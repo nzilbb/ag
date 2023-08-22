@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.unisyn</artifactId>
-  <version>2.0.0</version>
+  <version>2.0.1</version>
 
   <name>nzilbb.annotator.unisyn</name>
   <description>Looks up accent-specific versions of the Unisyn English lexicon to annotate English words with their pronunciations.</description>
