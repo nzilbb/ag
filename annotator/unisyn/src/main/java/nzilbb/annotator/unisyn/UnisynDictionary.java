@@ -192,7 +192,7 @@ public class UnisynDictionary implements Dictionary {
     }
     String sSql = "SELECT DISTINCT "+valueField+", supplemental, variant"
       +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-      +" WHERE LOWER("+keyField+") = LOWER(?)"
+      +" WHERE "+keyField+" = ?"
       +" ORDER BY variant";
     sql = rdb.prepareStatement(sqlx.apply(sSql));
     // ensure keyField/valueField are valid
@@ -215,7 +215,7 @@ public class UnisynDictionary implements Dictionary {
     throws SQLException {      
     Vector<String> queryResults = new Vector<String>();
     if (key != null) {
-      sql.setString(1, key);
+      sql.setString(1, key.toLowerCase());
       ResultSet rs = sql.executeQuery();
       try {
         while (rs.next()) {
@@ -551,10 +551,9 @@ public class UnisynDictionary implements Dictionary {
       PreparedStatement sql = rdb.prepareStatement(
         sqlx.apply(
           "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-          // use LOWER to remove case sensitivity
-          +" WHERE LOWER("+keyField+") = LOWER(?)"));
+          +" WHERE "+keyField+" = ?"));
       try {
-        sql.setString(1, key);
+        sql.setString(1, key.toLowerCase());
         if (sql.executeUpdate() == 0) {
           throw new DictionaryReadOnlyException(
             this, "No entries found for " + key);
@@ -581,12 +580,11 @@ public class UnisynDictionary implements Dictionary {
       PreparedStatement sql = rdb.prepareStatement(
         sqlx.apply(
           "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-          // use LOWER to remove case sensitivity of BINARY
-          +" WHERE LOWER("+keyField+") = LOWER(?)"
+          +" WHERE "+keyField+" = ?"
           // force case-sensitivity for value, because it might be DISC, in which 'i' != 'I' etc.
           +" AND "+valueField+" = BINARY ?"));
       try {
-        sql.setString(1, key);
+        sql.setString(1, key.toLowerCase());
         sql.setString(2, entry);
         if (sql.executeUpdate() == 0) {
           throw new DictionaryReadOnlyException(
