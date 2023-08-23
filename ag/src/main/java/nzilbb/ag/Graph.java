@@ -1131,7 +1131,7 @@ public class Graph extends Annotation {
    
   /**
    * Creates a tag annotation.
-   * @param toTag The annotation to tag.
+   * @param toTag The annotation to tag, which can be the parent, or a child of the correct parent.
    * @param layerId The tag layer ID.
    * @param label The tag label.
    * @return The tag annotation created.
@@ -1187,12 +1187,27 @@ public class Graph extends Annotation {
    * @param to The last annotation to span.
    * @param layerId The layer ID of the resulting annotation.
    * @param label The label of the resulting annotation.
-   * @param parent The new annotation's parent.
+   * @param parent The new annotation's parent (or a child of the correct parent).
    * @return The new annotation.
    */
   public Annotation createSpan(
     Annotation from, Annotation to, String layerId, String label, Annotation parent) {
-    Annotation span = new Annotation(null, label, layerId, from.getStartId(), to.getEndId(), parent.getId());
+    // first check whether this is the actual parent, or whether it's a child of the parent
+    Layer spanLayer = getLayer(layerId);
+    Layer parentLayer = getLayer(parent.getLayerId());
+    String parentId = parent.getId();
+    if (spanLayer != null
+        && spanLayer.getParentId() != null
+        && !spanLayer.getParentId().equals(parent.getLayerId())
+        && parentLayer != null
+        && spanLayer.getParentId().equals(parentLayer.getParentId())) {
+      // parent of 'parent' is the real parent
+      parentId = parent.getParentId();
+    }
+
+    // create the span
+    Annotation span = new Annotation(null, label, layerId, from.getStartId(), to.getEndId(), parentId);
+    // add it to the graph
     getGraph().addAnnotation(span);
     return span;
   } // end of createSpan()
