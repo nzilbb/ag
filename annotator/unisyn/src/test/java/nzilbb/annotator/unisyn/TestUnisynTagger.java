@@ -106,7 +106,7 @@ public class TestUnisynTagger {
     assertEquals("field",
                  "pron_disc", annotator.getField());
     assertEquals("token layer",
-                 "word", annotator.getTokenLayerId());
+                 "orthography", annotator.getTokenLayerId());
     assertEquals("transcript language layer",
                  "transcript_language", annotator.getTranscriptLanguageLayerId());
     assertEquals("phrase language layer",
@@ -135,8 +135,8 @@ public class TestUnisynTagger {
       .collect(Collectors.toSet());
     assertEquals("3 required layer: "+requiredLayers,
                  3, requiredLayers.size());
-    assertTrue("word required "+requiredLayers,
-               requiredLayers.contains("word"));
+    assertTrue("orthography required "+requiredLayers,
+               requiredLayers.contains("orthography"));
     assertTrue("transcript_language required "+requiredLayers,
                requiredLayers.contains("transcript_language"));
     assertTrue("lang required "+requiredLayers,
@@ -174,10 +174,19 @@ public class TestUnisynTagger {
     assertEquals("l1zi", prons.next());
     assertEquals("d$g", prons.next());
 
+    // ensure parents are on word layer
+    for (Annotation pron : g.all("phonemes")) {
+      Annotation parent = pron.getParent();
+      assertNotNull("parent set: " + pron, parent);
+      assertEquals("parent on correct layer: " + pron, "word", parent.getLayerId());
+    }
+
     // add a word
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("a")
-                    .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
-                    .setParent(g.first("turn")));
+    Annotation newWord = g.addAnnotation(
+      new Annotation().setLayerId("word").setLabel("a")
+      .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
+      .setParent(g.first("turn")));
+    g.createTag(newWord, "orthography", "a");
 
     // change a word
     firstWord.setLabel("dog");
@@ -300,7 +309,7 @@ public class TestUnisynTagger {
     try {
       annotator.setTaskParameters(
         // doesn't exist in the schema
-        "tokenLayerId=orthography"
+        "tokenLayerId=nonexistent"
         +"&transcriptLanguageLayerId=transcript_language"
         +"&phraseLanguageLayerId=lang"
         +"&tagLayerId=unisyn"
@@ -512,6 +521,14 @@ public class TestUnisynTagger {
       .map(annotation->annotation.getLabel()).collect(Collectors.toList());
     assertEquals("No tokens annotated "+pronLabels,
                  0, pronLabels.size());
+    
+    // ensure parents are on word layer
+    for (Annotation pron : g.all("phonemes")) {
+      Annotation parent = pron.getParent();
+      assertNotNull("parent set: " + pron, parent);
+      assertEquals("parent on correct layer: " + pron, "word", parent.getLayerId());
+    }
+
   }   
 
   /** Test that language-specific tagging works when only phrases are targeted, and also
@@ -830,6 +847,130 @@ public class TestUnisynTagger {
     };
     for (int i = 0; i < syllables.length; i++) {
       assertEquals("label " + i, syllableLabels[i], syllables[i].getLabel());
+      assertEquals("parent layer " + i, "word", syllables[i].getParent().getLayerId());
+      assertEquals("parent " + i, parentLabels[i], syllables[i].getParent().getLabel());
+      assertEquals(
+        "start phone " + i,
+        startPhones[i],
+        syllables[i].getStart().startOf("phone").iterator().next().getLabel());
+    }
+  }   
+
+  /** Test syllable recovery using orthography. */
+  @Test public void syllableRecoveryUsingOrthography() throws Exception {
+      
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+
+    // annotator.getStatusObservers().add(s -> System.out.println(s));
+    
+    // use specified configuration
+    annotator.setTaskParameters(
+      "tokenLayerId=orthography"
+      +"&transcriptLanguageLayerId="   // no transcript language layer
+      +"&phraseLanguageLayerId="       // no phrase language layer
+      +"&tagLayerId=syllable"          // non-default layer
+      +"&lexicon=test.unisyn"
+      +"&field=pron_disc"
+      +"&phoneLayerId=phone");
+    
+    assertEquals("token layer orthography",
+                 "orthography", annotator.getTokenLayerId());
+    assertNull("transcript language layer",
+               annotator.getTranscriptLanguageLayerId());
+    assertNull("phrase language layer",
+               annotator.getPhraseLanguageLayerId());
+    assertEquals("phone layer",
+                 "phone", annotator.getPhoneLayerId());
+    assertEquals("tag layer",
+                 "syllable", annotator.getTagLayerId());
+    assertFalse("stripSyllStress",
+                annotator.getStripSyllStress());
+    assertNotNull("tag layer was created",
+                  schema.getLayer(annotator.getTagLayerId()));
+    assertEquals("tag layer child of word",
+                 "word", schema.getLayer(annotator.getTagLayerId()).getParentId());
+    assertEquals("tag layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 schema.getLayer(annotator.getTagLayerId()).getAlignment());
+    assertEquals("tag layer type correct",
+                 Constants.TYPE_IPA,
+                 schema.getLayer(annotator.getTagLayerId()).getType());
+    assertEquals("lexicon",
+                 "test.unisyn", annotator.getLexicon());
+    assertEquals("field",
+                 "pron_disc", annotator.getField());
+    assertTrue("tag layer allows peers",
+               schema.getLayer(annotator.getTagLayerId()).getPeers());
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("2 required layer: "+requiredLayers,
+                 2, requiredLayers.size());
+    assertTrue("phone required "+requiredLayers,
+               requiredLayers.contains("phone"));
+    assertTrue("orthography required "+requiredLayers,
+               requiredLayers.contains("orthography"));
+    String outputLayers[] = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                 1, outputLayers.length);
+    assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                 "syllable", outputLayers[0]);
+    
+    Annotation firstWord = g.first("word");
+    assertEquals("double check the first word is what we think it is: "+firstWord,
+                 "The", firstWord.getLabel());
+    
+    assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                 9, g.all("word").length);
+    assertEquals("double check there are no syllables: "+Arrays.asList(g.all("syllable")),
+                 0, g.all("freuency").length);
+    // run the annotator
+    assertEquals("phone layer",
+                 "phone", annotator.phoneLayerId);
+    annotator.transform(g);
+    Annotation[] syllables = g.all("syllable");
+    assertEquals("Correct number of tokens "+Arrays.asList(syllables),
+                 10, syllables.length);
+    String[] syllableLabels = {
+      "D'@", "kw'Ik", "br'6n",
+      // no entry for fox
+      "_'Vmps",
+      "'5", "v@r",
+      "D@",
+      "l'1z", "i",
+      "d'$g"
+    };
+    String[] parentLabels = {
+      "The", "quick", "brown",
+      // no entry for fox
+      "jumps",
+      "over", "over",
+      "the",
+      "lazy", "lazy",
+      "dog"
+    };
+    String[] startPhones = {
+      "D", "k", "b",
+      // no entry for fox
+      "_",
+      "5", "v",
+      "D",
+      "l", "I", // i->I
+      "d"
+    };
+    String[] endPhones = {
+      "@", "k", "n",
+      // no entry for fox
+      "s",
+      "5", "@", // non-rhotic endiing
+      "i", // @ -> i
+      "z", "I", // i->I
+      "g"
+    };
+    for (int i = 0; i < syllables.length; i++) {
+      assertEquals("label " + i, syllableLabels[i], syllables[i].getLabel());
+      assertEquals("parent layer " + i, "word", syllables[i].getParent().getLayerId());
       assertEquals("parent " + i, parentLabels[i], syllables[i].getParent().getLabel());
       assertEquals(
         "start phone " + i,
@@ -1152,6 +1293,56 @@ public class TestUnisynTagger {
                  0, mappings.size());
   }   
 
+  /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly */
+  @Test public void transformTranscripts() {
+    GraphStoreHarness store = new GraphStoreHarness();
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    try {
+      annotator.setTaskParameters(null);
+
+      // call tagMatchingAnnotations
+      annotator.transformTranscripts(store, null);
+    } catch(Exception exception) {
+      fail(""+exception);
+    }
+
+    // check the right calls were made to the graph store
+    assertEquals("aggregateMatchingAnnotations operation",
+                 "DISTINCT", store.aggregateMatchingAnnotationsOperation);
+    assertEquals("aggregateMatchingAnnotations expression",
+                 "layer.id == 'orthography'", store.aggregateMatchingAnnotationsExpression);
+    
+    assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
+                 2, store.tagMatchingAnnotationsLabels.size());
+    assertEquals("tagMatchingAnnotations layerId quick",
+                 "kwIk", store.tagMatchingAnnotationsLabels.get(
+                   "layer.id == 'orthography' && label == 'quick'"));
+    assertEquals("tagMatchingAnnotations layerId brown",
+                 "br6n", store.tagMatchingAnnotationsLabels.get(
+                   "layer.id == 'orthography' && label == 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
+                 2, store.tagMatchingAnnotationsLayerIds.size());
+    assertEquals("tagMatchingAnnotations layerId quick",
+                 "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+                   "layer.id == 'orthography' && label == 'quick'"));
+    assertEquals("tagMatchingAnnotations layerId brown",
+                 "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+                   "layer.id == 'orthography' && label == 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num confidences: "
+                 + store.tagMatchingAnnotationsConfidences,
+                 2, store.tagMatchingAnnotationsConfidences.size());
+    assertEquals("tagMatchingAnnotations layerId quick",
+                 Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+                   "layer.id == 'orthography' && label == 'quick'"));
+    assertEquals("tagMatchingAnnotations layerId brown",
+                 Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+                   "layer.id == 'orthography' && label == 'brown'"));    
+  }
+   
+
   /**
    * Returns a graph for annotating.
    * @return The graph for testing with.
@@ -1176,6 +1367,9 @@ public class TestUnisynTagger {
       new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true),
+      new Layer("orthography", "Orthography").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
       new Layer("unisyn", "Pronunciation").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true)
       .setParentId("word").setParentIncludes(true),
@@ -1236,6 +1430,17 @@ public class TestUnisynTagger {
       g.addAnnotation(new Annotation().setLayerId("word").setLabel("dog")
                       .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
                       .setParent(turn));
+
+    // orthography
+    g.createTag(the1, "orthography", "the");
+    g.createTag(quick, "orthography", "quick");
+    g.createTag(brown, "orthography", "brown");
+    g.createTag(fox, "orthography", "fox");
+    g.createTag(jumps, "orthography", "jumps");
+    g.createTag(over, "orthography", "over");
+    g.createTag(the2, "orthography", "the");
+    g.createTag(lazy, "orthography", "lazy");
+    g.createTag(dog, "orthography", "dog");
 
     // phones for syllable recovery
     

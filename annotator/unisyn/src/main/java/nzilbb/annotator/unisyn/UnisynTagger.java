@@ -1666,7 +1666,9 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
           Character phoneLabel = step.getTo();
           // increment phone index if this step has one
           if (phoneLabel != null) {
-            p++;
+            if (p < phones.length-1) {
+              p++;
+            }
             lastPhone = phones[p];
             if (firstPhone == null) firstPhone = phones[p];
           }
@@ -1826,7 +1828,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
           labelExpression.append("].includes(graphId)");
         }
       }
-      setStatus("Getting distinct token labels: " + labelExpression);
+      setStatus("Getting distinct token labels...");
       String[] distinctWords = store.aggregateMatchingAnnotations(
         "DISTINCT", labelExpression.toString());
       setStatus("There are "+distinctWords.length+" distinct token labels");
@@ -1848,7 +1850,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
           }
           if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
             StringBuilder tokenExpression = new StringBuilder(labelExpression);
-            tokenExpression.append(" && label = '").append(esc(word)).append("'");
+            tokenExpression.append(" && label == '").append(esc(word)).append("'");
             setStatus(word+" → "+tag);
             store.tagMatchingAnnotations(
               tokenExpression.toString(), tagLayerId, tag, Constants.CONFIDENCE_AUTOMATIC);

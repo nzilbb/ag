@@ -35,14 +35,15 @@ getSchema(s => {
       && /.*lang.*/.test(layer.id));
   // select the first one by default
   transcriptLanguageLayerId.selectedIndex = 1;
-  
-  var phraseLanguageLayerId = document.getElementById("phraseLanguageLayerId");
-  addLayerOptions(
-    phraseLanguageLayerId, schema,
-    layer => layer.parentId == schema.turnLayerId && layer.alignment == 2
-      && /.*lang.*/.test(layer.id));
-  // select the first one by default
-  phraseLanguageLayerId.selectedIndex = 1;
+
+  // TODO
+  // var phraseLanguageLayerId = document.getElementById("phraseLanguageLayerId");
+  // addLayerOptions(
+  //   phraseLanguageLayerId, schema,
+  //   layer => layer.parentId == schema.turnLayerId && layer.alignment == 2
+  //     && /.*lang.*/.test(layer.id));
+  // // select the first one by default
+  // phraseLanguageLayerId.selectedIndex = 1;
 
   // populate syllable recovery phone layer options...
   var phoneLayerId = document.getElementById("phoneLayerId");
