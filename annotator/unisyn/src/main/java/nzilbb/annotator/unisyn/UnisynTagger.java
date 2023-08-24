@@ -1806,11 +1806,23 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
       
       StringBuilder labelExpression = new StringBuilder();
       labelExpression.append("layer.id == '").append(esc(tokenLayer.getId())).append("'");
-      if (transcriptLanguageLayerId != null && targetLanguagePattern != null) {
-        labelExpression.append(" && /").append(targetLanguagePattern).append("/.test(first('")
-          .append(esc(transcriptLanguageLayerId)).append("').label)");
-        // TODO take phraseLanguageLayerId into account
-      }
+      if (targetLanguagePattern != null
+          && (phraseLanguageLayerId != null || transcriptLanguageLayerId != null)) {
+        labelExpression.append(" && /").append(targetLanguagePattern).append("/.test(");
+        if (phraseLanguageLayerId != null) {
+          labelExpression.append("first('").append(esc(phraseLanguageLayerId))
+            .append("').label");
+          if (transcriptLanguageLayerId != null) {
+            labelExpression.append(" ?? "); // add coalescing operator
+          }
+        }
+        if (transcriptLanguageLayerId != null) {
+          labelExpression.append("first('").append(esc(transcriptLanguageLayerId))
+            .append("').label");
+        }
+        labelExpression.append(")");
+      } // add language condition
+      
       if (expression != null && expression.trim().length() > 0) {
         labelExpression.append(" && [");
         String[] ids = store.getMatchingTranscriptIds(expression);
