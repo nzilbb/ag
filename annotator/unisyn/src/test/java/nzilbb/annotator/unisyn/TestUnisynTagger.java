@@ -1373,6 +1373,161 @@ public class TestUnisynTagger {
   }
 
   /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly,
+   * including partial language filtering. */
+  @Test public void transformTranscriptsWithPartialLanguageFiltering() {
+    GraphStoreHarness store = new GraphStoreHarness();
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    try {
+      annotator.setTaskParameters(
+        "tokenLayerId=word"
+        +"&transcriptLanguageLayerId=transcript_language"
+        +"&phraseLanguageLayerId="
+        +"&targetLanguagePattern=en.*"
+        +"&tagLayerId=unisyn"
+        +"&lexicon=test.unisyn"
+        +"&field=pron_disc"
+        +"&firstVariantOnly=false");
+      
+      // call tagMatchingAnnotations
+      annotator.transformTranscripts(store, null);
+    } catch(Exception exception) {
+      fail("trancript lang only: "+exception);
+    }
+
+    // check the right calls were made to the graph store
+    assertEquals("aggregateMatchingAnnotations operation",
+                 "DISTINCT", store.aggregateMatchingAnnotationsOperation);
+    assertEquals(
+      "trancript lang only: aggregateMatchingAnnotations expression",
+      "layer.id == 'word'"
+      +" && /en.*/.test(first('transcript_language').label)",
+      store.aggregateMatchingAnnotationsExpression);
+    
+    assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
+                 2, store.tagMatchingAnnotationsLabels.size());
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId quick",
+      "kw'Ik", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId brown",
+      "br'6n", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
+                 2, store.tagMatchingAnnotationsLayerIds.size());
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId quick",
+      "unisyn", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId brown",
+      "unisyn", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals("trancript lang only: tagMatchingAnnotations num confidences: "
+                 + store.tagMatchingAnnotationsConfidences,
+                 2, store.tagMatchingAnnotationsConfidences.size());
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId quick",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId brown",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'brown'"));
+
+    store = new GraphStoreHarness();
+    try {
+      annotator.setTaskParameters(
+        "tokenLayerId=word"
+        +"&transcriptLanguageLayerId="
+        +"&phraseLanguageLayerId=lang"
+        +"&targetLanguagePattern=en.*"
+        +"&tagLayerId=unisyn"
+        +"&lexicon=test.unisyn"
+        +"&field=pron_disc"
+        +"&firstVariantOnly=false");
+      
+      // call tagMatchingAnnotations
+      annotator.transformTranscripts(store, null);
+    } catch(Exception exception) {
+      fail("phrase lang only: "+exception);
+    }
+
+    // check the right calls were made to the graph store
+    assertEquals("phrase lang only: aggregateMatchingAnnotations operation",
+                 "DISTINCT", store.aggregateMatchingAnnotationsOperation);
+    assertEquals(
+      "phrase lang only: aggregateMatchingAnnotations expression",
+      "layer.id == 'word'"
+      +" && /en.*/.test(first('lang').label)",
+      store.aggregateMatchingAnnotationsExpression);
+    
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
+      2, store.tagMatchingAnnotationsLabels.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      "kw'Ik", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations layerId brown",
+      "br'6n", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations num layerIds: "
+      + store.tagMatchingAnnotationsLayerIds,
+      2, store.tagMatchingAnnotationsLayerIds.size());
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations layerId quick",
+      "unisyn", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations layerId brown",
+      "unisyn", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals("phrase lang only: tagMatchingAnnotations num confidences: "
+                 + store.tagMatchingAnnotationsConfidences,
+                 2, store.tagMatchingAnnotationsConfidences.size());
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations layerId quick",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations layerId brown",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'brown'"));
+  }
+
+  /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly,
    * excluding language filtering. */
   @Test public void transformTranscriptsWithoutLanguageFiltering() {
     GraphStoreHarness store = new GraphStoreHarness();
