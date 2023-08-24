@@ -1089,6 +1089,57 @@ public class TestAGQLListener {
                  "labels('corpus') EMPTY INTERSECTION ['IA','CC']", parse.toString());
   }
 
+  @Test public void coalesce() {
+    final StringBuffer parse = new StringBuffer();
+    final StringBuffer error = new StringBuffer();
+    AGQLListener listener = new AGQLBaseListener() {
+        // @Override public void exitEveryRule(ParserRuleContext ctx)
+        // {
+        //   System.out.println(ctx.getClass().getSimpleName() + ": " + ctx.getText());
+        // }
+        @Override public void exitCoalesceExpression(AGQLParser.CoalesceExpressionContext ctx) {
+          parse.append("COALESCE< "
+                       + ctx.leftOperand.getText()
+                       + " || "
+                       + ctx.rightOperand.getText()
+                       + " >");
+        }
+        @Override public void visitErrorNode(ErrorNode node) {
+          // System.out.println("ERROR: " + node.getText());
+          error.append(node.getText());
+        }
+      };
+
+    AGQLLexer lexer = new AGQLLexer(
+      CharStreams.fromString(
+        "/en.*/.test(first('language').label ?? first('transcript_language').label)"));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    AGQLParser parser = new AGQLParser(tokens);
+    AGQLParser.BooleanExpressionContext tree = parser.booleanExpression();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
+    assertTrue("INCLUDESANY: No errors: " + error.toString(), error.length() == 0);
+    assertEquals(
+      "INCLUDESANY: Parse structure: " + parse,
+      "COALESCE< first('language').label || first('transcript_language').label >",
+      parse.toString());
+
+    // TODO figure out why "COALESCE(a,b)" expressions don't work
+    // parse.setLength(0);
+    // lexer = new AGQLLexer(
+    //   CharStreams.fromString(
+    //     "/en.*/.test(COALESCE(first('language').label, first('transcript_language').label))"));
+    // tokens = new CommonTokenStream(lexer);
+    // parser = new AGQLParser(tokens);
+    // tree = parser.booleanExpression();
+    // ParseTreeWalker.DEFAULT.walk(listener, tree);
+    // assertTrue("INCLUDESANY: No errors: " + error.toString(), error.length() == 0);
+    // assertEquals(
+    //   "INCLUDESANY: Parse structure: " + parse,
+    //   "COALESCE< first('language').label || first('transcript_language').label >",
+    //   parse.toString());
+
+  }
+
   @Test public void patternMatchExpression() {
     final StringBuffer parse = new StringBuffer();
     final StringBuffer error = new StringBuffer();

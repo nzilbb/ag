@@ -1,6 +1,6 @@
 /**
  * Annotation Graph Query Language grammar.
- * Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
+ * Copyright 2015-2023 New Zealand Institute of Language, Brain and Behaviour, 
  * University of Canterbury
  * Written by Robert Fromont - robert.fromont@canterbury.ac.nz
  *
@@ -80,7 +80,30 @@ operand
   | anchorConfidenceExpression # AnchorConfidenceOperand
   | graphIdExpression          # GraphIdOperand
   | listLengthExpression       # ListLengthOperand
+  | coalesceExpression         # CoalesceOperand
   | atom                       # AtomOperand
+  ;
+
+coalesceParameter
+  : ordinalExpression          # CoalesceOrdinalOperand
+  | labelExpression            # CoalesceLabelOperand
+  | annotatorExpression        # CoalesceAnnotatorOperand
+  | whenExpression             # CoalesceWhenOperand
+  | layerExpression            # CoalesceLayerOperand
+  | idExpression               # CoalesceIdOperand
+  | parentIdExpression         # CoalesceParentIdOperand
+  | confidenceExpression       # CoalesceConfidenceOperand
+  | anchorIdExpression         # CoalesceAnchorIdOperand
+  | anchorOffsetExpression     # CoalesceAnchorOffsetOperand
+  | anchorConfidenceExpression # CoalesceAnchorConfidenceOperand
+  | graphIdExpression          # CoalesceGraphIdOperand
+  | listLengthExpression       # CoalesceListLengthOperand
+  | atom                       # CoalesceAtomOperand
+  ;
+  
+coalesceExpression
+  : COALESCE OPEN_PAREN leftOperand=coalesceParameter COMMA rightOperand=coalesceParameter CLOSE_PAREN
+  | leftOperand=coalesceParameter COALESCING rightOperand=coalesceParameter
   ;
 
 listExpression
@@ -311,6 +334,8 @@ INTEGER_LITERAL       : '-'? [0-9]+ ;
 NUMBER_LITERAL        : '-'? [0-9]+ '.' [0-9]+ ; 
 SLASH                 : '/' ;
 NOT                   : ' NOT' | '!' ;
+COALESCE              : 'COALESCE' ;
+COALESCING            : '??' ;
 
 /* ignore white space */
 WS : [ \n\t\r]+ -> channel(HIDDEN);
