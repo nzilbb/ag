@@ -29,10 +29,7 @@ import nzilbb.ag.StoreException;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
-public class AGQLException
-  extends StoreException
-{
-  // Attributes:
+public class AGQLException extends StoreException {
 
   /**
    * AGQL expression that caused the error.
@@ -75,23 +72,20 @@ public class AGQLException
   /**
    * Default constructor.
    */
-  public AGQLException()
-  {
+  public AGQLException() {
   } // end of constructor
   
   /**
    * Constructor with message.
    */
-  public AGQLException(String message)
-  {
+  public AGQLException(String message) {
     super(message);
   } // end of constructor
 
   /**
    * Constructor.
    */
-  public AGQLException(String expression, List<String> errors)
-  {
+  public AGQLException(String expression, List<String> errors) {
     super("Error parsing \""+expression+"\": " + errors.toString());
     setExpression(expression);
     setErrors(errors);

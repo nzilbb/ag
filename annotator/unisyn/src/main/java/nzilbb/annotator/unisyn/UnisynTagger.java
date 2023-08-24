@@ -39,6 +39,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -54,6 +55,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
@@ -64,6 +66,9 @@ import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.sql.ConnectionFactory;
+import nzilbb.editpath.EditStep;
+import nzilbb.editpath.MinimumEditPathString;
+import nzilbb.encoding.comparator.DISC2DISCComparator;
 import nzilbb.util.IO;
 
 /**
@@ -71,12 +76,10 @@ import nzilbb.util.IO;
  * <a href="https://www.cstr.ed.ac.uk/projects/unisyn/">
  *  https://www.cstr.ed.ac.uk/projects/unisyn/</a>
  */
-// TODO migration:
-// TODO rename tables Unisyn_ -> UnisynTagger_
 @UsesRelationalDatabase
 public class UnisynTagger extends Annotator implements ImplementsDictionaries {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.6"; }
+  public String getMinimumApiVersion() { return "1.1.3"; }
   
   /**
    * {@link UsesRelationalDatabase} method that sets the information required for
@@ -1130,7 +1133,14 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * @param newTargetLanguagePattern Regular expression for specifying which language to
    * tag the tokens of. 
    */
-  public UnisynTagger setTargetLanguagePattern(String newTargetLanguagePattern) { targetLanguagePattern = newTargetLanguagePattern; return this; }
+  public UnisynTagger setTargetLanguagePattern(String newTargetLanguagePattern) {
+    if (newTargetLanguagePattern != null // empty string means null
+        && newTargetLanguagePattern.trim().length() == 0) {
+      newTargetLanguagePattern = null;
+    }
+    targetLanguagePattern = newTargetLanguagePattern;
+    return this;
+  }
   
   /**
    * The ID of the lexicon to use.
@@ -1203,7 +1213,8 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * Setter for {@link #stripSyllStress}: Whether to strip syllable/stress markings or not.
    * @param newStripSyllStress Whether to strip syllable/stress markings or not.
    */
-  public UnisynTagger setStripSyllStress(Boolean newStripSyllStress) { stripSyllStress = newStripSyllStress; return this; }
+  public UnisynTagger setStripSyllStress(Boolean newStripSyllStress) {
+    stripSyllStress = newStripSyllStress; return this; }
   
   /**
    * Which field to annotate the token with.
@@ -1239,21 +1250,43 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
   public UnisynTagger setField(String newField) { field = newField; return this; }
   
   /**
-   * Whether to recover syllable structure.
-   * @see #getRecoverSyllables()
-   * @see #setRecoverSyllables(Boolean)
+   * LayerId containing phones for which syllable structure should be recovered.
+   * <p> If set, the annotator looks up the stress/syllable-tagged pronunciation for each
+   * token, and uses it to partition the phones on this layer into stress-marked syllables
+   * - i.e. an annotation will be created for each syllable, with start/end anchors
+   * coinciding with the first/last phones on <var>phoneLayerId</var>.
+   * @see #getPhoneLayerId()
+   * @see #setPhoneLayerId(String)
    */
-  protected Boolean recoverSyllables;
+  protected String phoneLayerId;
   /**
-   * Getter for {@link #recoverSyllables}: Whether to recover syllable structure.
-   * @return Whether to recover syllable structure.
+   * Getter for {@link #phoneLayerId}: LayerId containing phones for which syllable
+   * structure should be recovered. 
+   * <p> If set, the annotator looks up the stress/syllable-tagged pronunciation for each
+   * token, and uses it to partition the phones on this layer into stress-marked syllables
+   * - i.e. an annotation will be created for each syllable, with start/end anchors
+   * coinciding with the first/last phones on <var>syllableComponentLayerId</var>.
+   * @return LayerId containing phones for which syllable structure should be recovered.
    */
-  public Boolean getRecoverSyllables() { return recoverSyllables; }
+  public String getPhoneLayerId() { return phoneLayerId; }
   /**
-   * Setter for {@link #recoverSyllables}: Whether to recover syllable structure.
-   * @param newRecoverSyllables Whether to recover syllable structure.
+   * Setter for {@link #phoneLayerId}: LayerId containing phones for which syllable
+   * structure should be recovered. 
+   * <p> If set, the annotator looks up the stress/syllable-tagged pronunciation for each
+   * token, and uses it to partition the phones on this layer into stress-marked syllables
+   * - i.e. an annotation will be created for each syllable, with start/end anchors
+   * coinciding with the first/last phones on <var>syllableComponentLayerId</var>.
+   * @param newPhoneLayerId LayerId containing phones for which syllable structure should
+   * be recovered. 
    */
-  public UnisynTagger setRecoverSyllables(Boolean newRecoverSyllables) { recoverSyllables = newRecoverSyllables; return this; }
+  public UnisynTagger setPhoneLayerId(String newPhoneLayerId) {
+    if (newPhoneLayerId != null // empty string means null
+        && newPhoneLayerId.trim().length() == 0) {
+      newPhoneLayerId = null;
+    }
+    phoneLayerId = newPhoneLayerId;
+    return this;
+  }
   
   /**
    * Sets the configuration for a given annotation task.
@@ -1275,7 +1308,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
       }
       stripSyllStress = Boolean.TRUE;
       firstVariantOnly = Boolean.FALSE;
-      recoverSyllables = Boolean.FALSE;
+      phoneLayerId = null;
       
       // default transcript language layer
       Layer[] candidates = schema.getMatchingLayers(
@@ -1318,13 +1351,12 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
       lexicon = null;
       stripSyllStress = null;
       firstVariantOnly = Boolean.FALSE;
-      recoverSyllables = Boolean.FALSE;
+      phoneLayerId = null;
 
       // set state from parameters
       beanPropertiesFromQueryString(parameters);
     }
     if (firstVariantOnly == null) firstVariantOnly = Boolean.FALSE;
-    if (recoverSyllables == null) recoverSyllables = Boolean.FALSE;
       
     if (schema.getLayer(tokenLayerId) == null)
       throw new InvalidConfigurationException(this, "Token layer not found: " + tokenLayerId);
@@ -1334,6 +1366,13 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
     if (phraseLanguageLayerId != null && schema.getLayer(phraseLanguageLayerId) == null) 
       throw new InvalidConfigurationException(
         this, "Phrase language layer not found: " + phraseLanguageLayerId);
+    if (phoneLayerId != null) {
+      if (schema.getLayer(phoneLayerId) == null) 
+        throw new InvalidConfigurationException(
+          this, "Phone layer not found: " + phoneLayerId);
+      // stripping syllable boundaries makes no sense if we're recovering syllable structure
+      stripSyllStress = Boolean.FALSE;
+    }
     if (lexicon == null || lexicon.length() == 0)
       throw new InvalidConfigurationException(this, "Lexicon not specified");
     try { // check dictionary configuration is valid
@@ -1367,7 +1406,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
     if (tagLayer == null) {
       schema.addLayer(
         new Layer(tagLayerId)
-        .setAlignment(Constants.ALIGNMENT_NONE)
+        .setAlignment(phoneLayerId == null?Constants.ALIGNMENT_NONE:Constants.ALIGNMENT_INTERVAL)
         .setPeers(!firstVariantOnly)
         .setParentId(schema.getWordLayerId())
         .setType(
@@ -1404,6 +1443,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
       throw new InvalidConfigurationException(this, "No input token layer set.");
     Vector<String> requiredLayers = new Vector<String>();
     requiredLayers.add(tokenLayerId);
+    if (phoneLayerId !=null) requiredLayers.add(phoneLayerId);
     if (transcriptLanguageLayerId != null) requiredLayers.add(transcriptLanguageLayerId);
     if (phraseLanguageLayerId != null) requiredLayers.add(phraseLanguageLayerId);
     return requiredLayers.toArray(new String[0]);
@@ -1440,6 +1480,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         throw new InvalidConfigurationException(
           this, "Invalid input token layer: " + tokenLayerId);
       }
+      String wordLayerId = tokenLayerId;
       Layer tagLayer = graph.getSchema().getLayer(tagLayerId);
       if (tagLayer == null) {
         throw new InvalidConfigurationException(
@@ -1448,7 +1489,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
          
       // what languages are in the transcript?
       boolean transcriptIsMainlyTargetLang = true;
-      if (transcriptLanguageLayerId != null) {
+      if (transcriptLanguageLayerId != null && targetLanguagePattern != null) {
         Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
         if (transcriptLanguage != null) {
           if (!transcriptLanguage.getLabel().matches(targetLanguagePattern)) { // not TargetLang
@@ -1457,18 +1498,17 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         }
       }
       boolean thereArePhraseTags = false;
-      if (phraseLanguageLayerId != null) {
+      if (phraseLanguageLayerId != null && targetLanguagePattern != null) {
         if (graph.first(phraseLanguageLayerId) != null) {
           thereArePhraseTags = true;
         }
       }
 
       TreeMap<String,Vector<Annotation>> toAnnotate = new TreeMap<String,Vector<Annotation>>();
-      // TODO recoverSyllables
       // should we just tag everything?
       if (transcriptIsMainlyTargetLang && !thereArePhraseTags) {
         // process all tokens
-        for (Annotation token : graph.all(tokenLayerId)) {
+        for (Annotation token : graph.all(wordLayerId)) {
           // tag only tokens that are not already tagged
           if (token.first(tagLayerId) == null) { // not tagged yet
             registorForAnnotation(token, toAnnotate);
@@ -1480,14 +1520,14 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         // tag the exceptions
         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
           if (!phrase.getLabel().matches(targetLanguagePattern)) { // not TargetLang
-            for (Annotation token : phrase.all(tokenLayerId)) {
+            for (Annotation token : phrase.all(wordLayerId)) {
               // mark the token as an exception
               token.put("@notTargetLang", Boolean.TRUE);
             } // next token in the phrase
           } // non-TargetLang phrase
         } // next phrase
             
-        for (Annotation token : graph.all(tokenLayerId)) {
+        for (Annotation token : graph.all(wordLayerId)) {
           if (token.containsKey("@notTargetLang")) {
             // while we're here, we remove the @notTargetLang mark
             token.remove("@notTargetLang");
@@ -1502,7 +1542,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         // process only the tokens phrase-tagged as TargetLang
         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
           if (phrase.getLabel().matches(targetLanguagePattern)) {
-            for (Annotation token : phrase.all(tokenLayerId)) {
+            for (Annotation token : phrase.all(wordLayerId)) {
               // tag only tokens that are not already tagged
               if (token.first(tagLayerId) == null) { // not tagged yet
                 registorForAnnotation(token, toAnnotate);
@@ -1517,35 +1557,43 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         try {
           int t = 0;
           int typeCount = toAnnotate.size();
+          setStatus("Distinct words: " + typeCount);
           setPercentComplete(0);
           for (String type : toAnnotate.keySet()) { // for each type
             if (isCancelling()) break;
-            boolean found = false;
-            HashSet<String> soFar = new HashSet<String>(); // only unique entries
-            for (String entry : dictionary.lookup(type)) {
+            if (phoneLayerId != null) { // syllable recovery
               
-              if (!found) setStatus("Tagging: " + type); // (log this only once)
-              found = true;
-              if (stripSyllStress) {
-                entry = entry.replaceAll(
-                  // replace characters in this class
-                  "['\",-]"
-                  // also any trailing space in case phonemes are space-delimited,
-                  // extra spaces aren't left behind
-                  +" *","");
-              }
-              if (!soFar.contains(entry)) { // duplicates are possible if stripSyllStress
-                for (Annotation token : toAnnotate.get(type)) {
-                  token.createTag(tagLayerId, entry)
-                    .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+              recoverSyllables(toAnnotate.get(type), dictionary.lookup(type));
+              
+            } else { // regular lookup/tag
+
+              boolean found = false;
+              HashSet<String> soFar = new HashSet<String>(); // only unique entries
+              for (String entry : dictionary.lookup(type)) {
+                
+                if (!found) setStatus("Tagging: " + type); // (log this only once)
+                found = true;
+                
+                if (stripSyllStress) {
+                  entry = entry.replaceAll(
+                    // replace characters in this class
+                    "['\",-]" // TODO don't assume DISC
+                    // also any trailing space in case phonemes are space-delimited,
+                    // extra spaces aren't left behind
+                    +" *","");
                 }
-                soFar.add(entry);
-              }
+                if (!soFar.contains(entry)) { // duplicates are possible if stripSyllStress
+                  for (Annotation token : toAnnotate.get(type)) {
+                    token.createTag(tagLayerId, entry)
+                      .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                  } // for each token
+                  soFar.add(entry);
+                }
               
-              // do we want the first entry only?
-              if (firstVariantOnly) break;
-              
-            } // next entry
+                // do we want the first entry only?
+                if (firstVariantOnly) break;
+              } // next entry
+            } // regular lookup/tag
             setPercentComplete(++t * 100 / typeCount);
             
           } // next type
@@ -1563,16 +1611,107 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
   }
   
   /**
-   * Registers a token for annotation.
-   * @param token
-   * @param toAnnotate
+   * Recover syllables for all the given tokens of the given type.
+   * @param tokens Word tokens to recover the syllables of.
+   * @param pronunciations Syllable/stress marked possible pronunciations from dictionary.
+   */
+  protected void recoverSyllables(Vector<Annotation> tokens, List<String> pronunciations) {
+    if (pronunciations.size() == 0) return; // no pronunciation entries
+    if (tokens.size() == 0) return; // no tokens
+    Graph graph = tokens.get(0).getGraph();    
+    
+    for (Annotation token : tokens) {
+
+      if (token.first(tagLayerId) != null) {
+        setStatus(
+          "Skipping token with existing " + tagLayerId + " annotations: "
+          + token.getLabel() + " ("+token.getId()+")");
+        continue;
+      }
+      Annotation phones[] = token.all(phoneLayerId);
+      if (phones.length > 0) { // there are phones to recover syllabification from
+        
+        // find the best entry for these segments
+        final String concatenatedSegments = Arrays.stream(phones)
+          .map(segment -> segment.getLabel())
+          .collect(Collectors.joining());
+        final String stressMarkers = field.equals("pron_disc")?"['\",]":"[*~-]";
+        final String syllableStressMarkers = field.equals("pron_disc")?"['\",-]":"[.*~-]";
+        final Character syllableBoundary = field.equals("pron_disc")?'-':'.';
+        String firstPron = pronunciations.get(0);
+        Optional<String> firstMatchingPron = pronunciations.stream()
+          .filter(pron -> concatenatedSegments.equals(pron.replaceAll(syllableStressMarkers,"")))
+          .findAny();
+        Optional<String> firstMatchingStressedPron = pronunciations.stream()
+          .filter(pron -> concatenatedSegments.equals(pron.replaceAll(syllableStressMarkers,"")))
+          .filter(pron -> pron.matches(".*"+stressMarkers+".*"))
+          .findAny();
+        String bestPron = firstMatchingStressedPron
+          .orElse(firstMatchingPron
+                  .orElse(firstPron));
+        setStatus("Token " + token + " -> " + bestPron);
+
+        // find an edit path between bestPron and the phone labels
+        MinimumEditPathString editPath  = new MinimumEditPathString(new DISC2DISCComparator());
+        List<EditStep<Character>> path = editPath.minimumEditPath(bestPron, concatenatedSegments);
+
+        // traverse the edit path looking for syllable boundaries, annotating as we go
+        int p = -1; // phones index
+        int o = 1; // syllable ordinal
+        Annotation firstPhone = phones[0];
+        Annotation lastPhone = phones[0];
+        StringBuilder label = new StringBuilder();
+        for (EditStep<Character> step : path) {
+          Character syllableCharacter = step.getFrom();
+          Character phoneLabel = step.getTo();
+          // increment phone index if this step has one
+          if (phoneLabel != null) {
+            if (p < phones.length-1) {
+              p++;
+            }
+            lastPhone = phones[p];
+            if (firstPhone == null) firstPhone = phones[p];
+          }
+          // have we hit a syllable boundary?
+          if (syllableBoundary.equals(syllableCharacter)) {
+            if (firstPhone == null) firstPhone = lastPhone;
+            // annotate the syllable
+            graph.createSpan​(firstPhone, lastPhone, tagLayerId, label.toString(), token)
+              .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+            // next syllable should start on the next phone            
+            firstPhone = null;
+            label.setLength(0);
+          } else if (syllableCharacter != null) {
+            // accumulate label
+            label.append(syllableCharacter);
+          }
+        } // next edit step
+        
+        // finish last syllable
+        if (firstPhone == null) firstPhone = lastPhone;
+        graph.createSpan​(firstPhone, lastPhone, tagLayerId, label.toString(), token)
+          .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                
+      } // there are phones
+    } // token doesn't already have syllables
+  } // end of recoverSyllables()
+  
+  /**
+   * Registers a token for annotation, by adding it to the list in the given map of labels
+   * to annotations with that label.
+   * @param token The token to annotate.
+   * @param toAnnotate A map of label→Annotations that may or may not contain an entry for
+   * this token's label
    */
   protected void registorForAnnotation(
     Annotation token, TreeMap<String,Vector<Annotation>> toAnnotate) {
-    if (!toAnnotate.containsKey(token.getLabel())) {
-      toAnnotate.put(token.getLabel(), new Vector<Annotation>());
+    String lookup = token.getLabel();
+    if (lookup.length() > 0) {
+      if (!toAnnotate.containsKey(lookup)) {
+        toAnnotate.put(lookup, new Vector<Annotation>());
+      }
+      toAnnotate.get(lookup).add(token);
     }
-    toAnnotate.get(token.getLabel()).add(token);
   } // end of registorForAnnotation()
 
   /**
@@ -1598,10 +1737,10 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
 
       String tokenExpression = "layerId = '"+esc(tokenLayerId)+"'"
         +" && label = '"+esc(sourceLabel)+"'";
-      if (transcriptLanguageLayerId != null
-          && (targetLanguagePattern != null && targetLanguagePattern.length() > 0)) {
+      if (transcriptLanguageLayerId != null && targetLanguagePattern != null) {
         tokenExpression += " && /"+targetLanguagePattern+"/.test(first('"
           +esc(transcriptLanguageLayerId)+"').label)";
+        // TODO take phraseLanguageLayerId into account
       }
       int count = 0;
       HashSet<String> soFar = new HashSet<String>(); // only unique entries
@@ -1609,7 +1748,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
         if (stripSyllStress) {
           tag = tag.replaceAll(
             // replace characters in this class
-            "['\",-]"
+            "['\",-]" // TODO don't assume DISC
             // also any trailing space in case phonemes are space-delimited,
             // extra spaces aren't left behind
             +" *","");
@@ -1628,6 +1767,122 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
       throw new TransformationException(this, x);
     } finally {
       dictionary.close();
+    }
+  }
+  
+  /**
+   * Transforms all graphs from the given graph store that match the given graph expression.
+   * <p> This implementation uses
+   * {@link GraphStoreQuery#aggregateMatchingAnnotations(String,String)}
+   * and {@link GraphStore#tagMatchingAnnotations​(String,String,String,Integer)}
+   * to optimize tagging transcripts en-masse.
+   * @param store The graph to store.
+   * @param expression An expression for identifying transcripts to update, or null to transform
+   * all transcripts in the store.
+   * @return The changes introduced by the tranformation.
+   * @throws TransformationException If the transformation cannot be completed.
+   */
+  public void transformTranscripts​(GraphStore store, String expression)
+    throws TransformationException, InvalidConfigurationException, StoreException,
+    PermissionException {
+    if (phoneLayerId != null) { // syllable recovery should be done one transcript at a time
+      super.transformTranscripts​(store, expression);
+      return;
+    }
+    
+    setRunning(true);
+    try {
+      setPercentComplete(0);
+      Layer tokenLayer = schema.getLayer(tokenLayerId);
+      if (tokenLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid input token layer: " + tokenLayerId);
+      }
+      Layer tagLayer = schema.getLayer(tagLayerId);
+      if (tagLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid output tag layer: " + tagLayerId);
+      }    
+      
+      StringBuilder labelExpression = new StringBuilder();
+      labelExpression.append("layer.id == '").append(esc(tokenLayer.getId())).append("'");
+      if (targetLanguagePattern != null
+          && (phraseLanguageLayerId != null || transcriptLanguageLayerId != null)) {
+        labelExpression.append(" && /").append(targetLanguagePattern).append("/.test(");
+        if (phraseLanguageLayerId != null) {
+          labelExpression.append("first('").append(esc(phraseLanguageLayerId))
+            .append("').label");
+          if (transcriptLanguageLayerId != null) {
+            labelExpression.append(" ?? "); // add coalescing operator
+          }
+        }
+        if (transcriptLanguageLayerId != null) {
+          labelExpression.append("first('").append(esc(transcriptLanguageLayerId))
+            .append("').label");
+        }
+        labelExpression.append(")");
+      } // add language condition
+      
+      if (expression != null && expression.trim().length() > 0) {
+        labelExpression.append(" && [");
+        String[] ids = store.getMatchingTranscriptIds(expression);
+        if (ids.length == 0) {
+          setStatus("No matching transcripts");
+          setPercentComplete(100);
+          return;
+        } else {
+          labelExpression.append(
+            Arrays.stream(ids)
+            // quote and escape each ID
+            .map(id->"'"+id.replace("'", "\\'")+"'")
+            // make a comma-delimited list
+            .collect(Collectors.joining(",")));
+          labelExpression.append("].includes(graphId)");
+        }
+      }
+      setStatus("Getting distinct token labels...");
+      String[] distinctWords = store.aggregateMatchingAnnotations(
+        "DISTINCT", labelExpression.toString());
+      setStatus("There are "+distinctWords.length+" distinct token labels");
+      int w = 0;
+      Dictionary dictionary = getDictionary();
+      // for each label
+      for (String word : distinctWords) {
+        if (isCancelling()) break;
+        HashSet<String> soFar = new HashSet<String>(); // only unique entries
+        for (String tag : dictionary.lookup(word)) {
+          if (isCancelling()) break;
+          if (stripSyllStress) {
+            tag = tag.replaceAll(
+              // replace characters in this class
+              "['\",-]" // TODO don't assume DISC
+              // also any trailing space in case phonemes are space-delimited,
+              // extra spaces aren't left behind
+              +" *","");
+          }
+          if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
+            StringBuilder tokenExpression = new StringBuilder(labelExpression);
+            tokenExpression.append(" && label == '").append(esc(word)).append("'");
+            setStatus(word+" → "+tag);
+            store.tagMatchingAnnotations(
+              tokenExpression.toString(), tagLayerId, tag, Constants.CONFIDENCE_AUTOMATIC);
+            soFar.add(tag);
+          }
+          // do we want the first entry only?
+          if (firstVariantOnly) break;        
+        } // next entry
+        setPercentComplete((++w * 100) / distinctWords.length);
+      } // next word
+      if (isCancelling()) {
+        setStatus("Cancelled.");
+      } else {
+        setPercentComplete(100);
+        setStatus("Finished.");
+      }
+    } catch(DictionaryException x) {
+      throw new TransformationException(this, x);
+    } finally {
+      setRunning(false);
     }
   }
   
@@ -1735,7 +1990,6 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
     try {
       String keyField = "wordform";
       String valueField = field;
-      if (recoverSyllables) keyField = field;
       return getDictionary(lexicon, keyField, valueField);
     } catch (PatternSyntaxException sqlP) {
       throw new DictionaryException(null, sqlP);

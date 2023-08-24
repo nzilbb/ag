@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -128,6 +128,16 @@ public interface CloneableBean {
               if (v != null) {
                 if (v instanceof CloneableBean) {
                   map.add(k.toString(), ((CloneableBean)v).toJson());
+                } else if (v instanceof List) {
+                  JsonArrayBuilder list = Json.createArrayBuilder();
+                  for (Object e : (List)v) {
+                    if (e instanceof CloneableBean) {
+                      list.add(((CloneableBean)e).toJson());
+                    } else {
+                      list.add(e.toString());
+                    }
+                  }
+                  map.add(k.toString(), list);
                 } else {
                   map.add(k.toString(), v.toString());
                 }

@@ -62,17 +62,17 @@ progress {
 #uploadForm {
     padding-bottom: 20px;
 }
-#sample {
-    border-collapse: collapse;
-    display: inline-table;
-    max-width: 90vw;
-    overflow: auto;
+
+/* For map.html */
+
+.phoneme-orig {
+    font-family: monospace;
 }
-#sample th input {
-    width: 95%;
+.phoneme-disc input {
+    width: 20px;
 }
-#sample td {
-    border: 1px solid silver;
+.note input {
+    width: 200px;
 }
 
 /* Layout on narrower screens */

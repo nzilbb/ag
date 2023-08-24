@@ -87,7 +87,7 @@ The basic process of making a YouTube video corpus with TextGrid transcripts is:
 
 ### 1. Download Youtube videos with subtitles
 
-There's a tool called [youtube-dl](https://rg3.github.io/youtube-dl/) which can be used for
+There's a tool called [yt-dlp](https://github.com/yt-dlp/yt-dlp) which can be used for
 downloading videos from YouTube. It's a command-line program that can be given a URL for
 downloading. If the URL is a playlist, then it will download all videos in the playlist into
 separate files.
@@ -107,12 +107,12 @@ It has many useful command-line options:
 So for example the following command will download MP4 files and English closed-captions
 for the given playlist:  
 ```
-youtube-dl -f mp4 --sub-lang en https://www.youtube.com/playlist?list=PLdsZeeCVYnY3em55M2d3Iq3H-jSPLIWBF
+yt-dlp -f mp4 --sub-lang en https://www.youtube.com/playlist?list=PLdsZeeCVYnY3em55M2d3Iq3H-jSPLIWBF
 ```
 
 ...and the following will download WAV files instead of MP4 for the given playlist:  
 ```
-youtube-dl  --extract-audio --audio-format wav --sub-lang en https://www.youtube.com/playlist?list=PLdsZeeCVYnY3em55M2d3Iq3H-jSPLIWBF
+yt-dlp  --extract-audio --audio-format wav --sub-lang en https://www.youtube.com/playlist?list=PLdsZeeCVYnY3em55M2d3Iq3H-jSPLIWBF
 ```
 
 **Caveat:** There's a potential problem with using YouTube's automatically-generated captions;

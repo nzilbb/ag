@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -34,73 +34,73 @@ import nzilbb.sql.mysql.MySQLTranslator;
  */
 public class DerbyConnectionFactory implements ConnectionFactory {
 
-   // Attributes:
+  // Attributes:
 
-   /**
-    * Location for the database files.
-    * @see #getLocation()
-    * @see #setLocation(File)
-    */
-   protected File location;
-   /**
-    * Getter for {@link #location}: Location for the database files.
-    * @return Location for the database files.
-    */
-   public File getLocation() { return location; }
-   /**
-    * Setter for {@link #location}: Location for the database files.
-    * @param newLocation Location for the database files.
-    */
-   public DerbyConnectionFactory setLocation(File newLocation) { location = newLocation; return this; }
+  /**
+   * Location for the database files.
+   * @see #getLocation()
+   * @see #setLocation(File)
+   */
+  protected File location;
+  /**
+   * Getter for {@link #location}: Location for the database files.
+   * @return Location for the database files.
+   */
+  public File getLocation() { return location; }
+  /**
+   * Setter for {@link #location}: Location for the database files.
+   * @param newLocation Location for the database files.
+   */
+  public DerbyConnectionFactory setLocation(File newLocation) { location = newLocation; return this; }
 
-   /**
-    * Database name - default is "derby".
-    * @see #getName()
-    * @see #setName(String)
-    */
-   protected String name = "derby";
-   /**
-    * Getter for {@link #name}: Database name - default is "derby".
-    * @return Database name.
-    */
-   public String getName() { return name; }
-   /**
-    * Setter for {@link #name}: Database name.
-    * @param newName Database name.
-    */
-   public DerbyConnectionFactory setName(String newName) { name = newName; return this; }
+  /**
+   * Database name - default is "derby".
+   * @see #getName()
+   * @see #setName(String)
+   */
+  protected String name = "derby";
+  /**
+   * Getter for {@link #name}: Database name - default is "derby".
+   * @return Database name.
+   */
+  public String getName() { return name; }
+  /**
+   * Setter for {@link #name}: Database name.
+   * @param newName Database name.
+   */
+  public DerbyConnectionFactory setName(String newName) { name = newName; return this; }
    
-   // Methods:
+  // Methods:
    
-   /**
-    * Constructor.
-    * @param location Location for the database files.
-    */
-   public DerbyConnectionFactory(File location) {
-      this.location = location;
-   } // end of constructor
+  /**
+   * Constructor.
+   * @param location Location for the database files.
+   */
+  public DerbyConnectionFactory(File location) {
+    this.location = location;
+  } // end of constructor
 
-   /**
-    * Creates a new database connection.
-    * @return A connected database connection.
-    * @throws SQLException If there's a problem connecting to the database.
-    */
-   public Connection newConnection() throws SQLException {
-      if (!location.exists()) {
-         throw new SQLException("Location doesn't exist: " + location.getPath());
-      }
-      String connectionURL = "jdbc:derby:"
-         +location.getPath().replace('\\','/') +"/"+name+";create=true";
-      return DriverManager.getConnection(connectionURL, null, null);
-   }
+  /**
+   * Creates a new database connection.
+   * @return A connected database connection.
+   * @throws SQLException If there's a problem connecting to the database.
+   */
+  public Connection newConnection() throws SQLException {
+    if (!location.exists()) {
+      throw new SQLException("Location doesn't exist: " + location.getPath());
+    }
+    String connectionURL = "jdbc:derby:"
+      +location.getPath().replace('\\','/') +"/"+name+";create=true";
+    return DriverManager.getConnection(connectionURL, null, null);
+  }
    
-   /**
-    * Constructs an SQL translator appropriate for the type of connection made by 
-    * {@link #newConnection()}. 
-    * @return An SQL translator.
-    */
-   public MySQLTranslator newSQLTranslator() {
-      return new DerbySQLTranslator();
-   }
+  /**
+   * Constructs an SQL translator appropriate for the type of connection made by 
+   * {@link #newConnection()}. 
+   * @return An SQL translator.
+   */
+  public MySQLTranslator newSQLTranslator() {
+    return new DerbySQLTranslator();
+  }
 
 } // end of class DerbyConnectionFactory

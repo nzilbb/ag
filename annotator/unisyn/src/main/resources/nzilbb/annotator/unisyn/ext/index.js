@@ -18,6 +18,15 @@ function listLexicons() {
       var td = document.createElement("td");
       tr.appendChild(td);
       td.appendChild(document.createTextNode(lexiconId));
+      
+      td = document.createElement("td");
+      tr.appendChild(td);
+      var a = document.createElement("a");
+      td.appendChild(a);
+      a.title = `Phoneme Map for ${lexiconId}`;
+      a.appendChild(document.createTextNode("Phoneme Map"));
+      a.href = `map.html?${lexiconId}`;
+
       td = document.createElement("td");
       tr.appendChild(td);
       var button = document.createElement("button");            
@@ -25,6 +34,11 @@ function listLexicons() {
       button.title = `Delete ${lexiconId}`;
       button.appendChild(document.createTextNode("❌"));
       button.onclick = ()=>{deleteLexicon(lexiconId);};
+    }
+    if (lexiconIds.length == 0) { // no lexicons yet
+      // invite the user to upload a file
+      document.getElementById("uploadForm").open = true;
+
     }
     finishedLoading();
   });
@@ -41,14 +55,9 @@ function deleteLexicon(lexiconId) {
 }
 
 function selectFile() {
-  console.log("selectFile...");
   var input = document.getElementById("file");
-  console.log("input " + input);
-  console.log("files " + input.files);
   if (input.files.length == 0) return;
   var file = input.files[0];
-  console.log("file " + file);
-  console.log("name " + file.name);
   document.getElementById("lexicon").value = file.name
   document.getElementById("btnUploadLexicon").removeAttribute("disabled");
 }
@@ -63,7 +72,6 @@ function uploadLexicon() {
   fd.append("lexicon", document.getElementById("lexicon").value);
   fd.append("file", file);
   postForm("loadLexicon", fd, function(e) {
-    console.log("uploadResult " + this.responseText);
     uploadProgress.max = uploadProgress.max || 100;
     uploadProgress.value = uploadProgress.max;
     var result = this.responseText;
@@ -77,13 +85,11 @@ function uploadLexicon() {
         = "<p class='error'>"+result+"</p>";
     }
   }, function(e) {
-    console.log("uploadProgress " + e.loaded);
     if (e.lengthComputable) {
       uploadProgress.max = e.total;
       uploadProgress.value = e.loaded;
     }
   }, function(e) {
-    console.log("uploadFailed " + this.responseText);
     uploadProgress.max = uploadProgress.max || 100;
     uploadProgress.value = uploadProgress.value || 1;
     document.getElementById("uploadResult").innerHTML
@@ -98,7 +104,6 @@ function trackLexiconLoad() {
       // keep tracking progress
       window.setTimeout(trackLexiconLoad, 1000);
     } else { // finished
-      console.log("load finished.");
       document.getElementById("uploadForm").removeAttribute("open");
       listLexicons();
     }
