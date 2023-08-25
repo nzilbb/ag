@@ -34,6 +34,102 @@
     files on the computer that HTK Aligner is to be installed on. </li> 
 </ol>
 
+<h3> Compiling HTK on Mac OS </h3>
+
+<h4> Older Intel Macs </h4>
+
+<ol>
+  <li> Download and unpack HTK source code</li>
+  <li> Open Terminal (Finder|Applications|Utilities|Terminal) </li>
+  <li> Change working directory to <i>htk</i> in the files you just unpacked, e.g. <hr>
+    <tt>cd ~/Downloads/htk</tt> </li>
+  <li> Run the following command:<br>
+    <tt>xcode-select --install</tt><br>
+    ...and install the XCode components.</li>
+  <li> Run the following command:<br>
+    <tt>export CPPFLAGS=-UPHNALG</tt></li>
+  <li> Run the following command:<br>
+    <tt>./configure --without-x --disable-hslab</tt></li>
+  <li> Run the following command:<br>
+    <tt>make all</tt></li>
+  <li> Run the following command:<br>
+    <tt>sudo make install</tt></li>
+</ol>
+
+<h4> Newer ARM Mac (M1 and M2)</h4>
+
+<ol>
+  <li> Download and unpack HTK source code</li>
+  <li> Open Terminal (Finder|Applications|Utilities|Terminal) </li>
+  <li> Change working directory to <i>htk</i> in the files you just unpacked, e.g. <hr>
+    <tt>cd ~/Downloads/htk</tt> </li>
+  <li> Edit the file called <i>configure</i>, and insert the following lines at line 5561 (i.e. just before <tt>esac</tt>):<pre>
+        arm*darwin*)
+                CFLAGS="-Wno-implicit-function-declaration -D'ARCH=\"darwin\"' $CFLAGS"
+                ARCH=darwin
+                Objcopy=echo
+                PRILF="-x"
+                CPU=darwin
+                SHRLF="-shared"
+                LIBEXT=dylib
+        ;;</pre></li>
+  <li> Save and close configure</li>
+  <li> Run the following command in Terminal:<br>
+    <tt>sed -i -e 's|^#include &lt;malloc.h&gt;$|/*#include &lt;malloc.h&gt;*/|g' HTKLib/strarr.c</tt>
+  <li> Run the following command:<br>
+    <tt>xcode-select --install</tt><br>
+    ...and install the XCode components.</li>
+  <li> Run the following command:<br>
+    <tt>export CPPFLAGS=-UPHNALG</tt></li>
+  <li> Run the following command:<br>
+    <tt>./configure --without-x --disable-hslab</tt></li>
+  <li> Run the following command:<br>
+    <tt>make all</tt></li>
+  <li> Run the following command:<br>
+    <tt>sudo make install</tt></li>
+</ol>
+
+<h3> Compiling on Linux systems </h3>
+
+<h4>Ubuntu</h4>
+
+<ol>
+  <li> Download and unpack HTK source code</li>
+  <li> Open Terminal (Finder|Applications|Utilities|Terminal) </li>
+  <li> Change working directory to <i>htk</i> in the files you just unpacked, e.g. <hr>
+    <tt>cd ~/Downloads/htk</tt> </li>
+  <li> Run the following command:<br>
+    <tt>./configure --without-x --disable-hslab --disable-hlmtools</tt></li>
+  <li> Run the following command:<br>
+    <tt>make all</tt></li>
+  <li> Run the following command:<br>
+    <tt>sudo make install</tt></li>
+</ol>
+
+<h4> RHEL 8 </h4>
+
+<ol>
+  <li> Run the following command:<br>
+    <tt>cd /tmp</tt></li>
+  <li> Run the following command:<br>
+    <tt>sudo  yum -y install glibc-devel.i686 libX11-devel.i686 glibc-devel.i686 libstdc++-devel.i686</tt></li>
+  <li> Run the following command, subtituting in your HTK username:<br>
+    <tt>wget --user={username} --ask-password http://htk.eng.cam.ac.uk/ftp/software/HTK-3.4.1.tar.gz</tt><br>
+    ...and enter your HTK password.</li>
+  <li> Run the following command:<br>
+    <tt>tar -zxf HTK-3.4.1.tar.gz</tt></li>
+  <li> Run the following command:<br>
+    <tt>cd htk</tt></li>
+  <li> Run the following command:<br>
+    <tt>./configure</tt></li>
+  <li> Edit the file <i>HLMTools/Makefile</i> to replace spaces with a tab character on line 77</tt></li>
+  <li> Run the following command:<br>
+    <tt>make all</tt></li>
+  <li> Run the following command:<br>
+    <tt>sudo make install</tt></li>
+</ol>
+
+<hr>
 <p> The Penn Phonetics Lab Force Aligner models
   (<a href="http://www.ling.upenn.edu/phonetics/p2fa/" target="p2fa">P2FA</a> - Jiahong
   Yuan and Mark Liberman. 2008. <i>Speaker identification on the SCOTUS corpus.</i>
