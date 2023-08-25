@@ -64,14 +64,28 @@ getSchema(s => {
             // set the checkbox
             document.getElementById("firstVariantOnly").checked
                 = parameters.get("firstVariantOnly");
-            // if there's no utterance tag layer defined
-            if (pronunciationLayerId.selectedIndex == 0
-                // but there's a layer named after the task
-                && schema.layers[taskId]) {
+            // if there's no pronunciation layer defined
+            if (pronunciationLayerId.selectedIndex == 0) {
+              // but there's a layer named after the task
+              if ( schema.layers[taskId]) {
                 
                 // select that layer by default
                 pronunciationLayerId.value = taskId;
-            }
+              } else if (/.+:.+/.test(taskId)) { // might be an 'auxiliary'?
+                var layerId = taskId.replace(/:.+/,"");
+                if (schema.layers[layerId]) { // there's a layer named after the task
+                  // select it
+                  pronunciationLayerId.value = layerId;
+                }
+              }
+              // if there's no option for the output layer, add one
+              if (pronunciationLayerId.value != taskId) {
+                var layerOption = document.createElement("option");
+                layerOption.appendChild(document.createTextNode(taskId));
+                pronunciationLayerId.appendChild(layerOption);
+                pronunciationLayerId.value = taskId;
+              }
+            } // no pronunciation layer defined
             // show correct encoding example
             changedEncoding(document.getElementById("encoding"));
         } finally {
@@ -83,7 +97,7 @@ getSchema(s => {
 // this function detects when the user selects [add new layer]:
 function changedLayer(select) {
     if (select.value == "[add new layer]") {
-        var newLayer = prompt("Please enter the new layer ID", "phonemes");
+        var newLayer = prompt("Please enter the new layer ID", taskId);
         if (newLayer) { // they didn't cancel
             // check there's not already a layer with that name
             for (var l in schema.layers) {
