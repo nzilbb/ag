@@ -256,7 +256,9 @@ public class JythonAnnotator extends Annotator {
       throw new InvalidConfigurationException(this, "Schema is not set.");
     HashSet<String> requiredLayers = new HashSet<String>();
     // look for patterns that access layers
-    String[] patterns = { // https://xkcd.com/1421/
+    String[] patterns = {
+      "^#! input[Ll]ayer: (.*?)\\s*$", // shebang
+       // https://xkcd.com/1421/
       "\\.list\\(\"([^\"]+)\"\\)",          "\\.list\\('([^']+)'\\)",
       "\\.all\\(\"([^\"]+)\"\\)",           "\\.all\\('([^']+)'\\)",
       "\\.my\\(\"([^\"]+)\"\\)",            "\\.my\\('([^']+)'\\)",
@@ -276,7 +278,7 @@ public class JythonAnnotator extends Annotator {
       ,                                     "\\.overlappingAnnotations\\([^)]+'([^']+)'\\)"
     };
     for (String pattern : patterns) {
-      Matcher matcher = Pattern.compile(pattern).matcher(script);
+      Matcher matcher = Pattern.compile(pattern, Pattern.MULTILINE).matcher(script);
       while (matcher.find()) {
         requiredLayers.add(matcher.group(1));
       } // next match
@@ -295,7 +297,9 @@ public class JythonAnnotator extends Annotator {
   public String[] getOutputLayers() throws InvalidConfigurationException { // TODO inferring from the script isn't robust, this will have to be explicitly set by the user - use shebangs something like #! output-layer: xxx and validated them in the task config webapp
     HashSet<String> outputLayers = new HashSet<String>();
     // look for patterns that annotate layers
-    String[] patterns = { // https://xkcd.com/1421/ 
+    String[] patterns = {
+      "^#! output[lL]ayer: (.*?)\\s*$", // shebang
+      // https://xkcd.com/1421/ ...
       // Annotation.createTag(layerId, label)
       "\\.createTag\\(\"([^\"]+)\",[^)]+\\)", 
       "\\.createTag\\('([^']+)',[^)]+\\)",
@@ -319,7 +323,7 @@ public class JythonAnnotator extends Annotator {
       "\\.addAnnotation\\([^']+,\\s*'([^']+)'[^)]*\\)", 
     };
     for (String pattern : patterns) {
-      Matcher matcher = Pattern.compile(pattern).matcher(script);
+      Matcher matcher = Pattern.compile(pattern, Pattern.MULTILINE).matcher(script);
       while (matcher.find()) {
         outputLayers.add(matcher.group(1));
       } // next match

@@ -77,7 +77,7 @@ public class TestJythonAnnotator {
     return fThisClass.getParentFile();
   }   
 
-  //* There's no default configuration */
+  /** There's no default configuration **/
   @Test public void defaultParameters() throws Exception {
  
     Graph g = graph();
@@ -92,7 +92,7 @@ public class TestJythonAnnotator {
     }
   }   
    
-  /* Test full script use case. */
+  /** Test full script use case. */
   @Test public void fullScript() throws Exception {
       
     Graph g = graph();
@@ -162,7 +162,7 @@ public class TestJythonAnnotator {
     } // next check
   }
 
-  /* Test detection of input layers. */
+  /** Test detection of input layers. */
   @Test public void inputLayerDetection() throws Exception {
       
     Graph g = graph();
@@ -235,7 +235,7 @@ public class TestJythonAnnotator {
     } // next script
   }
 
-  /* Test detection of output layers. */
+  /** Test detection of output layers. */
   @Test public void outputLayerDetection() throws Exception {
     JythonAnnotator annotator = new JythonAnnotator();
       
@@ -300,6 +300,53 @@ public class TestJythonAnnotator {
          
     } // next script
 
+    assertNotNull("default output layer was created",
+                  schema.getLayer("test"));
+    assertEquals("default output layer child of root",
+                 schema.getRoot().getId(), schema.getLayer("test").getParentId());
+    assertEquals("default output layer not aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 schema.getLayer("test").getAlignment());
+    assertEquals("default output layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer("test").getType());
+  }
+
+  /** Test detection of input/output layers via shebangs. */
+  @Test public void shebangSupport() throws Exception {
+    JythonAnnotator annotator = new JythonAnnotator();
+      
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+
+    String script = "# Test a script that defies auto-detection of layers"
+      +"\\n#! inputLayer: word "
+      +"\\ntokenLayer = 'word'"
+      +"\\ntagLayer = 'test'"
+      +"\\nfor w in transcript.all(tokenLayer):"
+      +"\\n  w.createTag(tagLayer, 'l')"
+      +"\\n#! outputLayer: test";
+    annotator.setTaskParameters(
+      "{\"sourceLayerId\":\"word\","
+      +"\"destinationLayerId\":\"\","
+      +"\"labelMapping\":\"false\","
+      +"\"transcriptLanguageLayerId\":\"\"," // no transcript language layer
+      +"\"phraseLanguageLayerId\":null,"     // null phrase language layer
+      +"\"language\":\"\","
+      +"\"script\":\""+script+"\""
+      +"}");
+    String[] inputLayers = annotator.getRequiredLayers();
+    assertEquals("1 required layer: "+script+": "+Arrays.asList(inputLayers),
+                 1, inputLayers.length);
+    assertEquals("word required: "+script+" : "+Arrays.asList(inputLayers),
+                 "word", inputLayers[0]);
+    String[] outputLayers = annotator.getOutputLayers();
+    assertEquals("1 required layer: "+script+": "+Arrays.asList(outputLayers),
+                 1, outputLayers.length);
+    assertEquals("test required: "+script+" : "+Arrays.asList(outputLayers),
+                 "test", outputLayers[0]);
+    
     assertNotNull("default output layer was created",
                   schema.getLayer("test"));
     assertEquals("default output layer child of root",
