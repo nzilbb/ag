@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -707,7 +707,94 @@ public class TestCMUDictionaryTagger {
                  "L AE1 Z AH0 L IY0", prons.next());
 
   }
-   
+  
+  /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly,
+   * including language filtering. */
+  @Test public void transformTranscriptsWithLanguageFiltering() {
+    GraphStoreHarness store = new GraphStoreHarness();
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    try {
+      annotator.setTaskParameters(null);
+      
+      // call tagMatchingAnnotations
+      annotator.transformTranscripts(store, null);
+    } catch(Exception exception) {
+      fail(""+exception);
+    }
+
+    // check the right calls were made to the graph store
+    assertEquals("aggregateMatchingAnnotations operation",
+                 "DISTINCT", store.aggregateMatchingAnnotationsOperation);
+    assertEquals(
+      "aggregateMatchingAnnotations expression",
+      "layer.id == 'word'"
+      +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)",
+      store.aggregateMatchingAnnotationsExpression);
+    
+    assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
+                 2, store.tagMatchingAnnotationsLabels.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      "K W IH1 K", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      "B R AW1 N", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
+                 2, store.tagMatchingAnnotationsLayerIds.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num confidences: "
+                 + store.tagMatchingAnnotationsConfidences,
+                 2, store.tagMatchingAnnotationsConfidences.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'brown'"));
+  }
+
+
+  /** Test dictionary registration. */
+  @Test public void dictionaryRegistration() throws Exception {
+
+    List<String> ids = annotator.getDictionaryIds();
+    assertEquals("there's only one dictionary: " + ids,
+                 1, ids.size());
+    // (I don't actually care what the ID is)
+    Dictionary dict = annotator.getDictionary(ids.iterator().next());
+    assertTrue("Dictionary is the right type: " + dict.getClass().getName(),
+               dict instanceof CMUDictionary);
+
+    assertNotNull("null dictionary ID is supported",
+                  annotator.getDictionary(null));
+  }   
+ 
   /**
    * Returns a graph for annotating.
    * @return The graph for testing with.
@@ -778,21 +865,6 @@ public class TestCMUDictionaryTagger {
                     .setParent(turn));
     return g;
   } // end of graph()
-
-  /** Test dictionary registration. */
-  @Test public void dictionaryRegistration() throws Exception {
-
-    List<String> ids = annotator.getDictionaryIds();
-    assertEquals("there's only one dictionary: " + ids,
-                 1, ids.size());
-    // (I don't actually care what the ID is)
-    Dictionary dict = annotator.getDictionary(ids.iterator().next());
-    assertTrue("Dictionary is the right type: " + dict.getClass().getName(),
-               dict instanceof CMUDictionary);
-
-    assertNotNull("null dictionary ID is supported",
-               annotator.getDictionary(null));
-  }   
 
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.annotator.cmudict.TestCMUDictionaryTagger");
