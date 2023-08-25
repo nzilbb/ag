@@ -804,16 +804,32 @@ public class CMUDictionaryTagger extends Annotator
     StoreException {
     Dictionary dictionary = getDictionary("cmudict");
     try {
+
+      StringBuilder languageExpression = new StringBuilder();
+      if (phraseLanguageLayerId != null || transcriptLanguageLayerId != null) {
+        languageExpression.append(" && /").append("en.*").append("/.test(");
+        if (phraseLanguageLayerId != null) {
+          languageExpression.append("first('").append(esc(phraseLanguageLayerId))
+            .append("').label");
+          if (transcriptLanguageLayerId != null) {
+            languageExpression.append(" ?? "); // add coalescing operator
+          }
+        }
+        if (transcriptLanguageLayerId != null) {
+          languageExpression.append("first('").append(esc(transcriptLanguageLayerId))
+            .append("').label");
+        }
+        languageExpression.append(")");
+      } // add language condition
       
       store.deleteMatchingAnnotations(
         "layerId = '"+esc(pronunciationLayerId)+"'"
+        +languageExpression
         +" && first('"+esc(tokenLayerId)+"').label == '"+esc(sourceLabel)+"'");
 
       String tokenExpression = "layerId = '"+esc(tokenLayerId)+"'"
+        +languageExpression
         +" && label = '"+esc(sourceLabel)+"'";
-      if (transcriptLanguageLayerId != null) {
-        tokenExpression += " && /en.*/.test(first('"+esc(transcriptLanguageLayerId)+"').label)";
-      }
       int count = 0;
       for (String pronunciation : dictionary.lookup(sourceLabel)) {
         
