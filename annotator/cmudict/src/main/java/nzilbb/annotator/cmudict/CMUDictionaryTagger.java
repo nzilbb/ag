@@ -35,6 +35,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
@@ -515,36 +517,34 @@ public class CMUDictionaryTagger extends Annotator
       }
       firstVariantOnly = Boolean.FALSE;
          
-      try {
-        // default transcript language layer
-        Layer[] candidates = schema.getMatchingLayers(
-          layer -> schema.getRoot().getId().equals(layer.getParentId())
-          && layer.getAlignment() == Constants.ALIGNMENT_NONE // transcript attribute
-          && layer.getId().toLowerCase().matches(".*lang.*")); // with 'lang' in the name
-        if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
-            
-        // default phrase language layer
-        candidates = schema.getMatchingLayers(
-          layer -> schema.getTurnLayerId() != null
-          && schema.getTurnLayerId().equals(layer.getParentId()) // child of turn
-          && layer.getId().toLowerCase().matches(".*lang.*")); // with 'lang' in the name
-        if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
-
-        // default output layer
-        candidates = schema.getMatchingLayers(
-          layer -> schema.getWordLayerId() != null
-          && schema.getWordLayerId().equals(layer.getParentId())
-          && layer.getAlignment() == Constants.ALIGNMENT_NONE // word tag
-          && layer.getId().toLowerCase().matches(".*lang.*") // with 'lang' in the name
-          && (layer.getId().toLowerCase().matches(".*phoneme.*")
-              || layer.getId().toLowerCase().matches(".*pronunciation.*")));
-        if (candidates.length > 0) {
-          pronunciationLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          pronunciationLayerId = "phonemes";
-        }
-      } catch(ScriptException impossible) {}
-         
+      // default transcript language layer
+      Layer[] candidates = schema.getMatchingLayers(
+        layer -> schema.getRoot().getId().equals(layer.getParentId())
+        && layer.getAlignment() == Constants.ALIGNMENT_NONE // transcript attribute
+        && layer.getId().toLowerCase().matches(".*lang.*")); // with 'lang' in the name
+      if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
+      
+      // default phrase language layer
+      candidates = schema.getMatchingLayers(
+        layer -> schema.getTurnLayerId() != null
+        && schema.getTurnLayerId().equals(layer.getParentId()) // child of turn
+        && layer.getId().toLowerCase().matches(".*lang.*")); // with 'lang' in the name
+      if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
+      
+      // default output layer
+      candidates = schema.getMatchingLayers(
+        layer -> schema.getWordLayerId() != null
+        && schema.getWordLayerId().equals(layer.getParentId())
+        && layer.getAlignment() == Constants.ALIGNMENT_NONE // word tag
+        && layer.getId().toLowerCase().matches(".*lang.*") // with 'lang' in the name
+        && (layer.getId().toLowerCase().matches(".*phoneme.*")
+            || layer.getId().toLowerCase().matches(".*pronunciation.*")));
+      if (candidates.length > 0) {
+        pronunciationLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        pronunciationLayerId = "phonemes";
+      }
+      
     } else {
       beanPropertiesFromQueryString(parameters);
     }
@@ -804,16 +804,32 @@ public class CMUDictionaryTagger extends Annotator
     StoreException {
     Dictionary dictionary = getDictionary("cmudict");
     try {
+
+      StringBuilder languageExpression = new StringBuilder();
+      if (phraseLanguageLayerId != null || transcriptLanguageLayerId != null) {
+        languageExpression.append(" && /").append("en.*").append("/.test(");
+        if (phraseLanguageLayerId != null) {
+          languageExpression.append("first('").append(esc(phraseLanguageLayerId))
+            .append("').label");
+          if (transcriptLanguageLayerId != null) {
+            languageExpression.append(" ?? "); // add coalescing operator
+          }
+        }
+        if (transcriptLanguageLayerId != null) {
+          languageExpression.append("first('").append(esc(transcriptLanguageLayerId))
+            .append("').label");
+        }
+        languageExpression.append(")");
+      } // add language condition
       
       store.deleteMatchingAnnotations(
         "layerId = '"+esc(pronunciationLayerId)+"'"
+        +languageExpression
         +" && first('"+esc(tokenLayerId)+"').label == '"+esc(sourceLabel)+"'");
 
       String tokenExpression = "layerId = '"+esc(tokenLayerId)+"'"
+        +languageExpression
         +" && label = '"+esc(sourceLabel)+"'";
-      if (transcriptLanguageLayerId != null) {
-        tokenExpression += " && /en.*/.test(first('"+esc(transcriptLanguageLayerId)+"').label)";
-      }
       int count = 0;
       for (String pronunciation : dictionary.lookup(sourceLabel)) {
         
@@ -828,6 +844,115 @@ public class CMUDictionaryTagger extends Annotator
       throw new TransformationException(this, x);
     } finally {
       dictionary.close();
+    }
+  }
+  
+  /**
+   * Transforms all graphs from the given graph store that match the given graph expression.
+   * <p> This implementation uses
+   * {@link GraphStoreQuery#aggregateMatchingAnnotations(String,String)}
+   * and {@link GraphStore#tagMatchingAnnotations​(String,String,String,Integer)}
+   * to optimize tagging transcripts en-masse.
+   * @param store The graph to store.
+   * @param expression An expression for identifying transcripts to update, or null to transform
+   * all transcripts in the store.
+   * @return The changes introduced by the tranformation.
+   * @throws TransformationException If the transformation cannot be completed.
+   */
+  public void transformTranscripts​(GraphStore store, String expression)
+    throws TransformationException, InvalidConfigurationException, StoreException,
+    PermissionException {
+    setRunning(true);
+    try {
+      setPercentComplete(0);
+      Layer tokenLayer = schema.getLayer(tokenLayerId);
+      if (tokenLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid input token layer: " + tokenLayerId);
+      }
+      Layer pronunciationLayer = schema.getLayer(pronunciationLayerId);
+      if (pronunciationLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid output pronunciation layer: " + pronunciationLayerId);
+      }    
+      
+      StringBuilder labelExpression = new StringBuilder();
+      labelExpression.append("layer.id == '").append(esc(tokenLayer.getId())).append("'");
+      if (phraseLanguageLayerId != null || transcriptLanguageLayerId != null) {
+        labelExpression.append(" && /").append("en.*").append("/.test(");
+        if (phraseLanguageLayerId != null) {
+          labelExpression.append("first('").append(esc(phraseLanguageLayerId))
+            .append("').label");
+          if (transcriptLanguageLayerId != null) {
+            labelExpression.append(" ?? "); // add coalescing operator
+          }
+        }
+        if (transcriptLanguageLayerId != null) {
+          labelExpression.append("first('").append(esc(transcriptLanguageLayerId))
+            .append("').label");
+        }
+        labelExpression.append(")");
+      } // add language condition
+      
+      if (expression != null && expression.trim().length() > 0) {
+        labelExpression.append(" && [");
+        String[] ids = store.getMatchingTranscriptIds(expression);
+        if (ids.length == 0) {
+          setStatus("No matching transcripts");
+          setPercentComplete(100);
+          return;
+        } else {
+          labelExpression.append(
+            Arrays.stream(ids)
+            // quote and escape each ID
+            .map(id->"'"+id.replace("'", "\\'")+"'")
+            // make a comma-delimited list
+            .collect(Collectors.joining(",")));
+          labelExpression.append("].includes(graphId)");
+        }
+      }
+      setStatus("Getting distinct token labels...");
+      String[] distinctWords = store.aggregateMatchingAnnotations(
+        "DISTINCT", labelExpression.toString());
+      setStatus("There are "+distinctWords.length+" distinct token labels");
+      int w = 0;
+      Dictionary dictionary = getDictionary("cmudict");
+      // for each label
+      for (String word : distinctWords) {
+        if (isCancelling()) break;
+        boolean found = false;
+        StringBuilder tokenExpression = new StringBuilder(labelExpression);
+        tokenExpression.append(" && label == '").append(esc(word)).append("'");
+        for (String pronunciation : dictionary.lookup(word)) {
+          if (isCancelling()) break;
+          setStatus(word+" → "+pronunciation);
+          found = true;
+          store.tagMatchingAnnotations(
+            tokenExpression.toString(), pronunciationLayerId, pronunciation,
+            Constants.CONFIDENCE_AUTOMATIC);
+          // do we want the first entry only?
+          if (firstVariantOnly) break;        
+        } // next entry
+        if (!found) { // might be a hesitation?
+          String pronunciation = hesitationToDISC(word);
+          if (pronunciation != null) {
+            store.tagMatchingAnnotations(
+              tokenExpression.toString(), pronunciationLayerId, pronunciation,
+              Constants.CONFIDENCE_AUTOMATIC);
+          }
+        }
+        setPercentComplete((++w * 100) / distinctWords.length);
+      } // next word
+      if (isCancelling()) {
+        setStatus("Cancelled.");
+      } else {
+        setPercentComplete(100);
+        setStatus("Finished.");
+      }
+    } catch(DictionaryException x) {
+      throw new TransformationException(this, x);
+    } finally {
+      setRunning(false);
     }
   }
   

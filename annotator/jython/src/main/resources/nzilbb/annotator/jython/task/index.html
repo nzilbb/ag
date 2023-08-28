@@ -73,28 +73,74 @@
         Graph. <var>transcript</var> can be traversed to inspect annotations, and can have
         annotations added to it (on this layer only), which will be saved back to
         LaBB-CAT&#39;s annotation store when the script completes. </p>
+
+      <h2 id="inputLayers"> Input Layers </h2>
       
       <p> The <var>transcript</var> graph is populated with annotations from the layers
-        that are referring to in script.</p>
-      
+        that are specified by 'shebang' comments at the start of the script. In general,
+        these are added automatically when you load/save the script, but you can manually
+        add them if required. </p>
+
+      <p> Shebangs that identify input layers look like this:<br>
+        <tt style="color:#8b4513;"># inputLayer: <i>layerId</i></tt></p>
+      <p> e.g. if your script assumes that the <i>turn</i>, <i>word</i>, and <i>pos</i>
+        layers are present, you should have the following comment lines in you script:<pre>
+<span style="color:#8b4513;"># inputLayer: turn</span>
+<span style="color:#8b4513;"># inputLayer: word</span>
+<span style="color:#8b4513;"># inputLayer: pos</span></pre></p>
+
+      <h2 id="outputLayers"> Output Layers </h2>
+
+      <p> Your script will most likely create new annotations. The best way to do this is
+        use one of the following methods: </p>
+
+      <ul>
+        <li><code><var>transcript</var>.createTag(<var>annotationToTag</var>,
+            "layerId", <var>label</var>)</code></li>
+        <li><code><var>transcript</var>.createAnnotation(<var>fromAnchor</var>,
+            <var>toAnchor</var>, "layerId", <var>label</var>,
+            <var>parentAnnotation</var>)</code></li>
+        <li><code><var>transcript</var>.createSpan(<var>fromAnnotation</var>,
+            <var>toAnnotation</var>, "layerId", <var>label</var>)</code></li>
+        <li><code><var>transcript</var>.createSpan(<var>fromAnnotation</var>,
+            <var>toAnnotation</var>, "layerId", <var>label</var>,
+            <var>parentAnnotation</var>)</code></li>
+      </ul>
+
       <p> If your script creates new annotations on a layer that doesn't exist yet,
-        (e.g. by using <code><var>annotation</var>.createTag("layer", <var>label</var>)</code>),
         then the mentioned layer will be automatically created as an interval span
         layer. If you want another type of layer (e.g. a word tag layer), be sure
         to click the <q>New Layer</q> button, fill in the details that appear, and
         click the <q>Define Layer</q> button, to ensure the right type of layer is
         created. </p>
+
+      <p> Changes to the <var>transcript</var> graph will only be made on output layers
+        that are specified by 'shebang' comments at the start of the script. In general, 
+        these are added automatically when you load/save the script, but you can manually
+        add them if required. </p>
+
+      <p> Shebangs that identify output layers look like this:<br>
+        <tt style="color:#8b4513;"># outputLayer: <i>layerId</i></tt></p>
+      <p> e.g. if your script creates annotations on the <i>syllable</i> and <i>syllableCount</i>
+        layers, you should have the following comment lines in you script:<pre>
+<span style="color:#8b4513;"># outputLayer: syllable</span>
+<span style="color:#8b4513;"># outputLayer: syllableCount</span></pre></p>
+
+      <h2 id="example"> Example Script </h2>
       
       <p> The script might look something like the following, which tags each word with its
         length, on a layer called "length":</p> 
       <pre>
+<span style="color:#8b4513;"># inputLayer: turn</span>
+<span style="color:#8b4513;"># inputLayer: word</span>
+<span style="color:#8b4513;"># outputLayer: length</span>
 <span style="color:#8b4513;"># for each turn in the transcript</span>
 <span style="color:#800080;">for</span> turn <span style="color:#800080;">in</span> transcript.all(&quot;turn&quot;):
 &nbsp; <span style="color:#800080;">if</span> annotator.cancelling <span style="color:#800080;">break</span> <span style="color:#8b4513;"># cancelled by the user</span>
 &nbsp; <span style="color:#8b4513;"># for each word</span>
 &nbsp; <span style="color:#800080;">for</span> word <span style="color:#800080;">in</span> turn.all(&quot;word&quot;):
 &nbsp;&nbsp;&nbsp; <span style="color:#8b4513;"># tag the word with it's length</span>
-&nbsp;&nbsp;&nbsp; word.createTag("length", &quot;length: &quot; + str(len(word.label))
+&nbsp;&nbsp;&nbsp; transcript.createTag(word, "length", &quot;length: &quot; + str(len(word.label))
 &nbsp;&nbsp;&nbsp; log("Tagged word: " + word.label)
             </pre>
 
