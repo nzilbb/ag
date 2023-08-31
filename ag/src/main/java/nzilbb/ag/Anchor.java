@@ -95,6 +95,18 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
       
     return this;
   }
+  /**
+   * Setter for <i>offset</i>: The anchor's time/character offset, and its confidence.
+   * @param offset The anchor's time/character offset.
+   * @param confidence Confidence rating.
+   * @see TrackedMap#setConfidence(Integer)
+   * @return A reference to this object. 
+   */
+  public synchronized Anchor setOffset(Double offset, Integer confidence) {
+    setOffset(offset);
+    setConfidence(confidence);
+    return this;
+  }
 
   // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't
   // result in infinite recursion

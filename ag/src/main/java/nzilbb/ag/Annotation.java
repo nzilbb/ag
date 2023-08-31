@@ -92,6 +92,18 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
     this.label = label; 
     return this;
   }
+  /**
+   * Setter for <i>label</i>: The annotation's label and its confidence.
+   * @param label The annotation's label.
+   * @param confidence Confidence rating.
+   * @see TrackedMap#setConfidence(Integer)
+   * @return A reference this this object. 
+   */
+  public Annotation setLabel(String label, Integer confidence) { 
+    setLabel(label);
+    setConfidence(confidence);
+    return this;
+  }
 
   /**
    * The identifier of the annotation's layer.
