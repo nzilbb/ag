@@ -22,23 +22,35 @@
 package nzilbb.transcriber.google;
 
 import com.google.api.gax.longrunning.OperationFuture;
-import com.google.cloud.speech.v1p1beta1.LongRunningRecognizeMetadata;
-import com.google.cloud.speech.v1p1beta1.LongRunningRecognizeResponse;
-import com.google.cloud.speech.v1p1beta1.RecognitionAudio;
-import com.google.cloud.speech.v1p1beta1.RecognitionConfig.AudioEncoding;
-import com.google.cloud.speech.v1p1beta1.RecognitionConfig;
-import com.google.cloud.speech.v1p1beta1.RecognizeResponse;
-import com.google.cloud.speech.v1p1beta1.SpeakerDiarizationConfig;
-import com.google.cloud.speech.v1p1beta1.SpeechClient;
-import com.google.cloud.speech.v1p1beta1.SpeechRecognitionAlternative;
-import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult;
-import com.google.cloud.speech.v1p1beta1.WordInfo;
+import com.google.cloud.speech.v2.AutoDetectDecodingConfig;
+import com.google.cloud.speech.v2.BatchRecognizeRequest;
+import com.google.cloud.speech.v2.BatchRecognizeFileMetadata;
+import com.google.cloud.speech.v2.BatchRecognizeResponse;
+import com.google.cloud.speech.v2.BatchRecognizeFileResult;
+import com.google.cloud.speech.v2.BatchRecognizeResults;
+import com.google.cloud.speech.v2.CreateRecognizerRequest;
+import com.google.cloud.speech.v2.DeleteRecognizerRequest;
+import com.google.cloud.speech.v2.OperationMetadata;
+import com.google.cloud.speech.v2.RecognitionConfig;
+import com.google.cloud.speech.v2.RecognitionOutputConfig;
+import com.google.cloud.speech.v2.InlineOutputConfig;
+import com.google.cloud.speech.v2.RecognitionFeatures;
+import com.google.cloud.speech.v2.RecognizeRequest;
+import com.google.cloud.speech.v2.RecognizeResponse;
+import com.google.cloud.speech.v2.Recognizer;
+import com.google.cloud.speech.v2.SpeechClient;
+import com.google.cloud.speech.v2.SpeechRecognitionAlternative;
+import com.google.cloud.speech.v2.SpeechRecognitionResult;
+import com.google.cloud.speech.v2.WordInfo;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import com.google.protobuf.ByteString;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -46,6 +58,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.sound.sampled.AudioFormat;
@@ -54,17 +67,28 @@ import javax.sound.sampled.AudioSystem;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.Transcriber;
+import nzilbb.ag.automation.UsesFileSystem;
+import nzilbb.media.wav.WAV;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
 //import com.google.api.gax.core.FixedCredentialsProvider;
 //import com.google.auth.Credentials;
+//https://alicejli.github.io/java-cloud-bom/google-cloud-speech/index.html
+//https://cloud.google.com/speech-to-text/v2/docs/how-to
 
 /**
  * Automatic transcriber that uses Google's
  * <a target="google-speech-to-text" href="https://cloud.google.com/speech-to-text/">
  * Speech to Text </a> to transcribe recordings.
+ * <p> To set up local access to the Speech to Text API:
+ * <ol>
+ *  <li><tt>sudo snap install --classic google-cloud-cli</tt></li>
+ *  <li><tt>gcloud init</tt></li>
+ *  <li><tt>gcloud auth application-default login</tt></li>
+ * </ol>
  * @author Robert Fromont robert@fromont.net.nz
  */
+@UsesFileSystem
 public class GoogleTranscriber extends Transcriber {
 
   /**
@@ -89,13 +113,18 @@ public class GoogleTranscriber extends Transcriber {
    * @see #getBucketName()
    * @see #setBucketName(String)
    */
-  protected String bucketName = "nzilbb-test"; // TODO remove  
+  protected String bucketName = null;
   /**
    * Getter for {@link #bucketName}: Name of the Google Cloud Storage bucket for
    * uploading speech recordings to. 
    * @return Name of the Google Cloud Storage bucket for uploading speech recordings to.
    */
-  public String getBucketName() { return bucketName; }
+  public String getBucketName() {
+    if (bucketName == null) {
+      return getClass().getSimpleName();
+    }
+    return bucketName;
+  }
   /**
    * Setter for {@link #bucketName}: Name of the Google Cloud Storage bucket for
    * uploading speech recordings to. 
@@ -103,20 +132,96 @@ public class GoogleTranscriber extends Transcriber {
    * recordings to. 
    */
   public GoogleTranscriber setBucketName(String newBucketName) { bucketName = newBucketName; return this; }
-
+  
+  /**
+   * Number of seconds between checks whether the recognition job has finished. Default is 10.
+   * @see #getPollingIntervalSeconds()
+   * @see #setPollingIntervalSeconds(int)
+   */
+  protected int pollingIntervalSeconds = 10;
+  /**
+   * Getter for {@link #pollingIntervalSeconds}: Number of seconds between checks whether
+   * the recognition job has finished.  Default is 10.
+   * @return Number of seconds between checks whether the recognition job has finished.
+   */
+  public int getPollingIntervalSeconds() { return pollingIntervalSeconds; }
+  /**
+   * Setter for {@link #pollingIntervalSeconds}: Number of seconds between checks whether the recognition job has finished.
+   * @param newPollingIntervalSeconds Number of seconds between checks whether the recognition job has finished.
+   */
+  public GoogleTranscriber setPollingIntervalSeconds(int newPollingIntervalSeconds) { pollingIntervalSeconds = newPollingIntervalSeconds; return this; }
+  
+  /**
+   * Layer ID for tag of transcript language. Default is "transcript_language".
+   * @see #getTranscriptLanguageLayerId()
+   * @see #setTranscriptLanguageLayerId(String)
+   */
+  protected String transcriptLanguageLayerId = "transcript_language";
+  /**
+   * Getter for {@link #transcriptLanguageLayerId}: Layer ID for tag of transcript
+   * language.  Default is "transcript_language".
+   * @return Layer ID for tag of transcript language.
+   */
+  public String getTranscriptLanguageLayerId() { return transcriptLanguageLayerId; }
+  /**
+   * Setter for {@link #transcriptLanguageLayerId}: Layer ID for tag of transcript language.
+   * @param newTranscriptLanguageLayerId Layer ID for tag of transcript language.
+   */
+  public GoogleTranscriber setTranscriptLanguageLayerId(String newTranscriptLanguageLayerId) {
+    if (newTranscriptLanguageLayerId != null && newTranscriptLanguageLayerId.length() == 0) {
+      newTranscriptLanguageLayerId = null;
+    }
+    transcriptLanguageLayerId = newTranscriptLanguageLayerId;
+    return this;
+  }
+  
+  /**
+   * Default language to assume. Default value is "en-US".
+   * @see #getDefaultLanguage()
+   * @see #setDefaultLanguage(String)
+   */
+  protected String defaultLanguage = "en-US";
+  /**
+   * Getter for {@link #defaultLanguage}: Default language to assume. Default value is "en-US".
+   * @return Default language to assume.
+   */
+  public String getDefaultLanguage() { return defaultLanguage; }
+  /**
+    * Setter for {@link #defaultLanguage}: Default language to assume.
+    * @param newDefaultLanguage Default language to assume.
+    */
+  public GoogleTranscriber setDefaultLanguage(String newDefaultLanguage) { defaultLanguage = newDefaultLanguage; return this; }
+  
+  /**
+   * Recognition model to use. Default is "latest_long".
+   * @see #getModel()
+   * @see #setModel(String)
+   */
+  protected String model = "latest_long";
+  /**
+   * Getter for {@link #model}: Recognition model to use. Default is "latest_long".
+   * @return Recognition model to use.
+   */
+  public String getModel() { return model; }
+  /**
+   * Setter for {@link #model}: Recognition model to use.
+   * @param newModel Recognition model to use.
+   */
+  public GoogleTranscriber setModel(String newModel) { model = newModel; return this; }
+  
   /**
    * Default constructor.
    */
   public GoogleTranscriber() {      
   } // end of constructor
-
+  
   /**
    * <b> Get the minimum version of the nzilbb.ag API supported by the serializer. </b>
    * @return Minimum version of the nzilbb.ag API supported by the serializer.
    * @see Constants#VERSION
    */
   public String getMinimumApiVersion() {
-    return "1.0.0";
+    return "1.1.2";
   }
    
   /**
@@ -246,29 +351,24 @@ public class GoogleTranscriber extends Transcriber {
   @Override
   public Graph transcribe(File speech, Graph transcript) throws Exception {
 
+    String recognizerId = "rec-"+speech.getName().replaceAll("[^a-z0-9-]","-");
+
     AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(speech);
     AudioFormat format = audioInputStream.getFormat();
     long frames = audioInputStream.getFrameLength();
-    double duration = 0;
-    if (frames > 0) {
-      duration = ((double)frames) / format.getFrameRate(); 
-    } else {
-      System.err.println("Could not determine duration from audio: " + speech.getName());
-    }
+    Double duration = WAV.duration(speech);
+    setStatus("Speech duration: " + duration + "s");
     // add anchors
     Anchor graphStart = transcript.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
-    Anchor graphEnd = transcript.getOrCreateAnchorAt(duration, Constants.CONFIDENCE_MANUAL);
-      
+    Anchor graphEnd = duration == null?graphStart
+      :transcript.getOrCreateAnchorAt(duration, Constants.CONFIDENCE_MANUAL);
+    
     // add participant if required
     Annotation participant = transcript.first(schema.getParticipantLayerId());
     if (participant == null) {
-      participant = new Annotation()
-        .setLayerId(schema.getParticipantLayerId())
-        .setLabel(transcript.getId())
-        .setStartId(graphStart.getId())
-        .setEndId(graphEnd.getId());
+      participant = transcript.createAnnotation(
+        graphStart, graphEnd, schema.getParticipantLayerId(), transcript.getId(), transcript);
       participant.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-      transcript.addAnnotation(participant);
     } else {
       participant
         .setStartId(graphStart.getId())
@@ -282,100 +382,148 @@ public class GoogleTranscriber extends Transcriber {
     }
     turn.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
 
-    Annotation utterance = turn.first(schema.getUtteranceLayerId());      
-    if (utterance == null) {
-      utterance = transcript.createTag(
-        turn, schema.getUtteranceLayerId(), turn.getLabel());
-    }
+    // Initialize client that will be used to send requests. This client only needs to be created
+    // once, and can be reused for multiple requests. After completing all of your requests, call
+    // the "close" method on the client to safely clean up any remaining background resources.
+    try (SpeechClient speechClient = SpeechClient.create()) {
+      Path path = speech.toPath();
+      byte[] data = Files.readAllBytes(path);
+      ByteString audioBytes = ByteString.copyFrom(data);
+      
+      String parent = String.format("projects/%s/locations/global", projectId);
 
-    // Upload file to Google Cloud Storage 
-    Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-    BlobId blobId = BlobId.of(bucketName, speech.getName());
-    BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-    Blob blob = storage.create(blobInfo, Files.readAllBytes(speech.toPath()));
-    String uri = "gs://"+blob.getBucket()+"/"+blob.getName();
+      String language = defaultLanguage;
+      // if (transcriptLanguageLayerId != null) { TODO
+      //   Annotation languageTag = transcript.first(transcriptLanguageLayerId);
+      //   if (languageTag != null && languageTag.getLabel().trim().length() > 0) {
+      //     language = languageTag.getLabel();
+      //   }
+      // }
+      // setStatus("Assumed language: " + language);
 
-    // Instantiate a client
-    // SpeechSettings speechSettings = // TODO auth configuration via the app
-    //    SpeechSettings.newBuilder()
-    //    .setCredentialsProvider(FixedCredentialsProvider.create(myCredentials))
-    //    .build();
-    try (SpeechClient speechClient = SpeechClient.create(/*speechSettings*/)) {
-         
-      // Builds the sync recognize request
-      RecognitionConfig config =
-        RecognitionConfig.newBuilder()
-        // .setEncoding(AudioEncoding.LINEAR16) // TODO format.get??()
-        .setSampleRateHertz((int)format.getSampleRate())
-        .setLanguageCode("en-US") // TODO get from the graph?
-        .setEnableWordTimeOffsets(true)
-        .setDiarizationConfig(
-          SpeakerDiarizationConfig.newBuilder()
-          .setEnableSpeakerDiarization(true)               
-          .setMinSpeakerCount(2) // TODO make these configurable
-          .setMaxSpeakerCount(2)
-          .build())
+      // First, create a recognizer
+      Recognizer recognizer = Recognizer.newBuilder()  // TODO maybe just use default recogniser "_" instead?
+        .setModel(model)
+        .addLanguageCodes(language)
         .build();
-      RecognitionAudio audio = RecognitionAudio.newBuilder().setUri(uri).build();
-         
-      // Performs speech recognition on the audio file
-      // Use non-blocking call for getting file transcription
-      OperationFuture<LongRunningRecognizeResponse, LongRunningRecognizeMetadata> response =
-        speechClient.longRunningRecognizeAsync(config, audio);
-         
-      while (!response.isDone()) {
-        System.out.println("Waiting for response...");
-        Thread.sleep(10000);
+      
+      CreateRecognizerRequest createRecognizerRequest = CreateRecognizerRequest.newBuilder() 
+        .setParent(parent)
+        .setRecognizerId(recognizerId)
+        .setRecognizer(recognizer)
+        .build();
+
+      OperationFuture<Recognizer, OperationMetadata> operationFuture =
+        speechClient.createRecognizerAsync(createRecognizerRequest);
+      recognizer = operationFuture.get();
+      Storage storage = null;
+      BlobId blobId = null;
+      try {
+        
+        // Next, create the transcription request
+        RecognitionConfig recognitionConfig = RecognitionConfig.newBuilder()
+          .setAutoDecodingConfig(AutoDetectDecodingConfig.newBuilder().build())
+          .setFeatures(RecognitionFeatures.newBuilder().setEnableWordTimeOffsets(true).build())
+          // TODO diarization
+          .build();
+
+        List<SpeechRecognitionResult> results = null;
+        if (duration != null && duration < 60) { // can do synchronous request
+          setStatus("Starting synchronous recognize reques...t");
+        
+          RecognizeRequest request = RecognizeRequest.newBuilder()
+            .setConfig(recognitionConfig)
+            .setRecognizer(recognizer.getName())
+            .setContent(audioBytes)
+            .build();
+          
+          RecognizeResponse response = speechClient.recognize(request);
+          results = response.getResultsList();
+        } else { // must be asynchronous via google cloud storage
+          setStatus("Starting asynchronous recognize request via Google Storage...");
+
+          // upload to google storage
+          storage = StorageOptions.newBuilder().setProjectId(projectId).build()
+            .getService();
+          blobId = BlobId.of(getBucketName(), speech.getName());
+          BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+          Blob blob = storage.create(blobInfo, Files.readAllBytes(speech.toPath()));
+          String uri = "gs://"+blob.getBucket()+"/"+blob.getName();
+
+          BatchRecognizeFileMetadata file = BatchRecognizeFileMetadata.newBuilder()
+            .setUri(uri).build();
+          RecognitionOutputConfig outputConfig = RecognitionOutputConfig.newBuilder()
+            .setInlineResponseConfig​(InlineOutputConfig.newBuilder().build())
+            .build();
+          BatchRecognizeRequest request = BatchRecognizeRequest.newBuilder()
+            .setConfig(recognitionConfig)
+            .setRecognitionOutputConfig(outputConfig)
+            .setRecognizer(recognizer.getName())
+            .addFiles(file)
+            .build();
+          OperationFuture <BatchRecognizeResponse,OperationMetadata> operation
+            = speechClient.batchRecognizeAsync​(request);
+          while (!operation.isDone()) {
+            setStatus("Waiting for response...");
+            Thread.sleep(pollingIntervalSeconds * 1000);
+          }
+          BatchRecognizeResponse response = operation.get();
+          Map<String,BatchRecognizeFileResult> fileResults = response.getResults();
+          BatchRecognizeFileResult result = fileResults.get(uri);
+          results = result.getTranscript().getResultsList();
+        }
+        
+        setStatus("There are " + results.size() + " results");
+        for (SpeechRecognitionResult result : results) {
+          // There can be several alternative transcripts for a given chunk of speech. Just use the
+          // first (most likely) one here.
+          if (result.getAlternativesCount() > 0) {
+            SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
+            
+            Anchor utteranceStart = null;
+            Anchor utteranceEnd = null;
+            for (WordInfo word : alternative.getWordsList()) {
+              // int speaker = word.getSpeakerTag();
+              double startSeconds
+                = word.getStartOffset().getSeconds()
+                + word.getStartOffset().getNanos() * 0.000000001;
+              Anchor start = transcript.getOrCreateAnchorAt(
+                startSeconds, Constants.CONFIDENCE_AUTOMATIC);
+              if (utteranceStart == null) utteranceStart = start;
+              double endSeconds
+                = word.getEndOffset().getSeconds()
+                + word.getEndOffset().getNanos() * 0.000000001;
+              Anchor end = transcript.getOrCreateAnchorAt(
+                endSeconds, Constants.CONFIDENCE_AUTOMATIC);
+              utteranceEnd = end;
+              
+              // TODO the words can be doubled and instantaneous, so check for that
+              // TODO e.g. thank:280.0-280.5 you:280.5-280.5 thank:280.0-280.5 you:280.5-280.5
+              // TODO maybe eliminate duplicates, and un-anchor instantaneous words?
+              
+              Annotation token = transcript.createAnnotation(
+                start, end, schema.getWordLayerId(), word.getWord(), turn);
+              token.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+              
+              // TODO automatically break into turns based on speaker tag
+            } // next word
+            
+            if (utteranceStart != null && utteranceEnd != null) {
+              Annotation utterance = transcript.createAnnotation(
+                utteranceStart, utteranceEnd, schema.getUtteranceLayerId(),
+                alternative.getTranscript(), turn);
+              utterance.setConfidence((int)(alternative.getConfidence() * 100));
+            } // add utterance
+          }
+        }
+        setStatus("Finished transcribing " + speech.getName());
+      } finally {
+        speechClient.deleteRecognizerAsync(recognizer.getName()).get();
+        if (storage != null && blobId != null) { // delete the file from Google Cloud Storage
+          storage.delete(blobId);
+        }
       }
-
-      LongRunningRecognizeResponse longRunningRecognizeResponse = response.get();
-      SpeechRecognitionAlternative alternative =
-        longRunningRecognizeResponse
-        .getResults(longRunningRecognizeResponse.getResultsCount() - 1)
-        .getAlternatives(0);         
-      int confidence = (int)(alternative.getConfidence() * 100);
-         
-      // alternative.getTranscript() gives the full text
-      System.out.println("Transcription: " + alternative.getTranscript());
-         
-      // but Google also provides individual words, with alignment, so we'll use those
-      // instead
-      for (WordInfo word : alternative.getWordsList()) {
-        int speaker = word.getSpeakerTag();
-        System.out.println(word.toString());
-        Annotation token = new Annotation()
-          .setLayerId(schema.getWordLayerId())
-          .setLabel(word.getWord())
-          .setParentId(turn.getId());
-        double startSeconds
-          = word.getStartTime().getSeconds()
-          + word.getStartTime().getNanos() * 0.000000001;
-        Anchor start = transcript.getOrCreateAnchorAt(
-          startSeconds, Constants.CONFIDENCE_AUTOMATIC);
-        token.setStartId(start.getId());
-        double endSeconds
-          = word.getEndTime().getSeconds()
-          + word.getEndTime().getNanos() * 0.000000001;
-        Anchor end = transcript.getOrCreateAnchorAt(
-          endSeconds, Constants.CONFIDENCE_AUTOMATIC);
-        token.setEndId(end.getId());
-        token.setConfidence(confidence);
-
-        // TODO the words can be doubled and instantaneous, so check for that
-        // TODO e.g. thank:280.0-280.5 you:280.5-280.5 thank:280.0-280.5 you:280.5-280.5
-        // TODO maybe eliminate duplicates, and un-anchor instantaneous words?
-            
-        transcript.addAnnotation(token);
-            
-        // TODO automatically break into utterances based on pauses between words
-        // TODO automatically break into turns based on speaker tag
-      } // next word
-
-    } finally {
-      // delete the file from Google Cloud Storage
-      storage.delete(blobId);
-    }      
-            
+    }
     return transcript;
   }
    
