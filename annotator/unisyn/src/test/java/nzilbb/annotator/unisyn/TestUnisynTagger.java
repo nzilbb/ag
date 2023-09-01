@@ -1039,6 +1039,10 @@ public class TestUnisynTagger {
                  1, outputLayers.length);
     assertEquals("output layer correct "+Arrays.asList(outputLayers),
                  "syllable", outputLayers[0]);
+
+    // can get dictionary for this configuration with null ID
+    assertNotNull("configuration dictionary available by passing null ID",
+                  annotator.getDictionary(null));
     
     Annotation firstWord = g.first("word");
     assertEquals("double check the first word is what we think it is: "+firstWord,
