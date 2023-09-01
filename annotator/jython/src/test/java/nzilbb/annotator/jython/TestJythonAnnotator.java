@@ -321,12 +321,12 @@ public class TestJythonAnnotator {
     annotator.setSchema(schema);
 
     String script = "# Test a script that defies auto-detection of layers"
-      +"\\n#! inputLayer: word "
+      +"\\n# inputLayer: word "
       +"\\ntokenLayer = 'word'"
       +"\\ntagLayer = 'test'"
       +"\\nfor w in transcript.all(tokenLayer):"
       +"\\n  w.createTag(tagLayer, 'l')"
-      +"\\n#! outputLayer: test";
+      +"\\n#! outputLayer: test"; // previous style of shebangs
     annotator.setTaskParameters(
       "{\"sourceLayerId\":\"word\","
       +"\"destinationLayerId\":\"\","

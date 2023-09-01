@@ -173,14 +173,14 @@ function addShebangs(script) {
   // (processed in reverse order because shebangs are prepended to the script)
   outputLayers.reverse()
   for (l in outputLayers) {
-    var shebang = `#! outputLayer: ${outputLayers[l]}\n`;
+    var shebang = `# outputLayer: ${outputLayers[l]}\n`;
     if (!script.includes(shebang)) { // shebang isn't there
       script = shebang + script;
     }
   }
   inputLayers.reverse()
   for (l in inputLayers) {
-    var shebang = `#! inputLayer: ${inputLayers[l]}\n`;
+    var shebang = `# inputLayer: ${inputLayers[l]}\n`;
     if (!script.includes(shebang)) { // shebang isn't there
       script = shebang + script;
     }
@@ -190,7 +190,7 @@ function addShebangs(script) {
 
 function checkShebangs(script, allowCancel) {
   var invalidInputLayers = [];
-  var inputShebangPattern = new RegExp("^#! inputLayer:(.*)$", "gm");
+  var inputShebangPattern = new RegExp("^#[!|]? inputLayer:(.*)$", "gm");
   var match = inputShebangPattern.exec(script);
   while (match) {
     var layerId = match[1].trim();
@@ -201,7 +201,7 @@ function checkShebangs(script, allowCancel) {
   } // next match
 
   var invalidOutputLayers = [];
-  var outputShebangPattern = new RegExp("^#! outputLayer:(.*)$", "gm");
+  var outputShebangPattern = new RegExp("^#[!|]? outputLayer:(.*)$", "gm");
   match = outputShebangPattern.exec(script);
   while (match) {
     var layerId = match[1].trim();
