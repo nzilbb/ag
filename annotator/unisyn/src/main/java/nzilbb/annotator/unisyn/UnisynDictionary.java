@@ -354,7 +354,8 @@ public class UnisynDictionary implements Dictionary {
       PreparedStatement sql = rdb.prepareStatement(
         sqlx.apply(
           "SELECT COUNT(DISTINCT "+keyField+")"
-          +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId));
+          +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
+          +" WHERE supplemental = 1"));
       try {
         ResultSet rs = sql.executeQuery();
         try {
@@ -381,7 +382,8 @@ public class UnisynDictionary implements Dictionary {
       PreparedStatement sql = rdb.prepareStatement(
         sqlx.apply(
           "SELECT COUNT(DISTINCT "+valueField+")"
-          +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId));
+          +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
+          +" WHERE supplemental = 1"));
       try {
         ResultSet rs = sql.executeQuery();
         try {
@@ -485,7 +487,7 @@ public class UnisynDictionary implements Dictionary {
       int frequency = 0; 
       int syllableCount = 1;
       
-      if (valueField.equals("pron_orig")) {
+      if (valueField.equals("pron_disc")) {
         pronOrig = entry;
         if (map != null) {
           // we've been given a DISC pronunciation, so have to convert it back to 'original' Unisyn
@@ -504,6 +506,8 @@ public class UnisynDictionary implements Dictionary {
           pronOrig = unisyn.toString().trim();
         }
         syllableCount = pronOrig.replaceAll("[^.]", "").length() + 1;
+      } else if (valueField.equals("pron_orig")) {
+        pronOrig = entry;
       } else if (valueField.equals("pos")) {
         pos = entry;
       } else if (valueField.equals("enriched_orthography")) {
@@ -548,18 +552,33 @@ public class UnisynDictionary implements Dictionary {
     throws DictionaryReadOnlyException, DictionaryException {
 
     try {
-      PreparedStatement sql = rdb.prepareStatement(
+      // are there even any entries?
+      PreparedStatement sqlCheck = rdb.prepareStatement(
         sqlx.apply(
-          "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
+          "SELECT COUNT(*) FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
           +" WHERE "+keyField+" = ?"));
+      sqlCheck.setString(1, key.toLowerCase());
+      ResultSet rs = sqlCheck.executeQuery();
       try {
-        sql.setString(1, key.toLowerCase());
-        if (sql.executeUpdate() == 0) {
-          throw new DictionaryReadOnlyException(
-            this, "No entries found for " + key);
-        }
+        rs.next();
+        if (rs.getInt(1) > 0) { // there are entries (could be read-only)
+          PreparedStatement sql = rdb.prepareStatement(
+            sqlx.apply(
+              "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
+              +" WHERE "+keyField+" = ? AND supplemental = 1"));
+          try {
+            sql.setString(1, key.toLowerCase());
+            if (sql.executeUpdate() == 0) {
+              throw new DictionaryReadOnlyException(
+                this, "No editable entries found for " + key);
+            }
+          } finally {
+            sql.close();
+          }
+        } // there were entries
       } finally {
-        sql.close();
+        rs.close();
+        sqlCheck.close();
       }
       return null;
     } catch (SQLException sqlX) {
@@ -577,21 +596,57 @@ public class UnisynDictionary implements Dictionary {
   public String remove(String key, String entry)
     throws DictionaryReadOnlyException, DictionaryException {
     try {
-      PreparedStatement sql = rdb.prepareStatement(
-        sqlx.apply(
-          "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-          +" WHERE "+keyField+" = ?"
-          // force case-sensitivity for value, because it might be DISC, in which 'i' != 'I' etc.
-          +" AND "+valueField+" = BINARY ?"));
-      try {
-        sql.setString(1, key.toLowerCase());
-        sql.setString(2, entry);
-        if (sql.executeUpdate() == 0) {
-          throw new DictionaryReadOnlyException(
-            this, "No entry found for " + key + " = " + entry);
+      String valueFieldUsed = valueField;
+      if (valueField.equals("pron_disc")) {
+        if (map != null) {
+          // we've been given a DISC pronunciation, so have to convert it back to 'original' Unisyn
+          StringBuffer unisyn = new StringBuffer(entry.length() * 2);
+          unisyn.append("{ ");
+          for (char disc : entry.toCharArray()) {
+            String phone = ""+disc;
+            if (reverseMap.containsKey(phone)) {
+              unisyn.append(reverseMap.get(phone));
+            } else { // pass through unknown phones
+              unisyn.append(phone);
+            }
+            unisyn.append(" ");
+          } // next phone
+          unisyn.append("}");
+          entry = unisyn.toString().trim();
+          valueFieldUsed = "pron_orig";
         }
+      }
+      // are there even any entries?
+      PreparedStatement sqlCheck = rdb.prepareStatement(
+        sqlx.apply(
+          "SELECT COUNT(*) FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
+          +" WHERE "+keyField+" = ?"));
+      sqlCheck.setString(1, key.toLowerCase());
+      ResultSet rs = sqlCheck.executeQuery();
+      try {
+        rs.next();
+        if (rs.getInt(1) > 0) { // there are entries (could be read-only)
+          PreparedStatement sql = rdb.prepareStatement(
+            sqlx.apply(
+              "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
+              +" WHERE "+keyField+" = ?"
+              // force case-sensitivity for value, because it might be DISC, in which 'i' != 'I' etc.
+              +" AND "+valueFieldUsed+" = BINARY ?"
+              +" AND supplemental = 1"));
+          try {
+            sql.setString(1, key.toLowerCase());
+            sql.setString(2, entry);
+            if (sql.executeUpdate() == 0) {
+              throw new DictionaryReadOnlyException(
+                this, "No editable entry found for " + key + " = " + entry);
+            }
+          } finally {
+            sql.close();
+          }
+        } // there were entries at all
       } finally {
-        sql.close();
+        rs.close();
+        sqlCheck.close();
       }
       return null;
     } catch (SQLException sqlX) {
@@ -616,6 +671,7 @@ public class UnisynDictionary implements Dictionary {
         sqlx.apply(
           "SELECT DISTINCT "+keyField+", variant"
           +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
+          +" WHERE supplemental = 1"
           +" ORDER BY variant"
           + (length > 0? " LIMIT " + start + ", " + length:"")));
       try {
@@ -623,7 +679,7 @@ public class UnisynDictionary implements Dictionary {
         try {
           while (rs.next()) {
             String word = rs.getString(keyField);
-            Vector<String> entries = lookupEntries(word, false);
+            Vector<String> entries = lookupEntries(word, true);
             if (entries.size() == 0) continue;
             words.put(word, entries);
           } // next word
@@ -648,7 +704,7 @@ public class UnisynDictionary implements Dictionary {
   public List<String> lookupEditableEntry(String key)
     throws DictionaryReadOnlyException, DictionaryException {
     try {
-      return lookupEntries(key, false);
+      return lookupEntries(key, true);
     } catch (SQLException sqlX) {
       throw new DictionaryException(this, sqlX);
     }
