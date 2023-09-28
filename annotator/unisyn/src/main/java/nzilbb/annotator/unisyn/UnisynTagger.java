@@ -2022,6 +2022,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * @throws DictionaryException If the given dictionary doesn't exist.
    */
   public Dictionary getDictionary(String id) throws DictionaryException {
+    if (id == null) return getDictionary(); // dictionary for current configuration
     try {
       // dictionary IDs are formatted "${lexicon}:${keyField}->${valueField}"
       Matcher idParser = Pattern.compile("^(?<lexicon>[^:]+):(?<keyField>.+)->(?<valueField>.+)$")

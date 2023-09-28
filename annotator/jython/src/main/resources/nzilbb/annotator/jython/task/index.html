@@ -77,11 +77,11 @@
       <h2 id="inputLayers"> Input Layers </h2>
       
       <p> The <var>transcript</var> graph is populated with annotations from the layers
-        that are specified by 'shebang' comments at the start of the script. In general,
+        that are specified by 'magic' comments at the start of the script. In general,
         these are added automatically when you load/save the script, but you can manually
         add them if required. </p>
 
-      <p> Shebangs that identify input layers look like this:<br>
+      <p> Comments that identify input layers look like this:<br>
         <tt style="color:#8b4513;"># inputLayer: <i>layerId</i></tt></p>
       <p> e.g. if your script assumes that the <i>turn</i>, <i>word</i>, and <i>pos</i>
         layers are present, you should have the following comment lines in you script:<pre>
@@ -115,11 +115,11 @@
         created. </p>
 
       <p> Changes to the <var>transcript</var> graph will only be made on output layers
-        that are specified by 'shebang' comments at the start of the script. In general, 
+        that are specified by 'magic' comments at the start of the script. In general, 
         these are added automatically when you load/save the script, but you can manually
         add them if required. </p>
 
-      <p> Shebangs that identify output layers look like this:<br>
+      <p> Comments that identify output layers look like this:<br>
         <tt style="color:#8b4513;"># outputLayer: <i>layerId</i></tt></p>
       <p> e.g. if your script creates annotations on the <i>syllable</i> and <i>syllableCount</i>
         layers, you should have the following comment lines in you script:<pre>

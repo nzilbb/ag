@@ -53,6 +53,7 @@ import nzilbb.util.IO;
  * ASR system to perform speech-to-text.
  * @author Robert Fromont robert@fromont.net.nz
  */
+@UsesFileSystem
 public class WhisperTranscriber extends Transcriber {
 
   File whisperExe;

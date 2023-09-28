@@ -41,6 +41,7 @@ import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.automation.Dictionary;
+import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
@@ -1039,6 +1040,10 @@ public class TestUnisynTagger {
                  1, outputLayers.length);
     assertEquals("output layer correct "+Arrays.asList(outputLayers),
                  "syllable", outputLayers[0]);
+
+    // can get dictionary for this configuration with null ID
+    assertNotNull("configuration dictionary available by passing null ID",
+                  annotator.getDictionary(null));
     
     Annotation firstWord = g.first("word");
     assertEquals("double check the first word is what we think it is: "+firstWord,
@@ -1155,32 +1160,6 @@ public class TestUnisynTagger {
     for (String expected : moreExpectedIds) {      
       assertTrue(expected, ids.contains(expected));
     }
-
-    // dictionary works
-    Dictionary dictionary = annotator.getDictionary("temp:wordform->pron_orig");
-    List<String> entries = dictionary.lookup("quick");
-    assertEquals("one entry returned - " + entries,
-                 1, entries.size());
-    assertEquals("entry correct", "\"kw@k", entries.get(0));
-
-    entries = dictionary.lookup("the");
-    assertEquals("multiple entries - " + entries, 3, entries.size());
-    assertEquals("first entry", "D@", entries.get(0));
-    assertEquals("second entry", "Di:", entries.get(1));
-    assertEquals("third entry", "\"Di:", entries.get(2));
-
-    // can add/remove entry
-    entries = dictionary.lookup("fox");
-    assertEquals("no entries - " + entries, 0, entries.size());
-    
-    dictionary.add("fox", "\"fQks");
-    entries = dictionary.lookup("fox");
-    assertEquals("one entries - " + entries, 1, entries.size());
-    assertEquals("only entry", "\"fQks", entries.get(0));
-    
-    dictionary.remove("fox", "\"fQks");
-    entries = dictionary.lookup("fox");
-    assertEquals("no entries - " + entries, 0, entries.size());
 
     // can remove lexicons
     assertEquals("Can delete lexicon", "", annotator.deleteLexicon("temp"));

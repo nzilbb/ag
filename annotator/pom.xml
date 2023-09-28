@@ -31,5 +31,6 @@
     <module>flatlexicon</module>
     <module>basservices</module>
     <module>reaper</module>
+    <module>unisyn</module>
   </modules>  
 </project>

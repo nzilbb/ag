@@ -257,7 +257,7 @@ public class JythonAnnotator extends Annotator {
     HashSet<String> requiredLayers = new HashSet<String>();
     // look for patterns that access layers
     String[] patterns = {
-      "^#! input[Ll]ayer: (.*?)\\s*$", // shebang
+      "^#[!|]? input[Ll]ayer: (.*?)\\s*$", // shebang
        // https://xkcd.com/1421/
       "\\.list\\(\"([^\"]+)\"\\)",          "\\.list\\('([^']+)'\\)",
       "\\.all\\(\"([^\"]+)\"\\)",           "\\.all\\('([^']+)'\\)",
@@ -298,7 +298,7 @@ public class JythonAnnotator extends Annotator {
     HashSet<String> outputLayers = new HashSet<String>();
     // look for patterns that annotate layers
     String[] patterns = {
-      "^#! output[lL]ayer: (.*?)\\s*$", // shebang
+      "^#[!|]? output[lL]ayer: (.*?)\\s*$", // shebang
       // https://xkcd.com/1421/ ...
       // Annotation.createTag(layerId, label)
       "\\.createTag\\(\"([^\"]+)\",[^)]+\\)", 
