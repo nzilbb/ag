@@ -311,9 +311,9 @@ public class UnisynDictionary implements Dictionary {
       Map<String,List<String>> words = new LinkedHashMap<String,List<String>>();
       PreparedStatement sql = rdb.prepareStatement(
         sqlx.apply(
-          "SELECT DISTINCT "+keyField+", variant"
+          "SELECT DISTINCT "+keyField
           +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-          +" ORDER BY variant"
+          +" ORDER BY "+keyField
           + (length > 0? " LIMIT " + start + ", " + length:"")));
       try {
         ResultSet rs = sql.executeQuery();
@@ -669,10 +669,10 @@ public class UnisynDictionary implements Dictionary {
       Map<String,List<String>> words = new LinkedHashMap<String,List<String>>();
       PreparedStatement sql = rdb.prepareStatement(
         sqlx.apply(
-          "SELECT DISTINCT "+keyField+", variant"
+          "SELECT DISTINCT "+keyField
           +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-          +" WHERE supplemental = 1"
-          +" ORDER BY variant"
+          +" WHERE supplemental = true"
+          +" ORDER BY "+keyField
           + (length > 0? " LIMIT " + start + ", " + length:"")));
       try {
         ResultSet rs = sql.executeQuery();
