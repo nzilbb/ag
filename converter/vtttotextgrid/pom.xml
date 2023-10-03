@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>vtt-to-textgrid</artifactId>
   <name>nzilbb.converter.vtttotextgrid</name>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <description>WebVTT subtitles to Praat TextGrid converter</description>
 
   <properties>
@@ -21,7 +21,7 @@
     
     <output.package>nzilbb.formatter.praat</output.package>
     <output.path>nzilbb/formatter/praat/</output.path>
-    <output.version>2.6.0</output.version>
+    <output.version>2.6.5</output.version>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -41,8 +41,8 @@
     </dependency>
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
-      <artifactId>converter-base</artifactId>
-      <version>1.0.3</version>
+      <artifactId>nzilbb.ag</artifactId>
+      <version>1.1.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -119,14 +119,8 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>nz.ilbb.ag</groupId>
-                  <artifactId>converter-base</artifactId>
-                  <version>1.0.3</version>
-                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.1.3-SNAPSHOT</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
