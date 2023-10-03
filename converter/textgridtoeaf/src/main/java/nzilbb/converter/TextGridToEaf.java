@@ -114,7 +114,7 @@ public class TextGridToEaf extends Converter {
   
   /** File filter for identifying files of the correct type */
   protected FileNameExtensionFilter getFileFilter() {
-    return new FileNameExtensionFilter("ELAN files", "eaf");
+    return new FileNameExtensionFilter("Praat TextGrids", "TextGrid");
   }
   
   /**
