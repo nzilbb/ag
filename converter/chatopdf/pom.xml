@@ -17,7 +17,7 @@
 
     <input.package>nzilbb.formatter.clan</input.package>
     <input.path>nzilbb/formatter/clan/</input.path>
-    <input.version>1.2.0</input.version>
+    <input.version>1.2.3</input.version>
     
     <output.package>nzilbb.formatter.pdf</output.package>
     <output.path>nzilbb/formatter/pdf/</output.path>
