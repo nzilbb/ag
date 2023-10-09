@@ -10,14 +10,14 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>trs-to-pdf</artifactId>
   <name>nzilbb.converter.trstopdf</name>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <description>Transcriber transcript to PDF converter</description>
 
   <properties>
     
     <input.package>nzilbb.formatter.transcriber</input.package>
     <input.path>nzilbb/formatter/transcriber/</input.path>
-    <input.version>2.0.2</input.version>
+    <input.version>2.0.5</input.version>
     
     <output.package>nzilbb.formatter.pdf</output.package>
     <output.path>nzilbb/formatter/pdf/</output.path>
