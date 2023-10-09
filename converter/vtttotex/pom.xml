@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>vtt-to-tex</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <name>nzilbb.converter.vtttotex</name>
   <description>WebVTT subtitle to LaTeX converter</description>
 
@@ -17,7 +17,7 @@
 
     <input.package>nzilbb.formatter.webvtt</input.package>
     <input.path>nzilbb/formatter/webvtt/</input.path>
-    <input.version>0.6.0</input.version>
+    <input.version>0.7.0</input.version>
     
     <output.package>nzilbb.formatter.latex</output.package>
     <output.path>nzilbb/formatter/latex/</output.path>
