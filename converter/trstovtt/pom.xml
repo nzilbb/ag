@@ -10,18 +10,18 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>trs-to-vtt</artifactId>
   <name>nzilbb.converter.trstovtt</name>
-  <version>1.0.2</version>
+  <version>1.1.0</version>
   <description>Transcriber transcript to WebVTT subtitles converter</description>
 
   <properties>
     
     <input.package>nzilbb.formatter.transcriber</input.package>
     <input.path>nzilbb/formatter/transcriber/</input.path>
-    <input.version>2.0.0</input.version>
+    <input.version>2.0.5</input.version>
     
     <output.package>nzilbb.formatter.webvtt</output.package>
     <output.path>nzilbb/formatter/webvtt/</output.path>
-    <output.version>0.6.1</output.version>
+    <output.version>0.7.0</output.version>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
