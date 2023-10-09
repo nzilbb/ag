@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>cha-to-pdf</artifactId>
-  <version>0.1.3</version>
+  <version>0.1.4</version>
   <name>nzilbb.converter.chatopdf</name>
   <description>CLAN CHAT transcript to PDF converter</description>
 
