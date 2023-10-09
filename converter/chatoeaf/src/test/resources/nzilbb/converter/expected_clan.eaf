@@ -1,6 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?><ANNOTATION_DOCUMENT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" AUTHOR="Oscar Wilde" DATE="" FORMAT="2.7" VERSION="2.7" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv2.7.xsd">
+<?xml version="1.0" encoding="UTF-8"?><ANNOTATION_DOCUMENT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" AUTHOR="Oscar Wilde" DATE="" FORMAT="3.0" VERSION="3.0" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv3.0.xsd">
   <HEADER MEDIA_FILE="" TIME_UNITS="milliseconds">
     <PROPERTY NAME="lastUnusedAnnotationId">242</PROPERTY>
+    <PROPERTY NAME="metadata:participant_ses:Nony_mouse"/>
+    <PROPERTY NAME="metadata:participant_ses:Investigator"/>
+    <PROPERTY NAME="metadata:participant_role:Nony_mouse">Participant</PROPERTY>
+    <PROPERTY NAME="metadata:participant_role:Investigator">Investigator</PROPERTY>
+    <PROPERTY NAME="metadata:participant_education:Nony_mouse"/>
+    <PROPERTY NAME="metadata:participant_education:Investigator"/>
+    <PROPERTY NAME="metadata:participant_gender:Nony_mouse"/>
+    <PROPERTY NAME="metadata:participant_gender:Investigator"/>
+    <PROPERTY NAME="metadata:participant_corpus:Nony_mouse">W</PROPERTY>
+    <PROPERTY NAME="metadata:participant_corpus:Investigator">W</PROPERTY>
+    <PROPERTY NAME="metadata:participant_language:Nony_mouse">en</PROPERTY>
+    <PROPERTY NAME="metadata:participant_language:Investigator">en</PROPERTY>
+    <PROPERTY NAME="metadata:participant_age:Nony_mouse"/>
+    <PROPERTY NAME="metadata:participant_age:Investigator"/>
+    <PROPERTY NAME="metadata:participant_group:Nony_mouse"/>
+    <PROPERTY NAME="metadata:participant_group:Investigator"/>
   </HEADER>
   <TIME_ORDER>
     <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="1"/>
@@ -247,7 +263,7 @@
     <TIME_SLOT TIME_SLOT_ID="ts242" TIME_VALUE="680138"/>
     <TIME_SLOT TIME_SLOT_ID="ts243" TIME_VALUE="681935"/>
   </TIME_ORDER>
-  <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="Nony_mouse" TIER_ID="Nony_mouse">
+  <TIER ANNOTATOR="Oscar Wilde" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="Nony_mouse" TIER_ID="Nony_mouse">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a1" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts2">
         <ANNOTATION_VALUE>ab abc abcdef abcd gonna lie abcd abc pet abcdefghij</ANNOTATION_VALUE>
@@ -255,7 +271,7 @@
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a2" TIME_SLOT_REF1="ts2" TIME_SLOT_REF2="ts3">
-        <ANNOTATION_VALUE>abc abcde abc ab abcd ab abc worryin i abcd</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>abc abcde abc ab abcd ab abc worryin i~ abcd</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
@@ -865,7 +881,7 @@
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a127" TIME_SLOT_REF1="ts128" TIME_SLOT_REF2="ts129">
-        <ANNOTATION_VALUE>ab ab spent abc morning op abcde abc abcdefg opening abcdefghi abcdefgh</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>ab ab spent abc morning op~ abcde abc abcdefg opening abcdefghi abcdefgh</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
@@ -1439,7 +1455,7 @@
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
   </TIER>
-  <TIER LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="Investigator" TIER_ID="Investigator">
+  <TIER ANNOTATOR="Oscar Wilde" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="Investigator" TIER_ID="Investigator">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a17" TIME_SLOT_REF1="ts2" TIME_SLOT_REF2="ts3">
         <ANNOTATION_VALUE>she'll ab nd abcdefg</ANNOTATION_VALUE>
@@ -1460,6 +1476,7 @@
   <LINGUISTIC_TYPE CONSTRAINTS="Symbolic_Association" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="tag-lt" TIME_ALIGNABLE="false"/>
   <LINGUISTIC_TYPE CONSTRAINTS="Included_In" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="subinterval-lt" TIME_ALIGNABLE="true"/>
   <LINGUISTIC_TYPE CONSTRAINTS="Time_Subdivision" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="partition-lt" TIME_ALIGNABLE="true"/>
+  <LINGUISTIC_TYPE CONSTRAINTS="Symbolic_Subdivision" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="token-lt" TIME_ALIGNABLE="false"/>
   <CONSTRAINT DESCRIPTION="Time subdivision of parent annotation's time interval, no time gaps allowed within this interval" STEREOTYPE="Time_Subdivision"/>
   <CONSTRAINT DESCRIPTION="Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered" STEREOTYPE="Symbolic_Subdivision"/>
   <CONSTRAINT DESCRIPTION="1-1 association with a parent annotation" STEREOTYPE="Symbolic_Association"/>
