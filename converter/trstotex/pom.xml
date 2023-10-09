@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>trs-to-tex</artifactId>
-  <version>0.1.1</version>
+  <version>0.2.0</version>
   <name>nzilbb.convert.trstotex</name>
   <description>Transcriber transcript to LaTeX document converter</description>
 
@@ -17,7 +17,7 @@
 
     <input.package>nzilbb.formatter.transcriber</input.package>
     <input.path>nzilbb/formatter/transcriber/</input.path>
-    <input.version>2.0.2</input.version>
+    <input.version>2.0.5</input.version>
     
     <output.package>nzilbb.formatter.latex</output.package>
     <output.path>nzilbb/formatter/latex/</output.path>
