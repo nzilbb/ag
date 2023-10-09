@@ -1,6 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?><ANNOTATION_DOCUMENT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" AUTHOR="Robert Fromont" DATE="" FORMAT="2.7" VERSION="2.7" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv2.7.xsd">
+<?xml version="1.0" encoding="UTF-8"?><ANNOTATION_DOCUMENT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" AUTHOR="Robert Fromont" DATE="" FORMAT="3.0" VERSION="3.0" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv3.0.xsd">
   <HEADER MEDIA_FILE="" TIME_UNITS="milliseconds">
     <PROPERTY NAME="lastUnusedAnnotationId">150</PROPERTY>
+    <PROPERTY NAME="metadata:transcript_version">7</PROPERTY>
+    <PROPERTY NAME="metadata:participant_gender:mop03-2b">male</PROPERTY>
+    <PROPERTY NAME="metadata:participant_gender:Interviewer">female</PROPERTY>
+    <PROPERTY NAME="metadata:participant_dialect:mop03-2b">native</PROPERTY>
+    <PROPERTY NAME="metadata:participant_dialect:Interviewer">native</PROPERTY>
+    <PROPERTY NAME="metadata:participant_accent:mop03-2b">nze</PROPERTY>
+    <PROPERTY NAME="metadata:participant_accent:Interviewer">ame</PROPERTY>
+    <PROPERTY NAME="metadata:participant_scope:mop03-2b">local</PROPERTY>
+    <PROPERTY NAME="metadata:participant_scope:Interviewer">local</PROPERTY>
   </HEADER>
   <TIME_ORDER>
     <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="0"/>
@@ -144,7 +153,7 @@
     <TIME_SLOT TIME_SLOT_ID="ts139" TIME_VALUE="302834"/>
     <TIME_SLOT TIME_SLOT_ID="ts140" TIME_VALUE="304334"/>
   </TIME_ORDER>
-  <TIER LANG_REF="eng" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="Interviewer" TIER_ID="Interviewer">
+  <TIER ANNOTATOR="Robert Fromont" LANG_REF="eng" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="Interviewer" TIER_ID="Interviewer">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a31" TIME_SLOT_REF1="ts30" TIME_SLOT_REF2="ts31">
         <ANNOTATION_VALUE>well inconsolable I imagine</ANNOTATION_VALUE>
@@ -162,7 +171,7 @@
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a93" TIME_SLOT_REF1="ts91" TIME_SLOT_REF2="ts92">
-        <ANNOTATION_VALUE> well the funny light hasn't gone on -</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>well the funny light hasn't gone on -</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
@@ -217,7 +226,7 @@
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a139" TIME_SLOT_REF1="ts131" TIME_SLOT_REF2="ts132">
-        <ANNOTATION_VALUE> -- </ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>--</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
@@ -246,7 +255,7 @@
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
   </TIER>
-  <TIER LANG_REF="eng" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="mop03-2b" TIER_ID="mop03-2b">
+  <TIER ANNOTATOR="Robert Fromont" LANG_REF="eng" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="mop03-2b" TIER_ID="mop03-2b">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a10" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts11">
         <ANNOTATION_VALUE>and ah . Cyril would arrive at the door</ANNOTATION_VALUE>
@@ -694,7 +703,7 @@
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a109" TIME_SLOT_REF1="ts105" TIME_SLOT_REF2="ts6">
-        <ANNOTATION_VALUE>or some and there's nothing much on it or </ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>or some and there's nothing much on it or</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>
@@ -844,7 +853,7 @@
     </ANNOTATION>
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a149" TIME_SLOT_REF1="ts140" TIME_SLOT_REF2="ts10">
-        <ANNOTATION_VALUE> well there was five of us &lt;five&gt;</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>well there was five of us &lt;five&gt;</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
   </TIER>
@@ -899,6 +908,7 @@
   <LINGUISTIC_TYPE CONSTRAINTS="Symbolic_Association" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="tag-lt" TIME_ALIGNABLE="false"/>
   <LINGUISTIC_TYPE CONSTRAINTS="Included_In" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="subinterval-lt" TIME_ALIGNABLE="true"/>
   <LINGUISTIC_TYPE CONSTRAINTS="Time_Subdivision" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="partition-lt" TIME_ALIGNABLE="true"/>
+  <LINGUISTIC_TYPE CONSTRAINTS="Symbolic_Subdivision" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="token-lt" TIME_ALIGNABLE="false"/>
   <LANGUAGE LANG_DEF="http://cdb.iso.org/lg/CDB-00138502-001" LANG_ID="eng" LANG_LABEL="English"/>
   <CONSTRAINT DESCRIPTION="Time subdivision of parent annotation's time interval, no time gaps allowed within this interval" STEREOTYPE="Time_Subdivision"/>
   <CONSTRAINT DESCRIPTION="Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered" STEREOTYPE="Symbolic_Subdivision"/>
