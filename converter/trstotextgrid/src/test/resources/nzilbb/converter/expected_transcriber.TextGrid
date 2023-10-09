@@ -43,7 +43,7 @@ item []:
         intervals [8]:
             xmin = 185.339 
             xmax = 188.932 
-            text = " well the funny light hasn't gone on -" 
+            text = "well the funny light hasn't gone on -" 
         intervals [9]:
             xmin = 188.932 
             xmax = 189.464 
@@ -107,7 +107,7 @@ item []:
         intervals [24]:
             xmin = 287.177 
             xmax = 288.646 
-            text = " -- " 
+            text = "--" 
         intervals [25]:
             xmin = 288.646 
             xmax = 289.677 
@@ -525,7 +525,7 @@ item []:
         intervals [96]:
             xmin = 214.822 
             xmax = 218.29 
-            text = "or some and there's nothing much on it or " 
+            text = "or some and there's nothing much on it or" 
         intervals [97]:
             xmin = 218.29 
             xmax = 220.696 
@@ -657,4 +657,4 @@ item []:
         intervals [129]:
             xmin = 304.334 
             xmax = 306.92 
-            text = " well there was five of us <five>" 
+            text = "well there was five of us <five>" 
