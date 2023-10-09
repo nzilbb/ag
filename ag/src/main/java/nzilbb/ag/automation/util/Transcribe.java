@@ -89,6 +89,24 @@ public class Transcribe extends CommandLineProgram {
     * implements the transcriber. 
     */
    public String getTranscriberName() { return transcriberName; }
+  
+  /**
+   * Transcriber installation configuration, if any is required.
+   * @see #getConfig()
+   * @see #setConfig(String)
+   */
+  protected String config;
+  /**
+   * Getter for {@link #config}: Transcriber installation configuration, if any is required.
+   * @return Transcriber installation configuration, if any is required.
+   */
+  public String getConfig() { return config; }
+  /**
+   * Setter for {@link #config}: Transcriber installation configuration, if any is required.
+   * @param newConfig Transcriber installation configuration, if any is required.
+   */
+  @Switch("Transcriber installation configuration, if it requires any.")
+  public Transcribe setConfig(String newConfig) { config = newConfig; return this; }
 
    /**
     * Descriptor for the transcriber.
@@ -151,9 +169,12 @@ public class Transcribe extends CommandLineProgram {
       // is the name a jar file name or a class name
       try { // try as a jar file
          descriptor = new AnnotatorDescriptor(new File(transcriberName));
+         System.err.println(""+descriptor);
       } catch (Throwable notAJarName) { // try as a class name
+         System.err.println(transcriberName + " "+notAJarName+", trying as class name...");
          try {
             descriptor = new AnnotatorDescriptor(transcriberName, getClass().getClassLoader());
+            System.err.println(""+descriptor);
          } catch(Throwable exception) {
             System.err.println("Could not get transcriber: " + transcriberName);
          }
@@ -186,6 +207,17 @@ public class Transcribe extends CommandLineProgram {
       if (!transcriberDir.exists()) transcriberDir.mkdir();
       transcriber.setWorkingDirectory(transcriberDir);      
       // TODO transcriber.getDiarizationRequired()
+
+      if (config != null && config.trim().length() > 0) {
+        if (verbose) System.err.println("Configuring transcriber: " + config);
+        try {
+          transcriber.setConfig(config);
+        } catch(InvalidConfigurationException exception) {
+          System.err.println(
+            "Configuring transcriber: \"" + config + "\" - ERROR: " + exception.getMessage());
+          return;
+        }
+      }
 
       if (verbose) transcriber.getStatusObservers().add(s->System.err.println(s));
 
