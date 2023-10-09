@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>vtt-to-cha</artifactId>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
   <name>nzilbb.converter.vtttocha</name>
   <description>WebVTT subtitles to CLAN CHAT transcript converter</description>
   
@@ -17,11 +17,11 @@
 
     <input.package>nzilbb.formatter.webvtt</input.package>
     <input.path>nzilbb/formatter/webvtt/</input.path>
-    <input.version>0.6.0</input.version>
+    <input.version>0.7.0</input.version>
     
     <output.package>nzilbb.formatter.clan</output.package>
     <output.path>nzilbb/formatter/clan/</output.path>
-    <output.version>1.2.0</output.version>    
+    <output.version>1.2.3</output.version>    
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
