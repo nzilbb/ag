@@ -10,14 +10,14 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>vtt-to-textgrid</artifactId>
   <name>nzilbb.converter.vtttotextgrid</name>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <description>WebVTT subtitles to Praat TextGrid converter</description>
 
   <properties>
     
     <input.package>nzilbb.formatter.webvtt</input.package>
     <input.path>nzilbb/formatter/webvtt/</input.path>
-    <input.version>0.6.0</input.version>
+    <input.version>0.7.0</input.version>
     
     <output.package>nzilbb.formatter.praat</output.package>
     <output.path>nzilbb/formatter/praat/</output.path>
