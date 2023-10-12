@@ -600,7 +600,7 @@ public class Evaluate extends CommandLineProgram {
           return txt.exists();
         }});
     if (wavs.length == 0) {
-      System.err.println("Now .wav files with .txt transcripts found: " + files);
+      System.err.println("No .wav files with .txt transcripts found: " + files);
       return;
     }
 
