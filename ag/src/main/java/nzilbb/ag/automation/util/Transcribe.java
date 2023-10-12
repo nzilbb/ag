@@ -169,14 +169,18 @@ public class Transcribe extends CommandLineProgram {
       // is the name a jar file name or a class name
       try { // try as a jar file
          descriptor = new AnnotatorDescriptor(new File(transcriberName));
-         System.err.println(""+descriptor);
+         if (verbose) System.err.println(""+descriptor);
       } catch (Throwable notAJarName) { // try as a class name
-         System.err.println(transcriberName + " "+notAJarName+", trying as class name...");
+        if (verbose) {
+          System.err.println(transcriberName + " "+notAJarName+", trying as class name...");
+          notAJarName.printStackTrace(System.err);
+        }
          try {
             descriptor = new AnnotatorDescriptor(transcriberName, getClass().getClassLoader());
-            System.err.println(""+descriptor);
+            if (verbose) System.err.println(""+descriptor);
          } catch(Throwable exception) {
             System.err.println("Could not get transcriber: " + transcriberName);
+            return;
          }
       }
       Annotator annotator = descriptor.getInstance();
