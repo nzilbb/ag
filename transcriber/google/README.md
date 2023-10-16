@@ -43,3 +43,19 @@ Once this is done, building with tests can be achieved with the command:
 ```
 mvn package
 ```
+### Alternative credentials
+
+An alternative to use a `GoogleTranscriber-key.json` file is to use the `gcloud`
+command-line tool to log in into Google Cloud on your local system.
+
+To log in via `gcloud`, use the following command:
+
+```
+gcloud auth application-default login
+```
+
+After this, automated tests should work using:
+
+```
+mvn package
+```

@@ -299,7 +299,10 @@ public class GoogleTranscriber extends Transcriber {
     setRunning(true);
     setPercentComplete(0);
     setStatus(""); // clear any residual status from the last run...      
-    beanPropertiesFromQueryString(config);      
+    beanPropertiesFromQueryString(config);
+    if (projectId == null) {
+      throw new InvalidConfigurationException(this, "projectId must be specified.");
+    }
     setPercentComplete(100);
     setRunning(false);
   }
@@ -507,11 +510,11 @@ public class GoogleTranscriber extends Transcriber {
           }
 
           // ensure bucket exists
-          Bucket bucket = storage.get(bucketName);
+          Bucket bucket = storage.get(getBucketName());
           if (bucket == null) { // bucket doesn't exist
             // create it
-            setStatus("Creating bucket: " + bucketName);
-            storage.create(BucketInfo.of(bucketName));
+            setStatus("Creating bucket: " + getBucketName());
+            storage.create(BucketInfo.of(getBucketName()));
           }
           
           // put file in bucket

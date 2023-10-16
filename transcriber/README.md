@@ -91,7 +91,7 @@ java -cp nzilbb.ag.jar:~/.m2/repository/org/glassfish/javax.json/1.1.4/javax.jso
 To test the transcriber, use the following command:
 
 ```
-java -cp nzilbb.ag.jar nzilbb.ag.automation.util.Transcribe nzilbb.transcriber.mytranscriber-0.1.0 speech.wav
+java -cp nzilbb.ag.jar"~/.m2/repository/org/glassfish/javax.json/1.1.4/javax.json-1.1.4.jar nzilbb.ag.automation.util.Transcribe nzilbb.transcriber.mytranscriber-0.1.0 speech.wav
 ```
 
 This will output a JSON representation of the transcript annotation graph.
