@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>slt-to-trs</artifactId>
-  <version>0.1.8</version>
+  <version>0.1.10</version>
   <name>nzilbb.converter.slttotrs</name>
   <description>SALT transcript to Transcriber transcript converter</description>
 
@@ -17,7 +17,7 @@
     
     <input.package>nzilbb.formatter.salt</input.package>
     <input.path>nzilbb/formatter/salt/</input.path>
-    <input.version>0.2.2</input.version>
+    <input.version>0.3.0</input.version>
     
     <output.package>nzilbb.formatter.transcriber</output.package>
     <output.path>nzilbb/formatter/transcriber/</output.path>
@@ -31,8 +31,8 @@
   <dependencies>
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
-      <artifactId>converter-base</artifactId>
-      <version>[1.0.3,)</version>
+      <artifactId>nzilbb.ag</artifactId>
+      <version>1.1.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
@@ -120,14 +120,8 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>nz.ilbb.ag</groupId>
-                  <artifactId>converter-base</artifactId>
-                  <version>1.0.3</version>
-                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.1.3-SNAPSHOT</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

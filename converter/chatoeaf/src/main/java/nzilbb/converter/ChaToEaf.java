@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -27,6 +27,7 @@ import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.GraphSerializer;
+import nzilbb.configure.ParameterSet;
 import nzilbb.formatter.clan.ChatSerialization;
 import nzilbb.formatter.elan.EAFSerialization;
 import nzilbb.util.ProgramDescription;
@@ -177,6 +178,16 @@ public class ChaToEaf extends Converter {
       .setPeers(true).setPeersOverlap(true).setSaturated(false));
     return schema;
   } // end of getSchema()
-  
+
+  /**
+   * Specifies which layers should be given to the serializer. The default implementaion
+   * returns only the "utterance" layer.
+   * @return An array of layer IDs.
+   */
+  @Override public String[] getLayersToSerialize() {
+    String[] layers = { "utterance", "transcript_scribe" };
+    return layers;
+  } // end of getLayersToSerialize()
+
   private static final long serialVersionUID = -1;
 } // end of class ChaToEaf

@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>trs-to-eaf</artifactId>
-  <version>1.0.0</version>
+  <version>1.2.0</version>
   <name>nzilbb.converter.trstoeaf</name>
   <description>Transcriber transcript to ELAN file converter</description>
 
@@ -17,11 +17,11 @@
     
     <input.package>nzilbb.formatter.transcriber</input.package>
     <input.path>nzilbb/formatter/transcriber/</input.path>
-    <input.version>2.0.2</input.version>
+    <input.version>2.0.5</input.version>
     
     <output.package>nzilbb.formatter.elan</output.package>
     <output.path>nzilbb/formatter/elan/</output.path>
-    <output.version>1.5.3</output.version>
+    <output.version>1.7.8</output.version>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -31,8 +31,8 @@
   <dependencies>
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
-      <artifactId>converter-base</artifactId>
-      <version>[1.0.3,)</version>
+      <artifactId>nzilbb.ag</artifactId>
+      <version>1.1.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
@@ -119,14 +119,8 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>nz.ilbb.ag</groupId>
-                  <artifactId>converter-base</artifactId>
-                  <version>1.0.3</version>
-                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>1.0.2</version>
+                  <version>1.1.3-SNAPSHOT</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

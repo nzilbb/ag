@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2023 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -270,11 +270,14 @@ public abstract class Converter extends GuiProgram {
    */
   public void convert(File inputFile) throws SerializationException, Exception {
     if (verbose) System.out.println("Converting " + inputFile.getPath());
+    // ensure we can access parent, to look for media
+    final File dir = (inputFile.getParentFile() != null? inputFile.getParentFile()
+                      : new File("."));
 
     // look for media files
     String nameWithoutExtension = IO.WithoutExtension(inputFile.getName());
     Vector<MediaFile> mediaFiles = new Vector<MediaFile>();
-    for (File f : inputFile.getParentFile().listFiles(new FilenameFilter() {
+    for (File f : dir.listFiles(new FilenameFilter() {
         public boolean accept(File mediaDir, String name) {
           if (name.startsWith(nameWithoutExtension)) {
             String lowercase = name.toLowerCase();
@@ -348,8 +351,6 @@ public abstract class Converter extends GuiProgram {
     serializer.configure(serializerConfig, schema);
 
     // serialize
-    final File dir = (inputFile.getParentFile() != null? inputFile.getParentFile()
-                      : new File("."));
     serializer.serialize(
       Arrays.spliterator(graphs), getLayersToSerialize(),
       stream -> {
@@ -395,7 +396,9 @@ public abstract class Converter extends GuiProgram {
       // look for media files
       String nameWithoutExtension = IO.WithoutExtension(inputFile.getName());
       Vector<MediaFile> mediaFiles = new Vector<MediaFile>();
-      for (File f : inputFile.getParentFile().listFiles(new FilenameFilter() {
+      final File dir = (inputFile.getParentFile() != null? inputFile.getParentFile()
+                        : new File("."));
+      for (File f : dir.listFiles(new FilenameFilter() {
           public boolean accept(File mediaDir, String name) {
             if (name.startsWith(nameWithoutExtension)) {
               String lowercase = name.toLowerCase();

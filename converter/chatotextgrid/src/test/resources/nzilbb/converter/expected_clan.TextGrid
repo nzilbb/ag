@@ -57,7 +57,7 @@ item []:
         intervals [3]:
             xmin = 21.51 
             xmax = 25.057 
-            text = "abc abcde abc ab abcd ab abc worryin i abcd" 
+            text = "abc abcde abc ab abcd ab abc worryin i~ abcd" 
         intervals [4]:
             xmin = 25.057 
             xmax = 29.994 
@@ -553,7 +553,7 @@ item []:
         intervals [127]:
             xmin = 369.8 
             xmax = 371.278 
-            text = "ab ab spent abc morning op abcde abc abcdefg opening abcdefghi abcdefgh" 
+            text = "ab ab spent abc morning op~ abcde abc abcdefg opening abcdefghi abcdefgh" 
         intervals [128]:
             xmin = 371.278 
             xmax = 373.206 

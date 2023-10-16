@@ -1732,8 +1732,9 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
     try {
       
       StringBuilder languageExpression = new StringBuilder();
-      if (phraseLanguageLayerId != null || transcriptLanguageLayerId != null) {
-        languageExpression.append(" && /").append("en.*").append("/.test(");
+      if (targetLanguagePattern != null
+          && (phraseLanguageLayerId != null || transcriptLanguageLayerId != null)) {
+        languageExpression.append(" && /").append(targetLanguagePattern).append("/.test(");
         if (phraseLanguageLayerId != null) {
           languageExpression.append("first('").append(esc(phraseLanguageLayerId))
             .append("').label");

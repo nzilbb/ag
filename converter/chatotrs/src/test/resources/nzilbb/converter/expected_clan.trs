@@ -20,7 +20,7 @@
 </Turn>
 <Turn speaker="spk2 spk1" startTime="21.510" endTime="25.057">
 <Sync time="21.510"/>
-<Who nb="2"/>abc abcde abc ab abcd ab abc worryin i abcd
+<Who nb="2"/>abc abcde abc ab abcd ab abc worryin i~ abcd
 <Who nb="1"/>she'll ab nd abcdefg
 </Turn>
 <Turn speaker="spk2" startTime="67.392" endTime="71.049">
@@ -141,7 +141,7 @@
 <Sync time="361.723"/>ab I abc ab abc ab abcde ab abcde ab my parent's abcde ab I could ab
 <Sync time="365.161"/>abcde ab abc abcdefg ab abcd abcdefghi abcdefgh abcd abcd
 <Sync time="367.495"/>
-<Sync time="369.800"/>ab ab spent abc morning op abcde abc abcdefg opening abcdefghi abcdefgh
+<Sync time="369.800"/>ab ab spent abc morning op~ abcde abc abcdefg opening abcdefghi abcdefgh
 <Sync time="371.278"/>abc abcd ab abc a abcd abcdefghi
 <Sync time="373.206"/>abc abcd ab abcde ab abc abcdefgh abcdefghi
 <Sync time="375.636"/>ab abc abcdef ab abc abcde abc abcde ab my abcdefgh abcde abc a

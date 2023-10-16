@@ -15,7 +15,6 @@
   </description>
   <packaging>pom</packaging>
   <modules>
-    <module>converter</module>
     <module>eaftotrs</module>
     <module>eaftoslt</module>
     <module>trstoeaf</module>

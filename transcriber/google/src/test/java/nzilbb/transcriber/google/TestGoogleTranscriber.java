@@ -63,7 +63,7 @@ public class TestGoogleTranscriber {
     transcriber.setWorkingDirectory(dir);
     
     // set the annotator configuration
-    transcriber.setConfig(transcriber.getConfig());
+    transcriber.setConfig("bucketName=nzilbb-test");
     
     transcriber.getStatusObservers().add(s->System.err.println(s));
     System.out.println("Configured.");
