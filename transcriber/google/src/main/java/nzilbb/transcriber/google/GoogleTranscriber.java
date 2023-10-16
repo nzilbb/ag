@@ -22,6 +22,8 @@
 package nzilbb.transcriber.google;
 
 import com.google.api.gax.longrunning.OperationFuture;
+import com.google.api.gax.core.CredentialsProvider;
+import com.google.auth.Credentials;
 import com.google.cloud.speech.v2.AutoDetectDecodingConfig;
 import com.google.cloud.speech.v2.BatchRecognizeRequest;
 import com.google.cloud.speech.v2.BatchRecognizeFileMetadata;
@@ -41,17 +43,22 @@ import com.google.cloud.speech.v2.Recognizer;
 import com.google.cloud.speech.v2.SpeechClient;
 import com.google.cloud.speech.v2.SpeechRecognitionAlternative;
 import com.google.cloud.speech.v2.SpeechRecognitionResult;
+import com.google.cloud.speech.v2.SpeechSettings;
 import com.google.cloud.speech.v2.WordInfo;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageException;
 import com.google.cloud.storage.StorageOptions;
 import com.google.protobuf.ByteString;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -71,6 +78,7 @@ import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.media.wav.WAV;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 //import com.google.api.gax.core.FixedCredentialsProvider;
 //import com.google.auth.Credentials;
 //https://alicejli.github.io/java-cloud-bom/google-cloud-speech/index.html
@@ -96,7 +104,7 @@ public class GoogleTranscriber extends Transcriber {
    * @see #getProjectId()
    * @see #setProjectId(String)
    */
-  protected String projectId = "glassy-outcome-308619"; // TODO remove
+  protected String projectId = null;
   /**
    * Getter for {@link #projectId}: Google Cloud Storage Project ID
    * @return Google Cloud Storage Project ID
@@ -106,7 +114,11 @@ public class GoogleTranscriber extends Transcriber {
    * Setter for {@link #projectId}: Google Cloud Storage Project ID
    * @param newProjectId Google Cloud Storage Project ID
    */
-  public GoogleTranscriber setProjectId(String newProjectId) { projectId = newProjectId; return this; }
+  public GoogleTranscriber setProjectId(String newProjectId) {
+    projectId = newProjectId;
+    if (projectId != null && projectId.trim().length() == 0) projectId = null;
+    return this;
+  }
    
   /**
    * Name of the Google Cloud Storage bucket for uploading speech recordings to.
@@ -121,7 +133,7 @@ public class GoogleTranscriber extends Transcriber {
    */
   public String getBucketName() {
     if (bucketName == null) {
-      return getClass().getSimpleName();
+      return "nzilbb-transcriber";
     }
     return bucketName;
   }
@@ -132,6 +144,29 @@ public class GoogleTranscriber extends Transcriber {
    * recordings to. 
    */
   public GoogleTranscriber setBucketName(String newBucketName) { bucketName = newBucketName; return this; }
+  
+  /**
+   * Path to Google API key json file.
+   * @see #getKeyPath()
+   * @see #setKeyPath(String)
+   */
+  protected String keyPath = null;
+  /**
+   * Getter for {@link #keyPath}: Path to Google API key json file. 
+   * @return Path to Google API key json file.
+   */
+  public String getKeyPath() {
+    return keyPath;
+  }
+  /**
+   * Setter for {@link #keyPath}: Path to Google API key json file. 
+   * @param newKeyPath Path to Google API key json file.
+   */
+  public GoogleTranscriber setKeyPath(String newKeyPath) {
+    keyPath = newKeyPath;
+    if (keyPath != null && keyPath.trim().length() == 0) keyPath = null;
+    return this;
+  }
   
   /**
    * Number of seconds between checks whether the recognition job has finished. Default is 10.
@@ -384,8 +419,22 @@ public class GoogleTranscriber extends Transcriber {
 
     // Initialize client that will be used to send requests. This client only needs to be created
     // once, and can be reused for multiple requests. After completing all of your requests, call
-    // the "close" method on the client to safely clean up any remaining background resources.
-    try (SpeechClient speechClient = SpeechClient.create()) {
+    // the "close" method on the client to safely clean up any remaining background
+    // resources.
+    SpeechSettings.Builder speechSettingsBuilder = SpeechSettings.newBuilder();
+    if (keyPath != null) {
+      setStatus("Using keyPath: " + keyPath);
+      speechSettingsBuilder.setCredentialsProvider(new CredentialsProvider() {
+          public Credentials getCredentials() {
+            try {
+              return ServiceAccountCredentials.fromStream(new FileInputStream(keyPath));
+            } catch (Exception x) {
+              setStatus("Could not access key file \""+keyPath+"\": " + x);
+              return null;
+            }
+          }});
+    }
+    try (SpeechClient speechClient = SpeechClient.create(speechSettingsBuilder.build())) {
       Path path = speech.toPath();
       byte[] data = Files.readAllBytes(path);
       ByteString audioBytes = ByteString.copyFrom(data);
@@ -442,9 +491,30 @@ public class GoogleTranscriber extends Transcriber {
         } else { // must be asynchronous via google cloud storage
           setStatus("Starting asynchronous recognize request via Google Storage...");
 
-          // upload to google storage
-          storage = StorageOptions.newBuilder().setProjectId(projectId).build()
-            .getService();
+          // upload to google storage...
+          
+          if (keyPath != null) {
+            storage = StorageOptions.newBuilder()
+              .setProjectId(projectId)
+              .setCredentials(ServiceAccountCredentials.fromStream(new FileInputStream(keyPath)))
+              .build()
+              .getService();
+          } else {
+            storage = StorageOptions.newBuilder()
+              .setProjectId(projectId)
+              .build()
+              .getService();
+          }
+
+          // ensure bucket exists
+          Bucket bucket = storage.get(bucketName);
+          if (bucket == null) { // bucket doesn't exist
+            // create it
+            setStatus("Creating bucket: " + bucketName);
+            storage.create(BucketInfo.of(bucketName));
+          }
+          
+          // put file in bucket
           blobId = BlobId.of(getBucketName(), speech.getName());
           BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
           Blob blob = storage.create(blobInfo, Files.readAllBytes(speech.toPath()));
