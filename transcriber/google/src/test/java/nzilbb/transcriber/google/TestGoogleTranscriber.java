@@ -45,9 +45,12 @@ import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.util.IO;
 
 public class TestGoogleTranscriber {
-  
+  // UPDATE THE FOLLOWING SETTINGS TO MATCH YOUR GOOGLE CLOUD RESOURCES:
+  static final String projectId = "glassy-outcome-308619";
+  static final String bucketName = "junit-test-transcriber";
+
   static GoogleTranscriber transcriber = new GoogleTranscriber();
-  
+
   @BeforeClass
   public static void install() throws Exception {
     
@@ -63,7 +66,14 @@ public class TestGoogleTranscriber {
     transcriber.setWorkingDirectory(dir);
     
     // set the annotator configuration
-    transcriber.setConfig("bucketName=nzilbb-test");
+    String config = "projectId="+projectId+"&bucketName="+bucketName;
+    // set Google API key file if it exists
+    File key = new File(new File(System.getProperty("user.home")), "GoogleTranscriber-key.json");
+    if (key.exists()) {
+      System.out.println("Using API key: " + key.getAbsolutePath());
+      config += "&keyPath="+key.getAbsolutePath();
+    }
+    transcriber.setConfig(config);
     
     transcriber.getStatusObservers().add(s->System.err.println(s));
     System.out.println("Configured.");
