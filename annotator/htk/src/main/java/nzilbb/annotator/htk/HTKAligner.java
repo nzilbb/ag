@@ -1317,11 +1317,14 @@ public class HTKAligner extends Annotator {
                   getStore().getFragment( // get the fragment corresponding to the utterance
                     utterance.getGraph().getId(), utterance.getId(), layerIds));
               } // next utterance
-              setStatus("Aligning " + speaker);
-              transformFragments(utterances.stream(), alignedFragmentConsumer);
-              setStatus(speaker + " aligned.");
-              completedBatches++;
-              if (isCancelling()) break;
+              if (isCancelling()) {
+                break;
+              } else {
+                setStatus("Aligning " + speaker);
+                transformFragments(utterances.stream(), alignedFragmentConsumer);
+                setStatus(speaker + " aligned.");
+                completedBatches++;
+              }
             } // next batch
           } // not cancelling
         } // graph store set
