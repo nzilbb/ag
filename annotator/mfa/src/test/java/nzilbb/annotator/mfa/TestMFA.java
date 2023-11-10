@@ -94,6 +94,8 @@ public class TestMFA {
 
   /** Ensure validDictionaryNames method works. */
   @Test public void validDictionaryNames() throws Exception {
+        annotator.getStatusObservers().add(status->System.out.println(status));
+
     Collection<String> names = annotator.validDictionaryNames();
     assertTrue("validDictionaryNames contains english_mfa " + names,
                names.contains("english_mfa")); // 2.0.0rc3 was "english"
@@ -104,7 +106,7 @@ public class TestMFA {
   }   
 
   /** Ensure validDictionaryNames method works. */
-  /* @Test */ public void validAcousticModels() throws Exception {
+  @Test public void validAcousticModels() throws Exception {
     Collection<String> names = annotator.validAcousticModels();
     assertTrue("validAcousticModels contains english_mfa " + names,
                names.contains("english_mfa")); // 2.0.0rc3 was "english"
@@ -277,7 +279,7 @@ public class TestMFA {
 
   /** Test alignment of fragment with pre-trained models/dictionary (english/english),
    * updating word token alignments and creating children. */
-  /*@Test*/ public void pretrainedModels() throws Exception {
+  @Test public void pretrainedModels() throws Exception {
     annotator.setSessionName("pretrainedModels");
     annotator.getStatusObservers().add(status->System.out.println(status));
     

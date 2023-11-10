@@ -94,6 +94,10 @@ import nzilbb.util.IO;
 public class MFA extends Annotator { 
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
   public String getMinimumApiVersion() { return "1.0.7"; }
+
+  /** The version of the montreal-forced-aligner package that the aligner will attempt to
+   * install if it's not already installed. (This only works inside Docker containers.) */
+  public final String attemptToInstallVersion = "2.2.17";
   
   /**
    * Path to the mfa executable. 
@@ -513,13 +517,13 @@ public class MFA extends Annotator {
     String[] dictionaryLines = dictionariesRaw.split("\n");
     List<String> dictionaries = Arrays.stream(dictionaryLines)
       .map(
-        s->s.replace("\r","")     // remove carriage returns used on Windows systems
-        .replaceAll("^[^']*'","") // remove leading quote and anything before it
-        .replaceAll("',?$",""))   // remove trailing quote
-      .filter(s->s.length() > 0)  // no blank lines
+        s->s.replace("\r","")        // remove carriage returns used on Windows systems
+        .replaceAll("^[^']*'","")    // remove leading quote and anything before it
+        .replaceAll("'[,:]?.*$","")) // remove trailing quote and anything after it
+      .filter(s->s.length() > 0)     // no blank lines
       .filter(s->s.indexOf(":") < 0) // not the list header
-      .filter(s->!s.equals("["))  // not just an open-bracket
-      .filter(s->!s.equals("]"))  // not just a close-bracket
+      .filter(s->!s.equals("["))     // not just an open-bracket
+      .filter(s->!s.equals("]"))     // not just a close-bracket
       .sorted()
       .collect(Collectors.toList());
     return dictionaries;
@@ -535,13 +539,13 @@ public class MFA extends Annotator {
     String[] acousticModelLines = acousticModelsRaw.split("\n");
     List<String> acousticModels = Arrays.stream(acousticModelLines)
       .map(
-        s->s.replace("\r","")     // remove carriage returns used on Windows systems
-        .replaceAll("^[^']*'","") // remove leading quote and anything before it
-        .replaceAll("',?$",""))   // remove trailing quote
-      .filter(s->s.length() > 0)  // no blank lines
+        s->s.replace("\r","")        // remove carriage returns used on Windows systems
+        .replaceAll("^[^']*'","")    // remove leading quote and anything before it
+        .replaceAll("'[,:]?.*$","")) // remove trailing quote and anything after it
+      .filter(s->s.length() > 0)     // no blank lines
       .filter(s->s.indexOf(":") < 0) // not the list header
-      .filter(s->!s.equals("["))  // not just an open-bracket
-      .filter(s->!s.equals("]"))  // not just a close-bracket
+      .filter(s->!s.equals("["))     // not just an open-bracket
+      .filter(s->!s.equals("]"))     // not just a close-bracket
       .sorted()
       .collect(Collectors.toList());
     return acousticModels;
@@ -729,7 +733,7 @@ public class MFA extends Annotator {
               .arg("-y") // yes to everything
               .arg("-n").arg("aligner") // env name
               .arg("-c").arg("conda-forge")
-              .arg("montreal-forced-aligner")
+              .arg("montreal-forced-aligner="+attemptToInstallVersion)
               .setWorkingDirectory(getWorkingDirectory());
             cmd.getStdoutObservers().add(m->setStatus(m));
             cmd.getStderrObservers().add(m->setStatus(m));
