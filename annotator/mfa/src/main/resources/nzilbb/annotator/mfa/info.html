@@ -94,3 +94,10 @@
 <p> On Windows: 
   <br><tt>conda update -c conda-forge -p C:\ProgramData\Miniconda3\envs\aligner montreal-forced-aligner</tt>
 </p>
+
+<p> Alternatively, you can remove the <tt>aligner</tt> environment and re-create it again: </p>
+
+<ol>
+  <li><tt>/opt/conda/bin/conda env remove -n aligner</tt></li>
+  <li><tt>/opt/conda/bin/conda create -n aligner -c conda-forge montreal-forced-aligner</tt></li>
+</ol>
