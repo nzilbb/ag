@@ -64,7 +64,7 @@
     <tt>chmod -R go-w /opt/conda</tt><br>
     <tt>chmod -R go+rX /opt/conda</tt></li>
   <li> Install the Montreal Forced Aligner <br>
-    <tt>/opt/conda/bin/conda create -n aligner -c conda-forge montreal-forced-aligner</tt></li>
+    <tt>/opt/conda/bin/conda create -n aligner -c conda-forge montreal-forced-aligner=2.2.17</tt></li>
 </ol>
 
 <h3> Windows </h3>
@@ -79,7 +79,7 @@
     <tt>C:\ProgramData\Miniconda3</tt></li>
   <li> When asked, tick the <q>add to PATH</q> option.</li>
   <li> Install the Montreal Forced Aligner by specifying a path to the environment <br>
-    <tt>conda create -c conda-forge -p C:\ProgramData\Miniconda3\envs\aligner montreal-forced-aligner</tt></li>
+    <tt>conda create -c conda-forge -p C:\ProgramData\Miniconda3\envs\aligner montreal-forced-aligner=2.2.17</tt></li>
 </ol>
 
 <h2> Upgrading Montreal Forced Aligner </h2>
@@ -95,9 +95,12 @@
   <br><tt>conda update -c conda-forge -p C:\ProgramData\Miniconda3\envs\aligner montreal-forced-aligner</tt>
 </p>
 
-<p> Alternatively, you can remove the <tt>aligner</tt> environment and re-create it again: </p>
+<p> Alternatively, you can remove the <tt>aligner</tt> environment and re-create it again, using a specific version represented below by <var>n.n.n</var>: </p>
 
 <ol>
   <li><tt>/opt/conda/bin/conda env remove -n aligner</tt></li>
-  <li><tt>/opt/conda/bin/conda create -n aligner -c conda-forge montreal-forced-aligner</tt></li>
+  <li><tt>/opt/conda/bin/conda create -n aligner -c conda-forge montreal-forced-aligner=<var>n.n.n</var></tt></li>
 </ol>
+
+<p> You can find out information about recent versions here:
+  <br><a href="https://montreal-forced-aligner.readthedocs.io/en/latest/installation.html#installing-older-versions-of-mfa">https://montreal-forced-aligner.readthedocs.io/en/latest/installation.html#installing-older-versions-of-mfa</a></p>
