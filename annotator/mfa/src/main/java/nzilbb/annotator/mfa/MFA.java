@@ -95,9 +95,21 @@ public class MFA extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
   public String getMinimumApiVersion() { return "1.0.7"; }
 
-  /** The version of the montreal-forced-aligner package that the aligner will attempt to
-   * install if it's not already installed. (This only works inside Docker containers.) */
-  public final String attemptToInstallVersion = "2.2.17";
+  /**
+   * The version of the montreal-forced-aligner package that the aligner will attempt to
+   * install if it's not already installed. (This only works inside Docker containers.) 
+   * @see #getBuiltForMfaVersion()
+   */
+  protected final String builtForMfaVersion = "2.2.17";
+  /**
+   * Getter for {@link #builtForMfaVersion}: The version of the montreal-forced-aligner
+   * package that the aligner will attempt to install if it's not already installed. (This
+   * only works inside Docker containers.) 
+   * @return The version of the montreal-forced-aligner package that the aligner will
+   * attempt to install if it's not already installed. (This only works inside Docker
+   * containers.) 
+   */
+  public String getBuiltForMfaVersion() { return builtForMfaVersion; }
   
   /**
    * Path to the mfa executable. 
@@ -682,7 +694,7 @@ public class MFA extends Annotator {
   }
   
   /**
-   * Start an attempt to install MFA.
+   * Start an attempt to install the version of MFA indicated by {@link #builtForMfaVersion}.
    * <p> This is only likely to work inside a Docker container, where the current user has
    * superuser privileges.
    * <p> This method starts the installation process in a new thread, and returns
@@ -733,7 +745,7 @@ public class MFA extends Annotator {
               .arg("-y") // yes to everything
               .arg("-n").arg("aligner") // env name
               .arg("-c").arg("conda-forge")
-              .arg("montreal-forced-aligner="+attemptToInstallVersion)
+              .arg("montreal-forced-aligner="+builtForMfaVersion)
               .setWorkingDirectory(getWorkingDirectory());
             cmd.getStdoutObservers().add(m->setStatus(m));
             cmd.getStderrObservers().add(m->setStatus(m));
