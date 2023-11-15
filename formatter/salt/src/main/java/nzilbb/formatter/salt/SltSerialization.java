@@ -1299,7 +1299,7 @@ public class SltSerialization extends Deserialize implements GraphDeserializer, 
     // parameters allow codes that are found in the stream to be mapped to phrase/word layers
     // (e.g. lexical/pronounce annotations)
     // and comments of particular type to span/phrase layers (e.g. {NOISE:...} comments)
-    ParameterSet parameters = new ParameterSet();
+    parameters = new ParameterSet();
     LinkedHashMap<String,Layer> phraseWordLayers = new LinkedHashMap<String,Layer>();
     LinkedHashMap<String,Layer> spanPhraseLayers = new LinkedHashMap<String,Layer>();
     for (Layer layer : schema.getLayers().values()) {
