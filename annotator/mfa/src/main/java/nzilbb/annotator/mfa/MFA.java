@@ -1057,10 +1057,9 @@ public class MFA extends Annotator {
   // members for managing progress
 
   /**
-   * Transforms the graph. In this case, the graph is simply summarized, by counting all
-   * tokens of each word type, and printing out the result to stdout.
+   * Transforms the graph. 
    * @param graph The graph to transform.
-   * @return The changes introduced by the transformation.
+   * @return The transformed graph.
    * @throws TransformationException If the transformation cannot be completed.
    */
   public Graph transform(Graph graph) throws TransformationException {
@@ -1190,7 +1189,7 @@ public class MFA extends Annotator {
               // ensure other commands don't start/stop database server
               mfa(false, "configure", "--disable_auto_server");
               // start db server
-              mfa(false, "server", "start");
+              mfa(false, "server", "start", "--use_postgres");
               dbServer = true;
             } catch (TransformationException x) {
               setStatus("DB setup failed: " + x);
@@ -1222,6 +1221,7 @@ public class MFA extends Annotator {
                 parameters.add(""+retryBeam);
                 parameters.add("--uses_speaker_adaptation");
                 parameters.add(noSpeakerAdaptation?"False":"True");
+                parameters.add("--use_postgres");
                 String[] paramatersArray = parameters.toArray(new String[0]);
                 mfa(false, paramatersArray);
                 setPercentComplete(80); // (up to 5 phases of 10% each arrives at 80%)
@@ -1242,7 +1242,8 @@ public class MFA extends Annotator {
                         corpusDir.getPath(), dictionary, modelsName,
                         alignedDir.getPath(),
                         "--beam", ""+beam, "--retry-beam", ""+retryBeam,
-                        "--uses_speaker_adaptation", noSpeakerAdaptation?"False":"True");
+                        "--uses_speaker_adaptation", noSpeakerAdaptation?"False":"True",
+                        "--use_postgres");
                     // log contents of ${tempDir}/corpus/align.log
                     copyLog(new File(new File(tempDir, "corpus"), "align.log"));
                   } // not cancelling
@@ -1253,7 +1254,7 @@ public class MFA extends Annotator {
               if (dbServer) {
                 try {
                   setStatus("Shutting down database server...");
-                  mfa(false, "server", "stop", "--mode", "smart");
+                  mfa(false, "server", "stop", "--mode", "smart", "--use_postgres");
                 } catch (TransformationException x) {
                   setStatus("DB shutdown failed: " + x);
                 }
@@ -1696,7 +1697,7 @@ public class MFA extends Annotator {
       Vector<String> dependentLayerIds = new Vector<String>();
       ids.add(schema.getTurnLayerId());
       ids.add(schema.getUtteranceLayerId());
-      ids.add(schema.getWordLayerId());
+      ids.add(schema.getWordLayerId()); // TODO need this really?
       if (utteranceTagLayerId != null) ids.add(utteranceTagLayerId);
       if (wordAlignmentLayerId != null && !schema.getWordLayerId().equals(wordAlignmentLayerId)) {
         ids.add(wordAlignmentLayerId);
@@ -1908,8 +1909,11 @@ public class MFA extends Annotator {
               
               // now scan the dependent layers and fix up any child anchors that are out of bounds
               // TODO fix merge/defaultOffsetGenerator so that this hack isn't necessary
+              // TODO AnnotatorWrapperManager rolls back these changes anyway!
               for (String layerId : dependentLayerIds) {
                 for (Annotation a : fragment.all(layerId)) {
+
+                  // start anchor:
                   // was it originally connected to the parent?
                   if (!a.getStartId().equals(a.getParent().getStartId())
                       && a.getOriginalStartId().equals(a.getParent().getOriginalStartId())) {
@@ -1918,13 +1922,14 @@ public class MFA extends Annotator {
                     // is the start now too early?
                     a.setStart(a.getParent().getStart());
                   }
-                  
+
+                  // end anchor:
                   // was it originally connected to the parent?
                   if (!a.getEndId().equals(a.getParent().getEndId())
                       && a.getOriginalEndId().equals(a.getParent().getOriginalEndId())) {
                     a.setEnd(a.getParent().getEnd());
                   } else if (a.getEnd().getOffset() > a.getParent().getEnd().getOffset()) {
-                    // is the end now too early?
+                    // is the end now too late?
                     a.setEnd(a.getParent().getEnd());
                   }
                 } // next sub-word annotation
