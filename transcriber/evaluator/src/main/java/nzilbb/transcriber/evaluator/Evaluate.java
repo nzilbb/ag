@@ -672,7 +672,8 @@ public class Evaluate extends CommandLineProgram {
 
       // transcribe recordings batch
       timer.start("Time to transcribe");
-      transcriber.transcribeFragments(Arrays.stream(wavs), transcribed -> { 
+      transcriber.transcribeFragments(Arrays.stream(wavs), transcribed -> {
+          System.err.println("transcribeFragments " + transcribed);
           timer.end("Time to transcribe"); // stop timer while we evaluate...
           try {
             // ensure the schema has everything we expect
@@ -733,8 +734,11 @@ public class Evaluate extends CommandLineProgram {
         utteranceCsv.close();
       } catch (Exception x) {
       }
-      System.err.println(
-        "Time to transcribe: " + (((double)timer.getTotals().get("Time to transcribe")) / 1000.0));
+      if (timer.getTotals().containsKey("Time to transcribe")) {
+        System.err.println(
+          "Time to transcribe: " + (((double)timer.getTotals().get("Time to transcribe")) / 1000.0));
+
+      }
     }
   } // end of evaluateFromFileSystem()
   
@@ -937,8 +941,10 @@ public class Evaluate extends CommandLineProgram {
       } catch (Exception x) {
       }
     }
-    System.err.println(
-      "Time to transcribe: " + (((double)timer.getTotals().get("Time to transcribe")) / 1000.0));
+    if (timer.getTotals().containsKey("Time to transcribe")) {
+      System.err.println(
+        "Time to transcribe: " + (((double)timer.getTotals().get("Time to transcribe")) / 1000.0));
+    }
   } // end of evaluateFromLabbcat()
   
   /**

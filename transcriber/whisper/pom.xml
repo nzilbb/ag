@@ -9,13 +9,13 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.transcriber.whisper</artifactId>
-  <version>0.2.0</version>
+  <version>0.2.1</version>
 
   <name>nzilbb.transcriber.whisper</name>
   <description>Transcriber that uses Whisper to transcribe audio</description>
 
   <properties>
-    <nzilbb.formatter.webvtt.version>0.6.2</nzilbb.formatter.webvtt.version>
+    <nzilbb.formatter.webvtt.version>0.7.0</nzilbb.formatter.webvtt.version>
     <package.path>nzilbb/transcriber/whisper/</package.path>
     <annotator.class>nzilbb.transcriber.whisper.WhisperTranscriber</annotator.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

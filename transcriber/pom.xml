@@ -19,5 +19,6 @@
     <module>deepspeech</module>
     <module>google</module>
     <module>whisper</module>
+    <module>papareo</module>
   </modules>
 </project>

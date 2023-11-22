@@ -181,8 +181,10 @@ public class GoogleTranscriber extends Transcriber {
    */
   public int getPollingIntervalSeconds() { return pollingIntervalSeconds; }
   /**
-   * Setter for {@link #pollingIntervalSeconds}: Number of seconds between checks whether the recognition job has finished.
-   * @param newPollingIntervalSeconds Number of seconds between checks whether the recognition job has finished.
+   * Setter for {@link #pollingIntervalSeconds}: Number of seconds between checks whether
+   * the recognition job has finished. 
+   * @param newPollingIntervalSeconds Number of seconds between checks whether the
+   * recognition job has finished. 
    */
   public GoogleTranscriber setPollingIntervalSeconds(int newPollingIntervalSeconds) { pollingIntervalSeconds = newPollingIntervalSeconds; return this; }
   
@@ -426,7 +428,7 @@ public class GoogleTranscriber extends Transcriber {
     // resources.
     SpeechSettings.Builder speechSettingsBuilder = SpeechSettings.newBuilder();
     if (keyPath != null) {
-      setStatus("Using keyPath: " + keyPath);
+      // setStatus("Using keyPath: " + keyPath);
       speechSettingsBuilder.setCredentialsProvider(new CredentialsProvider() {
           public Credentials getCredentials() {
             try {

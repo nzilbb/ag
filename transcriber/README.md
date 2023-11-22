@@ -7,7 +7,7 @@ Modules that perform automatic transcription of speech recordings using ASR/STT.
 1. In this directory, run the following command (change *myannotator* to the required name):
    ```
    mvn archetype:generate \
-     -DgroupId=nzilbb \
+     -DgroupId=nz.ilbb.ag \
      -DartifactId=mytranscriber \
      -DarchetypeArtifactId=maven-archetype-quickstart \
      -DarchetypeVersion=1.4 \
@@ -29,7 +29,7 @@ Modules that perform automatic transcription of speech recordings using ASR/STT.
     <dependency>
       <groupId>nzilbb</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.0.7,)</version>
+      <version>[1.0.8,)</version>
       <scope>compile</scope>
     </dependency>
    ```
