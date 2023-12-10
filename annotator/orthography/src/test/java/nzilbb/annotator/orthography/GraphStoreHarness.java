@@ -50,7 +50,7 @@ public class GraphStoreHarness implements GraphStore {
     throws StoreException, PermissionException {
     aggregateMatchingAnnotationsOperation = operation;
     aggregateMatchingAnnotationsExpression = expression;
-    return new String[]{"Foo!"," 'bar'"};
+    return new String[]{"Foo\\"," 'bar'"};
   }
 
 

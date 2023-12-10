@@ -403,18 +403,19 @@ public class TestOrthographyStandardizer {
     
     assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
                  2, store.tagMatchingAnnotationsLabels.size());
-    assertEquals("tagMatchingAnnotations layerId foo",
+    assertEquals("tagMatchingAnnotations layerId foo back-slash: "
+                 + store.tagMatchingAnnotationsLabels,
                  "foo", store.tagMatchingAnnotationsLabels.get(
-                   "layer.id == 'word' && label == 'Foo!'"));
-    assertEquals("tagMatchingAnnotations layerId bar",
+                   "layer.id == 'word' && label == 'Foo\\\\'"));
+    assertEquals("tagMatchingAnnotations layerId bar: " + store.tagMatchingAnnotationsLabels,
                  "bar", store.tagMatchingAnnotationsLabels.get(
                    "layer.id == 'word' && label == ' \\'bar\\''"));
     
     assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
                  2, store.tagMatchingAnnotationsLayerIds.size());
-    assertEquals("tagMatchingAnnotations layerId foo",
+    assertEquals("tagMatchingAnnotations layerId foo back-slash",
                  "orthography", store.tagMatchingAnnotationsLayerIds.get(
-                   "layer.id == 'word' && label == 'Foo!'"));
+                   "layer.id == 'word' && label == 'Foo\\\\'"));
     assertEquals("tagMatchingAnnotations layerId bar",
                  "orthography", store.tagMatchingAnnotationsLayerIds.get(
                    "layer.id == 'word' && label == ' \\'bar\\''"));
@@ -422,9 +423,9 @@ public class TestOrthographyStandardizer {
     assertEquals("tagMatchingAnnotations num confidences: "
                  + store.tagMatchingAnnotationsConfidences,
                  2, store.tagMatchingAnnotationsConfidences.size());
-    assertEquals("tagMatchingAnnotations layerId foo",
+    assertEquals("tagMatchingAnnotations layerId foo back-slash",
                  Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
-                   "layer.id == 'word' && label == 'Foo!'"));
+                   "layer.id == 'word' && label == 'Foo\\\\'"));
     assertEquals("tagMatchingAnnotations layerId bar",
                  Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
                    "layer.id == 'word' && label == ' \\'bar\\''"));    

@@ -258,7 +258,7 @@ public class OrthographyStandardizer extends Annotator {
       
       StringBuilder labelExpression = new StringBuilder();
       labelExpression.append("layer.id == '");
-      labelExpression.append(tokenLayer.getId().replace("'", "\\'"));
+      labelExpression.append(esc(tokenLayer.getId()));
       labelExpression.append("'");
       if (expression != null && expression.trim().length() > 0) {
         labelExpression.append(" && [");
@@ -271,7 +271,7 @@ public class OrthographyStandardizer extends Annotator {
           labelExpression.append(
             Arrays.stream(ids)
             // quote and escape each ID
-            .map(id->"'"+id.replace("'", "\\'")+"'")
+            .map(id->"'"+esc(id)+"'")
             // make a comma-delimited list
             .collect(Collectors.joining(",")));
           labelExpression.append("].includes(graphId)");
@@ -289,7 +289,7 @@ public class OrthographyStandardizer extends Annotator {
         setStatus("\""+word+"\" → \""+orthography+"\"");
         // tag all tokens of this word with the orthography
         store.tagMatchingAnnotations(
-          labelExpression + " && label == '"+word.replace("'", "\\'")+"'",
+          labelExpression + " && label == '"+esc(word)+"'",
           orthographyLayerId, orthography, Constants.CONFIDENCE_AUTOMATIC);
         setPercentComplete((++soFar * 100) / distinctWords.length);
       } // next word
@@ -356,5 +356,15 @@ public class OrthographyStandardizer extends Annotator {
     }
     return orth;
   } // end of orthography()
-   
+
+  /**
+   * Escapes quotes in the given string for inclusion in QL or SQL queries.
+   * @param s The string to escape.
+   * @return The given string, with quotes escapeed.
+   */
+  private String esc(String s) {
+    if (s == null) return "";
+    return s.replace("\\","\\\\").replace("'","\\'");
+  } // end of esc()
+  
 } // end of class OrthographyStandardizer

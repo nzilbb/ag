@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.orthography</artifactId>
   <name>nzilbb.annotator.orthography</name>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
 
   <properties>
     <package.path>nzilbb/annotator/orthography/</package.path>
@@ -58,7 +58,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <trimStackTrace>false</trimStackTrace>
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>
