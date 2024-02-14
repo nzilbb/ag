@@ -1137,7 +1137,16 @@ public class HTKAligner extends Annotator {
     HashSet<String> outputLayers = new HashSet<String>();
     if (participantTagLayerId != null) outputLayers.add(participantTagLayerId);
     if (utteranceTagLayerId != null) outputLayers.add(utteranceTagLayerId);
-    if (wordAlignmentLayerId != null) outputLayers.add(wordAlignmentLayerId);
+    if (wordAlignmentLayerId != null
+        // avoid a dependency loop: htk needs orthography, which needs word, which needs htk..
+        && !wordAlignmentLayerId.equals(schema.getWordLayerId())) {
+      Layer wordAlignmentLayer = schema.getLayer(wordAlignmentLayerId);
+      if (wordAlignmentLayer != null
+          && !schema.getWordLayerId().equals(wordAlignmentLayer.getParentId())
+          && wordAlignmentLayer.getAlignment() != Constants.ALIGNMENT_NONE) {
+        outputLayers.add(wordAlignmentLayerId);
+      } // not a word tag layer
+    } // not the word layer
     if (phoneAlignmentLayerId != null) outputLayers.add(phoneAlignmentLayerId);
     if (scoreLayerId != null) outputLayers.add(scoreLayerId);
     return outputLayers.toArray(new String[0]);
