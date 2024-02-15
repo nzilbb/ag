@@ -110,7 +110,7 @@
               <artifactSet>
                 <excludes>
                   <exclude>junit:junit</exclude>
-                  <exclude>nzilbb.ag:*</exclude>
+                  <exclude>nz.ilbb.ag:*</exclude>
                   <exclude>org.conscrypt:*</exclude><!-- CLI execution breaks with this -->
                 </excludes>
               </artifactSet>

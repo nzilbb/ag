@@ -75,6 +75,39 @@
           <outputDirectory>../../bin</outputDirectory>
         </configuration>
       </plugin>
+      <!-- include dependencies in our jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <!-- the base name of the resource bundle, a fully qualified class name -->
+                  <resource>META-INF/services/io.grpc.LoadBalancerProvider</resource>
+                </transformer>
+              </transformers>
+              <artifactSet>
+                <excludes>
+                  <exclude>junit:junit</exclude>
+                  <exclude>nz.ilbb.ag:nzilbb.ag:*</exclude>
+                  <exclude>org.antlr:*</exclude>
+                  <exclude>org.apache.derby:*</exclude>
+                  <exclude>org.glassfish:*</exclude>
+                  <exclude>commons-codec:*</exclude>
+                  <exclude>commons-fileupload:*</exclude>
+                </excludes>
+              </artifactSet>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
