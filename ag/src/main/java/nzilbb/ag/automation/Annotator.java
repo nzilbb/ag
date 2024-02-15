@@ -496,7 +496,7 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
         } // not Boolean
       } // not String
     }  // next parameter
-  } // end of beanPropertiessFromQueryString()
+  } // end of beanPropertiesFromQueryString()
   
   /**
    * Converts a JSON string to bean properties.
