@@ -249,9 +249,10 @@ public class Validator extends Transform implements GraphTransformer {
       for (Annotation annotation : graph.getAnnotationsById().values()) {
         if (!needMoreValidation) { // haven't found any interesting changes yet
           // we don't validate if the only changes are to tag layers with no children etc.
-          if (annotation.getParentId() == null
+          if (annotation.getParentId() == null // no parent
               && annotation.getLayer().getParentId() != null
-              && annotation.getLayer().getParentId() != graph.getSchema().getRoot().getId()) {
+              && !annotation.getLayer().getParentId()
+              .equals(graph.getSchema().getRoot().getId())) {
             needMoreValidation = true;
           } else {
             if (annotationNeedsValidation(annotation)) {
