@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1255,10 +1255,12 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
    * @return The annotation.
    */
   public Annotation addAnnotation(Annotation annotation) {
-    getAnnotations(annotation.getLayerId()).add(annotation);
+    // set parent ID before adding to child annotations list,
+    // because the assigned parent is important to the comparator
     if (annotation.getParentId() == null || !annotation.getParentId().equals(getId())) {
       annotation.setParentId(getId());
-    }
+    } 
+    getAnnotations(annotation.getLayerId()).add(annotation);
     return annotation;
   } // end of addAnnotation()
    

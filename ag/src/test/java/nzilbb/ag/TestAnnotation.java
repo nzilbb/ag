@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2016 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -26,6 +26,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 import java.util.LinkedHashMap;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
 
 public class TestAnnotation 
@@ -489,6 +490,41 @@ public class TestAnnotation
       assertFalse("not anchored", unknownEnd.getAnchored());
      
    }
+
+  /** Ensure that child anchors come out in ordinal order when parent graph is not set. */
+   @Test public void graphlessChildOrder() 
+   {
+     Annotation participant = new Annotation("m_-2_2436", "Interviewer", "participant");
+     Annotation episode1 = new Annotation("m_-50_135", "First Episode", "episode")
+       .setOrdinal(1);
+     Annotation episode2 = new Annotation("m_-50_75", "Episode Two", "episode")
+       .setOrdinal(2);
+     Annotation episode3 = new Annotation("m_-50_105", "Episode Three", "episode")
+       .setOrdinal(3);
+
+     // no graph is set
+     participant.addAnnotation(episode2);
+     participant.addAnnotation(episode1);
+     participant.addAnnotation(episode3);
+     assertNotEquals("Children not in addition order",
+                     "Episode Two, First Episode, Episode Three",
+                     participant.annotations.get("episode").stream()
+                     .map(a->a.getLabel()).collect(Collectors.joining(", ")));
+     assertNotEquals("Children not in ID order",
+                     "Episode Three, First Episode, Episode Two",
+                     participant.annotations.get("episode").stream()
+                     .map(a->a.getLabel()).collect(Collectors.joining(", ")));
+     assertNotEquals("Children not in Label order",
+                     "Episode Three, Episode Two, First Episode",
+                     participant.annotations.get("episode").stream()
+                     .map(a->a.getLabel()).collect(Collectors.joining(", ")));
+     assertEquals("Children in ordinal order",
+                  "First Episode, Episode Two, Episode Three",
+                  participant.annotations.get("episode").stream()
+                  .map(a->a.getLabel()).collect(Collectors.joining(", ")));
+   }
+      
+
 /*
    @Test public void containment() 
    {
