@@ -536,6 +536,8 @@ public class MFA extends Annotator {
       .filter(s->s.indexOf(":") < 0) // not the list header
       .filter(s->!s.equals("["))     // not just an open-bracket
       .filter(s->!s.equals("]"))     // not just a close-bracket
+      .filter(s->!s.equals("{"))     // not just an open-brace
+      .filter(s->!s.equals("}"))     // not just a close-brace
       .sorted()
       .collect(Collectors.toList());
     return dictionaries;
@@ -558,6 +560,8 @@ public class MFA extends Annotator {
       .filter(s->s.indexOf(":") < 0) // not the list header
       .filter(s->!s.equals("["))     // not just an open-bracket
       .filter(s->!s.equals("]"))     // not just a close-bracket
+      .filter(s->!s.equals("{"))     // not just an open-brace
+      .filter(s->!s.equals("}"))     // not just a close-brace
       .sorted()
       .collect(Collectors.toList());
     return acousticModels;
@@ -1049,7 +1053,16 @@ public class MFA extends Annotator {
     HashSet<String> outputLayers = new HashSet<String>();
     if (participantTagLayerId != null) outputLayers.add(participantTagLayerId);
     if (utteranceTagLayerId != null) outputLayers.add(utteranceTagLayerId);
-    if (wordAlignmentLayerId != null) outputLayers.add(wordAlignmentLayerId);
+    if (wordAlignmentLayerId != null
+        // avoid a dependency loop: mfa needs orthography, which needs word, which needs mfa...
+        && !wordAlignmentLayerId.equals(schema.getWordLayerId())) {
+      Layer wordAlignmentLayer = schema.getLayer(wordAlignmentLayerId);
+      if (wordAlignmentLayer != null
+          && !schema.getWordLayerId().equals(wordAlignmentLayer.getParentId())
+          && wordAlignmentLayer.getAlignment() != Constants.ALIGNMENT_NONE) {
+        outputLayers.add(wordAlignmentLayerId);
+      } // not a word tag layer
+    } // not the word layer
     if (phoneAlignmentLayerId != null) outputLayers.add(phoneAlignmentLayerId);
     return outputLayers.toArray(new String[0]);
   }
