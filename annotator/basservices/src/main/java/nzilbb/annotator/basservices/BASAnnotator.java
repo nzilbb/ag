@@ -799,7 +799,16 @@ public class BASAnnotator extends Annotator {
     if ("G2P".equals(service)) {
       if (pronunciationLayerId != null) outputLayers.add(pronunciationLayerId);
     } else if ("MAUSBasic".equals(service)) {
-      if (wordAlignmentLayerId != null) outputLayers.add(wordAlignmentLayerId);
+      if (wordAlignmentLayerId != null
+          // avoid a dependency loop: bas needs orthography, which needs word, which needs bas...
+          && !wordAlignmentLayerId.equals(schema.getWordLayerId())) {
+        Layer wordAlignmentLayer = schema.getLayer(wordAlignmentLayerId);
+        if (wordAlignmentLayer != null
+            && !schema.getWordLayerId().equals(wordAlignmentLayer.getParentId())
+            && wordAlignmentLayer.getAlignment() != Constants.ALIGNMENT_NONE) {
+          outputLayers.add(wordAlignmentLayerId);
+        } // not a word tag layer
+      } // not the word layer
       if (phoneAlignmentLayerId != null) outputLayers.add(phoneAlignmentLayerId);
     }
     return outputLayers.toArray(new String[0]);
