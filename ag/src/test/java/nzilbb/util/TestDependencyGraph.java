@@ -142,36 +142,48 @@ public class TestDependencyGraph {
    */
   @Test public void layerManagerGraph() throws Exception {
 
+    final Integer LAYER_WORD = 0;
+    final Integer LAYER_SEGMENT = 1;
+    final Integer LAYER_ORTHOGRAPHY = 2;
+    final Integer LAYER_UTTERANCE = 12;
+    final Integer LAYER_PRON = 30;
+    final Integer LAYER_PHONOLOGY = 50;
+    final Integer LAYER_HTK = 75;
+    final Integer LAYER_ARPABET = 100;
+    final Integer LAYER_PARTICIPANT = -2;
+    final Integer LAYER_MAIN_PARTICIPANT = -3;
+
     // Layer Manager configurations as they come out of the database
-    LayerManagerConfig word = new LayerManagerConfig("word", 0, null, null);
-    LayerManagerConfig segment = new LayerManagerConfig("segment", 1, null, null);
+    LayerManagerConfig word = new LayerManagerConfig("word", LAYER_WORD, null, null);
+    LayerManagerConfig segment = new LayerManagerConfig("segment", LAYER_SEGMENT, null, null);
     LayerManagerConfig utterance
-      = new LayerManagerConfig("utterance", 12, null, null);
+      = new LayerManagerConfig("utterance", LAYER_UTTERANCE, null, null);
     LayerManagerConfig orthography
-      = new LayerManagerConfig("orthography", 2, null, "Orth Standardizer"); 
-    orthography.dependsOnLayers.add(0);
-    LayerManagerConfig pron = new LayerManagerConfig("pron", 30, null, null);
+      = new LayerManagerConfig("orthography", LAYER_ORTHOGRAPHY, null, "Orth Standardizer"); 
+    orthography.dependsOnLayers.add(LAYER_WORD);
+    LayerManagerConfig pron = new LayerManagerConfig("pron", LAYER_PRON, null, null);
     LayerManagerConfig phonology
-      = new LayerManagerConfig("phonology", 50, null, "CELEX");
-    phonology.dependsOnLayers.add(2);
+      = new LayerManagerConfig("phonology", LAYER_PHONOLOGY, null, "CELEX");
+    phonology.dependsOnLayers.add(LAYER_ORTHOGRAPHY);
     LayerManagerConfig phonologyPron =
-      new LayerManagerConfig("phonology", 50, 1, "Pattern Matcher"); // aux
-    //phonologyPron.dependsOn(phonology); // auxiliary depends on its primary manager
-    phonologyPron.dependsOnLayers.add(2);
-    phonologyPron.dependsOnLayers.add(30);
+      new LayerManagerConfig("phonology", LAYER_PHONOLOGY, 1, "Pattern Matcher"); // aux
+    phonologyPron.dependsOnLayers.add(LAYER_ORTHOGRAPHY);
+    phonologyPron.dependsOnLayers.add(LAYER_PRON);
+    // ARPABET depends indirectly on HTK, but is defined before
     LayerManagerConfig arpabet
-      = new LayerManagerConfig("arpabet", 100, null, "Character Mapper");
-    arpabet.dependsOnLayers.add(1);
-    LayerManagerConfig htk = new LayerManagerConfig("htk", 75, null, "HTKAligner");
+      = new LayerManagerConfig("arpabet", LAYER_ARPABET, null, "Character Mapper");
+    arpabet.dependsOnLayers.add(LAYER_SEGMENT);
+    LayerManagerConfig htk = new LayerManagerConfig("htk", LAYER_HTK, null, "HTKAligner");
     // required layers
-    htk.dependsOnLayers.add(0);
-    htk.dependsOnLayers.add(2);
-    htk.dependsOnLayers.add(12);
-    htk.dependsOnLayers.add(50);
-    //htk.dependsOn(phonologyPron); // all auxiliaries
+    htk.dependsOnLayers.add(LAYER_WORD);
+    htk.dependsOnLayers.add(LAYER_ORTHOGRAPHY);
+    htk.dependsOnLayers.add(LAYER_UTTERANCE);
+    htk.dependsOnLayers.add(LAYER_PHONOLOGY);
+    // test that non-temporal layer dependencies don't cause problems
+    htk.dependsOnLayers.add(LAYER_PARTICIPANT);
+    htk.dependsOnLayers.add(LAYER_MAIN_PARTICIPANT);
     // output layers
-    htk.generatesLayers.add(1); // also generates segment layer
-    //segment.dependsOnLayers(htk);
+    htk.generatesLayers.add(LAYER_SEGMENT); // also generates segment layer
 
     // add them all to a list
     LinkedHashSet<LayerManagerConfig> configurations
@@ -209,16 +221,20 @@ public class TestDependencyGraph {
 
     // by now we have loaded all configurations into idToNodes
 
-    // ensure that node interdependencies are set
+    // ensure that node interdependencies are set, and add to dependency graph
+    DependencyGraph<LayerManagerConfig> graph = new DependencyGraph<LayerManagerConfig>();
     for (Integer layerId : idToNodes.keySet()) {
       for (DependencyNode<LayerManagerConfig> node : idToNodes.get(layerId)) {
+        graph.add(node);
         LayerManagerConfig config = node.getProvider();
         
         // make sure it depends on all its input layers
         for (Integer needsLayerId : config.dependsOnLayers) { // for each layer dependency
-          for (DependencyNode<LayerManagerConfig> needsNode : idToNodes.get(needsLayerId)) {
-            node.dependsOn(needsNode);
-          } // next config for this dependency layer
+          if (idToNodes.containsKey(needsLayerId)) { // only layer_ids we have info about
+            for (DependencyNode<LayerManagerConfig> needsNode : idToNodes.get(needsLayerId)) {
+              node.dependsOn(needsNode);
+            } // next config for this dependency layer
+          } // needsLayerId is known
         } // next dependency layer
 
         // make sure all the generated layers are registered with dependent configurations
@@ -232,14 +248,6 @@ public class TestDependencyGraph {
         
       } // next config for the layer
     } // next layer_id
-
-    // now register the nodes in the graph
-    DependencyGraph<LayerManagerConfig> graph = new DependencyGraph<LayerManagerConfig>();
-    for (Integer layerId : idToNodes.keySet()) {
-      for (DependencyNode<LayerManagerConfig> node : idToNodes.get(layerId)) {
-        graph.add(node);
-      } // next node for this layer
-    } // next layer
 
     Collection<DependencyNode<LayerManagerConfig>> resolutionNodes = graph.resolve();
     List<String> res = resolutionNodes.stream()
