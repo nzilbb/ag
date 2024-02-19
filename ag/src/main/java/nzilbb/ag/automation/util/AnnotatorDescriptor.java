@@ -35,13 +35,14 @@ import nzilbb.ag.automation.Annotator;
 import nzilbb.util.CloneableBean;
 import nzilbb.util.ClonedProperty;
 import nzilbb.util.IO;
+import nzilbb.util.SemanticVersionComparator;
 
 /**
  * Provides information about an Annotator implementation, including what resources it
  * provides and requires. 
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class AnnotatorDescriptor implements CloneableBean {
+public class AnnotatorDescriptor implements CloneableBean, Comparable {
    
   // Attributes:
 
@@ -314,6 +315,23 @@ public class AnnotatorDescriptor implements CloneableBean {
       return null;
     }
   } // end of getResource()
+
+  /**
+   * If two descriptors have different annotator IDs, comparison is by annotator ID. If
+   * they're the same annotation ID, comparison is by version, using
+   {@link SemanticVersionComparator}.
+   */
+  public int compareTo(Object o) {
+    if (o == null) throw new NullPointerException();
+    if (!(o instanceof AnnotatorDescriptor)) return 999;
+    AnnotatorDescriptor other = (AnnotatorDescriptor)o;
+    int comparison = getAnnotatorId().compareTo(other.getAnnotatorId());
+    if (comparison == 0) { // equal annotatorId
+      comparison = new SemanticVersionComparator().compare(
+        getVersion(), other.getVersion());
+    }
+    return comparison;
+  }
    
   /**
    * A description of the annotator.
