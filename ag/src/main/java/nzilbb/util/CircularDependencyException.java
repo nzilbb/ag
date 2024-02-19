@@ -47,7 +47,7 @@ public class CircularDependencyException extends Exception {
    */
   @Override
   public String toString() {
-    return ""+node;
+    return "Circular dependency: "+node;
   } // end of toString()
 
 } // end of class CircularDependencyException
