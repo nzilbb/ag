@@ -1,5 +1,5 @@
 //
-// Copyright 2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2022-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -257,12 +257,12 @@ public class FlatLexicon implements Dictionary {
    */
   public int countAllKeys() throws DictionaryException {
     try {
-      PreparedStatement sql = rdb.prepareStatement(
+      PreparedStatement sqlCount = rdb.prepareStatement(
         sqlx.apply(
           "SELECT COUNT(DISTINCT "+quote+keyField+quote+")"
           +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId));
       try {
-        ResultSet rs = sql.executeQuery();
+        ResultSet rs = sqlCount.executeQuery();
         try {
           rs.next();
           return rs.getInt(1);
@@ -270,7 +270,7 @@ public class FlatLexicon implements Dictionary {
           rs.close();
         }
       } finally {
-        sql.close();
+        sqlCount.close();
       }
     } catch(Throwable x) {
       return 0;
@@ -291,14 +291,14 @@ public class FlatLexicon implements Dictionary {
     throws DictionaryReadOnlyException, DictionaryException {
     try {
       Map<String,List<String>> words = new LinkedHashMap<String,List<String>>();
-      PreparedStatement sql = rdb.prepareStatement(
+      PreparedStatement sqlList = rdb.prepareStatement(
         sqlx.apply(
           "SELECT DISTINCT "+quote+keyField+quote+""
           +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
           +" ORDER BY "+quote+keyField+quote+""
           + (length > 0? " LIMIT " + start + ", " + length:"")));
       try {
-        ResultSet rs = sql.executeQuery();
+        ResultSet rs = sqlList.executeQuery();
         try {
           while (rs.next()) {
             String word = rs.getString(keyField);
@@ -310,7 +310,7 @@ public class FlatLexicon implements Dictionary {
           rs.close();
         }
       } finally {
-        sql.close();
+        sqlList.close();
       }
       return words;
     } catch (SQLException sqlX) {
@@ -333,12 +333,12 @@ public class FlatLexicon implements Dictionary {
    */
   public int countEditableKeys() throws DictionaryReadOnlyException, DictionaryException {
     try {
-      PreparedStatement sql = rdb.prepareStatement(
+      PreparedStatement sqlCount = rdb.prepareStatement(
         sqlx.apply(
           "SELECT COUNT(DISTINCT "+quote+keyField+quote+")"
           +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId));
       try {
-        ResultSet rs = sql.executeQuery();
+        ResultSet rs = sqlCount.executeQuery();
         try {
           rs.next();
           return rs.getInt(1);
@@ -346,7 +346,7 @@ public class FlatLexicon implements Dictionary {
           rs.close();
         }
       } finally {
-        sql.close();
+        sqlCount.close();
       }
     } catch (SQLException sqlX) {
       throw new DictionaryException(this, sqlX);
@@ -360,12 +360,12 @@ public class FlatLexicon implements Dictionary {
   public int countEditableEntries()
     throws DictionaryReadOnlyException, DictionaryException {
     try {
-      PreparedStatement sql = rdb.prepareStatement(
+      PreparedStatement sqlCount = rdb.prepareStatement(
         sqlx.apply(
           "SELECT COUNT(DISTINCT "+quote+valueField+quote+")"
           +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId));
       try {
-        ResultSet rs = sql.executeQuery();
+        ResultSet rs = sqlCount.executeQuery();
         try {
           rs.next();
           return rs.getInt(1);
@@ -373,7 +373,7 @@ public class FlatLexicon implements Dictionary {
           rs.close();
         }
       } finally {
-        sql.close();
+        sqlCount.close();
       }
     } catch (SQLException sqlX) {
       throw new DictionaryException(this, sqlX);
@@ -388,12 +388,12 @@ public class FlatLexicon implements Dictionary {
    */
   public String aggregateEntries(String operation) throws DictionaryException {
     try {
-      PreparedStatement sql = rdb.prepareStatement(
+      PreparedStatement sqlAggregate = rdb.prepareStatement(
         sqlx.apply(
         "SELECT "+operation+"(DISTINCT "+quote+valueField+quote+")"
         +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId));
       try {
-        ResultSet rs = sql.executeQuery();
+        ResultSet rs = sqlAggregate.executeQuery();
         try {
           rs.next();
           return rs.getString(1);
@@ -401,7 +401,7 @@ public class FlatLexicon implements Dictionary {
           rs.close();
         }
       } finally {
-        sql.close();
+        sqlAggregate.close();
       }
     } catch (SQLException sqlX) {
       return null;
@@ -419,10 +419,10 @@ public class FlatLexicon implements Dictionary {
     String select = operation + "("+quote+keyField+quote+")";
     if ("COUNT".equals(operation)) select = "COUNT(DISTINCT "+quote+keyField+quote+")";
     try {
-      PreparedStatement sql = rdb.prepareStatement(
+      PreparedStatement sqlAggregate = rdb.prepareStatement(
         "SELECT "+select+" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId);
       try {
-        ResultSet rs = sql.executeQuery();
+        ResultSet rs = sqlAggregate.executeQuery();
         try {
           rs.next();
           return rs.getString(1);
@@ -430,7 +430,7 @@ public class FlatLexicon implements Dictionary {
           rs.close();
         }
       } finally {
-        sql.close();
+        sqlAggregate.close();
       }
     } catch (SQLException sqlX) {
       return null;
@@ -447,15 +447,15 @@ public class FlatLexicon implements Dictionary {
     throws DictionaryReadOnlyException, DictionaryException {
 
     try {
-      sql = rdb.prepareStatement(
+      PreparedStatement sqlInsert = rdb.prepareStatement(
         "INSERT INTO "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
         +" ("+quote+keyField+quote+", "+quote+valueField+quote+", supplemental) VALUES (?,?,1)");
       try {
-        sql.setString(1, key.toLowerCase());
-        sql.setString(2, entry);
-        sql.executeUpdate();
+        sqlInsert.setString(1, key.toLowerCase());
+        sqlInsert.setString(2, entry);
+        sqlInsert.executeUpdate();
       } finally {
-        sql.close();
+        sqlInsert.close();
       }
       
       return null;
@@ -474,22 +474,21 @@ public class FlatLexicon implements Dictionary {
     throws DictionaryReadOnlyException, DictionaryException {
 
     try {
-      PreparedStatement sql = rdb.prepareStatement(
+      PreparedStatement sqlDelete = rdb.prepareStatement(
         "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
         // use BINARY for accent sensitivity
         // use LOWER to remove case sensitivity of BINARY
         +" WHERE "+(caseSensitive?"":"LOWER")+"("+quote+keyField+quote+")"
         +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)");
       try {
-        sql.setString(1, key);
-        if (sql.executeUpdate() == 0) {
-          throw new DictionaryReadOnlyException(
-            this, "No entries found for " + key);
+        sqlDelete.setString(1, key);
+        if (sqlDelete.executeUpdate() == 0) {
+          return null;
         }
       } finally {
-        sql.close();
+        sqlDelete.close();
       }
-      return null;
+      return key;
     } catch (SQLException sqlX) {
       throw new DictionaryException(this, sqlX);
     }
@@ -505,7 +504,7 @@ public class FlatLexicon implements Dictionary {
   public String remove(String key, String entry)
     throws DictionaryReadOnlyException, DictionaryException {
     try {
-      PreparedStatement sql = rdb.prepareStatement(
+      PreparedStatement sqlDelete = rdb.prepareStatement(
         "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
         // use BINARY for accent sensitivity
         // use LOWER to remove case sensitivity of BINARY
@@ -514,16 +513,15 @@ public class FlatLexicon implements Dictionary {
         +" AND "+(caseSensitive?"":"LOWER")+"("+quote+valueField+quote+")"
         +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)");
       try {
-        sql.setString(1, key);
-        sql.setString(2, entry);
-        if (sql.executeUpdate() == 0) {
-          throw new DictionaryReadOnlyException(
-            this, "No entry found for " + key + " = " + entry);
+        sqlDelete.setString(1, key);
+        sqlDelete.setString(2, entry);
+        if (sqlDelete.executeUpdate() == 0) {
+          return null;
         }
       } finally {
-        sql.close();
+        sqlDelete.close();
       }
-      return null;
+      return key+"-"+entry;
     } catch (SQLException sqlX) {
       throw new DictionaryException(this, sqlX);
     }
@@ -542,12 +540,12 @@ public class FlatLexicon implements Dictionary {
     throws DictionaryReadOnlyException, DictionaryException {
     try {
       Map<String,List<String>> words = new LinkedHashMap<String,List<String>>();
-      PreparedStatement sql = rdb.prepareStatement(
+      PreparedStatement sqlList = rdb.prepareStatement(
         "SELECT DISTINCT "+quote+keyField+quote+" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
         +" ORDER BY "+quote+keyField+quote+""
         + (length > 0? " LIMIT " + start + ", " + length:""));
       try {
-        ResultSet rs = sql.executeQuery();
+        ResultSet rs = sqlList.executeQuery();
         try {
           while (rs.next()) {
             String word = rs.getString(keyField);
@@ -559,7 +557,7 @@ public class FlatLexicon implements Dictionary {
           rs.close();
         }
       } finally {
-        sql.close();
+        sqlList.close();
       }
       return words;
     } catch (SQLException sqlX) {
