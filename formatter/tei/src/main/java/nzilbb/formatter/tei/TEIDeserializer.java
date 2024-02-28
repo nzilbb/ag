@@ -55,6 +55,51 @@ import nzilbb.configure.ParameterSet;
 /**
  * Deserializer for TEI P5 XML files.
  * <p>TEI tag support is basic at this stage, and many tags are not explicitly interpreted, but most can be mapped to arbitrary annotation layers.
+ * <p><b>The TEI header and Meta-data</b></p>
+ * <p>Certain constructions in the &lt;teiHeader&gt; section of a TEI file are recognised:
+ * <ul>
+ *  <li>
+ *    in the <code>&lt;fileDesc&gt;</code> subsection:
+ *    <ul>
+ *      <li>
+ *        the text in <code>&lt;titleStmt&gt;&lt;title&gt;</code>… is taken to be the value of the "title" transcript attribute</li>
+ *      <li>
+ *        the text in <code>&lt;titleStmt&gt;&lt;respStmt&gt;&lt;name&gt;</code>… is taken to be the value of the "scribe" transcript attribute (i.e. the name of the transcriber)</li>
+ *      <li>
+ *        the text in <code>&lt;publicationStmt&gt;&lt;distributor&gt;</code>… is taken to be the value of the "distributor" transcript attribute</li>
+ *      <li>
+ *        the text in <code>&lt;publicationStmt&gt;&lt;publisher&gt;</code>… is taken to be the value of the "publisher" transcript attribute</li>
+ *      <li>
+ *        the text in <code>&lt;publicationStmt&gt;&lt;availability&gt;&lt;p&gt;</code>… is taken to be the value of the "availability" transcript attribute</li>
+ *      <li>
+ *        the text in <code>&lt;publicationStmt&gt;&lt;date&gt;</code>… is taken to be the value of the "air_date" transcript attribute</li>
+ *      <li>
+ *        the text in <code>&lt;publicationStmt&gt;&lt;distributor&gt;</code>… is taken to be the value of the "distributor" transcript attribute</li>
+ *      <li>
+ *        the text in <code>&lt;sourceDesc&gt;&lt;bibleStruct&gt;<code>&lt;monogr&gt;<code>&lt;author&gt;</code></code></code>… is taken to be the name of the author of the text (who is created as the sole 'participant' of the transcript)</li>
+ *    </ul>
+ *  </li>
+ *  <li>
+ *    in the <code>&lt;profileDesc&gt;</code> subsection:
+ *    <ul>
+ *      <li>
+ *        the text in <code>&lt;creation&gt;&lt;date&gt;</code>… is taken to be the value of the "creation_date" transcript attribute</li>
+ *      <li>
+ *        the value of the <code>&lt;langUsage&gt;&lt;language ident="</code>…<code>"&gt;</code> attribute is taken to be the value of the "creation_date" transcript attribute</li>
+ *      <li>
+ *        the <code>&lt;particDesc&gt;&lt;person</code><code>&gt;</code> tagss are taken to be participants, whose &lt;idno&gt; tag specifies the participant's identifier, and whose other tags specify the participant's attributes named after the tag name (or optionally are added as transcript attributes). The content of the <code>&lt;person&gt;</code> tag's <code>&lt;age&gt;</code> tag is converted to a single number (in years) if the text is formatted as <samp><var>y</var>;<var>m</var>.<var>d</var></samp> or as <samp><var>y</var> years <var>m</var> months <var>d</var> days</samp></li>
+ *    </ul>
+ *  </li>
+ *  <li>
+ *    in the <code>&lt;revisionDesc&gt;</code> subsection:
+ *    <ul>
+ *      <li>
+ *        the text in <code>&lt;change&gt;&lt;date&gt;</code>… is taken to be the value of the "version_date" transcript attribute</li>
+ *      <li>
+ *        the text in <code>&lt;change&gt;&lt;respStmt&gt;&lt;name&gt;</code>… is taken to be the value of the "scribe" transcript attribute</li>
+ *    </ul>
+ *  </li>
+ * </ul>
  * <p>Arbitrary transcript/document attributes are implemented by including a &lt;notesStmt&gt;
  * within the &lt;fileDesc&gt; header, containing one &lt;note&gt; tag per attribute, and using the
  * <tt>type</tt> attribute as the attribute key and the tag content as the value - e.g.<br>
@@ -77,11 +122,28 @@ import nzilbb.configure.ParameterSet;
  *   &lt;note type="origin"&gt;Liverpool&lt;/note&gt;
  * &lt;/person&gt;
  * </pre>
+ * <p><b>Tags in the text</b></p>
+ * <p>  The P5 guidelines for TEI specify a dazzling array of tags for capturing all kinds of information about texts, only a subset of which will work well with this formatter. There is explicit support for the following TEI tags:
+ * <ul>
+ *  <li>
+ *    <code>&lt;p&gt;</code>, <code>&lt;div&gt;</code>, and <code>&lt;ab&gt;</code> are interpreted as starting a new line</li>
+ *  <li>
+ *    <code>&lt;w&gt;</code> tags (for marking up words) are used for word tokenization if they are present (if they are absent, standard whitespace-based tokenization is used). Attributes of the <code>&lt;w&gt;</code> tag like <code>lemma</code> or <code>type</code> can be mapped to word layers for capturing such tagging in the text.</li>
+ *  <li>
+ *    the <code>&lt;choice&gt;&lt;orig&gt;</code>…<code>&lt;/orig&gt;&lt;reg&gt;</code>…<code>&lt;/reg&gt;&lt;/choice&gt;</code> construction for marking regularization of text is recognized, and the contents of the <code>&lt;reg&gt;</code>…<code>&lt;/reg&gt;</code> tag can be extracted to the "lexical" layer (for single-word regularization) or a selected 'meta' layer (if multi-word regularization is used).</li>
+ *  <li>
+ *    <code>&lt;foreign&gt;</code> is recognised as marking sections of the transcript as being in another language, and so its contents are annotated on the "language" layer, using value of the the <code>xml:lang</code> attribute as the annotation label.</li>
+ *  <li>
+ *    <code>&lt;note&gt;</code> is recognised as a commentary marker, and so its contents are put on to the "comment" layer instead of being inserted into the transcript text.</li>
+ *  <li>
+ *    <code>&lt;unclear&gt;</code> tags can create annotations on a selected layer, and the <code>reason</code> and <code>cert</code> attributes recognised and used in the resulting annotation label if present.</li>
+ *</ul>
+ * <p>Other tags are by default mapped on to the "entities" layer (in which case their tag name, and its type attribute if present, will be used for the entity label).  Alternatively, if there is a layer that is named after the TEI tag name, then tags will be mapped to that layer by default during upload. For example, to have all &lt;sic&gt; tags extracted to their own layer (instead of the "entities" layer) by default, create a new 'phrase' layer called "sic".
  * <p>Special support for regularization is used; for a construction like this: <br>
  * <code>&lt;choice&gt;&lt;orig&gt;color&lt;/orig&gt;&lt;reg&gt;colour&lt;/reg&gt;&lt;/choice&gt;</code> <br>
  * The contents of &lt;reg&gt;...&lt;/reg&gt; is used on the words layer, and it is annotated
  * on a layer mapped to "orig" with the contents of the 
- * <p>This deserializer supports part of the &lt;orig&gt;...&lt;/orig&gt; tag.
+ * <p>This deserializer supports part of the &lt;orig&gt;...&lt;/orig&gt; tag
  * <a href="http://jtei.revues.org/476">schema for Representation of Computer-mediated Communication</a> 
  * proposed by Michael Beißwenger, Maria Ermakova, Alexander Geyken, Lothar Lemnitzer, 
  * and Angelika Storrer (2012), with the exception of the following:
