@@ -139,11 +139,7 @@ import nzilbb.configure.ParameterSet;
  *    <code>&lt;unclear&gt;</code> tags can create annotations on a selected layer, and the <code>reason</code> and <code>cert</code> attributes recognised and used in the resulting annotation label if present.</li>
  *</ul>
  * <p>Other tags are by default mapped on to the "entities" layer (in which case their tag name, and its type attribute if present, will be used for the entity label).  Alternatively, if there is a layer that is named after the TEI tag name, then tags will be mapped to that layer by default during upload. For example, to have all &lt;sic&gt; tags extracted to their own layer (instead of the "entities" layer) by default, create a new 'phrase' layer called "sic".
- * <p>Special support for regularization is used; for a construction like this: <br>
- * <code>&lt;choice&gt;&lt;orig&gt;color&lt;/orig&gt;&lt;reg&gt;colour&lt;/reg&gt;&lt;/choice&gt;</code> <br>
- * The contents of &lt;reg&gt;...&lt;/reg&gt; is used on the words layer, and it is annotated
- * on a layer mapped to "orig" with the contents of the 
- * <p>This deserializer supports part of the &lt;orig&gt;...&lt;/orig&gt; tag
+ * <p>This deserializer supports part of the
  * <a href="http://jtei.revues.org/476">schema for Representation of Computer-mediated Communication</a> 
  * proposed by Michael Beißwenger, Maria Ermakova, Alexander Geyken, Lothar Lemnitzer, 
  * and Angelika Storrer (2012), with the exception of the following:
