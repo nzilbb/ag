@@ -26,6 +26,10 @@ function listLexicons() {
             button.appendChild(document.createTextNode("❌"));
             button.onclick = ()=>{deleteLexicon(lexiconId);};
         }
+        if (!lexiconIds.length) {
+            // no lexicons yet, so they'll want to upload a file
+            document.getElementById("uploadForm").setAttribute("open",true);
+        }
         finishedLoading();
     });
 }

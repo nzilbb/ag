@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.flatlexicon</artifactId>
-  <version>3.1.4</version>
+  <version>3.1.5</version>
 
   <name>nzilbb.annotator.flatlexicon</name>
   <description>Looks up lexicons derived from a flat file (e.g. in CSV format)</description>
