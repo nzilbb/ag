@@ -71,6 +71,7 @@ getSchema(s => {
                     destinationLayerId.appendChild(layerOption);
                     destinationLayerId.value = taskId;
                 }
+              changedLayer(destinationLayerId);
             } else {
                 
                 // set initial values of properties in the form
@@ -99,8 +100,8 @@ getSchema(s => {
                         newMapping(mapping.source, mapping.destination);
                     } // next mapping
                 }
+              changedLayer(destinationLayerId, parameters.sourceLayerId);
             }
-            changedLayer(destinationLayerId);
             changeTranslation();
         } finally {
             // hide spinner
@@ -110,49 +111,49 @@ getSchema(s => {
 });
 
 // destination layer changed
-function changedLayer(select) {
-    if (select.value == "[add layer]") {
-        var newLayer = prompt( //  default is the task ID
-            "Please enter the new layer ID", taskId);
-        if (newLayer) { // they didn't cancel
-            // check there's not already a layer with that name
-            for (var l in schema.layers) {
-                var layer = schema.layers[l];
-                if (layer.id == newLayer) {
-                    alert("A layer called "+newLayer+" already exists");
-                    select.selectedIndex = 0;
-                    return;
-                }
-            } // next layer
-            // add the layer to the list
-            var layerOption = document.createElement("option");
-            layerOption.appendChild(document.createTextNode(newLayer));
-            select.appendChild(layerOption);
-            // select it
-            select.selectedIndex = select.children.length - 1;
+function changedLayer(select, previousSourceValue) {
+  if (select.value == "[add layer]") {
+    var newLayer = prompt( //  default is the task ID
+      "Please enter the new layer ID", taskId);
+    if (newLayer) { // they didn't cancel
+      // check there's not already a layer with that name
+      for (var l in schema.layers) {
+        var layer = schema.layers[l];
+        if (layer.id == newLayer) {
+          alert("A layer called "+newLayer+" already exists");
+          select.selectedIndex = 0;
+          return;
         }
-    } else {
-        // ensure the source layer is in the same scope as the destination layer
-        var sourceLayerId = document.getElementById("sourceLayerId");
-        var previousValue = sourceLayerId.value;
-        var destinationLayer = schema.layers[select.value];
-        // clear existing options (except the first)
-        while (sourceLayerId.options.length > 1) sourceLayerId.options.remove(1);
-        if (destinationLayer.parentId == "segment") {
-            addLayerOptions(
-                sourceLayerId, schema,
-                layer => (layer.id == "segment" || layer.parentId == "segment")
-                    && layer.id != destinationLayer.id);
-        } else { // word layer
-            addLayerOptions(
-                sourceLayerId, schema,
-                layer => (layer.id == schema.wordLayerId
-                          || (layer.parentId == schema.wordLayerId && layer.id != "segment"))
-                    && layer.id != destinationLayer.id);
-        }
-        sourceLayerId.value = previousValue;
-        
+      } // next layer
+      // add the layer to the list
+      var layerOption = document.createElement("option");
+      layerOption.appendChild(document.createTextNode(newLayer));
+      select.appendChild(layerOption);
+      // select it
+      select.selectedIndex = select.children.length - 1;
     }
+  } else {
+    // ensure the source layer is in the same scope as the destination layer
+    var sourceLayerId = document.getElementById("sourceLayerId");
+    if (!previousSourceValue) previousSourceValue = sourceLayerId.value;
+    var destinationLayer = schema.layers[select.value];
+    // clear existing options (except the first)
+    while (sourceLayerId.options.length > 1) sourceLayerId.options.remove(1);
+    if (destinationLayer.parentId == "segment") {
+      addLayerOptions(
+        sourceLayerId, schema,
+        layer => (layer.id == "segment" || layer.parentId == "segment")
+          && layer.id != destinationLayer.id);
+    } else { // word layer
+      addLayerOptions(
+        sourceLayerId, schema,
+        layer => (layer.id == schema.wordLayerId
+                  || (layer.parentId == schema.wordLayerId && layer.id != "segment"))
+          && layer.id != destinationLayer.id);
+    }
+    sourceLayerId.value = previousSourceValue;
+    
+  }
 }
 
 function changeTranslation() {
