@@ -473,8 +473,8 @@ public class BundleSerialization implements GraphSerializer, SchemaSerializer, G
                if (l1AncestorCount != l2AncestorCount) return l1AncestorCount - l2AncestorCount;
           
                // if they have the same number of ancestors...
-               int l1DescendantDepth = l1.getDescendentDepth();
-               int l2DescendantDepth = l2.getDescendentDepth();
+               int l1DescendantDepth = l1.getDescendantDepth();
+               int l2DescendantDepth = l2.getDescendantDepth();
                // if they have a different descendant depth,
                // the one with shallower descendants is lower
                if (l1DescendantDepth != l2DescendantDepth) return l1DescendantDepth - l2DescendantDepth;
