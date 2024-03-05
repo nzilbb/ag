@@ -105,6 +105,9 @@ function loadDictionaryOptions(onLoad) {
         }
         if (originalValue) {
             dictionary.value = originalValue;
+        } else if (dictionaries.length == 1) { // there's only one dictionary
+          // so select it
+            dictionary.selectedIndex = 1;
         } else {
             dictionary.selectedIndex = 0;
         }
