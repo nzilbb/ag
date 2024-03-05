@@ -155,22 +155,11 @@ public class FlatLexicon implements Dictionary {
    * @param newCaseSensitive Whether dictionary lookups are case sensitive or not. 
    */
   public FlatLexicon setCaseSensitive(boolean newCaseSensitive) throws SQLException {
-    if (sql != null) {
-      try { sql.close(); } catch(Exception exception) {}
-    }
     caseSensitive = newCaseSensitive;
-    sql = rdb.prepareStatement(
-      sqlx.apply(
-        "SELECT DISTINCT "+quote+valueField+quote+", supplemental"
-        +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-        // use BINARY for accent sensitivity
-        // use LOWER to remove case sensitivity of BINARY
-        +" WHERE "+(caseSensitive?"":"LOWER")+"("+quote+keyField+quote+")"
-        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)"
-        +" ORDER BY "+quote+valueField+quote+""));
+    defineQuery();
     return this;
   }
-  
+
   /**
    * Constructor.
    */
@@ -185,7 +174,7 @@ public class FlatLexicon implements Dictionary {
     this.lexicon = lexicon;
     this.keyField = keyField;
     this.valueField = valueField;
-    this.caseSensitive = caseSensitive;
+    
     sql = rdb.prepareStatement(
       sqlx.apply(
         "SELECT lexicon_id FROM "+annotator.getAnnotatorId()+"_lexicon WHERE name = ?"));
@@ -203,7 +192,7 @@ public class FlatLexicon implements Dictionary {
     } finally {
       sql.close();
     }
-    setCaseSensitive(false); // this creates the sql query
+    defineQuery();
     // ensure keyField/valueField are valid
     try {
       lookupEntries("test", false);
@@ -478,8 +467,8 @@ public class FlatLexicon implements Dictionary {
         "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
         // use BINARY for accent sensitivity
         // use LOWER to remove case sensitivity of BINARY
-        +" WHERE "+(caseSensitive?"":"LOWER")+"("+quote+keyField+quote+")"
-        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)");
+        +" WHERE "+quote+keyField+quote
+        +" = "+(caseSensitive?"BINARY ":"")+"?");
       try {
         sqlDelete.setString(1, key);
         if (sqlDelete.executeUpdate() == 0) {
@@ -508,10 +497,10 @@ public class FlatLexicon implements Dictionary {
         "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
         // use BINARY for accent sensitivity
         // use LOWER to remove case sensitivity of BINARY
-        +" WHERE "+(caseSensitive?"":"LOWER")+"("+quote+keyField+quote+")"
-        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)"
-        +" AND "+(caseSensitive?"":"LOWER")+"("+quote+valueField+quote+")"
-        +" = BINARY "+(caseSensitive?"":"LOWER")+"(?)");
+        +" WHERE "+quote+keyField+quote
+        +" = "+(caseSensitive?"BINARY ":"")+"?"
+        +" AND "+quote+valueField+quote
+        +" = "+(caseSensitive?"BINARY ":"")+"?");
       try {
         sqlDelete.setString(1, key);
         sqlDelete.setString(2, entry);
@@ -564,6 +553,34 @@ public class FlatLexicon implements Dictionary {
       throw new DictionaryException(this, sqlX);
     }
   }
+
+  /** Pre-SQL-translation with default access so that TestFlatLexiconTagger can check it. */
+  String rawQuery = null;
+  /** Post-SQL-translation with default access so that TestFlatLexiconTagger can check it. */
+  String translatedQuery = null;
+  /**
+   * Defines the SQL query for lookups.
+   * @throw SQLException If there's a problem while preparing the statement.
+   */
+  private void defineQuery() throws SQLException {
+    if (sql != null) {
+      try { sql.close(); } catch(Exception exception) {}
+    }
+    // Previously we used BINARY for accent sensitivity
+    // and LOWER() to remove case sensitivity of BINARY.
+    // However in most cases, case-insensitivity is what's required,
+    // and on MySQL, using LOWER disables the use of the column index, so lookups are slow
+    // So we use utf8mb4_unicode_ci as is for case insensitivity and BINARY for case sensitivity
+    // This means that case and accent sensitivity are tied together for MySQL,
+    // but also means that when the back end is a Derby database, case-insensitivity is
+    // not supported.
+    rawQuery = "SELECT DISTINCT "+quote+valueField+quote+", supplemental"
+      +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
+      +" WHERE "+quote+keyField+quote+" = "+(caseSensitive?"BINARY ":"")+"?"
+      +" ORDER BY "+quote+valueField+quote;
+    translatedQuery = sqlx.apply(rawQuery);
+    sql = rdb.prepareStatement(translatedQuery);
+  } // end of defineQuery()
 
   /**
    * {@link Dictionary} method - Returns a specific editable key from the dictionary.
