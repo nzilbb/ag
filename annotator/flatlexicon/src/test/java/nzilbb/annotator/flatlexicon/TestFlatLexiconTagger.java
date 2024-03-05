@@ -227,6 +227,10 @@ public class TestFlatLexiconTagger {
                annotator.getTranscriptLanguageLayerId());
     assertNull("phrase language layer",
                annotator.getPhraseLanguageLayerId());
+    assertNull("target language",
+               annotator.getTargetLanguagePattern());
+    assertFalse("case sensitivity",
+                annotator.getCaseSensitive());
     assertEquals("tag layer",
                  "frequency", annotator.getTagLayerId());
     assertNotNull("tag layer was created",
@@ -863,6 +867,316 @@ public class TestFlatLexiconTagger {
     assertEquals("Lexicon (and its dictionaries) were deleted: " + ids,
                  6, ids.size());
   }   
+
+  /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly,
+   * including language filtering. */
+  @Test public void transformTranscriptsWithLanguageFiltering() {
+    GraphStoreHarness store = new GraphStoreHarness();
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    try {
+      annotator.setTaskParameters(
+        "tokenLayerId=word"
+        +"&transcriptLanguageLayerId=transcript_language"
+        +"&phraseLanguageLayerId=lang"
+        +"&targetLanguagePattern=en.*"
+        +"&tagLayerId=phonemes"
+        +"&dictionary=a-z.csv:Word->Pronunciation"
+        +"&firstVariantOnly=false"
+        +"&caseSensitive=on"
+        +"&strip=");
+      
+      // call tagMatchingAnnotations
+      annotator.transformTranscripts(store, null);
+    } catch(Exception exception) {
+      fail(""+exception);
+    }
+    
+    // check the right calls were made to the graph store
+    assertEquals("aggregateMatchingAnnotations operation",
+                 "DISTINCT", store.aggregateMatchingAnnotationsOperation);
+    assertEquals(
+      "aggregateMatchingAnnotations expression",
+      "layer.id == 'word'"
+      +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)",
+      store.aggregateMatchingAnnotationsExpression);
+    
+    assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
+                 2, store.tagMatchingAnnotationsLabels.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      "k w ɪ k", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      "b r aʊ n", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
+                 2, store.tagMatchingAnnotationsLayerIds.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num confidences: "
+                 + store.tagMatchingAnnotationsConfidences,
+                 2, store.tagMatchingAnnotationsConfidences.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && label == 'brown'"));
+  }
+
+  /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly,
+   * including partial language filtering. */
+  @Test public void transformTranscriptsWithPartialLanguageFiltering() {
+    GraphStoreHarness store = new GraphStoreHarness();
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    try {
+      annotator.setTaskParameters(
+        "tokenLayerId=word"
+        +"&transcriptLanguageLayerId=transcript_language"
+        +"&phraseLanguageLayerId="
+        +"&targetLanguagePattern=en.*"
+        +"&tagLayerId=phonemes"
+        +"&dictionary=a-z.csv:Word->Pronunciation"
+        +"&firstVariantOnly=false"
+        +"&caseSensitive=on"
+        +"&strip=");
+      
+      // call tagMatchingAnnotations
+      annotator.transformTranscripts(store, null);
+    } catch(Exception exception) {
+      fail("trancript lang only: "+exception);
+    }
+    
+    // check the right calls were made to the graph store
+    assertEquals("aggregateMatchingAnnotations operation",
+                 "DISTINCT", store.aggregateMatchingAnnotationsOperation);
+    assertEquals(
+      "trancript lang only: aggregateMatchingAnnotations expression",
+      "layer.id == 'word'"
+      +" && /en.*/.test(first('transcript_language').label)",
+      store.aggregateMatchingAnnotationsExpression);
+    
+    assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
+                 2, store.tagMatchingAnnotationsLabels.size());
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId quick",
+      "k w ɪ k", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId brown",
+      "b r aʊ n", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
+                 2, store.tagMatchingAnnotationsLayerIds.size());
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId quick",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId brown",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals("trancript lang only: tagMatchingAnnotations num confidences: "
+                 + store.tagMatchingAnnotationsConfidences,
+                 2, store.tagMatchingAnnotationsConfidences.size());
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId quick",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "trancript lang only: tagMatchingAnnotations layerId brown",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('transcript_language').label)"
+        +" && label == 'brown'"));
+
+    store = new GraphStoreHarness();
+    try {
+      annotator.setTaskParameters(
+        "tokenLayerId=word"
+        +"&transcriptLanguageLayerId="
+        +"&phraseLanguageLayerId=lang"
+        +"&targetLanguagePattern=en.*"
+        +"&tagLayerId=phonemes"
+        +"&dictionary=a-z.csv:Word->Pronunciation"
+        +"&firstVariantOnly=false"
+        +"&caseSensitive=on"
+        +"&strip=");
+      
+      // call tagMatchingAnnotations
+      annotator.transformTranscripts(store, null);
+    } catch(Exception exception) {
+      fail("phrase lang only: "+exception);
+    }
+
+    // check the right calls were made to the graph store
+    assertEquals("phrase lang only: aggregateMatchingAnnotations operation",
+                 "DISTINCT", store.aggregateMatchingAnnotationsOperation);
+    assertEquals(
+      "phrase lang only: aggregateMatchingAnnotations expression",
+      "layer.id == 'word'"
+      +" && /en.*/.test(first('lang').label)",
+      store.aggregateMatchingAnnotationsExpression);
+    
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
+      2, store.tagMatchingAnnotationsLabels.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      "k w ɪ k", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations layerId brown",
+      "b r aʊ n", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations num layerIds: "
+      + store.tagMatchingAnnotationsLayerIds,
+      2, store.tagMatchingAnnotationsLayerIds.size());
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations layerId quick",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations layerId brown",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'brown'"));
+    
+    assertEquals("phrase lang only: tagMatchingAnnotations num confidences: "
+                 + store.tagMatchingAnnotationsConfidences,
+                 2, store.tagMatchingAnnotationsConfidences.size());
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations layerId quick",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'quick'"));
+    assertEquals(
+      "phrase lang only: tagMatchingAnnotations layerId brown",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && /en.*/.test(first('lang').label)"
+        +" && label == 'brown'"));
+  }
+
+  /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly,
+   * excluding language filtering. */
+  @Test public void transformTranscriptsWithoutLanguageFiltering() {
+    GraphStoreHarness store = new GraphStoreHarness();
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    try {
+      annotator.setTaskParameters(
+        "tokenLayerId=word"
+        +"&transcriptLanguageLayerId=transcript_language"
+        +"&phraseLanguageLayerId=lang"
+        +"&targetLanguagePattern="
+        +"&tagLayerId=phonemes"
+        +"&dictionary=a-z.csv:Word->Pronunciation"
+        +"&firstVariantOnly=false"
+        +"&caseSensitive=on"
+        +"&strip=");
+      
+      // call tagMatchingAnnotations
+      annotator.transformTranscripts(store, null);
+    } catch(Exception exception) {
+      fail(""+exception);
+    }
+
+    // check the right calls were made to the graph store
+    assertEquals("aggregateMatchingAnnotations operation",
+                 "DISTINCT", store.aggregateMatchingAnnotationsOperation);
+    assertEquals(
+      "aggregateMatchingAnnotations expression",
+      "layer.id == 'word'",
+      store.aggregateMatchingAnnotationsExpression);
+    
+    assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
+                 2, store.tagMatchingAnnotationsLabels.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      "k w ɪ k", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && label == 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      "b r aʊ n", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && label == 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
+                 2, store.tagMatchingAnnotationsLayerIds.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && label == 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && label == 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num confidences: "
+                 + store.tagMatchingAnnotationsConfidences,
+                 2, store.tagMatchingAnnotationsConfidences.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && label == 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && label == 'brown'"));
+  }
 
   /**
    * Returns a graph for annotating.

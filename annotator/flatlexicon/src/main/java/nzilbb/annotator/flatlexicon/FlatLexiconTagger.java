@@ -39,7 +39,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +52,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
@@ -61,6 +64,7 @@ import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.sql.ConnectionFactory;
 import nzilbb.util.IO;
+import nzilbb.util.Timers;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -574,7 +578,14 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param newTargetLanguagePattern Regular expression for specifying which language to
    * tag the tokens of. 
    */
-  public FlatLexiconTagger setTargetLanguagePattern(String newTargetLanguagePattern) { targetLanguagePattern = newTargetLanguagePattern; return this; }
+  public FlatLexiconTagger setTargetLanguagePattern(String newTargetLanguagePattern) {
+    if (newTargetLanguagePattern != null // empty string means null
+        && newTargetLanguagePattern.trim().length() == 0) {
+      newTargetLanguagePattern = null;
+    }
+    targetLanguagePattern = newTargetLanguagePattern;
+    return this;
+  }
   
   /**
    * The ID of the dictionary to use.
@@ -679,6 +690,12 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
 
+    // default values:
+    strip = "";
+    targetLanguagePattern = null;
+    firstVariantOnly = Boolean.FALSE;
+    caseSensitive = Boolean.FALSE;
+
     if (parameters == null) { // apply default configuration
          
       if (schema.getLayer("orthography") != null) {
@@ -686,9 +703,6 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       } else {
         tokenLayerId = schema.getWordLayerId();
       }
-      strip = "";
-      firstVariantOnly = Boolean.FALSE;
-      caseSensitive = Boolean.FALSE;
          
       try {
         // default transcript language layer
@@ -974,23 +988,42 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
     Dictionary dictionary = getDictionary(this.dictionary);
     try {
       
+      StringBuilder languageExpression = new StringBuilder();
+      if (targetLanguagePattern != null
+          && (phraseLanguageLayerId != null || transcriptLanguageLayerId != null)) {
+        languageExpression.append(" && /").append(targetLanguagePattern).append("/.test(");
+        if (phraseLanguageLayerId != null) {
+          languageExpression.append("first('").append(esc(phraseLanguageLayerId))
+            .append("').label");
+          if (transcriptLanguageLayerId != null) {
+            languageExpression.append(" ?? "); // add coalescing operator
+          }
+        }
+        if (transcriptLanguageLayerId != null) {
+          languageExpression.append("first('").append(esc(transcriptLanguageLayerId))
+            .append("').label");
+        }
+        languageExpression.append(")");
+      } // add language condition
+      
       store.deleteMatchingAnnotations(
         "layerId = '"+esc(tagLayerId)+"'"
+        +languageExpression
         +" && first('"+esc(tokenLayerId)+"').label == '"+esc(sourceLabel)+"'");
 
       String tokenExpression = "layerId = '"+esc(tokenLayerId)+"'"
+        +languageExpression
         +" && label = '"+esc(sourceLabel)+"'";
-      if (transcriptLanguageLayerId != null
-          && (targetLanguagePattern != null && targetLanguagePattern.length() > 0)) {
-        tokenExpression += " && /"+targetLanguagePattern+"/.test(first('"
-          +esc(transcriptLanguageLayerId)+"').label)";
-      }
       int count = 0;
-      for (String tag : dictionary.lookup(sourceLabel)) {        
-        if (strip.length() > 0) tag = tag.replaceAll("["+strip+"]","");              
-        store.tagMatchingAnnotations(
-          tokenExpression, tagLayerId, tag, Constants.CONFIDENCE_AUTOMATIC);
-        count++;
+      HashSet<String> soFar = new HashSet<String>(); // only unique entries
+      for (String tag : dictionary.lookup(sourceLabel)) {
+        if (strip.length() > 0) tag = tag.replaceAll("["+strip+"]","");
+        if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
+          store.tagMatchingAnnotations(
+            tokenExpression, tagLayerId, tag, Constants.CONFIDENCE_AUTOMATIC);
+          soFar.add(tag);
+          count++;
+        }
         // do we want the first entry only?
         if (firstVariantOnly) break;        
       } // next entry
@@ -999,6 +1032,120 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       throw new TransformationException(this, x);
     } finally {
       dictionary.close();
+    }
+  }
+
+  /**
+   * Transforms all graphs from the given graph store that match the given graph expression.
+   * <p> This implementation uses
+   * {@link GraphStoreQuery#aggregateMatchingAnnotations(String,String)}
+   * and {@link GraphStore#tagMatchingAnnotations​(String,String,String,Integer)}
+   * to optimize tagging transcripts en-masse.
+   * @param store The graph to store.
+   * @param expression An expression for identifying transcripts to update, or null to transform
+   * all transcripts in the store.
+   * @return The changes introduced by the tranformation.
+   * @throws TransformationException If the transformation cannot be completed.
+   */
+  public void transformTranscripts​(GraphStore store, String expression)
+    throws TransformationException, InvalidConfigurationException, StoreException,
+    PermissionException {
+
+    setRunning(true);
+    Timers timers = new Timers();
+    try {
+      setPercentComplete(0);
+      Layer tokenLayer = schema.getLayer(tokenLayerId);
+      if (tokenLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid input token layer: " + tokenLayerId);
+      }
+      Layer tagLayer = schema.getLayer(tagLayerId);
+      if (tagLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid output tag layer: " + tagLayerId);
+      }    
+      
+      StringBuilder labelExpression = new StringBuilder();
+      labelExpression.append("layer.id == '").append(esc(tokenLayer.getId())).append("'");
+      if (targetLanguagePattern != null
+          && (phraseLanguageLayerId != null || transcriptLanguageLayerId != null)) {
+        labelExpression.append(" && /").append(targetLanguagePattern).append("/.test(");
+        if (phraseLanguageLayerId != null) {
+          labelExpression.append("first('").append(esc(phraseLanguageLayerId))
+            .append("').label");
+          if (transcriptLanguageLayerId != null) {
+            labelExpression.append(" ?? "); // add coalescing operator
+          }
+        }
+        if (transcriptLanguageLayerId != null) {
+          labelExpression.append("first('").append(esc(transcriptLanguageLayerId))
+            .append("').label");
+        }
+        labelExpression.append(")");
+      } // add language condition
+      
+      if (expression != null && expression.trim().length() > 0) {
+        labelExpression.append(" && [");
+        String[] ids = store.getMatchingTranscriptIds(expression);
+        if (ids.length == 0) {
+          setStatus("No matching transcripts");
+          setPercentComplete(100);
+          return;
+        } else {
+          labelExpression.append(
+            Arrays.stream(ids)
+            // quote and escape each ID
+            .map(id->"'"+id.replace("'", "\\'")+"'")
+            // make a comma-delimited list
+            .collect(Collectors.joining(",")));
+          labelExpression.append("].includes(graphId)");
+        }
+      }
+      setStatus("Getting distinct token labels...");
+      timers.start("store.aggregateMatchingAnnotations");
+      String[] distinctWords = store.aggregateMatchingAnnotations(
+        "DISTINCT", labelExpression.toString());
+      timers.end("store.aggregateMatchingAnnotations");
+      setStatus("There are "+distinctWords.length+" distinct token labels");
+      int w = 0;
+      Dictionary dictionary = getDictionary(this.dictionary);
+      // for each label
+      for (String word : distinctWords) {
+        if (isCancelling()) break;
+        HashSet<String> soFar = new HashSet<String>(); // only unique entries
+        timers.start("dictionary.lookup");
+        for (String tag : dictionary.lookup(word)) {
+          timers.end("dictionary.lookup");
+          if (isCancelling()) break;
+          if (strip.length() > 0) tag = tag.replaceAll("["+strip+"]","");
+          if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
+            StringBuilder tokenExpression = new StringBuilder(labelExpression);
+            tokenExpression.append(" && label == '").append(esc(word)).append("'");
+            setStatus(word+" → "+tag);
+            timers.start("store.tagMatchingAnnotations");
+            store.tagMatchingAnnotations(
+              tokenExpression.toString(), tagLayerId, tag, Constants.CONFIDENCE_AUTOMATIC);
+            timers.end("store.tagMatchingAnnotations");
+            soFar.add(tag);
+          }
+          timers.end("dictionary.lookup");
+          setStatus(timers.toString());
+          // do we want the first entry only?
+          if (firstVariantOnly) break;        
+        } // next entry
+        setPercentComplete((++w * 100) / distinctWords.length);
+      } // next word
+      if (isCancelling()) {
+        setStatus("Cancelled.");
+      } else {
+        setPercentComplete(100);
+        setStatus("Finished.");
+      }
+    } catch(DictionaryException x) {
+      throw new TransformationException(this, x);
+    } finally {
+      setRunning(false);
     }
   }
   
