@@ -86,6 +86,10 @@ getSchema(s => {
           // select that layer by default
           tagLayerId.value = taskId;
         }
+        // tick strip-syllabification box by default
+        if (!text) { // there were no incoming parameters, so this is the first time
+          document.getElementById("stripSyllStress").checked = true;
+        }
       } finally {
         finishedLoading();
       }
@@ -115,6 +119,9 @@ function loadLexiconOptions(onLoad) {
     }
     if (originalValue) {
       lexicon.value = originalValue;
+    } else if (lexicons.length == 1) { // there's only one lexicon
+      // so select it
+      lexicon.selectedIndex = 1;
     } else {
       lexicon.selectedIndex = 0;
     }
