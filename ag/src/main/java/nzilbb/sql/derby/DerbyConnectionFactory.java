@@ -90,7 +90,13 @@ public class DerbyConnectionFactory implements ConnectionFactory {
       throw new SQLException("Location doesn't exist: " + location.getPath());
     }
     String connectionURL = "jdbc:derby:"
-      +location.getPath().replace('\\','/') +"/"+name+";create=true";
+      +location.getPath().replace('\\','/') +"/"+name+";create=true;"
+      // the PRIMARY collation is case and accent insensitive
+      // use BINARY comparisons to get accent/case sensitivity
+      +"collation=TERRITORY_BASED:PRIMARY";
+    // TODO Can't register functions implemented in a jar that's not on the classpath
+    // return DerbySQLTranslator.CreateFunctions(
+    //   DriverManager.getConnection(connectionURL, null, null));
     return DriverManager.getConnection(connectionURL, null, null);
   }
    
