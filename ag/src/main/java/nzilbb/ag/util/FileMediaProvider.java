@@ -26,6 +26,7 @@ import java.util.Vector;
 import nzilbb.ag.Graph;
 import nzilbb.ag.GraphMediaProvider;
 import nzilbb.ag.MediaFile;
+import nzilbb.ag.MediaTrackDefinition;
 import nzilbb.ag.PermissionException;
 import nzilbb.ag.StoreException;
 

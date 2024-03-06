@@ -11,6 +11,7 @@ nzilbb.ag.serialize.json
 nzilbb.ag.serialize.util
 nzilbb.ag.util
 nzilbb.configure
+nzilbb.converter
 nzilbb.editpath
 nzilbb.encoding
 nzilbb.encoding.comparator
