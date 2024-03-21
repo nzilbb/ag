@@ -139,23 +139,22 @@ public class FlatLexicon implements Dictionary {
   public String getDictionaryId() { return lexicon+":"+keyField+"->"+valueField; }
   
   /**
-   * Whether dictionary lookups are case sensitive or not.
-   * @see #getCaseSensitive()
-   * @see #setCaseSensitive(boolean)
+   * Whether dictionary lookups are case/accent sensitive or not.
+   * @see #getExactMatch()
+   * @see #setExactMatch(boolean)
    */
-  protected boolean caseSensitive = false;
+  protected boolean exactMatch = false;
   /**
-   * Getter for {@link #caseSensitive}: Whether dictionary lookups are case sensitive or not. 
-   * @return Whether dictionary lookups are case sensitive or not.
+   * Getter for {@link #exactMatch}: Whether dictionary lookups are case/accent sensitive or not.
+   * @return Whether dictionary lookups are case/accent sensitive or not.
    */
-  public boolean getCaseSensitive() { return caseSensitive; }
+  public boolean getExactMatch() { return exactMatch; }
   /**
-   * Setter for {@link #caseSensitive}: Whether dictionary lookups are case sensitive or
-   * not.
-   * @param newCaseSensitive Whether dictionary lookups are case sensitive or not. 
+   * Setter for {@link #exactMatch}: Whether dictionary lookups are case/accent sensitive or not.
+   * @param newExactMatch Whether dictionary lookups are case/accent sensitive or not.
    */
-  public FlatLexicon setCaseSensitive(boolean newCaseSensitive) throws SQLException {
-    caseSensitive = newCaseSensitive;
+  public FlatLexicon setExactMatch(boolean newExactMatch) throws SQLException {
+    exactMatch = newExactMatch;
     defineQuery();
     return this;
   }
@@ -465,10 +464,9 @@ public class FlatLexicon implements Dictionary {
     try {
       PreparedStatement sqlDelete = rdb.prepareStatement(
         "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-        // use BINARY for accent sensitivity
-        // use LOWER to remove case sensitivity of BINARY
+        // use BINARY for case/accent sensitivity
         +" WHERE "+quote+keyField+quote
-        +" = "+(caseSensitive?"BINARY ":"")+"?");
+        +" = "+(exactMatch?"BINARY ":"")+"?");
       try {
         sqlDelete.setString(1, key);
         if (sqlDelete.executeUpdate() == 0) {
@@ -495,12 +493,11 @@ public class FlatLexicon implements Dictionary {
     try {
       PreparedStatement sqlDelete = rdb.prepareStatement(
         "DELETE FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-        // use BINARY for accent sensitivity
-        // use LOWER to remove case sensitivity of BINARY
+        // use BINARY for case/accent sensitivity
         +" WHERE "+quote+keyField+quote
-        +" = "+(caseSensitive?"BINARY ":"")+"?"
+        +" = "+(exactMatch?"BINARY ":"")+"?"
         +" AND "+quote+valueField+quote
-        +" = "+(caseSensitive?"BINARY ":"")+"?");
+        +" = "+(exactMatch?"BINARY ":"")+"?");
       try {
         sqlDelete.setString(1, key);
         sqlDelete.setString(2, entry);
@@ -576,7 +573,7 @@ public class FlatLexicon implements Dictionary {
     // not supported.
     rawQuery = "SELECT DISTINCT "+quote+valueField+quote+", supplemental"
       +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
-      +" WHERE "+quote+keyField+quote+" = "+(caseSensitive?"BINARY ":"")+"?"
+      +" WHERE "+quote+keyField+quote+" = "+(exactMatch?"BINARY ":"")+"?"
       +" ORDER BY "+quote+valueField+quote;
     translatedQuery = sqlx.apply(rawQuery);
     sql = rdb.prepareStatement(translatedQuery);

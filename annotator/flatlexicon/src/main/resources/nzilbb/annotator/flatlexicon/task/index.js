@@ -67,7 +67,8 @@ getSchema(s => {
         document.getElementById("firstVariantOnly").checked
           = parameters.get("firstVariantOnly");
         document.getElementById("exactMatch").checked
-          = parameters.get("exactMatch");
+          = parameters.get("exactMatch")
+          || parameters.get("caseSensitive"); // backwards compatibility
         // if there's no utterance tag layer defined
         if (tagLayerId.selectedIndex == 0
             // but there's a layer named after the task

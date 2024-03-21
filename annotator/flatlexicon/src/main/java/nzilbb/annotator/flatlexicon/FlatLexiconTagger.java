@@ -659,25 +659,34 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param newStrip Characters to remove from the entry tag labels, if any.
    */
   public FlatLexiconTagger setStrip(String newStrip) { strip = newStrip; return this; }
-
+  
   /**
-   * Whether dictionary lookups are case sensitive or not. By default, lookups are
-   * case-insensitive. 
-   * @see #getCaseSensitive()
-   * @see #setCaseSensitive(Boolean)
+   * Whether dictionary lookups are case/accent sensitive or not. By default, lookups are
+   * case/accent insensitive. 
+   * @see #getExactMatch()
+   * @see #setExactMatch(Boolean)
    */
-  protected Boolean caseSensitive = Boolean.FALSE;
+  protected Boolean exactMatch = Boolean.FALSE;
   /**
-   * Getter for {@link #caseSensitive}: Whether dictionary lookups are case sensitive or
-   * not. By default, lookups are case-insensitive. 
-   * @return Whether dictionary lookups are case sensitive or not.
+   * Getter for {@link #exactMatch}: Whether dictionary lookups are case/accent sensitive
+   * or not. By default, lookups are case/accent insensitive. 
+   * @return Whether dictionary lookups are case/accent sensitive or not. By default,
+   * lookups are case/accent insensitive. 
    */
-  public Boolean getCaseSensitive() { return caseSensitive; }
+  public Boolean getExactMatch() { return exactMatch; }
   /**
-   * Setter for {@link #caseSensitive}: Whether dictionary lookups are case sensitive or not.
-   * @param newCaseSensitive Whether dictionary lookups are case sensitive or not. 
+   * Setter for {@link #exactMatch}: Whether dictionary lookups are case/accent sensitive
+   * or not. 
+   * @param newExactMatch Whether dictionary lookups are case/accent sensitive or not. 
    */
-  public FlatLexiconTagger setCaseSensitive(Boolean newCaseSensitive) { caseSensitive = newCaseSensitive; return this; }
+  public FlatLexiconTagger setExactMatch(Boolean newExactMatch) { exactMatch = newExactMatch; return this; }
+  
+  /**
+   * Deprecated synonym for {@link #setExactMatch(Boolean)} for backwards compatibility.
+   * @param newExactMatch Whether dictionary lookups are case/accent sensitive or not. 
+   */
+  @Deprecated
+  public FlatLexiconTagger setCaseSensitive(Boolean newExactMatch) { return setExactMatch(newExactMatch); }  
   
   /**
    * Sets the configuration for a given annotation task.
@@ -694,7 +703,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
     strip = "";
     targetLanguagePattern = null;
     firstVariantOnly = Boolean.FALSE;
-    caseSensitive = Boolean.FALSE;
+    exactMatch = Boolean.FALSE;
 
     if (parameters == null) { // apply default configuration
          
@@ -738,7 +747,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       beanPropertiesFromQueryString(parameters);
     }
     if (firstVariantOnly == null) firstVariantOnly = Boolean.FALSE;
-    if (caseSensitive == null) caseSensitive = Boolean.FALSE;
+    if (exactMatch == null) exactMatch = Boolean.FALSE;
       
     if (schema.getLayer(tokenLayerId) == null)
       throw new InvalidConfigurationException(this, "Token layer not found: " + tokenLayerId);
@@ -1265,7 +1274,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
      throws DictionaryException {
      try {
        return new FlatLexicon(this, newConnection(), sqlx, lexicon, keyField, valueField)
-         .setCaseSensitive(caseSensitive == null?Boolean.FALSE:caseSensitive);
+         .setExactMatch(exactMatch == null?Boolean.FALSE:exactMatch);
      } catch(SQLException sqlX) {
        throw new DictionaryException(null, sqlX);
      }

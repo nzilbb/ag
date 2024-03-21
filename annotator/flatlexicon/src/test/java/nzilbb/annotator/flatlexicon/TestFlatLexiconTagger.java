@@ -229,8 +229,8 @@ public class TestFlatLexiconTagger {
                annotator.getPhraseLanguageLayerId());
     assertNull("target language",
                annotator.getTargetLanguagePattern());
-    assertFalse("case sensitivity",
-                annotator.getCaseSensitive());
+    assertFalse("case/accent sensitivity",
+                annotator.getExactMatch());
     assertEquals("tag layer",
                  "frequency", annotator.getTagLayerId());
     assertNotNull("tag layer was created",
@@ -417,6 +417,27 @@ public class TestFlatLexiconTagger {
       +"&targetLanguagePattern=");
     // no exception is thrown, but firstVariantOnly is now true
     assertTrue("firstVariantOnly has been corrected", annotator.getFirstVariantOnly());
+
+    // set caseSensitive instead of exactMatch - for backwards compatibility
+    annotator.getSchema().addLayer(
+      new Layer("frequency")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      // no peers allowed
+      .setPeers(false)
+      .setParentId(annotator.getSchema().getWordLayerId()));
+    annotator.setTaskParameters(
+      "tokenLayerId=word"
+      +"&transcriptLanguageLayerId=transcript_language"
+      +"&phraseLanguageLayerId=lang"
+      +"&tagLayerId=frequency"
+      // all variants
+      +"&firstVariantOnly=false"
+      +"&dictionary=a-z.csv:Word->Frequency"
+      +"&targetLanguagePattern="
+      +"&caseSensitive=on");
+    // no exception is thrown, but firstVariantOnly is now true
+    assertTrue("Backwards compatibility: caseSensitive used instead of exactMatch",
+               annotator.getExactMatch());
   }   
 
   /** Test that language-specific tagging works when the whole transcript is not targeted */
@@ -622,7 +643,7 @@ public class TestFlatLexiconTagger {
       +"&tagLayerId=phonemes"
       +"&dictionary=a-z.csv:Word->Pronunciation"
       +"&firstVariantOnly=false"
-      +"&caseSensitive=false"
+      +"&exactMatch=false"
       +"&strip=");
       
     assertEquals("token layer",
@@ -649,8 +670,8 @@ public class TestFlatLexiconTagger {
                 annotator.getFirstVariantOnly());
     assertTrue("tag layer allows peers (firstVariantOnly=false)",
                schema.getLayer(annotator.getTagLayerId()).getPeers());
-    assertFalse("caseSensitive=false",
-                annotator.getCaseSensitive());
+    assertFalse("exactMatch=false",
+                annotator.getExactMatch());
     Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
       .collect(Collectors.toSet());
     assertEquals("3 required layer: "+requiredLayers,
@@ -694,7 +715,7 @@ public class TestFlatLexiconTagger {
    
   /** Test that case-sensitive matching works. */
   /*TODO Case sensitivity doesn't work with Derby @Test */
-  public void caseSensitive() throws Exception {
+  public void exactMatch() throws Exception {
       
     Graph g = graph();
       
@@ -728,7 +749,7 @@ public class TestFlatLexiconTagger {
       +"&tagLayerId=phonemes"
       +"&dictionary=a-z.csv:Word->Pronunciation"
       +"&firstVariantOnly=false"
-      +"&caseSensitive=on"
+      +"&exactMatch=on"
       +"&strip=");
       
     assertEquals("token layer",
@@ -755,8 +776,8 @@ public class TestFlatLexiconTagger {
                 annotator.getFirstVariantOnly());
     assertTrue("tag layer allows peers (firstVariantOnly=false)",
                schema.getLayer(annotator.getTagLayerId()).getPeers());
-    assertTrue("caseSensitive=true",
-                annotator.getCaseSensitive());
+    assertTrue("exactMatch=true",
+                annotator.getExactMatch());
     Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
       .collect(Collectors.toSet());
     assertEquals("3 required layer: "+requiredLayers,
@@ -854,7 +875,7 @@ public class TestFlatLexiconTagger {
     Dictionary dictionary = annotator.getDictionary("dict:type->phonemes");
     FlatLexicon lexicon = (FlatLexicon)dictionary;
     // TODO case sensitivity not supported with Derby
-    // lexicon.setCaseSensitive(true);
+    // lexicon.setExactMatch(true);
     // List<String> entries = dictionary.lookup("QUÍCK");
     // assertEquals("entry returned, case-insentitive, accent sensitive",
     //              1, entries.size());
@@ -863,19 +884,19 @@ public class TestFlatLexiconTagger {
     // while we've got a dictionary, check the case/accent sensitivity
     // NB with the test RDBMS used for testing - Derby - accent sensitivity can't
     // be tested, so we look internally at the pre-translation SQL used for queries
-    lexicon.setCaseSensitive(true);
+    lexicon.setExactMatch(true);
     assertTrue("MySQL for case-sensitive", lexicon.rawQuery.endsWith(
                  "WHERE \"type\" = BINARY ? ORDER BY \"phonemes\""));
     // Can't support case-sensitivity for Derby as well as MySQL, so we prioritise MySQL
     assertTrue("Derby SQL for case-sensitive", lexicon.translatedQuery.endsWith(
                  "WHERE \"type\" = ? ORDER BY \"phonemes\""));
-    lexicon.setCaseSensitive(false);
+    lexicon.setExactMatch(false);
     assertTrue("MySQL for case-insensitive", lexicon.rawQuery.endsWith(
                  "WHERE \"type\" = ? ORDER BY \"phonemes\""));
     assertTrue("Derby SQL for case-insensitive", lexicon.translatedQuery.endsWith(
                  "WHERE \"type\" = ? ORDER BY \"phonemes\""));
     
-    lexicon.setCaseSensitive(false);
+    lexicon.setExactMatch(false);
     List<String> entries = dictionary.lookup("THE");
     assertEquals("first line is not ignored", 2, entries.size());
     assertEquals("first entry correct (order is alphabetical)", "ð i:", entries.get(0));
@@ -903,7 +924,7 @@ public class TestFlatLexiconTagger {
         +"&tagLayerId=phonemes"
         +"&dictionary=a-z.csv:Word->Pronunciation"
         +"&firstVariantOnly=false"
-        +"&caseSensitive=on"
+        +"&exactMatch=on"
         +"&strip=");
       
       // call tagMatchingAnnotations
@@ -983,7 +1004,7 @@ public class TestFlatLexiconTagger {
         +"&tagLayerId=phonemes"
         +"&dictionary=a-z.csv:Word->Pronunciation"
         +"&firstVariantOnly=false"
-        +"&caseSensitive=on"
+        +"&exactMatch=on"
         +"&strip=");
       
       // call tagMatchingAnnotations
@@ -1057,7 +1078,7 @@ public class TestFlatLexiconTagger {
         +"&tagLayerId=phonemes"
         +"&dictionary=a-z.csv:Word->Pronunciation"
         +"&firstVariantOnly=false"
-        +"&caseSensitive=on"
+        +"&exactMatch=on"
         +"&strip=");
       
       // call tagMatchingAnnotations
@@ -1140,7 +1161,7 @@ public class TestFlatLexiconTagger {
         +"&tagLayerId=phonemes"
         +"&dictionary=a-z.csv:Word->Pronunciation"
         +"&firstVariantOnly=false"
-        +"&caseSensitive=on"
+        +"&exactMatch=on"
         +"&strip=");
       
       // call tagMatchingAnnotations
