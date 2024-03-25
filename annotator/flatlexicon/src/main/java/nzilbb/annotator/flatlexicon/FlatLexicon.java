@@ -26,10 +26,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
@@ -208,9 +211,9 @@ public class FlatLexicon implements Dictionary {
    * @return a Vector of Strings, one for each entry for the given word
    * @throws SQLException
    */
-  protected Vector<String> lookupEntries(String key, boolean supplementalOnly)
+  protected List<String> lookupEntries(String key, boolean supplementalOnly)
     throws SQLException {      
-    Vector<String> queryResults = new Vector<String>();
+    Set<String> queryResults = new LinkedHashSet<String>(); // TODO Set instead of List
     if (key != null) {
       sql.setString(1, key);
       ResultSet rs = sql.executeQuery();
@@ -226,7 +229,7 @@ public class FlatLexicon implements Dictionary {
         rs.close();
       }
     }
-    return queryResults;
+    return queryResults.stream().collect(Collectors.toList());
   }
   /** 
    * {@link Dictionary} method - Look up all entries for the given key.
@@ -290,7 +293,7 @@ public class FlatLexicon implements Dictionary {
         try {
           while (rs.next()) {
             String word = rs.getString(keyField);
-            Vector<String> entries = lookupEntries(word, false);
+            List<String> entries = lookupEntries(word, false);
             if (entries.size() == 0) continue;
             words.put(word, entries);
           } // next word
@@ -535,7 +538,7 @@ public class FlatLexicon implements Dictionary {
         try {
           while (rs.next()) {
             String word = rs.getString(keyField);
-            Vector<String> entries = lookupEntries(word, false);
+            List<String> entries = lookupEntries(word, false);
             if (entries.size() == 0) continue;
             words.put(word, entries);
           } // next word
@@ -571,10 +574,10 @@ public class FlatLexicon implements Dictionary {
     // This means that case and accent sensitivity are tied together for MySQL,
     // but also means that when the back end is a Derby database, case-insensitivity is
     // not supported.
-    rawQuery = "SELECT DISTINCT "+quote+valueField+quote+", supplemental"
+    rawQuery = "SELECT "+quote+valueField+quote+", supplemental"
       +" FROM "+annotator.getAnnotatorId()+"_lexicon_"+lexiconId
       +" WHERE "+quote+keyField+quote+" = "+(exactMatch?"BINARY ":"")+"?"
-      +" ORDER BY "+quote+valueField+quote;
+      +" ORDER BY serial";
     translatedQuery = sqlx.apply(rawQuery);
     sql = rdb.prepareStatement(translatedQuery);
   } // end of defineQuery()

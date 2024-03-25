@@ -155,17 +155,17 @@ public class TestFlatLexiconTagger {
     assertEquals("Correct number of tokens "+pronLabels,
                  11, pronLabels.size());
     Iterator<String> prons = pronLabels.iterator();
-    assertEquals("Entries in alphabetical order",
-                 "ð i:", prons.next());
-    assertEquals("Multiple pronunciations",
+    assertEquals("Variant order is order encountered in file",
                  "ð ə", prons.next());
+    assertEquals("Multiple pronunciations",
+                 "ð i:", prons.next());
     assertEquals("k w ɪ k", prons.next());
     assertEquals("b r aʊ n", prons.next());
     assertEquals("f ɒ k s", prons.next());
     assertEquals("ʤ ʌ m p s", prons.next());
     assertEquals("'əʊ - v ə", prons.next());
-    assertEquals("ð i:", prons.next());
     assertEquals("ð ə", prons.next());
+    assertEquals("ð i:", prons.next());
     assertEquals("l 'eɪ - z i:", prons.next());
     assertEquals("d ɒ g", prons.next());
 
@@ -185,16 +185,16 @@ public class TestFlatLexiconTagger {
                  12, pronLabels.size());
     prons = pronLabels.iterator();
     assertEquals("First word is still tagged, because existing tags aren't removed",
-                 "ð i:", prons.next());
-    assertEquals("First word is still tagged, because existing tags aren't removed",
                  "ð ə", prons.next());
+    assertEquals("First word is still tagged, because existing tags aren't removed",
+                 "ð i:", prons.next());
     assertEquals("k w ɪ k", prons.next());
     assertEquals("b r aʊ n", prons.next());
     assertEquals("f ɒ k s", prons.next());
     assertEquals("ʤ ʌ m p s", prons.next());
     assertEquals("'əʊ - v ə", prons.next());
-    assertEquals("ð i:", prons.next());
     assertEquals("ð ə", prons.next());
+    assertEquals("ð i:", prons.next());
     assertEquals("l 'eɪ - z i:", prons.next());
     assertEquals("d ɒ g", prons.next());
     assertEquals("New token",
@@ -603,8 +603,10 @@ public class TestFlatLexiconTagger {
     assertEquals("f ɒ k s", prons.next());
     assertEquals("ʤ ʌ m p s", prons.next());
     assertEquals("əʊ v ə", prons.next());
-    assertEquals("ð i:", prons.next());
-    assertEquals("ð ə", prons.next());
+    assertEquals("variant order is order encountered in file - ð ə first",
+                 "ð ə", prons.next());
+    assertEquals("variant order is order encountered in file - ð i: second",
+                 "ð i:", prons.next());
 
   }   
 
@@ -699,10 +701,10 @@ public class TestFlatLexiconTagger {
     assertEquals("Correct number of annotations "+pronLabels,
                  6, pronLabels.size());
     Iterator<String> prons = pronLabels.iterator();
-    assertEquals("Entries in alphabetical order",
-                 "ð i:", prons.next());
-    assertEquals("Multiple pronunciations",
+    assertEquals("Variant order is order encountered in file",
                  "ð ə", prons.next());
+    assertEquals("Multiple pronunciations",
+                 "ð i:", prons.next());
     assertEquals("NZE phrase is tagged",
                  "k w ɪ k", prons.next());
     assertEquals("NZE phrase is tagged",
@@ -885,22 +887,22 @@ public class TestFlatLexiconTagger {
     // NB with the test RDBMS used for testing - Derby - accent sensitivity can't
     // be tested, so we look internally at the pre-translation SQL used for queries
     lexicon.setExactMatch(true);
-    assertTrue("MySQL for case-sensitive", lexicon.rawQuery.endsWith(
-                 "WHERE \"type\" = BINARY ? ORDER BY \"phonemes\""));
+    assertTrue("MySQL for case-sensitive:" + lexicon.rawQuery,
+               lexicon.rawQuery.endsWith("WHERE \"type\" = BINARY ? ORDER BY serial"));
     // Can't support case-sensitivity for Derby as well as MySQL, so we prioritise MySQL
-    assertTrue("Derby SQL for case-sensitive", lexicon.translatedQuery.endsWith(
-                 "WHERE \"type\" = ? ORDER BY \"phonemes\""));
+    assertTrue("Derby SQL for case-sensitive: " + lexicon.translatedQuery,
+               lexicon.translatedQuery.endsWith("WHERE \"type\" = ? ORDER BY serial"));
     lexicon.setExactMatch(false);
-    assertTrue("MySQL for case-insensitive", lexicon.rawQuery.endsWith(
-                 "WHERE \"type\" = ? ORDER BY \"phonemes\""));
-    assertTrue("Derby SQL for case-insensitive", lexicon.translatedQuery.endsWith(
-                 "WHERE \"type\" = ? ORDER BY \"phonemes\""));
+    assertTrue("MySQL for case-insensitive: " + lexicon.rawQuery,
+               lexicon.rawQuery.endsWith("WHERE \"type\" = ? ORDER BY serial"));
+    assertTrue("Derby SQL for case-insensitive: " + lexicon.translatedQuery,
+               lexicon.translatedQuery.endsWith("WHERE \"type\" = ? ORDER BY serial"));
     
     lexicon.setExactMatch(false);
     List<String> entries = dictionary.lookup("THE");
     assertEquals("first line is not ignored", 2, entries.size());
-    assertEquals("first entry correct (order is alphabetical)", "ð i:", entries.get(0));
-    assertEquals("second entry correct", "ð ə", entries.get(1));
+    assertEquals("first entry correct (order is serial)", "ð ə", entries.get(0));
+    assertEquals("second entry correct", "ð i:", entries.get(1));
 
     // can remove lexicons
     assertEquals("Can delete lexicon", "", annotator.deleteLexicon("dict"));
