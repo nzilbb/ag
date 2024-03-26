@@ -1603,10 +1603,14 @@ public class MFA extends Annotator {
     if (utteranceTagLayerId != null) prefix = utteranceTagLayerId;
     else if (phoneAlignmentLayerId != null) prefix = phoneAlignmentLayerId;
     File parentDir = new File(System.getProperty("java.io.tmpdir"));
-    if (System.getProperty("os.name").startsWith("Windows") && parentDir.getPath().contains(" ")) {
-      // MFA doesn't handle paths with spaces well, so we try to use a path with no spaces
-      // like C:\WINDOWS\TEMP
-      parentDir = new File(System.getenv("TEMP"));
+    if (System.getProperty("os.name").startsWith("Windows")) {
+      // MFA doesn't handle paths with spaces well...
+      if (parentDir.getPath().contains(" ")) {
+        // ...so we try to use a path with no spaces like C:\WINDOWS\TEMP
+        parentDir = new File(System.getenv("TEMP"));
+      }
+      // ...and ensure the new name doesn't include spaces either
+      newName = newName.replace(" ", "-");
     }
     File newSessionWorkingDirectory = new File(
       parentDir,
