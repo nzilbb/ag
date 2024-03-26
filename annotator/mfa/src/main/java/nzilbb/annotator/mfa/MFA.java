@@ -426,6 +426,23 @@ public class MFA extends Annotator {
    * not (true). Influences the "--uses_speaker_adaptation" command line parameter. 
    */
    public MFA setNoSpeakerAdaptation(boolean newNoSpeakerAdaptation) { noSpeakerAdaptation = newNoSpeakerAdaptation; return this; }
+
+  /**
+   * If alignment fails, don't clean up files.
+   * @see #getNoCleanupOnFailure()
+   * @see #setNoCleanupOnFailure(boolean)
+   */
+  protected boolean noCleanupOnFailure = false;
+  /**
+   * Getter for {@link #noCleanupOnFailure}: If alignment fails, don't clean up files.
+   * @return If alignment fails, don't clean up files.
+   */
+  public boolean getNoCleanupOnFailure() { return noCleanupOnFailure; }
+  /**
+   * Setter for {@link #noCleanupOnFailure}: If alignment fails, don't clean up files.
+   * @param newNoCleanupOnFailure If alignment fails, don't clean up files.
+   */
+  public MFA setNoCleanupOnFailure(boolean newNoCleanupOnFailure) { noCleanupOnFailure = newNoCleanupOnFailure; return this; }
   
   /**
    * Default constructor.
@@ -1293,7 +1310,11 @@ public class MFA extends Annotator {
       }
       
       // cleanup
-      IO.RecursivelyDelete(sessionWorkingDir);
+      if (failure == null || !noCleanupOnFailure) { // no failure, or cleanup regardless
+        IO.RecursivelyDelete(sessionWorkingDir);
+      } else {
+        setStatus("Working files not cleaned up after failure: " + sessionWorkingDir.getPath());
+      }
       
       if (failure != null) throw failure;
       

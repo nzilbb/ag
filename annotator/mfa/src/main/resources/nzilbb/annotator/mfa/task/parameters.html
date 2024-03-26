@@ -31,6 +31,8 @@
   <dt> noSpeakerAdaptation </dt> <dd> Whether trained acoustic models are adapted for each
     speaker before alignment or not. Set any non-empty value for this parameter to use
     the <tt>--uses_speaker_adaptation False</tt> switch, omit the parameter otherwise</dd> 
+  <dt> noCleanupOnFailure </dt> <dd> If an error occurs, working files will be deleted by default.
+    Set this to any non-empty value working files to be left in place for manual inspection.</dd> 
   <dt> ignoreAlignmentStatuses </dt> <dd> Set any non-empty value of this parameter to
     overwrite manual alignments, otherwise omit this parameter.  </dd>
   <dt> wordAlignmentLayerId </dt> <dd> Output layer on which word alignments are
