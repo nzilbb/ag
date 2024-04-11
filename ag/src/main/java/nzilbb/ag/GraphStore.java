@@ -125,13 +125,13 @@ public interface GraphStore extends GraphStoreQuery {
   /**
    * Saves the given media for the given transcript
    * @param id The transcript ID
-   * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
    * @param mediaUrl A URL to the media content.
+   * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
    * @throws StoreException If an error prevents the media from being saved.
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
    */
-  public void saveMedia(String id, String trackSuffix, String mediaUrl)
+  public void saveMedia(String id, String mediaUrl, String trackSuffix)
     throws StoreException, PermissionException, GraphNotFoundException;
 
   /**
