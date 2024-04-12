@@ -131,7 +131,7 @@ public interface GraphStore extends GraphStoreQuery {
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
    */
-  public void saveMedia(String id, String mediaUrl, String trackSuffix)
+  public MediaFile saveMedia(String id, String mediaUrl, String trackSuffix)
     throws StoreException, PermissionException, GraphNotFoundException;
 
   /**
@@ -153,7 +153,16 @@ public interface GraphStore extends GraphStoreQuery {
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
    */
-  public void saveEpisodeDocument(String id, String url)
+  public MediaFile saveEpisodeDocument(String id, String url)
+    throws StoreException, PermissionException, GraphNotFoundException;
+  
+  /**
+   * Delete a given media or document file.
+   * @param id The associated transcript ID.
+   * @param fileName The media file name, e.g. {@link MediaFile#name}.
+   * @throws StoreException, PermissionException, GraphNotFoundException
+   */
+  public void deleteMedia(String id, String fileName)
     throws StoreException, PermissionException, GraphNotFoundException;
 
   /** Synonym for {@link #deleteTranscript(String)}. */
