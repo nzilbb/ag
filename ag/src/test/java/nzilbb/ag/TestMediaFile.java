@@ -62,6 +62,19 @@ public class TestMediaFile {
     assertEquals("audio/wav", json.getString("mimeType"));
     assertEquals("https://somewhere/something.wav", json.getString("url"));
     assertEquals("Audio", json.getString("name"));
+    
+    MediaFile mp3 = new MediaFile()
+      .setTrackSuffix("_mic")
+      .setMimeType("audio/mp3")
+      .setUrl("https://somewhere/something.mp3")
+      .setName("Audio")
+      .setGenerateFrom(a);
+    json = mp3.toJson();
+    assertEquals("_mic", json.getString("trackSuffix"));
+    assertEquals("audio/mp3", json.getString("mimeType"));
+    assertEquals("https://somewhere/something.mp3", json.getString("url"));
+    assertEquals("Audio", json.getString("name"));
+    assertTrue(json.containsKey("generateFrom"));
   }
 
 

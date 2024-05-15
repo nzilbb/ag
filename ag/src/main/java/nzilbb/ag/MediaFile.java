@@ -126,6 +126,7 @@ public class MediaFile implements CloneableBean {
    * @return The media file from which this one could be generated, or null if the file
    * already exists. 
    */
+  @ClonedProperty
   public MediaFile getGenerateFrom() { return generateFrom; }
   /**
    * Setter for {@link #generateFrom}: The media file from which this one could be
