@@ -167,6 +167,9 @@ function getTaskParameters() {
                 document.getElementById("pronunciationLayerId").disabled
                     = document.getElementById("multilingualIPA").disabled
                     = document.getElementById("dictionaryName").value != ""; 
+                // no acoustic model means train/align, and speaker adaptation shouldn't be specified
+                document.getElementById("noSpeakerAdaptation").disabled
+                    = document.getElementById("modelsName").value == "";
             }
             // if there's no utterance tag layer defined
             if (utteranceTagLayerId.selectedIndex == 0
@@ -251,9 +254,14 @@ document.getElementById("form").onsubmit = function(e) {
 }
 
 document.getElementById("dictionaryName").onchange = function(e) {
-    // either pronunciationLayerId or dictionaryName
-    document.getElementById("pronunciationLayerId").disabled
-    // if pronunciationLayerId, then phoneSet
-        = document.getElementById("phoneSet").disabled
-        = document.getElementById("dictionaryName").value != "";
+  // either pronunciationLayerId or dictionaryName
+  document.getElementById("pronunciationLayerId").disabled
+  // if pronunciationLayerId, then phoneSet
+    = document.getElementById("phoneSet").disabled
+    = document.getElementById("dictionaryName").value != "";
+}
+document.getElementById("modelsName").onchange = function(e) {
+  // no acoustic model means train/align, and speaker adaptation shouldn't be specified
+  document.getElementById("noSpeakerAdaptation").disabled
+    = document.getElementById("modelsName").value == "";
 }

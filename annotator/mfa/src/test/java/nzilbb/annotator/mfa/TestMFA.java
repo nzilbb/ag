@@ -281,7 +281,9 @@ public class TestMFA {
    * updating word token alignments and creating children. */
   @Test public void pretrainedModels() throws Exception {
     annotator.setSessionName("pretrainedModels");
-    annotator.getStatusObservers().add(status->System.out.println(status));
+    if (annotator.getStatusObservers().size() == 0) {
+      annotator.getStatusObservers().add(status->System.out.println(status));
+    }
     
     Graph f = fragment();
     Schema schema = f.getSchema();
@@ -339,8 +341,10 @@ public class TestMFA {
   /** Test alignment of fragment with pre-trained IPA models/dictionary
    * (english_ipa/english_uk_ipa), updating word token alignments and creating children. */
   /*@Test*/ public void pretrainedIPAModels() throws Exception {
-    annotator.setSessionName("pretrainedModels");
-    annotator.getStatusObservers().add(status->System.out.println(status));
+    annotator.setSessionName("pretrainedIPAModels");
+    if (annotator.getStatusObservers().size() == 0) {
+      annotator.getStatusObservers().add(status->System.out.println(status));
+    }
     
     Graph f = fragment();
     Schema schema = f.getSchema();
@@ -557,7 +561,9 @@ public class TestMFA {
   /* @Test doesn't work, presumably because there's almost no data!
    */ public void trainAndAlign() throws Exception {
     annotator.setSessionName("trainAndAlign");
-    annotator.getStatusObservers().add(status->System.out.println(status));
+    if (annotator.getStatusObservers().size() == 0) {
+      annotator.getStatusObservers().add(status->System.out.println(status));
+    }
     
     Graph f = fragment();
     Schema schema = f.getSchema();

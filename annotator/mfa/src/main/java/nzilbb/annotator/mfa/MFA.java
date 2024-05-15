@@ -1249,8 +1249,6 @@ public class MFA extends Annotator {
                 parameters.add(""+beam);
                 parameters.add("--retry-beam");
                 parameters.add(""+retryBeam);
-                parameters.add("--uses_speaker_adaptation");
-                parameters.add(noSpeakerAdaptation?"False":"True");
                 parameters.add("--use_postgres");
                 String[] paramatersArray = parameters.toArray(new String[0]);
                 mfa(false, paramatersArray);
