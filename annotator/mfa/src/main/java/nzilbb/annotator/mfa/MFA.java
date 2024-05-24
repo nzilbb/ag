@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1244,6 +1244,8 @@ public class MFA extends Annotator {
                 parameters.add("long_textgrid");
                 parameters.add(corpusDir.getPath());
                 parameters.add(dictionaryFile.getPath());
+                parameters.add(modelsDir.getPath());
+                parameters.add("--output_directory");
                 parameters.add(alignedDir.getPath());
                 parameters.add("--beam");
                 parameters.add(""+beam);
@@ -1336,8 +1338,10 @@ public class MFA extends Annotator {
   protected Map<String,LinkedHashSet<String>> dictionary;
   /** Dictionary file */
   protected File dictionaryFile;
-  /** Directory for MFA output file */
+  /** Directory for MFA output alignments */
   protected File alignedDir;
+  /** Directory for MFA output models */
+  protected File modelsDir;
   Pattern errorPattern = Pattern.compile(".*error.*", Pattern.CASE_INSENSITIVE + Pattern.DOTALL);
   // MFA reports progress during training, but there are a variable umber phases that go from
   // 0% to 100%
@@ -1355,6 +1359,7 @@ public class MFA extends Annotator {
     tempDir = null;
     corpusDir = null;
     alignedDir = null;
+    modelsDir = null;
     dictionary = null;
     dictionaryFile = null;
     // load condaPath from config file
@@ -1428,6 +1433,7 @@ public class MFA extends Annotator {
       corpusDir = new File(sessionWorkingDir, "corpus");
       corpusDir.mkdir();
       alignedDir = new File(sessionWorkingDir, "aligned");
+      modelsDir = new File(sessionWorkingDir, "models");
       
       final DecimalFormat formatter = new DecimalFormat("0.0000");
       
@@ -1625,6 +1631,7 @@ public class MFA extends Annotator {
       tempDir = new File(sessionWorkingDir, "temp");
       corpusDir = new File(sessionWorkingDir, "corpus");
       alignedDir = new File(sessionWorkingDir, "aligned");
+      modelsDir = new File(sessionWorkingDir, "models");
       setStatus("Session name now: " + sessionName);
     } // rename successful
   } // end of renameSession()
@@ -1671,12 +1678,25 @@ public class MFA extends Annotator {
     }
 
     for (String arg : args) exe.arg(arg);
-    exe.getStdoutObservers().add(s->setStatus(s.replaceAll("[[0-9]+m","")));
+    exe.getStdoutObservers().add(s-> {
+        // log each line seperately
+        StringTokenizer lines = new StringTokenizer(s.replaceAll("[[0-9]+m",""), "\n\r");
+        while (lines.hasMoreTokens()) {
+          String line = lines.nextToken().trim();
+          if (line.length() > 0) { // skip blank lines
+            setStatus(line);
+          }
+        }
+      });
     exe.getStderrObservers().add(s-> {
         // is it a progress bar?
         Matcher progressMatcher = progressPattern.matcher(s);
         if (!progressMatcher.find()) {
-          setStatus(s);
+          StringTokenizer lines = new StringTokenizer(s, "\n\r");
+          while (lines.hasMoreTokens()) {
+            String line = lines.nextToken().trim();
+            setStatus(line);
+          }
         }
       });
     exe.run();
@@ -1776,17 +1796,26 @@ public class MFA extends Annotator {
 
       // output files are in subdirectories of alignedDir
       Vector<File> outputFiles = new Vector<File>();
-      for (File d : alignedDir.listFiles()) {
-        if (d.isFile()) { // probably unaligned.txt
-          outputFiles.add(d);
-        } else if (d.isDirectory()) {
-          for (File f : d.listFiles()) {
-            if (f.isFile()) { // presumably a TextGrid
-              outputFiles.add(f);
-            }
-          } // next subdir file
-        } // subdir
-      } // next corpusDir fild
+      File[] alignmentFiles = alignedDir.listFiles();
+      if (alignmentFiles != null) {
+        for (File d : alignmentFiles) {
+          if (d.isFile()) { // probably unaligned.txt
+            outputFiles.add(d);
+          } else if (d.isDirectory()) {
+            for (File f : d.listFiles()) {
+              if (f.isFile()) { // presumably a TextGrid
+                outputFiles.add(f);
+              }
+            } // next subdir file
+          } // subdir
+        } // next corpusDir fild
+      } else { // alignmentFiles == null
+        if (!alignedDir.exists()) {
+          setStatus("Alignments directory doesn't exist: " + alignedDir.getPath());
+        } else {
+          setStatus("Alignments directory is empty: " + alignedDir.getPath());
+        }
+      }
       if (outputFiles.size() == 0) {
         setStatus("No alignments were produced.");
         throw new TransformationException(this, "No alignments were produced.");
