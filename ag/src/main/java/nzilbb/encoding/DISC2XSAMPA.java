@@ -29,6 +29,55 @@ import java.util.HashMap;
  * to X-SAMPA-encoded phonemic transcriptions like
  * <tt>str\eIndZ</tt>.
  *
+
+<style type="text/css">
+ #mapping td:first-child, #mapping th:first-child { text-align: right; } 
+ #mapping td:nth-child(2) { text-align: center; } 
+ #mapping td:nth-child(3) { font-family: monospace; } 
+ #mapping td:first-child { font-family: monospace; } 
+</style>
+<table id="mapping"><caption>Mapping</caption>
+ <thead><tr>
+  <th>DISC</th><th></th><th>X-SAMPA</th><th>Example</th>
+ </tr></thead>
+ <tbody>
+
+ <tr><td colspan="3"></td><th colspan="2">Vowels</th></tr>
+ <tr><td>i</td>  <td>→</td>  <td>i:</td></tr>
+ <tr><td>#</td>  <td>→</td>  <td>A:</td></tr>
+ <tr><td>$</td>  <td>→</td>  <td>O:</td></tr>
+ <tr><td>u</td>  <td>→</td>  <td>u:</td></tr>
+ <tr><td>3</td>  <td>→</td>  <td>3:</td></tr>
+ <tr><td>1</td>  <td>→</td>  <td>eI</td></tr>
+ <tr><td>2</td>  <td>→</td>  <td>aI</td></tr>
+ <tr><td>4</td>  <td>→</td>  <td>OI</td></tr>
+ <tr><td>5</td>  <td>→</td>  <td>@U</td></tr>
+ <tr><td>6</td>  <td>→</td>  <td>aU</td></tr>
+ <tr><td>7</td>  <td>→</td>  <td>I@</td></tr>
+ <tr><td>8</td>  <td>→</td>  <td>E@</td></tr>
+ <tr><td>9</td>  <td>→</td>  <td>U@</td></tr>
+ <tr><td>c</td>  <td>→</td>  <td>{~</td></tr>
+ <tr><td>q</td>  <td>→</td>  <td>A~:</td></tr>
+ <tr><td>0</td>  <td>→</td>  <td>{~:</td></tr>
+ <tr><td>~</td>  <td>→</td>  <td>O~:</td></tr>
+         
+ <tr><td colspan="3"></td><th colspan="2">Consonants</th></tr>
+ <tr><td>J</td>  <td>→</td>  <td>tS</td></tr>
+ <tr><td>_</td>  <td>→</td>  <td>dZ</td></tr>
+ <tr><td>R</td>  <td>→</td>  <td>r*</td></tr>
+         
+ <tr><td>r</td>  <td>→</td>  <td>r\</td></tr>
+ <tr><td>}</td>  <td>→</td>  <td>}:</td></tr>
+ <tr><td>l</td>  <td>→</td>  <td>5</td></tr>
+         
+ <tr><td>C</td>  <td>→</td>  <td>N=</td></tr>
+ <tr><td>F</td>  <td>→</td>  <td>m=</td></tr>
+ <tr><td>H</td>  <td>→</td>  <td>n=</td></tr>
+ <tr><td>P</td>  <td>→</td>  <td>l=</td></tr>
+
+ </tbody>
+</table>
+
  * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * @see XSAMPA2DISC
  * @author Robert Fromont robert@fromont.net.nz

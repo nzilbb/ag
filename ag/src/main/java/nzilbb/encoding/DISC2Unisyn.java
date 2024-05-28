@@ -37,6 +37,70 @@ import java.util.HashMap;
  *  <li><code>,</code> &rarr; <code>-</code> - tertiary stress</li>
  *  <li><code>-</code> &rarr; <code>.</code> - syllable boundary</li>
  * </ul> 
+
+<style type="text/css">
+ #mapping td:first-child, #mapping th:first-child { text-align: right; } 
+ #mapping td:nth-child(2) { text-align: center; } 
+ #mapping td:nth-child(3) { font-family: monospace; } 
+ #mapping td:first-child { font-family: monospace; } 
+</style>
+<table id="mapping"><caption>Mapping</caption>
+ <thead><tr>
+  <th>DISC</th><th></th><th>Unisyn</th><th>Example</th>
+ </tr></thead>
+ <tbody>
+
+ <tr><td colspan="3"></td><th colspan="2">Stress and syllabification</th></tr>
+ <tr><td>'</td>  <td>→</td>  <td>*</td>   <td></td> <td>primary stress</td></tr>
+ <tr><td>"</td>  <td>→</td>  <td>~</td>   <td></td> <td>secondary stress</td></tr>
+ <tr><td>,</td>  <td>→</td>  <td>-</td>   <td></td> <td>tertiary stress</td></tr>
+ <tr><td>-</td>  <td>→</td>  <td>.</td>   <td></td> <td>syllable boundary</td></tr>
+
+ <tr><td colspan="3"></td><th colspan="2">Vowels</th></tr>
+ <tr><td>E</td>  <td>→</td>  <td>e</td>   <td>DRESS</td></tr>
+ <tr><td>{</td>  <td>→</td>  <td>a</td>   <td>TRAP</td></tr>
+ <tr><td>#</td>  <td>→</td>  <td>ah</td>   <td>BATH</td></tr>
+ <tr><td>5</td>  <td>→</td>  <td>ou</td>   <td>GOAT</td><td>but a monophthong for edi</td></tr>
+ <tr><td>Q</td>  <td>→</td>  <td>o</td>   <td>LOT</td></tr>
+ <tr><td>$</td>  <td>→</td>  <td>oo</td>   <td>THOUGHT</td><td>(but a diphthong in some en-US)</td></tr>
+ <tr><td>i</td>  <td>→</td>  <td>ii</td>   <td>FLEECE</td></tr>
+ <tr><td>I</td>  <td>→</td>  <td>i</td>   <td>KIT</td></tr>
+ <tr><td>@</td>  <td>→</td>  <td>@</td>   <td>schwa</td></tr>
+ <tr><td>V</td>  <td>→</td>  <td>uh</td>   <td>STRUT</td></tr>
+ <tr><td>U</td>  <td>→</td>  <td>u</td>   <td>FOOT</td></tr>
+ <tr><td>u</td>  <td>→</td>  <td>uu</td>   <td>GOOSE</td></tr>
+ <tr><td>1</td>  <td>→</td>  <td>ei</td>   <td>FACE</td></tr>
+ <tr><td>2</td>  <td>→</td>  <td>ai</td>   <td>PRICE</td></tr>
+ <tr><td>4</td>  <td>→</td>  <td>oi</td>   <td>CHOICE</td></tr>
+ <tr><td>6</td>  <td>→</td>  <td>ow</td>   <td>MOUTH</td></tr>
+ <tr><td>7</td>  <td>→</td>  <td>i@</td>   <td>NEAR</td></tr>
+ <tr><td>3</td>  <td>→</td>  <td>@@r</td>   <td>NURSE</td></tr>
+ <tr><td>8</td>  <td>→</td>  <td>eir</td>   <td>SQUARING</td><td>(actually a monophthong in many)</td></tr>
+ <tr><td>9</td>  <td>→</td>  <td>ur</td>   <td>JURY</td></tr>
+
+ <tr><td colspan="3"></td><th colspan="2">Missing</th></tr>
+ <tr><td>c</td>  <td>→</td>  <td>o</td>   <td>LOT</td></tr>
+ <tr><td>q</td>  <td>→</td>  <td>o</td>   <td>LOT</td></tr>
+ <tr><td>0</td>  <td>→</td>  <td>o</td>   <td>LOT</td></tr>
+ <tr><td>~</td>  <td>→</td>  <td>o</td>   <td>LOT</td></tr>
+
+ <tr><td colspan="3"></td><th colspan="2">Consonants</th></tr>
+ <tr><td>j</td>  <td>→</td>  <td>y</td></tr>
+ <tr><td>J</td>  <td>→</td>  <td>ch</td></tr>
+ <tr><td>_</td>  <td>→</td>  <td>jh</td></tr>
+ <tr><td>S</td>  <td>→</td>  <td>sh</td></tr>
+ <tr><td>Z</td>  <td>→</td>  <td>zh</td></tr>
+ <tr><td>T</td>  <td>→</td>  <td>th</td></tr>
+ <tr><td>D</td>  <td>→</td>  <td>dh</td></tr>
+ <tr><td>L</td>  <td>→</td>  <td>t^</td>   <td>butter/merry flap</td></tr>
+ <tr><td>F</td>  <td>→</td>  <td>m!</td>   <td>chasm</td></tr>
+ <tr><td>H</td>  <td>→</td>  <td>n!</td>   <td>mission</td></tr>
+ <tr><td>N</td>  <td>→</td>  <td>ng </td></tr>
+ <tr><td>P</td>  <td>→</td>  <td>l!</td>   <td>cattle</td></tr>
+
+ </tbody>
+</table>
+
  * @see Unisyn2DISC 
  * @author Robert Fromont robert@fromont.net.nz
  */

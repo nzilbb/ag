@@ -34,6 +34,22 @@ package nzilbb.encoding;
  * ...becomes:
  * <tt>m _ʌ t n̩ t͡ʃ _ɔ p s</tt>.
  *
+
+<style type="text/css">
+ #mapping td:first-child, #mapping th:first-child { text-align: right; } 
+ #mapping td:nth-child(2) { text-align: center; } 
+ #mapping td:nth-child(3) { font-family: monospace; } 
+ #mapping td:first-child { font-family: monospace; } 
+</style>
+<table id="mapping"><caption>Mapping</caption>
+ <thead><tr>
+  <th>Source</th><th></th><th>Destination</th><th>Example</th>
+ </tr></thead>
+ <tbody>
+
+ </tbody>
+</table>
+
  * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * @see DISC2HTK
  * @author Robert Fromont robert@fromont.net.nz

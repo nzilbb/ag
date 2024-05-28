@@ -30,6 +30,53 @@ import java.util.Vector;
  * <tt>tr&amp;nskrIpS@n</tt> 
  * to CELEX-DISC-encoded transcriptions like
  * <tt>tr{nskrIpS@n</tt>. 
+
+<style type="text/css">
+ #mapping td:first-child, #mapping th:first-child { text-align: right; } 
+ #mapping td:nth-child(2) { text-align: center; } 
+ #mapping td:nth-child(3) { font-family: monospace; } 
+ #mapping td:first-child { font-family: monospace; } 
+</style>
+<table id="mapping"><caption>Mapping</caption>
+ <thead><tr>
+  <th>Kirshenbaum</th><th></th><th>DISC</th>
+ </tr></thead>
+ <tbody>
+
+ <tr><td colspan="3"></td><th colspan="2">Vowels</th></tr>
+ <tr><td>&amp;</td>  <td>→</td>  <td>{</td></tr>
+ <tr><td>i:</td>  <td>→</td>  <td>i</td></tr>
+ <tr><td>A:</td>  <td>→</td>  <td>#</td></tr>
+ <tr><td>A.</td>  <td>→</td>  <td>Q</td></tr>
+ <tr><td>O:</td>  <td>→</td>  <td>$</td></tr>
+ <tr><td>u:</td>  <td>→</td>  <td>u</td></tr>
+ <tr><td>V\"</td>  <td>→</td>  <td>3</td></tr>
+         
+ <tr><td>eI</td>  <td>→</td>  <td>1</td></tr>
+ <tr><td>aI</td>  <td>→</td>  <td>2</td></tr>
+ <tr><td>OI</td>  <td>→</td>  <td>4</td></tr>
+ <tr><td>@U</td>  <td>→</td>  <td>5</td></tr>
+ <tr><td>aU</td>  <td>→</td>  <td>6</td></tr>
+ <tr><td>I@</td>  <td>→</td>  <td>7</td></tr>
+ <tr><td>E@</td>  <td>→</td>  <td>8</td></tr>
+ <tr><td>U@</td>  <td>→</td>  <td>9</td></tr>
+ <tr><td>&amp;~</td>  <td>→</td>  <td>c</td></tr>
+ <tr><td>A~:</td>  <td>→</td>  <td>q</td></tr>
+ <tr><td>&amp;~:</td>  <td>→</td>  <td>0</td></tr>
+ <tr><td>A.~:</td>  <td>→</td>  <td>~</td></tr>
+         
+ <tr><td colspan="3"></td><th colspan="2">Consonants</th></tr>
+ <tr><td>tS</td>  <td>→</td>  <td>J</td></tr>
+ <tr><td>dZ</td>  <td>→</td>  <td>_</td></tr>
+ <tr><td>r*</td>  <td>→</td>  <td>R</td></tr>
+ <tr><td>N-</td>  <td>→</td>  <td>C</td></tr>
+ <tr><td>m-</td>  <td>→</td>  <td>F</td></tr>
+ <tr><td>n-</td>  <td>→</td>  <td>H</td></tr>
+ <tr><td>l-</td>  <td>→</td>  <td>P</td></tr>
+
+ </tbody>
+</table>
+
  * @see DISC2SAMPA
  * @author Robert Fromont robert@fromont.net.nz
  */

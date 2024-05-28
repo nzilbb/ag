@@ -30,6 +30,67 @@ import java.util.Vector;
  * to CELEX-DISC-encoded transcriptions like
  * <tt>str1n_</tt>. 
  *
+
+<style type="text/css">
+ #mapping td:first-child, #mapping th:first-child { text-align: right; } 
+ #mapping td:nth-child(2) { text-align: center; } 
+ #mapping td:nth-child(3) { font-family: monospace; } 
+ #mapping td:first-child { font-family: monospace; } 
+</style>
+<table id="mapping"><caption>Mapping</caption>
+ <thead><tr>
+  <th>X-SAMPA</th><th></th><th>DISC</th><th>Example</th>
+ </tr></thead>
+ <tbody>
+
+ <tr><td colspan="3"></td><th colspan="2">Vowels</th></tr>
+ <tr><td>i:</td>  <td>→</td>  <td>i</td></tr>
+ <tr><td>A:</td>  <td>→</td>  <td>#</td></tr>
+ <tr><td>O:</td>  <td>→</td>  <td>$</td></tr>
+ <tr><td>u:</td>  <td>→</td>  <td>u</td></tr>
+ <tr><td>3:</td>  <td>→</td>  <td>3</td></tr>
+ <tr><td>eI</td>  <td>→</td>  <td>1</td></tr>
+ <tr><td>aI</td>  <td>→</td>  <td>2</td></tr>
+ <tr><td>OI</td>  <td>→</td>  <td>4</td></tr>
+ <tr><td>@U</td>  <td>→</td>  <td>5</td></tr>
+ <tr><td>aU</td>  <td>→</td>  <td>6</td></tr>
+ <tr><td>I@</td>  <td>→</td>  <td>7</td></tr>
+ <tr><td>E@</td>  <td>→</td>  <td>8</td></tr>
+ <tr><td>U@</td>  <td>→</td>  <td>9</td></tr>
+ <tr><td>{~</td>  <td>→</td>  <td>c</td></tr>
+ <tr><td>A~:</td>  <td>→</td>  <td>q</td></tr>
+ <tr><td>{~:</td>  <td>→</td>  <td>0</td></tr>
+ <tr><td>O~:</td>  <td>→</td>  <td>~</td></tr>
+
+ <tr><td colspan="3"></td><th colspan="2">Vowels output by MAUSBasic</th></tr>
+ <tr><td>@}</td>  <td>→</td>  <td>5</td></tr>
+ <tr><td>Ae</td>  <td>→</td>  <td>2</td></tr>
+ <tr><td>{Q</td>  <td>→</td>  <td>6</td></tr>
+ <tr><td>{I</td>  <td>→</td>  <td>1</td></tr> // duplicate of "eI"
+ <tr><td>6</td>  <td>→</td>  <td>@</td></tr> // 'open schwa' (ɐ)
+ <tr><td>o:</td>  <td>→</td>  <td>$</td></tr>
+ <tr><td>O", 'Q</td></tr>
+ <tr><td>4", 'L</td></tr> // flap - this is an extension to DISC
+         
+ <tr><td colspan="3"></td><th colspan="2">(different from SAMPA)</th></tr>
+ <tr><td>}:</td>  <td>→</td>  <td>}</td></tr>
+         
+ <tr><td colspan="3"></td><th colspan="2">Consonants</th></tr>
+ <tr><td>tS</td>  <td>→</td>  <td>J</td></tr>
+ <tr><td>dZ</td>  <td>→</td>  <td>_</td></tr>
+ <tr><td>r*</td>  <td>→</td>  <td>R</td></tr>
+	 
+ <tr><td colspan="3"></td><th colspan="2">(different from SAMPA)</th></tr>
+ <tr><td>r\\</td>  <td>→</td>  <td>r</td></tr>
+ <tr><td>5</td>  <td>→</td>  <td>l</td></tr>
+ <tr><td>N=</td>  <td>→</td>  <td>C</td></tr>
+ <tr><td>m=</td>  <td>→</td>  <td>F</td></tr>
+ <tr><td>n=</td>  <td>→</td>  <td>H</td></tr>
+ <tr><td>l=</td>  <td>→</td>  <td>P</td></tr>
+
+ </tbody>
+</table>
+
  * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * @see DISC2XSAMPA
  * @author Robert Fromont robert@fromont.net.nz

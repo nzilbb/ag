@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -53,6 +53,82 @@ import java.util.HashMap;
  * </dl> 
  * <p> ... and any other phones encountered that are in neither set are passed through
  * unchanged. 
+
+<style type="text/css">
+ #mapping td:first-child, #mapping th:first-child { text-align: right; } 
+ #mapping td:nth-child(2) { text-align: center; } 
+ #mapping td:nth-child(3) { font-family: monospace; } 
+ #mapping td:first-child { font-family: monospace; } 
+</style>
+<table id="mapping"><caption>Mapping</caption>
+ <thead><tr>
+  <th>ARPAbet</th><th></th><th>DISC</th><th>Example</th>
+ </tr></thead>
+ <tbody>
+
+ <tr><td colspan="3"></td><th colspan="2">Vowels</th></tr>
+ <tr><td>AA</td>  <td>→</td>  <td>#</td>   <td>BATH       </td> <td>odd/father</td></tr>
+ <tr><td>AE</td>  <td>→</td>  <td>{</td>   <td>TRAP       </td> <td>at/fast</td></tr>
+         </td></tr>
+ <tr><td>AH</td>  <td>→</td>  <td>V</td>   <td>STRUT      </td> <td>hut/but</td></tr>
+         </td></tr>
+ <tr><td>AO</td>  <td>→</td>  <td>$</td>   <td>THOUGHT    </td> <td>ought/fall - one-to-two - this could also be Q!</td></tr>
+ <tr><td>AO</td>  <td>→</td>  <td>Q</td>   <td>LOT     </td> <td>ought/off</td></tr>
+ <tr><td>AW</td>  <td>→</td>  <td>6</td>   <td>MOUTH      </td> <td>cow/how</td></tr>
+ <tr><td>AX</td>  <td>→</td>  <td>@</td>   <td>schwa      </td> <td>discuss</td></tr>
+ <tr><td>AY</td>  <td>→</td>  <td>2</td>   <td>PRICE      </td> <td>hide/my</td></tr>
+ <tr><td>EH</td>  <td>→</td>  <td>E</td>   <td>DRESS      </td> <td>Ed/red</td></tr>
+ <tr><td>ER</td>  <td>→</td>  <td>3</td>   <td>NURSE      </td> <td>hurt/her</td></tr>
+ <tr><td>EY</td>  <td>→</td>  <td>1</td>   <td>FACE       </td> <td>ate/say</td></tr>
+ <tr><td>IH</td>  <td>→</td>  <td>I</td>   <td>KIT        </td> <td>it/big</td></tr>
+ <tr><td>IY</td>  <td>→</td>  <td>i</td>   <td>FLEECE     </td> <td>eat/bee</td></tr>
+ <tr><td>OW</td>  <td>→</td>  <td>5</td>   <td>GOAT       </td> <td>oat/show</td></tr>
+ <tr><td>OY</td>  <td>→</td>  <td>4</td>   <td>CHOICE     </td> <td>toy/boy</td></tr>
+ <tr><td>UH</td>  <td>→</td>  <td>U</td>   <td>FOOT       </td> <td>hood/should</td></tr>
+ <tr><td>UW</td>  <td>→</td>  <td>u</td>   <td>GOOSE      </td> <td>two/you</td></tr>
+
+ <tr><td colspan="3"></td><th colspan="2">Syllabics not in CMU set but exist in DISC</th></tr>
+ <tr><td>EM</td>  <td>→</td>  <td>F</td>   <td>idealism</td></tr>
+ <tr><td>EN</td>  <td>→</td>  <td>H</td>   <td>burden</td></tr>
+ <tr><td>EL</td>  <td>→</td>  <td>P</td>   <td>dangle</td></tr>
+ <tr><td>UN</td>  <td>→</td>  <td>C</td>   <td>bacon </td></tr>
+ <tr><td>VN</td>  <td>→</td>  <td>0</td>   <td>lingerie</td></tr>
+ <tr><td>ON</td>  <td>→</td>  <td>~</td>   <td>bouillon</td></tr>
+ <tr><td>IM</td>  <td>→</td>  <td>c</td>   <td>timbre</td></tr>
+ <tr><td>IN</td>  <td>→</td>  <td>q</td>   <td>detente</td></tr>
+
+ <tr><td colspan="3"></td><th colspan="2">Consonants</th></tr>
+ <tr><td>B</td>  <td>→</td>  <td>b</td></tr>
+ <tr><td>CH</td>  <td>→</td>  <td>J</td></tr>
+ <tr><td>D</td>  <td>→</td>  <td>d</td></tr>
+ <tr><td>DH</td>  <td>→</td>  <td>D</td></tr>
+ <tr><td>F</td>  <td>→</td>  <td>f</td></tr>
+ <tr><td>G</td>  <td>→</td>  <td>g</td></tr>
+ <tr><td>HH</td>  <td>→</td>  <td>h</td></tr>
+ <tr><td>JH</td>  <td>→</td>  <td>_</td></tr>
+ <tr><td>K</td>  <td>→</td>  <td>k</td></tr>
+ <tr><td>L</td>  <td>→</td>  <td>l</td></tr>
+ <tr><td>M</td>  <td>→</td>  <td>m</td></tr>
+ <tr><td>N</td>  <td>→</td>  <td>n</td></tr>
+ <tr><td>NG</td>  <td>→</td>  <td>N</td></tr>
+ <tr><td>P</td>  <td>→</td>  <td>p</td></tr>
+ <tr><td>R</td>  <td>→</td>  <td>r</td></tr>
+ <tr><td>S</td>  <td>→</td>  <td>s</td></tr>
+ <tr><td>SH</td>  <td>→</td>  <td>S</td></tr>
+ <tr><td>T</td>  <td>→</td>  <td>t</td></tr>
+ <tr><td>TH</td>  <td>→</td>  <td>T</td></tr>
+ <tr><td>V</td>  <td>→</td>  <td>v</td></tr>
+ <tr><td>W</td>  <td>→</td>  <td>w</td></tr>
+ <tr><td>Y</td>  <td>→</td>  <td>j</td></tr>
+ <tr><td>Z</td>  <td>→</td>  <td>z</td></tr>
+ <tr><td>ZH</td>  <td>→</td>  <td>Z</td></tr>
+ <tr><td>DX</td>  <td>→</td>  <td>L</td>   <td>flap</td> <td>Not in the CMU set but exist in Buckeye corpus. This is an extension to DISC (although it clashes with a German vowel)</td></tr>
+ <tr><td>NX</td>  <td>→</td>  <td>^</td>   <td>nasal flap</td> <td>doesn't exist in DISC, we make it /n/</td></tr>
+ <tr><td>TQ</td>  <td>→</td>  <td>?</td>   <td>glottal stop</td> <td>this is an extension to DISC</td></tr>
+
+ </tbody>
+</table>
+
  *
  * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * @see DISC2ARPAbet

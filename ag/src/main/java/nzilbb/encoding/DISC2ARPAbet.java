@@ -54,6 +54,86 @@ import java.util.HashMap;
  * <p> ... and any other phones encountered that are in neither set are passed through
  * unchanged.
  *
+
+<style type="text/css">
+ #mapping td:first-child, #mapping th:first-child { text-align: right; } 
+ #mapping td:nth-child(2) { text-align: center; } 
+ #mapping td:nth-child(3) { font-family: monospace; } 
+ #mapping td:first-child { font-family: monospace; } 
+</style>
+<table id="mapping"><caption>Mapping</caption>
+ <thead><tr>
+  <th>DISC</th><th></th><th>ARPAbet</th><th>Example</th>
+ </tr></thead>
+ <tbody>
+
+ <tr><td colspan="3"></td><th colspan="2">Vowels</th></tr>
+ <tr><td>#</td>  <td>→</td>  <td>AA</td>   <td>BATH       </td> <td>odd/father</td></tr>
+ <tr><td>{</td>  <td>→</td>  <td>AE</td>   <td>TRAP       </td> <td>at/fast</td></tr>
+ <tr><td>V</td>  <td>→</td>  <td>AH</td>   <td>STRUT      </td> <td>hut/but</td></tr>
+ <tr><td>$</td>  <td>→</td>  <td>AO</td>   <td>THOUGHT    </td> <td>ought/fall - two-to-one</td></tr>
+ <tr><td>Q</td>  <td>→</td>  <td>AO</td>   <td>LOT        </td> <td>ought/off - two-to-one</td></tr>
+ <tr><td>6</td>  <td>→</td>  <td>AW</td>   <td>MOUTH      </td> <td>cow/how</td></tr>
+ <tr><td>@</td>  <td>→</td>  <td>AX</td>   <td>schwa      </td> <td>discuss</td></tr>
+ <tr><td>2</td>  <td>→</td>  <td>AY</td>   <td>PRICE      </td> <td>hide/my</td></tr>
+ <tr><td>E</td>  <td>→</td>  <td>EH</td>   <td>DRESS      </td> <td>Ed/red</td></tr>
+ <tr><td>3</td>  <td>→</td>  <td>ER</td>   <td>NURSE      </td> <td>hurt/her</td></tr>
+ <tr><td>1</td>  <td>→</td>  <td>EY</td>   <td>FACE       </td> <td>ate/say</td></tr>
+ <tr><td>I</td>  <td>→</td>  <td>IH</td>   <td>KIT        </td> <td>it/big</td></tr>
+ <tr><td>i</td>  <td>→</td>  <td>IY</td>   <td>FLEECE     </td> <td>eat/bee</td></tr>
+ <tr><td>5</td>  <td>→</td>  <td>OW</td>   <td>GOAT       </td> <td>oat/show</td></tr>
+ <tr><td>4</td>  <td>→</td>  <td>OY</td>   <td>CHOICE     </td> <td>toy/boy</td></tr>
+ <tr><td>U</td>  <td>→</td>  <td>UH</td>   <td>FOOT       </td> <td>hood/should</td></tr>
+ <tr><td>u</td>  <td>→</td>  <td>UW</td>   <td>GOOSE      </td> <td>two/you</td></tr>
+
+ <tr><td colspan="3"></td><th colspan="2">Consonants</th></tr>
+ <tr><td>b</td>  <td>→</td>  <td>B</td></tr>
+ <tr><td>J</td>  <td>→</td>  <td>CH</td></tr>
+ <tr><td>d</td>  <td>→</td>  <td>D</td></tr>
+ <tr><td>D</td>  <td>→</td>  <td>DH</td></tr>
+ <tr><td>f</td>  <td>→</td>  <td>F </td></tr>
+ <tr><td>g</td>  <td>→</td>  <td>G</td></tr>
+ <tr><td>h</td>  <td>→</td>  <td>HH</td></tr>
+ <tr><td>_</td>  <td>→</td>  <td>JH</td></tr>
+ <tr><td>k</td>  <td>→</td>  <td>K</td></tr>
+ <tr><td>l</td>  <td>→</td>  <td>L</td></tr>
+ <tr><td>m</td>  <td>→</td>  <td>M</td></tr>
+ <tr><td>n</td>  <td>→</td>  <td>N</td></tr>
+ <tr><td>N</td>  <td>→</td>  <td>NG</td></tr>
+ <tr><td>p</td>  <td>→</td>  <td>P</td></tr>
+ <tr><td>r</td>  <td>→</td>  <td>R</td></tr>
+ <tr><td>R</td>  <td>→</td>  <td>R</td> <td></td> <td>Possible linking R is pretty definitely R</td></tr>
+ <tr><td>s</td>  <td>→</td>  <td>S</td></tr>
+ <tr><td>S</td>  <td>→</td>  <td>SH</td></tr>
+ <tr><td>t</td>  <td>→</td>  <td>T</td></tr>
+ <tr><td>T</td>  <td>→</td>  <td>TH</td></tr>
+ <tr><td>v</td>  <td>→</td>  <td>V</td></tr>
+ <tr><td>w</td>  <td>→</td>  <td>W</td></tr>
+ <tr><td>j</td>  <td>→</td>  <td>Y</td></tr>
+ <tr><td>z</td>  <td>→</td>  <td>Z</td></tr>
+ <tr><td>Z</td>  <td>→</td>  <td>ZH</td></tr>
+
+ <tr><td colspan="3"></td><th colspan="2">Not in the CMU set but exist in Buckeye corpus</th></tr>
+ <tr><td>L</td>  <td>→</td>  <td>DX</td>   <td>flap</td> <td>this is an extension to DISC</td></tr>
+ <tr><td>^</td>  <td>→</td>  <td>NX</td>   <td>nasal flap</td> <td>doesn't exist in DISC, we make it /n/</td></tr>
+ <tr><td>?</td>  <td>→</td>  <td>TQ</td>   <td>glottal stop</td> <td>this is an extension to DISC</td></tr>
+
+ <tr><td colspan="3"></td><th colspan="2">Not in CMU set but exist in DISC</th></tr>
+ <tr><td>7</td>  <td>→</td>  <td>IY R</td>   <td>NEAR</td></tr>
+ <tr><td>8</td>  <td>→</td>  <td>EH R</td>   <td>SQUARE</td></tr>
+ <tr><td>9</td>  <td>→</td>  <td>UH R</td>   <td>CURE</td></tr>
+ <tr><td>F</td>  <td>→</td>  <td>EM</td>   <td>idealism</td></tr>
+ <tr><td>H</td>  <td>→</td>  <td>EN</td>   <td>burden</td></tr>
+ <tr><td>P</td>  <td>→</td>  <td>EL</td>   <td>dangle</td></tr>
+ <tr><td>C</td>  <td>→</td>  <td>UN</td>   <td>bacon</td></tr>
+ <tr><td>0</td>  <td>→</td>  <td>VN</td>   <td>lingerie</td></tr>
+ <tr><td>~</td>  <td>→</td>  <td>ON</td>   <td>bouillon</td></tr>
+ <tr><td>c</td>  <td>→</td>  <td>IM</td>   <td>timbre</td></tr>
+ <tr><td>q</td>  <td>→</td>  <td>IN</td>   <td>detente</td></tr>
+
+ </tbody>
+</table>
+
  * <style type="text/css"> tt:before { content: '/'; } tt:after { content: '/'; } </style>
  * @see ARPAbet2DISC 
  * @see CMU2DISC
