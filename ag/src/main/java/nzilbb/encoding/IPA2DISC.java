@@ -33,7 +33,7 @@ import java.util.HashMap;
  * {@link DISC2IPA}, but also recognise other IPA symbols like /ʤ/, and 
  * Montreal Forced Aligner symbols like /ej/, for conversion to DISC.
 
-<h3 id="#mapping">Mapping</h3>
+<h3 id="mapping">Mapping</h3>
 
 <div style="display: flex; flex-direction: row; align-items: baseline;">
 <style type="text/css">

@@ -31,7 +31,7 @@ import java.util.HashMap;
  * <p> This supports straight round-trip conversion with IPA symbols used by
  * {@link IPA2DISC}. The 1-to-1 mappings are:
 
-<h3 id="#mapping">Mapping</h3>
+<h3 id="mapping">Mapping</h3>
 
 <style type="text/css">
  #equiv td:first-child, #equiv th:first-child { text-align: right; } 
