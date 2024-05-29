@@ -14,6 +14,9 @@
   <dt> orthographyLayerId </dt> <dd> Input layer from which words come. </dd>
   <dt> pronunciationLayerId </dt> <dd> Input layer from which word pronunciations
     come. If you don't select this layer, you must specify a value for <tt>dictionaryName</tt>. </dd>
+  <dt> overlapThreshold </dt> <dd> Percentage of overlap with other speech, above which the
+    utterance is ignored. 0 or blank means no utterances are ignored, no matter how much they
+    overlap with other speech. </dd>
   <dt> multilingualIPA </dt> <dd> Set any non-empty value for this parameter to use
     the <tt>--multilingual_ipa</tt> switch, omit the parameter otherwise</dd> 
   <dt> dictionaryName </dt> <dd> If you wish to use one of the available language
@@ -26,6 +29,9 @@
     Available models are listed at 
     <a href="https://github.com/MontrealCorpusTools/mfa-models/tree/main/acoustic" target="mfa">https://github.com/MontrealCorpusTools/mfa-models/tree/main/acoustic</a>
   </dd>
+  <dt> usePostgres </dt> <dd> Whether to use PostGreSQL as the relational database engine
+    Set to any non-empty value for this parameter to use the <tt>--use_postgres</tt> switch.
+    Otherwise, MFA uses SQLLite instead (<tt>--no_use_postgres</tt>).</dd>  
   <dt> beam </dt> <dd> This is the value for the <tt>--beam</tt> mfa parameter.</dd>  
   <dt> retryBeam </dt> <dd> This is the value for the <tt>--retry-beam</tt> mfa parameter.</dd>   
   <dt> noSpeakerAdaptation </dt> <dd> Whether trained acoustic models are adapted for each

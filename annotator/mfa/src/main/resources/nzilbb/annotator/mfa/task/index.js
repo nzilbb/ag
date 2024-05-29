@@ -133,6 +133,9 @@ function getTaskParameters() {
         try {
             if (!parameters) { // new task
                 // set some sensible defaults
+                getText("getOverlapThreshold", value => {
+                    document.getElementById("overlapThreshold").value = value;
+                });
             } else {
                 parameters = new URLSearchParams(parameters);
                 

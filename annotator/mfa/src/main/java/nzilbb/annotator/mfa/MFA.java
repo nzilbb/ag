@@ -460,6 +460,26 @@ public class MFA extends Annotator {
    * @param newUsePostgres Whether to use PostGres (or SQLite).
    */
   public MFA setUsePostgres(boolean newUsePostgres) { usePostgres = newUsePostgres; return this; }
+
+  /**
+   * Percentage of overlap with other speech, above which the utterance is ignored.
+   * @see #getOverlapThreshold()
+   * @see #setOverlapThreshold(Integer)
+   */
+  protected Integer overlapThreshold = Integer.valueOf(5);
+  /**
+   * Getter for {@link #overlapThreshold}: Percentage of overlap with other speech, above
+   * which the utterance is ignored. 
+   * @return Percentage of overlap with other speech, above which the utterance is ignored.
+   */
+  public Integer getOverlapThreshold() { return overlapThreshold; }
+  /**
+   * Setter for {@link #overlapThreshold}: Percentage of overlap with other speech, above
+   * which the utterance is ignored.
+   * @param newOverlapThreshold Percentage of overlap with other speech, above which the 
+   * utterance is ignored.   
+   */
+  public MFA setOverlapThreshold(Integer newOverlapThreshold) { overlapThreshold = newOverlapThreshold; return this; }
   
   /**
    * Default constructor.
@@ -1483,6 +1503,48 @@ public class MFA extends Annotator {
                 +fragment.getId()+"\"");
               return;
             }
+
+            // simultaneous speech?
+            if (overlapThreshold != null) {
+              if (getStore() == null) {
+                setStatus("No access to graph store, so simultaneous speech cannot be detected.");
+              } else {
+                Annotation utterance = fragment.first(schema.getUtteranceLayerId());
+                double dAnnotationDuration = utterance.getDuration();
+                // get all other utterances that overlap with this one
+                String query = "graph.id == '"+esc(fragment.sourceGraph().getId())+"'"
+                  +" && layer.id == '"+esc(schema.getUtteranceLayerId())+"'"
+                  +" && start.offset <= " + utterance.getEnd().getOffset()
+                  +" && end.offset >= " + utterance.getStart().getOffset()
+                  +" && id <> '"+utterance.getId()+"'";
+                Annotation[] overlappingUtterances = getStore().getMatchingAnnotations(query);
+                // collect them all into a graph for comparing anchor offsets
+                Graph g = new Graph(); 
+                HashSet<String> anchorIds = new HashSet<String>();
+                for (Annotation other : overlappingUtterances) {
+                  g.addAnnotation(other);
+                  anchorIds.add(other.getStartId());
+                  anchorIds.add(other.getEndId());
+                }
+                Anchor[] anchors = getStore().getAnchors(
+                  fragment.sourceGraph().getId(),
+                  anchorIds.toArray(new String[anchorIds.size()]));
+                for (Anchor anchor : anchors) g.addAnchor(anchor);
+                
+                // look for an overlap that's greater than the threshold
+                for (Annotation other : overlappingUtterances) {
+                  double dOverlap = -other.distance(utterance);
+                  if (dOverlap / dAnnotationDuration > overlapThreshold / 100.0) {
+                    setStatus(
+                      "Fragment has " + formatter.format(dOverlap)
+                      + "s overlap with other speakers"+
+                      " ("+other.getLabel()+" "+other.getStart()+"-"+other.getEnd()+")"
+                      +" and will be ignored: " + "\"" + fragment + "\"");
+                    return;
+                  } // overlap over threshold
+                } // next overlapping utterance
+              } // graph store is set
+            } // overlapThreshold
             
             StringBuilder utteranceOrthography = new StringBuilder();
             boolean bJustAddedNoise = false; // TODO add noises and transcribe as "spn" in dict

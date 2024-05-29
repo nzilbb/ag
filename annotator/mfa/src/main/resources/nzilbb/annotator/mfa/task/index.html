@@ -26,6 +26,12 @@
             <option value="">[none]</option>
         </select></span>
       </div>
+      <div class="field" title="Percentage of overlap with other speech, above which the utterance is ignored.
+0 or blank means no utterances are ignored, no matter how much they overlap with other speech.">
+        <label for="overlapThreshold"> Overlap Threshold </label>
+        <span><input id="overlapThreshold" name="overlapThreshold"
+                     type="number" min="0" max="100">%</span>
+      </div>
       <div class="field" title="Value for --phone_set parameter, which allows the selection of different numbers of HMM states depending on the type of phoneme. This value should match the phoneme encoding of the Pronunciation Layer.">
         <label for="phoneSet"> Phone Set
           <a href="https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/workflows/train_acoustic_model.html"
