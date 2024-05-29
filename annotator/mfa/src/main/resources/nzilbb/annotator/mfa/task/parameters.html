@@ -15,8 +15,8 @@
   <dt> pronunciationLayerId </dt> <dd> Input layer from which word pronunciations
     come. If you don't select this layer, you must specify a value for <tt>dictionaryName</tt>. </dd>
   <dt> overlapThreshold </dt> <dd> Percentage of overlap with other speech, above which the
-    utterance is ignored. 0 or blank means no utterances are ignored, no matter how much they
-    overlap with other speech. </dd>
+    utterance is ignored. 0 means no utterances are ignored, no matter how much they
+    overlap with other speech. If not specified, default is 5%.</dd>
   <dt> multilingualIPA </dt> <dd> Set any non-empty value for this parameter to use
     the <tt>--multilingual_ipa</tt> switch, omit the parameter otherwise</dd> 
   <dt> dictionaryName </dt> <dd> If you wish to use one of the available language

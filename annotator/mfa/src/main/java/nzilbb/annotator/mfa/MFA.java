@@ -52,6 +52,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -479,7 +480,13 @@ public class MFA extends Annotator {
    * @param newOverlapThreshold Percentage of overlap with other speech, above which the 
    * utterance is ignored.   
    */
-  public MFA setOverlapThreshold(Integer newOverlapThreshold) { overlapThreshold = newOverlapThreshold; return this; }
+  public MFA setOverlapThreshold(Integer newOverlapThreshold) {
+    if (newOverlapThreshold != null && newOverlapThreshold.intValue() == 0) {
+      overlapThreshold = null;
+    } else {
+      overlapThreshold = newOverlapThreshold;
+    }
+    return this; }
   
   /**
    * Default constructor.
@@ -579,7 +586,7 @@ public class MFA extends Annotator {
    * @return A list of valid values for {@link #dictionaryName}.
    */
   public Collection<String> validDictionaryNames() throws TransformationException {
-    String dictionariesRaw = mfa(true, "model", "download", "dictionary");
+    String dictionariesRaw = mfa(true, getWorkingDirectory(), "model", "download", "dictionary");
     String[] dictionaryLines = dictionariesRaw.split("\n");
     List<String> dictionaries = Arrays.stream(dictionaryLines)
       .map(
@@ -603,7 +610,7 @@ public class MFA extends Annotator {
    * @return A list of valid values for {@link #modelsName}.
    */
   public Collection<String> validAcousticModels() throws TransformationException {
-    String acousticModelsRaw = mfa(true, "model", "download", "acoustic");
+    String acousticModelsRaw = mfa(true, getWorkingDirectory(), "model", "download", "acoustic");
     String[] acousticModelLines = acousticModelsRaw.split("\n");
     List<String> acousticModels = Arrays.stream(acousticModelLines)
       .map(
@@ -1255,9 +1262,11 @@ public class MFA extends Annotator {
               try {
                 setStatus("Setting up database...");
                 // ensure other commands don't start/stop database server
-                mfa(false, "configure", "--disable_auto_server");
+                mfa(false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
+                    "configure", "--disable_auto_server");
                 // start db server
-                mfa(false, "server", "start", "--"+(usePostgres?"":"no_")+"use_postgres");
+                mfa(false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
+                    "server", "start", "--"+(usePostgres?"":"no_")+"use_postgres");
                 dbServer = true;
               } catch (TransformationException x) {
                 setStatus("DB setup failed: " + x);
@@ -1292,28 +1301,46 @@ public class MFA extends Annotator {
                 parameters.add(""+retryBeam);
                 parameters.add("--"+(usePostgres?"":"no_")+"use_postgres");
                 String[] paramatersArray = parameters.toArray(new String[0]);
-                mfa(false, paramatersArray);
+                mfa(false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
+                    paramatersArray);
                 setPercentComplete(80); // (up to 5 phases of 10% each arrives at 80%)
                 // log contents of ${tempDir}/corpus/train_acoustic_model.log
                 copyLog(new File(new File(tempDir, "corpus"), "train_acoustic_model.log"));
               } else { // pretrained
-                // TODO if not exists getWorkingDirectory() + "/pretrained_models/acoustic/"+modelsName+".zip"
-                mfa(false, "model","download","acoustic", modelsName);// MFA_ROOT_DIR = getWorkingDirectory()
+                // Have we already download the models?
+                File acousticModelsZip
+                  = new File(new File(
+                               new File(getWorkingDirectory(), "pretrained_models"), "acoustic"),
+                             modelsName+".zip");
+                if (!acousticModelsZip.exists()) {
+                  mfa(false, getWorkingDirectory(),
+                      "model","download","acoustic", modelsName);
+                } else {
+                  setStatus("Acoustic models already downloaded: " + modelsName);
+                }
                 setPercentComplete(25);
                 if (!isCancelling()) {
+                  String dictionary = dictionaryFile != null?dictionaryFile.getPath():null;
                   if (dictionaryName != null) {
-                    // TODO if not exists getWorkingDirectory() + "/pretrained_models/dictionary/"+dictionaryName+".dict"
-                    mfa(false, "model","download","dictionary", dictionaryName);// MFA_ROOT_DIR = getWorkingDirectory()
+                    File builtInDict = new File(
+                      new File(new File(
+                                 getWorkingDirectory(), "pretrained_models"), "dictionary"),
+                      dictionaryName+".dict");
+                    if (!builtInDict.exists()) {
+                      mfa(false, getWorkingDirectory(),
+                          "model","download","dictionary", dictionaryName);
+                    } else {
+                      setStatus("Dictionary already downloaded: " + dictionaryName);
+                    }
                     setPercentComplete(30);
+                    dictionary = builtInDict.getPath();
                   }
-                  // TODO maybe getWorkingDirectory() + "/pretrained_models/dictionary/"+dictionaryName+".dict"
-                  String dictionary = dictionaryFile != null?dictionaryFile.getPath():dictionaryName;
                   if (!isCancelling()) {
-                    mfa(false, "align", "--clean",
+                    mfa(false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
+                        "align", "--clean",
                         "--output_format", "long_textgrid",
                         corpusDir.getPath(), dictionary,
-                        // TODO getWorkingDirectory() + "/pretrained_models/acoustic/"+modelsName+".zip"
-                        modelsName,
+                        acousticModelsZip.getPath(),
                         alignedDir.getPath(),
                         "--beam", ""+beam, "--retry-beam", ""+retryBeam,
                         "--uses_speaker_adaptation", noSpeakerAdaptation?"False":"True",
@@ -1328,7 +1355,8 @@ public class MFA extends Annotator {
               if (dbServer) {
                 try {
                   setStatus("Shutting down database server...");
-                  mfa(false, "server", "stop", "--mode", "smart", "--use_postgres");
+                  mfa(false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
+                      "server", "stop", "--mode", "smart", "--use_postgres");
                 } catch (TransformationException x) {
                   setStatus("DB shutdown failed: " + x);
                 }
@@ -1728,11 +1756,12 @@ public class MFA extends Annotator {
    * Execute an mfa command
    * @param ignoreErrors Whether to ignore errors (true), or throw an exception when
    * stderr or stdout include the word "error" (false).
+   * @param mfaRootDir Which directory to use for MFA_ROOT_DIR - i.e. MFA's working directory.
    * @param args The command line arguments.
    * @return The output of the command.
    * @throws TransformationException If execution fails.
    */
-  public String mfa(boolean ignoreErrors, String... args) throws TransformationException {
+  public String mfa(boolean ignoreErrors, File mfaRootDir, String... args) throws TransformationException {
     setStatus("mfa " + Arrays.stream(args).collect(Collectors.joining(" ")));
 
     File mfa = new File(mfaPath, "mfa");
@@ -1743,11 +1772,10 @@ public class MFA extends Annotator {
     if (!condaBin.exists()) condaBin = new File(condaPath, "condabin");
     File conda = new File(condaBin, "conda");
     if (!conda.exists()) conda = new File(condaBin, "conda.bat");
-    File dir = sessionWorkingDir != null?sessionWorkingDir:getWorkingDirectory();
 
     exe = new Execution();
     if (System.getProperty("os.name").startsWith("Windows")) {
-      exe.env("MFA_ROOT_DIR", dir.getPath())
+      exe.env("MFA_ROOT_DIR", mfaRootDir.getPath())
         .setWorkingDirectory(envPath)
         .setExe("cmd").arg("/C").arg(conda.getPath()) // or: .setExe(conda)        
         .arg("run")
@@ -1758,8 +1786,8 @@ public class MFA extends Annotator {
       exe.getEnvironmentVariables().putAll(System.getenv());
     } else { // non-Windows systems call mfa directly (conda run doesn't work)
       exe.env("PATH", System.getenv("PATH")+pathVariableSuffix())
-        .env("HOME", dir.getPath())
-        .env("MFA_ROOT_DIR", dir.getPath())
+        .env("HOME", mfaRootDir.getPath())
+        .env("MFA_ROOT_DIR", mfaRootDir.getPath())
         .setExe(mfa); // TODO -j <num_jobs>
     }
 

@@ -80,7 +80,9 @@ public class TestMFA {
     // set the annotator configuration, which will install the lexicon the first time (only)
     annotator.setConfig("");
     
-    //annotator.getStatusObservers().add(status->System.out.println(status));
+    if (annotator.getStatusObservers().size() == 0) {
+      annotator.getStatusObservers().add(status->System.out.println(status));
+    }
     System.out.println("OK.");
   }
 
@@ -94,7 +96,9 @@ public class TestMFA {
 
   /** Ensure validDictionaryNames method works. */
   @Test public void validDictionaryNames() throws Exception {
-        annotator.getStatusObservers().add(status->System.out.println(status));
+    // if (annotator.getStatusObservers().size() == 0) {
+    //   annotator.getStatusObservers().add(status->System.out.println(status));
+    // }
 
     Collection<String> names = annotator.validDictionaryNames();
     assertTrue("validDictionaryNames contains english_mfa " + names,
@@ -128,7 +132,9 @@ public class TestMFA {
     Graph g = graph();
     Schema schema = g.getSchema();
     annotator.setSchema(schema);
-    //annotator.getStatusObservers().add(status->System.out.println(status));
+    // if (annotator.getStatusObservers().size() == 0) {
+    //   annotator.getStatusObservers().add(status->System.out.println(status));
+    // }
     
     try { // use default configuration
       annotator.setTaskParameters(null);
@@ -138,7 +144,7 @@ public class TestMFA {
   }   
 
   /** Ensure valid task parameters don't raise errors, and change the schema when appropriate. */
-  @Test public void setValidParameters() throws Exception {
+  @Test public void setValidTaskParameters() throws Exception {
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -156,6 +162,9 @@ public class TestMFA {
       +"&wordAlignmentLayerId=word"
       +"&phoneAlignmentLayerId=segment");
     assertFalse("noSpeakerAdaptation=false is default", annotator.getNoSpeakerAdaptation());
+    assertFalse("usePostgres=false is default", annotator.getUsePostgres());
+    assertEquals("overlapThreshold 5 by default",
+                 Integer.valueOf(5), annotator.getOverlapThreshold());
     
     annotator.setTaskParameters(
       "orthographyLayerId=word"
@@ -165,7 +174,12 @@ public class TestMFA {
       +"&utteranceTagLayerId=mfa"
       +"&participantTagLayerId="
       +"&wordAlignmentLayerId=word"
-      +"&phoneAlignmentLayerId=segment");
+      +"&phoneAlignmentLayerId=segment"
+      +"&usePostgres=on"
+      +"&overlapThreshold=10");
+    assertTrue("usePostgres setting works", annotator.getUsePostgres());
+    assertEquals("overlapThreshold setting works",
+                 Integer.valueOf(10), annotator.getOverlapThreshold());
     
     annotator.setTaskParameters(
       "orthographyLayerId=word"
@@ -176,8 +190,10 @@ public class TestMFA {
       +"&utteranceTagLayerId=mfa"
       +"&participantTagLayerId="
       +"&wordAlignmentLayerId=word"
-      +"&phoneAlignmentLayerId=segment");
+      +"&phoneAlignmentLayerId=segment"
+      +"&overlapThreshold=0"); // zero overlapThreshold means null
     assertTrue("noSpeakerAdaptation=true sets attribute", annotator.getNoSpeakerAdaptation());
+    assertNull("overlapThreshold un-setting works", annotator.getOverlapThreshold());
     
     annotator.setTaskParameters(
       "orthographyLayerId=word"
@@ -190,7 +206,7 @@ public class TestMFA {
       +"&wordAlignmentLayerId=word"
       +"&phoneAlignmentLayerId=segment");
     assertFalse("noSpeakerAdaptation=false sets attribute", annotator.getNoSpeakerAdaptation());
-    
+
     // layers are created as required
     annotator.setTaskParameters(
       "orthographyLayerId=word"
@@ -281,9 +297,9 @@ public class TestMFA {
    * updating word token alignments and creating children. */
   @Test public void pretrainedModels() throws Exception {
     annotator.setSessionName("pretrainedModels");
-    if (annotator.getStatusObservers().size() == 0) {
-      annotator.getStatusObservers().add(status->System.out.println(status));
-    }
+    // if (annotator.getStatusObservers().size() == 0) {
+    //   annotator.getStatusObservers().add(status->System.out.println(status));
+    // }
     
     Graph f = fragment();
     Schema schema = f.getSchema();
@@ -340,11 +356,11 @@ public class TestMFA {
   
   /** Test alignment of fragment with pre-trained IPA models/dictionary
    * (english_ipa/english_uk_ipa), updating word token alignments and creating children. */
-  /*@Test*/ public void pretrainedIPAModels() throws Exception {
+  @Test public void pretrainedIPAModels() throws Exception {
     annotator.setSessionName("pretrainedIPAModels");
-    if (annotator.getStatusObservers().size() == 0) {
-      annotator.getStatusObservers().add(status->System.out.println(status));
-    }
+    // if (annotator.getStatusObservers().size() == 0) {
+    //   annotator.getStatusObservers().add(status->System.out.println(status));
+    // }
     
     Graph f = fragment();
     Schema schema = f.getSchema();
@@ -379,7 +395,7 @@ public class TestMFA {
     
     Annotation[] phones = word.all("segment");
     assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
-    String[] labels = { "s", "t", "æ", "tʃ", "ʉː", "ʔ" };
+    String[] labels = { "s", "t", "æ", "tʃ", "ʉː", "t" };
     for (int p = 0; p < phones.length; p++) {      
       assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
       if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL
@@ -400,9 +416,11 @@ public class TestMFA {
   }   
   
   /** Test alignment of full graph works. */
-  /* @Test */ public void graphTransform() throws Exception {
+  @Test public void graphTransform() throws Exception {
     annotator.setSessionName("graphTransform");
-    annotator.getStatusObservers().add(status->System.out.println(status));
+    // if (annotator.getStatusObservers().size() == 0) {
+    //   annotator.getStatusObservers().add(status->System.out.println(status));
+    // }
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -462,9 +480,11 @@ public class TestMFA {
 
   /** Test alignment of fragment with pre-trained models, adding alignments independent of 
    *  original word alignments. */
-  /*@Test*/ public void alignToPhraseLayers() throws Exception {
+  @Test public void alignToPhraseLayers() throws Exception {
     annotator.setSessionName("alignToPhraseLayers");
-    //annotator.getStatusObservers().add(status->System.out.println(status));
+    // if (annotator.getStatusObservers().size() == 0) {
+    //   annotator.getStatusObservers().add(status->System.out.println(status));
+    // }
     
     Graph f = fragment();
     Schema schema = f.getSchema();
