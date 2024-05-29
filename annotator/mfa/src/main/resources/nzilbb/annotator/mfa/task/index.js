@@ -163,6 +163,8 @@ function getTaskParameters() {
                     = parameters.get("noSpeakerAdaptation");
                 document.getElementById("noCleanupOnFailure").checked
                     = parameters.get("noCleanupOnFailure");
+                document.getElementById("usePostgres").checked
+                    = parameters.get("usePostgres");
                 // either pronunciationLayerId or dictionaryName
                 document.getElementById("pronunciationLayerId").disabled
                     = document.getElementById("multilingualIPA").disabled

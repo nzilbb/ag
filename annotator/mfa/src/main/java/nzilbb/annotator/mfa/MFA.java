@@ -445,6 +445,23 @@ public class MFA extends Annotator {
   public MFA setNoCleanupOnFailure(boolean newNoCleanupOnFailure) { noCleanupOnFailure = newNoCleanupOnFailure; return this; }
   
   /**
+   * Whether to use PostGres (or SQLite).
+   * @see #getUsePostgres()
+   * @see #setUsePostgres(boolean)
+   */
+  protected boolean usePostgres = false;
+  /**
+   * Getter for {@link #usePostgres}: Whether to use PostGres (or SQLite).
+   * @return Whether to use PostGres (or SQLite).
+   */
+  public boolean getUsePostgres() { return usePostgres; }
+  /**
+   * Setter for {@link #usePostgres}: Whether to use PostGres (or SQLite).
+   * @param newUsePostgres Whether to use PostGres (or SQLite).
+   */
+  public MFA setUsePostgres(boolean newUsePostgres) { usePostgres = newUsePostgres; return this; }
+  
+  /**
    * Default constructor.
    */
   public MFA() {
@@ -1214,15 +1231,17 @@ public class MFA extends Annotator {
             // management, and explicitly start/stop the server
             // https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/server/index.html
             boolean dbServer = false;
-            try {
-              setStatus("Setting up database...");
-              // ensure other commands don't start/stop database server
-              mfa(false, "configure", "--disable_auto_server");
-              // start db server
-              mfa(false, "server", "start", "--use_postgres");
-              dbServer = true;
-            } catch (TransformationException x) {
-              setStatus("DB setup failed: " + x);
+            if (usePostgres) {
+              try {
+                setStatus("Setting up database...");
+                // ensure other commands don't start/stop database server
+                mfa(false, "configure", "--disable_auto_server");
+                // start db server
+                mfa(false, "server", "start", "--"+(usePostgres?"":"no_")+"use_postgres");
+                dbServer = true;
+              } catch (TransformationException x) {
+                setStatus("DB setup failed: " + x);
+              }
             }
 
             try {
@@ -1251,29 +1270,34 @@ public class MFA extends Annotator {
                 parameters.add(""+beam);
                 parameters.add("--retry-beam");
                 parameters.add(""+retryBeam);
-                parameters.add("--use_postgres");
+                parameters.add("--"+(usePostgres?"":"no_")+"use_postgres");
                 String[] paramatersArray = parameters.toArray(new String[0]);
                 mfa(false, paramatersArray);
                 setPercentComplete(80); // (up to 5 phases of 10% each arrives at 80%)
                 // log contents of ${tempDir}/corpus/train_acoustic_model.log
                 copyLog(new File(new File(tempDir, "corpus"), "train_acoustic_model.log"));
               } else { // pretrained
-                mfa(false, "model","download","acoustic", modelsName);
+                // TODO if not exists getWorkingDirectory() + "/pretrained_models/acoustic/"+modelsName+".zip"
+                mfa(false, "model","download","acoustic", modelsName);// MFA_ROOT_DIR = getWorkingDirectory()
                 setPercentComplete(25);
                 if (!isCancelling()) {
                   if (dictionaryName != null) {
-                    mfa(false, "model","download","dictionary", dictionaryName);
+                    // TODO if not exists getWorkingDirectory() + "/pretrained_models/dictionary/"+dictionaryName+".dict"
+                    mfa(false, "model","download","dictionary", dictionaryName);// MFA_ROOT_DIR = getWorkingDirectory()
                     setPercentComplete(30);
                   }
+                  // TODO maybe getWorkingDirectory() + "/pretrained_models/dictionary/"+dictionaryName+".dict"
                   String dictionary = dictionaryFile != null?dictionaryFile.getPath():dictionaryName;
                   if (!isCancelling()) {
                     mfa(false, "align", "--clean",
                         "--output_format", "long_textgrid",
-                        corpusDir.getPath(), dictionary, modelsName,
+                        corpusDir.getPath(), dictionary,
+                        // TODO getWorkingDirectory() + "/pretrained_models/acoustic/"+modelsName+".zip"
+                        modelsName,
                         alignedDir.getPath(),
                         "--beam", ""+beam, "--retry-beam", ""+retryBeam,
                         "--uses_speaker_adaptation", noSpeakerAdaptation?"False":"True",
-                        "--use_postgres");
+                        "--"+(usePostgres?"":"no_")+"use_postgres");
                     // log contents of ${tempDir}/corpus/align.log
                     copyLog(new File(new File(tempDir, "corpus"), "align.log"));
                   } // not cancelling
