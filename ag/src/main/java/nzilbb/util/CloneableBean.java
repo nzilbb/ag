@@ -277,6 +277,23 @@ public interface CloneableBean {
                 }
               } else {
                 value = ((JsonString)value).getString();
+                String s = (String)value;
+                if (s.length() > 0) {
+                  // if we're expecting a number, try parsing the string value
+                  if (parameterClass.equals(Integer.class)) {
+                    value = Integer.valueOf(s);
+                  } else if (parameterClass.equals(int.class)) {
+                    value = Integer.valueOf(s);
+                  } else if (parameterClass.equals(Double.class)) {
+                    value = Double.valueOf(s);
+                  } else if (parameterClass.equals(double.class)) {
+                    value = Double.valueOf(s);
+                  } else if (parameterClass.equals(Long.class)) {
+                    value = Long.valueOf(s);
+                  } else if (parameterClass.equals(long.class)) {
+                    value = Long.valueOf(s);
+                  }
+                }
               }
             } else if (value instanceof JsonNumber) {
               if (parameterClass.equals(Integer.class)) {
