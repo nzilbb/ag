@@ -13,7 +13,7 @@ details>summary {
 }
 body>details>summary {
     cursor: help;
-    list-style-type: '🛈';
+    list-style-type: 'ⓘ';
 }
 
 h1 { font-size: 17pt; color: #859044; text-align: center; }
@@ -24,14 +24,6 @@ h5 { font-size: 13pt; color: #859044; }
 h6 { font-size: 12pt; color: #859044; }
 
 summary { padding: 10px; }
-
-details>summary {
-    cursor: pointer;
-}
-body>details>summary {
-    cursor: help;
-    list-style-type: '🛈';
-}
 
 label {
     font-weight: bold;
