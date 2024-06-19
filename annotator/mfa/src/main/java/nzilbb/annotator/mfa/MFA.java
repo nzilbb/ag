@@ -2039,6 +2039,7 @@ public class MFA extends Annotator {
             }
             
             if (mfaToPhonemes != null && phoneAlignmentLayerId != null) {
+              // convert labels from one encoding to another
               for (Annotation phone : alignedFragment.all(phoneAlignmentLayerId)) {
                 phone.setLabel(mfaToPhonemes.apply(phone.getLabel()));
               }
@@ -2061,7 +2062,7 @@ public class MFA extends Annotator {
             merger.transform(fragment);
             if (merger.getLog() != null) merger.getLog().forEach(l -> setStatus(l));
            
-            if (utteranceTagLayerId != null) {
+            if (utteranceTagLayerId != null) { // add timestamp tag?
               Annotation[] timestamps = fragment.tagsOn​(utteranceTagLayerId);
               if (timestamps.length > 0) { // update the existing tag
                 timestamps[0].setLabel(sTimestamp);
