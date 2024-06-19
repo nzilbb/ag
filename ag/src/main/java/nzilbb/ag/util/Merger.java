@@ -1927,6 +1927,26 @@ public class Merger extends Transform implements GraphTransformer {
                   }
                   return true;
                 })
+              // avoid bridging a gap across an annotation from a non-merging layer
+              // that's not being deleted
+              .filter(anOriginalPrevious -> {
+                  Optional<Annotation> bridge = anOriginal.getStart().endingAnnotations()
+                    .filter(Annotation::NotDestroyed)
+                    .filter(anOriginalEndsHere -> // bridges the gap
+                            anOriginalEndsHere.getStart() == anOriginalPrevious.getEnd())
+                    .filter(
+                      anOriginalEndsHere -> // editd graph doesn't include the layer
+                      editedGraph.getSchema().getLayer(anOriginalEndsHere.getLayerId()) == null)
+                    .findAny();
+                  if (bridge.isPresent()) {
+                      // there is an intervening annotation on a non-merging layer
+                      log("Don't link previous original: ", anOriginalPrevious,
+                          " across intervening annotation: ", bridge.get(),
+                          " to: ", anOriginal);
+                      return false;
+                  }
+                  return true;
+                })
               .filter(anOriginalPrevious -> {
                   // is the new original end anchor offset the same time as the edited start anchor?
                   // (we compare by offset because anchors don't have counterparts we can check)
@@ -2164,6 +2184,21 @@ public class Merger extends Transform implements GraphTransformer {
                   " to: ", anOriginal);
               interveningOriginal = true;
             }
+          }
+          // or on a layer that's not in the edited version of the graph
+          final Annotation finalLastOriginal = anLastOriginal;
+          Optional<Annotation> bridge = anOriginal.getStart().endingAnnotations()
+            .filter(Annotation::NotDestroyed)
+            .filter(anOriginalEndsHere -> // bridges the gap
+                    anOriginalEndsHere.getStart() == finalLastOriginal.getEnd())
+            .filter(anOriginalEndsHere -> // edited graph doesn't include the layer
+                    editedGraph.getSchema().getLayer(anOriginalEndsHere.getLayerId()) == null)
+            .findAny();
+          if (bridge.isPresent()) {
+            log("Don't link last: ", anLastOriginal,
+                " across intervening annotation: ", bridge.get(),
+                " to: ", anOriginal);
+            interveningOriginal = true;
           }
           if (anLastEdited.getEnd() == anEdited.getStart()
               // are they currently two separate anchors?
