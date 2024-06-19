@@ -2620,9 +2620,6 @@ public class Merger extends Transform implements GraphTransformer {
           while (iMyChildren.hasNext()) {
             Annotation an = iMyChildren.next();
             if (!children.contains(an)) {
-              if (GetConfidence(an) <= Constants.CONFIDENCE_AUTOMATIC) {
-                 an.destroy();
-              }
               iMyChildren.remove();
             }
           }
