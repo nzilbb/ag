@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -677,6 +677,16 @@ public class TextGridSerialization
           || sName.equalsIgnoreCase("turns")
           || sName.equalsIgnoreCase("turn")) {
         sName = getTurnLayer().getId();
+      }
+      if (sName.equalsIgnoreCase("phones")
+          || sName.equalsIgnoreCase("phone")
+          || sName.startsWith("phone ")
+          || sName.startsWith("phones ")) {
+        // possibly an MFA alignment textGrid
+        // in LaBB-CAT, the phones are on a layer called 'segment'
+        if (getSchema().getLayer("segment") != null) {
+          sName = "segment";
+        }
       }
       Layer layer = getSchema().getLayer(sName);
       if (layer == null) { // no exact match

@@ -561,7 +561,9 @@ public class TestTextGridSerialization {
       new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
       new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
       new Layer("word", "Words", 2, true, false, false, "turn", true),
-      new Layer("phone", "Phones", 2, true, true, true, "word", true),
+      // tiers are called "phone ..." but layer is called "segment",
+      // but they should map by default despite the different names
+      new Layer("segment", "Phones", 2, true, true, true, "word", true),
       new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
       new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
 
@@ -582,7 +584,7 @@ public class TestTextGridSerialization {
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
-    //for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
     assertEquals("word tier is mapped by default",
                  "word", ((Layer)defaultParamaters.get("tier2").getValue()).getId());
     assertEquals("other word tier is mapped by default",
@@ -668,7 +670,7 @@ public class TestTextGridSerialization {
     assertEquals("no conventional lexical annotations", 0, g.all("lexical").length);
 
     // phones
-    Annotation[] phones = g.all("phone");
+    Annotation[] phones = g.all("segment");
     assertEquals("phones", 13, phones.length);
 
     // participant
