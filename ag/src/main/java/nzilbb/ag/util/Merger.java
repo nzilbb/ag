@@ -1551,16 +1551,16 @@ public class Merger extends Transform implements GraphTransformer {
           // do they have a relationship that would actually preclude sharing?
           Layer otherLayer = annotation.getGraph().getLayer(a.getLayerId());
           if (layer != null && otherLayer != null) {
-            if (layer.getParentId().equals(otherLayer.getId())) { // other is parent layer to this
-              if (!layer.getSaturated()) return false; // sparse
+            if (layer.getParentId().equals(otherLayer.getId())) {
+              // other is parent layer to this
               
               // this belongs to another parent
               if (!a.getId().equals(annotation.getParentId())) return false;
+              
             } else if (otherLayer.getParentId().equals(layer.getId())) {
               // this is parent layer to other
-              if (!otherLayer.getSaturated()) return false; // sparse
 	       
-              // this belongs to another parent
+              // other belongs to another parent
               if (!annotation.getId().equals(a.getParentId())) return false;              
             }
           }
@@ -1657,16 +1657,16 @@ public class Merger extends Transform implements GraphTransformer {
           // do they have a relationship that would actually preclude sharing?
           Layer otherLayer = annotation.getGraph().getLayer(a.getLayerId());
           if (layer != null && otherLayer != null) {
-            if (layer.getParentId().equals(otherLayer.getId())) { // other is parent layer to this
-              if (!layer.getSaturated()) return false; // sparse
+            if (layer.getParentId().equals(otherLayer.getId())) {
+              // other is parent layer to this
               
               // this belongs to another parent
               if (!a.getId().equals(annotation.getParentId())) return false;
+              
             } else if (otherLayer.getParentId().equals(layer.getId())) {
               // this is parent layer to other
-              if (!otherLayer.getSaturated()) return false; // sparse
               
-              // this belongs to another parent
+              // other belongs to another parent
               if (!annotation.getId().equals(a.getParentId())) return false;
             }
           }
