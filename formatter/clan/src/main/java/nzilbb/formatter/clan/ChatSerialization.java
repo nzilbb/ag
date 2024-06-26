@@ -2367,11 +2367,12 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    * @throws SerializationParametersMissingException If not all required parameters have a value.
    */
   public String[] getRequiredLayers() throws SerializationParametersMissingException {
-    Vector<String> requiredLayers = new Vector<String>();
+    TreeSet<String> requiredLayers = new TreeSet<String>();
     requiredLayers.add(schema.getParticipantLayerId());
     if (targetParticipantLayer != null) requiredLayers.add(targetParticipantLayer.getId());
     requiredLayers.add(schema.getTurnLayerId());
     requiredLayers.add(schema.getUtteranceLayerId());
+    if (tokenLayer != null) requiredLayers.add(tokenLayer.getId());
     requiredLayers.add(schema.getWordLayerId());
     if (disfluencyLayer != null) requiredLayers.add(disfluencyLayer.getId());
     if (nonWordLayer != null) requiredLayers.add(nonWordLayer.getId());

@@ -2579,13 +2579,14 @@ public class TestChatSerialization {
     LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
       Arrays.asList(serializer.getRequiredLayers()));
     assertEquals("Needed layers: " + needLayers,
-                 11, needLayers.size());
+                 12, needLayers.size());
     assertTrue(needLayers.contains("who"));
     assertTrue(needLayers.contains("main_participant"));
     assertTrue(needLayers.contains("scribe"));
     assertTrue(needLayers.contains("transcript_language"));
     assertTrue(needLayers.contains("turn"));
     assertTrue(needLayers.contains("utterance"));
+    assertTrue(needLayers.contains("orthography"));
     assertTrue(needLayers.contains("word"));
     assertTrue(needLayers.contains("noise"));
     assertTrue(needLayers.contains("participant_age"));
