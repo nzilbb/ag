@@ -1304,7 +1304,9 @@ public class Merger extends Transform implements GraphTransformer {
               start.setOffset(anPreviousEditedOther.getEnd().getOffset());
               SetConfidence(start, newStatus);
             } // previous more reliable
-            if (anPreviousEditedOther.getEnd() != start) {			
+            if (anPreviousEditedOther.getEnd() != start
+                // only if we haven't already found an existing link
+                && start.getChange() == Change.Operation.Create) {
               log(layerId, ": Share anchor with prior: ", anLastOriginal,
                   " and new: ", newAnnotation, " using ", start);
               changeEndWithRelatedAnnotations(
@@ -1694,8 +1696,19 @@ public class Merger extends Transform implements GraphTransformer {
           .filter(anNext -> {
               if (!anNext.getStartId().equals(anNext.getEndId())
                   && newEndAnchor.getId().equals(anNext.getEndId())) {
-                log("Not changing end of related annotation ",
+                log("Not changing start of related annotation ",
                     anNext, " to avoid creating new instant");
+                return false; // don't create an instant where there wasn't one before
+              }
+              return true;
+            })
+          .filter(anNext -> {
+              Annotation counterpartAnnotation = GetCounterpart(annotation);
+              Annotation counterpartNext = GetCounterpart(anNext);
+              if (counterpartAnnotation != null && counterpartNext != null
+                  && !counterpartAnnotation.getEndId().equals(counterpartNext.getStartId())) {
+                log("Not changing start of related annotation ",
+                    anNext, " because it's not linked in the edited graph");
                 return false; // if not shared in the other graph, not shared here
               }
               return true;

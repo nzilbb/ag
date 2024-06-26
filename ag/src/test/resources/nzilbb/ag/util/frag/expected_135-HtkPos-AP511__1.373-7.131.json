@@ -1,0 +1,1275 @@
+
+{
+    "id": "AP511_MikeThorpe__1.373-7.131",
+    "schema": {
+        "corpusLayerId": "corpus",
+        "episodeLayerId": "episode",
+        "participantLayerId": "participant",
+        "turnLayerId": "turn",
+        "utteranceLayerId": "utterance",
+        "wordLayerId": "word",
+        "transcript": {
+            "description": "The annotation graph as a whole",
+            "children": {
+                "noise": {
+                    "description": "Noise",
+                    "alignment": 2,
+                    "peers": true,
+                    "peersOverlap": true,
+                    "parentIncludes": true,
+                    "saturated": false
+                },
+                "participant": {
+                    "description": "Participant",
+                    "alignment": 0,
+                    "peers": true,
+                    "peersOverlap": true,
+                    "parentIncludes": true,
+                    "saturated": true,
+                    "children": {
+                        "turn": {
+                            "description": "Speaker Turns",
+                            "alignment": 2,
+                            "peers": true,
+                            "peersOverlap": false,
+                            "parentIncludes": true,
+                            "saturated": false,
+                            "children": {
+                                "utterance": {
+                                    "description": "Utterances",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": true
+                                },
+                                "word": {
+                                    "description": "Raw word tokens",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false,
+                                    "children": {
+                                        "pos": {
+                                            "description": "Part of speech",
+                                            "alignment": 2,
+                                            "peers": true,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true
+                                        },
+                                        "segment": {
+                                            "description": "Segments/Phones",
+                                            "alignment": 2,
+                                            "peers": true,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "anchors": {
+        "n_40775": {
+            "offset": 1.373,
+            "confidence": 100,
+            "annotator": "labbcat",
+            "when": "2024-06-24T19:38:36.000"
+        },
+        "n_42035": {
+            "offset": 1.443,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40883": {
+            "offset": 1.603,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42560": {
+            "offset": 1.7229999999999999,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "4": {
+            "offset": 1.7879999999999998,
+            "confidence": 10,
+            "when": "2024-06-24T19:38:45.000"
+        },
+        "n_40873": {
+            "offset": 1.87,
+            "confidence": 100,
+            "annotator": "labbcat",
+            "when": "2024-06-24T19:38:36.000"
+        },
+        "n_40885": {
+            "offset": 1.9729999999999999,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42561": {
+            "offset": 2.043,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42562": {
+            "offset": 2.073,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40886": {
+            "offset": 2.1029999999999998,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40887": {
+            "offset": 2.203,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42563": {
+            "offset": 2.263,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42564": {
+            "offset": 2.3129999999999997,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40888": {
+            "offset": 2.373,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42598": {
+            "offset": 2.6029999999999998,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42597": {
+            "offset": 3.3129999999999997,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "c": {
+            "offset": 3.453,
+            "confidence": 10,
+            "when": "2024-06-24T19:38:45.000"
+        },
+        "n_42565": {
+            "offset": 3.5629999999999997,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40891": {
+            "offset": 3.593,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42566": {
+            "offset": 3.723,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42567": {
+            "offset": 3.9429999999999996,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42568": {
+            "offset": 4.043,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42569": {
+            "offset": 4.073,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40892": {
+            "offset": 4.103,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42570": {
+            "offset": 4.153,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42571": {
+            "offset": 4.213,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42572": {
+            "offset": 4.273,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42573": {
+            "offset": 4.303,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40893": {
+            "offset": 4.343,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42574": {
+            "offset": 4.403,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42575": {
+            "offset": 4.433,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42576": {
+            "offset": 4.523,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42577": {
+            "offset": 4.563,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42578": {
+            "offset": 4.643,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42579": {
+            "offset": 4.703,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42580": {
+            "offset": 4.753,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40874": {
+            "offset": 4.7940000000000005,
+            "confidence": 100,
+            "annotator": "labbcat",
+            "when": "2024-06-24T19:38:36.000"
+        },
+        "n_42581": {
+            "offset": 4.833,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42582": {
+            "offset": 4.873,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40894": {
+            "offset": 5.183,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42583": {
+            "offset": 5.353,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40895": {
+            "offset": 5.563000000000001,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42584": {
+            "offset": 5.643,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40896": {
+            "offset": 5.713,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42585": {
+            "offset": 5.813000000000001,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40897": {
+            "offset": 5.863,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42586": {
+            "offset": 5.913,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40898": {
+            "offset": 5.953,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42587": {
+            "offset": 5.993,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40899": {
+            "offset": 6.023000000000001,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42588": {
+            "offset": 6.083,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42589": {
+            "offset": 6.1930000000000005,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42590": {
+            "offset": 6.283,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40900": {
+            "offset": 6.323,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42591": {
+            "offset": 6.4430000000000005,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42592": {
+            "offset": 6.473,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42593": {
+            "offset": 6.543,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42594": {
+            "offset": 6.613,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40901": {
+            "offset": 6.723,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42595": {
+            "offset": 6.753,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42596": {
+            "offset": 6.9030000000000005,
+            "confidence": 50,
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_42036": {
+            "offset": 7.013,
+            "confidence": 50,
+            "annotator": "labbcat",
+            "when": "2024-06-26T14:54:32.000"
+        },
+        "n_40777": {
+            "offset": 7.131,
+            "confidence": 100,
+            "annotator": "labbcat",
+            "when": "2024-06-24T19:38:36.000"
+        }
+    },
+    "noise": [
+        {
+            "id": "e_32_239",
+            "label": "[knocking]",
+            "startId": "n_40873",
+            "endId": "n_40874",
+            "confidence": 100,
+            "annotator": "labbcat",
+            "when": "2024-06-24T19:38:37.000"
+        }
+    ],
+    "participant": [
+        {
+            "id": "m_-2_9",
+            "label": "AP511_MikeThorpe",
+            "startId": "n_40775",
+            "endId": "n_40777",
+            "turn": [
+                {
+                    "id": "em_11_189",
+                    "label": "AP511_MikeThorpe",
+                    "startId": "n_40775",
+                    "endId": "n_40777",
+                    "confidence": 100,
+                    "annotator": "labbcat",
+                    "when": "2024-06-26T14:54:58.000",
+                    "utterance": [
+                        {
+                            "id": "em_12_1168",
+                            "label": "AP511_MikeThorpe",
+                            "startId": "n_40775",
+                            "endId": "n_40777",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000"
+                        }
+                    ],
+                    "word": [
+                        {
+                            "id": "ew_0_23441",
+                            "label": "ah",
+                            "startId": "n_42035",
+                            "endId": "n_40883",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "1",
+                                    "label": "UH",
+                                    "startId": "n_42035",
+                                    "endId": "n_40883",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12480",
+                                    "label": "#",
+                                    "startId": "n_42035",
+                                    "endId": "n_40883",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23442",
+                            "label": "w~ .",
+                            "startId": "n_40883",
+                            "endId": "n_40885",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "3",
+                                    "label": "NN",
+                                    "startId": "n_40883",
+                                    "endId": "4",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "5",
+                                    "label": "SYM",
+                                    "startId": "4",
+                                    "endId": "n_40885",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12481",
+                                    "label": "w",
+                                    "startId": "n_40883",
+                                    "endId": "n_42560",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12482",
+                                    "label": "@",
+                                    "startId": "n_42560",
+                                    "endId": "n_40885",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23443",
+                            "label": "well",
+                            "startId": "n_40885",
+                            "endId": "n_40886",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "6",
+                                    "label": "UH",
+                                    "startId": "n_40885",
+                                    "endId": "n_40886",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12483",
+                                    "label": "w",
+                                    "startId": "n_40885",
+                                    "endId": "n_42561",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12484",
+                                    "label": "E",
+                                    "startId": "n_42561",
+                                    "endId": "n_42562",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12485",
+                                    "label": "l",
+                                    "startId": "n_42562",
+                                    "endId": "n_40886",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23444",
+                            "label": "I",
+                            "startId": "n_40886",
+                            "endId": "n_40887",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "7",
+                                    "label": "PRP",
+                                    "startId": "n_40886",
+                                    "endId": "n_40887",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12486",
+                                    "label": "2",
+                                    "startId": "n_40886",
+                                    "endId": "n_40887",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23445",
+                            "label": "have",
+                            "startId": "n_40887",
+                            "endId": "n_40888",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "8",
+                                    "label": "VBP",
+                                    "startId": "n_40887",
+                                    "endId": "n_40888",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12487",
+                                    "label": "h",
+                                    "startId": "n_40887",
+                                    "endId": "n_42563",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12488",
+                                    "label": "{",
+                                    "startId": "n_42563",
+                                    "endId": "n_42564",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12489",
+                                    "label": "v",
+                                    "startId": "n_42564",
+                                    "endId": "n_40888",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23446",
+                            "label": "a -",
+                            "startId": "n_40888",
+                            "endId": "n_42598",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-26T14:54:32.000",
+                            "pos": [
+                                {
+                                    "id": "9",
+                                    "label": "DT",
+                                    "startId": "n_40888",
+                                    "endId": "n_42598",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12490",
+                                    "label": "1",
+                                    "startId": "n_40888",
+                                    "endId": "n_42598",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23447",
+                            "label": "m~",
+                            "startId": "n_42597",
+                            "endId": "n_40891",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-26T14:54:32.000",
+                            "pos": [
+                                {
+                                    "id": "b",
+                                    "label": "NN",
+                                    "startId": "n_42597",
+                                    "endId": "c",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "d",
+                                    "label": "SYM",
+                                    "startId": "c",
+                                    "endId": "n_40891",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12491",
+                                    "label": "m",
+                                    "startId": "n_42597",
+                                    "endId": "n_42565",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12492",
+                                    "label": "@",
+                                    "startId": "n_42565",
+                                    "endId": "n_40891",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23448",
+                            "label": "fairly",
+                            "startId": "n_40891",
+                            "endId": "n_40892",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "e",
+                                    "label": "RB",
+                                    "startId": "n_40891",
+                                    "endId": "n_40892",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12493",
+                                    "label": "f",
+                                    "startId": "n_40891",
+                                    "endId": "n_42566",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12494",
+                                    "label": "E",
+                                    "startId": "n_42566",
+                                    "endId": "n_42567",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12495",
+                                    "label": "r",
+                                    "startId": "n_42567",
+                                    "endId": "n_42568",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12496",
+                                    "label": "l",
+                                    "startId": "n_42568",
+                                    "endId": "n_42569",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12497",
+                                    "label": "@",
+                                    "startId": "n_42569",
+                                    "endId": "n_40892",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23449",
+                            "label": "vivid",
+                            "startId": "n_40892",
+                            "endId": "n_40893",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "f",
+                                    "label": "JJ",
+                                    "startId": "n_40892",
+                                    "endId": "n_40893",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12498",
+                                    "label": "v",
+                                    "startId": "n_40892",
+                                    "endId": "n_42570",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12499",
+                                    "label": "I",
+                                    "startId": "n_42570",
+                                    "endId": "n_42571",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12500",
+                                    "label": "v",
+                                    "startId": "n_42571",
+                                    "endId": "n_42572",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12501",
+                                    "label": "@",
+                                    "startId": "n_42572",
+                                    "endId": "n_42573",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12502",
+                                    "label": "d",
+                                    "startId": "n_42573",
+                                    "endId": "n_40893",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23450",
+                            "label": "recollection",
+                            "startId": "n_40893",
+                            "endId": "n_40894",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "g",
+                                    "label": "NN",
+                                    "startId": "n_40893",
+                                    "endId": "n_40894",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12503",
+                                    "label": "r",
+                                    "startId": "n_40893",
+                                    "endId": "n_42574",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12504",
+                                    "label": "E",
+                                    "startId": "n_42574",
+                                    "endId": "n_42575",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12505",
+                                    "label": "k",
+                                    "startId": "n_42575",
+                                    "endId": "n_42576",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12506",
+                                    "label": "@",
+                                    "startId": "n_42576",
+                                    "endId": "n_42577",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12507",
+                                    "label": "l",
+                                    "startId": "n_42577",
+                                    "endId": "n_42578",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12508",
+                                    "label": "E",
+                                    "startId": "n_42578",
+                                    "endId": "n_42579",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12509",
+                                    "label": "k",
+                                    "startId": "n_42579",
+                                    "endId": "n_42580",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12510",
+                                    "label": "S",
+                                    "startId": "n_42580",
+                                    "endId": "n_42581",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12511",
+                                    "label": "@",
+                                    "startId": "n_42581",
+                                    "endId": "n_42582",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12512",
+                                    "label": "n",
+                                    "startId": "n_42582",
+                                    "endId": "n_40894",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23451",
+                            "label": "um",
+                            "startId": "n_40894",
+                            "endId": "n_40895",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "h",
+                                    "label": "UH",
+                                    "startId": "n_40894",
+                                    "endId": "n_40895",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12513",
+                                    "label": "V",
+                                    "startId": "n_40894",
+                                    "endId": "n_42583",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12514",
+                                    "label": "m",
+                                    "startId": "n_42583",
+                                    "endId": "n_40895",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23452",
+                            "label": "of",
+                            "startId": "n_40895",
+                            "endId": "n_40896",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "i",
+                                    "label": "IN",
+                                    "startId": "n_40895",
+                                    "endId": "n_40896",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12515",
+                                    "label": "V",
+                                    "startId": "n_40895",
+                                    "endId": "n_42584",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12516",
+                                    "label": "v",
+                                    "startId": "n_42584",
+                                    "endId": "n_40896",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23453",
+                            "label": "all",
+                            "startId": "n_40896",
+                            "endId": "n_40897",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "j",
+                                    "label": "DT",
+                                    "startId": "n_40896",
+                                    "endId": "n_40897",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12517",
+                                    "label": "$",
+                                    "startId": "n_40896",
+                                    "endId": "n_42585",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12518",
+                                    "label": "l",
+                                    "startId": "n_42585",
+                                    "endId": "n_40897",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23454",
+                            "label": "of",
+                            "startId": "n_40897",
+                            "endId": "n_40898",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "k",
+                                    "label": "IN",
+                                    "startId": "n_40897",
+                                    "endId": "n_40898",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12519",
+                                    "label": "V",
+                                    "startId": "n_40897",
+                                    "endId": "n_42586",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12520",
+                                    "label": "v",
+                                    "startId": "n_42586",
+                                    "endId": "n_40898",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23455",
+                            "label": "the",
+                            "startId": "n_40898",
+                            "endId": "n_40899",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "l",
+                                    "label": "DT",
+                                    "startId": "n_40898",
+                                    "endId": "n_40899",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12521",
+                                    "label": "D",
+                                    "startId": "n_40898",
+                                    "endId": "n_42587",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12522",
+                                    "label": "V",
+                                    "startId": "n_42587",
+                                    "endId": "n_40899",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23456",
+                            "label": "major",
+                            "startId": "n_40899",
+                            "endId": "n_40900",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "m",
+                                    "label": "JJ",
+                                    "startId": "n_40899",
+                                    "endId": "n_40900",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12523",
+                                    "label": "m",
+                                    "startId": "n_40899",
+                                    "endId": "n_42588",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12524",
+                                    "label": "1",
+                                    "startId": "n_42588",
+                                    "endId": "n_42589",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12525",
+                                    "label": "_",
+                                    "startId": "n_42589",
+                                    "endId": "n_42590",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12526",
+                                    "label": "@",
+                                    "startId": "n_42590",
+                                    "endId": "n_40900",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23457",
+                            "label": "quakes",
+                            "startId": "n_40900",
+                            "endId": "n_40901",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "n",
+                                    "label": "NNS",
+                                    "startId": "n_40900",
+                                    "endId": "n_40901",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12527",
+                                    "label": "k",
+                                    "startId": "n_40900",
+                                    "endId": "n_42591",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12528",
+                                    "label": "w",
+                                    "startId": "n_42591",
+                                    "endId": "n_42592",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12529",
+                                    "label": "1",
+                                    "startId": "n_42592",
+                                    "endId": "n_42593",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12530",
+                                    "label": "k",
+                                    "startId": "n_42593",
+                                    "endId": "n_42594",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12531",
+                                    "label": "s",
+                                    "startId": "n_42594",
+                                    "endId": "n_40901",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_23458",
+                            "label": "and",
+                            "startId": "n_40901",
+                            "endId": "n_42036",
+                            "confidence": 100,
+                            "annotator": "labbcat",
+                            "when": "2024-06-24T19:38:36.000",
+                            "pos": [
+                                {
+                                    "id": "o",
+                                    "label": "CC",
+                                    "startId": "n_40901",
+                                    "endId": "n_42036",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segment": [
+                                {
+                                    "id": "es_1_12532",
+                                    "label": "@",
+                                    "startId": "n_40901",
+                                    "endId": "n_42595",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12533",
+                                    "label": "n",
+                                    "startId": "n_42595",
+                                    "endId": "n_42596",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                },
+                                {
+                                    "id": "es_1_12534",
+                                    "label": "d",
+                                    "startId": "n_42596",
+                                    "endId": "n_42036",
+                                    "confidence": 50,
+                                    "when": "2024-06-26T14:54:32.000"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

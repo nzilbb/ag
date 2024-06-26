@@ -1,0 +1,621 @@
+{
+  "id": "AP511_MikeThorpe__1.373-7.131",
+  "schema": {
+    "corpusLayerId": "corpus",
+    "episodeLayerId": "episode",
+    "participantLayerId": "participant",
+    "turnLayerId": "turn",
+    "utteranceLayerId": "utterance",
+    "wordLayerId": "word",
+    "transcript": {
+      "description": "The annotation graph as a whole",
+      "children": {
+        "noise": {
+          "description": "Noise",
+          "alignment": 2,
+          "peers": true,
+          "peersOverlap": true,
+          "parentIncludes": true,
+          "saturated": false
+        },
+        "participant": {
+          "description": "Participant",
+          "alignment": 0,
+          "peers": true,
+          "peersOverlap": true,
+          "parentIncludes": true,
+          "saturated": true,
+          "children": {
+            "turn": {
+              "description": "Speaker Turns",
+              "alignment": 2,
+              "peers": true,
+              "peersOverlap": false,
+              "parentIncludes": true,
+              "saturated": false,
+              "children": {
+                "utterance": {
+                  "description": "Utterances",
+                  "alignment": 2,
+                  "peers": true,
+                  "peersOverlap": false,
+                  "parentIncludes": true,
+                  "saturated": true
+                },
+                "word": {
+                  "description": "Raw word tokens",
+                  "alignment": 2,
+                  "peers": true,
+                  "peersOverlap": false,
+                  "parentIncludes": true,
+                  "saturated": false,
+                  "children": {
+                    "pos": {
+                      "description": "Part of speech",
+                      "alignment": 2,
+                      "peers": true,
+                      "peersOverlap": false,
+                      "parentIncludes": true,
+                      "saturated": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "anchors": {
+    "n_40775": {
+      "offset": 1.373,
+      "confidence": 100,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:36.000"
+    },
+    "n_40777": {
+      "offset": 7.132,
+      "confidence": 100,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:36.000"
+    },
+    "n_42035": {
+      "offset": 1.373,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:36.000"
+    },
+    "n_40883": {
+      "offset": 1.6609,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40885": {
+      "offset": 2.2367,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40886": {
+      "offset": 2.5246,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40887": {
+      "offset": 2.8125,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40888": {
+      "offset": 3.1003999999999996,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40890": {
+      "offset": 3.3883,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40891": {
+      "offset": 3.9641,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40892": {
+      "offset": 4.252,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40893": {
+      "offset": 4.5399,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40894": {
+      "offset": 4.8278,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40895": {
+      "offset": 5.1156999999999995,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40896": {
+      "offset": 5.4036,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40897": {
+      "offset": 5.6915000000000004,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40898": {
+      "offset": 5.9794,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40899": {
+      "offset": 6.2673,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40900": {
+      "offset": 6.5552,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40901": {
+      "offset": 6.8431,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_42036": {
+      "offset": 7.131,
+      "confidence": 10,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:36.000"
+    },
+    "n_42132": {
+      "offset": 1.9487999999999999,
+      "confidence": 10,
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_42133": {
+      "offset": 3.6761999999999997,
+      "confidence": 10,
+      "when": "2024-06-24T19:38:45.000"
+    },
+    "n_40873": {
+      "offset": 1.87,
+      "confidence": 100,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:36.000"
+    },
+    "n_40874": {
+      "offset": 4.7940000000000005,
+      "confidence": 100,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:36.000"
+    }
+  },
+  "noise": [
+    {
+      "id": "e_32_239",
+      "label": "[knocking]",
+      "startId": "n_40873",
+      "endId": "n_40874",
+      "confidence": 100,
+      "annotator": "labbcat",
+      "when": "2024-06-24T19:38:37.000"
+    }
+  ],
+  "participant": [
+    {
+      "id": "m_-2_9",
+      "label": "AP511_MikeThorpe",
+      "startId": "n_40775",
+      "endId": "n_40777",
+      "turn": [
+        {
+          "id": "em_11_189",
+          "label": "AP511_MikeThorpe",
+          "startId": "n_40775",
+          "endId": "n_40777",
+          "confidence": 100,
+          "annotator": "labbcat",
+          "when": "2024-06-24T19:38:36.000",
+          "utterance": [
+            {
+              "id": "em_12_1168",
+              "label": "AP511_MikeThorpe",
+              "startId": "n_40775",
+              "endId": "n_40777",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000"
+            }
+          ],
+          "word": [
+            {
+              "id": "ew_0_23441",
+              "label": "ah",
+              "startId": "n_42035",
+              "endId": "n_40883",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5652",
+                  "label": "UH",
+                  "startId": "n_42035",
+                  "endId": "n_40883",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23442",
+              "label": "w~ .",
+              "startId": "n_40883",
+              "endId": "n_40885",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5653",
+                  "label": "NN",
+                  "startId": "n_40883",
+                  "endId": "n_42132",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                },
+                {
+                  "id": "ew_35_5654",
+                  "label": "SYM",
+                  "startId": "n_42132",
+                  "endId": "n_40885",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23443",
+              "label": "well",
+              "startId": "n_40885",
+              "endId": "n_40886",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5655",
+                  "label": "UH",
+                  "startId": "n_40885",
+                  "endId": "n_40886",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23444",
+              "label": "I",
+              "startId": "n_40886",
+              "endId": "n_40887",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5656",
+                  "label": "PRP",
+                  "startId": "n_40886",
+                  "endId": "n_40887",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23445",
+              "label": "have",
+              "startId": "n_40887",
+              "endId": "n_40888",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5657",
+                  "label": "VBP",
+                  "startId": "n_40887",
+                  "endId": "n_40888",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23446",
+              "label": "a -",
+              "startId": "n_40888",
+              "endId": "n_40890",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5658",
+                  "label": "DT",
+                  "startId": "n_40888",
+                  "endId": "n_40890",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23447",
+              "label": "m~",
+              "startId": "n_40890",
+              "endId": "n_40891",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5659",
+                  "label": "NN",
+                  "startId": "n_40890",
+                  "endId": "n_42133",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                },
+                {
+                  "id": "ew_35_5660",
+                  "label": "SYM",
+                  "startId": "n_42133",
+                  "endId": "n_40891",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23448",
+              "label": "fairly",
+              "startId": "n_40891",
+              "endId": "n_40892",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5661",
+                  "label": "RB",
+                  "startId": "n_40891",
+                  "endId": "n_40892",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23449",
+              "label": "vivid",
+              "startId": "n_40892",
+              "endId": "n_40893",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5662",
+                  "label": "JJ",
+                  "startId": "n_40892",
+                  "endId": "n_40893",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23450",
+              "label": "recollection",
+              "startId": "n_40893",
+              "endId": "n_40894",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5663",
+                  "label": "NN",
+                  "startId": "n_40893",
+                  "endId": "n_40894",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23451",
+              "label": "um",
+              "startId": "n_40894",
+              "endId": "n_40895",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5664",
+                  "label": "UH",
+                  "startId": "n_40894",
+                  "endId": "n_40895",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23452",
+              "label": "of",
+              "startId": "n_40895",
+              "endId": "n_40896",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5665",
+                  "label": "IN",
+                  "startId": "n_40895",
+                  "endId": "n_40896",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23453",
+              "label": "all",
+              "startId": "n_40896",
+              "endId": "n_40897",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5666",
+                  "label": "DT",
+                  "startId": "n_40896",
+                  "endId": "n_40897",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23454",
+              "label": "of",
+              "startId": "n_40897",
+              "endId": "n_40898",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5667",
+                  "label": "IN",
+                  "startId": "n_40897",
+                  "endId": "n_40898",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23455",
+              "label": "the",
+              "startId": "n_40898",
+              "endId": "n_40899",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5668",
+                  "label": "DT",
+                  "startId": "n_40898",
+                  "endId": "n_40899",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23456",
+              "label": "major",
+              "startId": "n_40899",
+              "endId": "n_40900",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5669",
+                  "label": "JJ",
+                  "startId": "n_40899",
+                  "endId": "n_40900",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23457",
+              "label": "quakes",
+              "startId": "n_40900",
+              "endId": "n_40901",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5670",
+                  "label": "NNS",
+                  "startId": "n_40900",
+                  "endId": "n_40901",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            },
+            {
+              "id": "ew_0_23458",
+              "label": "and",
+              "startId": "n_40901",
+              "endId": "n_42036",
+              "confidence": 100,
+              "annotator": "labbcat",
+              "when": "2024-06-24T19:38:36.000",
+              "pos": [
+                {
+                  "id": "ew_35_5671",
+                  "label": "CC",
+                  "startId": "n_40901",
+                  "endId": "n_42036",
+                  "confidence": 50,
+                  "when": "2024-06-24T19:38:45.000"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

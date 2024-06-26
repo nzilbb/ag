@@ -600,6 +600,9 @@ public class Validator extends Transform implements GraphTransformer {
         // all children on one child layer followed by all children on another child layer
 
         for (Layer childLayer : layer.getChildren().values()) {
+          // can't guarantee that the order of overlapping children can be correct
+          if (childLayer.getPeersOverlap()) continue;
+          
           log("Child layer: ", childLayer);
           LinkedHashSet<Anchor> anchors = new LinkedHashSet<Anchor>();
           if (annotation.getStart() != null) 
@@ -609,33 +612,75 @@ public class Validator extends Transform implements GraphTransformer {
             if (child.getParentId() != null // check they're really still a child
                 && !child.getParentId().equals(annotation.getId())) continue;
             log("child ", child);
+            anchors.add(child.getStart());
             // add anchors of aligned descendants
-            LayerTraversal<LinkedHashSet<Anchor>> traversal 
-              = new LayerTraversal<LinkedHashSet<Anchor>>(anchors, child) {
+            // this is in anchor order so that if there are multiple aligned grandchild layers
+            // the order of the anchors is not messed up by the traversal traversing one
+            // aligned grandchild layer and then the other - e.g. phone tags and pos tags
+            Set<Anchor> descendantAnchors = new TreeSet<Anchor>();
+            // UNLESS some of the descendants are themselves backwards!            
+            LayerTraversal<Annotation> backwardsDescenant
+              = new LayerTraversal<Annotation>(null, child) {
                   protected void pre(Annotation annotation) {
+                    if (annotation.getChange() == Change.Operation.Destroy) return;
                     Layer layer = annotation.getLayer();
-                    if (layer.getAlignment() != Constants.ALIGNMENT_NONE
+                    if (child != annotation
+                        && layer.getAlignment() != Constants.ALIGNMENT_NONE
                         && layer.getParentIncludes()
                         && !layer.getPeersOverlap()) {
-                      // log("Visiting: ", annotation);
-                      if (annotation.getStart() != null) 
+                      if (annotation.getAnchored()
+                          && annotation.getStart().getOffset().doubleValue()
+                          > annotation.getEnd().getOffset().doubleValue()) {
+                        setResult(annotation);
+                      }
+                    }
+                  }
+                };
+            if (backwardsDescenant.getResult() != null) { // there's a backwards descendant
+              // so just add descendant anchors in the order we find them
+              descendantAnchors = anchors;
+            }
+            LayerTraversal<Set<Anchor>> traversal 
+              = new LayerTraversal<Set<Anchor>>(descendantAnchors, child) {
+                  protected void pre(Annotation annotation) {
+                    if (annotation.getChange() == Change.Operation.Destroy) return;
+                    Layer layer = annotation.getLayer();
+                    if (child != annotation
+                        && layer.getAlignment() != Constants.ALIGNMENT_NONE
+                        && layer.getParentIncludes()
+                        && !layer.getPeersOverlap()
+                        // skip aligned children that are tags
+                        && !annotation.tags(child)) {
+                      // log("Entering: ", annotation);
+                      if (annotation.getStart() != null
+                          && annotation.getStart() != child.getStart()) 
                         getResult().add(annotation.getStart());
                     }
                   }
                   protected void post(Annotation annotation) {
+                    if (annotation.getChange() == Change.Operation.Destroy) return;
                     Layer layer = annotation.getLayer();
-                    if (layer.getAlignment() != Constants.ALIGNMENT_NONE
+                    if (child != annotation
+                        && layer.getAlignment() != Constants.ALIGNMENT_NONE
                         && layer.getParentIncludes()
-                        && !layer.getPeersOverlap()) {
-                      if (annotation.getEnd() != null) 
+                        && !layer.getPeersOverlap()
+                        // skip aligned children that are tags
+                        && !annotation.tags(child)) {
+                      // log("Exiting: ", annotation);
+                      if (annotation.getEnd() != null
+                        && annotation.getEnd() != child.getEnd()) 
                         getResult().add(annotation.getEnd());
                     }
                   }
 			
                 };
+            // log(traversal.getResult());
+            anchors.addAll(traversal.getResult());
+            anchors.add(child.getEnd());
           } // next child on this layer
-          if (annotation.getEnd() != null) 
+          if (annotation.getEnd() != null) {
             anchors.add(annotation.getEnd());
+          }
 
           Stack<Anchor> lastOffsetAnchors = new Stack<Anchor>();
           lastOffsetAnchors.push(new Anchor(null, Double.MIN_VALUE));
@@ -1579,14 +1624,12 @@ public class Validator extends Transform implements GraphTransformer {
       if (layer != null && otherLayer != null) {
         if (layer.getParentId() != null
             && layer.getParentId().equals(otherLayer.getId())) { // other is parent layer to this
-          if (!layer.getSaturated()) continue; // sparse
 
           // this belongs to another parent
           if (!anOther.getId().equals(annotation.getParentId())) continue;
         } else if (otherLayer.getParentId() != null
                  && otherLayer.getParentId().equals(layer.getId())) {
           // this is parent layer to other
-          if (!otherLayer.getSaturated()) continue; // sparse
 	       
           // this belongs to another parent
           if (!annotation.getId().equals(anOther.getParentId())) continue;
@@ -1707,13 +1750,11 @@ public class Validator extends Transform implements GraphTransformer {
       Layer otherLayer = annotation.getGraph().getLayer(anOther.getLayerId());
       if (layer != null && otherLayer != null) {
         if (layer.getParentId().equals(otherLayer.getId())) { // other is parent layer to this
-          if (!layer.getSaturated()) continue; // sparse
 
           // this belongs to another parent
           if (!anOther.getId().equals(annotation.getParentId())) continue;
         } else if (otherLayer.getParentId().equals(layer.getId())) {
           // this is parent layer to other
-          if (!otherLayer.getSaturated()) continue; // sparse
 	       
           // this belongs to another parent
           if (!annotation.getId().equals(anOther.getParentId())) continue;

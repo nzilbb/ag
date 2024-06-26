@@ -705,6 +705,7 @@ public class TestMerger {
           m.getNoChangeLayers().add(schema.getWordLayerId());
         }
         m.setDebug(log != null && fragmentName.indexOf(log) >= 0);
+        String failure = null;
         try {
           m.transform(originalGraph);
         } catch(TransformationException exception) {
@@ -713,8 +714,9 @@ public class TestMerger {
           exception.printStackTrace(pw);
           try { sw.close(); }
           catch(IOException x) {}
-          pw.close();	
-          fail(fragmentName + ": merge() failed" + exception.toString() + "\n" + sw);
+          pw.close();
+          // don't call fail() until we've printed the log and saved the final graph...
+          failure = fragmentName + ": merge() failed" + exception.toString() + "\n" + sw;
         }
         if (m.getLog() != null) for (String message : m.getLog()) System.out.println(message);
         for (String message : m.getErrors()) System.out.println("ERROR: " + message);
@@ -745,6 +747,10 @@ public class TestMerger {
         // save the actual result
         File fActual = new File(subdir, "final_" + fragmentName + ".json");
         saveGraphToJSON(fActual, originalGraph);
+
+        if (failure != null) {
+          fail(failure);
+        }
 	    
         // compare with what we expected
         Vector<String> actualLines = new Vector<String>();

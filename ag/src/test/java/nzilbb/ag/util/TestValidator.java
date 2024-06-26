@@ -1018,7 +1018,7 @@ public class TestValidator {
     // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
     v.setFullValidation(true);
-    // v.setDebug(true);
+    //v.setDebug(true);
     v.setDefaultOffsetThreshold(null);
     try {
       v.transform(g);

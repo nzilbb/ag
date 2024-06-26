@@ -46,7 +46,7 @@
                                             "peers": true,
                                             "peersOverlap": false,
                                             "parentIncludes": true,
-                                            "saturated": false}
+                                            "saturated": true}
                                     }
                                 },
                                 "utterances": {
