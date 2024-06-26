@@ -75,6 +75,41 @@ public class TestStanfordPosTagger {
     return fThisClass.getParentFile();
   }
 
+  /** Ensures that if there's an existing POS layer with an incorrect configuration, 
+   * it's corrected. */
+  @Test public void existingLayerCorrected() throws Exception {
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();    
+    // add POS layer with incorrect configuration (the one maybe created by LaBB-CAT)
+    schema.addLayer(
+      new Layer("pos", "Incorrectly configured POS layer")
+      .setType(Constants.TYPE_NUMBER)
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false)
+      .setPeersOverlap(true)
+      .setSaturated(false)
+      .setParentId("word"));
+    annotator.setSchema(schema);
+    annotator.setTaskParameters(null);
+    assertEquals("pos layer",
+                 "pos", annotator.getPosLayerId());
+    assertEquals("pos layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 schema.getLayer(annotator.getPosLayerId()).getAlignment());
+    assertEquals("pos layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getPosLayerId()).getType());
+    assertTrue("pos layer peers",
+               schema.getLayer(annotator.getPosLayerId()).getPeers());
+    assertTrue("pos layer included",
+               schema.getLayer(annotator.getPosLayerId()).getParentIncludes());
+    assertFalse("pos layer peers don't overlap",
+               schema.getLayer(annotator.getPosLayerId()).getPeersOverlap());
+    assertTrue("pos layer saturated",
+               schema.getLayer(annotator.getPosLayerId()).getSaturated());
+  }
+
   /** Annotation with default settings works as expected. */
   @Test public void defaultParameters() throws Exception {
     
@@ -108,6 +143,14 @@ public class TestStanfordPosTagger {
     assertEquals("pos layer type correct",
                  Constants.TYPE_STRING,
                  schema.getLayer(annotator.getPosLayerId()).getType());
+    assertTrue("pos layer peers",
+               schema.getLayer(annotator.getPosLayerId()).getPeers());
+    assertTrue("pos layer included",
+               schema.getLayer(annotator.getPosLayerId()).getParentIncludes());
+    assertFalse("pos layer peers don't overlap",
+               schema.getLayer(annotator.getPosLayerId()).getPeersOverlap());
+    assertTrue("pos layer saturated",
+               schema.getLayer(annotator.getPosLayerId()).getSaturated());
     assertEquals("model: english-caseless-left3words-distsim.tagger",
                  "english-caseless-left3words-distsim.tagger", annotator.getModel());
     assertTrue("pos layer allows peers", // contractions like "I'll" might have two tags
@@ -285,6 +328,12 @@ public class TestStanfordPosTagger {
                  schema.getLayer(annotator.getPosLayerId()).getType());
     assertTrue("pos layer allows peers",  // contractions like "I'll" might have two tags
                 schema.getLayer(annotator.getPosLayerId()).getPeers());
+    assertTrue("pos layer included",
+               schema.getLayer(annotator.getPosLayerId()).getParentIncludes());
+    assertFalse("pos layer peers don't overlap",
+               schema.getLayer(annotator.getPosLayerId()).getPeersOverlap());
+    assertTrue("pos layer saturated",
+               schema.getLayer(annotator.getPosLayerId()).getSaturated());
     assertEquals("model: english-bidirectional-distsim.tagger",
                  "english-bidirectional-distsim.tagger", annotator.getModel());
     Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
@@ -389,6 +438,14 @@ public class TestStanfordPosTagger {
     assertEquals("pos layer type correct",
                  Constants.TYPE_STRING,
                  schema.getLayer(annotator.getPosLayerId()).getType());
+    assertTrue("pos layer peers",
+               schema.getLayer(annotator.getPosLayerId()).getPeers());
+    assertTrue("pos layer included",
+               schema.getLayer(annotator.getPosLayerId()).getParentIncludes());
+    assertFalse("pos layer peers don't overlap",
+               schema.getLayer(annotator.getPosLayerId()).getPeersOverlap());
+    assertTrue("pos layer saturated",
+               schema.getLayer(annotator.getPosLayerId()).getSaturated());
     assertEquals("model: english-bidirectional-distsim.tagger",
                  "english-bidirectional-distsim.tagger", annotator.getModel());
     assertTrue("pos layer allows peers", // contractions like "I'll" might have two tags
@@ -524,6 +581,14 @@ public class TestStanfordPosTagger {
     assertEquals("pos layer type correct",
                  Constants.TYPE_STRING,
                  schema.getLayer(annotator.getPosLayerId()).getType());
+    assertTrue("pos layer peers",
+               schema.getLayer(annotator.getPosLayerId()).getPeers());
+    assertTrue("pos layer included",
+               schema.getLayer(annotator.getPosLayerId()).getParentIncludes());
+    assertFalse("pos layer peers don't overlap",
+               schema.getLayer(annotator.getPosLayerId()).getPeersOverlap());
+    assertTrue("pos layer saturated",
+               schema.getLayer(annotator.getPosLayerId()).getSaturated());
     assertEquals("model: english-caseless-left3words-distsim.tagger",
                  "english-caseless-left3words-distsim.tagger", annotator.getModel());
     assertTrue("pos layer allows peers", // contractions like "I'll" might have two tags

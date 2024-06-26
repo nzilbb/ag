@@ -454,13 +454,30 @@ public class StanfordPosTagger extends Annotator {
       schema.addLayer(
         new Layer(posLayerId)
         .setAlignment(Constants.ALIGNMENT_INTERVAL)
-        .setPeers(true)
+        .setPeers(true).setPeersOverlap(false)
+        .setParentIncludes(true)
         .setParentId(schema.getWordLayerId()));
     } else {
       if (posLayerId.equals(tokenLayerId)
           || posLayerId.equals(transcriptLanguageLayerId)
           || posLayerId.equals(phraseLanguageLayerId)) {
         throw new InvalidConfigurationException(this, "Invalid POS layer: " + posLayerId);
+      }
+      // ensure layer properties are valid
+      if (posLayer.getType() != Constants.TYPE_STRING)
+        posLayer.setType(Constants.TYPE_STRING);
+      if (posLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL)
+        posLayer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+      if (!posLayer.getPeers())
+        posLayer.setPeers(true);
+      if (!posLayer.getParentIncludes())
+        posLayer.setParentIncludes(true);
+      if (schema.getWordLayerId() != null // word child layer
+          && schema.getWordLayerId().equals(posLayer.getParentId())) {
+        if (posLayer.getPeersOverlap())
+          posLayer.setPeersOverlap(false);
+        if (!posLayer.getSaturated())
+          posLayer.setSaturated(true);
       }
     }
   }
