@@ -517,18 +517,20 @@ public class CMUDictionary implements Dictionary {
    * @throws OperationNotSupportedException When sEntry is already in the dictionary
    */
   public String suggest(String key) throws DictionaryException {
-    if (lookup(key) != null) {
+    if (lookup(key).size() > 0) {
       throw new DictionaryException(this, "Suggestion for existing word: " + key);
     }
     String suggestedPhonology = null;
       
     // suggest pronunciation based on heuristics, if possible
+    key = key.toLowerCase();
     if (key.endsWith("'s")) {
       // strip off the 's
       String candidate = key.substring(0, key.length() - 2);
       // look up the dictionary
       try {
         candidate = lookupEntries(candidate, false).firstElement();
+        if (encoding == Encoding.DISC) candidate = disc2cmu.apply(candidate);
         if (candidate != null) {
           // [sSzZJ_]_ -> Iz
           if (candidate.endsWith("S")
@@ -537,10 +539,9 @@ public class CMUDictionary implements Dictionary {
               || candidate.endsWith("ZH")
               || candidate.endsWith("CH")
               || candidate.endsWith("JH")) {
-            suggestedPhonology = candidate + " I Z";
+            suggestedPhonology = candidate + " IH0 Z";
           } else if (candidate.endsWith("K") // [-voice]_ -> s
                      || candidate.endsWith("F")
-                     || candidate.endsWith("H")
                      || candidate.endsWith("P")
                      || candidate.endsWith("T")
                      || candidate.endsWith("TH")) {
@@ -557,8 +558,9 @@ public class CMUDictionary implements Dictionary {
       // look up the dictionary
       try {
         candidate = lookupEntries(candidate, false).firstElement();
+        if (encoding == Encoding.DISC) candidate = disc2cmu.apply(candidate);
         if (candidate != null) {
-          suggestedPhonology = candidate + " IH V";
+          suggestedPhonology = candidate + " IH0 V";
         }
       } catch (Exception x) {
       }
@@ -568,8 +570,13 @@ public class CMUDictionary implements Dictionary {
       // look up the dictionary
       try {
         candidate = lookupEntries(candidate, false).firstElement();
+        if (encoding == Encoding.DISC) candidate = disc2cmu.apply(candidate);
         if (candidate != null) {
-          suggestedPhonology = candidate + " IH D";
+          if (candidate.matches(".*[AEIOU][^ ]*$")) { // ends with vowel
+            suggestedPhonology = candidate + " D";
+          } else {
+            suggestedPhonology = candidate + " IH0 D";
+          }
         }
       } catch (Exception x) {
       }
@@ -579,6 +586,7 @@ public class CMUDictionary implements Dictionary {
       // look up the dictionary
       try {
         candidate = lookupEntries(candidate, false).firstElement();
+        if (encoding == Encoding.DISC) candidate = disc2cmu.apply(candidate);
         if (candidate != null) { // [sSzZJ_]_ -> Iz
           if (candidate.endsWith("S")
               || candidate.endsWith("SH")
@@ -586,10 +594,9 @@ public class CMUDictionary implements Dictionary {
               || candidate.endsWith("ZH")
               || candidate.endsWith("CH")
               || candidate.endsWith("JH")) {
-            suggestedPhonology = candidate + " I Z";
+            suggestedPhonology = candidate + " IH0 Z";
           } else if (candidate.endsWith("K") // [-voice]_ -> s
                      || candidate.endsWith("F")
-                     || candidate.endsWith("H")
                      || candidate.endsWith("P")
                      || candidate.endsWith("T")
                      || candidate.endsWith("TH")) {

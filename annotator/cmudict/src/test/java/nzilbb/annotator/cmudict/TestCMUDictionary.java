@@ -39,6 +39,7 @@ import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
+import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
@@ -112,8 +113,80 @@ public class TestCMUDictionary {
     CMUDictionary dict = ((CMUDictionary)annotator.getDictionary("cmudict"))
       .setEncoding(CMUDictionary.Encoding.DISC);
     List<String> entries = dict.lookup("transcription");
-    assertEquals("DSIC",
+    assertEquals("DISC",
                  "tr{nskrIpS@n", entries.iterator().next());
+  }   
+
+  /** Ensure that suggestions work for words ending in s, 's, 've, etc...  */
+  @Test public void suggest() throws Exception {
+      
+    CMUDictionary dict = (CMUDictionary)annotator.getDictionary("cmudict");
+    try {
+      String suggestion = dict.suggest("TEST'S");
+      fail("suggest() for existing entry fails: " + suggestion);
+    } catch(DictionaryException exception) { // suggest for existing entry fails
+    }
+    assertEquals("suggestion works",
+                 "T EH1 S T IH0 NG Z", dict.suggest("TESTING'S"));
+
+    assertEquals("T EH1 S T S IH0 Z", dict.suggest("tests's"));
+    assertEquals("B R AH1 SH IH0 Z", dict.suggest("brush's"));
+    assertEquals("K AE1 M AH0 F L AA2 ZH IH0 Z", dict.suggest("CAMOUFLAGE's"));
+    assertEquals("K AE1 CH IH0 Z", dict.suggest("catch's"));
+    assertEquals("CH AE1 L AH0 N JH IH0 Z", dict.suggest("challenge's"));
+    assertEquals("B R IH1 K S", dict.suggest("BRICK'S"));
+    assertEquals("P AO1 R T R AH0 T S", dict.suggest("PORTRAIT'S"));
+    assertEquals("S AY1 K OW0 P AE2 TH S", dict.suggest("PSYCHOPATH'S"));
+
+    assertEquals("SH UH1 D AH0 N T IH0 V", dict.suggest("shouldn't've"));
+    
+    assertEquals("EH1 N IY0 B AH0 D IY0 D", dict.suggest("anybody'd"));
+    assertEquals("EH1 N IY0 P L EY2 S IH0 D", dict.suggest("ANYPLACE'd"));
+
+    assertEquals("B R IY2 OW1 SH IH0 Z", dict.suggest("brioches"));
+    assertEquals("AH0 S K AE1 N S IH0 Z", dict.suggest("ASKANCEs"));
+    assertEquals("K AE1 M AH0 F L AA2 ZH IH0 Z", dict.suggest("CAMOUFLAGEs"));
+    assertEquals("K L IY1 V AH0 JH IH0 Z", dict.suggest("cleavage's"));
+    assertEquals("K L AA1 T S", dict.suggest("CLOTTS"));
+    assertEquals("K AA1 M AH0 N W EH2 L TH S", dict.suggest("COMMONWEALTHS"));
+
+  }
+  
+  /** Ensure that suggestions work for words ending in s, 's, 've, etc...
+   * even if the dictionary is confgiured for DISC output  */
+  @Test public void suggestDISC() throws Exception {
+      
+    CMUDictionary dict = ((CMUDictionary)annotator.getDictionary("cmudict"))
+      .setEncoding(CMUDictionary.Encoding.DISC);
+    try {
+      String suggestion = dict.suggest("TEST'S");
+      fail("suggest() for existing entry fails: " + suggestion);
+    } catch(DictionaryException exception) { // suggest for existing entry fails
+    }
+    assertEquals("suggestion works",
+                 "tEstINz", dict.suggest("TESTING'S"));
+
+    assertEquals("tEsts@z", dict.suggest("tests's"));
+    assertEquals("brVS@z", dict.suggest("brush's"));
+    assertEquals("k{mIfl#Z@z", dict.suggest("CAMOUFLAGE's"));
+    assertEquals("k{J@z", dict.suggest("catch's"));
+    assertEquals("J{lIn_@z", dict.suggest("challenge's"));
+    assertEquals("brIks", dict.suggest("BRICK'S"));
+    assertEquals("p$rtrIts", dict.suggest("PORTRAIT'S"));
+    assertEquals("s2kIp{Ts", dict.suggest("PSYCHOPATH'S"));
+
+    assertEquals("SUdInt@v", dict.suggest("shouldn't've"));
+    
+    assertEquals("EnIbIdId", dict.suggest("anybody'd"));
+    assertEquals("EnIpl1s@d", dict.suggest("ANYPLACE'd"));
+
+    assertEquals("bri5S@z", dict.suggest("brioches"));
+    assertEquals("Isk{ns@z", dict.suggest("ASKANCEs"));
+    assertEquals("k{mIfl#Z@z", dict.suggest("CAMOUFLAGEs"));
+    assertEquals("klivI_@z", dict.suggest("cleavage's"));
+    assertEquals("kl#ts", dict.suggest("CLOTTS"));
+    assertEquals("k#mInwElTs", dict.suggest("COMMONWEALTHS"));
+
   }   
    
   @Test public void pagination() throws Exception {
