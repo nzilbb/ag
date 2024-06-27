@@ -795,6 +795,9 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           + " doesn't allow peer annotations; using first variant only.");
         firstVariantOnly = true;
       }
+      if (tagLayer.getAlignment() != Constants.ALIGNMENT_NONE) {
+        tagLayer.setAlignment(Constants.ALIGNMENT_NONE);
+      }
     }
   }
 

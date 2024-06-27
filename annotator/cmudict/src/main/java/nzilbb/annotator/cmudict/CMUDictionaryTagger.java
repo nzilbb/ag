@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -579,6 +579,9 @@ public class CMUDictionaryTagger extends Annotator
           "Pronunciation layer " + pronunciationLayerId
           + " doesn't allow peer annotations; using first variant only.");
         firstVariantOnly = true;
+      }
+      if (pronunciationLayer.getAlignment() != Constants.ALIGNMENT_NONE) {
+        pronunciationLayer.setAlignment(Constants.ALIGNMENT_NONE);
       }
     }
   }

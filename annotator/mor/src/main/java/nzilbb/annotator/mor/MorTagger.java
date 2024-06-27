@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -753,6 +753,12 @@ public class MorTagger extends Annotator {
             || prefixLayerId.equals(languagesLayerId)) {
           throw new InvalidConfigurationException(this, "Invalid prefix layer: " + prefixLayerId);
         }
+        if (layer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+          layer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+        }
+        if (!layer.getPeers()) layer.setPeers(true);
+        if (!layer.getPeersOverlap()) layer.setPeersOverlap(true);
+        if (layer.getSaturated()) layer.setSaturated(false);
       }
     }
 
@@ -772,6 +778,12 @@ public class MorTagger extends Annotator {
           throw new InvalidConfigurationException(
             this, "Invalid POS layer: " + partOfSpeechLayerId);
         }
+        if (layer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+          layer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+        }
+        if (!layer.getPeers()) layer.setPeers(true);
+        if (!layer.getPeersOverlap()) layer.setPeersOverlap(true);
+        if (layer.getSaturated()) layer.setSaturated(false);
       }
     }
 
@@ -791,6 +803,12 @@ public class MorTagger extends Annotator {
           throw new InvalidConfigurationException(
             this, "Invalid POS Subcategory layer: " + partOfSpeechSubcategoryLayerId);
         }
+        if (layer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+          layer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+        }
+        if (!layer.getPeers()) layer.setPeers(true);
+        if (!layer.getPeersOverlap()) layer.setPeersOverlap(true);
+        if (layer.getSaturated()) layer.setSaturated(false);
       }
     }
 
@@ -809,6 +827,12 @@ public class MorTagger extends Annotator {
             || stemLayerId.equals(languagesLayerId)) {
           throw new InvalidConfigurationException(this, "Invalid Stem layer: " + stemLayerId);
         }
+        if (layer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+          layer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+        }
+        if (!layer.getPeers()) layer.setPeers(true);
+        if (!layer.getPeersOverlap()) layer.setPeersOverlap(true);
+        if (layer.getSaturated()) layer.setSaturated(false);
       }
     }
 
@@ -828,6 +852,12 @@ public class MorTagger extends Annotator {
           throw new InvalidConfigurationException(
             this, "Invalid Fusion Suffix layer: " + fusionalSuffixLayerId);
         }
+        if (layer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+          layer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+        }
+        if (!layer.getPeers()) layer.setPeers(true);
+        if (!layer.getPeersOverlap()) layer.setPeersOverlap(true);
+        if (layer.getSaturated()) layer.setSaturated(false);
       }
     }
 
@@ -846,6 +876,12 @@ public class MorTagger extends Annotator {
             || suffixLayerId.equals(languagesLayerId)) {
           throw new InvalidConfigurationException(this, "Invalid Suffix layer: " + suffixLayerId);
         }
+        if (layer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+          layer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+        }
+        if (!layer.getPeers()) layer.setPeers(true);
+        if (!layer.getPeersOverlap()) layer.setPeersOverlap(true);
+        if (layer.getSaturated()) layer.setSaturated(false);
       }
     }
 
@@ -865,6 +901,12 @@ public class MorTagger extends Annotator {
           throw new InvalidConfigurationException(
             this, "Invalid English Gloss layer: " + glossLayerId);
         }
+        if (layer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+          layer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+        }
+        if (!layer.getPeers()) layer.setPeers(true);
+        if (!layer.getPeersOverlap()) layer.setPeersOverlap(true);
+        if (layer.getSaturated()) layer.setSaturated(false);
       }
     }
   }

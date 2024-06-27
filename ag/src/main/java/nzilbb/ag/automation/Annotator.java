@@ -624,6 +624,8 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    * (e.g. the PorterStemmer) then calling this method with 
    * <code> <var> parameters </var> = null </code> should apply any default parameters so
    * that the Annotator can be used without invoking the <tt> task </tt> web-app.
+   * <p> The annotator may change the {@link #schema} during this method, to add layers or
+   * correct the definition of output layers, as required.
    * @param parameters The configuration of the annotator, encoded in a String using
    * whatever mechanism is preferred (serialization of Properties object, JSON, etc.)
    * @throws InvalidConfigurationException

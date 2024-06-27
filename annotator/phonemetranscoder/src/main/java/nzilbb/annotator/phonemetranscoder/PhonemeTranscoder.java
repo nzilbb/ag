@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -354,6 +354,11 @@ public class PhonemeTranscoder extends Annotator {
           || destinationLayerId.equals(phraseLanguageLayerId)) {
         throw new InvalidConfigurationException(
           this, "Invalid destination layer: " + destinationLayerId);
+      }
+      if (("DISC".equals(translator.getDestinationEncoding())
+           || "IPA".equals(translator.getDestinationEncoding()))
+          && !destinationLayer.getType().equals("ipa")) {
+        destinationLayer.setType("ipa");
       }
     }
   }

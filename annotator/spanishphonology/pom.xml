@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.spanishphonology</artifactId>
   <name>nzilbb.annotator.spanishphonology</name>
-  <version>0.6.0</version>
+  <version>0.6.1</version>
 
   <properties>
     <package.path>nzilbb/annotator/spanishphonology/</package.path>

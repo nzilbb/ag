@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -929,10 +929,11 @@ public class HTKAligner extends Annotator {
                  || utteranceTagLayerId.equals(schema.getUtteranceLayerId())
                  || utteranceTagLayerId.equals(phoneAlignmentLayerId)
                  || utteranceTagLayerId.equals(participantTagLayerId)
-                 || !utteranceTagLayer.getParentId().equals(schema.getTurnLayerId())
-                 || utteranceTagLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+                 || !utteranceTagLayer.getParentId().equals(schema.getTurnLayerId())) {
         throw new InvalidConfigurationException(
           this, "Invalid utterance tag layer: " + utteranceTagLayerId);
+      } else if (utteranceTagLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+        utteranceTagLayer.setAlignment(Constants.ALIGNMENT_INTERVAL);
       }
     } // utteranceTagLayerId != null
     if (participantTagLayerId != null) {
@@ -953,10 +954,11 @@ public class HTKAligner extends Annotator {
                  || participantTagLayerId.equals(schema.getUtteranceLayerId())
                  || participantTagLayerId.equals(phoneAlignmentLayerId)
                  || participantTagLayerId.equals(utteranceTagLayerId)
-                 || !participantTagLayer.getParentId().equals(schema.getTurnLayerId())
-                 || participantTagLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+                 || !participantTagLayer.getParentId().equals(schema.getTurnLayerId())) {
         throw new InvalidConfigurationException(
           this, "Invalid participant tag layer: " + participantTagLayerId);
+      } else if (participantTagLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+        participantTagLayer.setAlignment(Constants.ALIGNMENT_INTERVAL);
       }
     } // participantTagLayerId != null
 
@@ -974,10 +976,11 @@ public class HTKAligner extends Annotator {
                || wordAlignmentLayerId.equals(schema.getUtteranceLayerId())
                || wordAlignmentLayerId.equals(phoneAlignmentLayerId)
                || wordAlignmentLayerId.equals(utteranceTagLayerId)
-               || !wordAlignmentLayer.getParentId().equals(schema.getTurnLayerId())
-               || wordAlignmentLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+               || !wordAlignmentLayer.getParentId().equals(schema.getTurnLayerId())) {
       throw new InvalidConfigurationException(
         this, "Invalid word alignment layer: " + wordAlignmentLayerId);
+    } else if (wordAlignmentLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+      wordAlignmentLayer.setAlignment(Constants.ALIGNMENT_INTERVAL);
     }
     
     Layer phoneAlignmentLayer = schema.getLayer(phoneAlignmentLayerId);
@@ -995,11 +998,13 @@ public class HTKAligner extends Annotator {
                || phoneAlignmentLayerId.equals(schema.getWordLayerId())
                || phoneAlignmentLayerId.equals(schema.getTurnLayerId())
                || phoneAlignmentLayerId.equals(schema.getUtteranceLayerId())
-               || phoneAlignmentLayerId.equals(utteranceTagLayerId)
-               || phoneAlignmentLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+               || phoneAlignmentLayerId.equals(utteranceTagLayerId)) {
       throw new InvalidConfigurationException(
         this, "Invalid phone alignment layer: " + phoneAlignmentLayerId);
     } else { // phoneAlignmentLayer is set and not a system layer
+      if (phoneAlignmentLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+        phoneAlignmentLayer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+      }
       // check it relates to wordAlignmentLayerId correctly
       if (wordAlignmentLayerId.equals(schema.getWordLayerId())) {
         if (!phoneAlignmentLayer.getParentId().equals(schema.getWordLayerId())) {
@@ -1060,11 +1065,13 @@ public class HTKAligner extends Annotator {
                  || scoreLayerId.equals(schema.getUtteranceLayerId())
                  || scoreLayerId.equals(phoneAlignmentLayerId)
                  || scoreLayerId.equals(utteranceTagLayerId)
-                 || !scoreLayer.getParentId().equals(schema.getTurnLayerId())
-                 || scoreLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+                 || !scoreLayer.getParentId().equals(schema.getTurnLayerId())) {
         throw new InvalidConfigurationException(
           this, "Invalid participant tag layer: " + scoreLayerId);
       } else { // scoreLayerId is set and not a system layer
+         if (scoreLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+           scoreLayer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+         }
         // check scoreLayer relates correctly to phoneAlignmentLayer
         if (phoneAlignmentLayer.getParentId().equals(schema.getWordLayerId())) {
           if (!scoreLayer.getParentId().equals(phoneAlignmentLayerId)) {

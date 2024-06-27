@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -187,12 +187,20 @@ public class OrthographyStandardizer extends Annotator {
     }
       
     // does the outputLayer need to be added to the schema?
-    if (schema.getLayer(orthographyLayerId) == null) {
+    Layer layer = schema.getLayer(orthographyLayerId);
+    if (layer == null) {
       schema.addLayer(
         new Layer(orthographyLayerId)
         .setAlignment(Constants.ALIGNMENT_NONE)
-        .setPeers(false)
+        .setPeers(false).setSaturated(true)
         .setParentId(schema.getWordLayerId()));
+    } else {
+        if (layer.getAlignment() != Constants.ALIGNMENT_NONE) {
+          layer.setAlignment(Constants.ALIGNMENT_NONE);
+        }
+        if (layer.getPeers()) layer.setPeers(false);
+        if (layer.getPeersOverlap()) layer.setPeersOverlap(false);
+        if (!layer.getSaturated()) layer.setSaturated(true);
     }
   }
 
