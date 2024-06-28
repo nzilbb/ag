@@ -1,3 +1,19 @@
+# nzilbb.ag 1.2.0
+
+For LaBB-CAT version 20240628.1316
+
+- Improve graph merge for aligned-word-child layers (e.g. phones and POS tags).
+- Ensure forced-alignment doesn't leave default-confidence anchors when word boundary
+  coincides with utterance boundary.
+- Ensure unrelated children are never deleted during merge, even automatically generated
+  ones. 
+- Ensure that MediaFile.generateFrom is serialized, so that callers can tell which files
+  already exist. 
+- GraphStore.saveMedia: swap order of mediaUrl/trackSuffix parameters, for consistency
+  with other API functions, and so that the nullable parameter is last.
+- GraphStore.deleteMedia: new method.
+- Make encoding mapping tables explicit in javadoc documentation.
+
 # nzilbb.ag 1.1.3
 
 For LaBB-CAT version 20240306.1320
