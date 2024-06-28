@@ -762,11 +762,11 @@ public class TestNormalizer {
 
     g.addAnchor(new Anchor("turnStart", 0.0, Constants.CONFIDENCE_MANUAL)); // turn start
 
-    g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT)); // the
-    g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT)); // quick
-    g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT)); // brown
-    g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox
-    g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT)); // fox end
+    g.addAnchor(new Anchor("a0", 0.01, Constants.CONFIDENCE_DEFAULT+1)); // the
+    g.addAnchor(new Anchor("a01", 0.02, Constants.CONFIDENCE_DEFAULT+1)); // quick
+    g.addAnchor(new Anchor("a02", 0.03, Constants.CONFIDENCE_DEFAULT+1)); // brown
+    g.addAnchor(new Anchor("a03", 0.04, Constants.CONFIDENCE_DEFAULT+1)); // fox
+    g.addAnchor(new Anchor("a04a", 0.04, Constants.CONFIDENCE_DEFAULT+1)); // fox end
 
     g.addAnchor(new Anchor("utteranceChange", 0.4, Constants.CONFIDENCE_MANUAL)); // utterance boundary
 
@@ -833,13 +833,13 @@ public class TestNormalizer {
       assertEquals("same offset", Double.valueOf(5.4), 
                    g.getAnnotation("dog").getEnd().getOffset());
 
-      assertEquals("low confidence", Constants.CONFIDENCE_DEFAULT, 
+      assertEquals("confidence copied from end", Constants.CONFIDENCE_DEFAULT+1, 
                    g.getAnnotation("the").getStart().getConfidence().intValue());
-      assertEquals("low confidence", Constants.CONFIDENCE_DEFAULT, 
+      assertEquals("confidence copied from start", Constants.CONFIDENCE_DEFAULT+1, 
                    g.getAnnotation("fox").getEnd().getConfidence().intValue());
-      assertEquals("low confidence", Constants.CONFIDENCE_DEFAULT, 
+      assertEquals("confidence copied from end", Constants.CONFIDENCE_AUTOMATIC, 
                    g.getAnnotation("jumps").getStart().getConfidence().intValue());
-      assertEquals("low confidence", Constants.CONFIDENCE_DEFAULT, 
+      assertEquals("confidence copied from start", Constants.CONFIDENCE_AUTOMATIC, 
                    g.getAnnotation("dog").getEnd().getConfidence().intValue());
 
     } catch(TransformationException exception) {
@@ -1332,9 +1332,9 @@ public class TestNormalizer {
       assertEquals("same offset", Double.valueOf(0.4), 
                    g.getAnnotation("jumps").getStart().getOffset());
 
-      assertEquals("same offset", Constants.CONFIDENCE_DEFAULT, 
+      assertEquals("confidence copied from start", Constants.CONFIDENCE_DEFAULT, 
                    g.getAnnotation("fox").getEnd().getConfidence().intValue());
-      assertEquals("same offset", Constants.CONFIDENCE_DEFAULT, 
+      assertEquals("confidence copied from end", Constants.CONFIDENCE_AUTOMATIC, 
                    g.getAnnotation("jumps").getStart().getConfidence().intValue());
 
     } catch(TransformationException exception) {

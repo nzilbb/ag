@@ -644,7 +644,7 @@ public class TestMerger {
    * Then test merge of graphs with mismatched granularities, to simulate exporting to TextGrid and then re-importing.
    */
   @Test public void fragmentTests() {
-    tests("frag", null);
+    tests("frag", "136");
   }
 
   /**

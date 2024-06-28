@@ -1,0 +1,341 @@
+
+{
+    "id": "016-HtkSimpleNoSegments__10.000-70.000",
+    "schema": {
+        "participantLayerId": "who",
+        "turnLayerId": "turns",
+        "utteranceLayerId": "utterances",
+        "wordLayerId": "token",
+        "transcript": {
+            "description": "The annotation graph as a whole",
+            "children": {
+                "who": {
+                    "description": "participants",
+                    "alignment": 0,
+                    "peers": true,
+                    "peersOverlap": true,
+                    "parentIncludes": true,
+                    "saturated": true,
+                    "children": {
+                        "turns": {
+                            "description": "turns",
+                            "alignment": 2,
+                            "peers": true,
+                            "peersOverlap": false,
+                            "parentIncludes": true,
+                            "saturated": false,
+                            "children": {
+                                "token": {
+                                    "description": "transcript",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false,
+                                    "children": {
+                                        "segments": {
+                                            "description": "segments",
+                                            "alignment": 2,
+                                            "peers": true,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true
+                                        }
+                                    }
+                                },
+                                "utterances": {
+                                    "description": "utterances",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "anchors": {
+        "n_100": {
+            "offset": 10.0,
+            "confidence": 100
+        },
+        "n_101": {
+            "offset": 10.0,
+            "confidence": 50
+        },
+        "3": {
+            "offset": 11.0,
+            "confidence": 50
+        },
+        "6": {
+            "offset": 12.0,
+            "confidence": 50
+        },
+        "n_200": {
+            "offset": 20.1,
+            "confidence": 50
+        },
+        "n_300": {
+            "offset": 30.1,
+            "confidence": 50
+        },
+        "b": {
+            "offset": 32.5,
+            "confidence": 50
+        },
+        "e": {
+            "offset": 35.0,
+            "confidence": 50
+        },
+        "h": {
+            "offset": 37.5,
+            "confidence": 50
+        },
+        "11": {
+            "offset": 39.9,
+            "confidence": 50
+        },
+        "n_400": {
+            "offset": 40.1,
+            "confidence": 50
+        },
+        "l": {
+            "offset": 40.2,
+            "confidence": 50
+        },
+        "o": {
+            "offset": 40.3,
+            "confidence": 50
+        },
+        "r": {
+            "offset": 48.0,
+            "confidence": 50
+        },
+        "n_500": {
+            "offset": 50.1,
+            "confidence": 50
+        },
+        "v": {
+            "offset": 52.0,
+            "confidence": 50
+        },
+        "13": {
+            "offset": 53.0,
+            "confidence": 50
+        },
+        "n_600": {
+            "offset": 60.9,
+            "confidence": 50
+        },
+        "z": {
+            "offset": 65.0,
+            "confidence": 50
+        },
+        "n_699": {
+            "offset": 70.0,
+            "confidence": 50
+        },
+        "n_700": {
+            "offset": 70.0,
+            "confidence": 100
+        }
+    },
+    "who": [
+        {
+            "id": "Maxwell Smart",
+            "label": "Maxwell Smart",
+            "startId": "n_100",
+            "endId": "n_700",
+            "turns": [
+                {
+                    "id": "em_11_0",
+                    "label": "Maxwell Smart",
+                    "startId": "n_100",
+                    "endId": "n_700",
+                    "confidence": 100,
+                    "token": [
+                        {
+                            "id": "ew_0_1",
+                            "label": "86-1-1",
+                            "startId": "n_101",
+                            "endId": "n_200",
+                            "confidence": 100,
+                            "segments": [
+                                {
+                                    "id": "2",
+                                    "label": "86-1-1-1",
+                                    "startId": "n_101",
+                                    "endId": "3",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "5",
+                                    "label": "86-1-1-2",
+                                    "startId": "3",
+                                    "endId": "6",
+                                    "confidence": 100
+                                },
+                                {
+                                    "id": "7",
+                                    "label": "86-1-1-3",
+                                    "startId": "6",
+                                    "endId": "n_200",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_2",
+                            "label": "86-1-2",
+                            "startId": "n_200",
+                            "endId": "n_300",
+                            "confidence": 100,
+                            "segments": [
+                                {
+                                    "id": "8",
+                                    "label": "86-1-2-1",
+                                    "startId": "n_200",
+                                    "endId": "n_300",
+                                    "confidence": 100
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_3",
+                            "label": "86-1-3",
+                            "startId": "n_300",
+                            "endId": "11",
+                            "confidence": 100,
+                            "segments": [
+                                {
+                                    "id": "a",
+                                    "label": "86-1-3-1",
+                                    "startId": "n_300",
+                                    "endId": "b",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "d",
+                                    "label": "86-1-3-2",
+                                    "startId": "b",
+                                    "endId": "e",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "g",
+                                    "label": "86-1-3-3",
+                                    "startId": "e",
+                                    "endId": "h",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "i",
+                                    "label": "86-1-3-4",
+                                    "startId": "h",
+                                    "endId": "11",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_4",
+                            "label": "86-1-4",
+                            "startId": "n_400",
+                            "endId": "n_500",
+                            "confidence": 100,
+                            "segments": [
+                                {
+                                    "id": "k",
+                                    "label": "86-1-4-1",
+                                    "startId": "n_400",
+                                    "endId": "l",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "n",
+                                    "label": "86-1-4-2",
+                                    "startId": "l",
+                                    "endId": "o",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "q",
+                                    "label": "86-1-4-3",
+                                    "startId": "o",
+                                    "endId": "r",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "s",
+                                    "label": "86-1-4-4",
+                                    "startId": "r",
+                                    "endId": "n_500",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_5",
+                            "label": "86-1-5",
+                            "startId": "n_500",
+                            "endId": "13",
+                            "confidence": 100,
+                            "segments": [
+                                {
+                                    "id": "u",
+                                    "label": "86-1-5-1",
+                                    "startId": "n_500",
+                                    "endId": "v",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "w",
+                                    "label": "86-1-5-2",
+                                    "startId": "v",
+                                    "endId": "13",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ew_0_6",
+                            "label": "86-1-6",
+                            "startId": "n_600",
+                            "endId": "n_699",
+                            "confidence": 100,
+                            "segments": [
+                                {
+                                    "id": "y",
+                                    "label": "86-1-6-1",
+                                    "startId": "n_600",
+                                    "endId": "z",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "10",
+                                    "label": "86-1-6-2",
+                                    "startId": "z",
+                                    "endId": "n_699",
+                                    "confidence": 50
+                                }
+                            ]
+                        }
+                    ],
+                    "utterances": [
+                        {
+                            "id": "em_12_1",
+                            "label": "Maxwell Smart",
+                            "startId": "n_100",
+                            "endId": "n_700",
+                            "confidence": 100
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

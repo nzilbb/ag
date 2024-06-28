@@ -204,11 +204,18 @@ public class Normalizer extends Transform implements GraphTransformer {
 
           // create a new anchor
           final Anchor newStart = new Anchor(
-            null, word.getStart().getOffset(),
-            // if the word end has the same confidence, just copy it, otherwise use "default"
-            oldStart.getConfidence() != null
-            && oldStart.getConfidence().equals(word.getEnd().getConfidence())?
-            oldStart.getConfidence():Constants.CONFIDENCE_DEFAULT);
+            null, word.getStart().getOffset(), oldStart.getConfidence());
+          if (word.getEnd().getConfidence() != null) {
+            // with both default spreading and forced alignment, the new start confidence
+            // should almost certainly be the same as the word's end confidence
+            if (word.getEnd().isEndOn(schema.getUtteranceLayerId())
+                || word.getEnd().isEndOn(schema.getTurnLayerId())) {
+              // unless the end is also joined, in which case use default  alignment
+              newStart.setConfidence(Constants.CONFIDENCE_DEFAULT);
+            } else {
+              newStart.setConfidence(word.getEnd().getConfidence());
+            }
+          }
           graph.addAnchor(newStart);
                
           // assign it to the word and any descendants that use it
@@ -231,11 +238,18 @@ public class Normalizer extends Transform implements GraphTransformer {
                
           // create a new anchor
           final Anchor newEnd = new Anchor(
-            null, word.getEnd().getOffset(),
-            // if the word start has the same confidence, just copy it, otherwise use "default"
-            word.getEnd().getConfidence() != null
-            && oldEnd.getConfidence().equals(word.getStart().getConfidence())?
-            oldEnd.getConfidence():Constants.CONFIDENCE_DEFAULT); 
+            null, word.getEnd().getOffset(), oldEnd.getConfidence()); 
+          if (word.getStart().getConfidence() != null) {
+            // with both default spreading and forced alignment, the new end confidence
+            // should almost certainly be the same as the word's start confidence
+            if (word.getStart().isStartOn(schema.getUtteranceLayerId())
+                || word.getStart().isStartOn(schema.getTurnLayerId())) {
+              // unless the end is also joined, in which case use default  alignment
+              newEnd.setConfidence(Constants.CONFIDENCE_DEFAULT);
+            } else {
+              newEnd.setConfidence(word.getStart().getConfidence());
+            }
+          }
           graph.addAnchor(newEnd);
                
           // assign it to the word and any descendants that use it
