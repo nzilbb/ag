@@ -25,11 +25,11 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.Connection;
@@ -309,8 +309,10 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
         int entryCount = 0;
         // and maybe convert the first space to a tab
         boolean firstSpace = fieldDelimiter.equals(" - ");
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+	BufferedReader reader = new BufferedReader(
+	   new InputStreamReader(new FileInputStream(file), "UTF-8"));
+	BufferedWriter writer = new BufferedWriter(
+	   new OutputStreamWriter(new FileOutputStream(tempFile), "UTF-8"));
         String line = reader.readLine(); 
         while (line != null) {
           if (line.trim().length() > 0) { // ignore blank lines

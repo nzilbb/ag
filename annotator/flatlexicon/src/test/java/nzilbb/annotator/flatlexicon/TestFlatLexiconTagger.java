@@ -904,6 +904,12 @@ public class TestFlatLexiconTagger {
     assertEquals("first entry correct (order is serial)", "ð ə", entries.get(0));
     assertEquals("second entry correct", "ð i:", entries.get(1));
 
+    // specific Polish example
+    entries = dictionary.lookup("życia");
+    assertEquals("Polish entry returned",
+                 1, entries.size());
+    assertEquals("Polish entry correct", "'ʐɨ-ʨa", entries.get(0));
+    
     // can remove lexicons
     assertEquals("Can delete lexicon", "", annotator.deleteLexicon("dict"));
     ids = annotator.getDictionaryIds();
