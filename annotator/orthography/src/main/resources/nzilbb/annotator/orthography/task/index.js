@@ -45,7 +45,7 @@ getSchema(s => {
                 newReplacement("’","'"); // 'smart' apostrophes to normal ones
                 newReplacement("[“”]","\""); // 'smart' quotes to normal ones
                 newReplacement("—","-"); // 'em-dash' to hyphen
-                newReplacement("[\\p{Punct}&&[^-~:']]",""); // remove all punctuation except ~, -, ', and :
+                newReplacement("[\\p{Punct}&&[^-~']]",""); // remove all punctuation except ~, -, and '
                 newReplacement("^[-']+",""); // remove leading hyphens/apostrophes
                 newReplacement("[-']+$",""); // remove trailing hyphens/apostrophes
                 

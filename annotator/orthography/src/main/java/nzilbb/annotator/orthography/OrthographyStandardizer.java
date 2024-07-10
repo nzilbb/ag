@@ -89,8 +89,8 @@ public class OrthographyStandardizer extends Annotator {
    *  <li>“ → " ('smart' quotes to normal ones)</li>
    *  <li>” → " ('smart' quotes to normal ones)</li>
    *  <li>— → - ('em-dash' to hyphen)</li>
-   *  <li>[\p{Punct}&amp;&amp;[^-~:']] →
-   *                 (all punctuation except <q>~</q>, <q>-</q>, <q>'</q>, and <q>:</q>)</li>
+   *  <li>[\p{Punct}&amp;&amp;[^-~']] →
+   *                 (all punctuation except <q>~</q>, <q>-</q>, and <q>'</q>)</li>
    *  <li>^[-']+ → (remove leading hyphens/apostrophes)</li>
    *  <li>[-']+$ → (remove trailing hyphens/apostrophes)</li>
    * </ol>
@@ -102,7 +102,7 @@ public class OrthographyStandardizer extends Annotator {
       put("’","'"); // 'smart' apostrophes to normal ones
       put("[“”]","\""); // 'smart' quotes to normal ones
       put("—","-"); // 'em-dash' to hyphen
-      put("[\\p{Punct}&&[^-~:']]",""); // remove all punctuation except ~, -, ', and :
+      put("[\\p{Punct}&&[^-~']]",""); // remove all punctuation except ~, -, and '
       put("^[-']+",""); // remove leading hyphens/apostrophes
       put("[-']+$",""); // remove trailing hyphens/apostrophes
     }};
@@ -115,8 +115,8 @@ public class OrthographyStandardizer extends Annotator {
    *  <li>“ → " ('smart' quotes to normal ones)</li>
    *  <li>” → " ('smart' quotes to normal ones)</li>
    *  <li>— → - ('em-dash' to hyphen)</li>
-   *  <li>[\p{Punct}&amp;&amp;[^-~:']] →
-   *                 (all punctuation except <q>~</q>, <q>-</q>, <q>'</q>, and <q>:</q>)</li>
+   *  <li>[\p{Punct}&amp;&amp;[^-~']] →
+   *                 (all punctuation except <q>~</q>, <q>-</q>, and <q>'</q>)</li>
    *  <li>^[-']+ → (remove leading hyphens/apostrophes)</li>
    *  <li>[-']+$ → (remove trailing hyphens/apostrophes)</li>
    * </ol>
