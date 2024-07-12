@@ -158,20 +158,12 @@ public class TrackedMap
                   json.add(key, (String)value);
                } else if (parameterClass.equals(Integer.class)) {
                   json.add(key, (Integer)value);
-               } else if (parameterClass.equals(int.class)) {
-                  json.add(key, (int)value);
                } else if (parameterClass.equals(Double.class)) {
-                  json.add(key, (Double)value);
-               } else if (parameterClass.equals(double.class)) {
                   json.add(key, (Double)value);
                } else if (parameterClass.equals(Long.class)) {
                   json.add(key, (Long)value);
-               } else if (parameterClass.equals(long.class)) {
-                  json.add(key, (long)value);
                } else if (parameterClass.equals(Boolean.class)) {
                   json.add(key, (Boolean)value);
-               } else if (parameterClass.equals(boolean.class)) {
-                  json.add(key, (boolean)value);
                } else if (value instanceof List) {
                  JsonArrayBuilder array = Json.createArrayBuilder();
                  for (Object v : ((List)value)) {
@@ -194,15 +186,21 @@ public class TrackedMap
                          if (kk == null) continue;
                          Object vv = ((Map)v).get(kk);
                          if (vv != null) {
-                           mm.add(kk.toString(), vv.toString());
+                           if (vv instanceof Integer) {
+                             mm.add(kk.toString(), (Integer)vv);
+                           } else if (vv instanceof Double) {
+                             mm.add(kk.toString(), (Double)vv);
+                           } else {
+                             mm.add(kk.toString(), vv.toString());
+                           }
                          }
-                       }
+                       } // next key
                        array.add(mm);
                      } else {
                        array.add(v.toString());
                      }
                    }
-                 }
+                 } // next element
                  json.add(key, array);
                } else if (value instanceof Map) {
                  JsonObjectBuilder map = Json.createObjectBuilder();
@@ -228,7 +226,13 @@ public class TrackedMap
                          if (kk == null) continue;
                          Object vv = ((Map)v).get(kk);
                          if (vv != null) {
-                           mm.add(kk.toString(), vv.toString());
+                           if (vv instanceof Integer) {
+                             mm.add(kk.toString(), (Integer)vv);
+                           } else if (vv instanceof Double) {
+                             mm.add(kk.toString(), (Double)vv);
+                           } else {
+                             mm.add(kk.toString(), vv.toString());
+                           }
                          }
                        }
                        map.add(k.toString(), mm);

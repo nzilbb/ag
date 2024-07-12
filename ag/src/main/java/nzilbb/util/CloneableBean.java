@@ -115,6 +115,22 @@ public interface CloneableBean {
             for (Object e : (List)value) {
               if (e instanceof CloneableBean) {
                 list.add(((CloneableBean)e).toJson());
+              } else if (e instanceof Map) {
+                JsonObjectBuilder map = Json.createObjectBuilder();
+                for (Object k : ((Map)e).keySet()) {
+                  if (k == null) continue;
+                  Object v = ((Map)e).get(k);
+                  if (v != null) {
+                    if (v instanceof CloneableBean) {
+                      map.add(k.toString(), ((CloneableBean)v).toJson());
+                    } else if (v instanceof Integer) {
+                      map.add(k.toString(), (Integer)v);
+                    } else {
+                      map.add(k.toString(), v.toString());
+                    }
+                  }
+                } // next element
+                list.add(map);
               } else {
                 list.add(e.toString());
               }
