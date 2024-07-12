@@ -172,6 +172,38 @@ public class TrackedMap
                   json.add(key, (Boolean)value);
                } else if (parameterClass.equals(boolean.class)) {
                   json.add(key, (boolean)value);
+               } else if (value instanceof List) {
+                 JsonArrayBuilder array = Json.createArrayBuilder();
+                 for (Object v : ((List)value)) {
+                   if (v != null) {
+                     if (v instanceof CloneableBean) {
+                       array.add(((CloneableBean)v).toJson());
+                     } else if (v instanceof List) {
+                       JsonArrayBuilder list = Json.createArrayBuilder();
+                       for (Object e : (List)v) {
+                         if (e instanceof CloneableBean) {
+                           list.add(((CloneableBean)e).toJson());
+                         } else {
+                           list.add(e.toString());
+                         }
+                       }
+                       array.add(list);
+                     } else if (v instanceof Map) {
+                       JsonObjectBuilder mm = Json.createObjectBuilder();
+                       for (Object kk : ((Map)v).keySet()) {
+                         if (kk == null) continue;
+                         Object vv = ((Map)v).get(kk);
+                         if (vv != null) {
+                           mm.add(kk.toString(), vv.toString());
+                         }
+                       }
+                       array.add(mm);
+                     } else {
+                       array.add(v.toString());
+                     }
+                   }
+                 }
+                 json.add(key, array);
                } else if (value instanceof Map) {
                  JsonObjectBuilder map = Json.createObjectBuilder();
                  for (Object k : ((Map)value).keySet()) {
