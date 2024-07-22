@@ -629,7 +629,14 @@ public class IO
    } // end of base64EncodeFile()
 
    /**
-    * Converts the given string into a version that's safe for a file name or URL.
+    * Converts the given string into a version that's generally safe for a file name or URL.
+    * <p> Specifically:
+    * <ul>
+    *  <li> the following characters are removed: <tt>\?*+$</tt></li>
+    *  <li> the following characters are converted to underscore: <tt>|:!&gt;&lt;=^</tt></li>
+    *  <li> the following characters are converted to text alternatives: <tt>@&amp;</tt></li>
+    * </ul>
+    * No URL-encoding is performed.
     * @param s The possibly unsafe string.
     * @return The given string with characters that are unsafe for file names or URLs removed.
     */
