@@ -101,11 +101,6 @@ public class JythonAnnotator extends Annotator {
   public JythonAnnotator setDownloadJython(boolean newDownloadJython) { downloadJython = newDownloadJython; return this; }
    
   /**
-   * The Python script engine.
-   */
-  protected ScriptEngine engine;
-   
-  /**
    * Python script.
    * @see #getScript()
    * @see #setScript(String)
@@ -351,6 +346,7 @@ public class JythonAnnotator extends Annotator {
   public Graph transform(Graph graph) throws TransformationException {
     setRunning(true);
      
+    ScriptEngine engine = null;
     File jythonJar = new File(getWorkingDirectory(), "jython.jar");
     if (!jythonJar.exists()) {
       throw new TransformationException(
@@ -380,17 +376,18 @@ public class JythonAnnotator extends Annotator {
       + factory.getLanguageName() + " ("+factory.getLanguageVersion()+")");
     engine.put(
       ScriptEngine.FILENAME, IO.SafeFileNameUrl(Arrays.asList(getOutputLayers()).toString()) + ".py");
-    ScriptContext context = engine.getContext();
 
-    context.setAttribute("annotator", this, ScriptContext.ENGINE_SCOPE);
-    context.setAttribute("transcript", graph, ScriptContext.ENGINE_SCOPE);
+    Bindings bindings = new SimpleBindings();
+    bindings.put("annotator", this);
+    bindings.put("transcript", graph);
 
     try {
       // provide logging function
       engine.eval(
         "def log(message):"
         +"\n  annotator.setStatus(\""+graph.getId().replaceAll("\"", "\\\"")+": \" + message)"
-        +"\n  return");
+        +"\n  return",
+        bindings);
          
       setPercentComplete(25);
          
@@ -398,7 +395,7 @@ public class JythonAnnotator extends Annotator {
       setStatus("Running script on " + graph.getId());
       // setStatus(script);
       try {
-        engine.eval(script);
+        engine.eval(script, bindings);
       } catch(ScriptException exception) {
         setStatus("Cancelling due to error: " + exception);
         cancel();
@@ -433,6 +430,8 @@ public class JythonAnnotator extends Annotator {
       } // not cancelling
     } catch (ScriptException exception) {
       throw new InvalidConfigurationException(this, exception);
+    } finally {
+      bindings.clear();
     }
     setRunning(false);
     return graph;
