@@ -599,6 +599,7 @@ public class Validator extends Transform implements GraphTransformer {
         // this ensures that the order of "turn" descendants isn't messed up by having
         // all children on one child layer followed by all children on another child layer
 
+        boolean hasChildAnnotations = false;
         for (Layer childLayer : layer.getChildren().values()) {
           // can't guarantee that the order of overlapping children can be correct
           if (childLayer.getPeersOverlap()) continue;
@@ -613,6 +614,7 @@ public class Validator extends Transform implements GraphTransformer {
                 && !child.getParentId().equals(annotation.getId())) continue;
             log("child ", child);
             anchors.add(child.getStart());
+            hasChildAnnotations = true;
             // add anchors of aligned descendants
             // this is in anchor order so that if there are multiple aligned grandchild layers
             // the order of the anchors is not messed up by the traversal traversing one
@@ -846,6 +848,46 @@ public class Validator extends Transform implements GraphTransformer {
             }
           } // next anchor
         } // next child layer
+        
+        if (!hasChildAnnotations) { // annotation has no children - check its own anchors
+          Anchor start = annotation.getStart();
+          Anchor end = annotation.getEnd();
+          if (start != null && start.getOffset() != null
+              && end != null && end.getOffset() != null) {
+            log("Checking (childless): ", end, " against ", start);
+            if (end.getOffset() < start.getOffset()) { // out of order
+              int startConfidence = Utility.getConfidence(start, defaultAnchorConfidence);
+              int endConfidence = Utility.getConfidence(end, defaultAnchorConfidence);
+              log("Anchors out of order: ", start, "[", startConfidence,
+                  "] followed by ", end, "[", endConfidence, "]");
+              if (startConfidence < endConfidence) {
+                log("Start has lower confidence, resetting it");
+                start.setOffset(null)
+                  .setConfidence(Constants.CONFIDENCE_NONE);
+
+              } else if (startConfidence > endConfidence) {
+                log("End has lower confidence, resetting it");
+                end.setOffset(null)
+                  .setConfidence(Constants.CONFIDENCE_NONE);
+              } else { // same confidence
+                if (startConfidence < Constants.CONFIDENCE_AUTOMATIC) {
+                  log("Both have equally low confidence, resetting both");
+                  start.setOffset(null)
+                    .setConfidence(Constants.CONFIDENCE_NONE);
+                  end.setOffset(null)
+                    .setConfidence(Constants.CONFIDENCE_NONE);
+                } else {
+                  errors.add(
+                    "Reversed anchors: "
+                    +annotation.getLabel()+" ["+annotation.getId()+"] "
+                    +start.getOffset()+"["+start.getId()+"]-"
+                    +end.getOffset()+"["+end.getId()
+                    +"] - Both have equally high confidence.");
+                }
+              }
+            } // anchors reversed
+          } // anchors set
+        } // there were no children
       } // next annotation
     } // next layer
   } // end of correctReversedAnchors()
