@@ -110,6 +110,46 @@ public class Normalizer extends Transform implements GraphTransformer {
   @Switch("Same-speaker inter-turn pauses shorter than this are merged into one turn")
   public Normalizer setMinimumTurnPauseLength(Double newMinimumTurnPauseLength) { minimumTurnPauseLength = newMinimumTurnPauseLength; return this; }
       
+  /**
+   * Whether a log of messages should be kept for reporting.
+   * @see #getDebug()
+   * @see #setDebug(boolean)
+   * @see #getLog()
+   * @see #log(Object...)
+   */
+  protected boolean debug = false;
+  /**
+   * Getter for {@link #debug}: Whether a log of messages should be kept for reporting.
+   * @return Whether a log of messages should be kept for reporting.
+   * @see #getLog()
+   * @see #log(Object...)
+   */
+  public boolean getDebug() { return debug; }
+  /**
+   * Setter for {@link #debug}: Whether a log of messages should be kept for reporting.
+   * @param newDebug Whether a log of messages should be kept for reporting.
+   * @see #getLog()
+   * @see #log(Object...)
+   */
+  public Normalizer setDebug(boolean newDebug) { debug = newDebug; return this; }
+
+  /**
+   * Messages for debugging.
+   * @see #getLog()
+   * @see #setLog(Vector)
+   */
+  protected Vector<String> log;
+  /**
+   * Getter for {@link #log}: Messages for debugging.
+   * @return Messages for debugging.
+   */
+  public Vector<String> getLog() { return log; }
+  /**
+   * Setter for {@link #log}: Messages for debugging.
+   * @param newLog Messages for debugging.
+   */
+  protected Normalizer setLog(Vector<String> newLog) { log = newLog; return this; }
+
   // Methods:
    
   /**
@@ -125,6 +165,8 @@ public class Normalizer extends Transform implements GraphTransformer {
    * @throws TransformationException If the transformation cannot be completed.
    */
   public Graph transform(Graph graph) throws TransformationException {
+    if (debug) setLog(new Vector<String>());
+
     Schema schema = graph.getSchema();
     if (schema.getParticipantLayer() == null) 
       throw new TransformationException(this, "No participant layer specified.");
@@ -142,14 +184,18 @@ public class Normalizer extends Transform implements GraphTransformer {
         if (onlyParticipant.getLabel() == null || onlyParticipant.getLabel().length() == 0)
         { // name them after the episode
           onlyParticipant.setLabel(episode[0].getLabel());
+          log("One unlabelled participant, now labelled: ", episode[0].getLabel());
         }
       }
     } // episode layer set
 
     // ensure turns and utterances are labelled with participant labels
     for (Annotation participant : graph.all(schema.getParticipantLayerId())) {
+      if (participant.getChange() == Change.Operation.Destroy) continue;
       for (Annotation turn : participant.getAnnotations(schema.getTurnLayerId())) {
+        if (turn.getChange() == Change.Operation.Destroy) continue;
         if (!participant.getLabel().equals(turn.getLabel())) {
+          log("Correcting label of ", turn, " to be ", participant.getLabel());
           turn.setLabel(participant.getLabel());
         }
         if (schema.getWordLayerId() != null) {
@@ -160,7 +206,9 @@ public class Normalizer extends Transform implements GraphTransformer {
               = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
             utterancesByAnchor.addAll(utterances);
             for (Annotation utterance : utterancesByAnchor) {
+              if (utterance.getChange() == Change.Operation.Destroy) continue;
               if (!participant.getLabel().equals(utterance.getLabel())) {
+                log("Correcting label of ", utterance, " to be ", participant.getLabel());
                 utterance.setLabel(participant.getLabel());
               }
               // check utterances are chained together
@@ -174,6 +222,7 @@ public class Normalizer extends Transform implements GraphTransformer {
                 // share anchors with
                 for (Annotation ending : lastUtterance.getEnd().getEndingAnnotations()) {
                   if (turn == ending.first(schema.getTurnLayerId())) {
+                    log("Chaining end of ", ending, " to new ", newEnd);
                     ending.setEnd(newEnd);
                   }
                 } // next ending annotation
@@ -186,14 +235,17 @@ public class Normalizer extends Transform implements GraphTransformer {
     } // next participant
    
     // join subsequent turns by the same speaker...
-    new Coalescer()
+    Coalescer c = new Coalescer()
       .setLayerId(schema.getTurnLayerId())
       .setMinimumPauseLength(getMinimumTurnPauseLength())
-      .transform(graph);
+      .setDebug(debug);    
+    c.transform(graph);
+    if (debug) log.addAll(c.getLog());
 
     if (schema.getWordLayerId() != null) {
       // disconnect words from turns and utterances
       for (Annotation word : graph.all(schema.getWordLayerId())) {
+        if (word.getChange() == Change.Operation.Destroy) continue;
         // check start anchor
         if (word.getStart().isStartOn(schema.getTurnLayerId())
             || word.getStart().isEndOn(schema.getTurnLayerId())
@@ -222,7 +274,9 @@ public class Normalizer extends Transform implements GraphTransformer {
           LayerTraversal<Vector<Change>> descendantTraverser
             = new LayerTraversal<Vector<Change>>(new Vector<Change>(), word) {
                 protected void pre(Annotation annotation) {
-                  if (annotation.getStart().equals(oldStart)) {
+                  if (annotation.getStart().equals(oldStart)
+                      && annotation.getChange() != Change.Operation.Destroy) {
+                    log("Disconnecting ", annotation, " start from turn/utterance");
                     annotation.setStart(newStart);
                   }
                 }
@@ -256,7 +310,9 @@ public class Normalizer extends Transform implements GraphTransformer {
           LayerTraversal<Vector<Change>> descendantTraverser
             = new LayerTraversal<Vector<Change>>(new Vector<Change>(), word) {
                 protected void pre(Annotation annotation) {
-                  if (annotation.getEnd().equals(oldEnd)) {
+                  if (annotation.getEnd().equals(oldEnd)
+                    && annotation.getChange() != Change.Operation.Destroy) {
+                    log("Disconnecting ", annotation, " end from turn/utterance");
                     annotation.setEnd(newEnd);
                   }
                 }
@@ -273,6 +329,7 @@ public class Normalizer extends Transform implements GraphTransformer {
       
       // tag each word with its utterance
       for (Annotation word : graph.all(wordLayerId)) {
+        if (word.getChange() == Change.Operation.Destroy) continue;
         Optional<Annotation> utterance = Arrays.stream(
           word.midpointIncludingAnnotationsOn(graph.getSchema().getUtteranceLayerId()))
           .filter(utt -> utt.getParentId().equals(word.getParentId()))
@@ -284,6 +341,7 @@ public class Normalizer extends Transform implements GraphTransformer {
 
       // now check each word for inter-utterance links and overflow...
       for (Annotation word : graph.all(wordLayerId)) {
+        if (word.getChange() == Change.Operation.Destroy) continue;
         Annotation utterance = (Annotation)word.get("@utterance");
         if (utterance == null) continue;
         
@@ -294,6 +352,7 @@ public class Normalizer extends Transform implements GraphTransformer {
               && utterance != followingUtterance) {
             // words are linked but utterances are different
             // so unlink them by creating a new end annotation
+            log("Unlink ", word, " from ", followingWord, " which is in another utterance.");
             word.setEnd(
               graph.addAnchor(
                 new Anchor(followingWord.getStart())));
@@ -305,12 +364,14 @@ public class Normalizer extends Transform implements GraphTransformer {
         if (word.getStart().getOffset() != null && utterance.getStart().getOffset() != null
             && word.getStart().getOffset() < utterance.getStart().getOffset()) {
           // word starts before utterance, so move word start forward
+          log("Correcting ", word, " that starts before utterance ", utterance);
           word.getStart().setOffset(utterance.getStart().getOffset());
           word.getStart().setConfidence(Constants.CONFIDENCE_NONE);
         } // checked word.start
         if (word.getEnd().getOffset() != null && utterance.getEnd().getOffset() != null
             && word.getEnd().getOffset() > utterance.getEnd().getOffset()) {
           // word ends before utterance, so move word end back
+          log("Correcting ", word, " that ends after utterance ", utterance);
           word.getEnd().setOffset(utterance.getEnd().getOffset());
           word.getEnd().setConfidence(Constants.CONFIDENCE_NONE);
         } // checked word.end
@@ -321,9 +382,11 @@ public class Normalizer extends Transform implements GraphTransformer {
     if (maxLabelLength != null) {
       // ensure no annotation has a label longer than the limit
       for (Annotation a : graph.getAnnotationsById().values()) {
+        if (a.getChange() == Change.Operation.Destroy) continue;
         if (a.getLabel() != null
             && a.getLabel().length() > maxLabelLength.intValue()) {
           // truncate the label TODO: split annotation in two
+          log("Truncating label of ", a);
           a.setLabel(a.getLabel().substring(0,maxLabelLength.intValue()));
         }
       } // next annotation
@@ -368,6 +431,55 @@ public class Normalizer extends Transform implements GraphTransformer {
     following.destroy();
   } // end of joinTurns()
 
+  /**
+   * A representation of the given annotation for logging purposes.
+   * @param annotation The annotation to log.
+   * @return A representation of the given annotation for loggin purposes.
+   */
+  protected String logAnnotation(Annotation annotation) {
+    if (annotation == null) return "[null]";
+    return "[" + annotation.getId() + "]" + annotation.getOrdinal() + "#" + annotation.getLabel() + "("+annotation.getStart()+"-"+annotation.getEnd()+")";
+  } // end of logAnnotation()
+
+  /**
+   * A representation of the given anchor for logging purposes.
+   * @param anchor The anchor to log.
+   * @return A representation of the given anchor for logging purposes.
+   */
+  protected String logAnchor(Anchor anchor) {
+    if (anchor == null) return "[null]";
+    return "[" + anchor.getId() + "]" + anchor.getOffset();
+  } // end of logAnnotation()
+   
+  /**
+   * Logs a debugging message.
+   * @param messages The objects making up the log message.
+   */
+  protected void log(Object ... messages) {
+    if (debug) { // we only interpret arguments to log() if we're actually debugging...
+      StringBuilder s = new StringBuilder();
+      for (Object m : messages) {
+        if (m == null) {
+          s.append("[null]");
+        } else if (m instanceof Annotation) {
+          Annotation annotation = (Annotation)m;
+          s.append("[").append(annotation.getId()).append("]")
+            .append(annotation.getOrdinal()).append("#")
+            .append(annotation.getLabel())
+            .append("(").append(annotation.getStart())
+            .append("-").append(annotation.getEnd()).append(")");
+        } else if (m instanceof Anchor) {
+          Anchor anchor = (Anchor)m;
+          s.append("[").append(anchor.getId()).append("]").append(anchor.getOffset());
+        } else {
+          s.append(m.toString());
+        }
+      }	 
+      log.add(s.toString());
+      System.err.println(s.toString());
+    }
+  } // end of log()
+  
   /** Command line interface entrypoint: reads JSON-encoded transcripts from stdin,
    * normalizes them, and writes them to stdout. */
   public static void main(String argv[]) {

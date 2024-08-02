@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
 
 /**
@@ -76,6 +77,30 @@ public class Coalescer implements GraphTransformer {
     if (minimumPauseLength == null) minimumPauseLength = 0.0;
     return minimumPauseLength;
   }
+  
+  /**
+   * Whether a log of messages should be kept for reporting.
+   * @see #getDebug()
+   * @see #setDebug(boolean)
+   * @see #getLog()
+   * @see #log(Object...)
+   */
+  protected boolean debug = false;
+  /**
+   * Getter for {@link #debug}: Whether a log of messages should be kept for reporting.
+   * @return Whether a log of messages should be kept for reporting.
+   * @see #getLog()
+   * @see #log(Object...)
+   */
+  public boolean getDebug() { return debug; }
+  /**
+   * Setter for {@link #debug}: Whether a log of messages should be kept for reporting.
+   * @param newDebug Whether a log of messages should be kept for reporting.
+   * @see #getLog()
+   * @see #log(Object...)
+   */
+  public Coalescer setDebug(boolean newDebug) { debug = newDebug; return this; }
+
   /**
    * Setter for {@link #minimumPauseLength}: Minimum amount of time between two peers with
    * the same parent, with no intervening peers, for which the inter-annotation pause
@@ -87,6 +112,23 @@ public class Coalescer implements GraphTransformer {
    */
   public Coalescer setMinimumPauseLength(Double newMinimumPauseLength) { minimumPauseLength = newMinimumPauseLength; return this; }
       
+  /**
+   * Messages for debugging.
+   * @see #getLog()
+   * @see #setLog(Vector)
+   */
+  protected Vector<String> log;
+  /**
+   * Getter for {@link #log}: Messages for debugging.
+   * @return Messages for debugging.
+   */
+  public Vector<String> getLog() { return log; }
+  /**
+   * Setter for {@link #log}: Messages for debugging.
+   * @param newLog Messages for debugging.
+   */
+  protected Coalescer setLog(Vector<String> newLog) { log = newLog; return this; }
+
   // Methods:
    
   /**
@@ -102,16 +144,21 @@ public class Coalescer implements GraphTransformer {
    * @throws TransformationException If the transformation cannot be completed.
    */
   public Graph transform(Graph graph) throws TransformationException {
+    if (debug) setLog(new Vector<String>());
 
     // join subsequent peers with the same label...
     // for each parent
     for (Annotation parent : graph.all(graph.getLayer(layerId).getParentId())) {
+      if (parent.getChange() == Change.Operation.Destroy) continue;
       TreeSet<Annotation> annotations = new TreeSet<Annotation>(
         // ensure we get children in anchor order
         new AnnotationComparatorByAnchor());
       annotations.addAll(parent.getAnnotations(layerId));
-
-      Annotation[] peers = annotations.toArray(new Annotation[0]);;
+      
+      Annotation[] peers = annotations.stream()
+        .filter(peer -> peer.getChange() != Change.Operation.Destroy)
+        .collect(Collectors.toList())
+        .toArray(new Annotation[0]);
       // go back through all the peers, looking for a peer with the same label that is
       // joined to, or overlaps, this one
 
@@ -161,6 +208,7 @@ public class Coalescer implements GraphTransformer {
    * @param following The following annotation, which will be deleted.
    */
   public void mergeAnnotations(Annotation preceding, Annotation following) {
+    log("Merge ", preceding, " with ", following);
     
     Anchor originalPrecedingEnd = preceding.getEnd();
     // set anchor
@@ -205,4 +253,52 @@ public class Coalescer implements GraphTransformer {
     following.destroy();
   } // end of mergeAnnotations()
   
+  /**
+   * A representation of the given annotation for logging purposes.
+   * @param annotation The annotation to log.
+   * @return A representation of the given annotation for loggin purposes.
+   */
+  protected String logAnnotation(Annotation annotation) {
+    if (annotation == null) return "[null]";
+    return "[" + annotation.getId() + "]" + annotation.getOrdinal() + "#" + annotation.getLabel() + "("+annotation.getStart()+"-"+annotation.getEnd()+")";
+  } // end of logAnnotation()
+
+  /**
+   * A representation of the given anchor for logging purposes.
+   * @param anchor The anchor to log.
+   * @return A representation of the given anchor for logging purposes.
+   */
+  protected String logAnchor(Anchor anchor) {
+    if (anchor == null) return "[null]";
+    return "[" + anchor.getId() + "]" + anchor.getOffset();
+  } // end of logAnnotation()
+   
+  /**
+   * Logs a debugging message.
+   * @param messages The objects making up the log message.
+   */
+  protected void log(Object ... messages) {
+    if (debug) { // we only interpret arguments to log() if we're actually debugging...
+      StringBuilder s = new StringBuilder();
+      for (Object m : messages) {
+        if (m == null) {
+          s.append("[null]");
+        } else if (m instanceof Annotation) {
+          Annotation annotation = (Annotation)m;
+          s.append("[").append(annotation.getId()).append("]")
+            .append(annotation.getOrdinal()).append("#")
+            .append(annotation.getLabel())
+            .append("(").append(annotation.getStart())
+            .append("-").append(annotation.getEnd()).append(")");
+        } else if (m instanceof Anchor) {
+          Anchor anchor = (Anchor)m;
+          s.append("[").append(anchor.getId()).append("]").append(anchor.getOffset());
+        } else {
+          s.append(m.toString());
+        }
+      }	 
+      log.add(s.toString());
+      System.err.println(s.toString());
+    }
+  } // end of log()
 } // end of class Coalescer
