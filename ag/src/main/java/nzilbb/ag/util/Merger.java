@@ -1690,7 +1690,7 @@ public class Merger extends Transform implements GraphTransformer {
       boolean bRelatedAnnotations = aOriginalEnd.startingAnnotations(annotation.getLayerId())
         .filter(Annotation::NotDestroyed)
         .findAny().isPresent();
-      if (bRelatedAnnotations) {
+      if (bRelatedAnnotations) { // there's a next annotation on the same layer
         aOriginalEnd.startingAnnotations(annotation.getLayerId())
           .filter(Annotation::NotDestroyed)
           .filter(anNext -> {
@@ -1718,12 +1718,12 @@ public class Merger extends Transform implements GraphTransformer {
               log("Changing start of next linked annotation ", anNext, " to ", newEndAnchor);
               changeStartWithRelatedAnnotations(anNext, newEndAnchor, layerIdsToExclude);
             });
-      } else {
+      } else { // there's not a next annotation on the same layer
         boolean bDeletedRelatedAnnotations
           = aOriginalEnd.startingAnnotations(annotation.getLayerId())
           .filter(Annotation::Destroyed)
           .findAny().isPresent();
-        if (bDeletedRelatedAnnotations) {
+        if (bDeletedRelatedAnnotations) { // there's a destroyed next annotation on the same layer
           // all the 'next' annotations on the same layer are deleted
           // ensure that annotations that start here on *other* layers come with us
           // find one related annotation on another layer
@@ -1735,9 +1735,62 @@ public class Merger extends Transform implements GraphTransformer {
                 anNext.get(), " to bring starting annotations too");
             changeStartWithRelatedAnnotations(anNext.get(), newEndAnchor, layerIdsToExclude);
           }
-        }
+        } // there's not a destroyed next annotation on the same layer
       } // there are no 'next' starting annotations
-    }
+    } else { // excluding this layer
+      // also change start anchor of annotations on other related layers
+      // e.g. if there's a noise annotation strung between two words,
+      // and now we're setting the end of the word to match the end of the last segment
+      // we also want the noise to start at the new high-confidence anchor, linked to the word
+      // instead of being left dangling with the old low-confidence anchor, now disconnected
+      aOriginalEnd.startingAnnotations()
+        .filter(a -> !layerIdsToExclude.contains(a.getLayerId()))
+        .filter(a -> {
+            // do they have a relationship that would actually preclude sharing?
+            Layer otherLayer = annotation.getGraph().getLayer(a.getLayerId());
+            if (layer != null && otherLayer != null) {
+              if (layer.getParentId().equals(otherLayer.getId())) {
+                // other is parent layer to this
+                
+                // this may belong to another parent
+                return false;
+                
+              } else if (otherLayer.getParentId().equals(layer.getId())) {
+                // this is parent layer to other
+                
+                // other may belong to another parent
+                return false;
+              } else if (otherLayer.getParentId() != null
+                         && otherLayer.getParentId().equals(layer.getParentId())) {
+                // both layers have the same parent
+                
+                // there's most likely another linked annotation that would prefer to keep this
+                // e.g. language tags to words
+                return false;
+              } else if (layer.getParent() != null
+                         && layer.getParent().getParentId() != null
+                         && layer.getParent().getParentId().equals(otherLayer.getParentId())) {
+                // this grandparent is other's parent
+                
+                // there's most likely another linked annotation that would prefer to keep this
+                // e.g. language tags to words where this is a phone
+                return false;
+              }
+            }
+            return true;
+          })
+        .collect(Collectors.toList()) // add to new collection to avoid concurrent modification
+        .forEach(a -> {
+            boolean bInstant = a.getInstantaneous();
+            log("Changing start", (bInstant?" and end":""), " of related annotation ", a,
+                " to ", newEndAnchor);
+            a.setStart(newEndAnchor);
+            if (bInstant) {
+              a.setEnd(newEndAnchor);
+            }
+          });
+    } // excluding this layer
+    
   } // end of changeStartWithRelatedAnnotations()
 
   /**
