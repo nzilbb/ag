@@ -1,0 +1,561 @@
+
+{
+    "id": "SOU_T2_BXHT82OR_SR_02122020__22_436_25_893.TextGrid",
+    "offsetGranularity": 0.001,
+    "schema": {
+        "participantLayerId": "who",
+        "turnLayerId": "turns",
+        "utteranceLayerId": "utterances",
+        "wordLayerId": "token",
+        "transcript": {
+            "description": "The annotation graph as a whole",
+            "children": {
+                "who": {
+                    "description": "Participants",
+                    "alignment": 0,
+                    "peers": true,
+                    "peersOverlap": true,
+                    "parentIncludes": true,
+                    "saturated": true,
+                    "children": {
+                        "turns": {
+                            "description": "Speaker turns",
+                            "alignment": 2,
+                            "peers": true,
+                            "peersOverlap": false,
+                            "parentIncludes": true,
+                            "saturated": false,
+                            "children": {
+                                "token": {
+                                    "description": "Words",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false,
+                                    "children": {
+                                        "pos": {
+                                            "description": "Part of speech",
+                                            "alignment": 0,
+                                            "peers": false,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true
+                                        },
+                                        "segments": {
+                                            "description": "Phones",
+                                            "alignment": 2,
+                                            "peers": true,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true
+                                        }
+                                    }
+                                },
+                                "utterances": {
+                                    "description": "Utterances",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "anchors": {
+        "1": {
+            "offset": 0.0,
+            "confidence": 100
+        },
+        "1a": {
+            "offset": 0.1700000000000017,
+            "confidence": 50
+        },
+        "r": {
+            "offset": 0.1999999999999993,
+            "confidence": 50
+        },
+        "u": {
+            "offset": 0.28000000000000114,
+            "confidence": 50
+        },
+        "x": {
+            "offset": 0.5500000000000007,
+            "confidence": 50
+        },
+        "10": {
+            "offset": 0.6799999999999997,
+            "confidence": 50
+        },
+        "4": {
+            "offset": 0.7199999999999989,
+            "confidence": 50
+        },
+        "14": {
+            "offset": 0.7699999999999996,
+            "confidence": 50
+        },
+        "17": {
+            "offset": 0.9200000000000017,
+            "confidence": 50
+        },
+        "6": {
+            "offset": 0.9499999999999993,
+            "confidence": 50
+        },
+        "1c": {
+            "offset": 0.9899999999999984,
+            "confidence": 50
+        },
+        "8": {
+            "offset": 1.0799999999999983,
+            "confidence": 50
+        },
+        "1g": {
+            "offset": 1.1700000000000017,
+            "confidence": 50
+        },
+        "1j": {
+            "offset": 1.1999999999999993,
+            "confidence": 50
+        },
+        "1m": {
+            "offset": 1.3000000000000007,
+            "confidence": 50
+        },
+        "a": {
+            "offset": 1.379999999999999,
+            "confidence": 50
+        },
+        "1q": {
+            "offset": 1.5,
+            "confidence": 50
+        },
+        "c": {
+            "offset": 1.6000000000000014,
+            "confidence": 50
+        },
+        "e": {
+            "offset": 1.6400000000000006,
+            "confidence": 50
+        },
+        "1v": {
+            "offset": 1.8299999999999983,
+            "confidence": 50
+        },
+        "1y": {
+            "offset": 1.9600000000000009,
+            "confidence": 50
+        },
+        "g": {
+            "offset": 2.3900000000000006,
+            "confidence": 50
+        },
+        "i": {
+            "offset": 2.3900000000000006,
+            "confidence": 50
+        },
+        "22": {
+            "offset": 2.530000000000001,
+            "confidence": 50
+        },
+        "k": {
+            "offset": 2.870000000000001,
+            "confidence": 50
+        },
+        "26": {
+            "offset": 2.9299999999999997,
+            "confidence": 50
+        },
+        "29": {
+            "offset": 3.1400000000000006,
+            "confidence": 50
+        },
+        "2a": {
+            "offset": 3.1799999999999997,
+            "confidence": 50
+        },
+        "2": {
+            "offset": 3.4570000000000007,
+            "confidence": 100
+        }
+    },
+    "who": [
+        {
+            "id": "o",
+            "label": "BXHT82OR-Child",
+            "startId": "1",
+            "endId": "2a",
+            "confidence": 100,
+            "turns": [
+                {
+                    "id": "n",
+                    "label": "BXHT82OR-Child",
+                    "startId": "1",
+                    "endId": "2",
+                    "confidence": 100,
+                    "token": [
+                        {
+                            "id": "5",
+                            "label": "Because",
+                            "startId": "1a",
+                            "endId": "4",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "pos5",
+                                    "label": "Q",
+                                    "startId": "1a",
+                                    "endId": "4",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "q",
+                                    "label": "b",
+                                    "startId": "1a",
+                                    "endId": "r",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "t",
+                                    "label": "@",
+                                    "startId": "r",
+                                    "endId": "u",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "w",
+                                    "label": "k",
+                                    "startId": "u",
+                                    "endId": "x",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "z",
+                                    "label": "V",
+                                    "startId": "x",
+                                    "endId": "10",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "11",
+                                    "label": "z",
+                                    "startId": "10",
+                                    "endId": "4",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "7",
+                            "label": "where",
+                            "startId": "4",
+                            "endId": "6",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "pos7",
+                                    "label": "DET",
+                                    "startId": "4",
+                                    "endId": "6",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "13",
+                                    "label": "w",
+                                    "startId": "4",
+                                    "endId": "14",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "16",
+                                    "label": "E",
+                                    "startId": "14",
+                                    "endId": "17",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "18",
+                                    "label": "r",
+                                    "startId": "17",
+                                    "endId": "6",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "9",
+                            "label": "they",
+                            "startId": "6",
+                            "endId": "8",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "pos9",
+                                    "label": "PRON",
+                                    "startId": "6",
+                                    "endId": "8",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "1b",
+                                    "label": "D",
+                                    "startId": "6",
+                                    "endId": "1c",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "1d",
+                                    "label": "1",
+                                    "startId": "1c",
+                                    "endId": "8",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "b",
+                            "label": "went",
+                            "startId": "8",
+                            "endId": "a",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posb",
+                                    "label": "VBD",
+                                    "startId": "8",
+                                    "endId": "a",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "1f",
+                                    "label": "w",
+                                    "startId": "8",
+                                    "endId": "1g",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "1i",
+                                    "label": "E",
+                                    "startId": "1g",
+                                    "endId": "1j",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "1l",
+                                    "label": "n",
+                                    "startId": "1j",
+                                    "endId": "1m",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "1n",
+                                    "label": "t",
+                                    "startId": "1m",
+                                    "endId": "a",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "d",
+                            "label": "for",
+                            "startId": "a",
+                            "endId": "c",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posd",
+                                    "label": "Q",
+                                    "startId": "a",
+                                    "endId": "c",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "1p",
+                                    "label": "f",
+                                    "startId": "a",
+                                    "endId": "1q",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "1r",
+                                    "label": "@",
+                                    "startId": "1q",
+                                    "endId": "c",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "f",
+                            "label": "a",
+                            "startId": "c",
+                            "endId": "e",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posf",
+                                    "label": "DET",
+                                    "startId": "c",
+                                    "endId": "e",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "1s",
+                                    "label": "@",
+                                    "startId": "c",
+                                    "endId": "e",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "h",
+                            "label": "walk",
+                            "startId": "e",
+                            "endId": "g",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posh",
+                                    "label": "NN",
+                                    "startId": "e",
+                                    "endId": "g",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "1u",
+                                    "label": "w",
+                                    "startId": "e",
+                                    "endId": "1v",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "1x",
+                                    "label": "$",
+                                    "startId": "1v",
+                                    "endId": "1y",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "1z",
+                                    "label": "k",
+                                    "startId": "1y",
+                                    "endId": "g",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "j",
+                            "label": "__",
+                            "startId": "g",
+                            "endId": "i",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "l",
+                            "label": "the",
+                            "startId": "i",
+                            "endId": "k",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posl",
+                                    "label": "DET",
+                                    "startId": "i",
+                                    "endId": "k",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "21",
+                                    "label": "D",
+                                    "startId": "i",
+                                    "endId": "22",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "23",
+                                    "label": "@",
+                                    "startId": "22",
+                                    "endId": "k",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "m",
+                            "label": "bird.",
+                            "startId": "k",
+                            "endId": "2a",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posm",
+                                    "label": "NN",
+                                    "startId": "k",
+                                    "endId": "2a",
+                                    "confidence": 50
+                                }
+                            ],
+                            "segments": [
+                                {
+                                    "id": "25",
+                                    "label": "b",
+                                    "startId": "k",
+                                    "endId": "26",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "28",
+                                    "label": "3",
+                                    "startId": "26",
+                                    "endId": "29",
+                                    "confidence": 50
+                                },
+                                {
+                                    "id": "2b",
+                                    "label": "d",
+                                    "startId": "29",
+                                    "endId": "2a",
+                                    "confidence": 50
+                                }
+                            ]
+                        }
+                    ],
+                    "utterances": [
+                        {
+                            "id": "3",
+                            "label": "Because where they went for a walk __ the bird.",
+                            "startId": "1",
+                            "endId": "2",
+                            "confidence": 100
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

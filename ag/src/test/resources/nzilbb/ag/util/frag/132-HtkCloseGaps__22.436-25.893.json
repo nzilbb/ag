@@ -1,0 +1,305 @@
+[
+
+{
+    "id": "SOU_T2_BXHT82OR_SR_02122020__22_436_25_893.TextGrid",
+    "offsetGranularity": 0.001,
+    "schema": {
+        "participantLayerId": "who",
+        "turnLayerId": "turns",
+        "utteranceLayerId": "utterances",
+        "wordLayerId": "token",
+        "transcript": {
+            "description": "The annotation graph as a whole",
+            "children": {
+                "who": {
+                    "description": "Participants",
+                    "alignment": 0,
+                    "peers": true,
+                    "peersOverlap": true,
+                    "parentIncludes": true,
+                    "saturated": true,
+                    "children": {
+                        "turns": {
+                            "description": "Speaker turns",
+                            "alignment": 2,
+                            "peers": true,
+                            "peersOverlap": false,
+                            "parentIncludes": true,
+                            "saturated": false,
+                            "children": {
+                                "utterances": {
+                                    "description": "Utterances",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": true
+                                },
+                                "token": {
+                                    "description": "Words",
+                                    "alignment": 2,
+                                    "peers": true,
+                                    "peersOverlap": false,
+                                    "parentIncludes": true,
+                                    "saturated": false,
+                                    "children": {
+                                        "pos": {
+                                            "description": "Part of speech",
+                                            "alignment": 0,
+                                            "peers": false,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true
+                                        },
+                                        "segments": {
+                                            "description": "Phones",
+                                            "alignment": 2,
+                                            "peers": true,
+                                            "peersOverlap": false,
+                                            "parentIncludes": true,
+                                            "saturated": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "anchors": {
+        "1": {
+            "offset": 0.0,
+            "confidence": 100
+        },
+        "1a": {
+            "offset": 0.0,
+            "confidence": 10
+        },
+        "4": {
+            "offset": 0.3457000000000008,
+            "confidence": 10
+        },
+        "6": {
+            "offset": 0.6914000000000016,
+            "confidence": 10
+        },
+        "8": {
+            "offset": 1.0370999999999988,
+            "confidence": 10
+        },
+        "a": {
+            "offset": 1.3827999999999996,
+            "confidence": 10
+        },
+        "c": {
+            "offset": 1.7285000000000004,
+            "confidence": 10
+        },
+        "e": {
+            "offset": 2.074200000000001,
+            "confidence": 10
+        },
+        "g": {
+            "offset": 2.419900000000002,
+            "confidence": 10
+        },
+        "i": {
+            "offset": 2.765599999999999,
+            "confidence": 10
+        },
+        "k": {
+            "offset": 3.1113,
+            "confidence": 10
+        },
+        "2a": {
+            "offset": 3.4570000000000007,
+            "confidence": 10
+        },
+        "2": {
+            "offset": 3.4570000000000007,
+            "confidence": 100
+        }
+    },
+    "who": [
+        {
+            "id": "o",
+            "label": "BXHT82OR-Child",
+            "startId": "1",
+            "endId": "2",
+            "confidence": 100,
+            "turns": [
+                {
+                    "id": "n",
+                    "label": "BXHT82OR-Child",
+                    "startId": "1",
+                    "endId": "2",
+                    "confidence": 100,
+                    "utterances": [
+                        {
+                            "id": "3",
+                            "label": "Because where they went for a walk __ the bird.",
+                            "startId": "1",
+                            "endId": "2",
+                            "confidence": 100
+                        }
+                    ],
+                    "token": [
+                        {
+                            "id": "5",
+                            "label": "Because",
+                            "startId": "1a",
+                            "endId": "4",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "pos5",
+                                    "label": "Q",
+                                    "startId": "1a",
+                                    "endId": "4",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "7",
+                            "label": "where",
+                            "startId": "4",
+                            "endId": "6",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "pos7",
+                                    "label": "DET",
+                                    "startId": "4",
+                                    "endId": "6",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "9",
+                            "label": "they",
+                            "startId": "6",
+                            "endId": "8",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "pos9",
+                                    "label": "PRON",
+                                    "startId": "6",
+                                    "endId": "8",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "b",
+                            "label": "went",
+                            "startId": "8",
+                            "endId": "a",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posb",
+                                    "label": "VBD",
+                                    "startId": "8",
+                                    "endId": "a",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "d",
+                            "label": "for",
+                            "startId": "a",
+                            "endId": "c",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posd",
+                                    "label": "Q",
+                                    "startId": "a",
+                                    "endId": "c",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "f",
+                            "label": "a",
+                            "startId": "c",
+                            "endId": "e",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posf",
+                                    "label": "DET",
+                                    "startId": "c",
+                                    "endId": "e",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "h",
+                            "label": "walk",
+                            "startId": "e",
+                            "endId": "g",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posh",
+                                    "label": "NN",
+                                    "startId": "e",
+                                    "endId": "g",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "j",
+                            "label": "__",
+                            "startId": "g",
+                            "endId": "i",
+                            "confidence": 100
+                        },
+                        {
+                            "id": "l",
+                            "label": "the",
+                            "startId": "i",
+                            "endId": "k",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posl",
+                                    "label": "DET",
+                                    "startId": "i",
+                                    "endId": "k",
+                                    "confidence": 50
+                                }
+                            ]
+                        },
+                        {
+                            "id": "m",
+                            "label": "bird.",
+                            "startId": "k",
+                            "endId": "2a",
+                            "confidence": 100,
+                            "pos": [
+                                {
+                                    "id": "posm",
+                                    "label": "NN",
+                                    "startId": "k",
+                                    "endId": "2a",
+                                    "confidence": 50
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}]
