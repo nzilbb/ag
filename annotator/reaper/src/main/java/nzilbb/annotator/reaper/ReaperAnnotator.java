@@ -504,19 +504,22 @@ public class ReaperAnnotator extends Annotator {
         
         // build the graph from the stream
         Graph[] graphs = deserializer.deserialize();
-        for (String warning : deserializer.getWarnings()) setStatus(warning);
-        Graph reaperGraph = graphs[0];
-        
-        reaperGraph.setId(transcript.getId());
-        reaperGraph.trackChanges();
-        Annotation[] f0Annotations = reaperGraph.all(f0LayerId);
-        for (Annotation a : f0Annotations) {
-          Anchor time = transcript.getOrCreateAnchorAt(
-            a.getStart().getOffset(), Constants.CONFIDENCE_AUTOMATIC);          
-          transcript.createAnnotation(time, time, f0LayerId, a.getLabel(), transcript);
-        } // next f0 annotation
-        setStatus("Added "+f0Annotations.length+" annotations to " + transcript.getId());
-        transcript.put("@valid", Boolean.TRUE); // TODO remove this workaround
+        if (!isCancelling()) {
+          for (String warning : deserializer.getWarnings()) setStatus(warning);
+          Graph reaperGraph = graphs[0];
+          
+          reaperGraph.setId(transcript.getId());
+          reaperGraph.trackChanges();
+          Annotation[] f0Annotations = reaperGraph.all(f0LayerId);
+          for (Annotation a : f0Annotations) {
+            if (isCancelling()) break;
+            Anchor time = transcript.getOrCreateAnchorAt(
+              a.getStart().getOffset(), Constants.CONFIDENCE_AUTOMATIC);          
+            transcript.createAnnotation(time, time, f0LayerId, a.getLabel(), transcript);
+          } // next f0 annotation
+          setStatus("Added "+f0Annotations.length+" annotations to " + transcript.getId());
+          transcript.put("@valid", Boolean.TRUE); // TODO remove this workaround
+        }
       } // parse .f0 file to generate annotations
 
     } catch (TransformationException x) {
