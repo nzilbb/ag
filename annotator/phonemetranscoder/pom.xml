@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.phonemetranscoder</artifactId>
   <name>nzilbb.annotator.phonemetranscoder</name>
-  <version>1.0.3</version>
+  <version>1.1.0</version>
   <description>Translates phonemice transcriptions from one encoding to another.</description>
 
   <properties>

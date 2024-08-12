@@ -210,6 +210,30 @@ public class PhonemeTranscoder extends Annotator {
    * List of mappings from source to destination labels for custom translation.
    */
   protected LinkedHashMap<String,String> customTranslation = new LinkedHashMap<String,String>();
+
+  /**
+   * Symbol delimiter for the custom mapping, e.g. " ".
+   * <tt>null</tt> or <tt>""</tt> means no delimiter.
+   * @see #getCustomDelimiter()
+   * @see #setCustomDelimiter(String)
+   */
+  protected String customDelimiter;
+  /**
+   * Getter for {@link #customDelimiter}: Symbol delimiter for the custom mapping, e.g. " ".
+   * <tt>null</tt> or <tt>""</tt> means no delimiter.
+   * @return Symbol delimiter for the custom mapping, e.g. " ".
+   */
+  public String getCustomDelimiter() { return customDelimiter; }
+  /**
+   * Setter for {@link #customDelimiter}: Symbol delimiter for the custom mapping, e.g. " ".
+   * <tt>null</tt> or <tt>""</tt> means no delimiter.
+   * @param newCustomDelimiter Symbol delimiter for the custom mapping, e.g. " ".
+   */
+  public PhonemeTranscoder setCustomDelimiter(String newCustomDelimiter) {
+    customDelimiter = newCustomDelimiter;
+    if (customDelimiter != null && customDelimiter.length() == 0) customDelimiter = null;
+    return this; }
+
   
   /**
    * Whether to copy source characters that match no mapping, for custom translations.
@@ -287,15 +311,26 @@ public class PhonemeTranscoder extends Annotator {
                     
                     // nibble off the right amount from the source label
                     label = label.substring(source.length());
-			
-                    destination.append(customTranslation.get(source));
+
+                    String match = customTranslation.get(source);
+                    if (match.length() > 0) {
+                      if (customDelimiter != null && destination.length() > 0) {
+                        destination.append(customDelimiter);
+                      }
+                      destination.append(customTranslation.get(source));
+                    }
                     break;
                   } // match found
                 } // next mapping
 		  
                 if (!matchFound) {
                   // copy as is?
-                  if (copyCharacters) destination.append(label.substring(0,1));
+                  if (copyCharacters) {
+                    if (customDelimiter != null && destination.length() > 0) {
+                      destination.append(customDelimiter);
+                    }
+                    destination.append(label.substring(0,1));
+                  }
                   // nibble off the first character
                   label = label.substring(1);
                 }

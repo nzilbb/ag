@@ -339,6 +339,7 @@ public class TestPhonemeTranscoder {
       +"\"destinationLayerId\":\"custom\","
       +"\"translation\":\"custom\","
       +"\"copyCharacters\":\"false\","
+      +"\"customDelimiter\":\"\"," // explicitly no delimiter
       +"\"custom\":["
       +"{\"source\":\"th\",\"destination\":\"ð\"},"
       +"{\"source\":\"er\",\"destination\":\"ɛǝ\"},"
@@ -404,6 +405,100 @@ public class TestPhonemeTranscoder {
     assertEquals("i", prons.next());
     assertEquals("ǝ", prons.next());
     assertEquals("ǝʃ", prons.next());
+    
+    // check parents
+    Annotation words[] = g.all("word");
+    Annotation tags[] = g.all("custom");
+    for (int w = 0; w < words.length; w++) {
+      assertEquals("Parent of tag " + w, words[w], tags[w].getParent());
+    }
+  }
+
+  /** 
+   * Ensure custom mapping of source to destination characters, with a delimiter, works. 
+   */
+  @Test public void customTranscodingWithoutDelimiter() throws Exception {
+    
+    Graph g = graph();
+    // tag the graph as being in New Zealand English
+    g.addTag(g, "transcript_language", "en-NZ");
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // use specified configuration
+    annotator.setTaskParameters(
+      "{\"sourceLayerId\":\"word\","
+      +"\"transcriptLanguageLayerId\":\"\","
+      +"\"phraseLanguageLayerId\":\"\","
+      +"\"destinationLayerId\":\"custom\","
+      +"\"translation\":\"custom\","
+      +"\"copyCharacters\":\"false\","
+      +"\"customDelimiter\":\" \"," // space delimiter
+      +"\"custom\":["
+      +"{\"source\":\"th\",\"destination\":\"ð\"},"
+      +"{\"source\":\"er\",\"destination\":\"ɛǝ\"},"
+      +"{\"source\":\"e\",\"destination\":\"i\"},"
+      +"{\"source\":\"a\",\"destination\":\"ǝ\"},"
+      +"{\"source\":\"tio\",\"destination\":\"ʃ\"},"
+      +"{\"source\":\"ll\",\"destination\":\"l\"},"
+      +"{\"source\":\"'\",\"destination\":\"\"}"
+      +"]}");          // CMU ARPAbet encoding
+    
+    assertEquals("source layer",
+                 "word", annotator.getSourceLayerId());
+    assertNull("transcript language layer",
+               annotator.getTranscriptLanguageLayerId());
+    assertNull("phrase language layer",
+               annotator.getPhraseLanguageLayerId());
+    assertEquals("destination layer",
+                 "custom", annotator.getDestinationLayerId());
+    assertNotNull("destination layer was created",
+                  schema.getLayer(annotator.getDestinationLayerId()));
+    assertEquals("destination layer child of word",
+                 "word", schema.getLayer(annotator.getDestinationLayerId()).getParentId());
+    assertEquals("destination layer not aligned",
+                 Constants.ALIGNMENT_NONE,
+                 schema.getLayer(annotator.getDestinationLayerId()).getAlignment());
+    assertEquals("destination layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getDestinationLayerId()).getType());
+    assertTrue("destination layer allows peers",
+               schema.getLayer(annotator.getDestinationLayerId()).getPeers());
+    assertEquals("translation",
+                 "custom", annotator.getTranslation());
+    assertFalse("don't copy characters",
+                annotator.getCopyCharacters());
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("1 required layer: "+requiredLayers,
+                 1, requiredLayers.size());
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    String outputLayers[] = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                 1, outputLayers.length);
+    assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                 "custom", outputLayers[0]);
+    
+    Annotation firstWord = g.first("word");
+    assertEquals("double check the first word is what we think it is: "+firstWord,
+                 "there'll", firstWord.getLabel());
+      
+    assertEquals("double check there are sources: "+Arrays.asList(g.all("word")),
+                 4, g.all("word").length);
+    assertEquals("double check there are no destinations: "+Arrays.asList(g.all("custom")),
+                 0, g.all("custom").length);
+    // run the annotator
+    annotator.transform(g);
+    List<String> pronLabels = Arrays.stream(g.all("custom"))
+      .map(annotation->annotation.getLabel()).collect(Collectors.toList());
+    assertEquals("Correct number of tags "+pronLabels,
+                 4, pronLabels.size());
+    Iterator<String> prons = pronLabels.iterator();
+    assertEquals("ð ɛǝ i l", prons.next());
+    assertEquals("i", prons.next());
+    assertEquals("ǝ", prons.next());
+    assertEquals("ǝ ʃ", prons.next());
     
     // check parents
     Annotation words[] = g.all("word");

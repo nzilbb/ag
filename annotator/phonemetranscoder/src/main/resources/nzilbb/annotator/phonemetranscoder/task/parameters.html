@@ -1,0 +1,79 @@
+<h3>Phoneme Transcoder</h3>
+
+<p> The Phoneme Transcoder translates word pronunciations from one phoneme encoding system
+  to another. </p>
+
+<p> There are a number of predefined phoneme encoding translations that can be used
+  (e.g. ARPAbet to CELEX DISC) or a custom symbol mapping can be specified. </p>
+
+<p> Configuration parameters are encoded as a JSON string, e.g. <br>
+  <pre>{
+    "sourceLayerId": "word",
+    "transcriptLanguageLayerId": "transcript_language",
+    "phraseLanguageLayerId": "language",
+    "destinationLayerId": "pronunciation",
+    "translation": "custom",
+    "copyCharacters": "true",
+    "custom": [
+      { "source":"th",  "destination":"ð"},
+      { "source":"er",  "destination":"ɛǝ"},
+      { "source":"e",   "destination":"i"},
+      { "source":"a",   "destination":"ǝ"},
+      { "source":"tio", "destination":"ʃ"},
+      { "source":"ll",  "destination":"l"},
+      { "source":"'",   "destination":""}
+    ]
+}</pre>
+  
+<p> The parameters are: </p>
+<dl>
+  <dt> sourceLayerId </dt> <dd> String ID of the input layer, which includes labels whose encoding
+    will be converted. </dd> 
+  <dt> language </dt> <dd> String that determines which language to target for
+    annotation. Leave this blank or omitted to ignore language, or enter an ISO
+    language/locale code, e.g. <q>en-NZ</q>, to target varieties of a particular
+    language. This setting is treated as a regular expression, so <q>es.*</q> will target
+    all varieties of Spanish, etc. If this parameters is specified,
+    the <i>transcriptLanguageLayerId</i> and <i>phraseLanguageLayerId</i> parameters
+    should also be specified, so the language of any given token can be determined.</dd>
+  <dt> phraseLanguageLayerId </dt> <dd> The text may be language-tagged - i.e. be enclosed
+    by an annotation on this layer - e.g. <q>language</q> </dd>
+  <dt> transcriptLanguageLayerId </dt> <dd> If text is not language-tagged, it is assumed
+    to be in the language of the transcript as a whole, which is determined by this layer
+    - e.g. <q>transcript_language</q> </dd>
+  <dt> destinationLayerId </dt> <dd> This is the ID of the layer that new annotations will
+    be added to - i.e. the output layer. </dd>
+  <dt> translation </dt> <dd> This string parameter determines what encoding the source and
+    destination layers are assumed to have, for transcoding purposes.<br>
+    Valid values are:
+    <ul>
+      <li> <q>DISC2CMU</q> : DISC → CMU </li>
+      <li> <q>CMU2DISC</q> : CMU → DISC </li>
+      <li> <q>DISC2ARPAbet</q> : DISC → ARPAbet </li>
+      <li> <q>ARPAbet2DISC</q> : ARPAbet → DISC </li>
+      <li> <q>DISC2Unisyn</q> : DISC → Unisyn </li>
+      <li> <q>Unisyn2DISC</q> : Unisyn → DISC </li>
+      <li> <q>DISC2Kirshenbaum</q> : DISC → Kirshenbaum </li>
+      <li> <q>Kirshenbaum2DISC</q> : Kirshenbaum → DISC </li>
+      <li> <q>DISC2SAMPA</q> : DISC → SAMPA </li>
+      <li> <q>SAMPA2DISC</q> : SAMPA → DISC </li>
+      <li> <q>DISC2XSAMPA</q> : DISC → XSAMPA </li>
+      <li> <q>XSAMPA2DISC</q> : XSAMPA → DISC </li>
+      <li> <q>DISC2IPA</q> : DISC → IPA </li>
+      <li> <q>custom</q> : Custom translation, defined by the <i>custom</i> parameter. </li>
+    </ul>
+  </dd>
+  <dt> copyCharacters </dt> <dd> For custom mappings, if the source layer annotation
+    matches no mapping, then the character from the input can be either ignored (i.e. set
+    this parameter to <tt>false</tt>) or it can be copied through to the output layer
+    label (i.e. set this parameter to <tt>true</tt>). </dd> 
+  <dt> customDelimiter </dt> <dd> Optional custom mapping string parameter. If specified,
+    each symbol in the output label will be delimited by this string. e.g. to delimit IPA
+    symbols with  space, set this parameter to " ".</dd>
+  <dt> custom </dt> <dd> If <i>translation</i> is set to <q>custom</q>, this parameter
+    specifies the map of input to output symbols. This is specified as an array of
+    object, each object having a <q>source</q> string attribute specifying the symbol in
+    the source layer, and a <q>destination</q> string attribute which is the symbol to output
+    in the destination layer label when the <i>source</i> symbol is found.</dd>
+</dl>
+

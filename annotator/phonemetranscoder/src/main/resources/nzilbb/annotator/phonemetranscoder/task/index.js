@@ -81,6 +81,7 @@ getSchema(s => {
                 document.getElementById("phraseLanguageLayerId").value
                     = parameters.phraseLanguageLayerId;
                 document.getElementById("language").value = parameters.language;
+                document.getElementById("customDelimiter").value = parameters.customDelimiter;
                 document.getElementById("copyCharacters").value = parameters.copyCharacters;
                 destinationLayerId = document.getElementById("destinationLayerId");
                 destinationLayerId.value = parameters.destinationLayerId;

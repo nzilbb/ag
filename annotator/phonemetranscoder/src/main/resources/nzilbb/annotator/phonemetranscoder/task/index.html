@@ -18,7 +18,7 @@
       
       </details>
       <details><summary><b> Translation </b></summary>
-        <p> This setting determines what encoding the source and destionation layers are
+        <p> This setting determines what encoding the source and destination layers are
           assumed to have, for transcoding purposes. </p>
         <p> For example, if the <b>Source Layer</b> contains pronunciations encoded with
           CELEX DISC labels, and you want the <b>Destination Layer</b> to contain those
@@ -183,7 +183,7 @@
         <p> The <i>Language</i> setting determines which language to target for
           annotation. Leave this blank to ignore language, or enter an ISO language/locale code,
           e.g. <tt> en-NZ </tt>, to target varieties of a particular language. This setting is
-          treated as a regular expression, so <tt> es.*</tt> will target all varietys of
+          treated as a regular expression, so <tt> es.*</tt> will target all varieties of
           Spanish, etc. </p>  
         
         <p>If you specify a language, then only utterances in the language specified will be
@@ -274,6 +274,16 @@
 	      <img src="remove.svg" alt="remove" />
 	    </button>
           </div>
+        </div>
+        <div id="delimiter"
+             title="Each output symbol may be separated from the others with a delimiter.">
+          <label for="customDelimiter">Symbol Delimiter</label>
+          <span>
+            <select name="customDelimiter" id="customDelimiter">
+	      <option value="">No delimiter</option>
+	      <option value=" ">Add a space between each symbol</option>
+            </select>
+          </span>
         </div>
         <div id="nomapping"
              title="If the source layer annotation matches no mapping, then any pre-existing annotation in the target layer should be...">
