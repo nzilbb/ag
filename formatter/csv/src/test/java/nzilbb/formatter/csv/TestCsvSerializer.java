@@ -51,7 +51,9 @@ public class TestCsvSerializer
       
       ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(0, serializer.configure(configuration, g.getSchema()).size());
+      assertEquals(1, serializer.configure(configuration, g.getSchema()).size());
+      assertEquals("minimumAnchorConfidence", Integer.valueOf(50), 
+                   (Integer)configuration.get("minimumAnchorConfidence").getValue());
       
       // no layers required
       String[] requiredLayers = serializer.getRequiredLayers();
@@ -86,11 +88,17 @@ public class TestCsvSerializer
       
       // create deserializer
       CsvSerializer serializer = new CsvSerializer();
-      serializer.setMinimumAnchorConfidence(null);
       
       ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
+      assertEquals(1, configuration.size());
+      assertEquals("minimumAnchorConfidence", Integer.valueOf(50), 
+                   (Integer)configuration.get("minimumAnchorConfidence").getValue());
+      configuration.get("minimumAnchorConfidence").setValue(Integer.valueOf(0));
+      
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(0, serializer.configure(configuration, g.getSchema()).size());
+      assertEquals(1, serializer.configure(configuration, g.getSchema()).size());
+      assertEquals("minimumAnchorConfidence", Integer.valueOf(0), 
+                   (Integer)configuration.get("minimumAnchorConfidence").getValue());
       
       // no layers required
       String[] requiredLayers = serializer.getRequiredLayers();
@@ -128,7 +136,9 @@ public class TestCsvSerializer
       
       ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(0, serializer.configure(configuration, g.getSchema()).size());
+      assertEquals(1, serializer.configure(configuration, g.getSchema()).size());
+      assertEquals("minimumAnchorConfidence", Integer.valueOf(50), 
+                   (Integer)configuration.get("minimumAnchorConfidence").getValue());
       
       // no layers required
       String[] requiredLayers = serializer.getRequiredLayers();
@@ -166,7 +176,9 @@ public class TestCsvSerializer
       
       ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
       // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-      assertEquals(0, serializer.configure(configuration, g.getSchema()).size());
+      assertEquals(1, serializer.configure(configuration, g.getSchema()).size());
+      assertEquals("minimumAnchorConfidence", Integer.valueOf(50), 
+                   (Integer)configuration.get("minimumAnchorConfidence").getValue());
       
       // no layers required
       String[] requiredLayers = serializer.getRequiredLayers();

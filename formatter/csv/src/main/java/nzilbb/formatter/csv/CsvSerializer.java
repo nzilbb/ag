@@ -1,5 +1,5 @@
 //
-// Copyright 2019-2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -59,315 +59,334 @@ import org.apache.commons.csv.*;
  */
 public class CsvSerializer implements GraphSerializer {
    
-   // Attributes:
+  // Attributes:
    
-   /** Static format so we don't keep creating and destroying one */
-   private static DecimalFormat fmt = new DecimalFormat(
-      // force the locale to something with . as the decimal separator
-      "0.000", new DecimalFormatSymbols(Locale.UK));
+  /** Static format so we don't keep creating and destroying one */
+  private static DecimalFormat fmt = new DecimalFormat(
+    // force the locale to something with . as the decimal separator
+    "0.000", new DecimalFormatSymbols(Locale.UK));
    
-   protected Vector<String> warnings;
-   /**
-    * Returns any warnings that may have arisen during the last execution of
-    * {@link #serialize(Spliterator,String[],Consumer,Consumer,Consumer)}.
-    * <p>{@link GraphSerializer} method.
-    * @return A possibly empty list of warnings.
-    */
-   public String[] getWarnings() {
-      return warnings.toArray(new String[0]);
-   }
+  protected Vector<String> warnings;
+  /**
+   * Returns any warnings that may have arisen during the last execution of
+   * {@link #serialize(Spliterator,String[],Consumer,Consumer,Consumer)}.
+   * <p>{@link GraphSerializer} method.
+   * @return A possibly empty list of warnings.
+   */
+  public String[] getWarnings() {
+    return warnings.toArray(new String[0]);
+  }
    
-   /**
-    * Layer schema.
-    * @see #getSchema()
-    * @see #setSchema(Schema)
-    */
-   protected Schema schema;
-   /**
-    * Getter for {@link #schema}: Layer schema.
-    * @return Layer schema.
-    */
-   public Schema getSchema() { return schema; }
-   /**
-    * Setter for {@link #schema}: Layer schema.
-    * @param newSchema Layer schema.
-    */
-   public CsvSerializer setSchema(Schema newSchema) { schema = newSchema; return this; }
+  /**
+   * Layer schema.
+   * @see #getSchema()
+   * @see #setSchema(Schema)
+   */
+  protected Schema schema;
+  /**
+   * Getter for {@link #schema}: Layer schema.
+   * @return Layer schema.
+   */
+  public Schema getSchema() { return schema; }
+  /**
+   * Setter for {@link #schema}: Layer schema.
+   * @param newSchema Layer schema.
+   */
+  public CsvSerializer setSchema(Schema newSchema) { schema = newSchema; return this; }
 
-   /**
-    * Participant information layer.
-    * @see #getParticipantLayer()
-    * @see #setParticipantLayer(Layer)
-    */
-   protected Layer participantLayer;
-   /**
-    * Getter for {@link #participantLayer}: Participant information layer.
-    * @return Participant information layer.
-    */
-   public Layer getParticipantLayer() { return participantLayer; }
-   /**
-    * Setter for {@link #participantLayer}: Participant information layer.
-    * @param newParticipantLayer Participant information layer.
-    */
-   public CsvSerializer setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; return this; }
+  /**
+   * Participant information layer.
+   * @see #getParticipantLayer()
+   * @see #setParticipantLayer(Layer)
+   */
+  protected Layer participantLayer;
+  /**
+   * Getter for {@link #participantLayer}: Participant information layer.
+   * @return Participant information layer.
+   */
+  public Layer getParticipantLayer() { return participantLayer; }
+  /**
+   * Setter for {@link #participantLayer}: Participant information layer.
+   * @param newParticipantLayer Participant information layer.
+   */
+  public CsvSerializer setParticipantLayer(Layer newParticipantLayer) { participantLayer = newParticipantLayer; return this; }
    
-   /**
-    * Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
-    * @see #getMinimumAnchorConfidence()
-    * @see #setMinimumAnchorConfidence(Integer)
-    */
-   protected Integer minimumAnchorConfidence = Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC);
-   /**
-    * Getter for {@link #minimumAnchorConfidence}: Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
-    * @return Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
-    */
-   public Integer getMinimumAnchorConfidence() { return minimumAnchorConfidence; }
-   /**
-    * Setter for {@link #minimumAnchorConfidence}: Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
-    * @param newMinimumAnchorConfidence Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
-    */
-   public CsvSerializer setMinimumAnchorConfidence(Integer newMinimumAnchorConfidence) { minimumAnchorConfidence = newMinimumAnchorConfidence; return this; }
+  /**
+   * Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
+   * @see #getMinimumAnchorConfidence()
+   * @see #setMinimumAnchorConfidence(Integer)
+   */
+  protected Integer minimumAnchorConfidence = Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC);
+  /**
+   * Getter for {@link #minimumAnchorConfidence}: Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
+   * @return Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
+   */
+  public Integer getMinimumAnchorConfidence() { return minimumAnchorConfidence; }
+  /**
+   * Setter for {@link #minimumAnchorConfidence}: Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
+   * @param newMinimumAnchorConfidence Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
+   */
+  public CsvSerializer setMinimumAnchorConfidence(Integer newMinimumAnchorConfidence) { minimumAnchorConfidence = newMinimumAnchorConfidence; return this; }
 
-   private long graphCount = 0;
-   private long consumedGraphCount = 0;
-   /**
-    * Determines how far through the serialization is.
-    * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
-    */
-   public Integer getPercentComplete() {
-      if (graphCount < 0) return null;
-      return (int)((consumedGraphCount * 100) / graphCount);
-   }
+  private long graphCount = 0;
+  private long consumedGraphCount = 0;
+  /**
+   * Determines how far through the serialization is.
+   * @return An integer between 0 and 100 (inclusive), or null if progress can not be calculated.
+   */
+  public Integer getPercentComplete() {
+    if (graphCount < 0) return null;
+    return (int)((consumedGraphCount * 100) / graphCount);
+  }
    
-   /**
-    * Serialization marked for cancelling.
-    * @see #getCancelling()
-    * @see #setCancelling(boolean)
-    */
-   protected boolean cancelling;
-   /**
-    * Getter for {@link #cancelling}: Serialization marked for cancelling.
-    * @return Serialization marked for cancelling.
-    */
-   public boolean getCancelling() { return cancelling; }
-   /**
-    * Setter for {@link #cancelling}: Serialization marked for cancelling.
-    * @param newCancelling Serialization marked for cancelling.
-    */
-   public CsvSerializer setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
-   /**
-    * Cancel the serialization in course (if any).
-    */
-   public void cancel() {
-      setCancelling(true);
-   }
+  /**
+   * Serialization marked for cancelling.
+   * @see #getCancelling()
+   * @see #setCancelling(boolean)
+   */
+  protected boolean cancelling;
+  /**
+   * Getter for {@link #cancelling}: Serialization marked for cancelling.
+   * @return Serialization marked for cancelling.
+   */
+  public boolean getCancelling() { return cancelling; }
+  /**
+   * Setter for {@link #cancelling}: Serialization marked for cancelling.
+   * @param newCancelling Serialization marked for cancelling.
+   */
+  public CsvSerializer setCancelling(boolean newCancelling) { cancelling = newCancelling; return this; }
+  /**
+   * Cancel the serialization in course (if any).
+   */
+  public void cancel() {
+    setCancelling(true);
+  }
 
-   // Methods:
+  // Methods:
    
-   /**
-    * Default constructor.
-    */
-   public CsvSerializer() {
-   } // end of constructor
+  /**
+   * Default constructor.
+   */
+  public CsvSerializer() {
+  } // end of constructor
 
-   /**
-    * Returns the serializer's descriptor.
-    * <p>{@link GraphSerializer} method.
-    * @return The serializer's descriptor
-    */
-   public SerializationDescriptor getDescriptor() {
-      return new SerializationDescriptor(
-	 "Comma Separated Values", "1.2", "text/csv", ".csv", "1.0.0", getClass().getResource("icon.png"));
-   }
+  /**
+   * Returns the serializer's descriptor.
+   * <p>{@link GraphSerializer} method.
+   * @return The serializer's descriptor
+   */
+  public SerializationDescriptor getDescriptor() {
+    return new SerializationDescriptor(
+      "Comma Separated Values", getClass().getPackage().getImplementationVersion(),
+      "text/csv", ".csv", "1.0.0", getClass().getResource("icon.png"));
+  }
 
-   /**
-    * Sets parameters for deserializer as a whole.  This might include database connection parameters, locations of supporting files, etc.
-    * <p>When the deserializer is installed, this method should be invoked with an empty parameter
-    *  set, to discover what (if any) general configuration is required. If parameters are
-    *  returned, and user interaction is possible, then the user may be presented with an
-    *  interface for setting/confirming these parameters.
-    * <p>{@link GraphSerializer} method.
-    * @param configuration The configuration for the deserializer. 
-    * @param schema The layer schema, definining layers and the way they interrelate.
-    * @return A list of configuration parameters (still) must be set before {@link GraphSerializer#getRequiredLayers()} can be invoked. If this is an empty list, {@link GraphSerializer#getRequiredLayers()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
-    */
-   public ParameterSet configure(ParameterSet configuration, Schema schema) {
-      setSchema(schema);
-      setParticipantLayer(schema.getParticipantLayer());
-      return configuration;
-   }   
+  /**
+   * Sets parameters for deserializer as a whole.  This might include database connection
+   * parameters, locations of supporting files, etc. 
+   * <p>When the deserializer is installed, this method should be invoked with an empty parameter
+   *  set, to discover what (if any) general configuration is required. If parameters are
+   *  returned, and user interaction is possible, then the user may be presented with an
+   *  interface for setting/confirming these parameters.
+   * <p>{@link GraphSerializer} method.
+   * @param configuration The configuration for the deserializer. 
+   * @param schema The layer schema, definining layers and the way they interrelate.
+   * @return A list of configuration parameters (still) must be set before {@link GraphSerializer#getRequiredLayers()} can be invoked. If this is an empty list, {@link GraphSerializer#getRequiredLayers()} can be invoked. If it's not an empty list, this method must be invoked again with the returned parameters' values set.
+   */
+  public ParameterSet configure(ParameterSet configuration, Schema schema) {
+    setSchema(schema);
+    setParticipantLayer(schema.getParticipantLayer());
+    
+    // set any values that have been passed in
+    for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
 
-   /**
-    * Determines which layers, if any, must be present in the graph that will be serialized.
-    * <p>{@link GraphSerializer} method.
-    * @return A list of IDs of layers that must be present in the graph that will be serialized.
-    * @throws SerializationParametersMissingException If not all required parameters have a value.
-    */
-   public String[] getRequiredLayers() throws SerializationParametersMissingException {
-      return new String[0];
-   }
+    if (!configuration.containsKey("minimumAnchorConfidence")) {
+      configuration.addParameter(
+        new Parameter("minimumAnchorConfidence", Integer.class, 
+                      "Min. Anchor Confidence",
+                      "Minimum confidence for an annotation's offset before it's included"
+                      +" in the CSV file. Generally, if set to 100, only manually set offsets "
+                      +" will be output, if set to 50, manually set and automatically aligned"
+                      +" offsets with be output, and specifying 0 ensures all offsets are output"
+                      +" regardless of reliability.", true));
+    }
+    if (configuration.get("minimumAnchorConfidence").getValue() == null) {
+      configuration.get("minimumAnchorConfidence").setValue(getMinimumAnchorConfidence());
+    }
 
-   /**
-    * Determines the cardinality between graphs and serialized streams.
-    * @return {@link GraphSerializer.Cardinality}.NtoOne as there is one stream produced
-    * regardless of  how many graphs are serialized.
-    */
-   public Cardinality getCardinality() {
-      return Cardinality.NToOne;
-   }
+    return configuration;
+  }   
 
-   // GraphSerializer method
+  /**
+   * Determines which layers, if any, must be present in the graph that will be serialized.
+   * <p>{@link GraphSerializer} method.
+   * @return A list of IDs of layers that must be present in the graph that will be serialized.
+   * @throws SerializationParametersMissingException If not all required parameters have a value.
+   */
+  public String[] getRequiredLayers() throws SerializationParametersMissingException {
+    return new String[0];
+  }
+
+  /**
+   * Determines the cardinality between graphs and serialized streams.
+   * @return {@link GraphSerializer.Cardinality}.NtoOne as there is one stream produced
+   * regardless of  how many graphs are serialized.
+   */
+  public Cardinality getCardinality() {
+    return Cardinality.NToOne;
+  }
+
+  // GraphSerializer method
    
-   /**
-    * Serializes the given graph, generating one or more {@link NamedStream}s.
-    * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
-    *  textgrid), however there are formats that use multiple files for the same transcript
-    *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
-    *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
-    *  export), which is why this method accepts a list.
-    * @param graphs The graphs to serialize.
-    * @param layerIds The IDs of the layers to include, or null for all layers.
-    * @param consumer The object receiving the streams.
-    * @param warnings The object receiving warning messages.
-    * @throws SerializerNotConfiguredException if the object has not been configured.
-    */
-   public void serialize(
-      Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
-      Consumer<String> warnings, Consumer<SerializationException> errors) 
-      throws SerializerNotConfiguredException {
+  /**
+   * Serializes the given graph, generating one or more {@link NamedStream}s.
+   * <p>Many data formats will only yield one stream (e.g. Transcriber transcript or Praat
+   *  textgrid), however there are formats that use multiple files for the same transcript
+   *  (e.g. XWaves, EmuR), which is why this method returns a list. There are formats that
+   *  are capable of storing multiple transcripts in the same file (e.g. AGTK, Transana XML
+   *  export), which is why this method accepts a list.
+   * @param graphs The graphs to serialize.
+   * @param layerIds The IDs of the layers to include, or null for all layers.
+   * @param consumer The object receiving the streams.
+   * @param warnings The object receiving warning messages.
+   * @throws SerializerNotConfiguredException if the object has not been configured.
+   */
+  public void serialize(
+    Spliterator<Graph> graphs, String[] layerIds, Consumer<NamedStream> consumer,
+    Consumer<String> warnings, Consumer<SerializationException> errors) 
+    throws SerializerNotConfiguredException {
       
-      graphCount = graphs.getExactSizeIfKnown();
-      try {
-         final StringBuffer fileName = new StringBuffer();
-         File csvFile = File.createTempFile("annotations.",".csv");
-         final CSVPrinter csv = new CSVPrinter(
-            new OutputStreamWriter(new FileOutputStream(csvFile), "UTF-8"), CSVFormat.EXCEL);
+    graphCount = graphs.getExactSizeIfKnown();
+    try {
+      final StringBuffer fileName = new StringBuffer();
+      File csvFile = File.createTempFile("annotations.",".csv");
+      final CSVPrinter csv = new CSVPrinter(
+        new OutputStreamWriter(new FileOutputStream(csvFile), "UTF-8"), CSVFormat.EXCEL);
          
-         csv.print("graph");
-         Vector<Layer> attributeLayers = new Vector<Layer>();
-         Vector<Layer> temporalLayers = new Vector<Layer>();
-         for (String layerId : layerIds) {
-            Layer layer = schema.getLayer(layerId);
-            if ((layer.getParentId().equals(schema.getRoot().getId())
-                 || layer.getParentId().equals(schema.getParticipantLayerId()))
-                && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
-               attributeLayers.add(layer);
-            } else {
-               temporalLayers.add(layer);
-            }
-         } // next layerId
+      csv.print("graph");
+      Vector<Layer> attributeLayers = new Vector<Layer>();
+      Vector<Layer> temporalLayers = new Vector<Layer>();
+      for (String layerId : layerIds) {
+        Layer layer = schema.getLayer(layerId);
+        if ((layer.getParentId().equals(schema.getRoot().getId())
+             || layer.getParentId().equals(schema.getParticipantLayerId()))
+            && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
+          attributeLayers.add(layer);
+        } else {
+          temporalLayers.add(layer);
+        }
+      } // next layerId
 
-         // there will be an attribute layer value, but no offsets, for every CSV row
-         for (Layer layer : attributeLayers) {
-            csv.print(layer.getId());
-         }
-
-         // there will be one temporal layer/value per CSV row
-         for (Layer layer : temporalLayers) {
-            csv.print(layer.getId());
-            switch (layer.getAlignment()) {
-               case Constants.ALIGNMENT_INSTANT:
-                  csv.print(layer.getId() + " offset");
-                  break;
-               default: // INTERVAL and NONE
-                  csv.print(layer.getId() + " start");
-                  csv.print(layer.getId() + " end");
-                  break;
-            }
-         } // next temporal layer
-         csv.println();
-         graphs.forEachRemaining(graph -> {
-               if (getCancelling()) return;
-               if (fileName.length() == 0) {
-                  fileName.append(graph.getId().replaceAll("\\.[^.]+$",""));
-               } else if (!fileName.toString().endsWith("-etc")) {
-                  fileName.append("-etc");
-               }
-
-               try {
-                  // target one temporal layer at a time
-                  for (Layer targetLayer : temporalLayers) {
-                     // there's one CSV row per annotation
-                     for (Annotation annotation : graph.all(targetLayer.getId())) {
-                        // graph ID
-                        csv.print(graph.getId());
-                        
-                        // all the attribute layers
-                        for (Layer attributeLayer : attributeLayers) {
-                           try {
-                              csv.print(
-                                 // multiple values are represented with multiple lines in the cell
-                                 String.join("\n",
-                                             // stream all annotations on the attribute layer
-                                             Arrays.stream(annotation.all(attributeLayer.getId()))
-                                             // convert to a stream of labels
-                                             .map(a -> a.getLabel())
-                                             // and convert the stream to an array
-                                             .collect(Collectors.toList()).toArray(new String[0])));
-                           } catch(NullPointerException exception) {
-                              csv.print("");
-                           }
-                        } // next attribute layer
-                        
-                        // now iterate through the temporal layers, inserting the label in the
-                        // right column, and adding blanks in the other columns
-                        for (Layer columnLayer : temporalLayers) {
-                           if (columnLayer == targetLayer) { // put values in these columns
-                              csv.print(annotation.getLabel());
-                              switch (columnLayer.getAlignment()) {
-                                 case Constants.ALIGNMENT_INSTANT:
-                                    csv.print(offset(annotation.getStart()));
-                                    break;
-                                 default: // INTERVAL and NONE
-                                    csv.print(offset(annotation.getStart()));
-                                    csv.print(offset(annotation.getEnd()));
-                                    break;
-                              }
-                           } else { // blank columns
-                              csv.print("");
-                              switch (columnLayer.getAlignment()) {
-                                 case Constants.ALIGNMENT_INSTANT:
-                                    csv.print("");
-                                    break;
-                                 default: // INTERVAL and NONE
-                                    csv.print("");
-                                    csv.print("");
-                                    break;
-                              }
-                           } // blank columns
-                        } // next temporal layer
-                        csv.println();
-                     } // next annotation
-                  } // next layer
-                  consumedGraphCount++;
-               } catch(Exception exception) {
-                  errors.accept(new SerializationException(exception));
-               }
-            }); // next graph
-         csv.flush();
-         csv.close();
-         consumer.accept(
-            new NamedStream(new TempFileInputStream(csvFile), fileName+".csv", "text/csv"));     
-      } catch(Exception exception) {
-         errors.accept(new SerializationException(exception));
+      // there will be an attribute layer value, but no offsets, for every CSV row
+      for (Layer layer : attributeLayers) {
+        csv.print(layer.getId());
       }
-   }
 
+      // there will be one temporal layer/value per CSV row
+      for (Layer layer : temporalLayers) {
+        csv.print(layer.getId());
+        switch (layer.getAlignment()) {
+          case Constants.ALIGNMENT_INSTANT:
+            csv.print(layer.getId() + " offset");
+            break;
+          default: // INTERVAL and NONE
+            csv.print(layer.getId() + " start");
+            csv.print(layer.getId() + " end");
+            break;
+        }
+      } // next temporal layer
+      csv.println();
+      graphs.forEachRemaining(graph -> {
+          if (getCancelling()) return;
+          if (fileName.length() == 0) {
+            fileName.append(graph.getId().replaceAll("\\.[^.]+$",""));
+          } else if (!fileName.toString().endsWith("-etc")) {
+            fileName.append("-etc");
+          }
+
+          try {
+            // target one temporal layer at a time
+            for (Layer targetLayer : temporalLayers) {
+              // there's one CSV row per annotation
+              for (Annotation annotation : graph.all(targetLayer.getId())) {
+                // graph ID
+                csv.print(graph.getId());
+                        
+                // all the attribute layers
+                for (Layer attributeLayer : attributeLayers) {
+                  try {
+                    csv.print(
+                      // multiple values are represented with multiple lines in the cell
+                      String.join("\n",
+                                  // stream all annotations on the attribute layer
+                                  Arrays.stream(annotation.all(attributeLayer.getId()))
+                                  // convert to a stream of labels
+                                  .map(a -> a.getLabel())
+                                  // and convert the stream to an array
+                                  .collect(Collectors.toList()).toArray(new String[0])));
+                  } catch(NullPointerException exception) {
+                    csv.print("");
+                  }
+                } // next attribute layer
+                        
+                // now iterate through the temporal layers, inserting the label in the
+                // right column, and adding blanks in the other columns
+                for (Layer columnLayer : temporalLayers) {
+                  if (columnLayer == targetLayer) { // put values in these columns
+                    csv.print(annotation.getLabel());
+                    switch (columnLayer.getAlignment()) {
+                      case Constants.ALIGNMENT_INSTANT:
+                        csv.print(offset(annotation.getStart()));
+                        break;
+                      default: // INTERVAL and NONE
+                        csv.print(offset(annotation.getStart()));
+                        csv.print(offset(annotation.getEnd()));
+                        break;
+                    }
+                  } else { // blank columns
+                    csv.print("");
+                    switch (columnLayer.getAlignment()) {
+                      case Constants.ALIGNMENT_INSTANT:
+                        csv.print("");
+                        break;
+                      default: // INTERVAL and NONE
+                        csv.print("");
+                        csv.print("");
+                        break;
+                    }
+                  } // blank columns
+                } // next temporal layer
+                csv.println();
+              } // next annotation
+            } // next layer
+            consumedGraphCount++;
+          } catch(Exception exception) {
+            errors.accept(new SerializationException(exception));
+          }
+        }); // next graph
+      csv.flush();
+      csv.close();
+      consumer.accept(
+        new NamedStream(new TempFileInputStream(csvFile), fileName+".csv", "text/csv"));     
+    } catch(Exception exception) {
+      errors.accept(new SerializationException(exception));
+    }
+  }
    
-   /**
-    * Returns the anchor's offset, or an empty string.
-    * @param anchor
-    * @return A string representing the offset, or an empty string if the offset is not set, or it's below #minimumAnchorConfidence.
-    */
-   public String offset(Anchor anchor) {
-      if (anchor == null) return "";
-      if (anchor.getOffset() == null) return "";
-      if (minimumAnchorConfidence != null) {
-         if (anchor.getConfidence() == null) return "";
-         if (anchor.getConfidence() < minimumAnchorConfidence) return "";
-      }
-      return anchor.getOffset().toString();
-   } // end of offset()
-
+  /**
+   * Returns the anchor's offset, or an empty string.
+   * @param anchor The anchor to represent.
+   * @return A string representing the offset, or an empty string if the offset is not
+   * set, or it's below {@link #minimumAnchorConfidence}. 
+   */
+  public String offset(Anchor anchor) {
+    if (anchor == null) return "";
+    if (anchor.getOffset() == null) return "";
+    if (minimumAnchorConfidence != null && anchor.getConfidence() > 0) {
+      if (anchor.getConfidence() == null) return "";
+      if (anchor.getConfidence() < minimumAnchorConfidence) return "";
+    }
+    return anchor.getOffset().toString();
+  } // end of offset()
 
 } // end of class CsvSerializer
