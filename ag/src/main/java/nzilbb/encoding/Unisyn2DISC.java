@@ -61,7 +61,7 @@ import java.util.HashMap;
  <tr><td>a</td>  <td>→</td>  <td>{</td>   <td>TRAP</td></tr>
  <tr><td>ou</td>  <td>→</td>  <td>5</td>   <td>GOAT</td> <td>(but a monophthong for edi)</td></tr>
  <tr><td>o</td>  <td>→</td>  <td>Q</td>   <td>LOT</td></tr>
- <tr><td>ah</td>  <td>→</td>  <td>#</td>   <td>BATH</td></tr>
+ <tr><td>ah</td>  <td>→</td>  <td>#</td>   <td>START</td></tr>
  <tr><td>oo</td>  <td>→</td>  <td>$</td>   <td>THOUGHT</td> <td>(but a diphthong in some en-US)</td></tr>
  <tr><td>ii</td>  <td>→</td>  <td>i</td>   <td>FLEECE</td></tr>
  <tr><td>i</td>  <td>→</td>  <td>I</td>   <td>KIT</td></tr>
@@ -79,10 +79,10 @@ import java.util.HashMap;
  <tr><td>ur</td>  <td>→</td>  <td>9</td>   <td>JURY</td></tr>
 
  <tr><td colspan="3"></td><th colspan="2">(troublesome because they map in accent-specific ways)</th></tr>
- <tr><td>ar</td>  <td>→</td>  <td>Q</td>   <td>start → PALM → LOT (US)</td> <td>(but BATH (RP))</td></tr>
- <tr><td>aa</td>  <td>→</td>  <td>Q</td>   <td>PALM → LOT (US)</td> <td>(but BATH (RP))</td></tr>
- <tr><td>oa</td>  <td>→</td>  <td>{</td>   <td>BANANA → TRAP (US)</td> <td>(but BATH (RP))</td></tr>
- <tr><td>ao</td>  <td>→</td>  <td>#</td>   <td>MAZDA → BATH</td> <td>(but TRAP (NZ))</td></tr>
+ <tr><td>ar</td>  <td>→</td>  <td>Q</td>   <td>start → PALM → LOT (US)</td> <td>(but START (RP))</td></tr>
+ <tr><td>aa</td>  <td>→</td>  <td>Q</td>   <td>PALM → LOT (US)</td> <td>(but START (RP))</td></tr>
+ <tr><td>oa</td>  <td>→</td>  <td>{</td>   <td>BANANA → TRAP (US)</td> <td>(but START (RP))</td></tr>
+ <tr><td>ao</td>  <td>→</td>  <td>#</td>   <td>MAZDA → START</td> <td>(but TRAP (NZ))</td></tr>
 
  <tr><td colspan="3"></td><th colspan="2">2-to-1</th></tr>
  <tr><td>our</td>  <td>→</td>  <td>$</td>   <td>FORCE → THOUGHT</td></tr>
@@ -167,7 +167,7 @@ public class Unisyn2DISC extends PhonemeTranslator {
          map.put("a",'{'); // TRAP
          map.put("ou",'5'); // GOAT - but a monophthong for edi
          map.put("o",'Q'); // LOT
-         map.put("ah",'#'); // BATH
+         map.put("ah",'#'); // START
          map.put("oo",'$'); // THOUGHT (but a diphthong in some en-US)
          map.put("ii",'i'); // FLEECE
          map.put("i",'I'); // KIT
@@ -185,10 +185,10 @@ public class Unisyn2DISC extends PhonemeTranslator {
          map.put("ur",'9'); // JURY
          
          // troublesome because they map in accent-specific ways
-         map.put("ar",'Q'); // start -> PALM -> LOT (US) (but BATH (RP))
-         map.put("aa",'Q'); // PALM -> LOT (US)  (but BATH (RP))
-         map.put("oa",'{'); // BANANA -> TRAP (US) (but BATH (RP))
-         map.put("ao",'#'); // MAZDA -> BATH (but TRAP (NZ))
+         map.put("ar",'Q'); // start -> PALM -> LOT (US) (but START (RP))
+         map.put("aa",'Q'); // PALM -> LOT (US)  (but START (RP))
+         map.put("oa",'{'); // BANANA -> TRAP (US) (but START (RP))
+         map.put("ao",'#'); // MAZDA -> START (but TRAP (NZ))
          
          // 2-to-1
          map.put("our",'$'); // FORCE -> THOUGHT

@@ -68,7 +68,7 @@ import java.util.HashMap;
  <tbody>
 
  <tr><td colspan="3"></td><th colspan="2">Vowels</th></tr>
- <tr><td>#</td>  <td>→</td>  <td>AA</td>   <td>BATH       </td> <td>odd/father</td></tr>
+ <tr><td>#</td>  <td>→</td>  <td>AA</td>   <td>START      </td> <td>odd/father</td></tr>
  <tr><td>{</td>  <td>→</td>  <td>AE</td>   <td>TRAP       </td> <td>at/fast</td></tr>
  <tr><td>V</td>  <td>→</td>  <td>AH</td>   <td>STRUT      </td> <td>hut/but</td></tr>
  <tr><td>$</td>  <td>→</td>  <td>AO</td>   <td>THOUGHT    </td> <td>ought/fall - two-to-one</td></tr>
@@ -155,7 +155,7 @@ public class DISC2ARPAbet extends PhonemeTranslator {
          map = new HashMap<Character,String>();
          
          // vowel e.g.s marked with  // LEXICAL SET - cmu/arpabet
-         map.put('#',"AA"); // BATH        - odd/father
+         map.put('#',"AA"); // START       - odd/father
          map.put('{',"AE"); // TRAP        - at/fast
          map.put('V',"AH"); // STRUT       - hut/but
          

@@ -53,7 +53,7 @@ import java.util.HashMap;
  <tbody>
 
  <tr><td colspan="3"></td><th colspan="2">Vowels</th></tr>
- <tr><td>AA</td>  <td>→</td>  <td>#</td>   <td>BATH       </td> <td>odd/father</td></tr>
+ <tr><td>AA</td>  <td>→</td>  <td>#</td>   <td>START      </td> <td>odd/father</td></tr>
  <tr><td>AE</td>  <td>→</td>  <td>{</td>   <td>TRAP       </td> <td>at/fast</td></tr>
  <tr><td>AH</td>  <td>→</td>  <td>V</td>   <td>STRUT      </td> <td>hut/but</td></tr>
  <tr><td>AO</td>  <td>→</td>  <td>$</td>   <td>THOUGHT    </td> <td>ought/fall - one-to-two this could also be Q!</td></tr>
@@ -137,7 +137,7 @@ public class CMU2DISC extends PhonemeTranslator {
       map = new HashMap<String,Character>();
       
       // vowel e.g.s marked with  // LEXICAL SET - cmu/arpabet
-      map.put("AA",'#'); // BATH        - odd/father
+      map.put("AA",'#'); // START       - odd/father
       map.put("AE",'{'); // TRAP        - at/fast
       
       // this is also used in words where it should be schwa!

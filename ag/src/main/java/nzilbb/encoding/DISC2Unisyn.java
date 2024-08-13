@@ -59,7 +59,7 @@ import java.util.HashMap;
  <tr><td colspan="3"></td><th colspan="2">Vowels</th></tr>
  <tr><td>E</td>  <td>→</td>  <td>e</td>   <td>DRESS</td></tr>
  <tr><td>{</td>  <td>→</td>  <td>a</td>   <td>TRAP</td></tr>
- <tr><td>#</td>  <td>→</td>  <td>ah</td>   <td>BATH</td></tr>
+ <tr><td>#</td>  <td>→</td>  <td>ah</td>   <td>START</td></tr>
  <tr><td>5</td>  <td>→</td>  <td>ou</td>   <td>GOAT</td><td>but a monophthong for edi</td></tr>
  <tr><td>Q</td>  <td>→</td>  <td>o</td>   <td>LOT</td></tr>
  <tr><td>$</td>  <td>→</td>  <td>oo</td>   <td>THOUGHT</td><td>(but a diphthong in some en-US)</td></tr>
@@ -128,7 +128,7 @@ public class DISC2Unisyn extends PhonemeTranslator {
          // vowels
          map.put('E', "e"); // DRESS
          map.put('{', "a"); // TRAP
-         map.put('#', "ah"); // BATH
+         map.put('#', "ah"); // START
          map.put('5', "ou"); // GOAT - but a monophthong for edi
          map.put('Q', "o"); // LOT
          map.put('$', "oo"); // THOUGHT (but a diphthong in some en-US)
