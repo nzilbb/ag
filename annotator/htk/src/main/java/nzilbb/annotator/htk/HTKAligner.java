@@ -3299,6 +3299,7 @@ public class HTKAligner extends Annotator {
             .setLayerId(schema.getTurnLayerId())
             .setId(turn.getId())
             .setLabel(turn.getLabel())
+            .setOrdinal(turn.getOrdinal())
             .setParentId(turn.getParentId())
             .setStartId(unknownStart.getId())
             .setEndId(unknownEnd.getId()));

@@ -311,7 +311,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
       this.ordinal = ordinal; 
       Annotation parent = getParent();
       if (parent != null) {
-        correctOrdinals(parent.getAnnotations(getLayerId()));
+        parent.correctOrdinals(parent.getAnnotations(getLayerId()));
       }
     } // ordinal actually changing      
     return this;
@@ -479,7 +479,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
       if (newSiblings != null && !newSiblings.contains(this)) {
         newSiblings.add(this);
         if (append || this.ordinal == 0) {
-          setOrdinal(newSiblings.size() + ordinalMinimum(getLayerId()) - 1);
+          setOrdinal(newSiblings.size() + newParent.ordinalMinimum(getLayerId()) - 1);
         }
       }
 /* TODO this incurs a surprisingly huge performance hit 
