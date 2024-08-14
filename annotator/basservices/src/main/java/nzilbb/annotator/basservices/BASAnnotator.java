@@ -1198,6 +1198,7 @@ public class BASAnnotator extends Annotator {
                           new Annotation()
                           .setLayerId(schema.getTurnLayerId())
                           .setLabel(turn.getLabel())
+                          .setOrdinal(turn.getOrdinal())
                           .setParentId(editedParticipant.getId())
                           .setStartId(unknownStart.getId())
                           .setEndId(unknownEnd.getId()));
