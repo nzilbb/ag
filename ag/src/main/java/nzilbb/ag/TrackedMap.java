@@ -557,8 +557,8 @@ public class TrackedMap
 
    /**
     * Registers a change to a tracked attribute, if appropriate (e.g. only if it is
-    * actually changing, and only if {@link #getTracker()} is set), and returns a corresponding
-    * change for the given attribute.  
+    * not already destroyed, actually changing, and only if {@link #getTracker()} is set), 
+    * and returns a corresponding change for the given attribute.  
     * @param key The attribute key.
     * @param value The proposed change.
     * @return Returns an Update change, or null if the value is not changing.
@@ -566,6 +566,7 @@ public class TrackedMap
    protected Change registerChange(String key, Object value)
    {
       if (tracker == null) return null; // nobody cares
+      if (Destroyed(this)) return null; // don't register changes of destroyed objects
 
       Change change = null;
       try
