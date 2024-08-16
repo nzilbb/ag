@@ -1059,11 +1059,22 @@ public class Merger extends Transform implements GraphTransformer {
           // in a predictable order regardless of their order of generation by a deserializer
           sortedAnnotations = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
         }
+        
         sortedAnnotations.addAll(theseByParticipant.get(who));
         theseForWho = new Vector<Annotation>(sortedAnnotations);
+        if (layer.getAlignment() != Constants.ALIGNMENT_NONE) { // aligned
+          // ordinals in temporal order
+          int ordinal = theseForWho.stream().mapToInt(a->a.getOrdinal()).min().orElse(1);
+          for (Annotation a : theseForWho) a.setOrdinal(ordinal++);
+        }
         sortedAnnotations.clear();
         sortedAnnotations.addAll(thoseByParticipant.get(who));
         thoseForWho = new Vector<Annotation>(sortedAnnotations);
+        if (layer.getAlignment() != Constants.ALIGNMENT_NONE) { // aligned
+          // ordinals in temporal order
+          int ordinal = thoseForWho.stream().mapToInt(a->a.getOrdinal()).min().orElse(1);
+          for (Annotation a : thoseForWho) a.setOrdinal(ordinal++);
+        }
       }
 
       // break collections into overlapping chunks to conserve memory

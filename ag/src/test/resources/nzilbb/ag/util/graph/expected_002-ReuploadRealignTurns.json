@@ -9,6 +9,14 @@
         "transcript": {
             "description": "The annotation graph as a whole",
             "children": {
+                "topic": {
+                    "description": "topic",
+                    "alignment": 2,
+                    "peers": true,
+                    "peersOverlap": false,
+                    "parentIncludes": true,
+                    "saturated": false
+                },
                 "who": {
                     "description": "participants",
                     "alignment": 0,
@@ -97,6 +105,10 @@
         },
         "2": {
             "offset": 1.0,
+            "confidence": 100
+        },
+        "n_1009": {
+            "offset": 1.01,
             "confidence": 100
         },
         "n_1011": {
@@ -239,6 +251,10 @@
             "offset": 6.5,
             "confidence": 10
         },
+        "n_1102": {
+            "offset": 7.0,
+            "confidence": 100
+        },
         "n_1120": {
             "offset": 7.666666666666667,
             "confidence": 10
@@ -270,6 +286,10 @@
         "n_1180": {
             "offset": 19.0,
             "confidence": 10
+        },
+        "n_1201": {
+            "offset": 20.0,
+            "confidence": 100
         },
         "n_1199": {
             "offset": 22.0,
@@ -320,6 +340,10 @@
             "confidence": 50
         },
         "n_1300": {
+            "offset": 30.0,
+            "confidence": 100
+        },
+        "n_1299": {
             "offset": 30.0,
             "confidence": 100
         },
@@ -404,6 +428,22 @@
             "confidence": 100
         }
     },
+    "topic": [
+        {
+            "id": "topic1",
+            "label": "topic1",
+            "startId": "n_1009",
+            "endId": "n_1102",
+            "comment": "TOPICS WILL KEEP THEIR ORDER"
+        },
+        {
+            "id": "topic2",
+            "label": "topic2",
+            "startId": "n_1201",
+            "endId": "n_1299",
+            "comment": "TOPICS WILL KEEP THEIR ORDER"
+        }
+    ],
     "who": [
         {
             "id": "Maxwell Smart",
