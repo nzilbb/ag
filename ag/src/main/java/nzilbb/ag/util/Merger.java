@@ -1040,23 +1040,30 @@ public class Merger extends Transform implements GraphTransformer {
       Vector<Annotation> theseForWho = theseByParticipant.get(who);
       Vector<Annotation> thoseForWho = thoseByParticipant.get(who);
 
-      // if it's a graph tag layer, sort annotations by label
-      // this ensures, e.g., that mapping the "who" layer lines the speakers up by name
-      if ((layer.getParentId() == null || rootLayerId.equals(layer.getParentId()))
-          && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
-        AnnotationComparatorByOrdinal byLabel = new AnnotationComparatorByOrdinal() {
-            public int compare(Annotation o1, Annotation o2) {
-              int labelComparison = o1.getLabel().compareTo(o2.getLabel());
-              if (labelComparison != 0) return labelComparison;
-              return super.compare(o1, o2);
-            }
-          };
-        TreeSet<Annotation> annotationsByLabel = new TreeSet<Annotation>(byLabel);
-        annotationsByLabel.addAll(theseByParticipant.get(who));
-        theseForWho = new Vector<Annotation>(annotationsByLabel);
-        annotationsByLabel.clear();
-        annotationsByLabel.addAll(thoseByParticipant.get(who));
-        thoseForWho = new Vector<Annotation>(annotationsByLabel);
+      // for top-level layers...
+      if ((layer.getParentId() == null || rootLayerId.equals(layer.getParentId()))) {
+        TreeSet<Annotation> sortedAnnotations = null;
+        // if it's a graph tag layer, sort annotations by label
+        // this ensures, e.g., that mapping the "who" layer lines the speakers up by name
+        if (layer.getAlignment() == Constants.ALIGNMENT_NONE) { // top level unaligned
+          AnnotationComparatorByOrdinal byLabel = new AnnotationComparatorByOrdinal() {
+              public int compare(Annotation o1, Annotation o2) {
+                int labelComparison = o1.getLabel().compareTo(o2.getLabel());
+                if (labelComparison != 0) return labelComparison;
+                return super.compare(o1, o2);
+              }
+            };
+          sortedAnnotations = new TreeSet<Annotation>(byLabel);
+        } else {  // top level aligned
+          // sort by offset first, which ensures that noise/comment annotations are processed
+          // in a predictable order regardless of their order of generation by a deserializer
+          sortedAnnotations = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
+        }
+        sortedAnnotations.addAll(theseByParticipant.get(who));
+        theseForWho = new Vector<Annotation>(sortedAnnotations);
+        sortedAnnotations.clear();
+        sortedAnnotations.addAll(thoseByParticipant.get(who));
+        thoseForWho = new Vector<Annotation>(sortedAnnotations);
       }
 
       // break collections into overlapping chunks to conserve memory
