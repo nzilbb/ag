@@ -86,6 +86,10 @@ public class TestMFA {
     System.out.println("OK.");
   }
 
+  @Before public void resetAnnotator() {
+    annotator.setDiscOutput(false);
+  }
+
   /** Infer the directory of the tests. */
   public static File dir() throws Exception { 
     URL urlThisClass = TestMFA.class.getResource(
@@ -313,7 +317,8 @@ public class TestMFA {
       +"&utteranceTagLayerId=utterance_mfa" // nonexistent
       +"&participantTagLayerId=participant_mfa" // nonexistent
       +"&wordAlignmentLayerId=word"
-      +"&phoneAlignmentLayerId=segment");
+      +"&phoneAlignmentLayerId=segment"
+      +"&discOutput=on");
     Layer layer = annotator.getSchema().getLayer("utterance_mfa");
     assertNotNull("utterance_mfa layer created", layer);
     layer = annotator.getSchema().getLayer("participant_mfa");
@@ -434,7 +439,8 @@ public class TestMFA {
       +"&utteranceTagLayerId=utterance_mfa" // nonexistent
       +"&participantTagLayerId=participant_mfa" // nonexistent
       +"&wordAlignmentLayerId=word"
-      +"&phoneAlignmentLayerId=segment");
+      +"&phoneAlignmentLayerId=segment"
+      +"&discOutput=on");
     Layer layer = annotator.getSchema().getLayer("utterance_mfa");
     assertNotNull("utterance_mfa layer created", layer);
     layer = annotator.getSchema().getLayer("participant_mfa");
@@ -596,7 +602,8 @@ public class TestMFA {
       +"&utteranceTagLayerId=utterance_mfa" // nonexistent
       +"&participantTagLayerId=participant_mfa" // nonexistent
       +"&wordAlignmentLayerId=word"
-      +"&phoneAlignmentLayerId=segment");
+      +"&phoneAlignmentLayerId=segment"
+      +"&discOutput=on");
     Layer layer = annotator.getSchema().getLayer("utterance_mfa");
     assertNotNull("utterance_mfa layer created", layer);
     layer = annotator.getSchema().getLayer("participant_mfa");
@@ -657,7 +664,8 @@ public class TestMFA {
       +"&utteranceTagLayerId=utterance_mfa" // nonexistent
       +"&participantTagLayerId=participant_mfa" // nonexistent
       +"&wordAlignmentLayerId=word"
-      +"&phoneAlignmentLayerId=segment");
+      +"&phoneAlignmentLayerId=segment"
+      +"&discOutput=on");
     Layer layer = annotator.getSchema().getLayer("utterance_mfa");
     assertNotNull("utterance_mfa layer created", layer);
     layer = annotator.getSchema().getLayer("participant_mfa");

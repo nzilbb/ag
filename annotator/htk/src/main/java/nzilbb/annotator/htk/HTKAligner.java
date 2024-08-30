@@ -553,6 +553,25 @@ public class HTKAligner extends Annotator {
    * @param newSessionName The training session ID.
    */
   public HTKAligner setSessionName(String newSessionName) { sessionName = newSessionName; return this; }
+
+  /**
+   * Whether to try to output DISC symbols on the phone alignment layer.
+   * @see #getDiscOutput()
+   * @see #setDiscOutput(boolean)
+   */
+  protected boolean discOutput = false;
+  /**
+   * Getter for {@link #discOutput}: Whether to try to output DISC symbols on the phone
+   * alignment layer. 
+   * @return Whether to try to output DISC symbols on the phone alignment layer.
+   */
+  public boolean getDiscOutput() { return discOutput; }
+  /**
+   * Setter for {@link #discOutput}: Whether to try to output DISC symbols on the phone
+   * alignment layer. 
+   * @param newDiscOutput Whether to try to output DISC symbols on the phone alignment layer.
+   */
+  public HTKAligner setDiscOutput(boolean newDiscOutput) { discOutput = newDiscOutput; return this; }
   
   /**
    * Default constructor.
@@ -1382,7 +1401,6 @@ public class HTKAligner extends Annotator {
       PhonemeTranslator phonemesToHtk = new PhonemeTranslator(); // (default no translation)
       PhonemeTranslator htkToPhonemes = phonemesToHtk;
       boolean discDictionary = "ipa".equals(schema.getLayer(pronunciationLayerId).getType());
-      boolean discOutput = "ipa".equals(schema.getLayer(phoneAlignmentLayerId).getType());
 
       List<Graph> fragments = null;
       TransformationException failure = null;

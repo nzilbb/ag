@@ -168,6 +168,8 @@ function getTaskParameters() {
                     = parameters.get("noCleanupOnFailure");
                 document.getElementById("usePostgres").checked
                     = parameters.get("usePostgres");
+                document.getElementById("discOutput").checked
+                    = parameters.get("discOutput");
                 // either pronunciationLayerId or dictionaryName
                 document.getElementById("pronunciationLayerId").disabled
                     = document.getElementById("multilingualIPA").disabled

@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -76,6 +76,11 @@ public class TestHTKAligner {
     
     //annotator.getStatusObservers().add(status->System.out.println(status));
     System.out.println("Installed.");
+  }
+
+  @Before
+  public void resetAnnotator() throws Exception {    
+    annotator.setDiscOutput(false);
   }
 
   public static File dir() throws Exception { 
@@ -238,7 +243,8 @@ public class TestHTKAligner {
       +"&noisePatterns=laugh.* unclear .*noise.*"
       +"&leftPattern="
       +"&rightPattern="
-      +"&pauseMarkers=-");
+      +"&pauseMarkers=-"
+      +"&discOutput=on");
     Layer layer = annotator.getSchema().getLayer("utterance_htk");
     assertNotNull("utterance_htk layer created", layer);
     layer = annotator.getSchema().getLayer("participant_htk");
@@ -306,7 +312,8 @@ public class TestHTKAligner {
       +"&noisePatterns=laugh.* unclear .*noise.*"
       +"&leftPattern="
       +"&rightPattern="
-      +"&pauseMarkers=-");
+      +"&pauseMarkers=-"
+      +"&discOutput=on");
     Layer layer = annotator.getSchema().getLayer("utterance_htk");
     assertNotNull("utterance_htk layer created", layer);
     layer = annotator.getSchema().getLayer("participant_htk");
@@ -370,7 +377,8 @@ public class TestHTKAligner {
       +"&noisePatterns=laugh.* unclear .*noise.*"
       +"&leftPattern="
       +"&rightPattern="
-      +"&pauseMarkers=-");
+      +"&pauseMarkers=-"
+      +"&discOutput=on");
     Layer layer = annotator.getSchema().getLayer("utterance_htk");
     assertNotNull("utterance_htk layer created", layer);
     layer = annotator.getSchema().getLayer("participant_htk");

@@ -487,7 +487,26 @@ public class MFA extends Annotator {
       overlapThreshold = newOverlapThreshold;
     }
     return this; }
-  
+
+  /**
+   * Whether to try to output DISC symbols on the phone alignment layer.
+   * @see #getDiscOutput()
+   * @see #setDiscOutput(boolean)
+   */
+  protected boolean discOutput = false;
+  /**
+   * Getter for {@link #discOutput}: Whether to try to output DISC symbols on the phone
+   * alignment layer. 
+   * @return Whether to try to output DISC symbols on the phone alignment layer.
+   */
+  public boolean getDiscOutput() { return discOutput; }
+  /**
+   * Setter for {@link #discOutput}: Whether to try to output DISC symbols on the phone
+   * alignment layer. 
+   * @param newDiscOutput Whether to try to output DISC symbols on the phone alignment layer.
+   */
+  public MFA setDiscOutput(boolean newDiscOutput) { discOutput = newDiscOutput; return this; }
+
   /**
    * Default constructor.
    */
@@ -1215,7 +1234,6 @@ public class MFA extends Annotator {
       PhonemeTranslator mfaToPhonemes = phonemesToMfa;
       boolean discDictionary = pronunciationLayerId != null
         && "ipa".equals(schema.getLayer(pronunciationLayerId).getType());
-      boolean discOutput = "ipa".equals(schema.getLayer(phoneAlignmentLayerId).getType());
 
       List<Graph> fragments = null;
       TransformationException failure = null;

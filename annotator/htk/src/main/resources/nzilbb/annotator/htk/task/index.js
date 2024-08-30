@@ -174,6 +174,8 @@ getSchema(s => {
                         = document.getElementById("scoreLayerId").disabled
                         = true;
                 }
+                document.getElementById("discOutput").checked
+                    = parameters.get("discOutput");
             }
             // if there's no utterance tag layer defined
             if (utteranceTagLayerId.selectedIndex == 0
