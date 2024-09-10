@@ -30,39 +30,39 @@ import nzilbb.util.IO;
 
 public class TestIO {
    
-   @Test public void Extension() throws Exception {
-      assertEquals("Simple case",
-                   "ext", IO.Extension("name.ext"));
-      assertEquals("Multiple dots",
-                   "TextGrid", IO.Extension("something__1.234-5.678.TextGrid"));
-      assertEquals("Consecutive dots",
-                   "trs", IO.Extension("something..trs"));
-      assertEquals("No dot = no extension",
-                   "", IO.Extension("something."));
-      assertEquals("Ending dot = no extension",
-                   "", IO.Extension("something."));
-      assertEquals("Graph fragment suffix",
-                   "", IO.Extension("something__1.234-5.678"));
-   }
-   @Test public void WithoutExtension() throws Exception {
-      assertEquals("Simple case",
-                   "name", IO.WithoutExtension("name.ext"));
-      assertEquals("Including digit",
-                   "video", IO.WithoutExtension("video.mp4"));
-      assertEquals("Multiple dots",
-                   "something__1.234-5.678",
-                   IO.WithoutExtension("something__1.234-5.678.TextGrid"));
-      assertEquals("Consecutive dots",
-                   "something.", IO.WithoutExtension("something..trs"));
-      assertEquals("No dot = no extension",
-                   "something", IO.WithoutExtension("something"));
-      assertEquals("Ending dot = no extension",
-                   "something.", IO.WithoutExtension("something."));
-      assertEquals("Graph fragment suffix",
-                   "something__1.234-5.678", IO.WithoutExtension("something__1.234-5.678"));
-   }
+  @Test public void Extension() throws Exception {
+    assertEquals("Simple case",
+                 "ext", IO.Extension("name.ext"));
+    assertEquals("Multiple dots",
+                 "TextGrid", IO.Extension("something__1.234-5.678.TextGrid"));
+    assertEquals("Consecutive dots",
+                 "trs", IO.Extension("something..trs"));
+    assertEquals("No dot = no extension",
+                 "", IO.Extension("something."));
+    assertEquals("Ending dot = no extension",
+                 "", IO.Extension("something."));
+    assertEquals("Graph fragment suffix",
+                 "", IO.Extension("something__1.234-5.678"));
+  }
+  @Test public void WithoutExtension() throws Exception {
+    assertEquals("Simple case",
+                 "name", IO.WithoutExtension("name.ext"));
+    assertEquals("Including digit",
+                 "video", IO.WithoutExtension("video.mp4"));
+    assertEquals("Multiple dots",
+                 "something__1.234-5.678",
+                 IO.WithoutExtension("something__1.234-5.678.TextGrid"));
+    assertEquals("Consecutive dots",
+                 "something.", IO.WithoutExtension("something..trs"));
+    assertEquals("No dot = no extension",
+                 "something", IO.WithoutExtension("something"));
+    assertEquals("Ending dot = no extension",
+                 "something.", IO.WithoutExtension("something."));
+    assertEquals("Graph fragment suffix",
+                 "something__1.234-5.678", IO.WithoutExtension("something__1.234-5.678"));
+  }
    
-   public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.util.TestIO");
-   }
+  public static void main(String args[]) {
+    org.junit.runner.JUnitCore.main("nzilbb.util.TestIO");
+  }
 }
