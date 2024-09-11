@@ -29,7 +29,8 @@ import java.io.File;
 import nzilbb.util.IO;
 
 public class TestIO {
-   
+
+  /** Ensure file extensions are correctly identified. */
   @Test public void Extension() throws Exception {
     assertEquals("Simple case",
                  "ext", IO.Extension("name.ext"));
@@ -44,6 +45,8 @@ public class TestIO {
     assertEquals("Graph fragment suffix",
                  "", IO.Extension("something__1.234-5.678"));
   }
+  
+  /** Ensure file extensions are correctly stripped. */
   @Test public void WithoutExtension() throws Exception {
     assertEquals("Simple case",
                  "name", IO.WithoutExtension("name.ext"));
@@ -60,6 +63,22 @@ public class TestIO {
                  "something.", IO.WithoutExtension("something."));
     assertEquals("Graph fragment suffix",
                  "something__1.234-5.678", IO.WithoutExtension("something__1.234-5.678"));
+  }
+
+  /** Ensure non-ASCII characters are correctly removed */
+  @Test public void OnlyASCII() {
+    assertEquals("Already all ASCII is not changed",
+                 "The quick_brown\nFox jump$ @ the lazy dog!",
+                 IO.OnlyASCII("The quick_brown\nFox jump$ @ the lazy dog!"));
+    assertEquals("Accents stripped leaving letters",
+                 "aaaeiiiiggnnsssuuy",
+                 IO.OnlyASCII("āăąēîïĩíĝġńñšŝśûůŷ"));
+    assertEquals("Non-ASCII characters removed",
+                 "results_orthography_([a+]nd).csv",
+                 IO.OnlyASCII("results_orthography≈_([a+]nd).csv"));
+    assertEquals("null becomes empty string",
+                 "",
+                 IO.OnlyASCII(null));
   }
    
   public static void main(String args[]) {

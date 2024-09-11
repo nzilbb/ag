@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -37,6 +37,7 @@ import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.text.Normalizer;
 import java.util.Base64;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -638,7 +639,8 @@ public class IO
    * </ul>
    * No URL-encoding is performed.
    * @param s The possibly unsafe string.
-   * @return The given string with characters that are unsafe for file names or URLs removed.
+   * @return The given string with characters that are unsafe for file names or URLs
+   * removed. If <var>s</var> is null, an empty string is returned.
    */
   public static String SafeFileNameUrl(String s) {
     if (s == null) return "";
@@ -647,7 +649,21 @@ public class IO
       .replaceAll("@","-at-")
       .replaceAll("&","-amp-");
   } // end of SafeFileNameUrl()
-
   
+  /**
+   * Strips all non-ASCII characters from the given string. Letters with accents are
+   * converted to the corresponding letter without the accent. 
+   * @param s The possibly-non-ASCII string.
+   * @return The given string with accents and other non-ASCII characters removed. 
+   * If <var>s</var> is null, an empty string is returned. 
+   */
+  public static String OnlyASCII(String s) {
+    if (s == null) return "";
+    return Normalizer
+      // split accents from their letters
+      .normalize(s, Normalizer.Form.NFKD)
+      // remove anything that's not ASCII
+      .replaceAll("\\P{ASCII}", "");
+  } // end of OnlyASCII()
    
 } // end of class IO
