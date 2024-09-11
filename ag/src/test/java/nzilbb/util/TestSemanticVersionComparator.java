@@ -26,42 +26,46 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 public class TestSemanticVersionComparator {
+  
+  /** Ensure basic comparisons like "1.2.3" &lt; "3.2.1" work. */
+  @Test public void basicSemanticComparison() throws Exception {
+    SemanticVersionComparator c = new SemanticVersionComparator();
+    assertTrue("equal", c.compare("1.2.3", "1.2.3") == 0);
+    assertTrue("less", c.compare("1.2.3", "3.2.1") < 0);
+    assertTrue("more", c.compare("3.2.1", "1.2.3") > 0);
+    assertTrue("less - non-ascii order", c.compare("2.3.4", "10.2.1") < 0);
+    assertTrue("more - non-ascii order", c.compare("10.2.1", "2.3.4") > 0);
+  }
    
-   @Test public void basicSemanticComparison() throws Exception {
-      SemanticVersionComparator c = new SemanticVersionComparator();
-      assertTrue("equal", c.compare("1.2.3", "1.2.3") == 0);
-      assertTrue("less", c.compare("1.2.3", "3.2.1") < 0);
-      assertTrue("more", c.compare("3.2.1", "1.2.3") > 0);
-      assertTrue("less - non-ascii order", c.compare("2.3.4", "10.2.1") < 0);
-      assertTrue("more - non-ascii order", c.compare("10.2.1", "2.3.4") > 0);
-   }
+  /** Ensure suffixed comparisons like "1.2.3-SNAPSHOT" &lt; "1.2.3" work. */
+  @Test public void semanticWithSuffixes() throws Exception {
+    SemanticVersionComparator c = new SemanticVersionComparator();
+    assertTrue("equal", c.compare("1.2.3-SNAPSHOT", "1.2.3-SNAPSHOT") == 0);
+    assertTrue("less", c.compare("1.2.3-SNAPSHOT", "1.2.3") < 0);
+    assertTrue("more", c.compare("1.2.3", "1.2.3-SNAPSHOT") > 0);
+    assertTrue("less - non-ascii order", c.compare("2.3.4-SNAPSHOT", "10.2.1") < 0);
+    assertTrue("more - non-ascii order", c.compare("10.2.1-SNAPSHOT", "2.3.4") > 0);
+  }
    
-   @Test public void semanticWithSuffixes() throws Exception {
-      SemanticVersionComparator c = new SemanticVersionComparator();
-      assertTrue("equal", c.compare("1.2.3-SNAPSHOT", "1.2.3-SNAPSHOT") == 0);
-      assertTrue("less", c.compare("1.2.3-SNAPSHOT", "1.2.3") < 0);
-      assertTrue("more", c.compare("1.2.3", "1.2.3-SNAPSHOT") > 0);
-      assertTrue("less - non-ascii order", c.compare("2.3.4-SNAPSHOT", "10.2.1") < 0);
-      assertTrue("more - non-ascii order", c.compare("10.2.1-SNAPSHOT", "2.3.4") > 0);
-   }
+  /** Ensure mixed-style comparisons like "20210329.1700" &lt; "1.2.3" work as expected. */
+  @Test public void semanticWithNonSemantic() throws Exception {
+    SemanticVersionComparator c = new SemanticVersionComparator();
+    assertTrue("less", c.compare("20210329.1700", "1.2.3") < 0);
+    assertTrue("more", c.compare("1.2.3", "20210329.1700") > 0);
+  }
    
-   @Test public void semanticWithNonSemantic() throws Exception {
-      SemanticVersionComparator c = new SemanticVersionComparator();
-      assertTrue("less", c.compare("20210329.1700", "1.2.3") < 0);
-      assertTrue("more", c.compare("1.2.3", "20210329.1700") > 0);
-   }
-   
-   @Test public void nonSemantic() throws Exception {
-      SemanticVersionComparator c = new SemanticVersionComparator();
-      assertTrue("equal", c.compare("20210329.1700", "20210329.1700") == 0);
-      assertTrue("less", c.compare("20210329.1700", "20210329.1701") < 0);
-      assertTrue("more", c.compare("20210329.1701", "20210329.1700") > 0);
+  /** Ensure non-semantic comparisons like "20210329.1700" &lt; "20210329.1701" work. */
+  @Test public void nonSemantic() throws Exception {
+    SemanticVersionComparator c = new SemanticVersionComparator();
+    assertTrue("equal", c.compare("20210329.1700", "20210329.1700") == 0);
+    assertTrue("less", c.compare("20210329.1700", "20210329.1701") < 0);
+    assertTrue("more", c.compare("20210329.1701", "20210329.1700") > 0);
 
-      assertTrue("less - amost semantic", c.compare("10.2", "2.1") < 0);
-      assertTrue("more - amost semantic", c.compare("2.1", "10.2") > 0);
-   }
+    assertTrue("less - amost semantic", c.compare("10.2", "2.1") < 0);
+    assertTrue("more - amost semantic", c.compare("2.1", "10.2") > 0);
+  }
    
-   public static void main(String args[]) {
-      org.junit.runner.JUnitCore.main("nzilbb.util.TestSemanticVersionComparator");
-   }
+  public static void main(String args[]) {
+    org.junit.runner.JUnitCore.main("nzilbb.util.TestSemanticVersionComparator");
+  }
 }
