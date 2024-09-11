@@ -47,6 +47,16 @@ public class TestSemanticVersionComparator {
     assertTrue("more - non-ascii order", c.compare("10.2.1-SNAPSHOT", "2.3.4") > 0);
   }
    
+  /** Ensure R-style hyphened comparisons like "1.2-3" &lt; "3.2-1" work. */
+  @Test public void basicSemanticComparisonRStyle() throws Exception {
+    SemanticVersionComparator c = new SemanticVersionComparator();
+    assertTrue("equal", c.compare("1.2-3", "1.2-3") == 0);
+    assertTrue("less", c.compare("1.2-3", "3.2-1") < 0);
+    assertTrue("more", c.compare("3.2-1", "1.2-3") > 0);
+    assertTrue("less - non-ascii order", c.compare("2.3-4", "10.2-1") < 0);
+    assertTrue("more - non-ascii order", c.compare("10.2-1", "2.3-4") > 0);
+  }
+   
   /** Ensure mixed-style comparisons like "20210329.1700" &lt; "1.2.3" work as expected. */
   @Test public void semanticWithNonSemantic() throws Exception {
     SemanticVersionComparator c = new SemanticVersionComparator();

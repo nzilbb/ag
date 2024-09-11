@@ -33,6 +33,8 @@ public class SemanticVersionComparator implements Comparator<String> {
 
    MessageFormat versionParser = new MessageFormat(
       "{0,number,integer}.{1,number,integer}.{2,number,integer}{3}");
+   MessageFormat versionParserHyphenPatch = new MessageFormat(
+      "{0,number,integer}.{1,number,integer}-{2,number,integer}{3}");
    /**
     * Default constructor.
     */
@@ -50,11 +52,19 @@ public class SemanticVersionComparator implements Comparator<String> {
       Object[] parse1 = null;
       try {
          parse1 = versionParser.parse(version1);
-      } catch(ParseException exception) {}
+      } catch(ParseException exception) {
+        try {
+          parse1 = versionParserHyphenPatch.parse(version1);
+        } catch(ParseException exception2) {}
+      }
       Object[] parse2 = null;
       try {
          parse2 = versionParser.parse(version2);
-      } catch(ParseException exception) {}
+      } catch(ParseException exception) {
+        try {
+          parse2 = versionParserHyphenPatch.parse(version2);
+        } catch(ParseException exception2) {}
+      }
 
       // if they're both parseable
       if (parse1 != null && parse2 != null) {
