@@ -269,6 +269,45 @@ public class TextGridSerialization
    * @return This object.
    */
   public TextGridSerialization setRenameShortNumericSpeakers(Boolean newRenameShortNumericSpeakers) { renameShortNumericSpeakers = newRenameShortNumericSpeakers; return this; }
+  
+  /**
+   * Allow multiple tiers when annotations actually overlap in layers where they
+   * shouldn't.
+   * <p> Sometimes a graph turns out to have, for example, segments that overlap within
+   * the same word, even though this is invalid. This causes TextGrids to have multiple
+   * tiers for the same layer/speaker, where there should be only one. Setting this
+   * parameter to false prohibits these multiple tiers, by dropping annotations that would
+   * create a new tier.
+   * @see #getAllowPeerOverlap()
+   * @see #setAllowPeerOverlap(Boolean)
+   */
+  protected Boolean allowPeerOverlap = Boolean.FALSE;
+  /**
+   * Getter for {@link #allowPeerOverlap}: Allow multiple tiers when annotations actually
+   * overlap in layers where they shouldn't. 
+   * <p> Sometimes a graph turns out to have, for example, segments that overlap within
+   * the same word, even though this is invalid. This causes TextGrids to have multiple
+   * tiers for the same layer/speaker, where there should be only one. Setting this
+   * parameter to false prohibits these multiple tiers, by dropping annotations that would
+   * create a new tier.
+   * @return Allow multiple tiers when annotations actually overlap in layers where they shouldn't.
+   */
+  public Boolean getAllowPeerOverlap() {
+    if (allowPeerOverlap == null) return Boolean.FALSE;
+    return allowPeerOverlap;
+  }
+  /**
+   * Setter for {@link #allowPeerOverlap}: Allow multiple tiers when annotations actually
+   * overlap in layers where they shouldn't. 
+   * <p> Sometimes a graph turns out to have, for example, segments that overlap within
+   * the same word, even though this is invalid. This causes TextGrids to have multiple
+   * tiers for the same layer/speaker, where there should be only one. Setting this
+   * parameter to false prohibits these multiple tiers, by dropping annotations that would
+   * create a new tier.
+   * @param newAllowPeerOverlap Allow multiple tiers when annotations actually overlap in
+   * layers where they shouldn't. 
+   */
+  public TextGridSerialization setAllowPeerOverlap(Boolean newAllowPeerOverlap) { allowPeerOverlap = newAllowPeerOverlap; return this; }
 
   /**
    * Returns the deserializer's descriptor.
@@ -544,6 +583,17 @@ public class TextGridSerialization
     }
     if (configuration.get("renameShortNumericSpeakers").getValue() == null) {
       configuration.get("renameShortNumericSpeakers").setValue(Boolean.TRUE);
+    }
+
+    if (!configuration.containsKey("allowPeerOverlap")) {
+      configuration.addParameter(
+        new Parameter(
+          "allowPeerOverlap", Boolean.class, 
+          "Allow peer overlap",
+          "Allows TextGrids with, for example, multiple segment tiers, if the underlying annotations are invalid and have overlapping segments.", true));
+    }
+    if (configuration.get("allowPeerOverlap").getValue() == null) {
+      configuration.get("allowPeerOverlap").setValue(Boolean.FALSE);
     }
 
     if (!configuration.containsKey("useConventions")) {
@@ -1522,53 +1572,72 @@ public class TextGridSerialization
             Vector<IntervalTier> tierList = tiers.get(who);
             IntervalTier tier = tierList.firstElement();
             double start = a.getStart().getOffset();
-            if (graph.compareOffsets(tier.getXmax(), start) > 0) { // xmax > start
-              // going backwards in time, so find/make a new tier
-              tier = null;
-              for (IntervalTier t : tierList) {
-                if (graph.compareOffsets(t.getXmax(), start) <= 0) { // xmax <= start
-                  // found a tier we can add to
-                  tier = t;
-                  break;
-                }
-              } // next tier in the list
-              if (tier == null) { // add a new tier
-                String tierName = layer.getId();
-                if (who.length() > 0) {
-                  // for utterance tiers, just use the speaker name
-                  if (layer.equals(getUtteranceLayer())) {
-                    tierName = who;
-                  } else {
-                    tierName += " - " + who;
-                  }
-                }
-                tier = new IntervalTier(tierName, 0, 0);
-                tierList.add(tier);
-              } // add a new tier
+            double end = a.getEnd().getOffset();
+            if (start > end) { // backwards!
+              a.getStart().setOffset(end);
+              a.getEnd().setOffset(start);
+              start = a.getStart().getOffset();
+              end = a.getEnd().getOffset();
             }
+            if (graph.compareOffsets(tier.getXmax(), start) > 0) { // xmax > start
+              // going backwards in time
+              if (layer.getPeersOverlap() // layer allows overlap
+                  || getAllowPeerOverlap()) { // or overlapping annotations setting allowed...
+                tier = null;
+                // find/make a new tier
+                for (IntervalTier t : tierList) {
+                  if (graph.compareOffsets(t.getXmax(), start) <= 0) { // xmax <= start
+                    // found a tier we can add to
+                    tier = t;
+                    break;
+                  }
+                } // next tier in the list
+                if (tier == null) { // add a new tier
+                  String tierName = layer.getId();
+                  if (who.length() > 0) {
+                    // for utterance tiers, just use the speaker name
+                    if (layer.equals(getUtteranceLayer())) {
+                      tierName = who;
+                    } else {
+                      tierName += " - " + who;
+                    }
+                  }
+                  tier = new IntervalTier(tierName, 0, 0);
+                  tierList.add(tier);
+                } // add a new tier
+              } // allowPeerOverlap
+              else if (graph.compareOffsets(tier.getXmax(), end) >= 0) { // xmax > end
+                // the annotation is completely before the end of the last one, so skip it
+                tier = null;
+              } else { // move the start of the annotation so that it fits in the gap
+                //System.out.println("Moving start of " + a.getLabel() + " from " + a.getStart() + " to " + tier.getXmax());
+              }
+            } // going backwards in time
 
-            // determine label
-            String label = a.getLabel();
-            if (layer.equals(getTurnLayer()) || layer.equals(getUtteranceLayer())
-                && getWordLayer() != null) {
-              // turn/utterances layers are filled by their word token labels
-              StringBuffer l = new StringBuffer();
-              for (Annotation token : a.all(getWordLayer().getId())) {
-                if (l.length() > 0) l.append(" ");
-                l.append(token.getLabel()); // TODO transcript convention support
-              } // next token
-              label = l.toString();
-            } // turn/utterance layer
-
-            // double-check we don't need to adjust the start offset a smidgin
-            if (tier.getXmax() > start) {
-              // offsets are within offsetGranularity, but not equal
-              a.getStart().setOffset(tier.getXmax());
-            } // adjust offset
-
-            // add an interval to it
-            tier.addInterval(new Interval(label, a.getStart().getOffset(), a.getEnd().getOffset()));
-            tier.setXmax(Math.max(tier.getXmax(), a.getEnd().getOffset()));
+            if (tier != null) {
+              // determine label
+              String label = a.getLabel();
+              if (layer.equals(getTurnLayer()) || layer.equals(getUtteranceLayer())
+                  && getWordLayer() != null) {
+                // turn/utterances layers are filled by their word token labels
+                StringBuffer l = new StringBuffer();
+                for (Annotation token : a.all(getWordLayer().getId())) {
+                  if (l.length() > 0) l.append(" ");
+                  l.append(token.getLabel()); // TODO transcript convention support
+                } // next token
+                label = l.toString();
+              } // turn/utterance layer
+              
+              // double-check we don't need to adjust the start offset a smidgin
+              if (tier.getXmax() > start) {
+                // offsets are within offsetGranularity, but not equal
+                a.getStart().setOffset(tier.getXmax());
+              } // adjust offset
+              
+              // add an interval to it
+              tier.addInterval(new Interval(label, a.getStart().getOffset(), a.getEnd().getOffset()));
+              tier.setXmax(Math.max(tier.getXmax(), a.getEnd().getOffset()));
+            }
           }
         } // next annotation
 
