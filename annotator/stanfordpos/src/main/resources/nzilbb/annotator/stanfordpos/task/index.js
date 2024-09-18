@@ -57,7 +57,9 @@ getSchema(s => {
     var posLayerId = document.getElementById("posLayerId");
     addLayerOptions(
         posLayerId, schema,
-        layer => layer.parentId == schema.wordLayerId && layer.alignment == 2);
+      layer => layer.parentId == schema.wordLayerId
+        && (layer.alignment == 2 // pos layers are aligned
+            || layer.id == taskId)); // ...but they might have set up the alignment wrong
     posLayerId.selectedIndex = 0;
 
     // what models are available
