@@ -2001,6 +2001,7 @@ public class Merger extends Transform implements GraphTransformer {
                     Annotation originalParentPrevious = originalParent.getPrevious();
                     if (originalParentPrevious != null
                         && originalPreviousParent != originalParentPrevious
+                        && Annotation.NotDestroyed(originalParent)
                         && Annotation.NotDestroyed(originalParentPrevious)) {
                       // there is an intervening annotation on the parent layer
                       log("Don't link previous original: ", anOriginalPrevious,
@@ -2262,6 +2263,7 @@ public class Merger extends Transform implements GraphTransformer {
             anOriginalPreviousNext = anLastOriginal.getParent().getNext();
             if (anOriginalPreviousNext != null
                 && anOriginalPreviousNext.getChange() != Change.Operation.Destroy
+                && anOriginal.getParent().getChange() != Change.Operation.Destroy
                 && anOriginalPreviousNext.equals(anOriginal.getParent().getPrevious())) {
               log("Don't link last: ", anLastOriginal,
                   " across intervening parent: ", anOriginalPreviousNext,
@@ -2480,8 +2482,41 @@ public class Merger extends Transform implements GraphTransformer {
                   })
                 .map(anOriginalParallel -> anOriginalParallel.getEnd())
                 .findAny();
+              if (!matchingMergedAnchor.isPresent()
+                  // for top-level layers only (e.g. noise) which won't link via child relations
+                  && schema.getRoot().getId().equals(layer.getParentId())
+                  && layer.getAlignment() != Constants.ALIGNMENT_NONE) { 
+                // try for linked annotations on another layer
+                matchingMergedAnchor = anEdited.getEnd().startingAnnotations()
+                  // skip ourselves
+                  .filter(a -> a != anEdited) 
+                  // not on our own layer
+                  .filter(a-> !a.getLayerId().equals(anEdited.getLayerId())) 
+                  // skip unmerged annotations from a neighboring fragments
+                  // (TODO not sure there can be any)
+                  .filter(Merger::HasCounterpart)
+                  .map(Merger::GetCounterpart) // now the linked annotation in the original graph
+                  // no use linking to the very same anchor
+                  .filter(a -> a.getStart() != anOriginal.getEnd())
+                  // offset should be the same
+                  .filter(a -> {
+                      Annotation anEditedLinked = GetCounterpart(a);
+                      if (compare(a.getStart(), anEditedLinked.getStart()) == 0
+                          // unless our offset is less trustworthy than theirs
+                          || GetConfidence(anEditedLinked.getStart()) < Constants.CONFIDENCE_AUTOMATIC
+                          || GetConfidence(a.getStart()) > GetConfidence(anEditedLinked.getStart())) {
+                        log(layerId, ": Different end anchor for ", anOriginal,
+                            ": linking to shared start of ", a);
+                        return true;
+                      }
+                      return false;                        
+                    })
+                  .map(anOriginalLinked -> anOriginalLinked.getStart())
+                  .findAny();
+              }
+              final Optional<Anchor> finalMatchingMergedAnchor = matchingMergedAnchor;
               
-              if (matchingMergedAnchor.isPresent()) {
+              if (finalMatchingMergedAnchor.isPresent()) {
                 // this, and all parallel annotation on *unrelated* layers come with us
                 anOriginal.getEnd().endingAnnotations()
                   .filter(a -> a != anOriginal)
@@ -2493,11 +2528,11 @@ public class Merger extends Transform implements GraphTransformer {
                       log(layerId, ": Different end anchor for ", anOriginal,
                           ": linking parallel ", an, " too");
                       if (an.getInstantaneous()) { // instant
-                        an.setStart(matchingMergedAnchor.get());
+                        an.setStart(finalMatchingMergedAnchor.get());
                       }
-                      an.setEnd(matchingMergedAnchor.get());
+                      an.setEnd(finalMatchingMergedAnchor.get());
                     });
-                anOriginal.setEnd(matchingMergedAnchor.get());
+                anOriginal.setEnd(finalMatchingMergedAnchor.get());
               } else { // no already-merged anchor we can use
                 // we might need a new anchor, if this is also the start anchor for
                 // another annotation with a different edited offset
