@@ -1584,7 +1584,7 @@ public class Validator extends Transform implements GraphTransformer {
           if (lastChild.getEnd() != null
               && lastChild.getEnd().getOffset() != null) {
             if (parent.getEnd() != null) {
-              if(parent.getEnd().getOffset() == null
+              if (parent.getEnd().getOffset() == null
                  || parent.getEnd().getOffset() > lastChild.getEnd().getOffset()) {
                 // narrow parent
                 String sOriginal = logAnnotation(parent);
@@ -1597,7 +1597,7 @@ public class Validator extends Transform implements GraphTransformer {
                   log("Resetting start of following annotation too ", followingParent);
                   changeStartWithRelatedAnnotations(followingParent, lastChild.getEnd());
                 } // next shared following annotations on the parent's layer
-              } else if (!parent.getEndId().equals(lastChild.getEndId())) {
+              } else if (!parent.getEnd().equals(lastChild.getEnd())) {
                 lastChild.setEndId(parent.getEndId());
                 log("Changed ", lastChild, " to share end anchor with ", parent);
               }
