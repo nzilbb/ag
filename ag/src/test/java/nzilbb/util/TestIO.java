@@ -80,6 +80,13 @@ public class TestIO {
                  "",
                  IO.OnlyASCII(null));
   }
+  
+  /** Ensure file-name/URL sanitization works. */
+  @Test public void SafeFileNameUrl() {
+    assertEquals("Removals", "", IO.SafeFileNameUrl("\\?*+$"));
+    assertEquals("Underscores", "_____", IO.SafeFileNameUrl("|:!=^"));
+    assertEquals("Text alternative", "-at--amp--gt--ge--lt--le-", IO.SafeFileNameUrl("@&>>=<<="));
+  }
    
   public static void main(String args[]) {
     org.junit.runner.JUnitCore.main("nzilbb.util.TestIO");

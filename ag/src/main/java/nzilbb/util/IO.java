@@ -634,8 +634,8 @@ public class IO
    * <p> Specifically:
    * <ul>
    *  <li> the following characters are removed: <tt>\?*+$</tt></li>
-   *  <li> the following characters are converted to underscore: <tt>|:!&gt;&lt;=^</tt></li>
-   *  <li> the following characters are converted to text alternatives: <tt>@&amp;</tt></li>
+   *  <li> the following characters are converted to underscore: <tt>|:!=^</tt></li>
+   *  <li> the following characters are converted to text alternatives: <tt>@&amp;&gt;&lt;</tt></li>
    * </ul>
    * No URL-encoding is performed.
    * @param s The possibly unsafe string.
@@ -645,7 +645,11 @@ public class IO
   public static String SafeFileNameUrl(String s) {
     if (s == null) return "";
     return s.replaceAll("[\\\\\\?\\*\\+\\$]", "")
-      .replaceAll("[\\|\\:\\!\\>\\<\\=\\^]", "_")	
+      .replaceAll("<=","-le-")
+      .replaceAll("<","-lt-")
+      .replaceAll(">=","-ge-")
+      .replaceAll(">","-gt-")
+      .replaceAll("[\\|\\:\\!\\=\\^]", "_")	
       .replaceAll("@","-at-")
       .replaceAll("&","-amp-");
   } // end of SafeFileNameUrl()
