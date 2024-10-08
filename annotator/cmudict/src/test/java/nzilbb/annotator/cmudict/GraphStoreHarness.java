@@ -76,15 +76,26 @@ public class GraphStoreHarness implements GraphStore {
   /**
    * Saves the given media for the given transcript
    * @param id The transcript ID
-   * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
    * @param mediaUrl A URL to the media content.
+   * @param trackSuffix The track suffix of the media - see {@link MediaTrackDefinition#suffix}.
    * @throws StoreException If an error prevents the media from being saved.
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
    */
-  public void saveMedia(String id, String trackSuffix, String mediaUrl)
+  public MediaFile saveMedia(String id, String mediaUrl, String trackSuffix)
     throws StoreException, PermissionException, GraphNotFoundException {
     throw new StoreException("saveMedia not supported");
+  }
+
+  /**
+   * Delete a given media or document file.
+   * @param id The associated transcript ID.
+   * @param fileName The media file name, e.g. {@link MediaFile#name}.
+   * @throws StoreException, PermissionException, GraphNotFoundException
+   */
+  public void deleteMedia(String id, String fileName)
+    throws StoreException, PermissionException, GraphNotFoundException {
+    throw new StoreException("deleteMedia not supported");
   }
 
   /**
@@ -100,6 +111,19 @@ public class GraphStoreHarness implements GraphStore {
     throw new StoreException("getAvailableMedia not supported");
   }
 
+  /**
+   * Saves the given document for the episode of the given transcript.
+   * @param id The transcript ID
+   * @param url A URL to the document.
+   * @throws StoreException If an error prevents the media from being saved.
+   * @throws PermissionException If saving the media is not permitted.
+   * @throws GraphNotFoundException If the transcript doesn't exist.
+   */
+  public MediaFile saveEpisodeDocument(String id, String url)
+    throws StoreException, PermissionException, GraphNotFoundException {
+    throw new StoreException("getAvailableMedia not supported");
+  }
+  
   /**
    * Gets the layer schema.
    * @return A schema defining the layers and how they relate to each other.
@@ -817,19 +841,6 @@ public class GraphStoreHarness implements GraphStore {
     throw new StoreException("Not implemented");
   }
 
-  /**
-   * Saves the given document for the episode of the given transcript.
-   * @param id The transcript ID
-   * @param url A URL to the document.
-   * @throws StoreException If an error prevents the media from being saved.
-   * @throws PermissionException If saving the media is not permitted.
-   * @throws GraphNotFoundException If the transcript doesn't exist.
-   */
-  public void saveEpisodeDocument(String id, String url)
-    throws StoreException, PermissionException, GraphNotFoundException {
-    throw new StoreException("Not implemented");
-  }
-   
   /**
    * Deletes the given transcript, and all associated files.
    * @param id The ID transcript to delete.

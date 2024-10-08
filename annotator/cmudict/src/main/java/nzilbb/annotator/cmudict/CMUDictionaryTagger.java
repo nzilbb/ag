@@ -37,6 +37,8 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -53,6 +55,7 @@ import nzilbb.ag.automation.ImplementsDictionaries;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
+import nzilbb.encoding.ValidLabelsDefinitions;
 import nzilbb.sql.ConnectionFactory;
 import nzilbb.util.IO;
 
@@ -77,7 +80,7 @@ import nzilbb.util.IO;
 public class CMUDictionaryTagger extends Annotator
   implements ImplementsDictionaries {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.6"; }
+  public String getMinimumApiVersion() { return "1.2.1"; }
    
   private PrintWriter log;
   private static SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
@@ -567,6 +570,7 @@ public class CMUDictionaryTagger extends Annotator
         .setAlignment(Constants.ALIGNMENT_NONE)
         .setPeers(!firstVariantOnly)
         .setParentId(schema.getWordLayerId()));
+      pronunciationLayer = schema.getLayer(pronunciationLayerId);
     } else {
       if (pronunciationLayerId.equals(tokenLayerId)
           || pronunciationLayerId.equals(transcriptLanguageLayerId)
@@ -584,6 +588,31 @@ public class CMUDictionaryTagger extends Annotator
         pronunciationLayer.setAlignment(Constants.ALIGNMENT_NONE);
       }
     }
+    // set valid labels (they're actually valid label parts!)
+    List<Map<String,Object>> validLabelsDefinition = new Vector<Map<String,Object>>();
+    if ("DISC".equals(getEncoding())) {
+      pronunciationLayer.setType(Constants.TYPE_IPA);
+      ValidLabelsDefinitions.AddDISCDefinitions(validLabelsDefinition);
+    } else { // ARPAbet
+      ValidLabelsDefinitions.AddARPAbetDefinitions(validLabelsDefinition);
+      // except the CMU symbols exclude certain symbols
+      HashSet<String> toRemove = new HashSet<String>() {{
+          add("AX1"); add("AX2"); add("AX0"); add("AXR"); add("DX");
+        }};
+      Iterator<Map<String,Object>> labels = validLabelsDefinition.iterator();
+      while (labels.hasNext()) {
+        Map<String,Object> definition = labels.next();
+        if (toRemove.contains((String)definition.get("label"))) {
+          labels.remove();
+        }
+      } // next label
+    } // ARPAbet
+    // for LaBB-CAT:
+    pronunciationLayer.put("validLabelsDefinition", validLabelsDefinition);
+    // for general use
+    pronunciationLayer.setValidLabels(
+      ValidLabelsDefinitions.ValidLabelsFromDefinition(validLabelsDefinition));
+
   }
 
   /**
@@ -1073,4 +1102,5 @@ public class CMUDictionaryTagger extends Annotator
     return disc;
   } // end of hestitationToDISC()
 
+  
 }

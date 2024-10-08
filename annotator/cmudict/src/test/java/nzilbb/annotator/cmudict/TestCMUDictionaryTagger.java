@@ -211,14 +211,24 @@ public class TestCMUDictionaryTagger {
                  "cmudict", annotator.getPronunciationLayerId());
     assertNotNull("pronunciation layer was created",
                   schema.getLayer(annotator.getPronunciationLayerId()));
+    Layer pronunciationLayer = schema.getLayer(annotator.getPronunciationLayerId());
     assertEquals("pronunciation layer child of word",
-                 "word", schema.getLayer(annotator.getPronunciationLayerId()).getParentId());
+                 "word", pronunciationLayer.getParentId());
     assertEquals("pronunciation layer not aligned",
                  Constants.ALIGNMENT_NONE,
-                 schema.getLayer(annotator.getPronunciationLayerId()).getAlignment());
+                 pronunciationLayer.getAlignment());
     assertEquals("pronunciation layer type correct",
                  Constants.TYPE_STRING,
-                 schema.getLayer(annotator.getPronunciationLayerId()).getType());
+                 pronunciationLayer.getType());
+    assertTrue("pronunciation layer has valid labels defined",
+               pronunciationLayer.getValidLabels().size() > 0);
+    assertTrue("valid labels are ARPAbet",
+               pronunciationLayer.getValidLabels().containsKey("UH0"));
+    String[] nonCMUARPAbet = { "AX1", "AX2", "AX0", "AXR", "DX" };
+    for (String label : nonCMUARPAbet) {
+      assertFalse("valid labels exclude non-CMU labels: " + label,
+                  pronunciationLayer.getValidLabels().containsKey(label));
+    }
     assertEquals("encoding",
                  "CMU", annotator.getEncoding());
     assertFalse("pronunciation layer disallows peers (firstVariantOnly=true)",
@@ -317,14 +327,19 @@ public class TestCMUDictionaryTagger {
                    "cmudict", annotator.getPronunciationLayerId());
       assertNotNull("pronunciation layer was created",
                     schema.getLayer(annotator.getPronunciationLayerId()));
+      Layer pronunciationLayer = schema.getLayer(annotator.getPronunciationLayerId());
       assertEquals("pronunciation layer child of word",
-                   "word", schema.getLayer(annotator.getPronunciationLayerId()).getParentId());
+                   "word", pronunciationLayer.getParentId());
       assertEquals("pronunciation layer not aligned",
                    Constants.ALIGNMENT_NONE,
-                   schema.getLayer(annotator.getPronunciationLayerId()).getAlignment());
+                   pronunciationLayer.getAlignment());
       assertEquals("pronunciation layer type correct",
-                   Constants.TYPE_STRING,
-                   schema.getLayer(annotator.getPronunciationLayerId()).getType());
+                   Constants.TYPE_IPA,
+                   pronunciationLayer.getType());
+      assertTrue("pronunciation layer has valid labels defined",
+                 pronunciationLayer.getValidLabels().size() > 0);
+      assertTrue("valid labels are DISC",
+                 pronunciationLayer.getValidLabels().containsKey("@"));
       assertEquals("encoding",
                    "DISC", annotator.getEncoding());
       assertFalse("pronunciation layer disallows peers (firstVariantOnly=true)",
