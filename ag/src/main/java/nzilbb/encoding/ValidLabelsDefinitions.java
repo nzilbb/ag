@@ -830,6 +830,854 @@ public class ValidLabelsDefinitions {
   } // end of addDISCLabelDefinitions()
 
   /**
+   * Add standard MAUS SAMPA-phoneme label definitions to the given map.
+   * @param validLabelsDefinition Map containing existing definitions, if any.
+   * @return <var>validLabelsDefinition</var>
+   */
+  public static List<Map<String,Object>> AddMausSAMPADefinitions(
+    List<Map<String,Object>> validLabelsDefinition) {
+    int display_order = validLabelsDefinition.size();
+    
+    // vowels
+        
+    // diphthongs
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "{I");
+      put("display", "eɪ"); put("description", "FACE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "Ae");
+      put("display", "aɪ"); put("description", "PRICE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "@}");
+      put("display", "əʊ"); put("description", "GOAT");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "OI");
+      put("display", "ɔɪ"); put("description", "CHOICE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "{Q");
+      put("display", "aʊ"); put("description", "MOUTH");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "I@");
+      put("display", "ɪə"); put("description", "NEAR");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "E@");
+      put("display", "ɛə"); put("description", "SQUARE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "U@");
+      put("display", "ʊə"); put("description", "CURE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+        
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "&");
+      put("display", "a"); //put("description", "X");h<b>a</b>t</td><td>(German)
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "A:");
+      put("display", "ɑː"); put("description", "START");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "A");
+      put("display", "ɑ"); //put("description", "X"); // k<b>a</b>levala</td><td>(German)
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "E");
+      put("display", "ɛ"); // put("description", "X");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});                  
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "i:");
+      put("display", "iː"); put("description", "FLEECE");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "u");
+      put("display", "uː"); put("description", "GOOSE");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "3:");
+      put("display", "ɜː"); put("description", "NURSE");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "{");
+      put("display", "æ"); put("description", "TRAP");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "o:");
+      put("display", "ɔː"); put("description", "THOUGHT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "I");
+      put("display", "ɪ"); put("description", "KIT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "V");
+      put("display", "ʌ"); put("description", "STRUT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "O");
+      put("display", "ɒ"); put("description", "LOT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "U");
+      put("display", "ʊ"); put("description", "FOOT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "@");
+      put("display", "ə"); put("description", "schwa");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "6");
+      put("display", "ɐ"); put("description", "open schwa");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+        
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "{~");
+      put("display", "æ̃"); put("description", "timbre");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "A~:");
+      put("display", "ɑ̃ː"); put("description", "détente");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "{~:");
+      put("display", "æ̃ː"); put("description", "lingerie");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "O~:");
+      put("display", "ɒ̃ː"); put("description", "bouillon");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+        
+    // syllabics
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "N,");
+      put("display", "ŋ̩"); put("description", "bacon");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "m,");
+      put("display", "m̩"); put("description", "idealism");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "n,");
+      put("display", "n̩"); put("description", "burden");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "l,");
+      put("display", "l̩"); put("description", "dangle");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+                
+    // consonants
+
+    // affricates
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "dZ");
+      put("display", "d͜ʒ"); // put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "tS");
+      put("display", "t͜ʃ"); // put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "ts");
+      put("display", "t͜s"); // put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "pf");
+      put("display", "pf");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+        
+    // glottal stop
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "?");
+      put("display", "ʔ"); put("description", "Glottal stop");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "4");
+      put("display", "ɾ"); put("description", "flap");
+      put("category", "CONSONANT"); put("subcategory", "Flap");
+    }});
+         
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "r");
+      put("display", "ɹ"); //put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "N");
+      put("display", "ŋ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "T");
+      put("display", "θ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "D");
+      put("display", "ð"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "S");
+      put("display", "ʃ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "Z");
+      put("display", "ʒ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+
+    // consontants with the same character in SAMPA and IPA (no display/selector so there's no picker)
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "p"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "b"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "t"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "d"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "k"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "g"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "l"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "m"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "n"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "f"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "v"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "s"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "z"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "j"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "h"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "w"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "x"); put("category", "CONSONANT"); }});
+    
+    // set display_order
+    for (Map<String,Object> label : validLabelsDefinition) {
+      if (!label.containsKey("display_order")) {
+        label.put("display_order", ++display_order);
+      }
+    } // next label
+    
+    return validLabelsDefinition;
+  } // end of addMAUSSAMPALabelDefinitions()
+
+  /**
+   * Add standard SAMPA-phoneme label definitions to the given map.
+   * @param validLabelsDefinition Map containing existing definitions, if any.
+   * @return <var>validLabelsDefinition</var>
+   */
+  public static List<Map<String,Object>> AddSAMPADefinitions(
+    List<Map<String,Object>> validLabelsDefinition) {
+    int display_order = validLabelsDefinition.size();
+    
+    // vowels
+        
+    // diphthongs
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "eI");
+      put("display", "eɪ"); put("description", "FACE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "aI");
+      put("display", "aɪ"); put("description", "PRICE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "@U");
+      put("display", "əʊ"); put("description", "GOAT");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "OI");
+      put("display", "ɔɪ"); put("description", "CHOICE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "aU");
+      put("display", "aʊ"); put("description", "MOUTH");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "I@");
+      put("display", "ɪə"); put("description", "NEAR");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "E@");
+      put("display", "ɛə"); put("description", "SQUARE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "U@");
+      put("display", "ʊə"); put("description", "CURE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+        
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "&");
+      put("display", "a"); //put("description", "X");h<b>a</b>t</td><td>(German)
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "A:");
+      put("display", "ɑː"); put("description", "START");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "A");
+      put("display", "ɑ"); //put("description", "X"); // k<b>a</b>levala</td><td>(German)
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "E");
+      put("display", "ɛ"); // put("description", "X");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});                  
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "i:");
+      put("display", "iː"); put("description", "FLEECE");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "u");
+      put("display", "uː"); put("description", "GOOSE");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "3:");
+      put("display", "ɜː"); put("description", "NURSE");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "{");
+      put("display", "æ"); put("description", "TRAP");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "O:");
+      put("display", "ɔː"); put("description", "THOUGHT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "I");
+      put("display", "ɪ"); put("description", "KIT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "V");
+      put("display", "ʌ"); put("description", "STRUT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "Q");
+      put("display", "ɒ"); put("description", "LOT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "U");
+      put("display", "ʊ"); put("description", "FOOT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "@");
+      put("display", "ə"); put("description", "schwa");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+        
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "{~");
+      put("display", "æ̃"); put("description", "timbre");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "A~:");
+      put("display", "ɑ̃ː"); put("description", "détente");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "{~:");
+      put("display", "æ̃ː"); put("description", "lingerie");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "O~:");
+      put("display", "ɒ̃ː"); put("description", "bouillon");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+        
+    // syllabics
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "N,");
+      put("display", "ŋ̩"); put("description", "bacon");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "m,");
+      put("display", "m̩"); put("description", "idealism");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "n,");
+      put("display", "n̩"); put("description", "burden");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "l,");
+      put("display", "l̩"); put("description", "dangle");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+                
+    // consonants
+
+    // affricates
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "dZ");
+      put("display", "d͜ʒ"); // put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "tS");
+      put("display", "t͜ʃ"); // put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "ts");
+      put("display", "t͜s"); // put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "pf");
+      put("display", "pf");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+        
+    // glottal stop
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "?");
+      put("display", "ʔ"); put("description", "Glottal stop");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+         
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "r");
+      put("display", "ɹ"); //put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "r*");
+      put("display", "ɹ"); put("selector", "linking-ɹ?"); put("description", "possible linking ɹ");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "N");
+      put("display", "ŋ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "T");
+      put("display", "θ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "D");
+      put("display", "ð"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "S");
+      put("display", "ʃ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "Z");
+      put("display", "ʒ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+
+    // consontants with the same character in SAMPA and IPA (no display/selector so there's no picker)
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "p"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "b"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "t"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "d"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "k"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "g"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "l"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "m"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "n"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "f"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "v"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "s"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "z"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "j"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "h"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "w"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "x"); put("category", "CONSONANT"); }});
+    
+    // set display_order
+    for (Map<String,Object> label : validLabelsDefinition) {
+      if (!label.containsKey("display_order")) {
+        label.put("display_order", ++display_order);
+      }
+    } // next label
+    
+    return validLabelsDefinition;
+  } // end of addSAMPALabelDefinitions()
+
+  /**
+   * Add standard X-SAMPA-phoneme label definitions to the given map.
+   * @param validLabelsDefinition Map containing existing definitions, if any.
+   * @return <var>validLabelsDefinition</var>
+   */
+  public static List<Map<String,Object>> AddXSAMPADefinitions(
+    List<Map<String,Object>> validLabelsDefinition) {
+    int display_order = validLabelsDefinition.size();
+    
+    // vowels
+        
+    // diphthongs
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "eI");
+      put("display", "eɪ"); put("description", "FACE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "aI");
+      put("display", "aɪ"); put("description", "PRICE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "@U");
+      put("display", "əʊ"); put("description", "GOAT");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "OI");
+      put("display", "ɔɪ"); put("description", "CHOICE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "aU");
+      put("display", "aʊ"); put("description", "MOUTH");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "I@");
+      put("display", "ɪə"); put("description", "NEAR");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "E@");
+      put("display", "ɛə"); put("description", "SQUARE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "U@");
+      put("display", "ʊə"); put("description", "CURE");
+      put("category", "VOWEL"); put("subcategory", "Diphthong");
+    }});
+        
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "&");
+      put("display", "a"); //put("description", "X");h<b>a</b>t</td><td>(German)
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "A:");
+      put("display", "ɑː"); put("description", "START");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "A");
+      put("display", "ɑ"); //put("description", "X"); // k<b>a</b>levala</td><td>(German)
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "E");
+      put("display", "ɛ"); // put("description", "X");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});                  
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "i:");
+      put("display", "iː"); put("description", "FLEECE");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "u");
+      put("display", "uː"); put("description", "GOOSE");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "3:");
+      put("display", "ɜː"); put("description", "NURSE");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "{");
+      put("display", "æ"); put("description", "TRAP");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "O:");
+      put("display", "ɔː"); put("description", "THOUGHT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "I");
+      put("display", "ɪ"); put("description", "KIT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "V");
+      put("display", "ʌ"); put("description", "STRUT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "Q");
+      put("display", "ɒ"); put("description", "LOT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "U");
+      put("display", "ʊ"); put("description", "FOOT");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "@");
+      put("display", "ə"); put("description", "schwa");
+      put("category", "VOWEL"); put("subcategory", "Monophthong");
+    }});
+        
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "{~");
+      put("display", "æ̃"); put("description", "timbre");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "A~:");
+      put("display", "ɑ̃ː"); put("description", "détente");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "{~:");
+      put("display", "æ̃ː"); put("description", "lingerie");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "O~:");
+      put("display", "ɒ̃ː"); put("description", "bouillon");
+      put("category", "VOWEL"); put("subcategory", "Nasal");
+    }});
+        
+    // syllabics
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "N=");
+      put("display", "ŋ̩"); put("description", "bacon");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "m=");
+      put("display", "m̩"); put("description", "idealism");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "n=");
+      put("display", "n̩"); put("description", "burden");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "l=");
+      put("display", "l̩"); put("description", "dangle");
+      put("category", "VOWEL"); put("subcategory", "Syllabic");
+    }});
+                
+    // consonants
+
+    // affricates
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "dZ");
+      put("display", "d͜ʒ"); // put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "tS");
+      put("display", "t͜ʃ"); // put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "ts");
+      put("display", "t͜s"); // put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "pf");
+      put("display", "pf");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+        
+    // glottal stop
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "?");
+      put("display", "ʔ"); put("description", "Glottal stop");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+         
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "r\\");
+      put("display", "ɹ"); //put("description", "X");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "r*");
+      put("display", "ɹ"); put("selector", "linking-ɹ?"); put("description", "possible linking ɹ");
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "N");
+      put("display", "ŋ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "T");
+      put("display", "θ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "D");
+      put("display", "ð"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "S");
+      put("display", "ʃ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "Z");
+      put("display", "ʒ"); 
+      put("category", "CONSONANT"); put("subcategory", "");
+    }});
+
+    // consontants with the same character in SAMPA and IPA (no display/selector so there's no picker)
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "p"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "b"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "t"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "d"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "k"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "g"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{ // 5->l
+      put("label", "5");
+      put("display", "l");
+      put("category", "CONSONANT");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "m"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "n"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "f"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "v"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "s"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "z"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "j"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "h"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "w"); put("category", "CONSONANT"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "x"); put("category", "CONSONANT"); }});
+    
+    // set display_order
+    for (Map<String,Object> label : validLabelsDefinition) {
+      if (!label.containsKey("display_order")) {
+        label.put("display_order", ++display_order);
+      }
+    } // next label
+    
+    return validLabelsDefinition;
+  } // end of addXSAMPALabelDefinitions()
+
+  /**
    * Add given labels, which are assumed to be IPA, to the given map.
    * @param validLabelsDefinition Map containing existing definitions, if any.
    * @param labels Labels to add.

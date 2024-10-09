@@ -1,5 +1,5 @@
 //
-// Copyright 2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2022-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -114,19 +114,24 @@ public class TestBASAnnotator {
       +"&participantTagLayerId="
       +"&wordAlignmentLayerId=word"
       +"&phoneAlignmentLayerId=segment");
+    Layer layer = schema.getLayer(annotator.getPhoneAlignmentLayerId());
+    assertTrue("phone layer has valid labels defined",
+               layer.getValidLabels().size() > 0);
+    assertTrue("valid labels are DISC",
+               layer.getValidLabels().containsKey("1"));
     
     // layers are created as required
     annotator.setTaskParameters(
       "orthographyLayerId=word"
       +"&service=MAUSBasic"
-      +"&phonemeEncoding=disc"
+      +"&phonemeEncoding=maus-sampa"
       +"&targetLanguagePattern=en-NZ"
       +"&transcriptLanguageLayerId=transcript_language"
       +"&utteranceTagLayerId=utterance_bas"     // nonexistent
       +"&participantTagLayerId=participant_bas" // nonexistent
       +"&wordAlignmentLayerId=word_alignment"   // nonexistent
       +"&phoneAlignmentLayerId=phone");         // nonexistent
-    Layer layer = annotator.getSchema().getLayer("utterance_bas");
+    layer = annotator.getSchema().getLayer("utterance_bas");
     assertNotNull("utterance_bas layer created", layer);
     layer = annotator.getSchema().getLayer("participant_bas");
     assertNotNull("participant_bas layer created", layer);
@@ -136,6 +141,10 @@ public class TestBASAnnotator {
     assertNotNull("phone layer created", layer);
     assertEquals("phone layer type", Constants.TYPE_IPA, layer.getType());
     assertTrue("phone layer peers", layer.getPeers());
+    assertTrue("phone layer has valid labels defined",
+               layer.getValidLabels().size() > 0);
+    assertTrue("valid labels are MAUS-SAMPA",
+               layer.getValidLabels().containsKey("Ae"));
   }   
 
   /** Ensure that invalid task parameters generate errors. */

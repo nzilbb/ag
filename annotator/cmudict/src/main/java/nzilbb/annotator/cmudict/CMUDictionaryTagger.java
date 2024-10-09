@@ -597,7 +597,8 @@ public class CMUDictionaryTagger extends Annotator
       ValidLabelsDefinitions.AddARPAbetDefinitions(validLabelsDefinition);
       // except the CMU symbols exclude certain symbols
       HashSet<String> toRemove = new HashSet<String>() {{
-          add("AX1"); add("AX2"); add("AX0"); add("AXR"); add("DX");
+          add("AX1"); add("AX2"); add("AX0"); add("AXR"); add("TQ"); add("DX");
+          add("IM"); add("IN"); add("VN"); add("ON"); add("UN"); add("EM"); add("EN"); add("EL");
         }};
       Iterator<Map<String,Object>> labels = validLabelsDefinition.iterator();
       while (labels.hasNext()) {

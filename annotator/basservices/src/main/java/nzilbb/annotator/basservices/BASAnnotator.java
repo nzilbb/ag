@@ -75,6 +75,7 @@ import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.util.Merger;
 import nzilbb.configure.ParameterSet;
 import nzilbb.encoding.PhonemeTranslator;
+import nzilbb.encoding.ValidLabelsDefinitions;
 import nzilbb.encoding.XSAMPA2DISC;
 import nzilbb.formatter.praat.TextGridSerialization;
 import nzilbb.util.Execution;
@@ -682,12 +683,13 @@ public class BASAnnotator extends Annotator {
           .setAlignment(Constants.ALIGNMENT_NONE)
           .setPeers(false).setPeersOverlap(false).setSaturated(true)
           .setParentId(schema.getWordLayerId())
-          .setDescription(service + " pronunciation.");
-        if ("disc".equals(phonemeEncoding) || "ipa".equals(phonemeEncoding)) {
-          pronunciationLayer.setType(Constants.TYPE_IPA);
-        }
+          .setDescription(service + " pronunciation.")
+          .setType(Constants.TYPE_IPA);
         schema.addLayer(pronunciationLayer);
       } else { // pronunciationLayer != null
+        if (pronunciationLayer.getType() != Constants.TYPE_IPA) {
+          pronunciationLayer.setType(Constants.TYPE_IPA);
+        }
         if (!pronunciationLayer.getParentId().equals(schema.getWordLayerId())) {
           throw new InvalidConfigurationException(
             this, "Pronunciation layer "+pronunciationLayerId
@@ -695,6 +697,28 @@ public class BASAnnotator extends Annotator {
             +" layer but is a " + pronunciationLayer.getParentId() + " layer");
         }
       } // pronunciationLayer != null
+      // set valid labels
+      List<Map<String,Object>> validLabelsDefinition = new Vector<Map<String,Object>>();
+      if ("disc".equals(phonemeEncoding)) { // DISC
+        ValidLabelsDefinitions.AddDISCDefinitions(validLabelsDefinition);
+      } else if ("sampa".equals(phonemeEncoding)) { // SAMPA
+        ValidLabelsDefinitions.AddSAMPADefinitions(validLabelsDefinition);
+      } else if ("x-sampa".equals(phonemeEncoding)) { // X-SAMPA
+        ValidLabelsDefinitions.AddXSAMPADefinitions(validLabelsDefinition);
+      } else if ("ipa".equals(phonemeEncoding)) { // IPA
+        // no definitions sorry
+      } else if ("arpabet".equals(phonemeEncoding)) { // ARPAbet
+        ValidLabelsDefinitions.AddARPAbetDefinitions(validLabelsDefinition);
+      } else { // MAUS SAMPA
+        ValidLabelsDefinitions.AddMausSAMPADefinitions(validLabelsDefinition);
+      }
+      if (validLabelsDefinition.size() > 0) {
+        // for LaBB-CAT:
+        pronunciationLayer.put("validLabelsDefinition", validLabelsDefinition);
+        // for general use
+        pronunciationLayer.setValidLabels(
+          ValidLabelsDefinitions.ValidLabelsFromDefinition(validLabelsDefinition));
+      }
     } else if ("MAUSBasic".equals(service)) {
       Layer wordAlignmentLayer = schema.getLayer(wordAlignmentLayerId);
       if (wordAlignmentLayer == null) {
@@ -721,10 +745,8 @@ public class BASAnnotator extends Annotator {
           .setAlignment(Constants.ALIGNMENT_INTERVAL)
           .setPeers(true).setPeersOverlap(false).setSaturated(false)
           .setParentId(schema.getTurnLayerId())
-          .setDescription(service + " phone alignments.");
-        if ("disc".equals(phonemeEncoding) || "ipa".equals(phonemeEncoding)) {
-          phoneAlignmentLayer.setType(Constants.TYPE_IPA);
-        }
+          .setDescription(service + " phone alignments.")
+          .setType(Constants.TYPE_IPA);
         schema.addLayer(phoneAlignmentLayer);
       } else if (phoneAlignmentLayerId.equals(wordAlignmentLayerId)
                  || phoneAlignmentLayerId.equals(schema.getWordLayerId())
@@ -737,8 +759,7 @@ public class BASAnnotator extends Annotator {
         if (phoneAlignmentLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
           phoneAlignmentLayer.setAlignment(Constants.ALIGNMENT_INTERVAL);
         }
-        if (("disc".equals(phonemeEncoding) || "ipa".equals(phonemeEncoding))
-            && phoneAlignmentLayer.getType() != Constants.TYPE_IPA) {
+        if (phoneAlignmentLayer.getType() != Constants.TYPE_IPA) {
           phoneAlignmentLayer.setType(Constants.TYPE_IPA);
         }
         // check it relates to wordAlignmentLayerId correctly
@@ -758,6 +779,18 @@ public class BASAnnotator extends Annotator {
           }
         } // wordAlignmentLayerId is not the standard word layer
       } // phoneAlignmentLayer is set and not a system layer
+      // set valid labels
+      List<Map<String,Object>> validLabelsDefinition = new Vector<Map<String,Object>>();
+      if ("disc".equals(phonemeEncoding)) { // DISC
+        ValidLabelsDefinitions.AddDISCDefinitions(validLabelsDefinition);
+      } else { // MAUS SAMPA
+        ValidLabelsDefinitions.AddMausSAMPADefinitions(validLabelsDefinition);
+      }
+      // for LaBB-CAT:
+      phoneAlignmentLayer.put("validLabelsDefinition", validLabelsDefinition);
+      // for general use
+      phoneAlignmentLayer.setValidLabels(
+        ValidLabelsDefinitions.ValidLabelsFromDefinition(validLabelsDefinition));
     } // MAUSBasic
   }
   

@@ -224,7 +224,10 @@ public class TestCMUDictionaryTagger {
                pronunciationLayer.getValidLabels().size() > 0);
     assertTrue("valid labels are ARPAbet",
                pronunciationLayer.getValidLabels().containsKey("UH0"));
-    String[] nonCMUARPAbet = { "AX1", "AX2", "AX0", "AXR", "DX" };
+    String[] nonCMUARPAbet = {
+      "AX1", "AX2", "AX0", "AXR", "TQ", "DX",
+      "IM", "IN", "VN", "ON", "UN", "EM", "EN", "EL"
+    };
     for (String label : nonCMUARPAbet) {
       assertFalse("valid labels exclude non-CMU labels: " + label,
                   pronunciationLayer.getValidLabels().containsKey(label));
