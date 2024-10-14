@@ -275,12 +275,16 @@ public class TrackedMap
                if (value instanceof JsonObject)
                { // complex object value
                   JsonObject objectValue = (JsonObject)value;
+                  System.out.println("objectValue: " + objectValue);
                   // what type are we expecting?
                   Class type = setter.getParameterTypes()[0];
                   boolean isMap = false;
                   for (Class i : type.getInterfaces())
                   {
-                     if (i.equals(Map.class)) isMap = true;
+                    // Java 11 introduces SequencedMap which isn't Map.class, so this doesn't work:
+                    //if (i.equals(Map.class)) isMap = true;
+                    // Use the name instead
+                    if (i.getName().endsWith("Map")) isMap = true;
                   }
                   if (isMap)
                   {
