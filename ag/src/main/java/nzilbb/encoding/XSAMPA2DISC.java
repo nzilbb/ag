@@ -134,6 +134,7 @@ public class XSAMPA2DISC extends PhonemeTranslator {
          map.put("Ae",'2');
          map.put("{Q",'6');
          map.put("{I",'1'); // duplicate of "eI"
+         map.put("e@",'8'); // duplicate of "E@"
          map.put("6",'@'); // 'open schwa' (ɐ)
          map.put("o:",'$');
          map.put("O", 'Q');

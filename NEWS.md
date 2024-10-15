@@ -1,3 +1,14 @@
+# nzilbb.ag 1.2.1
+
+For LaBB-CAT version 20241015.1456
+
+- Improve JSON serialization to ensure LaBB-CAT's layer.validLabelsDefinition is supported.
+- Standardize phoneme pickers with nzilbb.encoding.ValidLabelsDefinitions.
+- Improve graph merge, particularly in relation to 'noise' annotations keeping word links.
+- Ensure SemanticVersionComparator works with R package versions.
+- Implement IO.OnlyASCII() to non-ASCII characters, and strip accents from letters.
+- Improve filename sanitization.
+
 # nzilbb.ag 1.2.0
 
 For LaBB-CAT version 20240628.1316
