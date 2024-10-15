@@ -275,7 +275,6 @@ public class TrackedMap
                if (value instanceof JsonObject)
                { // complex object value
                   JsonObject objectValue = (JsonObject)value;
-                  System.out.println("objectValue: " + objectValue);
                   // what type are we expecting?
                   Class type = setter.getParameterTypes()[0];
                   boolean isMap = false;
