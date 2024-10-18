@@ -133,28 +133,35 @@ public class TestStanfordPosTagger {
                  "lang", annotator.getPhraseLanguageLayerId());
     assertEquals("pos layer",
                  "pos", annotator.getPosLayerId());
+    Layer posLayer = schema.getLayer(annotator.getPosLayerId());
     assertNotNull("pos layer was created",
-                  schema.getLayer(annotator.getPosLayerId()));
+                  posLayer);
     assertEquals("pos layer child of word",
-                 "word", schema.getLayer(annotator.getPosLayerId()).getParentId());
+                 "word", posLayer.getParentId());
     assertEquals("pos layer aligned",
                  Constants.ALIGNMENT_INTERVAL,
-                 schema.getLayer(annotator.getPosLayerId()).getAlignment());
+                 posLayer.getAlignment());
     assertEquals("pos layer type correct",
                  Constants.TYPE_STRING,
-                 schema.getLayer(annotator.getPosLayerId()).getType());
+                 posLayer.getType());
     assertTrue("pos layer peers",
-               schema.getLayer(annotator.getPosLayerId()).getPeers());
+               posLayer.getPeers());
     assertTrue("pos layer included",
-               schema.getLayer(annotator.getPosLayerId()).getParentIncludes());
+               posLayer.getParentIncludes());
     assertFalse("pos layer peers don't overlap",
-               schema.getLayer(annotator.getPosLayerId()).getPeersOverlap());
+               posLayer.getPeersOverlap());
     assertTrue("pos layer saturated",
-               schema.getLayer(annotator.getPosLayerId()).getSaturated());
+               posLayer.getSaturated());
     assertEquals("model: english-caseless-left3words-distsim.tagger",
                  "english-caseless-left3words-distsim.tagger", annotator.getModel());
     assertTrue("pos layer allows peers", // contractions like "I'll" might have two tags
-                schema.getLayer(annotator.getPosLayerId()).getPeers());
+               posLayer.getPeers());
+    assertTrue("pos layer has valid labels defined",
+               posLayer.getValidLabels().size() > 0);
+    assertNotNull("pos layer has expected valid labels defined",
+                  posLayer.getValidLabels().get("NN"));
+    assertNotNull("pos layer has expected valid label definitions defined",
+                  posLayer.get("validLabelsDefinition"));
     Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
       .collect(Collectors.toSet());
     assertEquals("4 required layer: "+requiredLayers,

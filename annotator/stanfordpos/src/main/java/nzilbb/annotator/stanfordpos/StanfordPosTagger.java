@@ -21,9 +21,9 @@
 //
 package nzilbb.annotator.stanfordpos;
 
-import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import java.io.BufferedReader;
 import java.io.File;
@@ -43,6 +43,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -61,6 +62,7 @@ import nzilbb.ag.automation.ImplementsDictionaries;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
+import nzilbb.encoding.ValidLabelsDefinitions;
 import nzilbb.sql.ConnectionFactory;
 import nzilbb.util.IO;
 
@@ -74,7 +76,7 @@ import nzilbb.util.IO;
 @UsesFileSystem
 public class StanfordPosTagger extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.1"; }
+  public String getMinimumApiVersion() { return "1.2.1"; }
   
   /**
    * Runs any processing required to uninstall the annotator.
@@ -451,12 +453,12 @@ public class StanfordPosTagger extends Annotator {
     // does the outputLayer need to be added to the schema?
     Layer posLayer = schema.getLayer(posLayerId);
     if (posLayer == null) {
-      schema.addLayer(
-        new Layer(posLayerId)
+      posLayer = new Layer(posLayerId)
         .setAlignment(Constants.ALIGNMENT_INTERVAL)
         .setPeers(true).setPeersOverlap(false)
         .setParentIncludes(true)
-        .setParentId(schema.getWordLayerId()));
+        .setParentId(schema.getWordLayerId());
+      schema.addLayer(posLayer);
     } else {
       if (posLayerId.equals(tokenLayerId)
           || posLayerId.equals(transcriptLanguageLayerId)
@@ -480,7 +482,168 @@ public class StanfordPosTagger extends Annotator {
           posLayer.setSaturated(true);
       }
     }
+    // ensure valid labels are set
+    if (posLayer.getValidLabels().size() == 0) {
+      // use richer 'validLabelsDefinition' for better UX in LaBB-CAT
+      List<Map<String,Object>> validLabelsDefinition = generateValidLabelsDefinition();      
+      // for LaBB-CAT:
+      posLayer.put("validLabelsDefinition", validLabelsDefinition);
+      // for general use
+      posLayer.setValidLabels(
+        ValidLabelsDefinitions.ValidLabelsFromDefinition(validLabelsDefinition));
+    }
   }
+  
+  /**
+   * Generates a validLabelsDefinition structure for ensuring there's a user-friendly
+   * selector in LaBB-CAT with the Penn Treebank POS tag set.
+   * @return A list of objects definining the Penn Treebank POS tag set.
+   * @see https://web.stanford.edu/~jurafsky/slp3/old_oct19/8.pdf
+   */
+  private List<Map<String,Object>> generateValidLabelsDefinition() {
+    List<Map<String,Object>> validLabelsDefinition = new Vector<Map<String,Object>>();
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "CC"); put("description", "coordinating conjunction e.g. and, but, or"); put("category", "MISC");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "CD"); put("description", "cardinal number e.g. one two"); put("category", "MISC");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "DT"); put("description", "determiner e.g. a the"); put("category", "DETERMINER");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "EX"); put("description", "existential 'there'"); put("category", "MISC");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "FW"); put("description", "foreign word  e.g. mea culpa"); put("category", "MISC");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "IN"); put("description", "preposition/subordin-conj e.g. of, in, by"); put("category", "MISC");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "JJ"); put("description", "adjective e.g. yellow"); put("category", "ADJECTIVAL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "JJR"); put("description", "comparative adjective e.g. bigger"); put("category", "ADJECTIVAL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "JJS"); put("description", "superlative adjective e.g. biggest"); put("category", "ADJECTIVAL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "LS"); put("description", "list item marker e.g. 1, 2, One"); put("category", "MISC");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "MD"); put("description", "modal e.g. can, should"); put("category", "VERB");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "NN"); put("description", "singular or mass noun e.g. llama"); put("category", "NOUN");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "NNS"); put("description", "plural noun e.g. llamas"); put("category", "NOUN");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "NNP"); put("description", "singular proper noun e.g. IBM"); put("category", "NOUN");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "NNPS"); put("description", "plural proper noun e.g. Carolinas"); put("category", "NOUN");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "PDT"); put("description", "predeterminer e.g. all, both"); put("category", "DETERMINER");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "POS"); put("description", "possessive ending e.g. 's"); put("category", "ADJECTIVAL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "PRP"); put("description", "personal pronoun e.g. I, you, he"); put("category", "NOUN");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "PRP$"); put("description", "possessive pronoun e.g. your, one's"); put("category", "ADJECTIVAL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "RB"); put("description", "adverb e.g. quickly"); put("category", "ADVERBIAL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "RBR"); put("description", "comparative adverb e.g. quicker"); put("category", "ADVERBIAL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "RBS"); put("description", "superlative adverb e.g. quickest"); put("category", "ADVERBIAL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "RP"); put("description", "particle e.g. up off"); put("category", "MISC");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "SYM"); put("description", "symbol e.g. =, %, &"); put("category", "SYMBOL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "TO"); put("description", "'to'"); put("category", "MISC");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "UH"); put("description", "interjection e.g. ah, oops"); put("category", "MISC");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "VB"); put("description", "verb base form e.g. eat"); put("category", "VERB");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "VBD"); put("description", "verb past tense e.g. ate"); put("category", "VERB");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "VBG"); put("description", "verb gerund e.g. eating"); put("category", "VERB");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "VBN"); put("description", "verb past participle e.g. eaten"); put("category", "VERB");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "VBP"); put("description", "verb non-3sg present e.g. eat"); put("category", "VERB");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "VBZ"); put("description", "verb 3sg present e.g. eats"); put("category", "VERB");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "WDT"); put("description", "wh- determiner e.g. which, that"); put("category", "DETERMINER");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "WP"); put("description", "wh- pronoun e.g. what, who"); put("category", "NOUN");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "WP$"); put("description", "wh- possessive e.g. whose"); put("category", "ADJECTIVAL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "WRB"); put("description", "wh- adverb e.g. how, where"); put("category", "ADVERBIAL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "$"); put("description", "dollar sign e.g. $"); put("category", "SYMBOL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "#"); put("description", "pound sign e.g. #"); put("category", "SYMBOL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "“"); put("description", "left quote e.g. ‘ or “"); put("category", "PUNCTUATION");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "”"); put("description", "right quote e.g. ’ or ”"); put("category", "PUNCTUATION");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "("); put("description", "left parenthesis e.g. [, (, {, <"); put("category", "SYMBOL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", ")"); put("description", "right parenthesis e.g. ], ), }, >"); put("category", "SYMBOL");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", ","); put("description", "comma"); put("category", "PUNCTUATION");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "."); put("description", "end sentence punctuation e.g. . ! ?"); put("category", "PUNCTUATION");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", ":"); put("description", "mid-sentence punctuation e.g. : ; ... – -"); put("category", "PUNCTUATION");
+    }});
+    // ensure that in all cases, "display" is the same as "label", so that it appears in
+    // LaBB-CAT's selector
+    for (Map<String,Object> definition : validLabelsDefinition) {
+      definition.put("display", definition.get("label"));
+    }
+    return validLabelsDefinition;
+  } // end of generateValidLabelsDefinition()
   
   /**
    * Determines which layers the annotator requires in order to annotate a graph.

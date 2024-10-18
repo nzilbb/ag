@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.stanfordpos</artifactId>
   <name>nzilbb.annotator.stanfordpos</name>
-  <version>0.3.4</version>
+  <version>1.0.0</version>
 
   <properties>
     <package.path>nzilbb/annotator/stanfordpos/</package.path>
@@ -27,7 +27,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.1.0</version>
+      <version>1.2.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -56,6 +56,13 @@
             </manifestEntries>
           </archive>
           <outputDirectory>../../bin</outputDirectory>
+        </configuration>
+      </plugin>
+      
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
 
