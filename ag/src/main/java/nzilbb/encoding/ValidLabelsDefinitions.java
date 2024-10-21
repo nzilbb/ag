@@ -374,30 +374,30 @@ public class ValidLabelsDefinitions {
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "V"); put("display", "v");
       put("category", "CONSONANT"); put("subcategory", "Fricative"); }});
-    validLabelsDefinition.add(new HashMap<String,Object>() {{
-      put("label", "S"); put("display", "s");
-      put("category", "CONSONANT"); put("subcategory", "Fricative"); }});
-    validLabelsDefinition.add(new HashMap<String,Object>() {{
-      put("label", "Z"); put("display", "z");
-      put("category", "CONSONANT"); put("subcategory", "Fricative"); }});
-    validLabelsDefinition.add(new HashMap<String,Object>() {{
-      put("label", "TH");
-      put("display", "θ"); 
-      put("category", "CONSONANT"); put("subcategory", "Fricative");
-    }});
-    validLabelsDefinition.add(new HashMap<String,Object>() {{
-      put("label", "DH");
-      put("display", "ð"); 
-      put("category", "CONSONANT"); put("subcategory", "Fricative");
-    }});
-    validLabelsDefinition.add(new HashMap<String,Object>() {{
+    validLabelsDefinition.add(new HashMap<String,Object>() {{ // SH before S
       put("label", "SH");
       put("display", "ʃ"); 
       put("category", "CONSONANT"); put("subcategory", "Fricative");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "S"); put("display", "s");
+      put("category", "CONSONANT"); put("subcategory", "Fricative"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{ // ZH before Z
       put("label", "ZH");
       put("display", "ʒ"); 
+      put("category", "CONSONANT"); put("subcategory", "Fricative");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "Z"); put("display", "z");
+      put("category", "CONSONANT"); put("subcategory", "Fricative"); }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{ // TH before T
+      put("label", "TH");
+      put("display", "θ"); 
+      put("category", "CONSONANT"); put("subcategory", "Fricative");
+    }});
+    validLabelsDefinition.add(new HashMap<String,Object>() {{ // DH before D
+      put("label", "DH");
+      put("display", "ð"); 
       put("category", "CONSONANT"); put("subcategory", "Fricative");
     }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
@@ -416,6 +416,14 @@ public class ValidLabelsDefinitions {
       put("category", "CONSONANT"); put("subcategory", "Affricate");
     }});
         
+    // tap
+
+    validLabelsDefinition.add(new HashMap<String,Object>() {{
+      put("label", "DX"); // DX before D
+      put("display", "ɾ"); put("description", "flap - extension to ARPABbet)");
+      put("category", "CONSONANT"); put("subcategory", "Tap");
+    }});
+
     // plosive
 
     validLabelsDefinition.add(new HashMap<String,Object>() {{
@@ -429,10 +437,10 @@ public class ValidLabelsDefinitions {
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "B"); put("display", "b");
       put("category", "CONSONANT"); put("subcategory", "Plosive"); }});
-    validLabelsDefinition.add(new HashMap<String,Object>() {{
+    validLabelsDefinition.add(new HashMap<String,Object>() {{ // after TH (above)
       put("label", "T"); put("display", "t");
       put("category", "CONSONANT"); put("subcategory", "Plosive"); }});
-    validLabelsDefinition.add(new HashMap<String,Object>() {{
+    validLabelsDefinition.add(new HashMap<String,Object>() {{ // after DH and DX (above)
       put("label", "D"); put("display", "d");
       put("category", "CONSONANT"); put("subcategory", "Plosive"); }});
     validLabelsDefinition.add(new HashMap<String,Object>() {{
@@ -444,7 +452,7 @@ public class ValidLabelsDefinitions {
     
     // nasal
 
-    validLabelsDefinition.add(new HashMap<String,Object>() {{
+    validLabelsDefinition.add(new HashMap<String,Object>() {{ // NG before N
       put("label", "NG");
       put("display", "ŋ"); 
       put("category", "CONSONANT"); put("subcategory", "Nasal");
@@ -455,14 +463,6 @@ public class ValidLabelsDefinitions {
     validLabelsDefinition.add(new HashMap<String,Object>() {{
       put("label", "N"); put("display", "n");
       put("category", "CONSONANT"); put("subcategory", "Nasal"); }});
-
-    // tap
-
-    validLabelsDefinition.add(new HashMap<String,Object>() {{
-      put("label", "DX");
-      put("display", "ɾ"); put("description", "flap - extension to ARPABbet)");
-      put("category", "CONSONANT"); put("subcategory", "Tap");
-    }});
 
     // approximant
 
