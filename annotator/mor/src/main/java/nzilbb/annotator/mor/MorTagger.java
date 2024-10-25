@@ -64,7 +64,7 @@ import nzilbb.util.ISO639;
 @UsesFileSystem
 public class MorTagger extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.3"; }
+  public String getMinimumApiVersion() { return "1.2.1"; }
   
   /**
    * Runs any processing required to uninstall the annotator.
@@ -93,7 +93,10 @@ public class MorTagger extends Annotator {
    * @return The MOR command-line program.
    */
   public File getMorExe() {
-    return new File(getWorkingDirectory(), "mor"); // TODO or exe?
+    return new File(
+      new File(
+        new File(
+          new File(getWorkingDirectory(), "unix-clan"), "unix"), "bin"), "mor"); // TODO or exe?
   } // end of getMorExe()
 
   /**
@@ -101,7 +104,10 @@ public class MorTagger extends Annotator {
    * @return The POST command-line program.
    */
   public File getPostExe() {
-    return new File(getWorkingDirectory(), "post"); // TODO or exe?
+    return new File(
+      new File(
+        new File(
+          new File(getWorkingDirectory(), "unix-clan"), "unix"), "bin"), "post"); // TODO or exe?
   } // end of getMorExe()
    
   /**
@@ -166,10 +172,9 @@ public class MorTagger extends Annotator {
           FileOutputStream out = new FileOutputStream(editedMakefile);
           // although the makefile includes some pre-baked lines we could un-comment,
           // POST compiles but doesn't run on 64-bit systems without the -m32 switch
-          // so we add our own definition of CFLAGS instead, based on the "4.4.1-4ubuntu9" config
-          out.write("CC = g++\n".getBytes());
+          // so we add our own definition of CFLAGS instead, based on the "Ubuntu 20.04.6" config
           out.write(
-            "CFLAGS = -DUNX -Wno-deprecated -Wno-deprecated-declarations -m32\n".getBytes());
+            "CFLAGS = -O -DUNX -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing -m32\n\n".getBytes());
           // now copy the rest of the makefiles
           IO.Pump(new FileInputStream(makefile), out);
           out.close();
@@ -208,26 +213,6 @@ public class MorTagger extends Annotator {
           // fall through to compiledMor check - maybe stderr output isn't fatal...
         }
         
-        // copy mor to base directory
-        File compiledMor = new File(new File(new File(unixClan, "unix"), "bin"), "mor");
-        if (!compiledMor.exists()) {
-          throw new InvalidConfigurationException(
-            this, "Compilation failed to create "+compiledMor.getPath());
-        }
-        if (!compiledMor.renameTo(mor)) {
-            throw new InvalidConfigurationException(
-              this, "Could not install compiled '"+mor.getName()+"'");
-        }
-        // copy post to base directory
-        File compiledPost = new File(new File(new File(unixClan, "unix"), "bin"), "post");
-        if (!compiledPost.exists()) {
-          throw new InvalidConfigurationException(
-            this, "Compilation failed to create "+compiledPost.getPath());
-        }
-        if (!compiledPost.renameTo(post)) {
-            throw new InvalidConfigurationException(
-              this, "Could not install compiled '"+post.getName()+"'");
-        }
       } // mor didn't exist
       setPercentComplete(60);
 
@@ -605,104 +590,113 @@ public class MorTagger extends Annotator {
 
     if (parameters == null) { // apply default configuration
       
-      try {
-        // default input layer
-        if (schema.getLayer("orthography") != null) {
-          tokenLayerId = "orthography";
-        } else {
-          tokenLayerId = schema.getWordLayerId();
-        }
-        
-        // default transcript language layer
-        Layer[] candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.root.id && layer.alignment == 0" // transcript attribute
-          +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
-        if (candidates.length > 0) languagesLayerId = candidates[0].getId();
-        
-        // mor layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId"
-          +" && (/^[Mm][Oo][Rr]$/.test(layer.id) || /^[Mm]orpho[Ss]yntax$/.test(layer.id))");
-        if (candidates.length > 0) {
-          morLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          morLayerId = "mor";
-        }
-
-        // prefix layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId"
-          +" && (/.*[Pp]refix.*/.test(layer.id))");
-        if (candidates.length > 0) {
-          prefixLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          prefixLayerId = "morPrefix";
-        }
-
-        // pos layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId" // word tag
-          +" && (/.*POS.*/.test(layer.id) || /.*pos.*/.test(layer.id)"
-          +" || /.*[Pp]art.*[Oo]f.*[Ss]peech.*/.test(layer.id))");
-        if (candidates.length > 0) {
-          partOfSpeechLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          partOfSpeechLayerId = "morPOS";
-        }
-
-        // pos subcategory layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId" // word tag
-          +" && (/.*[Ss]ubcategory.*/.test(layer.id))");
-        if (candidates.length > 0) {
-          partOfSpeechSubcategoryLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          partOfSpeechSubcategoryLayerId = "morPOSSubcategory";
-        }
-
-        // stem layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId" // word tag
-          +" && (/.*[Ss]tem.*/.test(layer.id))");
-        if (candidates.length > 0) {
-          stemLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          stemLayerId = "morStem";
-        }
-
-        // fusional suffix layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId" // word tag
-          +" && (/.*[Ff]usional.*[Ss]uffix.*/.test(layer.id))");
-        if (candidates.length > 0) {
-          fusionalSuffixLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          fusionalSuffixLayerId = "morFusionalSuffix";
-        }
-
-        // suffix layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId" // word tag
-          +" && (/.*[Ss]uffix.*/.test(layer.id))");
-        if (candidates.length > 0) {
-          suffixLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          suffixLayerId = "morSuffix";
-        }
-
-        // gloss layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId" // word tag
-          +" && (/.*[Gg]loss.*/.test(layer.id) || /.*[Ee]nglish.*/.test(layer.id))");
-        if (candidates.length > 0) {
-          glossLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          glossLayerId = "morGloss";
-        }
-        
-
-      } catch(ScriptException impossible) {}
+      // default input layer
+      if (schema.getLayer("orthography") != null) {
+        tokenLayerId = "orthography";
+      } else {
+        tokenLayerId = schema.getWordLayerId();
+      }
       
+      // default transcript language layer
+      Layer[] candidates = schema.getMatchingLayers(
+        layer ->
+        schema.getRoot().getId().equals(layer.getParentId())
+        && layer.getAlignment() == 0 // transcript attribute
+        && layer.getId().matches(".*lang.*")); // with 'lang' in the name
+      if (candidates.length > 0) languagesLayerId = candidates[0].getId();
+        
+      // mor layer
+      candidates = schema.getMatchingLayers(
+        layer ->
+        schema.getWordLayerId().equals(layer.getParentId()) // word tag
+        && (layer.getId().matches("^[Mm][Oo][Rr]$")
+            || layer.getId().matches("^[Mm]orpho[Ss]yntax$")));
+      if (candidates.length > 0) {
+        morLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        morLayerId = "mor";
+      }
+
+      // prefix layer
+      candidates = schema.getMatchingLayers(
+        layer ->
+        schema.getWordLayerId().equals(layer.getParentId()) // word tag
+        && layer.getId().matches(".*[Pp]refix.*"));
+      if (candidates.length > 0) {
+        prefixLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        prefixLayerId = "morPrefix";
+      }
+
+      // pos layer
+      candidates = schema.getMatchingLayers(
+        layer ->
+        schema.getWordLayerId().equals(layer.getParentId()) // word tag
+        && (layer.getId().matches(".*POS.*")
+            || layer.getId().matches(".*pos.*")
+            || layer.getId().matches(".*[Pp]art.*[Oo]f.*[Ss]peech.*")));
+      if (candidates.length > 0) {
+        partOfSpeechLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        partOfSpeechLayerId = "morPOS";
+      }
+
+      // pos subcategory layer
+      candidates = schema.getMatchingLayers(
+        layer ->
+        schema.getWordLayerId().equals(layer.getParentId()) // word tag
+        && layer.getId().matches(".*[Ss]ubcategory.*"));
+      if (candidates.length > 0) {
+        partOfSpeechSubcategoryLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        partOfSpeechSubcategoryLayerId = "morPOSSubcategory";
+      }
+
+      // stem layer
+      candidates = schema.getMatchingLayers(
+        layer ->
+        schema.getWordLayerId().equals(layer.getParentId()) // word tag
+        && layer.getId().matches(".*[Ss]tem.*"));
+      if (candidates.length > 0) {
+        stemLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        stemLayerId = "morStem";
+      }
+        
+      // fusional suffix layer
+      candidates = schema.getMatchingLayers(
+        layer ->
+        schema.getWordLayerId().equals(layer.getParentId()) // word tag
+        && layer.getId().matches(".*[Ff]usional.*[Ss]uffix.*"));
+      if (candidates.length > 0) {
+        fusionalSuffixLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        fusionalSuffixLayerId = "morFusionalSuffix";
+      }
+        
+      // suffix layer
+      candidates = schema.getMatchingLayers(
+        layer ->
+        schema.getWordLayerId().equals(layer.getParentId()) // word tag
+        && layer.getId().matches(".*[Ss]uffix.*"));
+      if (candidates.length > 0) {
+        suffixLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        suffixLayerId = "morSuffix";
+      }
+        
+      // gloss layer
+      candidates = schema.getMatchingLayers(
+        layer ->
+        schema.getWordLayerId().equals(layer.getParentId()) // word tag
+        && (layer.getId().matches(".*[Gg]loss.*")
+            || layer.getId().matches(".*[Ee]nglish.*")));
+      if (candidates.length > 0) {
+        glossLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        glossLayerId = "morGloss";
+      }
+        
     } else {
       beanPropertiesFromQueryString(parameters);
     }
@@ -992,6 +986,7 @@ public class MorTagger extends Annotator {
       if (!grammar.exists()) {
         throw new InvalidConfigurationException(this, "Grammar not installed: " + iso639Alpha3);
       }
+      setStatus("Grammar: " + grammar.getPath());
       
       // save the transcript in CHAT format
       ChatSerialization converter = new ChatSerialization();
@@ -1087,9 +1082,12 @@ public class MorTagger extends Annotator {
             IO.Pump(new FileInputStream(cha), mor.getProcess().getOutputStream());
             // wait for mor to finish
             while (!mor.getFinished()) try { Thread.sleep(500); } catch(Exception exception) {}
-            // setStatus(fragment.getId() + " : Finished mor.");
             // the annotated version has been written to stdout, so save it to a file...
-            IO.SaveInputStreamToFile(new StringBufferInputStream(mor.stdout()), cha);
+            String morOutput = mor.stdout()
+              // some versions of mor (24-Oct-2024) output arg[0] as well
+              // so we ignore everything befor @Begin
+              .replaceFirst(".*@Begin", "@Begin");
+            IO.SaveInputStreamToFile(new StringBufferInputStream(morOutput), cha);
 
             // run POST on the CHAT file for disambiguation
             File postDb = new File(grammar, "post.db");
@@ -1105,7 +1103,7 @@ public class MorTagger extends Annotator {
             setStatus(fragment.getId() + " : Running post...");
             new Thread(post).start();
             while (!post.getFinished()) try { Thread.sleep(500); } catch(Exception exception) {}
-            // setStatus(fragment.getId() + " : Finished post.");            
+            setStatus(fragment.getId() + " : Finished post.");
                                      
             // parse the CHAT file
             NamedStream[] deserializeStreams = {
@@ -1172,20 +1170,6 @@ public class MorTagger extends Annotator {
         }
       } // next utterance
 
-      // if any words are anchored TODO re-enable this when we totally trust DefaultOffsetGenerator
-      // boolean alignedWords = Arrays.stream(graph.all(schema.getWordLayerId()))
-      //   .filter(w->w.getAnchored()).findAny().isPresent();
-      // if (alignedWords) {
-      //   // ensure mor tags are also anchored
-      //   // (they can be chained across the duration of the word, with null offsets)
-      //   new DefaultOffsetGenerator().transform(graph);
-      // }
-      
-      // this flag is recognized by LaBB-CAT as a signal not to waste time validating the
-      // graph structure, as we've only deleted/added annotations on our output layer,
-      // not changed anchors or any other layers
-      graph.put("@valid", Boolean.TRUE); // TODO remove this
-      
       setStatus("Finished " + graph.getId());
       return graph;
     } finally {
