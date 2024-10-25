@@ -13,6 +13,7 @@ details>summary {
 }
 body>details>summary {
     cursor: help;
+    list-style-type: 'ⓘ';
 }
 
 h1 { font-size: 17pt; color: #859044; text-align: center; }

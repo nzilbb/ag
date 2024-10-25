@@ -14,7 +14,7 @@ details>summary {
 }
 body>details>summary {
     cursor: help;
-    list-style-type: '🛈';
+    list-style-type: 'ⓘ';
     font-weight: normal;
 }
 

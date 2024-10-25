@@ -11,9 +11,13 @@ body {
 details>summary {
     cursor: pointer;
 }
+body>details>summary::before {
+    content: 'ℹ';
+    color: #859044;
+    font-size: 16px;
+}
 body>details>summary {
     cursor: help;
-    list-style-type: '🛈';
 }
 
 h1 { font-size: 17pt; color: #859044; text-align: center; }
