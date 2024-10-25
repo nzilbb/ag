@@ -41,7 +41,8 @@ getSchema(s => {
   var morLayerId = document.getElementById("morLayerId");
   addLayerOptions(
     morLayerId, schema,
-    layer => layer.parentId == schema.wordLayerId && layer.alignment == 2);
+    layer => layer.parentId == schema.wordLayerId
+      && (layer.alignment == 2 || layer.id == taskId));
   morLayerId.selectedIndex = 0;
 
   var layerId = document.getElementById("prefixLayerId");

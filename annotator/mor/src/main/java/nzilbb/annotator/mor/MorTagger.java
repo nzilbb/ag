@@ -729,6 +729,10 @@ public class MorTagger extends Annotator {
             || morLayerId.equals(languagesLayerId)) {
           throw new InvalidConfigurationException(this, "Invalid MOR layer: " + morLayerId);
         }
+        // ensure layer is aligned
+        if (layer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+          layer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+        }
       }
     }
 
