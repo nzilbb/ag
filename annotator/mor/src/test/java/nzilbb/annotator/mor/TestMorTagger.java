@@ -108,18 +108,39 @@ public class TestMorTagger {
                 schema.getLayer(annotator.getMorLayerId()).getSaturated());
     assertFalse("pos layer not saturated",
                 schema.getLayer(annotator.getPartOfSpeechLayerId()).getSaturated());
+    assertTrue("pos layer has validLabels",
+                schema.getLayer(annotator.getPartOfSpeechLayerId())
+               .getValidLabels().size() > 0);
     assertFalse("pos subcategory not layer saturated",
                 schema.getLayer(annotator.getPartOfSpeechSubcategoryLayerId()).getSaturated());
+    assertTrue("pos subcategory not has validLabels",
+               schema.getLayer(annotator.getPartOfSpeechSubcategoryLayerId())
+               .getValidLabels().size() > 0);
     assertFalse("prefix layer not saturated",
                 schema.getLayer(annotator.getPrefixLayerId()).getSaturated());
+    assertTrue("prefix layer has validLabels",
+                schema.getLayer(annotator.getPrefixLayerId())
+               .getValidLabels().size() > 0);
     assertFalse("stem layer not saturated",
                 schema.getLayer(annotator.getStemLayerId()).getSaturated());
+    assertFalse("stem layer has no validLabels",
+                schema.getLayer(annotator.getStemLayerId())
+               .getValidLabels().size() > 0);
     assertFalse("fusional suffix layer not saturated",
                 schema.getLayer(annotator.getFusionalSuffixLayerId()).getSaturated());
+    assertTrue("fusional suffix layer has validLabels",
+                schema.getLayer(annotator.getFusionalSuffixLayerId())
+               .getValidLabels().size() > 0);
     assertFalse("suffix layer not saturated",
                 schema.getLayer(annotator.getSuffixLayerId()).getSaturated());
+    assertTrue("suffix layer has validLabels",
+                schema.getLayer(annotator.getSuffixLayerId())
+               .getValidLabels().size() > 0);
     assertFalse("gloss layer not saturated",
                 schema.getLayer(annotator.getGlossLayerId()).getSaturated());
+    assertFalse("gloss layer has no validLabels",
+                schema.getLayer(annotator.getGlossLayerId())
+               .getValidLabels().size() > 0);
     Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
       .collect(Collectors.toSet());
     assertEquals("Required layers: "+requiredLayers,
