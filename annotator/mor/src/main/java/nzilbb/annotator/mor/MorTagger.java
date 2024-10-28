@@ -1469,10 +1469,10 @@ public class MorTagger extends Annotator {
               .arg("+g1")
               .arg(cha.getPath());
             // start the process in its own thread
-            setStatus(fragment.getId() + " : Running post...");
+            //setStatus(fragment.getId() + " : Running post...");
             new Thread(post).start();
             while (!post.getFinished()) try { Thread.sleep(500); } catch(Exception exception) {}
-            setStatus(fragment.getId() + " : Finished post.");
+            //setStatus(fragment.getId() + " : Finished post.");
                                      
             // parse the CHAT file
             NamedStream[] deserializeStreams = {
@@ -1480,49 +1480,53 @@ public class MorTagger extends Annotator {
             ParameterSet defaultParamaters = converter.load(
               deserializeStreams, graph.getSchema());
             converter.setParameters(defaultParamaters);
-            graphs = converter.deserialize();
-            for (String warning : converter.getWarnings()) {
-              setStatus(fragment.getId() + " : " + warning);
-            }
-            Graph tagged = graphs[0];
-            tagged.trackChanges();
-            new Normalizer().transform(tagged);
-            tagged.commit();
+            try {
+              graphs = converter.deserialize();
+              for (String warning : converter.getWarnings()) {
+                setStatus(fragment.getId() + " : " + warning);
+              }
+              Graph tagged = graphs[0];
+              tagged.trackChanges();
+              new Normalizer().transform(tagged);
+              tagged.commit();
 
-            // remove words that are just "." or "-" - these are tokens added by mor
-            for (Annotation w : tagged.all(schema.getWordLayerId())) {
-              if (w.getLabel().matches("^\\W+$")) {
-                w.destroy();
+              // remove words that are just "." or "-" - these are tokens added by mor
+              for (Annotation w : tagged.all(schema.getWordLayerId())) {
+                if (w.getLabel().matches("^\\W+$")) {
+                  w.destroy();
+                }
               }
+              tagged.commit();
+            
+              // merge the changes into our graph by matching up the tokens
+              // use MinimumEditPath because sometimes mor adds or removes  tokens
+              MinimumEditPath<Annotation> mp = new MinimumEditPath<Annotation>(
+                new DefaultEditComparator<Annotation>(new EqualsComparator<Annotation>() {
+                    public int compare(Annotation o1, Annotation o2) {
+                      return o1.getLabel().compareTo(o2.getLabel());
+                    }
+                  }));
+              List<Annotation> originalWords = Arrays.asList(
+                utterance.all(tokenLayerId)); // output was token layer, so compare against that
+              List<Annotation> chaWords = Arrays.asList(
+                tagged.all(schema.getWordLayerId())); // tokens come in on word layer
+              for (EditStep<Annotation> step : mp.minimumEditPath(chaWords, originalWords)) {
+                if (step.getFrom() != null && step.getTo() != null) {
+                  copyAnnotations(morLayerId, step.getFrom(), step.getTo(), graph);
+                  copyAnnotations(prefixLayerId, step.getFrom(), step.getTo(), graph);
+                  copyAnnotations(partOfSpeechLayerId, step.getFrom(), step.getTo(), graph);
+                  copyAnnotations(
+                    partOfSpeechSubcategoryLayerId, step.getFrom(), step.getTo(), graph);
+                  copyAnnotations(stemLayerId, step.getFrom(), step.getTo(), graph);
+                  copyAnnotations(fusionalSuffixLayerId, step.getFrom(), step.getTo(), graph);
+                  copyAnnotations(suffixLayerId, step.getFrom(), step.getTo(), graph);
+                  copyAnnotations(glossLayerId, step.getFrom(), step.getTo(), graph);
+                }
+              } // next token
+            
+            } catch(SerializationException parseException) { // error parsing the tagged .cha file
+              setStatus(fragment.getId() + " not tagged: " + parseException.getMessage());
             }
-            tagged.commit();
-            
-            // merge the changes into our graph by matching up the tokens
-            // use MinimumEditPath because sometimes mor adds or removes  tokens
-            MinimumEditPath<Annotation> mp = new MinimumEditPath<Annotation>(
-              new DefaultEditComparator<Annotation>(new EqualsComparator<Annotation>() {
-                  public int compare(Annotation o1, Annotation o2) {
-                    return o1.getLabel().compareTo(o2.getLabel());
-                  }
-                }));
-            List<Annotation> originalWords = Arrays.asList(
-              utterance.all(tokenLayerId)); // output was token layer, so compare against that
-            List<Annotation> chaWords = Arrays.asList(
-              tagged.all(schema.getWordLayerId())); // tokens come in on word layer
-            for (EditStep<Annotation> step : mp.minimumEditPath(chaWords, originalWords)) {
-              if (step.getFrom() != null && step.getTo() != null) {
-                copyAnnotations(morLayerId, step.getFrom(), step.getTo(), graph);
-                copyAnnotations(prefixLayerId, step.getFrom(), step.getTo(), graph);
-                copyAnnotations(partOfSpeechLayerId, step.getFrom(), step.getTo(), graph);
-                copyAnnotations(
-                  partOfSpeechSubcategoryLayerId, step.getFrom(), step.getTo(), graph);
-                copyAnnotations(stemLayerId, step.getFrom(), step.getTo(), graph);
-                copyAnnotations(fusionalSuffixLayerId, step.getFrom(), step.getTo(), graph);
-                copyAnnotations(suffixLayerId, step.getFrom(), step.getTo(), graph);
-                copyAnnotations(glossLayerId, step.getFrom(), step.getTo(), graph);
-              }
-            } // next token
-            
             setPercentComplete(++u * 100 / utterances.length);
           } finally {
             cha.delete();
