@@ -76,7 +76,7 @@ import org.apache.commons.csv.CSVRecord;
 @UsesRelationalDatabase
 public class FlatLexiconTagger extends Annotator implements ImplementsDictionaries {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.6"; }
+  public String getMinimumApiVersion() { return "1.2.2"; }
      
   /**
    * Setter for {@link #status}: The current status of the task.
@@ -861,7 +861,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
          
       // what languages are in the transcript?
       boolean transcriptIsMainlyTargetLang = true;
-      if (transcriptLanguageLayerId != null) {
+      if (transcriptLanguageLayerId != null && targetLanguagePattern != null) {
         Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
         if (transcriptLanguage != null) {
           if (!transcriptLanguage.getLabel().matches(targetLanguagePattern)) { // not TargetLang
@@ -891,7 +891,8 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
             
         // tag the exceptions
         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-          if (!phrase.getLabel().matches(targetLanguagePattern)) { // not TargetLang
+          if (targetLanguagePattern != null
+              && !phrase.getLabel().matches(targetLanguagePattern)) { // not TargetLang
             for (Annotation token : phrase.all(tokenLayerId)) {
               // mark the token as an exception
               token.put("@notTargetLang", Boolean.TRUE);
@@ -1023,11 +1024,15 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       store.deleteMatchingAnnotations(
         "layerId = '"+esc(tagLayerId)+"'"
         +languageExpression
-        +" && first('"+esc(tokenLayerId)+"').label == '"+esc(sourceLabel)+"'");
+        +" && first('"+esc(tokenLayerId)+"').label "
+        +(exactMatch?"===":"==") // === is slower, so we don't use it unless necessary
+        +" '"+esc(sourceLabel)+"'");
 
       String tokenExpression = "layerId = '"+esc(tokenLayerId)+"'"
         +languageExpression
-        +" && label = '"+esc(sourceLabel)+"'";
+        +" && label "
+        +(exactMatch?"===":"==") // === is slower, so we don't use it unless necessary
+        +" '"+esc(sourceLabel)+"'";
       int count = 0;
       HashSet<String> soFar = new HashSet<String>(); // only unique entries
       for (String tag : dictionary.lookup(sourceLabel)) {
@@ -1119,13 +1124,14 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       setStatus("Getting distinct token labels...");
       timers.start("store.aggregateMatchingAnnotations");
       String[] distinctWords = store.aggregateMatchingAnnotations(
-        "DISTINCT", labelExpression.toString());
+        exactMatch?"DISTINCT BINARY":"DISTINCT", labelExpression.toString());
       timers.end("store.aggregateMatchingAnnotations");
       setStatus("There are "+distinctWords.length+" distinct token labels");
       int w = 0;
       Dictionary dictionary = getDictionary(this.dictionary);
       // for each label
       for (String word : distinctWords) {
+        setStatus(word+"...");
         if (isCancelling()) break;
         HashSet<String> soFar = new HashSet<String>(); // only unique entries
         timers.start("dictionary.lookup");
@@ -1135,7 +1141,9 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           if (strip.length() > 0) tag = tag.replaceAll("["+strip+"]","");
           if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
             StringBuilder tokenExpression = new StringBuilder(labelExpression);
-            tokenExpression.append(" && label == '").append(esc(word)).append("'");
+            tokenExpression.append(" && label ")
+              .append(exactMatch?"===":"==") // === is slower, so we don't use it unless necessary
+              .append(" '").append(esc(word)).append("'");
             setStatus(word+" → "+tag);
             timers.start("store.tagMatchingAnnotations");
             store.tagMatchingAnnotations(
@@ -1157,6 +1165,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
         setStatus("Finished.");
       }
     } catch(DictionaryException x) {
+      setStatus(x.getMessage());
       throw new TransformationException(this, x);
     } finally {
       setRunning(false);

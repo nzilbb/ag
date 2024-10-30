@@ -315,7 +315,7 @@ COMMA                 : ',' ;
 IDENTIFIER            : [a-zA-Z][a-zA-Z0-9_]* ;
 AND                   : ' AND ' | '&&' ;
 OR                    : ' OR '  | '||';
-EQ                    : '=' | '==' ;
+EQ                    : '=' | '==' | '===' ;
 NE                    : '<>' | '≠';
 MATCHES               : ' MATCHES ' ;
 LT                    : '<' ;

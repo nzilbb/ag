@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.flatlexicon</artifactId>
-  <version>3.1.8</version>
+  <version>3.1.9</version>
 
   <name>nzilbb.annotator.flatlexicon</name>
   <description>Looks up lexicons derived from a flat file (e.g. in CSV format)</description>
@@ -39,13 +39,11 @@
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
       <version>10.17.1.0</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derbyclient</artifactId>
       <version>10.15.2.0</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

@@ -958,7 +958,7 @@ public class TestAGQLListener {
         }
       };
 
-    String[] operators = {"=", "==", "<>", "<", ">", "<=", ">=" };
+    String[] operators = {"=", "==", "===", "<>", "<", ">", "<=", ">=" };
 
     for (String operator : operators) {
       parse.setLength(0);
