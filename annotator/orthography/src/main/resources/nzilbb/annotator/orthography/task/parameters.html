@@ -26,6 +26,8 @@
 <dl>
   <dt> tokenLayerId </dt> <dd> Input layer from which raw word tokens are selected. </dd>
   <dt> lowerCase </dt> <dd> "true" or "on" for conversion to lowercase, absent otherwise. </dd>
+  <dt> exactMatch</dt> <dd> "true" or "on" to ensure accented letters are always treated
+    as distinct from  unaccented letters. When turned on, full-layer generation may be slower. </dd> 
   <dt> orthographyLayerId </dt> <dd> Output layer on which new annotations are added. </dd>
   <dt> replacements </dt> <dd> An object in which the keys are regular expressions to
     match and the values are what to replace the corresponding matches with. </dd>

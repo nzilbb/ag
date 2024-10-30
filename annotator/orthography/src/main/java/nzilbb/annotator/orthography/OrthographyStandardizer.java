@@ -43,7 +43,7 @@ import nzilbb.ag.automation.InvalidConfigurationException;
 public class OrthographyStandardizer extends Annotator {
    
   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-  public String getMinimumApiVersion() { return "1.1.1"; }
+  public String getMinimumApiVersion() { return "1.2.2"; }
    
   /**
    * ID of the input layer containing word tokens.
@@ -79,6 +79,28 @@ public class OrthographyStandardizer extends Annotator {
    * @param newLowerCase Convert tokens to lower-case.
    */
   public OrthographyStandardizer setLowerCase(boolean newLowerCase) { lowerCase = newLowerCase; return this; }
+
+  /**
+   * Whether mass updates are accent-sensitive. By default, updates are accent insensitive. 
+   * <p> Setting this to true ensures that words than differ only by accents will be
+   * treated as distinct, even when generating the whole layer. When set to true, whole
+   * layer generation is significantly slower.
+   * @see #getExactMatch()
+   * @see #setExactMatch(Boolean)
+   */
+  protected boolean exactMatch = Boolean.FALSE;
+  /**
+   * Getter for {@link #exactMatch}: Whether mass updates are accent-sensitive. 
+   * By default, updates are accent insensitive.  
+   * @return Whether mass updates are accent-sensitive. By default, updates are accent 
+   * insensitive. 
+   */
+  public boolean getExactMatch() { return exactMatch; }
+  /**
+   * Setter for {@link #exactMatch}: Whether mass updates are accent-sensitive. 
+   * @param newExactMatch Whether mass updates are accent-sensitive. 
+   */
+  public OrthographyStandardizer setExactMatch(boolean newExactMatch) { exactMatch = newExactMatch; return this; }
 
   /**
    * Ordered list of patterns to replacements to make.
@@ -157,13 +179,17 @@ public class OrthographyStandardizer extends Annotator {
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
 
+    
     if (parameters == null) { // apply default configuration
          
       tokenLayerId = schema.getWordLayerId();
       orthographyLayerId = "orthography";
       lowerCase = true;
+      exactMatch = false;
          
     } else {
+      exactMatch = false; // new setting defaults to false
+      
       JsonObject json = beanPropertiesFromJSON(parameters);
 
       JsonObject jsonReplacements = json.getJsonObject("replacements");
@@ -287,7 +313,7 @@ public class OrthographyStandardizer extends Annotator {
       }
       setStatus("Getting distinct token labels: " + labelExpression);
       String[] distinctWords = store.aggregateMatchingAnnotations(
-        "DISTINCT", labelExpression.toString());
+        exactMatch?"DISTINCT BINARY":"DISTINCT", labelExpression.toString());
       setStatus("There are "+distinctWords.length+" distinct token labels");
       int soFar = 0;
       // for each label
@@ -297,7 +323,7 @@ public class OrthographyStandardizer extends Annotator {
         setStatus("\""+word+"\" → \""+orthography+"\"");
         // tag all tokens of this word with the orthography
         store.tagMatchingAnnotations(
-          labelExpression + " && label == '"+esc(word)+"'",
+          labelExpression + " && label "+(exactMatch?"===":"==")+" '"+esc(word)+"'",
           orthographyLayerId, orthography, Constants.CONFIDENCE_AUTOMATIC);
         setPercentComplete((++soFar * 100) / distinctWords.length);
       } // next word

@@ -51,6 +51,10 @@
       <details><summary><b> Lower-case </b></summary>
         <p> Whether to convert token labels to lowercase before processing replacements. </p>
       </details>
+      <details><summary><b> Accent-sensitive </b></summary>
+        <p> Whether to ensure accented letters are always treated as distinct from
+          unaccented letters. When turned on, full-layer generation may be slower.</p>
+      </details>
       <details><summary><b> Replacements </b></summary>
         <p> This is a list of replacements to be made. The left hand column contains
           regular expressions to be replaced, and the right hand column contains what
@@ -408,6 +412,10 @@
       <div class="field" title="Convert to lower-case">
         <label for="lowerCase">Lower-case</label>
         <span><input id="lowerCase" name="lowerCase" type="checkbox"></span>
+      </div>
+      <div class="field" title="Ensure accented letters are always treated as distinct from unaccented letters">
+        <label for="exactMatch">Accent-sensitive</label>
+        <span><input id="exactMatch" name="exactMatch" type="checkbox"></span>
       </div>
       <div id="replacementsDiv">
         <h3>Replacements</h3>

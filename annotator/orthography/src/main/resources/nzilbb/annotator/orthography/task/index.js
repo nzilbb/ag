@@ -35,6 +35,7 @@ getSchema(s => {
     }
 
     var lowerCase = document.getElementById("lowerCase");
+    var exactMatch = document.getElementById("exactMatch");
     
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getJSON("getTaskParameters", parameters => {
@@ -50,6 +51,7 @@ getSchema(s => {
                 newReplacement("[-']+$",""); // remove trailing hyphens/apostrophes
                 
                 lowerCase.checked = true;
+                exactMatch.checked = true;
                 
                 if (schema.layers[taskId]) { // there's a layer named after the task
                     // select it
@@ -73,6 +75,7 @@ getSchema(s => {
                 // set initial values of properties in the form
                 tokenLayerId.value = parameters.tokenLayerId;
                 lowerCase.checked = parameters.lowerCase;
+                exactMatch.checked = parameters.exactMatch;
                 orthographyLayerId.value = parameters.orthographyLayerId;
                 for (var replacement in parameters.replacements) {
                     newReplacement(replacement, parameters.replacements[replacement]);

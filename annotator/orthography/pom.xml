@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.orthography</artifactId>
   <name>nzilbb.annotator.orthography</name>
-  <version>0.1.4</version>
+  <version>0.1.5</version>
 
   <properties>
     <package.path>nzilbb/annotator/orthography/</package.path>
