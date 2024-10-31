@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.tei</artifactId>
   <name>nzilbb.formatter.tei</name>
-  <version>0.5.0</version>
+  <version>0.5.1</version>
 
   <properties>
     <package.path>nzilbb/formatter/tei/</package.path>
@@ -53,6 +53,12 @@
             </manifestEntries>
           </archive>
           <outputDirectory>../../bin</outputDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>

@@ -62,41 +62,68 @@ import nzilbb.configure.ParameterSet;
  *    in the <code>&lt;fileDesc&gt;</code> subsection:
  *    <ul>
  *      <li>
- *        the text in <code>&lt;titleStmt&gt;&lt;title&gt;</code>… is taken to be the value of the "title" transcript attribute</li>
+ *        the text in <code>&lt;titleStmt&gt;&lt;title&gt;</code>…
+ *        is taken to be the value of the "title" transcript attribute</li>
  *      <li>
- *        the text in <code>&lt;titleStmt&gt;&lt;respStmt&gt;&lt;name&gt;</code>… is taken to be the value of the "scribe" transcript attribute (i.e. the name of the transcriber)</li>
+ *        the text in <code>&lt;titleStmt&gt;&lt;respStmt&gt;&lt;name&gt;</code>…
+ *        is taken to be the value of the "scribe" transcript attribute
+ *        (i.e. the name of the transcriber)</li>
  *      <li>
- *        the text in <code>&lt;publicationStmt&gt;&lt;distributor&gt;</code>… is taken to be the value of the "distributor" transcript attribute</li>
+ *        the text in <code>&lt;publicationStmt&gt;&lt;distributor&gt;</code>…
+ *        is taken to be the value of the "distributor" transcript attribute</li>
  *      <li>
- *        the text in <code>&lt;publicationStmt&gt;&lt;publisher&gt;</code>… is taken to be the value of the "publisher" transcript attribute</li>
+ *        the text in <code>&lt;publicationStmt&gt;&lt;publisher&gt;</code>…
+ *        is taken to be the value of the "publisher" transcript attribute</li>
  *      <li>
- *        the text in <code>&lt;publicationStmt&gt;&lt;availability&gt;&lt;p&gt;</code>… is taken to be the value of the "availability" transcript attribute</li>
+ *        the text in <code>&lt;publicationStmt&gt;&lt;availability&gt;&lt;p&gt;</code>…
+ *        is taken to be the value of the "availability" transcript attribute</li>
  *      <li>
- *        the text in <code>&lt;publicationStmt&gt;&lt;date&gt;</code>… is taken to be the value of the "air_date" transcript attribute</li>
+ *        the text in <code>&lt;publicationStmt&gt;&lt;date&gt;</code>…
+ *        is taken to be the value of the "air_date" transcript attribute</li>
  *      <li>
- *        the text in <code>&lt;publicationStmt&gt;&lt;distributor&gt;</code>… is taken to be the value of the "distributor" transcript attribute</li>
+ *        the text in <code>&lt;publicationStmt&gt;&lt;distributor&gt;</code>…
+ *        is taken to be the value of the "distributor" transcript attribute</li>
  *      <li>
- *        the text in <code>&lt;sourceDesc&gt;&lt;bibleStruct&gt;<code>&lt;monogr&gt;<code>&lt;author&gt;</code></code></code>… is taken to be the name of the author of the text (who is created as the sole 'participant' of the transcript)</li>
+ *        the text in
+ *        <code>&lt;sourceDesc&gt;&lt;bibleStruct&gt;&lt;monogr&gt;&lt;author&gt;</code>…
+ *        is taken to be the value of the "scribe" transcript attribute
+ *        (i.e. the name of the transcriber)</li>
+ *      <li>
+ *        the text in
+ *        <code>&lt;sourceDesc&gt;&lt;bibl&gt;&lt;publisher&gt;</code>…
+ *        is taken to be the name of the author of the text (who is created as the
+ *        sole 'participant' of the transcript)</li>
  *    </ul>
  *  </li>
  *  <li>
  *    in the <code>&lt;profileDesc&gt;</code> subsection:
  *    <ul>
  *      <li>
- *        the text in <code>&lt;creation&gt;&lt;date&gt;</code>… is taken to be the value of the "creation_date" transcript attribute</li>
+ *        the text in <code>&lt;creation&gt;&lt;date&gt;</code>…
+ *        is taken to be the value of the "creation_date" transcript attribute</li>
  *      <li>
- *        the value of the <code>&lt;langUsage&gt;&lt;language ident="</code>…<code>"&gt;</code> attribute is taken to be the value of the "creation_date" transcript attribute</li>
+ *        the value of the <code>&lt;langUsage&gt;&lt;language ident="</code>…<code>"&gt;</code>
+ *        attribute is taken to be the value of the "creation_date" transcript attribute</li>
  *      <li>
- *        the <code>&lt;particDesc&gt;&lt;person</code><code>&gt;</code> tagss are taken to be participants, whose &lt;idno&gt; tag specifies the participant's identifier, and whose other tags specify the participant's attributes named after the tag name (or optionally are added as transcript attributes). The content of the <code>&lt;person&gt;</code> tag's <code>&lt;age&gt;</code> tag is converted to a single number (in years) if the text is formatted as <samp><var>y</var>;<var>m</var>.<var>d</var></samp> or as <samp><var>y</var> years <var>m</var> months <var>d</var> days</samp></li>
+ *        the <code>&lt;particDesc&gt;&lt;person</code><code>&gt;</code> tags
+ *        are taken to be participants, whose &lt;idno&gt; tag specifies the
+ *        participant's identifier, and whose other tags specify the participant's attributes
+ *        named after the tag name (or optionally are added as transcript attributes).
+ *        The content of the <code>&lt;person&gt;</code> tag's <code>&lt;age&gt;</code> tag
+ *        is converted to a single number (in years) if the text is formatted
+ *        as <samp><var>y</var>;<var>m</var>.<var>d</var></samp>
+ *        or as <samp><var>y</var> years <var>m</var> months <var>d</var> days</samp></li>
  *    </ul>
  *  </li>
  *  <li>
  *    in the <code>&lt;revisionDesc&gt;</code> subsection:
  *    <ul>
  *      <li>
- *        the text in <code>&lt;change&gt;&lt;date&gt;</code>… is taken to be the value of the "version_date" transcript attribute</li>
+ *        the text in <code>&lt;change&gt;&lt;date&gt;</code>…
+ *        is taken to be the value of the "version_date" transcript attribute</li>
  *      <li>
- *        the text in <code>&lt;change&gt;&lt;respStmt&gt;&lt;name&gt;</code>… is taken to be the value of the "scribe" transcript attribute</li>
+ *        the text in <code>&lt;change&gt;&lt;respStmt&gt;&lt;name&gt;</code>…
+ *        is taken to be the value of the "scribe" transcript attribute</li>
  *    </ul>
  *  </li>
  * </ul>
@@ -123,22 +150,53 @@ import nzilbb.configure.ParameterSet;
  * &lt;/person&gt;
  * </pre>
  * <p><b>Tags in the text</b></p>
- * <p>  The P5 guidelines for TEI specify a dazzling array of tags for capturing all kinds of information about texts, only a subset of which will work well with this formatter. There is explicit support for the following TEI tags:
+ * <p>  The P5 guidelines for TEI specify a dazzling array of tags for capturing all kinds
+ * of information about texts, only a subset of which will work well with this
+ * formatter. There is explicit support for the following TEI tags: 
  * <ul>
  *  <li>
- *    <code>&lt;p&gt;</code>, <code>&lt;div&gt;</code>, and <code>&lt;ab&gt;</code> are interpreted as starting a new line</li>
+ *    <code>&lt;p&gt;</code>, <code>&lt;div&gt;</code>, and <code>&lt;ab&gt;</code>
+ *     are interpreted as starting a new line</li>
  *  <li>
- *    <code>&lt;w&gt;</code> tags (for marking up words) are used for word tokenization if they are present (if they are absent, standard whitespace-based tokenization is used). Attributes of the <code>&lt;w&gt;</code> tag like <code>lemma</code> or <code>type</code> can be mapped to word layers for capturing such tagging in the text.</li>
+ *    <code>&lt;w&gt;</code> tags (for marking up words) are used for word tokenization
+ *     if they are present (if they are absent, standard whitespace-based tokenization is used).
+ *     Attributes of the <code>&lt;w&gt;</code> tag like <code>lemma</code> or <code>type</code>
+ *     can be mapped to word layers for capturing such tagging in the text.</li>
  *  <li>
- *    the <code>&lt;choice&gt;&lt;orig&gt;</code>…<code>&lt;/orig&gt;&lt;reg&gt;</code>…<code>&lt;/reg&gt;&lt;/choice&gt;</code> construction for marking regularization of text is recognized, and the contents of the <code>&lt;reg&gt;</code>…<code>&lt;/reg&gt;</code> tag can be extracted to the "lexical" layer (for single-word regularization) or a selected 'meta' layer (if multi-word regularization is used).</li>
+ *    the <code>&lt;choice&gt;&lt;orig&gt;</code>…<code>&lt;/orig&gt;&lt;reg&gt;</code>…<code>&lt;/reg&gt;&lt;/choice&gt;</code>
+ *     construction for marking regularization of text is recognized, and the contents of the
+ *     <code>&lt;reg&gt;</code>…<code>&lt;/reg&gt;</code> tag can be extracted to the
+ *     "lexical" layer (for single-word regularization) or a selected 'meta' layer
+ *     (if multi-word regularization is used).</li>
  *  <li>
- *    <code>&lt;foreign&gt;</code> is recognised as marking sections of the transcript as being in another language, and so its contents are annotated on the "language" layer, using value of the the <code>xml:lang</code> attribute as the annotation label.</li>
+ *    <code>&lt;foreign&gt;</code> is recognised as marking sections of the transcript as being
+ *     in another language, and so its contents are annotated on the "language" layer,
+ *     using value of the the <code>xml:lang</code> attribute as the annotation label.</li>
  *  <li>
- *    <code>&lt;note&gt;</code> is recognised as a commentary marker, and so its contents are put on to the "comment" layer instead of being inserted into the transcript text.</li>
+ *    <code>&lt;note&gt;</code> is recognised as a commentary marker, and so its contents
+ *     are put on to the "comment" layer instead of being inserted into the transcript text.</li>
  *  <li>
- *    <code>&lt;unclear&gt;</code> tags can create annotations on a selected layer, and the <code>reason</code> and <code>cert</code> attributes recognised and used in the resulting annotation label if present.</li>
- *</ul>
- * <p>Other tags are by default mapped on to the "entities" layer (in which case their tag name, and its type attribute if present, will be used for the entity label).  Alternatively, if there is a layer that is named after the TEI tag name, then tags will be mapped to that layer by default during upload. For example, to have all &lt;sic&gt; tags extracted to their own layer (instead of the "entities" layer) by default, create a new 'phrase' layer called "sic".
+ *    <code>&lt;unclear&gt;</code> tags can create annotations on a selected layer, and
+ *     the <code>reason</code> and <code>cert</code> attributes recognised and used in
+ *     the resulting annotation label if present.</li>
+ *  <li>
+ *    the <code>&lt;placeName placeName='nnn'&gt;&lt;country&gt;</code>ccc<code>&lt;/country&gt;&lt;ppp&lt;/placeName&gt;</code>
+ *     construction is recognized as tagging the name of a place <var>ppp</var> with
+ *     annotations for the correct place name <var>nnn</var> and country <var>ccc</var> 
+ *     - i.e. <var>ppp</var> is part of the text, but <var>nnn</var> and <var>ccc</var>
+ *     aren't. </li>
+ *  <li>
+ *    ...but the <code>&lt;country&gt;</code>ccc<code>&lt;/country&gt;</code> tag alone
+ *     is assumed to be annotating part of the text - i.e. <var>ccc</var> is left in the
+ *     text rather than being stripped out as it is when inside 
+ *     <code>&lt;placeName&gt;</code>...<code>&lt;/placeName&gt;</code>.</li>
+ * </ul>
+ * <p>Other tags are by default mapped on to the "entities" layer (in which case their tag
+ * name,and its type attribute if present, will be used for the entity label).
+ * Alternatively, if there is a layer that is named after the TEI tag name, then tags will
+ * be mapped to that layer by default during upload. For example, to have all &lt;sic&gt;
+ * tags extracted to their own layer (instead of the "entities" layer) by default, create
+ * a new 'phrase' layer called "sic". 
  * <p>This deserializer supports part of the
  * <a href="http://jtei.revues.org/476">schema for Representation of Computer-mediated Communication</a> 
  * proposed by Michael Beißwenger, Maria Ermakova, Alexander Geyken, Lothar Lemnitzer, 
@@ -1237,6 +1295,11 @@ public class TEIDeserializer implements GraphDeserializer {
         graph.createTag(graph, scribeLayer.getId(), sResult)
           .setConfidence(Constants.CONFIDENCE_MANUAL);;
       }
+      sResult = xpath.evaluate("fileDesc/sourceDesc/bibl/publisher/text()", header);
+      if (sResult != null && sResult.length() > 0 && scribeLayer != null) {
+        graph.createTag(graph, scribeLayer.getId(), sResult)
+          .setConfidence(Constants.CONFIDENCE_MANUAL);;
+      }
       sResult = xpath.evaluate("fileDesc/titleStmt/title/text()", header);
       if (sResult != null && sResult.length() > 0 && titleLayer != null) {
         graph.createTag(graph, titleLayer.getId(), sResult)
@@ -1437,6 +1500,7 @@ public class TEIDeserializer implements GraphDeserializer {
       Annotation anLastWord = null;
       Anchor aChoiceStarted = null;
       Annotation anCurrentOrig = null;
+      Annotation anCurrentCountry = null;
       Anchor lastAnchor = startAnchor;
       for (Node n : vNodes) {
         boolean finishHere = false;
@@ -1604,8 +1668,12 @@ public class TEIDeserializer implements GraphDeserializer {
             }
             if (layer != null) {
               String label = n.getNodeName();
-              if (n.getChildNodes().getLength() > 0) {
+              if (n.getChildNodes().getLength() > 0
+                  && n.getChildNodes().item(0).getNodeValue() != null) {
                 label = n.getChildNodes().item(0).getNodeValue();
+              }
+              if (n.getNodeName().equals("country")) {
+                label = n.getTextContent();
               }
               Annotation anEntity = new Annotation(null, label, layer.getId());
               anEntity.setConfidence(Constants.CONFIDENCE_MANUAL);
@@ -1618,6 +1686,11 @@ public class TEIDeserializer implements GraphDeserializer {
                   anEntity.setStart(aChoiceStarted);
                   anCurrentOrig = anEntity;
                 }
+              } else if (n.getNodeName().equals("country")) { // country
+                if (n.getParentNode().getNodeName().equals("placeName")) { //inside placeName
+                  anCurrentCountry = anEntity;
+                  finishHere = true;
+                }
               } else if (n.getNodeName().equals("note")) {
                 finishHere = true;			
               } else if (n.getNodeName().equals("pc")) {
@@ -1628,6 +1701,12 @@ public class TEIDeserializer implements GraphDeserializer {
                 Attr att = (Attr)n.getAttributes().getNamedItem("xml:lang");
                 if (att != null) {
                   // the label is the language
+                  anEntity.setLabel(att.getValue());
+                }
+              } else if (n.getNodeName().equals("placeName")) {
+                Attr att = (Attr)n.getAttributes().getNamedItem("placeName");
+                if (att != null) {
+                  // the label is the placeName attribute
                   anEntity.setLabel(att.getValue());
                 }
               } else if (n.getNodeName().equals("unclear")) {
@@ -1646,7 +1725,7 @@ public class TEIDeserializer implements GraphDeserializer {
                 if (att != null) {
                   anEntity.setLabel(anEntity.getLabel() + " (" + att.getValue() + ")");
                 }
-              } else { // everything that's not "orig" nor "note" nor "foreign" nor "unclear"
+              } else { // everything that's not "orig" nor "note" nor "foreign", etc...
                 anEntity.setLabel(n.getNodeName());
                 Attr att = (Attr)n.getAttributes().getNamedItem("type");
                 if (att != null) {
@@ -1679,6 +1758,13 @@ public class TEIDeserializer implements GraphDeserializer {
                               (double)iLastPosition, Constants.CONFIDENCE_MANUAL)
                             :lastAnchor);
             graph.addAnnotation(anEntity);
+            if (n.getNodeName().equals("placeName")) {
+              if (anCurrentCountry != null) { // country inside the placeName...
+                // ...ends in the same place
+                anCurrentCountry.setEnd(anEntity.getEnd());
+                anCurrentCountry = null;
+              } // country inside the placeName
+            }
             mFoundEntities.remove(n);
           }
         }  // some other entity
@@ -1786,19 +1872,23 @@ public class TEIDeserializer implements GraphDeserializer {
               || parameters.containsKey(child.getNodeName())) {
             vNodes.add(child);
           }
-          // we don't pass back the children of "orig" nor "note" nor "pc"
+          // we don't pass back the children of "orig" nor "note" nor "pc" nor "country"
           if (!child.getNodeName().equals("orig")
               && !child.getNodeName().equals("note")
-              && !child.getNodeName().equals("pc")) {
+              && !child.getNodeName().equals("pc")
+              && (!child.getNodeName().equals("country") // not country inside placeName
+                  || !n.getNodeName().equals("placeName"))) {
             vNodes.addAll(flattenToWords(child));
           }
           // we need the (start and) end of "choice" tags to correctly handle "orig" tags
           if (child.getNodeName().equals("choice")
-              // and other spans (but not note and pc, which are instantaneous)
+              // and other spans (but not note and pc etc., which are instantaneous)
               || (parameters.containsKey(child.getNodeName())
                   && !child.getNodeName().equals("note")
                   && !child.getNodeName().equals("pc")
-                  && !child.getNodeName().equals("pb"))) { // page break
+                  && !child.getNodeName().equals("pb")
+                  && (!child.getNodeName().equals("country") // not country inside placeName
+                      || !n.getNodeName().equals("placeName")))) {
             vNodes.add(child);
           }
         }
