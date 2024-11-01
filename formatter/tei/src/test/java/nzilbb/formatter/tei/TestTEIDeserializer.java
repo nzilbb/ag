@@ -71,7 +71,9 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());
+    assertEquals("graphXpath", "//text", 
+                 (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("language", "language", 
@@ -243,7 +245,9 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());      
+    assertEquals("graphXpath", "//text", 
+                 (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("language", "language", 
@@ -504,7 +508,9 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());
+    assertEquals("graphXpath", "//text", 
+                 (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertNull("language not mapped",
@@ -664,7 +670,9 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());
+    assertEquals("graphXpath", "//text", 
+                 (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("language", "language", 
@@ -921,7 +929,9 @@ public class TestTEIDeserializer {
     
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());
+    assertEquals("graphXpath", "//text", 
+                 (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("language", "language", 
@@ -1024,7 +1034,9 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());
+    assertEquals("graphXpath", "//text", 
+                 (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("language", "language", 
@@ -1153,8 +1165,12 @@ public class TestTEIDeserializer {
     TEIDeserializer deserializer = new TEIDeserializer();
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    configuration.get("graphXpath").setValue("//p");
     //for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 12, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());      
+    assertEquals("graphXpath parameter", "//p", 
+                 (String)configuration.get("graphXpath").getValue());
+    assertEquals("graphXpath attrinbute", "//p", deserializer.getGraphXpath());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("title", "title", 
@@ -1184,13 +1200,16 @@ public class TestTEIDeserializer {
 
     // build the graph
     Graph[] graphs = deserializer.deserialize();
-    Graph g = graphs[0];
+    assertEquals("Multiple graphs", 3, graphs.length);
 
     for (String warning : deserializer.getWarnings()) {
       System.out.println(warning);
     }
-      
-    assertEquals("test-scone.xml", g.getId());
+
+    // first graph
+    Graph g = graphs[0];
+    
+    assertEquals("test-scone.xml-1", g.getId());
     String[] title = g.labels("title"); 
     assertEquals(1, title.length);
     assertEquals("Test test", title[0]);
@@ -1211,14 +1230,14 @@ public class TestTEIDeserializer {
 
     // utterances
     Annotation[] utterances = g.all("utterance");
-    assertEquals("utterances", 74, utterances.length);
+    assertEquals("utterances", 23, utterances.length);
     assertEquals("first utterance start", Double.valueOf(0.0), utterances[0].getStart().getOffset());
     assertEquals("inter-line space", Double.valueOf(40.0), utterances[0].getEnd().getOffset());
     assertEquals("utterance label", "author", utterances[0].getParent().getLabel());
     assertEquals("turn parent", turns[0], utterances[0].getParent());
 
     Annotation[] words = g.all("word");
-    assertEquals("word count", 498, words.length);
+    assertEquals("word count", 116, words.length);
     assertEquals("first word start", Double.valueOf(0), words[0].getStart().getOffset());
     // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
     assertEquals("first word label", "at", words[0].getLabel());
@@ -1230,30 +1249,30 @@ public class TestTEIDeserializer {
 
     // entities
     Annotation[] placeNames = g.all("placeName");
-    assertEquals("placeName count", 4, placeNames.length);
-    assertEquals("placeName 1 label", "Home", placeNames[0].getLabel());
-    assertTrue("placeName 1 bounds: " + placeNames[0].getStart() + "-" + placeNames[0].getEnd(),
+    assertEquals("placeName count", 1, placeNames.length);
+    assertEquals("placeName label", "Home", placeNames[0].getLabel());
+    assertTrue("placeName bounds: " + placeNames[0].getStart() + "-" + placeNames[0].getEnd(),
                placeNames[0].tags(words[1])); // home
-    assertEquals("placeName 2 has no placeName attribute", "placeName", placeNames[1].getLabel());
-    assertEquals("placeName 2 content", "Dunedin", placeNames[1].first("word").getLabel());    
-    assertEquals("placeName 3 label", "home", placeNames[2].getLabel());
-    assertEquals("placeName 3 content", "home", placeNames[2].first("word").getLabel());
-    assertEquals("placeName 4 label", "Dunedin", placeNames[3].getLabel());
-    assertEquals("placeName 4 content",
-                 "N. E. Valley",
-                 Arrays.stream(placeNames[3].all("word"))
-                 .map(annotation->annotation.getLabel())
-                 .collect(Collectors.joining(" ")));
+    // assertEquals("placeName 2 has no placeName attribute", "placeName", placeNames[1].getLabel());
+    // assertEquals("placeName 2 content", "Dunedin", placeNames[1].first("word").getLabel());    
+    // assertEquals("placeName 3 label", "home", placeNames[2].getLabel());
+    // assertEquals("placeName 3 content", "home", placeNames[2].first("word").getLabel());
+    // assertEquals("placeName 4 label", "Dunedin", placeNames[3].getLabel());
+    // assertEquals("placeName 4 content",
+    //              "N. E. Valley",
+    //              Arrays.stream(placeNames[3].all("word"))
+    //              .map(annotation->annotation.getLabel())
+    //              .collect(Collectors.joining(" ")));
 
     // country
     Annotation[] countries = g.all("country");
-    assertEquals("countries", 5, countries.length);
+    assertEquals("countries", 2, countries.length);
     assertEquals("country 1 label", "Scotland", countries[0].getLabel());
     assertTrue("country 1 bounds", countries[0].tags(words[1]));
     assertEquals("country 2 label", "Scotland", countries[1].getLabel());
-    assertEquals("country 3 label", "New Zealand", countries[2].getLabel());
-    assertEquals("country 4 label", "New Zealand", countries[3].getLabel());
-    assertEquals("country 5 label", "New Zealand", countries[4].getLabel());
+    // assertEquals("country 3 label", "New Zealand", countries[2].getLabel());
+    // assertEquals("country 4 label", "New Zealand", countries[3].getLabel());
+    // assertEquals("country 5 label", "New Zealand", countries[4].getLabel());
 
     // strike-through
     Annotation[] strikeThrough = g.all("strike-through");
@@ -1276,8 +1295,154 @@ public class TestTEIDeserializer {
                  .collect(Collectors.joining(" ")));
     
     Annotation[] pb = g.all("pb");
-    assertEquals("page breaks", 6, pb.length);
-    assertEquals("pb", pb[0].getLabel());
+    assertEquals("page breaks", 0, pb.length);
+      
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+    }
+
+    // second graph
+    g = graphs[1];
+    
+    assertEquals("test-scone.xml-2", g.getId());
+    title = g.labels("title"); 
+    assertEquals(1, title.length);
+    assertEquals("Test test", title[0]);
+    assertEquals("transcriber's details", g.first("scribe").getLabel());
+
+    // participants     
+    author = g.all("who"); 
+    assertEquals(1, author.length);
+    assertEquals("Participant name defaults to ID", "author", author[0].getLabel());
+
+    // turns
+    turns = g.all("turn");
+    assertEquals("turns", 1, turns.length);
+    assertEquals("turn start", Double.valueOf(0.0), turns[0].getStart().getOffset());
+    //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
+    assertEquals("turn label", "author", turns[0].getLabel());
+    assertEquals("turn parent", author[0], turns[0].getParent());
+
+    // utterances
+    utterances = g.all("utterance");
+    assertEquals("utterances", 26, utterances.length);
+    assertEquals("first utterance start", Double.valueOf(0.0), utterances[0].getStart().getOffset());
+    assertEquals("inter-line space", Double.valueOf(36.0), utterances[0].getEnd().getOffset());
+    assertEquals("utterance label", "author", utterances[0].getParent().getLabel());
+    assertEquals("turn parent", turns[0], utterances[0].getParent());
+
+    words = g.all("word");
+    assertEquals("word count", 198, words.length);
+    assertEquals("first word start", Double.valueOf(0), words[0].getStart().getOffset());
+    // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
+    assertEquals("first word label", "fencing", words[0].getLabel());
+    assertEquals("inter-word space", Double.valueOf(8), words[0].getEnd().getOffset());
+    assertEquals("next word start where last ends",
+                 Double.valueOf(8), words[1].getStart().getOffset());
+    assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
+
+    // entities
+    placeNames = g.all("placeName");
+    assertEquals("placeName count", 1, placeNames.length);
+    assertEquals("placeName has no placeName attribute", "placeName", placeNames[0].getLabel());
+    assertEquals("placeName content", "Dunedin", placeNames[0].first("word").getLabel());    
+    // assertEquals("placeName 3 label", "home", placeNames[2].getLabel());
+    // assertEquals("placeName 3 content", "home", placeNames[2].first("word").getLabel());
+    // assertEquals("placeName 4 label", "Dunedin", placeNames[3].getLabel());
+    // assertEquals("placeName 4 content",
+    //              "N. E. Valley",
+    //              Arrays.stream(placeNames[3].all("word"))
+    //              .map(annotation->annotation.getLabel())
+    //              .collect(Collectors.joining(" ")));
+
+    // country
+    countries = g.all("country");
+    assertEquals("countries", 1, countries.length);
+    assertEquals("country label", "New Zealand", countries[0].getLabel());
+    // assertEquals("country 4 label", "New Zealand", countries[3].getLabel());
+    // assertEquals("country 5 label", "New Zealand", countries[4].getLabel());
+
+    // strike-through
+    strikeThrough = g.all("strike-through");
+    assertEquals("strikeThrough", 0, strikeThrough.length);
+    
+    // hi
+    highlight = g.all("hi");
+    assertEquals("highlight", 0, highlight.length);
+      
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+    }
+
+    // third graph
+    g = graphs[2];
+    
+    assertEquals("test-scone.xml-3", g.getId());
+    title = g.labels("title"); 
+    assertEquals(1, title.length);
+    assertEquals("Test test", title[0]);
+    assertEquals("transcriber's details", g.first("scribe").getLabel());
+
+    // participants     
+    author = g.all("who"); 
+    assertEquals(1, author.length);
+    assertEquals("Participant name defaults to ID", "author", author[0].getLabel());
+
+    // turns
+    turns = g.all("turn");
+    assertEquals("turns", 1, turns.length);
+    assertEquals("turn start", Double.valueOf(0.0), turns[0].getStart().getOffset());
+    //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
+    assertEquals("turn label", "author", turns[0].getLabel());
+    assertEquals("turn parent", author[0], turns[0].getParent());
+
+    // utterances
+    utterances = g.all("utterance");
+    assertEquals("utterances", 25, utterances.length);
+    assertEquals("first utterance start", Double.valueOf(0.0), utterances[0].getStart().getOffset());
+    assertEquals("inter-line space", Double.valueOf(42.0), utterances[0].getEnd().getOffset());
+    assertEquals("utterance label", "author", utterances[0].getParent().getLabel());
+    assertEquals("turn parent", turns[0], utterances[0].getParent());
+
+    words = g.all("word");
+    assertEquals("word count", 184, words.length);
+    assertEquals("first word start", Double.valueOf(0), words[0].getStart().getOffset());
+    // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
+    assertEquals("first word label", "great", words[0].getLabel());
+    assertEquals("inter-word space", Double.valueOf(6), words[0].getEnd().getOffset());
+    assertEquals("next word start where last ends",
+                 Double.valueOf(6), words[1].getStart().getOffset());
+    assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
+
+    // entities
+    placeNames = g.all("placeName");
+    assertEquals("placeName count", 2, placeNames.length);
+    assertEquals("placeName 1 label", "home", placeNames[0].getLabel());
+    assertEquals("placeName 1 content", "home", placeNames[0].first("word").getLabel());
+    assertEquals("placeName 2 label", "Dunedin", placeNames[1].getLabel());
+    assertEquals("placeName 2 content",
+                 "N. E. Valley",
+                 Arrays.stream(placeNames[1].all("word"))
+                 .map(annotation->annotation.getLabel())
+                 .collect(Collectors.joining(" ")));
+
+    // country
+    countries = g.all("country");
+    assertEquals("countries", 2, countries.length);
+    assertEquals("country 1 label", "New Zealand", countries[0].getLabel());
+    assertEquals("country 2 label", "New Zealand", countries[1].getLabel());
+
+    // strike-through
+    strikeThrough = g.all("strike-through");
+    assertEquals("strikeThrough", 0, strikeThrough.length);
+    
+    // hi
+    highlight = g.all("hi");
+    assertEquals("highlight", 0, highlight.length);
       
     // check all annotations have 'manual' confidence
     for (Annotation a : g.getAnnotationsById().values()) {

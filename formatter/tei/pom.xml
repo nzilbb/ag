@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.tei</artifactId>
   <name>nzilbb.formatter.tei</name>
-  <version>0.5.2</version>
+  <version>0.5.3</version>
 
   <properties>
     <package.path>nzilbb/formatter/tei/</package.path>

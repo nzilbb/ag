@@ -229,8 +229,8 @@ public class TEIDeserializer implements GraphDeserializer {
   /** Header node */
   protected Node header;
    
-  /** Main text node node */
-  protected Node text;
+  /** Main document node(s) */
+  protected NodeList texts;
    
   /**
    * Name of the file.
@@ -538,6 +538,31 @@ public class TEIDeserializer implements GraphDeserializer {
    * @param newBirthLayer Participant tag laye for birth date attribute.
    */
   public TEIDeserializer setBirthLayer(Layer newBirthLayer) { birthLayer = newBirthLayer; return this; }
+  
+  /**
+   * The XPath expression that identifies the document node(s). This is "//text" by
+   * default, which will produce one Graph per XML file. Can be something like "//p" to
+   * produce multiple Graphs, one per "p" tag. 
+   * @see #getGraphXpath()
+   * @see #setGraphXpath(String)
+   */
+  protected String graphXpath = "//text";
+  /**
+   * Getter for {@link #graphXpath}: The XPath expression that identifies the document
+   * node(s). This is "//text" by default, which will produce one Graph per XML file. Can
+   * be something like "//p" to produce multiple Graphs, one per "p" tag. 
+   * @return The XPath expression that identifies the document node(s). 
+   */
+  public String getGraphXpath() { return graphXpath; }
+  /**
+   * Setter for {@link #graphXpath}: The XPath expression that identifies the document
+   * node(s). This is "//text" by default, which will produce one Graph per XML file. Can
+   * be something like "//p" to produce multiple Graphs, one per "p" tag. 
+   * @param newGraphXpath The XPath expression that identifies the document node(s). This
+   * is "//text" by default, which will produce one Graph per XML file. Can be something
+   * like "//p" to produce multiple Graphs, one per "p" tag. 
+   */
+  public TEIDeserializer setGraphXpath(String newGraphXpath) { graphXpath = newGraphXpath; return this; }
 
   /**
    * Parameters and mappings for the next deserialization.
@@ -812,6 +837,18 @@ public class TEIDeserializer implements GraphDeserializer {
       Arrays.asList("participantbirth","participantborn","participantdob","participantdateofbirth","participantyearofbirth","participantbirthdate","participantbirthday","birth","born","dob","dateofbirth","yearofbirth","birthdate","birthday"));
     layerToCandidates.put("birthLayer", participantTagLayers);
 
+    if (!configuration.containsKey("graphXpath")) {
+      configuration.addParameter(
+        new Parameter(
+          "graphXpath", String.class, 
+          "XPath to Transcript(s)",
+          "XPath expression that identifies the node(s) that contain each document text - e.g. //text",
+          true));
+    }
+    if (configuration.get("graphXpath").getValue() == null) {
+      configuration.get("graphXpath").setValue(getGraphXpath());
+    }
+
     // add parameters that aren't in the configuration yet, and set possibile/default values
     for (Parameter p : layerToPossibilities.keySet()) {
       List<String> possibleNames = layerToPossibilities.get(p);
@@ -923,11 +960,14 @@ public class TEIDeserializer implements GraphDeserializer {
         throw new SerializationException("XML root is not TEI: " + root.getNodeName());
       }
       header = (Node) xpath.evaluate("//teiHeader", document, XPathConstants.NODE);
-      text = (Node) xpath.evaluate("//text", document, XPathConstants.NODE);
-	 
+      Node text = (Node) xpath.evaluate("//text", document, XPathConstants.NODE);
       if (text == null) {
         throw new SerializationException("Document has no text node");
       }
+      texts = (NodeList) xpath.evaluate(graphXpath, document, XPathConstants.NODESET);
+      if (texts == null) {
+        throw new SerializationException("Document has no graph nodes ("+graphXpath+")");
+      }	 
 	 
       setSchema(schema);
 
@@ -1238,612 +1278,624 @@ public class TEIDeserializer implements GraphDeserializer {
     // if there are errors, accumlate as many as we can before throwing SerializationException
     SerializationException errors = null;
 
-    Graph graph = new Graph();
-    graph.setId(getName());
-      
-    // creat the 0 anchor to prevent graph tagging from creating one with no confidence
-    Anchor startAnchor = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
-    Anchor endAnchor = null;
-    boolean characterOffsets = true;
+    Vector<Graph> graphs = new Vector<Graph>();
+    // typed <note>s can be mapped to graph tags
+    for (int t = 0; t < texts.getLength(); t++) {
+      Node text = (Node)texts.item(t);
 
-    if (getMediaDurationSeconds() != null) {
-      graph.setOffsetUnits(Constants.UNIT_SECONDS);
-      endAnchor = graph.getOrCreateAnchorAt(getMediaDurationSeconds(), Constants.CONFIDENCE_MANUAL);
-      characterOffsets = false;
-    } else {
-      graph.setOffsetUnits(Constants.UNIT_CHARACTERS); // TODO look for timeline
-    }
-
-    // add layers to the graph
-    // we don't just copy the whole schema, because that would imply that all the extra layers
-    // contained no annotations, which is not necessarily true
-    graph.addLayer((Layer)participantLayer.clone());
-    graph.getSchema().setParticipantLayerId(participantLayer.getId());
-    graph.addLayer((Layer)turnLayer.clone());
-    graph.getSchema().setTurnLayerId(turnLayer.getId());
-    graph.addLayer((Layer)utteranceLayer.clone());
-    graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
-    graph.addLayer((Layer)wordLayer.clone());
-    graph.getSchema().setWordLayerId(wordLayer.getId());
-    if (languageLayer != null) graph.addLayer((Layer)languageLayer.clone());
-    if (lexicalLayer != null) graph.addLayer((Layer)lexicalLayer.clone());
-    if (entityLayer != null) graph.addLayer((Layer)entityLayer.clone());
-    if (commentLayer != null) graph.addLayer((Layer)commentLayer.clone());
-    if (titleLayer != null) graph.addLayer((Layer)titleLayer.clone());
-    if (scribeLayer != null) graph.addLayer((Layer)scribeLayer.clone());
-    if (versionDateLayer != null) graph.addLayer((Layer)versionDateLayer.clone());
-    if (publicationDateLayer != null) graph.addLayer((Layer)publicationDateLayer.clone());
-    if (transcriptLanguageLayer != null) graph.addLayer((Layer)transcriptLanguageLayer.clone());
-    if (sexLayer != null) graph.addLayer((Layer)sexLayer.clone());
-    if (ageLayer != null) graph.addLayer((Layer)ageLayer.clone());
-    if (birthLayer != null) graph.addLayer((Layer)birthLayer.clone());
-    if (parameters == null) setParameters(new ParameterSet());
-    for (Parameter p : parameters.values()) {
-      Layer layer = (Layer)p.getValue();
-      if (layer != null && graph.getLayer(layer.getId()) == null) {
-        // haven't added this layer yet
-        graph.addLayer((Layer)layer.clone());
+      Graph graph = new Graph();
+      if (texts.getLength() == 1) {
+        graph.setId(getName());
+      } else {
+        graph.setId(getName() + "-" + (t+1));
       }
-    }
       
-    try {
-      // attributes
-      String sResult = xpath.evaluate("fileDesc/titleStmt/respStmt/name/text()", header);
-      if (sResult != null && sResult.length() > 0 && scribeLayer != null) {
-        graph.createTag(graph, scribeLayer.getId(), sResult)
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
+      // creat the 0 anchor to prevent graph tagging from creating one with no confidence
+      Anchor startAnchor = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
+      Anchor endAnchor = null;
+      boolean characterOffsets = true;
+      
+      if (getMediaDurationSeconds() != null) {
+        graph.setOffsetUnits(Constants.UNIT_SECONDS);
+        endAnchor = graph.getOrCreateAnchorAt(getMediaDurationSeconds(), Constants.CONFIDENCE_MANUAL);
+        characterOffsets = false;
+      } else {
+        graph.setOffsetUnits(Constants.UNIT_CHARACTERS); // TODO look for timeline
       }
-      sResult = xpath.evaluate("revisionDesc/change/respStmt/name/text()", header);
-      if (sResult != null && sResult.length() > 0 && scribeLayer != null) {
-        graph.createTag(graph, scribeLayer.getId(), sResult)
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
+      
+      // add layers to the graph
+      // we don't just copy the whole schema, because that would imply that all the extra layers
+      // contained no annotations, which is not necessarily true
+      graph.addLayer((Layer)participantLayer.clone());
+      graph.getSchema().setParticipantLayerId(participantLayer.getId());
+      graph.addLayer((Layer)turnLayer.clone());
+      graph.getSchema().setTurnLayerId(turnLayer.getId());
+      graph.addLayer((Layer)utteranceLayer.clone());
+      graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
+      graph.addLayer((Layer)wordLayer.clone());
+      graph.getSchema().setWordLayerId(wordLayer.getId());
+      if (languageLayer != null) graph.addLayer((Layer)languageLayer.clone());
+      if (lexicalLayer != null) graph.addLayer((Layer)lexicalLayer.clone());
+      if (entityLayer != null) graph.addLayer((Layer)entityLayer.clone());
+      if (commentLayer != null) graph.addLayer((Layer)commentLayer.clone());
+      if (titleLayer != null) graph.addLayer((Layer)titleLayer.clone());
+      if (scribeLayer != null) graph.addLayer((Layer)scribeLayer.clone());
+      if (versionDateLayer != null) graph.addLayer((Layer)versionDateLayer.clone());
+      if (publicationDateLayer != null) graph.addLayer((Layer)publicationDateLayer.clone());
+      if (transcriptLanguageLayer != null) graph.addLayer((Layer)transcriptLanguageLayer.clone());
+      if (sexLayer != null) graph.addLayer((Layer)sexLayer.clone());
+      if (ageLayer != null) graph.addLayer((Layer)ageLayer.clone());
+      if (birthLayer != null) graph.addLayer((Layer)birthLayer.clone());
+      if (parameters == null) setParameters(new ParameterSet());
+      for (Parameter p : parameters.values()) {
+        Layer layer = (Layer)p.getValue();
+        if (layer != null && graph.getLayer(layer.getId()) == null) {
+          // haven't added this layer yet
+          graph.addLayer((Layer)layer.clone());
+        }
       }
-      sResult = xpath.evaluate("fileDesc/sourceDesc/bibl/publisher/text()", header);
-      if (sResult != null && sResult.length() > 0 && scribeLayer != null) {
-        graph.createTag(graph, scribeLayer.getId(), sResult)
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
-      }
-      sResult = xpath.evaluate("fileDesc/titleStmt/title/text()", header);
-      if (sResult != null && sResult.length() > 0 && titleLayer != null) {
-        graph.createTag(graph, titleLayer.getId(), sResult)
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
-      }
-      sResult = xpath.evaluate("revisionDesc/change/date/text()", header);
-      if (sResult != null && sResult.length() > 0 && versionDateLayer != null) {
-        graph.createTag(graph, versionDateLayer.getId(), sResult)
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
-      }
-      sResult = xpath.evaluate("profileDesc/creation/date/text()", header);
-      if (sResult != null && sResult.length() > 0 && publicationDateLayer != null) {
-        graph.createTag(graph, publicationDateLayer.getId(), sResult)
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
-      } else { // might be CDC-style - i.e. on a timeline
-        sResult = xpath.evaluate("front/timeline/when/@absolute", text);
+      
+      try {
+        // attributes
+        String sResult = xpath.evaluate("fileDesc/titleStmt/respStmt/name/text()", header);
+        if (sResult != null && sResult.length() > 0 && scribeLayer != null) {
+          graph.createTag(graph, scribeLayer.getId(), sResult)
+            .setConfidence(Constants.CONFIDENCE_MANUAL);;
+        }
+        sResult = xpath.evaluate("revisionDesc/change/respStmt/name/text()", header);
+        if (sResult != null && sResult.length() > 0 && scribeLayer != null) {
+          graph.createTag(graph, scribeLayer.getId(), sResult)
+            .setConfidence(Constants.CONFIDENCE_MANUAL);;
+        }
+        sResult = xpath.evaluate("fileDesc/sourceDesc/bibl/publisher/text()", header);
+        if (sResult != null && sResult.length() > 0 && scribeLayer != null) {
+          graph.createTag(graph, scribeLayer.getId(), sResult)
+            .setConfidence(Constants.CONFIDENCE_MANUAL);;
+        }
+        sResult = xpath.evaluate("fileDesc/titleStmt/title/text()", header);
+        if (sResult != null && sResult.length() > 0 && titleLayer != null) {
+          graph.createTag(graph, titleLayer.getId(), sResult)
+            .setConfidence(Constants.CONFIDENCE_MANUAL);;
+        }
+        sResult = xpath.evaluate("revisionDesc/change/date/text()", header);
+        if (sResult != null && sResult.length() > 0 && versionDateLayer != null) {
+          graph.createTag(graph, versionDateLayer.getId(), sResult)
+            .setConfidence(Constants.CONFIDENCE_MANUAL);;
+        }
+        sResult = xpath.evaluate("profileDesc/creation/date/text()", header);
         if (sResult != null && sResult.length() > 0 && publicationDateLayer != null) {
           graph.createTag(graph, publicationDateLayer.getId(), sResult)
             .setConfidence(Constants.CONFIDENCE_MANUAL);;
-        }
-      }
-      sResult = xpath.evaluate("profileDesc/langUsage/language/@ident", header);
-      if (sResult != null && sResult.length() > 0 && transcriptLanguageLayer != null) {
-        graph.createTag(graph, transcriptLanguageLayer.getId(), sResult)
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
-      }
-      Attr lang = (Attr)text.getAttributes().getNamedItem("lang");
-      if (lang != null) {
-        graph.createTag(graph, transcriptLanguageLayer.getId(), lang.getValue().toLowerCase())
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
-      }
-      NodeList items = (NodeList) xpath.evaluate("fileDesc/sourceDesc/msDesc/msIdentifier/idno", header, XPathConstants.NODESET);
-      if (items != null && items.getLength() > 0) {
-        Element idno = (Element)items.item(0);
-        String value = idno.getTextContent();
-        if (value != null) value = value.trim();
-        if (value != null && value.length() > 0) { // there's value
-          Layer layer = null;	       
-          if (parameters.containsKey("idnoUrl")) { // idno is URL
-            layer = (Layer) parameters.get("idnoUrl").getValue();
-          } else if (parameters.containsKey("idno")) { // idno isn't URL
-            layer = (Layer) parameters.get("idno").getValue();
-          }
-          if (layer != null) { // it's mapped to a layer
-            graph.createTag(graph, layer.getId(), value)
+        } else { // might be CDC-style - i.e. on a timeline
+          sResult = xpath.evaluate("front/timeline/when/@absolute", text);
+          if (sResult != null && sResult.length() > 0 && publicationDateLayer != null) {
+            graph.createTag(graph, publicationDateLayer.getId(), sResult)
               .setConfidence(Constants.CONFIDENCE_MANUAL);;
           }
-        } // there's a value
-      }
-
-      items = (NodeList) xpath.evaluate("//note[@type]", header, XPathConstants.NODESET);
-      if (items != null && items.getLength() > 0) {
-        // typed <note>s can be mapped to graph tags
-        for (int p = 0; p < items.getLength(); p++) {
-          Element note = (Element)items.item(p);
-          String value = note.getTextContent();
+        }
+        sResult = xpath.evaluate("profileDesc/langUsage/language/@ident", header);
+        if (sResult != null && sResult.length() > 0 && transcriptLanguageLayer != null) {
+          graph.createTag(graph, transcriptLanguageLayer.getId(), sResult)
+            .setConfidence(Constants.CONFIDENCE_MANUAL);;
+        }
+        Attr lang = (Attr)text.getAttributes().getNamedItem("lang");
+        if (lang != null) {
+          graph.createTag(graph, transcriptLanguageLayer.getId(), lang.getValue().toLowerCase())
+            .setConfidence(Constants.CONFIDENCE_MANUAL);;
+        }
+        NodeList items = (NodeList) xpath.evaluate("fileDesc/sourceDesc/msDesc/msIdentifier/idno", header, XPathConstants.NODESET);
+        if (items != null && items.getLength() > 0) {
+          Element idno = (Element)items.item(0);
+          String value = idno.getTextContent();
           if (value != null) value = value.trim();
           if (value != null && value.length() > 0) { // there's value
-            String noteType = note.getAttribute("type");
-            String keyName = "header_note_type_"+noteType;
-            if (parameters.containsKey(keyName)) { // there is a parameter
-              Layer layer = (Layer) parameters.get(keyName).getValue();
-              if (layer != null) { // mapped to a layer
-                graph.createTag(graph, layer.getId(), value)
-                  .setConfidence(Constants.CONFIDENCE_MANUAL);;
-              }
-            } // there is a parameter
-          } // there's value
-        } // next note type
-      } // there are note types
-
-	 
-      // participants - teiHeader/profileDesc/particDesc[/listPerson]/person
-      Annotation participant = null;
-      items = (NodeList) xpath.evaluate(
-        // person may be a child of listPerson or directly of particDesc
-        "profileDesc/particDesc/listPerson/person|profileDesc/particDesc/person",
-        header, XPathConstants.NODESET);
-      if (items != null && items.getLength() > 0) {
-        for (int p = 0; p < items.getLength(); p++) {
-          participant = new Annotation(
-            null, "author", schema.getParticipantLayerId(), startAnchor.getId(),
-            startAnchor.getId());
-          participant.setConfidence(Constants.CONFIDENCE_MANUAL);
-          Element person = (Element)items.item(p);
-          // set ID
-          if (person.getAttribute("xml:id").length() > 0) { // @id attribute
-            participant.setId(person.getAttribute("xml:id"));
-          } else { // no @id, so look for idno element
-            sResult = xpath.evaluate("idno/text()", person);
-            if (sResult != null && sResult.length() > 0) {
-              participant.setId(sResult);
+            Layer layer = null;	       
+            if (parameters.containsKey("idnoUrl")) { // idno is URL
+              layer = (Layer) parameters.get("idnoUrl").getValue();
+            } else if (parameters.containsKey("idno")) { // idno isn't URL
+              layer = (Layer) parameters.get("idno").getValue();
             }
-          }
-          // set name
-          sResult = xpath.evaluate("persName/text()", person);
-          if (sResult != null && sResult.length() > 0) {
-            participant.setLabel(sResult);
-          } else if (participant.getId() != null) { // no name, so use the ID as the name
-            participant.setLabel(participant.getId());
-          }
-          participant.setParentId(graph.getId());
-          graph.addAnnotation(participant);
-	       
-          // now that they're added, we can tag them with more info...
-	       
-          // sex
-          if (person.getAttribute("sex").length() > 0
-              && getSexLayer() != null) {
-            graph.createTag(participant, sexLayer.getId(), person.getAttribute("sex"))
-              .setConfidence(Constants.CONFIDENCE_MANUAL);;
-          }
-          // age
-          sResult = xpath.evaluate("age/text()", person);
-          if (sResult != null && sResult.length() > 0
-              && getAgeLayer() != null) {
-            graph.createTag(participant, ageLayer.getId(), sResult)
-              .setConfidence(Constants.CONFIDENCE_MANUAL);;
-          }
-          // birth
-          sResult = xpath.evaluate("birth/@when", person);
-          if (sResult != null && sResult.length() > 0
-              && getBirthLayer() != null) {
-            graph.createTag(participant, birthLayer.getId(), sResult)
-              .setConfidence(Constants.CONFIDENCE_MANUAL);;
-          }
-	       
-          // other tags...
-          NodeList children = person.getChildNodes();
-          for (int c = 0; c < children.getLength(); c++) {
-            Node child = children.item(c);
-            if (child instanceof Element && child.getChildNodes().getLength() > 0) {
-              String name = child.getNodeName();
-              if (!name.equals("idno")
-                  && !name.equals("birth")
-                  && !name.equals("age")
-                  && !name.equals("persName")
-                  && !name.equals("note")) {
-                String value = child.getChildNodes().item(0).getNodeValue();
-                Layer layer = (Layer)parameters.get("person_" + name).getValue();
-                if (layer != null) {
-                  graph.createTag(participant, layer.getId(), value)
+            if (layer != null) { // it's mapped to a layer
+              graph.createTag(graph, layer.getId(), value)
+                .setConfidence(Constants.CONFIDENCE_MANUAL);;
+            }
+          } // there's a value
+        }
+
+        items = (NodeList) xpath.evaluate("//note[@type]", header, XPathConstants.NODESET);
+        if (items != null && items.getLength() > 0) {
+          // typed <note>s can be mapped to graph tags
+          for (int p = 0; p < items.getLength(); p++) {
+            Element note = (Element)items.item(p);
+            String value = note.getTextContent();
+            if (value != null) value = value.trim();
+            if (value != null && value.length() > 0) { // there's value
+              String noteType = note.getAttribute("type");
+              String keyName = "header_note_type_"+noteType;
+              if (parameters.containsKey(keyName)) { // there is a parameter
+                Layer layer = (Layer) parameters.get(keyName).getValue();
+                if (layer != null) { // mapped to a layer
+                  graph.createTag(graph, layer.getId(), value)
                     .setConfidence(Constants.CONFIDENCE_MANUAL);;
                 }
-              } else if (name.equals("note")) {
-                Attr noteType = (Attr)child.getAttributes().getNamedItem("type");
-                String keyName = "person_note_type_" + noteType.getValue();
-                if (noteType != null && parameters.containsKey(keyName)) {
-                  Layer layer = (Layer)parameters.get(keyName).getValue();
+              } // there is a parameter
+            } // there's value
+          } // next note type
+        } // there are note types
+
+	 
+        // participants - teiHeader/profileDesc/particDesc[/listPerson]/person
+        Annotation participant = null;
+        items = (NodeList) xpath.evaluate(
+          // person may be a child of listPerson or directly of particDesc
+          "profileDesc/particDesc/listPerson/person|profileDesc/particDesc/person",
+          header, XPathConstants.NODESET);
+        if (items != null && items.getLength() > 0) {
+          for (int p = 0; p < items.getLength(); p++) {
+            participant = new Annotation(
+              null, "author", schema.getParticipantLayerId(), startAnchor.getId(),
+              startAnchor.getId());
+            participant.setConfidence(Constants.CONFIDENCE_MANUAL);
+            Element person = (Element)items.item(p);
+            // set ID
+            if (person.getAttribute("xml:id").length() > 0) { // @id attribute
+              participant.setId(person.getAttribute("xml:id"));
+            } else { // no @id, so look for idno element
+              sResult = xpath.evaluate("idno/text()", person);
+              if (sResult != null && sResult.length() > 0) {
+                participant.setId(sResult);
+              }
+            }
+            // set name
+            sResult = xpath.evaluate("persName/text()", person);
+            if (sResult != null && sResult.length() > 0) {
+              participant.setLabel(sResult);
+            } else if (participant.getId() != null) { // no name, so use the ID as the name
+              participant.setLabel(participant.getId());
+            }
+            participant.setParentId(graph.getId());
+            graph.addAnnotation(participant);
+	       
+            // now that they're added, we can tag them with more info...
+	       
+            // sex
+            if (person.getAttribute("sex").length() > 0
+                && getSexLayer() != null) {
+              graph.createTag(participant, sexLayer.getId(), person.getAttribute("sex"))
+                .setConfidence(Constants.CONFIDENCE_MANUAL);;
+            }
+            // age
+            sResult = xpath.evaluate("age/text()", person);
+            if (sResult != null && sResult.length() > 0
+                && getAgeLayer() != null) {
+              graph.createTag(participant, ageLayer.getId(), sResult)
+                .setConfidence(Constants.CONFIDENCE_MANUAL);;
+            }
+            // birth
+            sResult = xpath.evaluate("birth/@when", person);
+            if (sResult != null && sResult.length() > 0
+                && getBirthLayer() != null) {
+              graph.createTag(participant, birthLayer.getId(), sResult)
+                .setConfidence(Constants.CONFIDENCE_MANUAL);;
+            }
+	       
+            // other tags...
+            NodeList children = person.getChildNodes();
+            for (int c = 0; c < children.getLength(); c++) {
+              Node child = children.item(c);
+              if (child instanceof Element && child.getChildNodes().getLength() > 0) {
+                String name = child.getNodeName();
+                if (!name.equals("idno")
+                    && !name.equals("birth")
+                    && !name.equals("age")
+                    && !name.equals("persName")
+                    && !name.equals("note")) {
+                  String value = child.getChildNodes().item(0).getNodeValue();
+                  Layer layer = (Layer)parameters.get("person_" + name).getValue();
                   if (layer != null) {
-                    String value = child.getTextContent();
                     graph.createTag(participant, layer.getId(), value)
                       .setConfidence(Constants.CONFIDENCE_MANUAL);;
                   }
+                } else if (name.equals("note")) {
+                  Attr noteType = (Attr)child.getAttributes().getNamedItem("type");
+                  String keyName = "person_note_type_" + noteType.getValue();
+                  if (noteType != null && parameters.containsKey(keyName)) {
+                    Layer layer = (Layer)parameters.get(keyName).getValue();
+                    if (layer != null) {
+                      String value = child.getTextContent();
+                      graph.createTag(participant, layer.getId(), value)
+                        .setConfidence(Constants.CONFIDENCE_MANUAL);;
+                    }
+                  }
                 }
-              }
-            } // element child
-          } // next child
+              } // element child
+            } // next child
 	       
-        } // next participant
-      } else { // no participants, so use an "author"
-        participant = new Annotation(null, "author", schema.getParticipantLayerId());
-        participant.setConfidence(Constants.CONFIDENCE_MANUAL);
-        // maybe the author is named
-        sResult = xpath.evaluate("fileDesc/sourceDesc/biblStruct/monogr/author/text()", header);
-        if (sResult != null && sResult.length() > 0) {
-          participant.setLabel(sResult);
-        } else {
-          sResult = xpath.evaluate("fileDesc/titleStmt/author/text()", header);
-          if (sResult != null && sResult.length() > 0) participant.setLabel(sResult);
+          } // next participant
+        } else { // no participants, so use an "author"
+          participant = new Annotation(null, "author", schema.getParticipantLayerId());
+          participant.setConfidence(Constants.CONFIDENCE_MANUAL);
+          // maybe the author is named
+          sResult = xpath.evaluate("fileDesc/sourceDesc/biblStruct/monogr/author/text()", header);
+          if (sResult != null && sResult.length() > 0) {
+            participant.setLabel(sResult);
+          } else {
+            sResult = xpath.evaluate("fileDesc/titleStmt/author/text()", header);
+            if (sResult != null && sResult.length() > 0) participant.setLabel(sResult);
+          }
+          participant.setParentId(graph.getId());
+          graph.addAnnotation(participant);
         }
-        participant.setParentId(graph.getId());
-        graph.addAnnotation(participant);
-      }
-      if (graph.all(getParticipantLayer().getId()).length > 1) {
-        // don't default to the single participant
-        participant = null;
-      }
+        if (graph.all(getParticipantLayer().getId()).length > 1) {
+          // don't default to the single participant
+          participant = null;
+        }
 	 
-      // graph
-      Annotation turn = new Annotation(
-        null, participant != null?participant.getLabel():"", getTurnLayer().getId());
-      turn.setConfidence(Constants.CONFIDENCE_MANUAL);
-      graph.addAnnotation(turn);
-      if (participant != null) turn.setParent(participant);
-      turn.setStart(startAnchor);
-      Annotation line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
-      line.setConfidence(Constants.CONFIDENCE_MANUAL);
-      line.setParentId(turn.getId());
-      line.setStart(turn.getStart());
-      int iLastPosition = 0;	 
+        // graph
+        Annotation turn = new Annotation(
+          null, participant != null?participant.getLabel():"", getTurnLayer().getId());
+        turn.setConfidence(Constants.CONFIDENCE_MANUAL);
+        graph.addAnnotation(turn);
+        if (participant != null) turn.setParent(participant);
+        turn.setStart(startAnchor);
+        Annotation line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
+        line.setConfidence(Constants.CONFIDENCE_MANUAL);
+        line.setParentId(turn.getId());
+        line.setStart(turn.getStart());
+        int iLastPosition = 0;	 
 	 
-      Vector<Node> vNodes = flattenToWords(text);      
-      HashMap<Node,Annotation> mFoundEntities = new HashMap<Node,Annotation>();
-      // for each word or text chunk
-      String wordLayerId = getWordLayer().getId();
-      int w = 1;
-      Annotation anLastWord = null;
-      Anchor aChoiceStarted = null;
-      Annotation anCurrentOrig = null;
-      Annotation anCurrentCountry = null;
-      Anchor lastAnchor = startAnchor;
-      for (Node n : vNodes) {
-        boolean finishHere = false;
-        if (n instanceof Text) {
-          StringTokenizer words = new StringTokenizer(n.getNodeValue()); // TODO use configured tokenizer
+        Vector<Node> vNodes = flattenToWords(text);      
+        HashMap<Node,Annotation> mFoundEntities = new HashMap<Node,Annotation>();
+        // for each word or text chunk
+        String wordLayerId = getWordLayer().getId();
+        int w = 1;
+        Annotation anLastWord = null;
+        Anchor aChoiceStarted = null;
+        Annotation anCurrentOrig = null;
+        Annotation anCurrentCountry = null;
+        Anchor lastAnchor = startAnchor;
+        for (Node n : vNodes) {
+          boolean finishHere = false;
+          if (n instanceof Text) {
+            StringTokenizer words = new StringTokenizer(n.getNodeValue()); // TODO use configured tokenizer
 
-          while (words.hasMoreTokens()) {
-            Annotation anWord = new Annotation(
-              null, words.nextToken(), wordLayerId, turn.getId());
-            anWord.setOrdinal(w++)
-              .setConfidence(Constants.CONFIDENCE_MANUAL);;
-            //TODO anWord.setLabelStatus(Labbcat.LABEL_STATUS_USER);
-            if (characterOffsets) {
-              anWord.setStartId(graph.getOrCreateAnchorAt(
-                                  (double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
-              iLastPosition += anWord.getLabel().length() + 1; // include inter-word space
-              anWord.setEndId(graph.getOrCreateAnchorAt(
-                                (double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
-            } else {
-              anWord.setStartId(lastAnchor.getId());
-              lastAnchor = new Anchor();
-              graph.addAnchor(lastAnchor);
-              anWord.setEndId(lastAnchor.getId());
-            }
-		  
-            graph.addAnnotation(anWord);
-		  
-            anLastWord = anWord;
-          } // next word
-        } else if (n.getNodeName().equals("p")
-                   || n.getNodeName().equals("div")
-                   || n.getNodeName().equals("ab")
-                   || n.getNodeName().equals("l")
-                   || n.getNodeName().equals("lb")) {
-          // end the last line
-          if (characterOffsets) {
-            line.setEnd(graph.getOrCreateAnchorAt(
-                          (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-          } else {
-            lastAnchor = new Anchor();
-            graph.addAnchor(lastAnchor);
-            line.setEnd(lastAnchor);
-          }
-          if (!line.getStartId().equals(line.getEndId())) {
-            // if we have <div><p>... don't create an instantaneous, empty line
-            graph.addAnnotation(line);
-          }
-	       
-          // start a new line
-          line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
-          line.setParentId(turn.getId())
-            .setConfidence(Constants.CONFIDENCE_MANUAL);;
-          //graph.addAnnotation(line);
-          if (characterOffsets) {
-            line.setStart(graph.getOrCreateAnchorAt(
-                            (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-          } else {
-            line.setStart(lastAnchor);
-          }
-        } else if (n.getNodeName().equals("u")
-                   || n.getNodeName().equals("posting")) {
-          if (turn.getLabel().length() == 0) { // default empty starting turn
-            // set participant
-            Element attributable = (Element)n;
-            if (attributable.getAttribute("who").length() > 0) {		  
-              Annotation who = graph.getAnnotation(attributable.getAttribute("who")
-                                                   .replaceAll("^#","")); // ignore leading #
-              if (who != null) {
-                participant = who;
-                turn.setLabel(participant.getLabel());
-                turn.setParentId(participant.getId());
-              }
-            }
-          } else { // new turn
-            // "attributable" spans, utterance, etc.
-            if (characterOffsets) {
-              turn.setEnd(graph.getOrCreateAnchorAt(
-                            (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-            } else {
-              lastAnchor = new Anchor();
-              graph.addAnchor(lastAnchor);
-              turn.setEnd(lastAnchor);
-            }
-            if (!turn.getStartId().equals(turn.getEndId())) {
-              // don't create an instantaneous, empty turn
-              graph.addAnnotation(turn);
-            }
-		  
-            // set participant
-            Element attributable = (Element)n;
-            if (attributable.getAttribute("who").length() > 0) {
-              Annotation who = graph.getAnnotation(attributable.getAttribute("who")
-                                                   .replaceAll("^#","")); // ignore leading #
-              if (who != null) {
-                participant = who;
-              }
-            }
-		  
-            // start a new turn
-            if (!turn.getStartId().equals(turn.getEndId())) {
-              turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
-              turn.setParentId(participant.getId())
+            while (words.hasMoreTokens()) {
+              Annotation anWord = new Annotation(
+                null, words.nextToken(), wordLayerId, turn.getId());
+              anWord.setOrdinal(w++)
                 .setConfidence(Constants.CONFIDENCE_MANUAL);;
-              graph.addAnnotation(turn);
+              //TODO anWord.setLabelStatus(Labbcat.LABEL_STATUS_USER);
               if (characterOffsets) {
-                turn.setStart(graph.getOrCreateAnchorAt(
-                                (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+                anWord.setStartId(graph.getOrCreateAnchorAt(
+                                    (double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
+                iLastPosition += anWord.getLabel().length() + 1; // include inter-word space
+                anWord.setEndId(graph.getOrCreateAnchorAt(
+                                  (double)iLastPosition, Constants.CONFIDENCE_MANUAL).getId());
               } else {
-                turn.setStart(lastAnchor);
+                anWord.setStartId(lastAnchor.getId());
+                lastAnchor = new Anchor();
+                graph.addAnchor(lastAnchor);
+                anWord.setEndId(lastAnchor.getId());
               }
-            } else {
-              turn.setParentId(participant.getId());
-            }
-            // start a new line too
+		  
+              graph.addAnnotation(anWord);
+		  
+              anLastWord = anWord;
+            } // next word
+          } else if (n.getNodeName().equals("p")
+                     || n.getNodeName().equals("div")
+                     || n.getNodeName().equals("ab")
+                     || n.getNodeName().equals("l")
+                     || n.getNodeName().equals("lb")) {
+            // end the last line
             if (characterOffsets) {
               line.setEnd(graph.getOrCreateAnchorAt(
                             (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
             } else {
+              lastAnchor = new Anchor();
+              graph.addAnchor(lastAnchor);
               line.setEnd(lastAnchor);
             }
             if (!line.getStartId().equals(line.getEndId())) {
               // if we have <div><p>... don't create an instantaneous, empty line
               graph.addAnnotation(line);
             }
+	       
+            // start a new line
             line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
             line.setParentId(turn.getId())
               .setConfidence(Constants.CONFIDENCE_MANUAL);;
+            //graph.addAnnotation(line);
             if (characterOffsets) {
               line.setStart(graph.getOrCreateAnchorAt(
                               (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
             } else {
               line.setStart(lastAnchor);
             }
-          }
-        } else if (n.getNodeName().equals("choice")) {
-          if (aChoiceStarted == null) { // opening a new choice tag
-            if (characterOffsets) {
-              aChoiceStarted = graph.getOrCreateAnchorAt(
-                (double)iLastPosition, Constants.CONFIDENCE_MANUAL);
-            } else {
-              aChoiceStarted = lastAnchor;
-            }
-            anCurrentOrig = null;
-          } else { // closing an opened choice tag
-            if (anCurrentOrig != null) {
+          } else if (n.getNodeName().equals("u")
+                     || n.getNodeName().equals("posting")) {
+            if (turn.getLabel().length() == 0) { // default empty starting turn
+              // set participant
+              Element attributable = (Element)n;
+              if (attributable.getAttribute("who").length() > 0) {		  
+                Annotation who = graph.getAnnotation(attributable.getAttribute("who")
+                                                     .replaceAll("^#","")); // ignore leading #
+                if (who != null) {
+                  participant = who;
+                  turn.setLabel(participant.getLabel());
+                  turn.setParentId(participant.getId());
+                }
+              }
+            } else { // new turn
+              // "attributable" spans, utterance, etc.
               if (characterOffsets) {
-                anCurrentOrig.setEnd(
-                  graph.getOrCreateAnchorAt(
-                    (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+                turn.setEnd(graph.getOrCreateAnchorAt(
+                              (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
               } else {
-                anCurrentOrig.setEnd(lastAnchor);
+                lastAnchor = new Anchor();
+                graph.addAnchor(lastAnchor);
+                turn.setEnd(lastAnchor);
+              }
+              if (!turn.getStartId().equals(turn.getEndId())) {
+                // don't create an instantaneous, empty turn
+                graph.addAnnotation(turn);
+              }
+		  
+              // set participant
+              Element attributable = (Element)n;
+              if (attributable.getAttribute("who").length() > 0) {
+                Annotation who = graph.getAnnotation(attributable.getAttribute("who")
+                                                     .replaceAll("^#","")); // ignore leading #
+                if (who != null) {
+                  participant = who;
+                }
+              }
+		  
+              // start a new turn
+              if (!turn.getStartId().equals(turn.getEndId())) {
+                turn = new Annotation(null, participant.getLabel(), getTurnLayer().getId());
+                turn.setParentId(participant.getId())
+                  .setConfidence(Constants.CONFIDENCE_MANUAL);;
+                graph.addAnnotation(turn);
+                if (characterOffsets) {
+                  turn.setStart(graph.getOrCreateAnchorAt(
+                                  (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+                } else {
+                  turn.setStart(lastAnchor);
+                }
+              } else {
+                turn.setParentId(participant.getId());
+              }
+              // start a new line too
+              if (characterOffsets) {
+                line.setEnd(graph.getOrCreateAnchorAt(
+                              (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+              } else {
+                line.setEnd(lastAnchor);
+              }
+              if (!line.getStartId().equals(line.getEndId())) {
+                // if we have <div><p>... don't create an instantaneous, empty line
+                graph.addAnnotation(line);
+              }
+              line = new Annotation(null, turn.getLabel(), getUtteranceLayer().getId());
+              line.setParentId(turn.getId())
+                .setConfidence(Constants.CONFIDENCE_MANUAL);;
+              if (characterOffsets) {
+                line.setStart(graph.getOrCreateAnchorAt(
+                                (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+              } else {
+                line.setStart(lastAnchor);
+              }
+            }
+          } else if (n.getNodeName().equals("choice")) {
+            if (aChoiceStarted == null) { // opening a new choice tag
+              if (characterOffsets) {
+                aChoiceStarted = graph.getOrCreateAnchorAt(
+                  (double)iLastPosition, Constants.CONFIDENCE_MANUAL);
+              } else {
+                aChoiceStarted = lastAnchor;
               }
               anCurrentOrig = null;
-            }
-            aChoiceStarted = null;
-          }
-        } else { // some other entity
-          if (!mFoundEntities.containsKey(n)) { // new named entity
-            Layer layer = (Layer)parameters.get(n.getNodeName()).getValue();
-            if (n.getNodeName().equals("pc")) { // <pc> tags can be mapped by type attribute
-              Attr att = (Attr)n.getAttributes().getNamedItem("type");
-              if (att != null && parameters.containsKey("pc_type_" + att.getValue())) {
-                layer = (Layer)parameters.get("pc_type_" + att.getValue()).getValue();
-              }
-            }
-            if (layer != null) {
-              String label = n.getNodeName();
-              if (n.getChildNodes().getLength() > 0
-                  && n.getChildNodes().item(0).getNodeValue() != null) {
-                label = n.getChildNodes().item(0).getNodeValue();
-              }
-              if (n.getNodeName().equals("country")) {
-                label = n.getTextContent();
-              }
-              Annotation anEntity = new Annotation(null, label, layer.getId());
-              anEntity.setConfidence(Constants.CONFIDENCE_MANUAL);
-              anEntity.setStart(characterOffsets?
-                                graph.getOrCreateAnchorAt(
-                                  (double)iLastPosition, Constants.CONFIDENCE_MANUAL)
-                                :lastAnchor);
-              if (n.getNodeName().equals("orig")) {
-                if (aChoiceStarted != null) {
-                  anEntity.setStart(aChoiceStarted);
-                  anCurrentOrig = anEntity;
-                }
-              } else if (n.getNodeName().equals("country")) { // country
-                if (n.getParentNode().getNodeName().equals("placeName")) { //inside placeName
-                  anCurrentCountry = anEntity;
-                  finishHere = true;
-                }
-              } else if (n.getNodeName().equals("note")) {
-                finishHere = true;			
-              } else if (n.getNodeName().equals("pc")) {
-                finishHere = true;
-              } else if (n.getNodeName().equals("pb")) { // page break
-                finishHere = true;
-              } else if (n.getNodeName().equals("foreign")) {
-                Attr att = (Attr)n.getAttributes().getNamedItem("xml:lang");
-                if (att != null) {
-                  // the label is the language
-                  anEntity.setLabel(att.getValue());
-                }
-              } else if (n.getNodeName().equals("placeName")) {
-                Attr att = (Attr)n.getAttributes().getNamedItem("placeName");
-                if (att != null) {
-                  // the label is the placeName attribute
-                  anEntity.setLabel(att.getValue());
-                }
-              } else if (n.getNodeName().equals("hi")) { // <hi rend='strikethrough:true;'>
-                Attr att = (Attr)n.getAttributes().getNamedItem("rend");
-                if (att != null) {
-                  // the label is the placeName attribute
-                  anEntity.setLabel(att.getValue());
-                }
-              } else if (n.getNodeName().equals("unclear")) {
-                anEntity.setLabel(n.getNodeName());
-                Attr att = (Attr)n.getAttributes().getNamedItem("reason");
-                if (att != null) {
-                  if (getEntityLayer() != null
-                      || !layer.getId().equals(getEntityLayer().getId())) {
-                    // tags have their own layer, so the label doesn't need the tag name
-                    anEntity.setLabel(att.getValue());
-                  } else {
-                    anEntity.setLabel(anEntity.getLabel() + ": " + att.getValue());
-                  }
-                }
-                att = (Attr)n.getAttributes().getNamedItem("cert");
-                if (att != null) {
-                  anEntity.setLabel(anEntity.getLabel() + " (" + att.getValue() + ")");
-                }
-              } else { // everything that's not "orig" nor "note" nor "foreign", etc...
-                anEntity.setLabel(n.getNodeName());
-                Attr att = (Attr)n.getAttributes().getNamedItem("type");
-                if (att != null) {
-                  if (getEntityLayer() == null
-                      || !layer.getId().equals(getEntityLayer())) {
-                    // tags have their own layer, so the label doesn't need the tag name
-                    anEntity.setLabel(att.getValue());
-                  } else {
-                    anEntity.setLabel(anEntity.getLabel() + ": " + att.getValue());
-                  }
-                }
-              } // not "orig" nor "note" nor "foreign" nor "unclear"
-              anEntity.setConfidence(Constants.CONFIDENCE_MANUAL);
-              if (layer.getParentId().equals(getTurnLayer().getId())) {
-                anEntity.setParentId(turn.getId());
-              }
-              else if (layer.getParentId().equals(schema.getRoot().getId())) {
-                anEntity.setParentId(graph.getId());
-              }
-              mFoundEntities.put(n, anEntity);
-            }
-          } else { // previously started entity
-            finishHere = true;
-          }
-	       
-          if (finishHere) { // close the entity
-            Annotation anEntity = mFoundEntities.get(n);
-            anEntity.setEnd(characterOffsets?
-                            graph.getOrCreateAnchorAt(
-                              (double)iLastPosition, Constants.CONFIDENCE_MANUAL)
-                            :lastAnchor);
-            graph.addAnnotation(anEntity);
-            if (n.getNodeName().equals("placeName")) {
-              if (anCurrentCountry != null) { // country inside the placeName...
-                // ...ends in the same place
-                anCurrentCountry.setEnd(anEntity.getEnd());
-                anCurrentCountry = null;
-              } // country inside the placeName
-            }
-            mFoundEntities.remove(n);
-          }
-        }  // some other entity
-      } // next node
-
-      if (characterOffsets)
-      {
-        turn.setEnd(graph.getOrCreateAnchorAt(
+            } else { // closing an opened choice tag
+              if (anCurrentOrig != null) {
+                if (characterOffsets) {
+                  anCurrentOrig.setEnd(
+                    graph.getOrCreateAnchorAt(
                       (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
-      } else {
-        turn.setEnd(endAnchor);
-      }
-      if (!turn.getStartId().equals(turn.getEndId())) {
-        // don't create an instantaneous, empty turn
-        graph.addAnnotation(turn);
-      }
-      line.setEnd(turn.getEnd());
-      if (!line.getStartId().equals(line.getEndId())) {
-        // don't create an instantaneous, empty line
-        graph.addAnnotation(line);
-      }
+                } else {
+                  anCurrentOrig.setEnd(lastAnchor);
+                }
+                anCurrentOrig = null;
+              }
+              aChoiceStarted = null;
+            }
+          } else { // some other entity
+            if (!mFoundEntities.containsKey(n)) { // new named entity
+              Layer layer = (Layer)parameters.get(n.getNodeName()).getValue();
+              if (n.getNodeName().equals("pc")) { // <pc> tags can be mapped by type attribute
+                Attr att = (Attr)n.getAttributes().getNamedItem("type");
+                if (att != null && parameters.containsKey("pc_type_" + att.getValue())) {
+                  layer = (Layer)parameters.get("pc_type_" + att.getValue()).getValue();
+                }
+              }
+              if (layer != null) {
+                String label = n.getNodeName();
+                if (n.getChildNodes().getLength() > 0
+                    && n.getChildNodes().item(0).getNodeValue() != null) {
+                  label = n.getChildNodes().item(0).getNodeValue();
+                }
+                if (n.getNodeName().equals("country")) {
+                  label = n.getTextContent();
+                }
+                Annotation anEntity = new Annotation(null, label, layer.getId());
+                anEntity.setConfidence(Constants.CONFIDENCE_MANUAL);
+                anEntity.setStart(characterOffsets?
+                                  graph.getOrCreateAnchorAt(
+                                    (double)iLastPosition, Constants.CONFIDENCE_MANUAL)
+                                  :lastAnchor);
+                if (n.getNodeName().equals("orig")) {
+                  if (aChoiceStarted != null) {
+                    anEntity.setStart(aChoiceStarted);
+                    anCurrentOrig = anEntity;
+                  }
+                } else if (n.getNodeName().equals("country")) { // country
+                  if (n.getParentNode().getNodeName().equals("placeName")) { //inside placeName
+                    anCurrentCountry = anEntity;
+                    finishHere = true;
+                  }
+                } else if (n.getNodeName().equals("note")) {
+                  finishHere = true;			
+                } else if (n.getNodeName().equals("pc")) {
+                  finishHere = true;
+                } else if (n.getNodeName().equals("pb")) { // page break
+                  finishHere = true;
+                } else if (n.getNodeName().equals("foreign")) {
+                  Attr att = (Attr)n.getAttributes().getNamedItem("xml:lang");
+                  if (att != null) {
+                    // the label is the language
+                    anEntity.setLabel(att.getValue());
+                  }
+                } else if (n.getNodeName().equals("placeName")) {
+                  Attr att = (Attr)n.getAttributes().getNamedItem("placeName");
+                  if (att != null) {
+                    // the label is the placeName attribute
+                    anEntity.setLabel(att.getValue());
+                  }
+                } else if (n.getNodeName().equals("hi")) { // <hi rend='strikethrough:true;'>
+                  Attr att = (Attr)n.getAttributes().getNamedItem("rend");
+                  if (att != null) {
+                    // the label is the placeName attribute
+                    anEntity.setLabel(att.getValue());
+                  }
+                } else if (n.getNodeName().equals("unclear")) {
+                  anEntity.setLabel(n.getNodeName());
+                  Attr att = (Attr)n.getAttributes().getNamedItem("reason");
+                  if (att != null) {
+                    if (getEntityLayer() != null
+                        || !layer.getId().equals(getEntityLayer().getId())) {
+                      // tags have their own layer, so the label doesn't need the tag name
+                      anEntity.setLabel(att.getValue());
+                    } else {
+                      anEntity.setLabel(anEntity.getLabel() + ": " + att.getValue());
+                    }
+                  }
+                  att = (Attr)n.getAttributes().getNamedItem("cert");
+                  if (att != null) {
+                    anEntity.setLabel(anEntity.getLabel() + " (" + att.getValue() + ")");
+                  }
+                } else { // everything that's not "orig" nor "note" nor "foreign", etc...
+                  anEntity.setLabel(n.getNodeName());
+                  Attr att = (Attr)n.getAttributes().getNamedItem("type");
+                  if (att != null) {
+                    if (getEntityLayer() == null
+                        || !layer.getId().equals(getEntityLayer())) {
+                      // tags have their own layer, so the label doesn't need the tag name
+                      anEntity.setLabel(att.getValue());
+                    } else {
+                      anEntity.setLabel(anEntity.getLabel() + ": " + att.getValue());
+                    }
+                  }
+                } // not "orig" nor "note" nor "foreign" nor "unclear"
+                anEntity.setConfidence(Constants.CONFIDENCE_MANUAL);
+                if (layer.getParentId().equals(getTurnLayer().getId())) {
+                  anEntity.setParentId(turn.getId());
+                }
+                else if (layer.getParentId().equals(schema.getRoot().getId())) {
+                  anEntity.setParentId(graph.getId());
+                }
+                mFoundEntities.put(n, anEntity);
+              }
+            } else { // previously started entity
+              finishHere = true;
+            }
+	       
+            if (finishHere) { // close the entity
+              Annotation anEntity = mFoundEntities.get(n);
+              anEntity.setEnd(characterOffsets?
+                              graph.getOrCreateAnchorAt(
+                                (double)iLastPosition, Constants.CONFIDENCE_MANUAL)
+                              :lastAnchor);
+              graph.addAnnotation(anEntity);
+              if (n.getNodeName().equals("placeName")) {
+                if (anCurrentCountry != null) { // country inside the placeName...
+                  // ...ends in the same place
+                  anCurrentCountry.setEnd(anEntity.getEnd());
+                  anCurrentCountry = null;
+                } // country inside the placeName
+              }
+              mFoundEntities.remove(n);
+            }
+          }  // some other entity
+        } // next node
 
-      graph.trackChanges();
-         
-      OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());
-      // orthographic characters include not only letters and numbers,
-      // but also @, so that tweet addressee annotations aren't clumped
-      clumper.setNonOrthoCharacterPattern("[^\\p{javaLetter}\\p{javaDigit}@]");
-      try {
-        // clump non-orthographic 'words' with real words
-        clumper.transform(graph);
-        graph.commit();
-      } catch(TransformationException exception) {
-        if (errors == null) errors = new SerializationException();
-        if (errors.getCause() == null) errors.initCause(exception);
-        errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
-      }
-	 
-      // set end anchors of graph tags
-      SortedSet<Anchor> anchors = graph.getSortedAnchors();
-      Anchor firstAnchor = anchors.first();
-      lastAnchor = anchors.last();
-      for (Annotation a : graph.all(getParticipantLayer().getId())) {
-        a.setStartId(firstAnchor.getId());
-        a.setEndId(lastAnchor.getId());
-      }
-
-      if (!characterOffsets) { // set default offsets
-        try
+        if (characterOffsets)
         {
-          new DefaultOffsetGenerator().transform(graph);	    
+          turn.setEnd(graph.getOrCreateAnchorAt(
+                        (double)iLastPosition, Constants.CONFIDENCE_MANUAL));
+        } else {
+          turn.setEnd(endAnchor);
+        }
+        if (!turn.getStartId().equals(turn.getEndId())) {
+          // don't create an instantaneous, empty turn
+          graph.addAnnotation(turn);
+        }
+        line.setEnd(turn.getEnd());
+        if (!line.getStartId().equals(line.getEndId())) {
+          // don't create an instantaneous, empty line
+          graph.addAnnotation(line);
+        }
+
+        graph.trackChanges();
+         
+        OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());
+        // orthographic characters include not only letters and numbers,
+        // but also @, so that tweet addressee annotations aren't clumped
+        clumper.setNonOrthoCharacterPattern("[^\\p{javaLetter}\\p{javaDigit}@]");
+        try {
+          // clump non-orthographic 'words' with real words
+          clumper.transform(graph);
+          graph.commit();
         } catch(TransformationException exception) {
           if (errors == null) errors = new SerializationException();
           if (errors.getCause() == null) errors.initCause(exception);
           errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
         }
-      }
 	 
-      graph.commit();
+        // set end anchors of graph tags
+        SortedSet<Anchor> anchors = graph.getSortedAnchors();
+        Anchor firstAnchor = anchors.first();
+        lastAnchor = anchors.last();
+        for (Annotation a : graph.all(getParticipantLayer().getId())) {
+          a.setStartId(firstAnchor.getId());
+          a.setEndId(lastAnchor.getId());
+        }
 
-      if (errors != null) throw errors;
+        if (!characterOffsets) { // set default offsets
+          try
+          {
+            new DefaultOffsetGenerator().transform(graph);	    
+          } catch(TransformationException exception) {
+            if (errors == null) errors = new SerializationException();
+            if (errors.getCause() == null) errors.initCause(exception);
+            errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
+          }
+        }
+	 
+        graph.commit();
 
-      // reset all change tracking
-      graph.getTracker().reset();
-      graph.setTracker(null);
+        if (errors != null) throw errors;
 
-      Graph[] graphs = { graph };
-      return graphs;
-    }
-    catch(XPathExpressionException x) { throw new SerializationException(x); }
+        // reset all change tracking
+        graph.getTracker().reset();
+        graph.setTracker(null);
+      } catch(XPathExpressionException x) {
+        throw new SerializationException(x);
+      }
+      
+      graphs.add(graph);
+    } // next graph node
+    
+    return graphs.toArray(new Graph[0]);
   }
 
   /**
