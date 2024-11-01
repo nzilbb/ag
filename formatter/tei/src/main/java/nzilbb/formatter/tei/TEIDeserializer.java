@@ -190,6 +190,9 @@ import nzilbb.configure.ParameterSet;
  *     is assumed to be annotating part of the text - i.e. <var>ccc</var> is left in the
  *     text rather than being stripped out as it is when inside 
  *     <code>&lt;placeName&gt;</code>...<code>&lt;/placeName&gt;</code>.</li>
+ *  <li>
+ *     <code>&lt;hi rend='rrr'&gt;</code>...<code>&lt;/hi&gt;</code> results in an annotation
+ *      with label <var>rrr</var>.</li>
  * </ul>
  * <p>Other tags are by default mapped on to the "entities" layer (in which case their tag
  * name,and its type attribute if present, will be used for the entity label).
@@ -1705,6 +1708,12 @@ public class TEIDeserializer implements GraphDeserializer {
                 }
               } else if (n.getNodeName().equals("placeName")) {
                 Attr att = (Attr)n.getAttributes().getNamedItem("placeName");
+                if (att != null) {
+                  // the label is the placeName attribute
+                  anEntity.setLabel(att.getValue());
+                }
+              } else if (n.getNodeName().equals("hi")) { // <hi rend='strikethrough:true;'>
+                Attr att = (Attr)n.getAttributes().getNamedItem("rend");
                 if (att != null) {
                   // the label is the placeName attribute
                   anEntity.setLabel(att.getValue());

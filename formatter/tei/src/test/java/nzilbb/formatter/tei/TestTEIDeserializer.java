@@ -1121,6 +1121,12 @@ public class TestTEIDeserializer {
       new Layer("country", "Country")
       .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true),
+      new Layer("strike-through", "Correction")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("hi", "Highlight")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
       new Layer("pc", "Punctuation")
       .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true),
@@ -1159,7 +1165,7 @@ public class TestTEIDeserializer {
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
     //for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals(4, defaultParameters.size());
+    assertEquals(6, defaultParameters.size());
     assertEquals("pb", "pb", 
                  ((Layer)defaultParameters.get("pb").getValue()).getId());
     assertNull("lg", 
@@ -1168,6 +1174,10 @@ public class TestTEIDeserializer {
                  ((Layer)defaultParameters.get("placeName").getValue()).getId());
     assertEquals("country", "country", 
                  ((Layer)defaultParameters.get("country").getValue()).getId());
+    assertEquals("strike-through", "strike-through", 
+                 ((Layer)defaultParameters.get("strike-through").getValue()).getId());
+    assertEquals("hi", "hi", 
+                 ((Layer)defaultParameters.get("hi").getValue()).getId());
       
     // configure the deserialization
     deserializer.setParameters(defaultParameters);
@@ -1245,6 +1255,26 @@ public class TestTEIDeserializer {
     assertEquals("country 4 label", "New Zealand", countries[3].getLabel());
     assertEquals("country 5 label", "New Zealand", countries[4].getLabel());
 
+    // strike-through
+    Annotation[] strikeThrough = g.all("strike-through");
+    assertEquals("strikeThrough", 1, strikeThrough.length);
+    assertEquals("strike-through label", "strike-through", strikeThrough[0].getLabel());
+    assertEquals("strike-through content",
+                 "much",
+                 Arrays.stream(strikeThrough[0].all("word"))
+                 .map(annotation->annotation.getLabel())
+                 .collect(Collectors.joining(" ")));
+    
+    // hi
+    Annotation[] highlight = g.all("hi");
+    assertEquals("highlight", 1, highlight.length);
+    assertEquals("highlight label", "strikethrough:true;", highlight[0].getLabel());
+    assertEquals("highlight content",
+                 "a quantity of",
+                 Arrays.stream(highlight[0].all("word"))
+                 .map(annotation->annotation.getLabel())
+                 .collect(Collectors.joining(" ")));
+    
     Annotation[] pb = g.all("pb");
     assertEquals("page breaks", 6, pb.length);
     assertEquals("pb", pb[0].getLabel());
