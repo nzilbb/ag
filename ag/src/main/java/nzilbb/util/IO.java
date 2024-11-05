@@ -303,7 +303,7 @@ public class IO
       
     long totalBytes = 0;
       
-    byte[] buffer = new byte[1024];
+    byte[] buffer = new byte[10240];
     int bytesRead = input.read(buffer);
     while (bytesRead >= 0) {
       totalBytes += bytesRead;
