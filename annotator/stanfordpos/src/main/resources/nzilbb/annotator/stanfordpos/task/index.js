@@ -152,7 +152,7 @@ function changedLayer(select) {
     }
 }
 
-function testTokenExclusionPattern(alertOnError) {
+function testPatterns(alertOnError) {
     var tokenExclusionPattern = document.getElementById("tokenExclusionPattern");
     try {
         
@@ -171,5 +171,24 @@ function testTokenExclusionPattern(alertOnError) {
             tokenExclusionPattern.focus();
         }
     }
-    return tokenExclusionPattern.className == "";
+    var targetLanguagePattern = document.getElementById("targetLanguagePattern");
+    try {
+        
+        // test regular expression is valid
+        new RegExp(targetLanguagePattern.value, "g");
+        // pattern is valid, so don't mark it as an error
+        targetLanguagePattern.className = "";
+        targetLanguagePattern.removeAttribute("title");
+        
+    } catch(error) {
+        // pattern is invalid, so don't mark it as an error
+        targetLanguagePattern.className = "error";
+        targetLanguagePattern.title = error;
+        if (alertOnError) {
+            alert("Invalid Target Language Pattern - " + error);
+            targetLanguagePattern.focus();
+        }
+    }
+  return tokenExclusionPattern.className == ""
+    && targetLanguagePattern.className == "";
 }

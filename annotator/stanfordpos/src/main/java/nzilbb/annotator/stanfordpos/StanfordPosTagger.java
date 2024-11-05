@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -127,10 +127,13 @@ public class StanfordPosTagger extends Annotator {
       if (zips == null || zips.length == 0) {
         // download from https://nlp.stanford.edu/software/stanford-tagger-4.2.0.zip
         File zip = new File(getWorkingDirectory(), "stanford-tagger-4.2.0.zip");
+        System.out.println("starting download...");
         setStatus("Downloading https://nlp.stanford.edu/software/stanford-tagger-4.2.0.zip");
         IO.SaveUrlToFile​(
           new URL("https://nlp.stanford.edu/software/stanford-tagger-4.2.0.zip"),
-          zip, new IntConsumer() { public void accept​(int value) {setPercentComplete(value / 2); }});
+          zip, new IntConsumer() { public void accept​(int value) {
+            setPercentComplete(value / 2);
+          }});
         zips = new File[] { zip };
       }
       setPercentComplete(50);
@@ -335,6 +338,33 @@ public class StanfordPosTagger extends Annotator {
   }
   
   /**
+   * Regular expression for specifying which language to tag the tokens of.
+   * @see #getTargetLanguagePattern()
+   * @see #setTargetLanguagePattern(String)
+   */
+  protected String targetLanguagePattern;
+  /**
+   * Getter for {@link #targetLanguagePattern}: Regular expression for specifying which
+   * language to tag the tokens of. 
+   * @return Regular expression for specifying which language to tag the tokens of.
+   */
+  public String getTargetLanguagePattern() { return targetLanguagePattern; }
+  /**
+   * Setter for {@link #targetLanguagePattern}: Regular expression for specifying which
+   * language to tag the tokens of. 
+   * @param newTargetLanguagePattern Regular expression for specifying which language to
+   * tag the tokens of. 
+   */
+  public StanfordPosTagger setTargetLanguagePattern(String newTargetLanguagePattern) {
+    if (newTargetLanguagePattern != null // empty string means null
+        && newTargetLanguagePattern.trim().length() == 0) {
+      newTargetLanguagePattern = null;
+    }
+    targetLanguagePattern = newTargetLanguagePattern;
+    return this;
+  }
+  
+  /**
    * Model to use for tagging.
    * @see #getModel()
    * @see #setModel(String)
@@ -378,7 +408,9 @@ public class StanfordPosTagger extends Annotator {
   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
-    
+
+    targetLanguagePattern = null;
+
     if (parameters == null) { // apply default configuration
       
       if (schema.getLayer("orthography") != null) {
@@ -434,12 +466,21 @@ public class StanfordPosTagger extends Annotator {
     if (phraseLanguageLayerId != null && schema.getLayer(phraseLanguageLayerId) == null) 
       throw new InvalidConfigurationException(
         this, "Phrase language layer not found: " + phraseLanguageLayerId);
-    if (tokenExclusionPattern.length() > 0) {
+    if (tokenExclusionPattern != null && tokenExclusionPattern.length() > 0) {
       try {
         Pattern.compile(tokenExclusionPattern);
       } catch(PatternSyntaxException exception) {
         throw new InvalidConfigurationException(
           this, "Invalid token exclusion pattern: " + exception.getMessage(), exception);
+      }
+    }
+    if ("".equals(targetLanguagePattern)) targetLanguagePattern = null;
+    if (targetLanguagePattern != null) {
+      try {
+       Pattern.compile(targetLanguagePattern);
+      } catch(PatternSyntaxException x) {
+        throw new InvalidConfigurationException(
+          this, "Invalid Target Language \""+targetLanguagePattern+"\": " + x.getMessage());
       }
     }
 
@@ -704,82 +745,123 @@ public class StanfordPosTagger extends Annotator {
         throw new InvalidConfigurationException(this, "Invalid output POS layer: " + posLayerId);
       }
 
-      // TODO handle language selection...
-
-      MaxentTagger tagger = new MaxentTagger(
-        new File(new File(getWorkingDirectory(), "models"), model).getPath());
-      
-      for (Annotation chunk : graph.all(chunkLayerId)) {
-        if (isCancelling()) break;
-        
-        Annotation[] tokens = chunk.all(tokenLayerId);
-        
-        // delete all existing tags before filtering out by pattern
-        for (Annotation t : tokens) {            
-          for (Annotation p: t.all(posLayerId)) {
-            p.destroy();
-          } // next pos tag
-        } // next token
-        
-        if (tokenExclusionPattern.length() > 0) {
-          final Pattern exclude = Pattern.compile(tokenExclusionPattern);
-          tokens = Arrays.stream(tokens).filter(t->!exclude.matcher(t.getLabel()).matches())
-            .toArray(Annotation[]::new);
+      boolean transcriptIsMainlyTargetLang = true;
+      if (transcriptLanguageLayerId != null && targetLanguagePattern != null) {
+        Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
+        if (transcriptLanguage != null) {
+          if (!transcriptLanguage.getLabel().matches(targetLanguagePattern)) { // not TargetLang
+            transcriptIsMainlyTargetLang = false;
+          }
+        } else { // transcript has no language, but we target a language
+          transcriptIsMainlyTargetLang = false;
         }
+      }
+      boolean thereArePhraseTags = false;
+      if (phraseLanguageLayerId != null) {
+        if (graph.first(phraseLanguageLayerId) != null) {
+          thereArePhraseTags = true;
+        }
+      }
+
+      if (!transcriptIsMainlyTargetLang && !thereArePhraseTags) {
+        setStatus("There are no tokens in the target language ("+targetLanguagePattern+")");
+      } else {
+        // handle language selection...
         
-        setStatus("Tagging chunk "+chunk.getStart() + "-" + chunk.getEnd());
-        if (tokens.length > 0) {
-
-          // if tokens contain spaces, these are eliminated by the parser
-          // so create a space-stripped version of the label
-          for (Annotation t : tokens) {
-            t.put("@untagged", t.getLabel().replaceAll("\\s",""));
+        MaxentTagger tagger = new MaxentTagger(
+          new File(new File(getWorkingDirectory(), "models"), model).getPath());
+        
+        for (Annotation chunk : graph.all(chunkLayerId)) {
+          if (isCancelling()) break;
+        
+          Annotation[] tokens = chunk.all(tokenLayerId);
+          
+          // delete all existing tags before filtering out by pattern
+          for (Annotation t : tokens) {            
+            for (Annotation p: t.all(posLayerId)) {
+              p.destroy();
+            } // next pos tag
           } // next token
+          
+          if (tokenExclusionPattern.length() > 0) {
+            final Pattern exclude = Pattern.compile(tokenExclusionPattern);
+            tokens = Arrays.stream(tokens).filter(t->!exclude.matcher(t.getLabel()).matches())
+              .toArray(Annotation[]::new);
+          }
 
-          String text = Arrays.stream(tokens)
-            .map(token -> token.getLabel())
-            .collect(Collectors.joining(" "));
-          List<List<HasWord>> sentences = MaxentTagger.tokenizeText(new StringReader(text));
-          int t = 0;
-          for (List<HasWord> sentence : sentences) {
-            List<TaggedWord> taggedSentence = tagger.tagSentence(sentence);
-            for (TaggedWord w : taggedSentence) {
-              if (t >= tokens.length) {
-                throw new TransformationException(
-                  this, "Too many tags for tokens. Last token: "
-                  + tokens[t-1]
-                  + ", next POS tag: " + w.tag() + " for word " + w.word());
-              }
-              Annotation token = tokens[t];
-              // skip any tokens with blank labels
-              while (token.getLabel().trim().length() == 0) {
-                token = tokens[++t];
-              }
-              
-              graph.createSubdivision(token, posLayerId, w.tag())
-                .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-              // there can be more than one tag per token
-              // e.g. "I'll" could be tagged "PRP" and "MD"
-              // so we keep a track of how much of the current token has been tagged
-              String untagged = (String)token.get("@untagged");              
-              if (untagged.equals(w.word())) { // finished with this token
-                token.remove("@untagged");
-                t++;
-              } else if (untagged.startsWith(w.word())) { // partial tag
-                token.put("@untagged", untagged.substring(w.word().length()));
-              } else { // something's gone wrong!
-                throw new TransformationException(
-                  this, "Chunk "+chunk.getStart() + "-" + chunk.getEnd()
-                  + ": Unexpected word in result: \"" + w.word() + "\""
-                  +" - was expecting something like: \"" + untagged + "\"."
-                  +" Tagged: " + taggedSentence.stream()
-                  .map(tok->tok.word()+"->"+tok.tag())
-                  .collect(Collectors.joining(" ")));
-              }
+          if (!transcriptIsMainlyTargetLang) { // transcript is wrong language
+            // filter out tokens that aren't phrase-tagged in the target language
+            final Pattern targetLanguage = Pattern.compile(targetLanguagePattern);
+            tokens = Arrays.stream(tokens).filter((token) -> {
+                Annotation phraseLanguage = token.first(phraseLanguageLayerId);
+                if (phraseLanguage == null) return false; // not tagged with a language
+                return targetLanguage.matcher(phraseLanguage.getLabel()).matches();
+              }).toArray(Annotation[]::new);
+          } else if (thereArePhraseTags) { // there are phrase-based language tags
+            // filter out tokens that aren't phrase-tagged in another language
+            final Pattern targetLanguage = Pattern.compile(targetLanguagePattern);
+            tokens = Arrays.stream(tokens).filter((token) -> {
+                Annotation phraseLanguage = token.first(phraseLanguageLayerId);
+                if (phraseLanguage == null) return true; // not tagged with a language
+                return targetLanguage.matcher(phraseLanguage.getLabel()).matches();
+              }).toArray(Annotation[]::new);
+          }
+        
+          setStatus("Tagging chunk "+chunk.getStart() + "-" + chunk.getEnd());
+          if (tokens.length > 0) {
+            
+            // if tokens contain spaces, these are eliminated by the parser
+            // so create a space-stripped version of the label
+            for (Annotation t : tokens) {
+              t.put("@untagged", t.getLabel().replaceAll("\\s",""));
             } // next token
-          } // next sentence          
-        } // there are tokens
-      } // next chunk
+            
+            String text = Arrays.stream(tokens)
+              .map(token -> token.getLabel())
+              .collect(Collectors.joining(" "));
+            List<List<HasWord>> sentences = MaxentTagger.tokenizeText(new StringReader(text));
+            int t = 0;
+            for (List<HasWord> sentence : sentences) {
+              List<TaggedWord> taggedSentence = tagger.tagSentence(sentence);
+              for (TaggedWord w : taggedSentence) {
+                if (t >= tokens.length) {
+                  throw new TransformationException(
+                    this, "Too many tags for tokens. Last token: "
+                    + tokens[t-1]
+                    + ", next POS tag: " + w.tag() + " for word " + w.word());
+                }
+                Annotation token = tokens[t];
+                // skip any tokens with blank labels
+                while (token.getLabel().trim().length() == 0) {
+                  token = tokens[++t];
+                }
+                
+                graph.createSubdivision(token, posLayerId, w.tag())
+                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                // there can be more than one tag per token
+                // e.g. "I'll" could be tagged "PRP" and "MD"
+                // so we keep a track of how much of the current token has been tagged
+                String untagged = (String)token.get("@untagged");              
+                if (untagged.equals(w.word())) { // finished with this token
+                  token.remove("@untagged");
+                  t++;
+                } else if (untagged.startsWith(w.word())) { // partial tag
+                  token.put("@untagged", untagged.substring(w.word().length()));
+                } else { // something's gone wrong!
+                  throw new TransformationException(
+                    this, "Chunk "+chunk.getStart() + "-" + chunk.getEnd()
+                    + ": Unexpected word in result: \"" + w.word() + "\""
+                    +" - was expecting something like: \"" + untagged + "\"."
+                    +" - token: \"" + token.getLabel() + "\" - " + token.getId()
+                    +" Tagged: " + taggedSentence.stream()
+                    .map(tok->tok.word()+"->"+tok.tag())
+                    .collect(Collectors.joining(" ")));
+                }
+              } // next token
+            } // next sentence
+          } // there are tokens
+        } // next chunk
+      } // there are possibly tokens in the right language
       
       return graph;
     } finally {

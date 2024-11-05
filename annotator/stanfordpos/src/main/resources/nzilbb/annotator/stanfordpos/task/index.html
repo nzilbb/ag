@@ -16,15 +16,15 @@
       <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="stanford">
         GNU General Public License</a> (v2 or later). </p>
     
-    <form method="POST" action="setTaskParameters" onsubmit="return testTokenExclusionPattern(true);">
+    <form method="POST" action="setTaskParameters" onsubmit="return testPatterns(true);">
       <div class="field" title="Input layer from which words come">
         <label for="tokenLayerId"> Token Layer </label>
         <span><select id="tokenLayerId" name="tokenLayerId" required></select></span>
       </div>
-      <div class="field" title="Pattern to match tokens that should be excluded from tagging">
+      <div class="field" title="Pattern to match tokens that should be excluded from tagging - e.g. um|ah|mm|.*~">
         <label for="tokenExclusionPattern"> Token Exclusion Pattern </label>
         <span><input id="tokenExclusionPattern" name="tokenExclusionPattern" type="text"
-                     onKeyUp="testTokenExclusionPattern();"
+                     onKeyUp="testPatterns();"
                      placeholder="Regular Expression"></span>
       </div>
       <div class="field"
@@ -57,6 +57,13 @@
             <option>[add new layer]</option>         <!-- allow adding a new layer -->
           </select>
         </span>
+      </div>
+      <div class="field"
+           title="Regular expression for the ISO language codes of the languages to target, or blank for all">
+        <label for="targetLanguagePattern">Target Language Pattern</label>
+        <span><input id="targetLanguagePattern" name="targetLanguagePattern"
+                     onKeyUp="testPatterns();"
+                     type="text" placeholder="Regular Expression"></span>
       </div>
       <div class="field">
         <label>Model to use</label>

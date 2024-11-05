@@ -1,0 +1,28 @@
+<h3>Flat Lexicon Tagger</h3>
+
+<p> This annotator tags words with their part of speech (POS) according to the
+  <a href="https://nlp.stanford.edu/software/tagger.html" target="stanford">Stanford POS Tagger</a>
+  developed by the
+  <a href="https://nlp.stanford.edu/" target="stanford">Stanford Natural Language Processing Group</a>,
+  licensed under the
+  <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="stanford">
+    GNU General Public License</a> (v2 or later). </p>
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>tokenLayerId=orthography&chunkLayerId=turn&posLayerId=pos&model=english-caseless-left3words-distsim.tagger</samp> </p>
+
+<p> Parameters are: </p>
+<dl>
+  <dt> tokenLayerId </dt> <dd> Input layer from which words come. </dd>
+  <dt> transcriptLanguageLayerId </dt> <dd> Transcript attribute for overall language. </dd>
+  <dt> phraseLanguageLayerId </dt> <dd> Layer for annotating phrases in a different
+    language. </dd> 
+  <dt> targetLanguagePattern </dt> <dd> Regular expression for the ISO language codes
+    of the languages to target, or blank for all. </dd> 
+  <dt> posLayerId </dt> <dd> Output layer on which part of speech annotations are added. </dd>
+  <dt> model </dt> <dd> Which part-of-speech model to use.
+    Invoke StanfordPosTagger's <tt>availableModels</tt> endpoint for a JSON-encoded list of
+    valid models.</dd> 
+  <dt> tokenExclusionPattern </dt> <dd> Pattern to match tokens that should be excluded
+    from tagging - e.g. um|ah|mm|.*~ </dd> 
+</dl>
