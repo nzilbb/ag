@@ -2482,8 +2482,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     //   }
     //   sAnnotationTag = "REF_ANNOTATION";
     // } // not top level
-    if (layer.getSaturated()
-        && layer.getAlignment() == Constants.ALIGNMENT_NONE
+    if (layer.getAlignment() == Constants.ALIGNMENT_NONE
         && dominatingLayer.getId().equals(wordLayer.getId())) { // word tag layer
       sAnnotationTag = "REF_ANNOTATION";
       if (layer.getPeers()) {
