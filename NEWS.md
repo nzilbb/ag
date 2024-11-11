@@ -1,3 +1,10 @@
+# nzilbb.ag 1.2.2
+
+- Larger buffer for downloads.
+- Ensure ARPAbet label definitions result in correct interpretations tweaking definition order.
+
+For LaBB-CAT version 20241111.1200
+
 # nzilbb.ag 1.2.1
 
 For LaBB-CAT version 20241015.1456
