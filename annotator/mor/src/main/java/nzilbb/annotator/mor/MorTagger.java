@@ -155,7 +155,7 @@ public class MorTagger extends Annotator {
               new IntConsumer() { public void accept​(int value) {
                 setPercentComplete(value / 5); }});
           }
-          setStatus("Upzipping " + zip.getName());
+          setStatus("Unzipping " + zip.getName());
           IO.Unzip(
             zip, getWorkingDirectory(),
             new IntConsumer() { public void accept​(int value) {
