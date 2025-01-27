@@ -1010,7 +1010,7 @@ public class TestPatternTagger {
          .toString(); // concatenate elements
       
       assertEquals("Correct tokens tagged",
-                   "[once, upon, a, time, there, was, a, jester, who, told, a, great, joke, "
+                   "[once, upon, a, time, there, was, a, jester., who, told, a, great, joke?, "
                    +"and, then, everyone, lived, happily, ever, after,]", tagged);
    }
 
@@ -1041,7 +1041,7 @@ public class TestPatternTagger {
          +"\"deleteOnNoMatch\":\"false\","
          +"\"destinationLayerId\":\"story\","
          +"\"mappings\":["
-         +" {\"pattern\":\"once upon a time (\\\\w+) (\\\\w+) (\\\\w+) (\\\\w+)"
+         +" {\"pattern\":\"once upon a time (\\\\w+) (\\\\w+) (\\\\w+) (\\\\w+)\\\\.?"
          +" (.+) happily ever after\",\"label\":\"story about $3 $4\"}"
          +"]}");
       
@@ -1107,7 +1107,7 @@ public class TestPatternTagger {
          .toString(); // concatenate elements
       
       assertEquals("Correct tokens tagged",
-                   "[once, upon, a, time, there, was, a, jester, who, told, a, great, joke, "
+                   "[once, upon, a, time, there, was, a, jester., who, told, a, great, joke?, "
                    +"and, then, everyone, lived, happily, ever, after,]", tagged);
    }
 
@@ -1203,10 +1203,121 @@ public class TestPatternTagger {
          .toString(); // concatenate elements
       
       assertEquals("Correct tokens tagged",
-                   "[once, upon, a, time, there, was, a, jester, who, told, a, great, joke, "
+                   "[once, upon, a, time, there, was, a, jester., who, told, a, great, joke?, "
                    +"and, then, everyone, lived, happily, ever, after,]", tagged);
    }
    
+   /* Test c-unit style tagging, i.e. partitioning by punctuation */
+   @Test public void punctuationBasedTagging() throws Exception {
+      PatternTagger annotator = new PatternTagger();
+      //annotator.getStatusObservers().add(m->System.out.println(m));
+      
+      Graph g = spanGraph();
+      g.trackChanges();
+      Schema schema = g.getSchema();
+      
+      // pre-add the output layer (there's another test that for its creation)
+      schema.addLayer(
+         new Layer("story")
+         .setAlignment(Constants.ALIGNMENT_INTERVAL)
+         .setPeers(true)
+         .setParentId(schema.getTurnLayerId())
+         .setType(Constants.TYPE_STRING));
+      
+      annotator.setSchema(schema);
+      
+      // use specified configuration
+      annotator.setTaskParameters(
+         "{\"sourceLayerId\":\"word\","
+         +"\"transcriptLanguageLayerId\":null," // no transcript language layer
+         +"\"phraseLanguageLayerId\":\"\","     // null phrase language layer
+         +"\"language\":\"\","
+         +"\"verbose\":true,"
+         +"\"deleteOnNoMatch\":\"false\","
+         +"\"destinationLayerId\":\"story\","
+         +"\"mappings\":["
+         +" {\"pattern\":\".*?([,.?!])\",\"label\":\"$1\"}"
+         +"]}");
+      
+      assertEquals("token layer",
+                   "word", annotator.getSourceLayerId());
+      assertNull("transcript language layer",
+                 annotator.getTranscriptLanguageLayerId());
+      assertNull("phrase language layer",
+                 annotator.getPhraseLanguageLayerId());
+      assertEquals("output layer",
+                   "story", annotator.getDestinationLayerId());
+      assertNotNull("output layer was created",
+                    schema.getLayer(annotator.getDestinationLayerId()));
+      assertEquals("output layer child of turn",
+                    "turn", schema.getLayer(annotator.getDestinationLayerId()).getParentId());
+      assertEquals("output layer aligned",
+                   Constants.ALIGNMENT_INTERVAL,
+                   schema.getLayer(annotator.getDestinationLayerId()).getAlignment());
+      assertEquals("output layer type correct",
+                   Constants.TYPE_STRING,
+                   schema.getLayer(annotator.getDestinationLayerId()).getType());
+      assertTrue("output layer allows peers",
+                 schema.getLayer(annotator.getDestinationLayerId()).getPeers());
+      assertEquals("language ok",
+                   "", annotator.getLanguage());
+      assertFalse("deleteOnNoMatch ok",
+                  annotator.getDeleteOnNoMatch());
+      Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+         .collect(Collectors.toSet());
+      assertEquals("2 required layer: "+requiredLayers,
+                   2, requiredLayers.size());
+      assertTrue("word required "+requiredLayers,
+                 requiredLayers.contains("word"));
+      assertTrue("turn required "+requiredLayers,
+                 requiredLayers.contains("turn"));
+      String outputLayers[] = annotator.getOutputLayers();
+      assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                   1, outputLayers.length);
+      assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                   "story", outputLayers[0]);
+
+      Annotation firstWord = g.first("word");
+      assertEquals("double check the first word is what we think it is: "+firstWord,
+                   "ok,", firstWord.getLabel());
+      
+      assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                   37, g.all("word").length);
+      assertEquals("double check there are no annotations: "+Arrays.asList(g.all("story")),
+                   0, g.all("story").length);
+      // run the annotator
+      annotator.transform(g);
+      Annotation[] annotations = g.all("story");
+
+      String[] labels = { ",", ".", "?", ",", "?", "?", "?"};
+      String[] units = {
+        "[ok,]",
+        "[once, upon, a, time, there, was, a, jester.]",
+        "[who, told, a, great, joke?]",
+        "[and, then, everyone, lived, happily, ever, after,]",
+        "[do, you, want, to, hear, it?]",
+        // "knock knock" not tagged because there's no punctuation
+        "[who's, there?]",
+        // "dejav" not tagged because there's no punctuation
+        "[dejav, who?]"};
+
+      for (int i = 0; i < annotations.length; i++) {
+        Annotation tag = annotations[i];
+        assertEquals("Annotation "+i+" label correct", labels[i], tag.getLabel());
+        assertEquals("First annotation marked for creation",
+                     Change.Operation.Create, tag.getChange());      
+        String tagged = Arrays.stream(tag.all("word")) // stream of Annotation
+          .map(annotation->annotation.getLabel()) // stream of String
+          .collect(Collectors.toList()) // List of String
+          .toString(); // concatenate elements
+        assertEquals("Annotation "+i+": Correct tokens tagged",
+                     units[i], tagged);
+      } // next annotation
+      
+      assertEquals("Correct number of tokens "+Arrays.asList(annotations),
+                   labels.length, annotations.length);
+   }
+
    /* Test tagging across turn boundaries */
    @Test public void spanTagging() throws Exception {
       PatternTagger annotator = new PatternTagger();
@@ -1370,7 +1481,7 @@ public class TestPatternTagger {
          .setStart(aPunchline).setEnd(end)
          .setParent(jester));
       g.createTag(story, "utterance",
-               "ok, once upon a time there was a jester who told a great joke"
+               "ok, once upon a time there was a jester. who told a great joke?"
                +" and then everyone lived happily ever after, do you want to hear it?");
       g.createTag(ok, "utterance",         "ok");
       g.createTag(knockKnock, "utterance", "knock knock");

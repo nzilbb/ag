@@ -1,0 +1,95 @@
+<h3>Pattern Tagger</h3>
+
+<p> This annotator generates new annotations by matching a list of regular expressions
+  against annotations on a selected layer; the first pattern that matches is used to tag
+  the annotation. </p> 
+
+<p> Configuration parameters are encoded as a JSON string, e.g. <br>
+  <pre>{
+  "sourceLayerId":"word",
+  "deleteOnNoMatch":"false",
+  "destinationLayerId":"pause",
+  "mappings":[
+    {"pattern":"mm+","label":"mm"},
+    {"pattern":"a+h+","label":"ah"}
+  ]
+}</pre>
+</p>
+
+<p> Parameters are: </p>
+<dl>
+  <dt> sourceLayerId </dt> <dd> Input layer from which matches for the regular expressions come. </dd>
+  <dt> transcriptLanguageLayerId </dt> <dd> Transcript attribute for overall language, so the
+    annotator can avoid tagging transcripts in the wrong language.
+    (Only applicable if sourceLayerId is a word layer.)</dd>
+  <dt> phraseLanguageLayerId </dt> <dd> Layer for annotating phrases in a different
+    language, so the annotator can avoid tagging word tokens in the wrong language.
+    (Only applicable if sourceLayerId is a word layer.)</dd> 
+  <dt> destinationLayerId </dt> <dd> This is the layer that new annotations will be added to. </dd>
+  <dt> mappings </dt> <dd> an ordered list of regular expressions to match against, 
+    and what the label should be if matched.
+    If both your sourceLayerId and destinationLayerId identify are word layers, these patterns
+    will be applied to each word individually.
+    If sourceLayerId identifies a word layer and your destinationLayerId identifies a
+    phrase (or span) layer, these patterns will be applied to the words concatenated together with
+    intervening spaces, one speaker-turn at a time (or for the whole transcript if
+    destinationLayerId is a span layer).
+    This is an array of JSON objects with the following attributes: <ul>
+      <li><q>pattern</q> - The regular expression to try to match.</li>
+      <li><q>label</q> - The label to use if the pattern matches. This can include
+        'captured group' expressions like <tt>$1</tt> to copy parts of the matched source label,
+        or it can copy a label from a different layer - e.g. "Copy from layer: orthography" will
+        result in the label being the same as what's on the orthography layer for this token.</li></ul></dd> 
+  <dt> deleteOnNoMatch </dt> <dd> boolean setting for whether any existing annotation on the
+    target layer should be deleted. </dd>
+</dl>
+
+<h4> Examples </h4>
+
+<p>Tag filled pauses like "um", "ah", "er", etc. on a word layer called "pause":</p>
+  <pre>{
+  "sourceLayerId":"orthography",
+  "deleteOnNoMatch":"false",
+  "destinationLayerId":"pause",
+  "mappings":[
+    {"pattern":"[ua]+h*m+","label":"um"},
+    {"pattern":"e+r*m+","label":"um"},
+    {"pattern":"mm+","label":"mm"},
+    {"pattern":"e+r+","label":"er"},
+    {"pattern":"a+h+","label":"ah"}
+  ]
+}</pre>
+
+<p>Copy any pronunciation tags from the "pronounce" word layer to the "phonemes" word layer,
+without deleting any other phoneme tags that might already be there:</p>
+<pre>{
+  "sourceLayerId":"pronounce",
+  "destinationLayerId":"phonemes",
+  "deleteOnNoMatch":false,
+  "mappings":[
+    {"pattern":".*","label":"$0"}
+  ]
+}</pre>
+
+<p>Annotate the 'fairy story' portion of a transcript -
+  i.e. the section starting "once upon a time" and ending "happily ever after" -
+  by adding an annotation labelled "story" to a span layer called "fairyStory"".</p>
+<pre>{
+  "sourceLayerId":"orthography",
+  "destinationLayerId":"fairyStory",
+  "deleteOnNoMatch":true,
+  "mappings":[
+  {"pattern":"once upon a time .* happily ever after","label":"story"}
+  ]
+}</pre>
+
+<p>Annotate groups of words that make up syntactically complete 'c-units' based on the
+  punctuation mark used to terminate them, on a phrase layer called "CUnit".</p>
+<pre>{
+  "sourceLayerId":"word",
+  "destinationLayerId":"CUnit",
+  "deleteOnNoMatch":true,
+  "mappings":[
+  {"pattern":".*?([.?>^])","label":"$1"}
+  ]
+}</pre>

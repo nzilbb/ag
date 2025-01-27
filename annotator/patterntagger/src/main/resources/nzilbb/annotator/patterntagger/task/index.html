@@ -91,6 +91,16 @@
         
         <p> You can use capturing groups in your regular expressions, to copy parts of the
           matching annotation to the target layer. </p>
+
+        <p> e.g. to partition turns grammatically sentences using punctutation: </p>
+        <ul>
+          <li> set <i>word</i> as the source layer (<i>orthography</i> has punctuation stripped
+            out, so won't work), </li>
+          <li> add the pattern <tt>.*?([.?!])</tt> to match phrases ending in a full-stop,
+            question mark, or exclamation mark, </li>
+          <li> and specify <tt>$1</tt> after the <big>&darr;</big>, to set the punction mark used
+            as the label for the phrase annotation.</li>
+        </ul>
         
         <p> More details about regular expression syntax are given in
           the <a href="#regex">Regular expression help</a> below. </p>
@@ -161,15 +171,29 @@
           identify all instances of the expression <q>kind of thing</q>. </p>  
         
         <p>To do this, you would, you would configure an annotator task with the following regular
-          expressions applied to the <i> orthography </i> layer to create new annotations on
+          expression applied to the <i> orthography </i> layer to create new annotations on
           a new <i> ellipsis </i> phrase layer: </p>
         <table style="margin: auto;">
           <tr><th> Regular Expression </th> <td> </td> <th> Label </th></tr>        
           <tr><td><code> kind(a|( of)) thing</code></td><td>→</td><td> ... </td></tr>
         </table>
         
-        <p> The result would be that every instance the sequence of words <q>kind of thing</q> or
-          <q>kinda thing</q> would be tagged with <q>...</q>. </p>
+        <p> The result would be that every instance of the sequence of words <q>kind of thing</q>
+          or <q>kinda thing</q> would be tagged with <q>...</q>. </p>
+
+        <p> Or you may want to tag grammatically complete units like sentences, questions,
+          by punctuation. </p>
+        <p>To do this, you would, you would configure an annotator task with the following regular
+          expressions applied to the <i> word </i> layer (not <i> orthography </i> which has
+          punctuation stripped out) to create new annotations on
+          a new <i> sentence </i> phrase layer: </p>
+        <table style="margin: auto;">
+          <tr><th> Regular Expression </th> <td> </td> <th> Label </th></tr>        
+          <tr><td><code>.*?([.?>^])</code></td><td>→</td><td> $1 </td></tr>
+        </table>
+
+        <p> The result would be that every sequence of words ending in full-stop, question mark,
+          or exclamation mark will be labelled with the punctuation mark used. </p>        
         
       </details>
       <details><summary><b><a name="regex">Regular expression help</a></b></summary>

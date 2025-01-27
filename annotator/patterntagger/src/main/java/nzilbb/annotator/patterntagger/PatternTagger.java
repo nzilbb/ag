@@ -207,6 +207,23 @@ public class PatternTagger extends Annotator {
     * used if it doesn't exist yet. 
     */
    public PatternTagger setDestinationLayerParentId(String newDestinationLayerParentId) { destinationLayerParentId = newDestinationLayerParentId; return this; }
+  
+  /**
+   * Whether to output extra logging.
+   * @see #getVerbose()
+   * @see #setVerbose(boolean)
+   */
+  protected boolean verbose = false;
+  /**
+   * Getter for {@link #verbose}: Whether to output extra logging.
+   * @return Whether to output extra logging.
+   */
+  public boolean getVerbose() { return verbose; }
+  /**
+   * Setter for {@link #verbose}: Whether to output extra logging.
+   * @param newVerbose Whether to output extra logging.
+   */
+  public PatternTagger setVerbose(boolean newVerbose) { verbose = newVerbose; return this; }
    
    /**
     * Sets the configuration for a given annotation task.
@@ -540,7 +557,7 @@ public class PatternTagger extends Annotator {
 
          // now that we've got some text to match against, start matching
          String sFinalText = sText.toString();
-         //if (debug) setStatus("Matching against: " + sFinalText);
+         if (verbose) setStatus("Matching against: " + sFinalText);
          Annotation[] textAnnotations = textGraph.all("||");
          for (Mapping mapping : mappings) {
             if (isCancelling()) break;
@@ -554,10 +571,12 @@ public class PatternTagger extends Annotator {
                }
                setStatus("Match:" + sMatch + "("+matcher.start()+"-"+matcher.end()+")");
                // find the start annotation
+               int startChar = matcher.start();
+               if (sMatch.startsWith(" ")) startChar++; // skip leading space if any
                int a = 0;
                Annotation anStart = textAnnotations[a];
                for (a = 0; a < textAnnotations.length; a++) {
-                  if (textAnnotations[a].getEnd().getOffset().intValue() >= matcher.start()) {
+                  if (textAnnotations[a].getEnd().getOffset().intValue() >= startChar) {
                      anStart = textAnnotations[a];
                      break;
                   }
@@ -575,7 +594,7 @@ public class PatternTagger extends Annotator {
                anStart = (Annotation)anStart.get("||");
                anEnd = (Annotation)anEnd.get("||");
                
-               //if (debug) setStatus("From " + anStart + " to " + anEnd);
+               if (verbose) setStatus("From " + anStart + " to " + anEnd);
                
                // create an annotation on our layer that spans
                // the start and end annotations
@@ -590,7 +609,7 @@ public class PatternTagger extends Annotator {
                   linkingAnnotations.retainAll(anEnd.getEnd().endOf(destinationLayerId));
                   if (linkingAnnotations.size() > 0) {
                      annotation = linkingAnnotations.iterator().next();
-                     //if (debug) setStatus("Updating " + annotation);
+                     if (verbose) setStatus("Updating " + annotation);
                      updatedAnnotationCount++;
                   }
                }
@@ -599,11 +618,11 @@ public class PatternTagger extends Annotator {
                      anStart.getStart(), anEnd.getEnd(), destinationLayerId, mapping.label,
                      parent);
                   newAnnotationCount++;
-                  //if (debug) setStatus("Added annotation: " + annotation);
+                  if (verbose) setStatus("Added annotation: " + annotation);
                }
                if (annotation.getLabel().indexOf('$') >= 0) { // group substitution
                   annotation.setLabel(
-                     sText.substring(matcher.start(), matcher.end())
+                     sText.substring(startChar, matcher.end())
                      .replaceAll(pattern.toString(), annotation.getLabel()));
                }
                annotation.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
