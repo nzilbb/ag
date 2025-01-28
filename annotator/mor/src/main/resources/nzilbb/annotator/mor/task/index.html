@@ -138,11 +138,18 @@
         <label for="tokenLayerId"> Token Layer </label>
         <span><select id="tokenLayerId" name="tokenLayerId" required></select></span>
       </div>
-      <div class="field" title="Transcript attribute for overall language, used to determin which grammar to use">
+      <div class="field" title="Transcript attribute for overall language, used to determine which grammar to use">
         <label for="languagesLayerId"> Language Attribute </label>
         <span>
           <select id="languagesLayerId" name="languagesLayerId">
             <option value="">[none]</option>
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Layer for chunking words into utterances for MOR to parse">
+        <label for="utteranceLayerId"> Utterance Partition Layer </label>
+        <span>
+          <select id="utteranceLayerId" name="utteranceLayerId">
           </select>
         </span>
       </div>

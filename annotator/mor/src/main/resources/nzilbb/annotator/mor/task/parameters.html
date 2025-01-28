@@ -1,0 +1,33 @@
+<h3>MOR Tagger</h3>
+
+<p> This annotator tags words with morphosyntactic codes according to
+  <a target="mor" href="https://doi.org/10.21415/T5B97X">MOR</a>,
+  a tool developed for the
+  <a target="mor" href="https://talkbank.org/">TalkBank project</a>. </p> 
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>morLayerId=mor&amp;splitMorTagGroups=true&amp;splitMorWordGroups=true</samp></p>
+
+<p> Parameters are: </p>
+<dl>
+  <dt> tokenLayerId </dt> <dd> Input layer from which words come. </dd>
+  <dt> languagesLayerId </dt> <dd> Transcript attribute for overall language, used
+    to determine which grammar to use.</dd>
+  <dt> utteranceLayerId </dt> <dd> Layer for chunking words into utterances for MOR to parse.
+    if not specified, the default 'utterance' layer will be used.</dd> 
+  <dt> morLayerId </dt> <dd> Output layer on which complete MOR tags are added. </dd>
+  <dt> splitMorTagGroups </dt> <dd> Whether to split alternative MOR taggings into separate
+    annotations. Value should be "on" for <tt>true</tt>, and the parameter
+    should be absent to indicate <tt>false</tt>. </dd> 
+  <dt> splitMorWordGroups </dt> <dd> Split MOR word groups into separate annotations.
+    Value should be "on" for <tt>true</tt>, and the parameter
+    should be absent to indicate <tt>false</tt>. </dd> 
+  <dt> prefixLayerId </dt> <dd> Output layer for prefixes in MOR tags. </dd> 
+  <dt> partOfSpeechLayerId </dt> <dd> Output layer for parts-of-speech in MOR tags. </dd> 
+  <dt> partOfSpeechSubcategoryLayerId </dt> <dd> Output layer for part-of-speech subcategories
+    in MOR tags. </dd> 
+  <dt> stemLayerId </dt> <dd> Output layer for stems in MOR tags. </dd> 
+  <dt> fusionalSuffixLayerId </dt> <dd> Output layer for fusional suffixes in MOR tags. </dd> 
+  <dt> suffixLayerId </dt> <dd> Output layer for (non-fusional) suffixes in MOR tags. </dd> 
+  <dt> glossLayerId </dt> <dd> Output layer for English glosses in MOR tags. </dd> 
+</dl>

@@ -37,6 +37,15 @@ getSchema(s => {
   // select the first one by default
   languagesLayerId.selectedIndex = 1;
   
+  // populate the utterance layer...    
+  var utteranceLayerId = document.getElementById("utteranceLayerId");
+  addLayerOptions(
+    utteranceLayerId, schema,
+    layer => layer.parentId == schema.turnLayerId && layer.alignment == 2
+      && layer.id != schema.wordLayerId);
+  // schema's utterance layer by default
+  utteranceLayerId.value = schema.utteranceLayerId;
+  
   // populate layer output select options...          
   var morLayerId = document.getElementById("morLayerId");
   addLayerOptions(
@@ -91,7 +100,7 @@ getSchema(s => {
   getText("getTaskParameters", text => {
     try {
       if (!text) { // default config 
-        text = "splitMorTagGroups=true&splitMorWordGroups=true&morLayerId=mor";
+        text = "morLayerId=mor&splitMorTagGroups=true&splitMorWordGroups=true&utteranceLayerId=utterance";
       }
       var parameters = new URLSearchParams("?"+text);
       
@@ -99,14 +108,14 @@ getSchema(s => {
       // (this assumes bean property names match input id's in the form above)
       for (const [key, value] of parameters) {
         var control = document.getElementById(key);
-        if (control) {
+        if (control) {          
           if (/.*LayerId$/.test(key)) {
             control.value = value;
-            
+
             // if there's a layer defined
             if (value
                 // but it's not in the schema
-                && !schema.layers[value]) {
+                && !schema.layers[value]) { 
               
               // add it to the list
               var select = document.getElementById(key);
@@ -123,7 +132,6 @@ getSchema(s => {
           }
         } // setting has a control
       } // next parameter
-      
       
       // if there's no mor layer defined
       if (morLayerId.selectedIndex == 0

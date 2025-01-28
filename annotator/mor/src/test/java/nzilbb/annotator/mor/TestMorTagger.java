@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -88,6 +88,8 @@ public class TestMorTagger {
     
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
+    assertEquals("utterance layer",
+                 "utterance", annotator.getUtteranceLayerId());
     assertEquals("transcript language layer",
                  "transcript_language", annotator.getLanguagesLayerId());
     assertEquals("mor layer",
@@ -179,7 +181,7 @@ public class TestMorTagger {
     assertEquals("double check there are no mores: "+Arrays.asList(g.all("mor")),
                  0, g.all("mor").length);
     // run the annotator
-    annotator.getStatusObservers().add(s->System.out.println(s));
+    //annotator.getStatusObservers().add(s->System.out.println(s));
     annotator.transform(g);
     List<Annotation> morAnnotations = Arrays.stream(g.all("mor"))
       .collect(Collectors.toList());
@@ -346,7 +348,7 @@ public class TestMorTagger {
     Schema schema = g.getSchema();
     annotator.setSchema(schema);
     
-    // use default configuration
+    // use specific configuration
     annotator.setTaskParameters(
       "tokenLayerId=word"
       +"&languagesLayerId=transcript_language"
@@ -363,6 +365,8 @@ public class TestMorTagger {
                  "transcript_language", annotator.getLanguagesLayerId());
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
+    assertEquals("utterance layer",
+                 "utterance", annotator.getUtteranceLayerId());
     assertNull("no mor layer",
                annotator.getMorLayerId());
     assertNull("no prefix layer",
@@ -544,6 +548,7 @@ public class TestMorTagger {
     annotator.setTaskParameters(
       "tokenLayerId=token"
       +"&languagesLayerId=transcript_language"
+      +"&utteranceLayerId=utterance"
       +"&morLayerId="
       +"&prefixLayerId="
       +"&partOfSpeechLayerId=part-of-speech"
@@ -555,6 +560,8 @@ public class TestMorTagger {
     
     assertEquals("token layer",
                  "token", annotator.getTokenLayerId());
+    assertEquals("utterance layer",
+                 "utterance", annotator.getUtteranceLayerId());
     assertEquals("transcript language layer",
                  "transcript_language", annotator.getLanguagesLayerId());
     assertNull("no mor layer",
@@ -605,7 +612,7 @@ public class TestMorTagger {
                requiredLayers.contains("participant"));
     assertTrue("turns required "+requiredLayers,
                requiredLayers.contains("turn"));
-    assertTrue("utterances required "+requiredLayers,
+    assertTrue("Utterance required "+requiredLayers,
                requiredLayers.contains("utterance"));
     assertTrue("word required "+requiredLayers,
                requiredLayers.contains("word"));
@@ -673,6 +680,135 @@ public class TestMorTagger {
     assertEquals("my", "my", mors.next().getLabel());
     assertEquals("blogging-morting", "bloggingmorting", mors.next().getLabel());
     assertEquals("lazily", "laze", mors.next().getLabel());
+
+    // ensure all word children are inside the word bounds
+    for (Annotation word : g.all("word")) {
+      for (String l : word.getAnnotations().keySet()) {
+        for (Annotation tag : word.getAnnotations().get(l)) {
+          assertTrue(
+            "word " + word.getId() + " ("+word.getStart()+"-"+word.getEnd()+")"
+            +" contains "+l+" child "+tag.getId() + " ("+tag.getStart()+"-"+tag.getEnd()+")",
+            word.includes(tag));
+        } // next child 
+      } // next child layer
+    } // next word
+  }
+
+  /** Configuring a different utterance layer works */
+  @Test public void otherUtteranceLayer() throws Exception {
+        
+    Graph g = graph();
+    g.trackChanges();
+    Schema schema = g.getSchema();
+
+    annotator.setSchema(schema);
+    // annotator.getStatusObservers().add(s->System.out.println(s));
+    
+    // use default configuration
+    annotator.setTaskParameters(
+      "tokenLayerId=word"
+      +"&languagesLayerId=transcript_language"
+      +"&utteranceLayerId=CUnit"
+      +"&morLayerId=mor"
+      +"&prefixLayerId="
+      +"&partOfSpeechLayerId="
+      +"&partOfSpeechSubcategoryLayerId="
+      +"&stemLayerId="
+      +"&fusionalSuffixLayerId="
+      +"&suffixLayerId="
+      +"&glossLayerId=");
+    
+    assertEquals("token layer",
+                 "word", annotator.getTokenLayerId());
+    assertEquals("CUnit layer",
+                 "CUnit", annotator.getUtteranceLayerId());
+    assertEquals("transcript language layer",
+                 "transcript_language", annotator.getLanguagesLayerId());
+    assertEquals("mor layer",
+                 "mor", annotator.getMorLayerId());
+    assertNotNull("mor layer was created",
+                  schema.getLayer(annotator.getMorLayerId()));
+    assertEquals("mor layer child of word",
+                 "word", schema.getLayer(annotator.getMorLayerId()).getParentId());
+    assertEquals("mor layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 schema.getLayer(annotator.getMorLayerId()).getAlignment());
+    assertEquals("mor layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getMorLayerId()).getType());
+    assertTrue("mor layer allows peers", // contractions like "I'll" might have two tags
+                schema.getLayer(annotator.getMorLayerId()).getPeers());
+    assertNull("no prefix layer",
+               annotator.getPrefixLayerId());
+    assertNull("no subcategory layer",
+               annotator.getPartOfSpeechSubcategoryLayerId());
+    assertNull("no fusionalSuffixLayerId layer",
+               annotator.getFusionalSuffixLayerId());
+    assertNull("no suffix layer",
+               annotator.getSuffixLayerId());
+    assertNull("no gloss layer",
+               annotator.getGlossLayerId());
+    assertNull("no pos layer",
+               annotator.getPartOfSpeechLayerId());
+    assertNull("no stem layer",
+               annotator.getStemLayerId());
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("Required layers: "+requiredLayers,
+                 5, requiredLayers.size());
+    assertTrue("participants required "+requiredLayers,
+               requiredLayers.contains("participant"));
+    assertTrue("turns required "+requiredLayers,
+               requiredLayers.contains("turn"));
+    assertTrue("CUnit required "+requiredLayers,
+               requiredLayers.contains("CUnit"));
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    assertTrue("transcript_language required "+requiredLayers,
+               requiredLayers.contains("transcript_language"));
+    Set<String> outputLayers = Arrays.stream(annotator.getOutputLayers())
+      .collect(Collectors.toSet());;
+    assertEquals("MOR as output layers: "+outputLayers,
+                 1, outputLayers.size());
+    assertTrue("output layers include mor", outputLayers.contains("mor"));
+    
+    Annotation firstWord = g.first("word");
+    assertEquals("double check the first word is what we think it is: "+firstWord,
+                 "I'll", firstWord.getLabel());
+      
+    assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                 9, g.all("word").length);
+    assertEquals("double check there are no POSes: "+Arrays.asList(g.all("part-of-speech")),
+                 0, g.all("part-of-speech").length);
+    // run the annotator
+    annotator.transform(g);
+    List<Annotation> morAnnotations = Arrays.asList(g.all("mor"));
+    assertEquals("Correct number of tokens (non-CUnit and disfluent w~ is skipped) "
+                 +morAnnotations,
+                 7, morAnnotations.size());
+    Iterator<Annotation> mors = morAnnotations.iterator();
+    assertEquals("I'll", "pro:sub|I", mors.next().getLabel());
+    assertEquals("I'll", "mod|will", mors.next().getLabel());
+    assertEquals("sing", "v|sing", mors.next().getLabel());
+    assertEquals("walk", "n|walk", mors.next().getLabel());
+    assertEquals("about", "prep|about", mors.next().getLabel());
+    assertEquals("my", "det:poss|my", mors.next().getLabel());
+    assertEquals("blogging-morting", "?|bloggingmorting", mors.next().getLabel());
+
+    mors = morAnnotations.iterator();
+    String[] wordLabels = {
+      "I'll", 
+      "I'll", 
+      "sing .",
+      "walk -", 
+      "about", 
+      "my", 
+      "blogging-morting"
+    };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], mors.next().first("word").getLabel());
+    }
 
     // ensure all word children are inside the word bounds
     for (Annotation word : g.all("word")) {
@@ -757,6 +893,9 @@ public class TestMorTagger {
       new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(true)
       .setParentId("turn").setParentIncludes(true),
+      new Layer("CUnit", "Alternative chunking").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
       new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true));
@@ -817,6 +956,20 @@ public class TestMorTagger {
                     .setStart(g.getOrCreateAnchorAt(80)).setEnd(
                       g.getOrCreateAnchorAt(90, Constants.CONFIDENCE_MANUAL))
                     .setParent(turn));
+
+    // alternative chunking of utterances...
+
+    // I'll sing
+    g.addAnnotation(new Annotation().setLayerId("CUnit").setLabel(".")
+                    .setStart(g.getOrCreateAnchorAt(10, Constants.CONFIDENCE_MANUAL)).setEnd(
+                      g.getOrCreateAnchorAt(30, Constants.CONFIDENCE_MANUAL))
+                    .setParent(turn));
+    // walk about my blogging-morting (excludes "lazily")
+    g.addAnnotation(new Annotation().setLayerId("CUnit").setLabel(".")
+                    .setStart(g.getOrCreateAnchorAt(45, Constants.CONFIDENCE_MANUAL)).setEnd(
+                      g.getOrCreateAnchorAt(80, Constants.CONFIDENCE_MANUAL))
+                    .setParent(turn));
+    
     return g;
   } // end of graph()
   

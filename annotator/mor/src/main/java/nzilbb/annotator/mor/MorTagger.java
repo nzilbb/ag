@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -67,7 +67,7 @@ import nzilbb.util.ISO639;
 @UsesFileSystem
 public class MorTagger extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.2.1"; }
+  public String getMinimumApiVersion() { return "1.2.3"; }
   
   /**
    * Runs any processing required to uninstall the annotator.
@@ -352,6 +352,28 @@ public class MorTagger extends Annotator {
   public MorTagger setTokenLayerId(String newTokenLayerId) { tokenLayerId = newTokenLayerId; return this; }
   
   /**
+   * ID of layer used to chunk input tokens for MOR - maybe be the system 'utterance'
+   * layer, or some other phrase layer. 
+   * @see #getUtteranceLayerId()
+   * @see #setUtteranceLayerId(String)
+   */
+  protected String utteranceLayerId;
+  /**
+   * Getter for {@link #utteranceLayerId}: ID of layer used to chunk input tokens for MOR
+   * - maybe be the system 'utterance' layer, or some other phrase layer. 
+   * @return ID of layer used to chunk input tokens for MOR - maybe be the system
+   * 'utterance' layer, or some other phrase layer. 
+   */
+  public String getUtteranceLayerId() { return utteranceLayerId; }
+  /**
+   * Setter for {@link #utteranceLayerId}: ID of layer used to chunk input tokens for MOR
+   * - maybe be the system 'utterance' layer, or some other phrase layer. 
+   * @param newUtteranceLayerId ID of layer used to chunk input tokens for MOR - maybe be
+   * the system 'utterance' layer, or some other phrase layer. 
+   */
+  public MorTagger setUtteranceLayerId(String newUtteranceLayerId) { utteranceLayerId = newUtteranceLayerId; return this; }
+  
+  /**
    * ID of the output layer.
    * @see #getMorLayerId()
    * @see #setMorLayerId(String)
@@ -599,6 +621,9 @@ public class MorTagger extends Annotator {
       } else {
         tokenLayerId = schema.getWordLayerId();
       }
+
+      // default utterance layer
+      utteranceLayerId = schema.getUtteranceLayerId();
       
       // default transcript language layer
       Layer[] candidates = schema.getMatchingLayers(
@@ -700,7 +725,7 @@ public class MorTagger extends Annotator {
         glossLayerId = "morGloss";
       }
         
-    } else {
+    } else {      
       beanPropertiesFromQueryString(parameters);
     }
     
@@ -710,6 +735,19 @@ public class MorTagger extends Annotator {
     } else if (schema.getLayer(tokenLayerId) == null)
       throw new InvalidConfigurationException(
         this, "Word token layer not found: " + tokenLayerId);
+
+    if (utteranceLayerId == null) {
+      // utterance layer was a introduced in version 0.3.0 and might not be specified by parameters
+      utteranceLayerId = schema.getUtteranceLayerId();
+    }
+    Layer utteranceLayer = schema.getLayer(utteranceLayerId);
+    if (utteranceLayer == null) 
+      throw new InvalidConfigurationException(
+        this, "Utterance layer not found: " + utteranceLayerId);
+    else if (utteranceLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL
+             || !schema.getTurnLayerId().equals(utteranceLayer.getParentId())) 
+      throw new InvalidConfigurationException(
+        this, "Utterance layer must be a phrase layer: " + utteranceLayerId);
     
     if (languagesLayerId != null && schema.getLayer(languagesLayerId) == null) 
       throw new InvalidConfigurationException(
@@ -1290,7 +1328,7 @@ public class MorTagger extends Annotator {
     Vector<String> requiredLayers = new Vector<String>();
     requiredLayers.add(schema.getParticipantLayerId());
     requiredLayers.add(schema.getTurnLayerId());
-    requiredLayers.add(schema.getUtteranceLayerId());
+    requiredLayers.add(utteranceLayerId);
     requiredLayers.add(schema.getWordLayerId());
     if (!schema.getWordLayerId().equals(tokenLayerId)) requiredLayers.add(tokenLayerId);
     requiredLayers.add(languagesLayerId);
@@ -1359,7 +1397,13 @@ public class MorTagger extends Annotator {
       
       // save the transcript in CHAT format
       ChatSerialization converter = new ChatSerialization();
-      ParameterSet configuration = converter.configure(new ParameterSet(), schema);
+
+      // ensure serialization uses the utterance partitioning specified by this.utteranceLayerId
+      // (not schema.utteranceLayerId, which might be different)
+      Schema serializationSchema = (Schema)schema.clone(); 
+      serializationSchema.setUtteranceLayerId(utteranceLayerId);
+      
+      ParameterSet configuration = converter.configure(new ParameterSet(), serializationSchema);
       configuration.get("tokenLayer").setValue(
         graph.getSchema().getLayer(tokenLayerId));
       configuration.get("morLayer").setValue(
@@ -1385,7 +1429,12 @@ public class MorTagger extends Annotator {
       configuration.get("splitMorWordGroups").setValue(
         Boolean.valueOf(splitMorWordGroups));
       
-      converter.configure(configuration, schema);
+      configuration = converter.configure(configuration, serializationSchema);
+      // no 'cUnitLayer' setting, even if the schema looks like there is one
+      // e.g. the user might have a layer called "CUnit", which might be set as our
+      // utteranceLayerId for chunking purposes.
+      // If the serializer selects that as 'cUnitLayer' by default, then things break.
+      converter.setCUnitLayer(null);
 
       // remove any existing annotations
       destroyAnnotations(morLayerId, graph);
@@ -1402,11 +1451,12 @@ public class MorTagger extends Annotator {
       String[] fragmentLayers = Stream.concat(
         Arrays.stream(getRequiredLayers()), Arrays.stream(getOutputLayers()))
         .collect(Collectors.toList()).toArray(new String[0]);
-      Annotation[] utterances = graph.all(schema.getUtteranceLayerId());
+      Annotation[] utterances = graph.all(utteranceLayerId);
       int u = 0;
       for (Annotation utterance : utterances) {
         if (isCancelling()) break;
         Graph fragment = graph.getFragment(utterance, fragmentLayers);
+        fragment.setSchema(serializationSchema);
         
         final Vector<SerializationException> exceptions = new Vector<SerializationException>();
         final Vector<NamedStream> serializeStreams = new Vector<NamedStream>();
