@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -93,7 +93,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
    
   // Attributes:
   private ISO639 iso639 = new ISO639(); // for standard ISO 639 language code processing
-  protected Vector<String> warnings;
+  protected Vector<String> warnings = new Vector<String>();
   
   /**
    * Name of the .cha file.
@@ -2206,6 +2206,9 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
     }
     if (errors != null) throw errors;
+
+    // remove temporary "@mor" layer
+    graph.getSchema().getLayers().remove("@mor");
       
     // reset all change tracking
     graph.getTracker().reset();
@@ -2427,11 +2430,14 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     graphCount = graphs.getExactSizeIfKnown();
     graphs.forEachRemaining(graph -> {
         if (getCancelling()) return;
+        this.warnings = new Vector<String>();
         try {
           consumer.accept(serializeGraph(graph, layerIds));
         } catch(SerializationException exception) {
           errors.accept(exception);
         }
+        for (String w : this.warnings) warnings.accept(w);
+        this.warnings.clear();
         consumedGraphCount++;
       }); // next graph
   }
@@ -2695,7 +2701,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       TreeSet<Annotation> utterancesByAnchor
         = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
       for (Annotation u : graph.all(schema.getUtteranceLayerId())) utterancesByAnchor.add(u);
-
+      
       Vector<String> morTags = new Vector<String>();
       for (Annotation utterance : utterancesByAnchor) {
         if (cancelling) break;
@@ -2713,7 +2719,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           Object[] participantLabel = { currentParticipant.getLabel() }; 
           writer.print("*" + participant.first("@code").getLabel() + ":");
         } // participant change
-
+        
         String delimiter = "\t";
         boolean printedSomething = false;
         for (Annotation token : utterance.all(tokenLayer.getId())) {

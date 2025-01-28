@@ -1,0 +1,8 @@
+@Begin
+@Languages:	eng
+@Participants:	INT someone Investigator
+@ID:	||INT|||||Investigator|||
+*INT:	I'll sing . 10000_30000
+%mor:	pro:sub|I~mod|will v|sing .
+%pos:	pro:sub|I~mod|will v|sing .
+@End

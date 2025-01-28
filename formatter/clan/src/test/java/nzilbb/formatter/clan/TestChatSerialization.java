@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -528,6 +528,16 @@ public class TestChatSerialization {
     assertEquals("There are no changes on a deserialized graph " + g.getChanges(),
                  0, g.getChanges().size());
 
+    // there's no "@mor" temporary layer
+    assertNull("The temporary @mor layer has been removed ",
+               g.getLayer("@mor"));
+
+    // all annotations have an ID
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertNotNull("ID is set " + a.getLabel() + " - " + a.getLayerId(),
+                    a.getId());
+    }
+
   }
 
   /** Basic file parsing where annotations are discarded */
@@ -739,7 +749,7 @@ public class TestChatSerialization {
     }
   }
 
-  /* Basic MOR tag parsing. <em>NB</em> the griffin-mor.cha test file is output from MOR that has
+  /** Basic MOR tag parsing. <em>NB</em> the griffin-mor.cha test file is output from MOR that has
    * been manually edited to create test cases that will cover cases not naturally
    * present in this test data. */
   @Test public void deserializeMor()  throws Exception {
@@ -938,10 +948,113 @@ public class TestChatSerialization {
     }
   }
   
-  /* Ignoring MOR tags and pauses; they're still parsed out, but no annotations are
+  /** MOR tag parsing for real MOR output for short file produced by MorTagger. **/
+  @Test public void deserializeShortMor()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "CUnit", "word", // CUnit is the name of the utterance partition layer
+      new Layer("languages", "Graph language", 0, true, true, true),
+      new Layer("who", "Participants", 0, true, true, true),
+      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+      new Layer("CUnit", "C-Units", 2, true, false, false, "turn", true),
+      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+      new Layer("word", "Words", 2, true, false, false, "turn", true),
+      new Layer("mor", "%mor tags")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("gem", "Gems", 2, true, false, true));
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "short-mor.cha")) };
+      
+    // create deserializer
+    ChatSerialization deserializer = new ChatSerialization();
+      
+    // general configuration
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals("MOR layer", "mor",
+                 ((Layer)configuration.get("morLayer").getValue()).getId());
+    assertEquals(40, deserializer.configure(configuration, schema).size());
+    
+    // Ensure the deserializer doesn't confuse "CUnit" as being the cUnitLayer which normally
+    // holds the unit terminator as the label, but here is just used for partitioning lines
+    configuration.get("cUnitLayer").setValue(null);
+    deserializer.configure(configuration, schema);
+    
+    assertEquals("Split MOR tag groups",
+                 Boolean.TRUE, deserializer.getSplitMorTagGroups());
+      
+    // load the stream
+    ParameterSet defaultParamaters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParamaters);
+
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    for (String warning : deserializer.getWarnings()) System.out.println(warning);
+    Graph g = graphs[0];
+
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+
+    // meta data
+    assertEquals("short-mor.cha", g.getId());
+      
+    String[] languages = g.labels("languages"); 
+    assertEquals(1, languages.length);
+    assertEquals("ISO639 alpha3 is converted to alpha2", "en", languages[0]);
+      
+    // participants     
+    assertEquals(1, g.all("who").length);
+    assertEquals("someone", g.getAnnotation("INT").getLabel());
+    assertEquals("who", g.getAnnotation("INT").getLayerId());
+
+    // turns
+    Annotation[] turns = g.all("turn");
+    assertEquals("Number of turns correct", 1, turns.length);
+
+    // utterances
+    Annotation[] utterances = g.all("c-unit");
+    //assertEquals("Number of utterances correct", 1, utterances.length);
+    Annotation[] words = g.all("word");
+    System.out.println(""+Arrays.asList(words));
+    String[] wordLabels = {
+      "I'll", "sing", "." };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+    }
+    for (int i = 0; i < words.length; i++) {
+      assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+                   i+1, words[i].getOrdinal());
+    }
+
+    // morphosyntactic tags
+    Annotation[] mor = g.all("turn")[0].all("mor");
+    String[] morLabels = {
+      "pro:sub|I", "mod|will", "v|sing", "." };
+    String[] taggedWordLabels = {
+      "I'll", "I'll", "sing", "." };
+    for (int i = 0; i < mor.length; i++) {
+      assertEquals("mor labels " + i, morLabels[i], mor[i].getLabel());
+      assertEquals("mor words " + i, taggedWordLabels[i], mor[i].getParent().getLabel());
+    }
+    
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      assertEquals("No change: " + a.getLayer() + ": " + a,
+                   Change.Operation.NoChange, a.getChange());
+    }
+  }
+  
+  /** Ignoring MOR tags and pauses; they're still parsed out, but no annotations are
    * created. <em>NB</em> the griffin-mor.cha test file is output from MOR that has 
    * been manually edited to create test cases that will cover cases not naturally
-   * present in this test data. */
+   * present in this test data. **/
   @Test public void canIgnorePausesAndMor()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -1089,10 +1202,10 @@ public class TestChatSerialization {
     }
   }
 
-  /* MOR tag parsing with tag groups (alternative analyses) split, but not word groups
+  /** MOR tag parsing with tag groups (alternative analyses) split, but not word groups
    * (sub-word components). <em>NB</em> the griffin-mor.cha test file is output from MOR
    * that has been manually edited to create test cases that will cover cases not
-   * naturally present in this test data. */
+   * naturally present in this test data. **/
   @Test public void splitMorTagGroupsNotWordGroups()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -1297,10 +1410,10 @@ public class TestChatSerialization {
 
   }
   
-  /* MOR tag parsing where all components are parsed and generate separate annotations. 
+  /** MOR tag parsing where all components are parsed and generate separate annotations. 
    * <em>NB</em> the griffin-mor.cha test file is output from MOR that has been manually
    * edited to create test cases that will cover cases not naturally present in this test
-   * data. */ 
+   * data. **/ 
   @Test public void splitMorWordGroups()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -1604,7 +1717,7 @@ public class TestChatSerialization {
     }
   }
   
-  /* MOR tag parsing where all components are parsed and generate separate annotations,
+  /** MOR tag parsing where all components are parsed and generate separate annotations,
    * but there's no layer for raw MOR labels. 
    * <em>NB</em> the griffin-mor.cha test file is output from MOR that has been manually
    * edited to create test cases that will cover cases not naturally present in this test
@@ -1873,7 +1986,7 @@ public class TestChatSerialization {
     }
   }
 
-  /* %pos is preferred over %mor for MOR tags.
+  /** %pos is preferred over %mor for MOR tags.
    * <em>NB</em> the griffin-post.cha test file is output from MOR that has been manually
    * edited to create test cases that will cover cases not naturally present in this test
    * data. */ 

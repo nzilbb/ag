@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.clan</artifactId>
   <name>nzilbb.formatter.clan</name>
-  <version>1.2.4</version>
+  <version>1.3.1</version>
 
   <properties>
     <package.path>nzilbb/formatter/clan/</package.path>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.1.0</version>
+      <version>1.2.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
