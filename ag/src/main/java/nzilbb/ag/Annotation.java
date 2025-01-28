@@ -1039,7 +1039,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
     // is it our own layer?
     assert layerId != null : "Annotation.all: layerId != null";
     if (layerId.equals(getLayerId())) {
-      // for now, return ourself - this is true of "transcript", and is probably generally true
+      // for now, return ourself - this is true of "word", and is probably generally true
       // whether it's true of, say "possible-pos" is debatable,
       // and whether it's true of tree-stuctured layers needs to be worked through TODO
       Annotation[] annotations = new Annotation[1];
@@ -1118,7 +1118,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
     // return the first child that t-includes this annotation
     if (commonAncestor != null 
         // common ancestor must be related - i.e. in the layer of commonAncestorLayer
-        && commonAncestor.getLayerId() == commonAncestorLayer.getId()) {
+        && commonAncestor.getLayerId().equals(commonAncestorLayer.getId())) {
       Vector<Annotation> annotations = new Vector<Annotation>();
       for (Annotation child : commonAncestor.all(layerId)) {
         if (child.includes(this) || this.includes(child)) {
