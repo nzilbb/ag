@@ -344,6 +344,285 @@ public class TestEAFSerialization {
     }
   }
 
+  /** Transcript conventions are correctly ignored. */
+  @Test public void noConventions()  throws Exception {    
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("location", "Arbitrary metadata").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("scribe", "Author").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("version_date", "Date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("lang", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("participant_GENDER", "Gender").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("noise", "Noise").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("language", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("lexical", "Lexical").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance.eaf")) };
+      
+    // create deserializer
+    EAFSerialization deserializer = new EAFSerialization();
+      
+    // general configuration
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    assertEquals(11, configuration.size());
+    assertEquals("comment", "comment", 
+                 ((Layer)configuration.get("commentLayer").getValue()).getId());
+    assertEquals("pronounce", "pronounce", 
+                 ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+    assertEquals("lexical", "lexical", 
+                 ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+    assertEquals("noise", "noise", 
+                 ((Layer)configuration.get("noiseLayer").getValue()).getId());
+    assertEquals("author", "scribe", 
+                 ((Layer)configuration.get("authorLayer").getValue()).getId());
+    assertEquals("version_date", "version_date", 
+                 ((Layer)configuration.get("dateLayer").getValue()).getId());
+    assertEquals("transcript language", "lang", 
+                 ((Layer)configuration.get("languageLayer").getValue()).getId());
+    assertEquals("phrase language", "language", 
+                 ((Layer)configuration.get("phraseLanguageLayer").getValue()).getId());
+    assertEquals("useConventions", Boolean.TRUE, 
+                 (Boolean)configuration.get("useConventions").getValue());
+    assertEquals("ignoreBlankAnnotations", Boolean.TRUE, 
+                 (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
+    assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
+                 (Double)configuration.get("minimumTurnPauseLength").getValue());
+      
+    configuration.get("useConventions").setValue(Boolean.FALSE);
+    
+    configuration.get("minimumTurnPauseLength").setValue(Double.valueOf(0.5));
+    assertEquals(11, deserializer.configure(configuration, schema).size());
+    assertEquals("customize minimumTurnPauseLength", Double.valueOf(0.5), 
+                 deserializer.getMinimumTurnPauseLength());
+    assertEquals("disable useConventions", Boolean.FALSE, 
+                 (Boolean)configuration.get("useConventions").getValue());
+
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    //for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals("Number of parameters: " + defaultParameters.values(),
+                 4, defaultParameters.size());
+    assertEquals("utterance mapping", "utterance", 
+                 ((Layer)defaultParameters.get("tier0").getValue()).getId());
+    assertEquals("utterance mapping", "utterance", 
+                 ((Layer)defaultParameters.get("tier1").getValue()).getId());
+    assertEquals("transcript attribute mapping", "location", 
+                 ((Layer)defaultParameters.get("metadata:location").getValue()).getId());
+    assertEquals("participant attribute mapping, case insensitive", "participant_GENDER", 
+                 ((Layer)defaultParameters.get("metadata:Gender").getValue()).getId());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+      
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+      
+    assertEquals("test_utterance.eaf", g.getId());
+
+    // attributes
+    assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
+    assertEquals("language is alpha-2", "en", g.first("lang").getLabel());
+    assertEquals("version date", "2017-08-28T16:48:05-03:00", g.first("version_date").getLabel());
+    assertEquals("metadata", "Flores", g.first("location").getLabel());
+
+    // participants     
+    Annotation[] who = g.all("who");
+    assertEquals(2, who.length);
+    assertEquals("interviewer", who[0].getLabel());
+    assertEquals(g, who[0].getParent());
+    assertEquals("participant", who[1].getLabel());
+    assertEquals(g, who[1].getParent());
+
+    // participant attributes
+    assertEquals("participant attribute - interviewer has correct gender",
+                 "NB", who[0].first("participant_GENDER").getLabel());
+    assertEquals("participant attribute - participant has correct gender",
+                 "F", who[1].first("participant_GENDER").getLabel());
+      
+    // turns
+    Annotation[] turns = g.all("turn");
+    assertEquals(13, turns.length);
+    assertEquals(Double.valueOf(4.675), turns[0].getStart().getOffset());
+    assertEquals(Double.valueOf(6.752), turns[0].getEnd().getOffset());
+    assertEquals("participant", turns[0].getLabel());
+    assertEquals(who[1], turns[0].getParent());
+      
+    assertEquals("turn after long pause not merged back to turn before pause",
+                 Double.valueOf(7.658), turns[1].getStart().getOffset());
+    assertEquals("turn after pause merged back to turn before pause",
+                 Double.valueOf(14.889000000000001), turns[1].getEnd().getOffset());
+    assertEquals("participant", turns[1].getLabel());
+    assertEquals(who[1], turns[1].getParent());
+      
+    assertEquals(Double.valueOf(14.889000000000001), turns[2].getStart().getOffset());
+    assertEquals(Double.valueOf(23.170), turns[2].getEnd().getOffset());
+    assertEquals("interviewer", turns[2].getLabel());
+    assertEquals(who[0], turns[2].getParent());
+
+    assertEquals(Double.valueOf(17.983), turns[3].getStart().getOffset());
+    assertEquals(Double.valueOf(140.366), turns[3].getEnd().getOffset());
+    assertEquals("participant", turns[3].getLabel());
+
+    assertEquals(Double.valueOf(140.366), turns[4].getStart().getOffset());
+    assertEquals(Double.valueOf(159.457), turns[4].getEnd().getOffset());
+    assertEquals("interviewer", turns[4].getLabel());
+
+    assertEquals(Double.valueOf(159.457), turns[5].getStart().getOffset());
+    assertEquals(Double.valueOf(282.871), turns[5].getEnd().getOffset());
+    assertEquals("participant", turns[5].getLabel());
+
+    assertEquals(Double.valueOf(282.871), turns[6].getStart().getOffset());
+    assertEquals(Double.valueOf(283.96500000000003), turns[6].getEnd().getOffset());
+    assertEquals("interviewer", turns[6].getLabel());
+
+    assertEquals(Double.valueOf(283.96500000000003), turns[7].getStart().getOffset());
+    assertEquals(Double.valueOf(310.60200000000003), turns[7].getEnd().getOffset());
+    assertEquals("participant", turns[7].getLabel());
+
+    assertEquals("simultaneous speech",
+                 Double.valueOf(284.84000000000003), turns[8].getStart().getOffset());
+    assertEquals("simultaneous speech",
+                 Double.valueOf(285.34000000000003), turns[8].getEnd().getOffset());
+    assertEquals("interviewer", turns[8].getLabel());
+
+    assertEquals(Double.valueOf(310.60200000000003), turns[9].getStart().getOffset());
+    assertEquals(Double.valueOf(311.071), turns[9].getEnd().getOffset());
+    assertEquals("interviewer", turns[9].getLabel());
+
+    assertEquals(Double.valueOf(311.071), turns[10].getStart().getOffset());
+    assertEquals(Double.valueOf(316.258), turns[10].getEnd().getOffset());
+    assertEquals("participant", turns[10].getLabel());
+
+    assertEquals(Double.valueOf(316.258), turns[11].getStart().getOffset());
+    assertEquals(Double.valueOf(317.195), turns[11].getEnd().getOffset());
+    assertEquals("interviewer", turns[11].getLabel());
+
+    assertEquals(Double.valueOf(317.195), turns[12].getStart().getOffset());
+    assertEquals(Double.valueOf(320.757), turns[12].getEnd().getOffset());
+    assertEquals("participant", turns[12].getLabel());
+
+    // utterances
+    Annotation[] utterances = g.all("utterance");
+    assertEquals(147, utterances.length);
+    assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
+    assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
+    assertEquals("Correct participant",
+                 "participant", utterances[0].getParent().getLabel());
+    assertEquals("Annotator is set on utterance " + utterances[0].getParent(),
+                 "robert", utterances[0].getAnnotator());
+    assertEquals(turns[0], utterances[0].getParent());
+
+    assertEquals(Double.valueOf(7.658), utterances[1].getStart().getOffset());
+    assertEquals("turn after pause merged back to turn before pause",
+                 Double.valueOf(10.348), utterances[1].getEnd().getOffset());
+    assertEquals("participant", utterances[1].getParent().getLabel());
+    assertEquals("turn after long pause not merged back to turn before pause",
+                 turns[1], utterances[1].getParent());
+
+    assertEquals(Double.valueOf(14.889000000000001), utterances[4].getStart().getOffset());
+    assertEquals(Double.valueOf(15.639000000000001), utterances[4].getEnd().getOffset());
+    assertEquals("correct other participant",
+                 "interviewer", utterances[4].getParent().getLabel());
+    assertNull("annotator not set (because it's not set for the TIER",
+               utterances[4].getAnnotator());
+    assertEquals(turns[2], utterances[4].getParent());
+
+    Annotation[] words = g.all("word");
+    String[] wordLabels = {
+      ". rest", // punctuation is clumped to words
+      "of", "that", "side", "of", "the",
+      "famly[f{mli](family)", // transcription conventions are ignored
+      "so", "he --" // punctuation is clumped to words
+    };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+      assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+                   i+1, words[i].getOrdinal());
+      assertEquals(turns[0].getId(), words[i].getParentId());
+      assertEquals("Annotator set on word tokens",
+                   "robert", words[i].getAnnotator());
+    }
+    String[] wordLabelsAfterPause = {
+      "generously",
+      "agreed(agrees)[@grid]",
+      "that", "she", "could", "go", "with", "him", "but", 
+      "there", "were", "so", "many", "people", "there", 
+      "that", "nothing", "was", "done", "constructively"
+    };
+    for (int i = 0; i < wordLabelsAfterPause.length; i++) {
+      assertEquals("word labels " + (i+wordLabels.length), wordLabelsAfterPause[i], words[i+wordLabels.length].getLabel());
+      assertEquals("Correct ordinal: " + i + " " + words[i+wordLabels.length].getLabel(), 
+                   i+1, words[i+wordLabels.length].getOrdinal());
+      assertEquals(turns[1].getId(), words[i+wordLabels.length].getParentId());
+    }
+
+    // comment
+    Annotation[] comments = g.all("comment");
+    assertEquals("no comments from conventions "+Arrays.asList(comments),
+                 0, comments.length);
+
+    // noise
+    Annotation[] noises = g.all("noise");
+    assertEquals("no noises from conventions "+Arrays.asList(noises),
+                 0, noises.length);
+
+    // ensure order of word tags isn't important
+      
+    // phrase language
+    Annotation[] language = g.all("language");
+    assertEquals("no language tags from conventions "+Arrays.asList(language),
+                 0, language.length);
+
+    // pronounce
+    Annotation[] pronounce = g.all("pronounce");
+    assertEquals("no pronounce tags from conventions "+Arrays.asList(pronounce),
+                 0, pronounce.length);
+
+    // lexical
+    Annotation[] lexical = g.all("lexical");
+    assertEquals("no lexical tags from conventions "+Arrays.asList(lexical),
+                 0, lexical.length);
+
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+    }
+  }
+
   /** Deserialization of file includeing word alignments as well as utterance divisions. */
   @Test public void utterance_word()  throws Exception {
     Schema schema = new Schema(
@@ -831,7 +1110,7 @@ public class TestEAFSerialization {
 
   /**
    * This tests that it's possible to deserialize without reference to a
-   * turn/utternance/word hierarchy. 
+   * turn/utterance/word hierarchy. 
    * In this case the utterances are simple 'freeform' annotations that are not tokenized.
    */
   @Test public void freeform_keep_empty_utterances()  throws Exception {

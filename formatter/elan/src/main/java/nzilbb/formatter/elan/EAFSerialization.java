@@ -377,7 +377,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
    * @see #getUseConventions()
    * @see #setUseConventions(Boolean)
    */
-  protected Boolean bUseConventions = Boolean.TRUE;
+  protected Boolean bUseConventions = Boolean.TRUE; // TODO enable/configure each convention separately so they can be selectively disabled
   /**
    * Getter for {@link #bUseConventions}: Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
    * @return Whether to use text conventions for comment, noise, lexical, and pronounce annotations.
@@ -1646,11 +1646,6 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
             // word[pronounce](lexical)
             pronounceTransformer.transform(graph);
             graph.commit();
-		  
-            // clump non-orthographic 'words' with real words
-            OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());	  
-            clumper.transform(graph);
-            graph.commit();
           } catch(TransformationException exception) {
             if (errors == null) errors = new SerializationException();
             if (errors.getCause() == null) errors.initCause(exception);
@@ -1658,6 +1653,19 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
               SerializationException.ErrorType.Tokenization, exception.getMessage());
           }
         } // apply transcription conventions
+            
+        // clump non-orthographic 'words' with real words
+        OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());
+        try {
+          clumper.transform(graph);
+          graph.commit();
+        } catch(TransformationException exception) {
+          if (errors == null) errors = new SerializationException();
+          if (errors.getCause() == null) errors.initCause(exception);
+          errors.addError(
+            SerializationException.ErrorType.Tokenization, exception.getMessage());
+        }
+          
       } else { // word layer mapped
         // ensure word parent turns are set
         for (Annotation word : graph.all(wordLayer.getId())) {
