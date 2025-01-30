@@ -381,6 +381,113 @@ public class TestSpanningConventionTransformer
       }
    }
 
+   @Test public void utteranceMedial() 
+   {
+      Graph g = new Graph();
+      g.setId("my graph");
+      g.setCorpus("cc");
+
+      g.setSchema(new Schema(
+                    "who", "turn", "utterance", "word",                    
+                    new Layer("who", "Participants")
+                    .setAlignment(Constants.ALIGNMENT_NONE) 
+                    .setPeers(true)
+                    .setPeersOverlap(true)
+                    .setSaturated(true),
+                    new Layer("turn", "Speaker turns")
+                    .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                    .setPeers(true)
+                    .setPeersOverlap(false)
+                    .setSaturated(false)
+                    .setParentId("who")
+                    .setParentIncludes(true),
+                    new Layer("utterance", "Utterances")
+                    .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                    .setPeers(true)
+                    .setPeersOverlap(false)
+                    .setSaturated(false)
+                    .setParentId("turn")
+                    .setParentIncludes(true),
+                    new Layer("word", "Words")
+                    .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                    .setPeers(true)
+                    .setPeersOverlap(false)
+                    .setSaturated(false)
+                    .setParentId("turn")
+                    .setParentIncludes(true),
+                    new Layer("noise", "Noise")
+                    .setAlignment(Constants.ALIGNMENT_INTERVAL)
+                    .setPeers(true)
+                    .setPeersOverlap(true)
+                    .setSaturated(false)));
+
+      g.addAnchor(new Anchor("a0", 0.0, 100)); // turn the start
+      g.addAnchor(new Anchor("a2", null, 0)); // quick
+      g.addAnchor(new Anchor("a3", 3.0, 100)); // utterance end
+      g.addAnchor(new Anchor("a31", 3.1, 100)); // brown and utterance start
+      g.addAnchor(new Anchor("a4", null, 0)); // fox
+      g.addAnchor(new Anchor("a?1", null, 0)); // jumps
+      g.addAnchor(new Anchor("a6", 6.0, 100)); // jumps and turn end
+
+      g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a6", "my graph"));
+
+      g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a6", "participant1"));
+      g.addAnnotation(new Annotation("utt1", "john smith", "utterance", "a0", "a3", "turn1"));
+      g.addAnnotation(new Annotation("utt2", "john smith", "utterance", "a31", "a6", "turn1"));
+
+      g.addAnnotation(new Annotation("word1", "the", "word", "a0", "a2", "turn1"));
+      g.addAnnotation(new Annotation("word2", "[quick]", "word", "a2", "a3", "turn1"));
+      g.addAnnotation(new Annotation("word3", "brown", "word", "a31", "a4", "turn1"));
+      g.addAnnotation(new Annotation("word4", "[fox]", "word", "a4", "a?1", "turn1"));
+      g.addAnnotation(new Annotation("word5", ".", "word", "a?1", "a6", "turn1"));
+
+      try
+      {
+         g.setTracker(new ChangeTracker());
+	 SpanningConventionTransformer transformer = new SpanningConventionTransformer(
+	    "word", "\\[(.*)", "(.*)\\]", true, null, null, "noise", "$1", "$1", false, false);
+	 transformer.transform(g);
+	 assertEquals("the", g.getAnnotation("word1").getLabel());
+	 assertEquals("start = end",
+                      Change.Operation.Destroy, g.getAnnotation("word2").getChange());
+	 assertEquals("not chained across gap",
+                      g.getAnchor("a2"), g.getAnnotation("word1").getEnd());
+	 assertEquals("brown", g.getAnnotation("word3").getLabel());
+	 assertEquals("ordinal corrected", 2, g.getAnnotation("word3").getOrdinal());
+	 assertEquals("none between",
+                      Change.Operation.Destroy, g.getAnnotation("word4").getChange());
+	 assertEquals("not chained across gap",
+                      g.getAnchor("a4"), g.getAnnotation("word3").getEnd());
+
+	 Annotation[] comments = g.list("noise");
+	 Annotation span = comments[0];
+	 assertEquals("quick", span.getLabel());
+	 assertEquals("a2", span.getStartId());
+	 assertEquals("a3", span.getEndId());
+	 assertEquals("parent set", "my graph", span.getParentId());
+
+	 span = comments[1];
+	 assertEquals("fox", span.getLabel());
+	 assertEquals("a4", span.getStartId());
+	 assertEquals("a?1", span.getEndId());
+	 assertEquals("parent set", "my graph", span.getParentId());
+
+         g.commit();
+         
+         new Normalizer()
+           .setMinimumTurnPauseLength(0.5)
+           .transform(g);
+         new Validator().transform(g); // doesn't throw any exceptions
+         // g.commit();
+         System.out.println(g.toJsonString());
+
+      }
+      catch(TransformationException exception)
+      {
+	 fail(exception.toString());
+      }
+   }
+
    @Test public void emptyResults() 
    {
       Graph g = new Graph();

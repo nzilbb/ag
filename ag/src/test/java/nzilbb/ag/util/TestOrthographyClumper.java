@@ -382,7 +382,7 @@ public class TestOrthographyClumper {
     // line break
     g.addAnnotation(new Annotation("jumps", "jumps", "word", "a10", "a11", "turn1"));
     g.addAnnotation(new Annotation("over", "over", "word", "a11", "a12", "turn1"));
-    g.addAnnotation(new Annotation("fullstop", ".", "word", "a12", "a13", "turn1"));
+    g.addAnnotation(new Annotation("noise2", "noise", "noise", "a12", "a13", "turn1"));
     g.addAnnotation(new Annotation("closequote", "\"", "word", "a13", "a14", "turn1"));
 
     try {
@@ -398,8 +398,9 @@ public class TestOrthographyClumper {
                    "--", words[3].getLabel());
       assertEquals("first word on second line unchanged",
                    "jumps", words[4].getLabel());
-      assertEquals("over . \"", words[5].getLabel());
-      assertEquals(6, words.length);
+      assertEquals("over", words[5].getLabel());
+      assertEquals("\"", words[6].getLabel());
+      assertEquals(7, words.length);
 
       Annotation lines[] = g.list("line");
       assertEquals("line anchors correct", "a0", lines[0].getStartId());
@@ -410,12 +411,14 @@ public class TestOrthographyClumper {
       
       for (int o = 0; o < words.length; o++) {
         assertEquals("orthography corrected", o+1, words[o].getOrdinal());
-        if (o == 3) {
+        if (o == 3 || o == 6) {
           assertNotEquals("anchor not linking", words[o-1].getEnd(), words[o].getStart());
         } else if (o > 0) {
           assertEquals("anchor linking", words[o-1].getEnd(), words[o].getStart());
         }
       }
+      System.out.println(g.toJsonString());
+      
     } catch(TransformationException exception) {
       fail(exception.toString());
     }

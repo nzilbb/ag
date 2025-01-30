@@ -276,7 +276,14 @@ public class OrthographyClumper implements GraphTransformer {
       } // next token
 	 
       if (toPrepend != null) { // something to prepend, but we haven't prepended it yet
-        if (last != null) { // can append it to the last token
+        // there's more than one token
+        if (last != null
+            // and there's no intervening gap
+            && toPrepend.getStart() == last.getEnd()
+            // and no partition annotations ending here
+            && (partitionLayerId == null || !toPrepend.getStart().isEndOn(partitionLayerId))) {
+          // can just append to last token
+          System.out.println("appending " + last.getLabel() + " " + toPrepend);
           last.setLabel(last.getLabel() + " " + toPrepend);
         } else { // no last token
           // so don't delete it
