@@ -1655,7 +1655,8 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
         } // apply transcription conventions
             
         // clump non-orthographic 'words' with real words
-        OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId());
+        OrthographyClumper clumper = new OrthographyClumper(
+          wordLayer.getId(), getUtteranceLayer().getId());
         try {
           clumper.transform(graph);
           graph.commit();

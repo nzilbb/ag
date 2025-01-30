@@ -176,7 +176,7 @@
     <TIER LANG_REF="eng" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="interviewer" TIER_ID="I">
         <ANNOTATION>
             <ALIGNABLE_ANNOTATION ANNOTATION_ID="a7" TIME_SLOT_REF1="ts7" TIME_SLOT_REF2="ts9">
-                <ANNOTATION_VALUE> right - </ANNOTATION_VALUE>
+                <ANNOTATION_VALUE> right [noise with trailing pause] - </ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
         <ANNOTATION>

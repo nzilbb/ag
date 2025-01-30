@@ -295,11 +295,18 @@ public class TestEAFSerialization {
 
     // noise
     Annotation[] noises = g.all("noise");
-    assertEquals("click", noises[0].getLabel());
-    assertEquals("um --", noises[0].getStart().endOf("word").iterator().next().getLabel());
-    assertEquals(Double.valueOf(132.992), noises[0].getEnd().getOffset());
+    assertEquals("noise with trailing pause", noises[0].getLabel());
+    assertEquals("right", noises[0].getStart().endOf("word").iterator().next().getLabel());
+    assertNull(noises[0].getEnd().getOffset());
+    assertEquals("pause not clumped across noise",
+                 "right",
+                 noises[0].getStart().endingAnnotations("word").iterator().next().getLabel());
+    
+    assertEquals("click", noises[1].getLabel());
+    assertEquals("um --", noises[1].getStart().endOf("word").iterator().next().getLabel());
+    assertEquals(Double.valueOf(132.992), noises[1].getEnd().getOffset());
 
-    assertEquals(1, noises.length);
+    assertEquals(2, noises.length);
 
     // ensure order of word tags isn't important
       
@@ -1224,7 +1231,7 @@ public class TestEAFSerialization {
 
     assertEquals(Double.valueOf(14.889000000000001), utterances[0].getStart().getOffset());
     assertEquals(Double.valueOf(15.639000000000001), utterances[0].getEnd().getOffset());
-    assertEquals(" right - ", utterances[0].getLabel());
+    assertEquals(" right [noise with trailing pause] - ", utterances[0].getLabel());
     assertEquals(g, utterances[0].getParent());
 
     // participant
@@ -1354,7 +1361,7 @@ public class TestEAFSerialization {
 
     assertEquals(Double.valueOf(14.889000000000001), utterances[0].getStart().getOffset());
     assertEquals(Double.valueOf(15.639000000000001), utterances[0].getEnd().getOffset());
-    assertEquals(" right - ", utterances[0].getLabel());
+    assertEquals(" right [noise with trailing pause] - ", utterances[0].getLabel());
     assertEquals(g, utterances[0].getParent());
 
     // participant

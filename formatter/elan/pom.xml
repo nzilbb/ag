@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.elan</artifactId>
   <name>nzilbb.formatter.elan</name>
-  <version>1.7.10</version>
+  <version>1.7.11</version>
 
   <properties>
     <package.path>nzilbb/formatter/elan/</package.path>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.1.0</version>
+      <version>1.2.3-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
