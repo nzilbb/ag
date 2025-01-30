@@ -10,11 +10,11 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.mor</artifactId>
   <name>nzilbb.annotator.mor</name>
-  <version>0.2.2</version>
+  <version>0.3.0</version>
   <description>Annotator that annotates words tags from the the Talk Bank MOR morphosyntactic tagger.</description>
 
   <properties>
-    <nzilbb.formatter.clan.version>1.3.0</nzilbb.formatter.clan.version>
+    <nzilbb.formatter.clan.version>1.3.1</nzilbb.formatter.clan.version>
     <package.path>nzilbb/annotator/mor/</package.path>
     <annotator.class>nzilbb.annotator.mor.MorTagger</annotator.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -89,7 +89,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <trimStackTrace>false</trimStackTrace>
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>
