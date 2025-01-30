@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -24,6 +24,7 @@ package nzilbb.ag.util;
 
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Pattern;
 import nzilbb.ag.*;
 
 /**
@@ -54,7 +55,34 @@ public class OrthographyClumper implements GraphTransformer {
    * non-orthographic character. 
    */
   public OrthographyClumper setNonOrthoCharacterPattern(String sNewNonOrthoCharacterPattern) { nonOrthoCharacterPattern = sNewNonOrthoCharacterPattern; return this; }
-   
+  
+  /**
+   * A regular expression that identifies characters that should be clumped to the
+   * following rather than previous word, e.g. opening parentheses. 
+   * Default value is <q>[({\[&lt;]</q>.
+   * @see #getClumpForwardPattern()
+   * @see #setClumpForwardPattern(String)
+   */
+  protected String clumpForwardPattern = "[({\\[<]";
+  /**
+   * Getter for {@link #clumpForwardPattern}: A regular expression that identifies
+   * characters that should be clumped to the following rather than previous word,
+   * e.g. opening parentheses. 
+   * Default value is <q>[({\[&lt;]</q>.
+   * @return A regular expression that identifies characters that should be clumped to the
+   * following rather than previous word, e.g. opening parentheses. 
+   */
+  public String getClumpForwardPattern() { return clumpForwardPattern; }
+  /**
+   * Setter for {@link #clumpForwardPattern}: A regular expression that identifies
+   * characters that should be clumped to the following rather than previous word,
+   * e.g. opening parentheses. 
+   * @param newClumpForwardPattern A regular expression that identifies characters that
+   * should be clumped to the following rather than previous word, e.g. opening
+   * parentheses. 
+   */
+  public OrthographyClumper setClumpForwardPattern(String newClumpForwardPattern) { clumpForwardPattern = newClumpForwardPattern; return this; }
+  
   /**
    * ID of the layer to transform.
    * @see #getWordLayerId()
@@ -71,7 +99,6 @@ public class OrthographyClumper implements GraphTransformer {
    * @param newWordLayerId ID of the layer to transform.
    */
   public OrthographyClumper setWordLayerId(String newWordLayerId) { wordLayerId = newWordLayerId; return this; }
-
    
   /**
    * ID of a partition layer, such that words can't be clumped across partitions.
@@ -130,6 +157,15 @@ public class OrthographyClumper implements GraphTransformer {
     if (wordLayer == null) 
       throw new TransformationException(this, "No layer: " + getWordLayerId());
 
+    Pattern clumpForward = null;
+    if (clumpForwardPattern != null && clumpForwardPattern.length() > 0) {
+      try {
+       clumpForward = Pattern.compile(clumpForwardPattern);
+      } catch(Exception exception) {
+        throw new TransformationException(this, exception);
+      }
+    }
+
     // for each parent
     for (Annotation parent : graph.all(wordLayer.getParentId())) {
       Annotation last = null;
@@ -143,11 +179,16 @@ public class OrthographyClumper implements GraphTransformer {
       for (Annotation token : parent.getAnnotations(getWordLayerId())) {
         if (token.getLabel().replaceAll(nonOrthoCharacterPattern, "").length() == 0) {
           token.destroy();
-          if (last != null 
+          if (last != null // not the first token
+              // not already prepending
+              && toPrepend == null 
               // if there are no intervening annotations or gaps
               && token.getStart() == last.getEnd()
               // no partition annotations ending here
-              && (partitionLayerId == null || !token.getStart().isEndOn(partitionLayerId))) {
+              && (partitionLayerId == null || !token.getStart().isEndOn(partitionLayerId))
+              // not a forward-clumping token
+              && (clumpForward == null || !clumpForward.matcher(token.getLabel()).matches())) {
+            
             last.setLabel(last.getLabel() + " " + token.getLabel());
 
             Anchor oldEnd = last.getEnd();
@@ -235,9 +276,13 @@ public class OrthographyClumper implements GraphTransformer {
       } // next token
 	 
       if (toPrepend != null) { // something to prepend, but we haven't prepended it yet
-        // so don't delete it
-        toPrepend.rollback(); // TODO remove the change
-        // System.out.println("unremoving final " + toPrepend);
+        if (last != null) { // can append it to the last token
+          last.setLabel(last.getLabel() + " " + toPrepend);
+        } else { // no last token
+          // so don't delete it
+          toPrepend.rollback(); // TODO remove the change
+          // System.out.println("unremoving final " + toPrepend);
+        }
       }
 
       if (changedOrdinals) {

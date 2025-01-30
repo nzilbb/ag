@@ -119,6 +119,93 @@ public class TestOrthographyClumper {
     }
   }
 
+  /** Opening parentheses clump with next rather than previous word.
+   * This is so parentheses can be used by the likes of PatternTagger to accurately tag
+   * words/phrases that are parenthesised */
+  @Test public void parentheses() {
+    Graph g = new Graph();
+    g.setId("my graph");
+    g.setCorpus("cc");
+
+    g.addLayer(new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
+                         true, // peers
+                         true, // peersOverlap
+                         true)); // saturated
+    g.addLayer(new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "who", // parentId
+                         true)); // parentIncludes
+    g.addLayer(new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
+                         true, // peers
+                         false, // peersOverlap
+                         false, // saturated
+                         "turn", // parentId
+                         true)); // parentIncludes
+
+    g.addAnchor(new Anchor("a0", 0.0));
+    g.addAnchor(new Anchor("a1", 1.0));
+    g.addAnchor(new Anchor("a2", 2.0));
+    g.addAnchor(new Anchor("a3", 3.0));
+    g.addAnchor(new Anchor("a4", 4.0));
+    g.addAnchor(new Anchor("a5", 5.0));
+    g.addAnchor(new Anchor("a6", 6.0));
+    g.addAnchor(new Anchor("a7", 7.0));
+    g.addAnchor(new Anchor("a8", 8.0));
+    g.addAnchor(new Anchor("a9", 9.0));
+    g.addAnchor(new Anchor("a10", 10.0));
+    g.addAnchor(new Anchor("a11", 11.0));
+    g.addAnchor(new Anchor("a12", 12.0));
+    g.addAnchor(new Anchor("a13", 13.0));
+    g.addAnchor(new Anchor("a14", 14.0));
+    g.addAnchor(new Anchor("a15", 15.0));
+    g.addAnchor(new Anchor("a16", 16.0));
+
+    g.addAnnotation(new Annotation("participant1", "john smith", "who", "a0", "a15", "my graph"));
+
+    g.addAnnotation(new Annotation("turn1", "john smith", "turn", "a0", "a15", "participant1"));
+
+    g.addAnnotation(new Annotation("hyphen", "-", "word", "a1", "a2", "turn1"));
+    g.addAnnotation(new Annotation("openroundparen", "(", "word", "a2", "a3", "turn1"));
+    g.addAnnotation(new Annotation("the", "the", "word", "a3", "a4", "turn1"));
+    g.addAnnotation(new Annotation("closeround paren", ")", "word", "a4", "a5", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick", "word", "a5", "a6", "turn1"));
+    g.addAnnotation(new Annotation("opensquarebracket", "[", "word", "a6", "a7", "turn1"));
+    g.addAnnotation(new Annotation("brown", "brown", "word", "a7", "a8", "turn1"));
+    g.addAnnotation(new Annotation("fox", "fox", "word", "a8", "a9", "turn1"));
+    g.addAnnotation(new Annotation("longpause", "--", "word", "a9", "a10", "turn1"));
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a10", "a11", "turn1"));
+    g.addAnnotation(new Annotation("opencurlybrace", "{", "word", "a11", "a12", "turn1"));
+    g.addAnnotation(new Annotation("over", "over", "word", "a12", "a13", "turn1"));
+    g.addAnnotation(new Annotation("closecurlybrace", "}", "word", "a13", "a14", "turn1"));
+    g.addAnnotation(new Annotation("trailingopenparen", "(", "word", "a14", "a15", "turn1"));
+
+    try {
+      g.setTracker(new ChangeTracker());
+      OrthographyClumper transformer = new OrthographyClumper("word");
+      transformer.transform(g);
+      g.commit();
+      Annotation words[] = g.list("word");
+      assertEquals("- ( the )", words[0].getLabel());
+      assertEquals("quick", words[1].getLabel());
+      assertEquals("[ brown", words[2].getLabel());
+      assertEquals("fox --", words[3].getLabel());
+      assertEquals("jumps", words[4].getLabel());
+      assertEquals("{ over } (", words[5].getLabel());
+      assertEquals(6, words.length);
+
+      for (int o = 0; o < words.length; o++) {
+        assertEquals("orthography corrected", o+1, words[o].getOrdinal());
+        if (o > 0) {
+          assertEquals("anchor linking", words[o-1].getEnd(), words[o].getStart());
+        }
+      }
+    } catch(TransformationException exception) {
+      fail(exception.toString());
+    }
+  }
+
   /** Clumping works only within utterances. */
   @Test public void dontClumpAcrossLines() {
     Graph g = new Graph();
