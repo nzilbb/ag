@@ -731,6 +731,80 @@ public class TestStanfordPosTagger {
     assertEquals("lazily", "RB", poses.next().getLabel());
   }   
 
+  /** There are phrases tagged in a particular language, but no targetLanguagePattern. */
+  @Test public void phraseLanguageTagsButNoTargetLanguage() throws Exception {
+    
+    Graph g = graph();
+    g.trackChanges();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+
+    // tag the graph as being in US English
+    g.createTag(g, "transcript_language", "en-US");
+
+    // tag some words as some other language - "I'll sing"
+    Annotation es = g.createAnnotation(g.getOrCreateAnchorAt(10), g.getOrCreateAnchorAt(30),
+                                         "lang", "es-AR",
+                                         g.first("turn"));
+    Annotation[] esWords = es.all("word");
+    assertEquals("words tagged as Spanish - " + Arrays.asList(esWords),
+                 2, esWords.length);
+    
+    // tag some words as Te Reo Māori - "[w~] walk about my blogging-posting"
+    Annotation lang = g.createAnnotation(g.getOrCreateAnchorAt(40), g.getOrCreateAnchorAt(80),
+                                         "lang", "mi",
+                                         g.first("turn"));
+    Annotation[] miWords = lang.all("word");
+    assertEquals("words tagged as Te Reo Māori - " + Arrays.asList(miWords),
+                 5, miWords.length);
+    assertEquals("Te Reo Māori word has lang tag " + Arrays.asList(miWords[0].all("lang")),
+                 lang, miWords[0].first("lang"));
+
+    // use specified configuration
+    annotator.setTaskParameters(
+      "tokenLayerId=word"
+      +"&tokenExclusionPattern=.*~"
+      +"&targetLanguagePattern=" // no target language
+      +"&chunkLayerId=utterance"
+      +"&transcriptLanguageLayerId=transcript_language"
+      +"&phraseLanguageLayerId=lang"
+      +"&posLayerId=pos"
+      +"&model=english-bidirectional-distsim.tagger"); // non-default tagger
+    
+    assertEquals("token layer",
+                 "word", annotator.getTokenLayerId());
+    assertNull("no target language pattern",
+               annotator.getTargetLanguagePattern());
+      
+    assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
+                 9, g.all("word").length);
+    assertEquals("double check there are no POSes: "+Arrays.asList(g.all("pos")),
+                 0, g.all("pos").length);
+    // run the annotator
+    // will tag: "and lazily"
+    annotator.transform(g);
+    List<Annotation> posAnnotations = Arrays.stream(g.all("pos"))
+      .collect(Collectors.toList());
+    assertEquals("Eleven tags "+posAnnotations, 11, posAnnotations.size());
+    Iterator<Annotation> poses = posAnnotations.iterator();
+    assertEquals("I'll", "PRP", poses.next().getLabel());
+    assertEquals("I'll", "MD", poses.next().getLabel());
+    assertEquals("sing", "VB", poses.next().getLabel());
+    assertEquals("and", "CC", poses.next().getLabel());
+    // w~ skipped
+    assertEquals("walk", "VB", poses.next().getLabel());
+    assertEquals("about (different from default model)",
+                 "IN", poses.next().getLabel());
+    assertEquals("my", "PRP$", poses.next().getLabel());
+    assertEquals("blogging-posting:blogging (OOD - different from default model)",
+                 "NN", poses.next().getLabel());
+    assertEquals("blogging-posting Hyphen",
+                 "HYPH", poses.next().getLabel());
+    assertEquals("blogging-posting:posting",
+                 "VBG", poses.next().getLabel());
+    assertEquals("lazily", "RB", poses.next().getLabel());
+  }   
+
   /** Ensure raw ONZE-style transcription can be used as input - i.e. including pause
    * annotations "." and "-" */
   @Test public void rawWordLayer() throws Exception {

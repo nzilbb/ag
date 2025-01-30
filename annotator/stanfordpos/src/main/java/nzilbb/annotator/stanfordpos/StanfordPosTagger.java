@@ -797,7 +797,8 @@ public class StanfordPosTagger extends Annotator {
                 if (phraseLanguage == null) return false; // not tagged with a language
                 return targetLanguage.matcher(phraseLanguage.getLabel()).matches();
               }).toArray(Annotation[]::new);
-          } else if (thereArePhraseTags) { // there are phrase-based language tags
+          } else if (thereArePhraseTags // there are phrase-based language tags
+                     && targetLanguagePattern != null) { // and we care about language
             // filter out tokens that aren't phrase-tagged in another language
             final Pattern targetLanguage = Pattern.compile(targetLanguagePattern);
             tokens = Arrays.stream(tokens).filter((token) -> {

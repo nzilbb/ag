@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.stanfordpos</artifactId>
   <name>nzilbb.annotator.stanfordpos</name>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 
   <properties>
     <package.path>nzilbb/annotator/stanfordpos/</package.path>
