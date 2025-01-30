@@ -312,7 +312,7 @@ public class TestEAFSerialization {
       
     // phrase language
     Annotation[] language = g.all("language");
-    assertEquals("two language tags", 2, language.length);
+    assertEquals("three language tags", 3, language.length);
     assertEquals("first language tag - converted to alpha-2 code", "mi", language[0].getLabel());
     assertEquals("first language tag word",
                  "whanau.", language[0].tagsOn("word")[0].getLabel());
@@ -325,6 +325,9 @@ public class TestEAFSerialization {
     Annotation lastWord = language[1].getEnd().endOf("word").iterator().next();
     assertEquals("second language tag word 3",
                  "Zélande", lastWord.getLabel());
+    assertEquals("third language tag - single word tagged in multi-word style", "es", language[2].getLabel());
+    assertEquals("third language tag word",
+                 "Pimienta", language[2].tagsOn("word")[0].getLabel());
 
     // pronounce
     Annotation[] pronounce = g.all("pronounce");

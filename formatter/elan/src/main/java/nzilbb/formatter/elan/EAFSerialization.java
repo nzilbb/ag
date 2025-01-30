@@ -1548,7 +1548,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
               = new SpanningConventionTransformer(
                 getWordLayer().getId(), "\\[CS:([^\\]]+)\\](.*)", "(.+)\\[CS:([^\\]]+)\\](\\p{Punct}*)",
                 false, "$2", "$1$3", 
-                phraseLanguageLayer==null?null:phraseLanguageLayer.getId(), "$1", null,
+                phraseLanguageLayer==null?null:phraseLanguageLayer.getId(), null, "$2",
                 false, false);
             phraseLanguageTransformer.transform(graph);
 		  
