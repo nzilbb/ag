@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -52,8 +53,28 @@ import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.sql.derby.DerbyConnectionFactory;
 import nzilbb.util.IO;
 
+/**
+ * Tests for the MFA integration annotator.
+ * <p> Before these tests can work, MFA (which is a thrid party tool) must be installed
+ * on the test machine:
+ * <ol>
+ *  <li> Install Anaconda
+ *   <ol>
+ *    <li><tt>wget https://repo.anaconda.com/archive/Anaconda3-2021.11-Linux-x86_64.sh</tt></li>
+ *    <li><tt>chmod u+x Anaconda3-2021.11-Linux-x86_64.sh</tt></li>
+ *    <li><tt>./Anaconda3-2021.11-Linux-x86_64.sh</tt></li>
+ *    </ol>
+ *  </li>
+ *  <li> Install MFA
+ *   <br><tt>conda create -n aligner -c conda-forge montreal-forced-aligner=3.2.1</tt>
+ *  </li>
+ * <p><b>NB</b> The version above may not be up-to-date, 
+ *  check the value of {@link MFA#builtForMfaVersion}</p>
+ * </ol>
+ */
 public class TestMFA {
   static final String condaPath = "/opt/conda/bin";
+  static final String condaEnvPath = "/opt/conda/envs/";
   static final String mfaEnvironment = "aligner";
 
   static MFA annotator = new MFA();
@@ -77,8 +98,9 @@ public class TestMFA {
     
     // not setting the graph store, sorry
     
-    // set the annotator configuration, which will install the lexicon the first time (only)
-    annotator.setConfig("");
+    // set the annotator configuration
+    annotator.setConfig("mfaPath="+URLEncoder.encode(
+                          condaEnvPath+mfaEnvironment+File.separator+"bin","UTF-8"));
     
     if (annotator.getStatusObservers().size() == 0) {
       annotator.getStatusObservers().add(status->System.out.println(status));
@@ -127,7 +149,8 @@ public class TestMFA {
   /** Ensure mfaVersion method works. */
   @Test public void mfaVersion() throws Exception {
     String version = annotator.mfaVersion();
-    assertTrue("MFA version is 2...: " + version, version.startsWith("2"));
+    System.out.println("MFA version " + version);
+    assertTrue("MFA version is 2 or 3...: " + version, version.matches("^[23].*"));
   }   
 
   /** Ensure default (null) task parameters return an error. */
@@ -400,7 +423,7 @@ public class TestMFA {
     
     Annotation[] phones = word.all("segment");
     assertEquals("Six phones " + Arrays.asList(phones), 6, phones.length);
-    String[] labels = { "s", "t", "æ", "tʃ", "ʉː", "t" };
+    String[] labels = { "s", "t", "a", "tʲ", "ʉː", "t" };
     for (int p = 0; p < phones.length; p++) {      
       assertEquals("DISC phone label " + p, labels[p], phones[p].getLabel());
       if (p > 0) { // first phone might coincide with start and be CONFIDENCE_MANUAL

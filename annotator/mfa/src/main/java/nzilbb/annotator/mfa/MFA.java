@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -101,7 +101,7 @@ public class MFA extends Annotator {
    * install if it's not already installed. (This only works inside Docker containers.) 
    * @see #getBuiltForMfaVersion()
    */
-  protected final String builtForMfaVersion = "2.2.17";
+  protected final String builtForMfaVersion = "3.2.1";
   /**
    * Getter for {@link #builtForMfaVersion}: The version of the montreal-forced-aligner
    * package that the aligner will attempt to install if it's not already installed. (This
@@ -1303,7 +1303,7 @@ public class MFA extends Annotator {
                 setPercentComplete(30); // (up to 5 phases of 10% each arrives at 80%)
                 Vector<String> parameters = new Vector<String>();
                 parameters.add("train");
-                parameters.add("--clean");
+                // Don't parameters.add("--clean"); it deletes everything including the corpus
                 if (multilingualIPA) {
                   parameters.add("--multilingual_ipa");
                 }
@@ -1359,15 +1359,16 @@ public class MFA extends Annotator {
                     dictionary = builtInDict.getPath();
                   }
                   if (!isCancelling()) {
-                    mfa(false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
-                        "align", "--clean",
-                        "--output_format", "long_textgrid",
-                        corpusDir.getPath(), dictionary,
-                        acousticModelsZip.getPath(),
-                        alignedDir.getPath(),
-                        "--beam", ""+beam, "--retry-beam", ""+retryBeam,
-                        "--uses_speaker_adaptation", noSpeakerAdaptation?"False":"True",
-                        "--"+(usePostgres?"":"no_")+"use_postgres");
+                    mfa(
+                      false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
+                      "align", // Don't "--clean", it deletes everything including the corpus
+                      "--output_format", "long_textgrid",
+                      corpusDir.getPath(), dictionary,
+                      acousticModelsZip.getPath(),
+                      alignedDir.getPath(),
+                      "--beam", ""+beam, "--retry-beam", ""+retryBeam,
+                      "--uses_speaker_adaptation", noSpeakerAdaptation?"False":"True",
+                      "--"+(usePostgres?"":"no_")+"use_postgres");
                     // log contents of ${tempDir}/corpus/align.log
                     copyLog(new File(new File(tempDir, "corpus"), "align.log"));
                   } // not cancelling
@@ -1687,7 +1688,6 @@ public class MFA extends Annotator {
             } else { // whole graph media is used in-situ (this should happen, but just in case...)
               IO.Copy(fTemp, fWav);
             }
-            
             utterances.add(fragment);            
             
           } catch (Exception x) {
