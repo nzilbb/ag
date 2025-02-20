@@ -315,6 +315,13 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
     try {
       Graph graph = new Graph();
       graph.setId(json.getString("id"));
+      // add any extra @ttributes that might be @ttached
+      for (String key : json.keySet()) {
+        if (key.startsWith("@")) {
+          graph.put(key, json.getString(key));
+        }
+      }            
+      
       if (json.containsKey("offsetGranularity"))
       {
         graph.setOffsetGranularity(json.getJsonNumber("offsetGranularity").doubleValue());
@@ -566,6 +573,13 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
             JsonGenerator json = factory.createGenerator(out);
             json.writeStartObject();
             json.write("id", graph.getId());
+
+            // add any extra @ttributes that might be @ttached
+            for (String key : graph.keySet()) {
+              if (key.startsWith("@")) {
+                json.write(key, graph.get(key).toString());
+              }
+            }
             
             // offsetGranularity
             if (graph.getOffsetGranularity() != null) {

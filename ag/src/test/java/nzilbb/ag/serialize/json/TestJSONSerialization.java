@@ -51,6 +51,8 @@ public class TestJSONSerialization
    {
       Graph g = new Graph();
       g.setId("test");
+      // @ttributes are serialized
+      g.put("@foo","bar");
 
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
@@ -342,6 +344,7 @@ public class TestJSONSerialization
       throws Exception
    {
       Graph g = new Graph();
+      g.put("@foo","bar"); // @attribute is serialized
       g.setId("test");
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",

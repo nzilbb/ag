@@ -1,6 +1,7 @@
 
 {
     "id":"test",
+    "@foo": "bar",
     "offsetGranularity": 0.001,
     "schema": {
         "participantLayerId": "who",
