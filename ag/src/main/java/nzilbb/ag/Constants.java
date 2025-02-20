@@ -97,6 +97,8 @@ public class Constants {
    public static final String TYPE_NUMBER = "number";
    /** Possible value for {@link Layer#getType()} representing a number - "number". */
    public static final String TYPE_BOOLEAN = "boolean";
+   /** Possible value for {@link Layer#getType()} representing a tree - "tree". */
+   public static final String TYPE_TREE = "tree";
    /** 
     * Possible value for {@link Layer#getType()} representing a string value select from a
     * closed set of possibilities - "select". 
