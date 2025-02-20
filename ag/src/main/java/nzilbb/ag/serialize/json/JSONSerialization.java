@@ -576,7 +576,7 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
 
             // add any extra @ttributes that might be @ttached
             for (String key : graph.keySet()) {
-              if (key.startsWith("@")) {
+              if (key.startsWith("@") && graph.get(key) != null) {
                 json.write(key, graph.get(key).toString());
               }
             }

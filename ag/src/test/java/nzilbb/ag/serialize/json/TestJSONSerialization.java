@@ -53,6 +53,8 @@ public class TestJSONSerialization
       g.setId("test");
       // @ttributes are serialized
       g.put("@foo","bar");
+      g.put("@bar",Integer.valueOf(99));
+      g.put("@null",null);
 
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
