@@ -315,6 +315,10 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
     try {
       Graph graph = new Graph();
       graph.setId(json.getString("id"));
+      if (json.containsKey("offsetUnits"))
+      {
+        graph.setOffsetUnits(json.getString("offsetUnits"));
+      }
       
       if (json.containsKey("offsetGranularity"))
       {
@@ -567,6 +571,10 @@ public class JSONSerialization implements GraphSerializer, GraphDeserializer {
             JsonGenerator json = factory.createGenerator(out);
             json.writeStartObject();
             json.write("id", graph.getId());
+            // offsetUnits
+            if (graph.getOffsetUnits() != null) {
+              json.write("offsetUnits", graph.getOffsetUnits());
+            }
 
             // offsetGranularity
             if (graph.getOffsetGranularity() != null) {

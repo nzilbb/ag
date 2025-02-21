@@ -1,6 +1,7 @@
 
 {
     "id": "test",
+    "offsetUnits": "pixels",
     "offsetGranularity": 0.001,
     "schema": {
         "participantLayerId": "who",

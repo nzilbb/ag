@@ -51,6 +51,7 @@ public class TestJSONSerialization
    {
       Graph g = new Graph();
       g.setId("test");
+      g.setOffsetUnits("pixels");
       // @ttributes are not serialized
       g.put("@foo","bar");
       g.put("@bar",Integer.valueOf(99));
@@ -347,6 +348,7 @@ public class TestJSONSerialization
    {
       Graph g = new Graph();
       g.setId("test");
+      g.setOffsetUnits("pixels");
       Schema schema = new Schema(
 	 "who", "turn", "utterance", "word",
 	 new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
