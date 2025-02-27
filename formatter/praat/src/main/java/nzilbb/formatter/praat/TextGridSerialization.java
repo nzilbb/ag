@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -308,7 +308,38 @@ public class TextGridSerialization
    * layers where they shouldn't. 
    */
   public TextGridSerialization setAllowPeerOverlap(Boolean newAllowPeerOverlap) { allowPeerOverlap = newAllowPeerOverlap; return this; }
-
+  
+  /**
+   * Minimum inter-word pause to trigger an utterance boundary, when no utterance layer is mapped.
+   * The default value is 0.5s.
+   * @see #getUtteranceThreshold()
+   * @see #setUtteranceThreshold(Double)
+   */
+  protected Double utteranceThreshold = Double.valueOf(0.5);
+  /**
+   * Getter for {@link #utteranceThreshold}: Minimum inter-word pause to trigger an
+   * utterance boundary, when no utterance layer is mapped. 
+   * @return Minimum inter-word pause to trigger an utterance boundary, when no utterance
+   * layer is mapped.
+   * The default value is 0.5s. 0 means 'do not infer utterance boundaries'.
+   */
+  public Double getUtteranceThreshold() {
+    if (utteranceThreshold == null) return Double.valueOf(0.5);
+    return utteranceThreshold;
+  }
+  /**
+   * Setter for {@link #utteranceThreshold}: Minimum inter-word pause to trigger an
+   * utterance boundary, when no utterance layer is mapped. 
+   * @param newUtteranceThreshold Minimum inter-word pause to trigger an utterance
+   * boundary, when no utterance layer is mapped. 0 means 'do not infer utterance
+   * boundaries'.
+   */
+  public TextGridSerialization setUtteranceThreshold(Double newUtteranceThreshold) {
+    if (newUtteranceThreshold == null) newUtteranceThreshold = Double.valueOf(0.0);
+    utteranceThreshold = newUtteranceThreshold;
+    return this;
+  }
+  
   /**
    * Returns the deserializer's descriptor.
    * <p>{@link GraphSerializer} and {@link GraphDeserializer} method.
@@ -596,6 +627,17 @@ public class TextGridSerialization
       configuration.get("allowPeerOverlap").setValue(Boolean.FALSE);
     }
 
+    if (!configuration.containsKey("utteranceThreshold")) {
+      configuration.addParameter(
+        new Parameter(
+          "utteranceThreshold", Double.class, 
+          "Utterance Threshold (s)",
+          "Minimum inter-word pause to trigger an utterance boundary, when no utterance layer is mapped. 0 means 'do not infer utterance boundaries'.", true));
+    }
+    if (configuration.get("utteranceThreshold").getValue() == null) {
+      configuration.get("utteranceThreshold").setValue(Double.valueOf(0.5));
+    }
+    
     if (!configuration.containsKey("useConventions")) {
       configuration.addParameter(
         new Parameter("useConventions", Boolean.class, 
@@ -979,29 +1021,42 @@ public class TextGridSerialization
     Anchor graphEnd = graph.getOrCreateAnchorAt(highestXmax, Constants.CONFIDENCE_MANUAL);
 
     // ensure both turns and utterances exist, and parents are set
-    // if (!turnLayerMapped && !utteranceLayerMapped && wordLayerMapped) TODO construct utterances
     if (wordLayerMapped && !turnLayerMapped && !utteranceLayerMapped) {
       // create utterances and turns from words
-         
+      
       // given there are no utterance/turn intervals, 
       // we assume that the tier name for words is the speaker name	 
       if (timers != null) timers.start("create turns/utterances");
       HashMap<String,Annotation> turnsByName = new HashMap<String,Annotation>();
       for (Annotation word : graph.all(wordLayer.getId())) {
+        
         String participantName = ((Tier)word.get("@tier")).getName();
         // if the tier name is something like "transcript - foo"...
         if (participantName.startsWith(word.getLayerId())) { // ... strip off the prefix
           participantName = participantName
             // strip off layer ID
-            .substring(word.getLayerId().length())
-            // trim spaces, dashes, etc.
-            .replaceAll("^\\W+","");
-        }
+            .substring(word.getLayerId().length());
+          // trim spaces, dashes, etc.
+          String withoutNonWordChars = participantName.replaceAll("^\\W+","");
+          // could be "word - foo" -> " - foo"
+          // but also could be "words" -> "s"
+          if (participantName.matches("^\\W.*") // starts with a non-word character
+              && withoutNonWordChars.length() > 1) { // leftover is plausibly a participant ID
+            participantName = withoutNonWordChars;
+          } else { // probable a "words" -> "s" case
+            participantName = IO.WithoutExtension(graph.getId());
+          }
+        } // tier name starts with layer name
+        
         Annotation turn = turnsByName.get(participantName);
-        if (turn == null) {
-          // create turn 
+        if (turn == null // no turn for this participant yet
+            || (utteranceThreshold > 0
+                && word.getStart().getOffset() - turn.getEnd().getOffset() > utteranceThreshold)) {
+          // new turn 
           turn = new Annotation(
-            null, participantName, turnLayer.getId(), graphStart.getId(), graphEnd.getId());
+            null, participantName, turnLayer.getId(),
+            utteranceThreshold > 0?word.getStartId():graphStart.getId(),
+            utteranceThreshold > 0?word.getEndId():graphEnd.getId());
           turn.setConfidence(Constants.CONFIDENCE_MANUAL);
           graph.addAnnotation(turn);
           turnsByName.put(participantName, turn);
@@ -1013,9 +1068,15 @@ public class TextGridSerialization
             .setConfidence(Constants.CONFIDENCE_MANUAL);;
           graph.addAnnotation(utterance);
         }
+        
         // set parent of word
-        word.setParent(turn);
-      } // next turn
+        word.setParent(turn);        
+        if (utteranceThreshold > 0) { // utterances//turns are being inferred
+          // update end of turn/utterance
+          turn.setEndId(word.getEndId());
+          turn.last(schema.getUtteranceLayerId()).setEndId(word.getEndId());
+        }
+      } // next word
       if (timers != null) timers.end("create turns/utterances");
     } else if (turnLayerMapped && !utteranceLayerMapped) { // create utterances from turns
       if (timers != null) timers.start("create utterances from turns");

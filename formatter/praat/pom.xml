@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.praat</artifactId>
   <name>nzilbb.formatter.praat</name>
-  <version>2.6.7</version>
+  <version>2.6.8</version>
 
   <properties>
     <package.path>nzilbb/formatter/praat/</package.path>
@@ -59,7 +59,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <trimStackTrace>false</trimStackTrace>
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>

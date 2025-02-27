@@ -71,7 +71,7 @@ public class TestTextGridSerialization {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("useConventions").setValue(Boolean.TRUE);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -310,7 +310,7 @@ public class TestTextGridSerialization {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("useConventions").setValue(Boolean.FALSE);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -405,7 +405,7 @@ public class TestTextGridSerialization {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("useConventions").setValue(Boolean.TRUE);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -489,7 +489,7 @@ public class TestTextGridSerialization {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("useConventions").setValue(Boolean.TRUE);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -580,7 +580,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -673,8 +673,6 @@ public class TestTextGridSerialization {
     Annotation[] phones = g.all("segment");
     assertEquals("phones", 13, phones.length);
 
-    // participant
-
     assertEquals("phone", "I", phones[0].getLabel());
     assertEquals("phone parent", "is", phones[0].getParent().getLabel());
     assertEquals("phone", "z", phones[1].getLabel());
@@ -733,7 +731,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -852,7 +850,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
       
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -880,7 +878,8 @@ public class TestTextGridSerialization {
 
     // participants     
     Annotation[] who = g.all("who");
-    assertEquals(2, who.length);
+    assertEquals("Correct number of speakers: " + Arrays.asList(who),
+                 2, who.length);
     assertEquals("participant", who[0].getLabel());
     assertEquals(g, who[0].getParent());
     assertEquals("interviewer", who[1].getLabel());
@@ -894,7 +893,7 @@ public class TestTextGridSerialization {
       
     // turns
     Annotation[] turns = g.all("turn");
-    assertEquals(2, turns.length);
+    assertEquals(20, turns.length);
     assertEquals("participant", turns[0].getLabel());
     assertEquals(who[0], turns[0].getParent());
     assertEquals("interviewer", turns[1].getLabel());
@@ -902,7 +901,7 @@ public class TestTextGridSerialization {
 
     // utterances
     Annotation[] utterances = g.all("utterance");
-    assertEquals(2, utterances.length);
+    assertEquals(20, utterances.length);
     assertEquals("participant", utterances[0].getParent().getLabel());
     assertEquals(turns[0], utterances[0].getParent());
     assertEquals("interviewer", utterances[1].getParent().getLabel());
@@ -960,7 +959,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -1159,7 +1158,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -1395,7 +1394,13 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals("Default utteranceThreshold",
+                 Double.valueOf(0.5), configuration.get("utteranceThreshold").getValue());
+    // no utterance inference
+    configuration.get("utteranceThreshold").setValue(Double.valueOf(0.0));
+    assertEquals(8, deserializer.configure(configuration, schema).size());
+    assertEquals("utteranceThreshold",
+                 Double.valueOf(0.0), deserializer.getUtteranceThreshold());
 
     // load the stream
     ParameterSet parameters = deserializer.load(streams, schema);
@@ -1516,6 +1521,126 @@ public class TestTextGridSerialization {
     }
   }
 
+  /** Test MFA-style full TextGrid, with words/phones tier, 
+   * ensuring participant ID and utterances are inferred. */
+  @Test public void mfa()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      // tiers are called "phones" but layer is called "segment",
+      // but they should map by default despite the different names
+      new Layer("segment", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
+
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "test_mfa.TextGrid")) };
+      
+    // create deserializer
+    TextGridSerialization deserializer = new TextGridSerialization();
+      
+    // general configuration
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
+
+    // load the stream
+    ParameterSet defaultParamaters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParamaters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals("words tier is mapped by default",
+                 "word", ((Layer)defaultParamaters.get("tier0").getValue()).getId());
+    assertEquals("phones tier is mapped by default",
+                 "segment", ((Layer)defaultParamaters.get("tier1").getValue()).getId());
+    assertEquals(2, defaultParamaters.size());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParamaters);
+      
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+    
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+    assertEquals("No warnings",
+                 0, deserializer.getWarnings().length);
+    
+    assertEquals("test_mfa.TextGrid", g.getId());
+    
+    // participants     
+    Annotation[] who = g.all("who");
+    assertEquals(1, who.length);
+    assertEquals("Participant is named after file",
+                 "test_mfa", who[0].getLabel());
+    assertEquals(g, who[0].getParent());
+      
+    // turns
+    Annotation[] turns = g.all("turn");
+    assertEquals("Multiple turns", 19, turns.length);
+    assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+    assertEquals(Double.valueOf(2.2390000000000043), turns[0].getEnd().getOffset());
+    assertEquals("test_mfa", turns[0].getLabel());
+    assertEquals(who[0], turns[0].getParent());
+      
+    assertEquals(Double.valueOf(2.75), turns[1].getStart().getOffset());
+    assertEquals(Double.valueOf(41.81199999999998), turns[1].getEnd().getOffset());
+    assertEquals("test_mfa", turns[1].getLabel());
+    assertEquals(who[0], turns[1].getParent());
+
+    // utterances
+    Annotation[] utterances = g.all("utterance");    
+    assertEquals("Multiple utterances", turns.length, utterances.length);
+    // one utterance per turn
+    for (int i = 0; i < turns.length; i++) {      
+      assertEquals("utterance " + i + " start",
+                   turns[i].getStartId(), utterances[i].getStartId());
+      assertEquals("utterance " + i + " end",
+                   turns[i].getEndId(), utterances[i].getEndId());
+      assertEquals("utterance " + i + " label",
+                   turns[i].getLabel(), utterances[i].getLabel());
+      assertEquals("utterance " + i + " parent",
+                   turns[i].getId(), utterances[i].getParentId());
+    }
+
+    Annotation[] words = g.all("word");
+    String[] wordLabels = {
+      "wsa's", "a", "labarapa", "alb", "kal", "kal", "appaal", "pa", "avarybaby",
+      "a", "asab", "pa", "pall", "sksaal", "basprakps", "wsal", "a", "walp", "al" 
+    };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
+      if (i < 9) { // first utterance/turn
+        assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+                     i+1, words[i].getOrdinal());
+        assertEquals(turns[0].getId(), words[i].getParentId());
+      } else { // second utterance/turn
+        assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+                     i-8, words[i].getOrdinal());
+        assertEquals(turns[1].getId(), words[i].getParentId());
+      }
+    }
+
+    // phones
+    Annotation[] phones = g.all("segment");
+    assertEquals("number of phones", 2325, phones.length);
+
+    assertEquals("phone", "s", phones[0].getLabel());
+    assertEquals("phone parent", "wsa's", phones[0].getParent().getLabel());
+    assertEquals("phone", "a", phones[1].getLabel());
+    assertEquals("phone parent", "wsa's", phones[1].getParent().getLabel());
+  }
+
   /** Test that a TextGrid with only annotation intervals, no turns/utterances/words, can
    * be deserialized.  */
   @Test public void intervals_only()  throws Exception {
@@ -1562,7 +1687,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
     
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -1631,7 +1756,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, deserializer.configure(configuration, schema).size());
+    assertEquals(8, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -1692,7 +1817,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, serializer.configure(configuration, schema).size());
+    assertEquals(8, serializer.configure(configuration, schema).size());
 
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(4, needLayers.length);
@@ -1759,7 +1884,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, serializer.configure(configuration, schema).size());
+    assertEquals(8, serializer.configure(configuration, schema).size());
 
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(4, needLayers.length);
@@ -1827,7 +1952,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, serializer.configure(configuration, schema).size());
+    assertEquals(8, serializer.configure(configuration, schema).size());
 
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(4, needLayers.length);
@@ -1899,7 +2024,7 @@ public class TestTextGridSerialization {
     // test invalid peer overlap allowance too
     // i.e. in "Cyril would", "would" starts on its own tier because it starts before "Cyril" ends
     configuration.get("allowPeerOverlap").setValue(Boolean.TRUE);
-    assertEquals(7, serializer.configure(configuration, schema).size());
+    assertEquals(8, serializer.configure(configuration, schema).size());
 
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(4, needLayers.length);
@@ -1967,7 +2092,9 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(7, serializer.configure(configuration, schema).size());
+    assertEquals("Default utteranceThreshold",
+                 Double.valueOf(0.5), configuration.get("utteranceThreshold").getValue());
+    assertEquals(8, serializer.configure(configuration, schema).size());
 
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(4, needLayers.length);
