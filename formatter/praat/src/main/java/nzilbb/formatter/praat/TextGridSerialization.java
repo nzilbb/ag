@@ -1050,23 +1050,42 @@ public class TextGridSerialization
         
         Annotation turn = turnsByName.get(participantName);
         if (turn == null // no turn for this participant yet
-            || (utteranceThreshold > 0
+            || (utteranceThreshold > 0 // or gap is more than the utterance threshold
                 && word.getStart().getOffset() - turn.getEnd().getOffset() > utteranceThreshold)) {
-          // new turn 
+          // new turn
+          Anchor newTurnStart = graphStart;
+          Anchor newTurnEnd = graphEnd;
+          if (utteranceThreshold > 0) { // utterance threshold breached
+            if (turn != null) { // there is a previous turn
+              // new turn starts a little before the word - up to utteranceThreshold before
+              newTurnStart  = graph.getOrCreateAnchorAt(
+                word.getStart().getOffset() - Math.min(
+                  (word.getStart().getOffset() - turn.getEnd().getOffset()) / 2,
+                  utteranceThreshold),
+                Constants.CONFIDENCE_MANUAL);
+              // old turn ends a littel after the last word - up to utteranceThreshold after
+              turn.setEnd(
+                graph.getOrCreateAnchorAt(
+                  turn.getEnd().getOffset() + Math.min(
+                    (word.getStart().getOffset() - turn.getEnd().getOffset()) / 2,
+                    utteranceThreshold),
+                  Constants.CONFIDENCE_MANUAL));
+            } else { // no previous turn
+              if (word.getStart().getOffset() - utteranceThreshold / 2 > 0) {
+                // new turn starts a little before the word - up to utteranceThreshold before
+                newTurnStart  = graph.getOrCreateAnchorAt(
+                  word.getStart().getOffset() - utteranceThreshold / 2,
+                  Constants.CONFIDENCE_MANUAL);
+              }
+            } // no previous turn
+            newTurnEnd = word.getEnd();
+          }
           turn = new Annotation(
-            null, participantName, turnLayer.getId(),
-            utteranceThreshold > 0?word.getStartId():graphStart.getId(),
-            utteranceThreshold > 0?word.getEndId():graphEnd.getId());
+            null, participantName, turnLayer.getId(), newTurnStart.getId(), newTurnEnd.getId());
           turn.setConfidence(Constants.CONFIDENCE_MANUAL);
           graph.addAnnotation(turn);
           turnsByName.put(participantName, turn);
 
-          // create utterance
-          Annotation utterance = new Annotation(turn);
-          utterance.setLayerId(utteranceLayer.getId())
-            .setParentId(turn.getId())
-            .setConfidence(Constants.CONFIDENCE_MANUAL);;
-          graph.addAnnotation(utterance);
         }
         
         // set parent of word
@@ -1074,9 +1093,18 @@ public class TextGridSerialization
         if (utteranceThreshold > 0) { // utterances//turns are being inferred
           // update end of turn/utterance
           turn.setEndId(word.getEndId());
-          turn.last(schema.getUtteranceLayerId()).setEndId(word.getEndId());
         }
       } // next word
+      
+      // now create an utterance per turn
+      for (Annotation turn : graph.all(turnLayer.getId())) {
+        // create utterance
+        Annotation utterance = new Annotation(
+          null, turn.getLabel(), utteranceLayer.getId(), turn.getStartId(), turn.getEndId())
+          .setParentId(turn.getId());
+        utterance.setConfidence(Constants.CONFIDENCE_MANUAL);
+        graph.addAnnotation(utterance);
+      } // next turn
       if (timers != null) timers.end("create turns/utterances");
     } else if (turnLayerMapped && !utteranceLayerMapped) { // create utterances from turns
       if (timers != null) timers.start("create utterances from turns");

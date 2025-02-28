@@ -894,7 +894,8 @@ public class TestTextGridSerialization {
     // turns
     Annotation[] turns = g.all("turn");
     assertEquals(20, turns.length);
-    assertEquals("participant", turns[0].getLabel());
+    assertEquals("correct label " + turns[0].getStart()+"-"+turns[0].getEnd(),
+                 "participant", turns[0].getLabel());
     assertEquals(who[0], turns[0].getParent());
     assertEquals("interviewer", turns[1].getLabel());
     assertEquals(who[1], turns[1].getParent());
@@ -1587,31 +1588,45 @@ public class TestTextGridSerialization {
       
     // turns
     Annotation[] turns = g.all("turn");
-    assertEquals("Multiple turns", 19, turns.length);
-    assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
-    assertEquals(Double.valueOf(2.2390000000000043), turns[0].getEnd().getOffset());
-    assertEquals("test_mfa", turns[0].getLabel());
-    assertEquals(who[0], turns[0].getParent());
+    assertEquals("Multiple turns", 10, turns.length);
+    assertEquals("first turn start",
+                 Double.valueOf(0.0), turns[0].getStart().getOffset());
+    assertEquals("first turn end",
+                 Double.valueOf(69.38499999999999), turns[0].getEnd().getOffset());
+    assertEquals("first turn label", "test_mfa", turns[0].getLabel());
+    assertEquals("first turn parent", who[0], turns[0].getParent());
       
-    assertEquals(Double.valueOf(2.75), turns[1].getStart().getOffset());
-    assertEquals(Double.valueOf(41.81199999999998), turns[1].getEnd().getOffset());
-    assertEquals("test_mfa", turns[1].getLabel());
-    assertEquals(who[0], turns[1].getParent());
+    assertEquals("second turn start",
+                 Double.valueOf(76.24799999999999), turns[1].getStart().getOffset());
+    assertEquals("second turn end",
+                 Double.valueOf(108.76899999999998), turns[1].getEnd().getOffset());
+    assertEquals("second turn label", "test_mfa", turns[1].getLabel());
+    assertEquals("second turn parent", who[0], turns[1].getParent());
 
     // utterances
     Annotation[] utterances = g.all("utterance");    
-    assertEquals("Multiple utterances", turns.length, utterances.length);
-    // one utterance per turn
-    for (int i = 0; i < turns.length; i++) {      
-      assertEquals("utterance " + i + " start",
-                   turns[i].getStartId(), utterances[i].getStartId());
-      assertEquals("utterance " + i + " end",
-                   turns[i].getEndId(), utterances[i].getEndId());
-      assertEquals("utterance " + i + " label",
-                   turns[i].getLabel(), utterances[i].getLabel());
-      assertEquals("utterance " + i + " parent",
-                   turns[i].getId(), utterances[i].getParentId());
-    }
+    assertEquals("Multiple utterances", 19, utterances.length);
+    assertEquals("first utterance start",
+                 Double.valueOf(0.0), utterances[0].getStart().getOffset());
+    assertEquals("first utterance end",
+                 Double.valueOf(2.494500000000002), utterances[0].getEnd().getOffset());
+    assertEquals("first utterance label", "test_mfa", utterances[0].getLabel());
+    assertEquals("first utterance parent", turns[0], utterances[0].getParent());
+      
+    assertEquals("second utterance start shared with first end",
+                 utterances[0].getEnd(), utterances[1].getStart());
+    assertEquals("second utterance end",
+                 Double.valueOf(42.08090699999998), utterances[1].getEnd().getOffset());
+    assertEquals("second utterance label", "test_mfa", utterances[1].getLabel());
+    assertEquals("second utterance parent", turns[0], utterances[1].getParent());
+
+    assertEquals("fifth utterance end",
+                 Double.valueOf(69.38499999999999), utterances[4].getEnd().getOffset());
+    assertEquals("fifth utterance parent", turns[0], utterances[4].getParent());
+    assertEquals("sixth utterance start",
+                 Double.valueOf(76.24799999999999), utterances[5].getStart().getOffset());
+    assertEquals("sixth utterance different parent", turns[1], utterances[5].getParent());
+
 
     Annotation[] words = g.all("word");
     String[] wordLabels = {
@@ -1620,15 +1635,9 @@ public class TestTextGridSerialization {
     };
     for (int i = 0; i < wordLabels.length; i++) {
       assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
-      if (i < 9) { // first utterance/turn
-        assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
-                     i+1, words[i].getOrdinal());
-        assertEquals(turns[0].getId(), words[i].getParentId());
-      } else { // second utterance/turn
-        assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
-                     i-8, words[i].getOrdinal());
-        assertEquals(turns[1].getId(), words[i].getParentId());
-      }
+      assertEquals("Correct ordinal: " + i + " " + words[i].getLabel(), 
+                   i+1, words[i].getOrdinal());
+      assertEquals(turns[0].getId(), words[i].getParentId());
     }
 
     // phones
