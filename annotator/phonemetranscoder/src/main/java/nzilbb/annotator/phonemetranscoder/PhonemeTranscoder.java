@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -523,8 +523,11 @@ public class PhonemeTranscoder extends Annotator {
       setStatus(sourceLayerId + " ("+translator.getSourceEncoding()+") → "
                 + destinationLayerId + " ("+translator.getDestinationEncoding()+")");
       for (Annotation token : toAnnotate) {
-        token.createTag(destinationLayerId, translator.apply(token.getLabel()))
-          .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+        String label = translator.apply(token.getLabel());
+        if (label.length() > 0) {
+          token.createTag(destinationLayerId, label)
+            .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+        }
       } // next token
       return graph;
     } finally {

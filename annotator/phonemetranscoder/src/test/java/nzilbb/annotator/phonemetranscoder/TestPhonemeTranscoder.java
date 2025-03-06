@@ -322,6 +322,7 @@ public class TestPhonemeTranscoder {
   /** 
    * Ensure custom mapping of source to destination characters, ignoring unknown
    * characters, works. 
+   * This includes a test for not saving blank labelled annotations.
    */
   @Test public void customTranscodingWithoutCopy() throws Exception {
     
@@ -344,7 +345,7 @@ public class TestPhonemeTranscoder {
       +"{\"source\":\"th\",\"destination\":\"ð\"},"
       +"{\"source\":\"er\",\"destination\":\"ɛǝ\"},"
       +"{\"source\":\"e\",\"destination\":\"i\"},"
-      +"{\"source\":\"a\",\"destination\":\"ǝ\"},"
+      // not "a" so that a label would be blank: +"{\"source\":\"a\",\"destination\":\"ǝ\"},"
       +"{\"source\":\"tio\",\"destination\":\"ʃ\"},"
       +"{\"source\":\"ll\",\"destination\":\"l\"},"
       +"{\"source\":\"'\",\"destination\":\"\"}"
@@ -399,18 +400,24 @@ public class TestPhonemeTranscoder {
     List<String> pronLabels = Arrays.stream(g.all("custom"))
       .map(annotation->annotation.getLabel()).collect(Collectors.toList());
     assertEquals("Correct number of tags "+pronLabels,
-                 4, pronLabels.size());
+                 3, pronLabels.size());
     Iterator<String> prons = pronLabels.iterator();
     assertEquals("ðɛǝil", prons.next());
     assertEquals("i", prons.next());
-    assertEquals("ǝ", prons.next());
-    assertEquals("ǝʃ", prons.next());
+    // no pronunciation for "a": assertEquals("ǝ", prons.next());
+    assertEquals("ʃ", prons.next());
     
     // check parents
     Annotation words[] = g.all("word");
     Annotation tags[] = g.all("custom");
     for (int w = 0; w < words.length; w++) {
-      assertEquals("Parent of tag " + w, words[w], tags[w].getParent());
+      if (w < 2) {
+        assertEquals("Parent of tag " + w, words[w], tags[w].getParent());
+      } else if (w == 2) {  // "a" skipped
+        assertNull("No tag for " + w, words[w].first("custom"));
+      } else {// if (w > 2) 
+        assertEquals("Parent of tag " + w, words[w], tags[w-1].getParent());
+      }
     }
   }
 
