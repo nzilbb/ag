@@ -1,6 +1,7 @@
 
 {
     "id": "005-ReuploadSplitTurns",
+    "offsetUnits": "s",
     "schema": {
         "participantLayerId": "who",
         "turnLayerId": "turns",

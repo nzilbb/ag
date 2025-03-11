@@ -1,6 +1,7 @@
 
 {
     "id": "SOU_T2_BXHT82OR_SR_02122020__22_436_25_893.TextGrid",
+    "offsetUnits": "s",
     "offsetGranularity": 0.001,
     "schema": {
         "participantLayerId": "who",

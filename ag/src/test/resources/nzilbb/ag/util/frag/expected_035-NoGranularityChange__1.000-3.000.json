@@ -1,6 +1,7 @@
 
 {
     "id": "034-GranularityNoChange__1.000-3.000",
+    "offsetUnits": "s",
     "schema": {
         "participantLayerId": "who",
         "turnLayerId": "turns",

@@ -1,6 +1,7 @@
 
 {
     "id": "130-CorrectAlignmentsAndLabels__64.310-67.260.TextGrid",
+    "offsetUnits": "s",
     "offsetGranularity": 0.001,
     "schema": {
         "participantLayerId": "participant",

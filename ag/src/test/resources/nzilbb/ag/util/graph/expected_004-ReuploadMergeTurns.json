@@ -1,6 +1,7 @@
 
 {
     "id": "004-ReuploadMergeTurns",
+    "offsetUnits": "s",
     "schema": {
         "participantLayerId": "who",
         "turnLayerId": "turns",

@@ -1,6 +1,7 @@
 
 {
     "id": "002-ReuploadRealignTurns",
+    "offsetUnits": "s",
     "schema": {
         "participantLayerId": "who",
         "turnLayerId": "turns",

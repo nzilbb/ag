@@ -1,6 +1,7 @@
 
 {
     "id": "017-HtkSimpleNoSegmentsLayers__10.000-70.000",
+    "offsetUnits": "s",
     "schema": {
         "participantLayerId": "who",
         "turnLayerId": "turns",
