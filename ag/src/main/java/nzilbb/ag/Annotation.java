@@ -1285,9 +1285,12 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
   public Annotation getNext() {
     Annotation parent = getParent();
     if (parent == null) return null;
-    SortedSet<Annotation> subsequent = parent.getAnnotations(getLayerId()).tailSet(this);
+    SortedSet<Annotation> peers = parent.getAnnotations(getLayerId());
+    // if (peers == null) return null;
+    assert peers != null : "peers != null: " + getId() + "["+getLayerId()+"]:"+getLabel()+" parent:"+parent.getId() + "["+parent.getLayerId()+"]:"+parent.getLabel();
+    SortedSet<Annotation> subsequent = peers.tailSet(this);
     // the first element in subsequent is this annotation - we want the second.
-    if (subsequent.size() == 1) return null;
+    if (subsequent.size() <= 1) return null;
     Iterator<Annotation> iSubsequent = subsequent.iterator();
     iSubsequent.next(); // move past first
     return iSubsequent.next();
