@@ -1094,12 +1094,10 @@ public class Validator extends Transform implements GraphTransformer {
       assert child.getAnchored()
         : "child.getAnchored() " + child.getLayerId() + ":" + child + " " + child.getStart()
         + " - " + child.getEnd();
-      assert candidate.getAnchored()
-        : "candidate.getAnchored() " + candidate + " " + candidate.getStart()
-        + " - " + candidate.getEnd();
-      if (nearestCandidate == null
-          || (nearestCandidate.getAnchored()
-              && child.distance(candidate) < child.distance(nearestCandidate))) {
+      if (candidate.getAnchored()
+          && (nearestCandidate == null
+              || (nearestCandidate.getAnchored()
+                  && child.distance(candidate) < child.distance(nearestCandidate)))) {
         nearestCandidate = candidate;
       }
     } // next candidate

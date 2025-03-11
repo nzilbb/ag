@@ -1443,6 +1443,20 @@ public class Merger extends Transform implements GraphTransformer {
       // TODO test case for this - insert Anew before Aold, they have same ordinals but Anew.start > original Aold.start
       Annotation anOriginal = GetCounterpart(anEdited);
       if (anOriginal.getOrdinal() != anEdited.getOrdinal()) {
+        Annotation anOriginalParent = anOriginal.getParent();
+        Annotation anEditedParent = anEdited.getParent();
+        if (anOriginalParent != null && anEdited != null) {
+          Annotation anEditedParentCounterpart = GetCounterpart(anEditedParent);
+          if (anEditedParentCounterpart != null
+              && anEditedParentCounterpart != anOriginalParent
+              && Annotation.NotDestroyed(anEditedParentCounterpart)
+              // the schema's might not totally agree, c.f. TestMerger#extractedFragmentMerge
+              && anEditedParentCounterpart.getLayerId().equals(layer.getParentId())) {
+            log(layerId, ": changing parent of: ", anOriginal,
+                " from ", anOriginalParent, " to ", anEditedParentCounterpart);
+            anOriginal.setParent(anEditedParentCounterpart);
+          } // parent has changed
+        } // there are parents in both graphs
         log(layerId, ": changing ordinal of: ", anOriginal,
             " from ", anOriginal.getOrdinal(), " to ", anEdited.getOrdinal());
         anOriginal.setOrdinal(anEdited.getOrdinal());
@@ -2413,7 +2427,10 @@ public class Merger extends Transform implements GraphTransformer {
                      && layer.getSaturated())
                     || (parallelLayer != null && parallelLayer.getParentId().equals(layerId)
                         && parallelLayer.getSaturated())) {
-                  if (!layer.getParentId().equals(anEditedParallel.getLayerId())) {
+                  if (!layer.getParentId().equals(anEditedParallel.getLayerId())
+                      // is the edited annotation actually the parent?
+                      && anEditedParallel.getParentId().equals(anEdited.getId())
+                    ) {
                     // parent layer 
                     bCheckEndAnchorOffset = false;
                     log(layerId, ": For ", anOriginal,
