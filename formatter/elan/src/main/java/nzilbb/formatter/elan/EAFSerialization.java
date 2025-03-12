@@ -947,6 +947,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                   attributeName.toLowerCase(), "participant_"+attributeName.toLowerCase(),
                   "transcript_"+attributeName.toLowerCase()
                 };
+                p.setPossibleValues(vPossibleLayers);
                 p.setValue(Utility.FindLayerById(
                              attributeLayers, Arrays.asList(attributePossibilities)));
                 mappings.addParameter(p);
