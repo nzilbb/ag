@@ -2196,6 +2196,7 @@ public class Validator extends Transform implements GraphTransformer {
   public void checkForFloatingUtterances(Graph graph) throws TransformationException {
     if (graph.getSchema().getTurnLayerId() != null) {
       for (Annotation a : graph.list(graph.getSchema().getTurnLayerId())) {
+        if (a.getChange() == Change.Operation.Destroy) continue;
         String error = null;
         if (a.getStart() != null) {
           if (a.getStart().getOffset() == null) {
@@ -2224,6 +2225,8 @@ public class Validator extends Transform implements GraphTransformer {
     }
     if (graph.getSchema().getUtteranceLayerId() != null) {
       for (Annotation a : graph.list(graph.getSchema().getUtteranceLayerId())) {
+        if (a.getChange() == Change.Operation.Destroy) continue;
+        
         String error = null;
         if (a.getStart() != null) {
           if (a.getStart().getOffset() == null) {
