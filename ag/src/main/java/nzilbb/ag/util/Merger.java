@@ -1452,9 +1452,7 @@ public class Merger extends Transform implements GraphTransformer {
               && Annotation.NotDestroyed(anEditedParentCounterpart)
               // the schema's might not totally agree, c.f. TestMerger#extractedFragmentMerge
               && anEditedParentCounterpart.getLayerId().equals(layer.getParentId())) {
-            log(layerId, ": changing parent of: ", anOriginal,
-                " from ", anOriginalParent, " to ", anEditedParentCounterpart);
-            anOriginal.setParent(anEditedParentCounterpart);
+            changeParentWithRelatedAnnotations(anOriginal, anEditedParentCounterpart);
           } // parent has changed
         } // there are parents in both graphs
         log(layerId, ": changing ordinal of: ", anOriginal,
@@ -1687,8 +1685,7 @@ public class Merger extends Transform implements GraphTransformer {
       .filter(a -> a != annotation)
       .filter(a -> !a.getLayerId().equals(annotation.getLayerId()))
       .filter(a -> !layerIdsToExclude.contains(a.getLayerId()))
-      .filter(a -> {
-          // do they have a relationship that would actually preclude sharing?
+      .filter(a -> { // do they have a relationship that would actually preclude sharing?
           Layer otherLayer = annotation.getGraph().getLayer(a.getLayerId());
           if (layer != null && otherLayer != null) {
             if (layer.getParentId().equals(otherLayer.getId())) {
@@ -1702,6 +1699,11 @@ public class Merger extends Transform implements GraphTransformer {
               
               // other belongs to another parent
               if (!annotation.getId().equals(a.getParentId())) return false;
+            } else if (otherLayer.getParentId().equals(layer.getParentId())) {
+              // these layers share a parent layer
+              
+              // avoid moving tags that (now) have a different parent
+              if (!annotation.getParentId().equals(a.getParentId())) return false;
             }
           }
           return true;
@@ -1824,6 +1826,27 @@ public class Merger extends Transform implements GraphTransformer {
     } // excluding this layer
     
   } // end of changeStartWithRelatedAnnotations()
+
+  /**
+   * Sets the parent of the given annotation, and also the parents of related annotations
+   * that have the same start/end anchors and same original parent - e.g. a forced-alignment
+   * tag of an utterance that's moving to a new turn. 
+   * @param annotation The annotation whose parent should be changed.
+   * @param newParent The new parent.
+   */
+  public void changeParentWithRelatedAnnotations(Annotation annotation, Annotation newParent) {
+    Annotation originalParent = annotation.getParent();
+    if (newParent == originalParent) return;
+    log(annotation.getLayerId(), ": changing parent of: ", annotation,
+        " from ", originalParent, " to ", newParent);
+    annotation.setParent(newParent);
+    for (Annotation tag : annotation.allTags()) {
+      if (originalParent.getId().equals(tag.getParentId())) {
+        tag.setParent(newParent);
+        log("Changing parent of tag: ", tag, " too");
+      }
+    }
+  }
 
   /**
    * PHASE 3: Check annotation labels against their counterparts, and sets

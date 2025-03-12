@@ -25,8 +25,8 @@
                             "parentIncludes": true,
                             "saturated": false,
                             "children": {
-                                "language": {
-                                    "description": "Language",
+                                "htk": {
+                                    "description": "HTK Alignment",
                                     "alignment": 2,
                                     "peers": true,
                                     "peersOverlap": false,
@@ -273,13 +273,20 @@
                     "startId": "n_1010",
                     "endId": "n_1400",
                     "confidence": 100,
-                    "language": [
+                    "htk": [
                         {
                             "id": "em_20_1",
-                            "label": "es",
-                            "startId": "n_1030",
-                            "endId": "n_1060",
-                            "confidence": 100
+                            "label": "alignment 1",
+                            "startId": "n_1010",
+                            "endId": "n_1040",
+                            "confidence": 50
+                        },
+                        {
+                            "id": "em_20_2",
+                            "label": "alignment 2",
+                            "startId": "n_1300",
+                            "endId": "n_1400",
+                            "confidence": 50
                         }
                     ],
                     "token": [

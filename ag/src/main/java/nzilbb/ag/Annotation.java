@@ -1576,6 +1576,28 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
   } // end of tagsOn()
    
   /**
+   * Finds all annotations on any layer that tag this annotation; where start
+   * and end anchors are shared. Annotations marked for deletion are ignored. 
+   * <p>A precondition is that the annotation's {@link #graph} is set.
+   * @return A list of annotations on any layer that tag this annotation.
+   */
+  public Annotation[] allTags() {
+    Vector<Annotation> tags = new Vector<Annotation>();
+    Anchor start = getStart();
+    if (start != null) {
+      String endId = getEndId();
+      for (Annotation other : start.getStartingAnnotations()) {
+        if (other.getChange() == Change.Operation.Destroy) continue;
+        if (other == this) continue; // exclude ourselves
+        if (other.getEndId().equals(endId)) {
+          tags.add(other);
+        }
+      } // next annotation
+    }
+    return tags.toArray(new Annotation[0]);
+  } // end of tagsOn()
+   
+  /**
    * Determines the first ancestor annotation this annotation has in common with the
    * given annotation. This may return the graph itself, if there are no earlier common
    * ancestors. "Ancestors" is inclusive in the sense that if either annotation is an
