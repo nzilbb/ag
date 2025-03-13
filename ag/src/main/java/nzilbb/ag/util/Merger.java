@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1438,23 +1438,23 @@ public class Merger extends Transform implements GraphTransformer {
         } // mapped, and the last one was a change
       } // not a new annotation
 	 
-      // copy ordinals - these will be updated later, but this ensures that annotations
-      // come out in order for following operations, despite crazy anchor values
+      // check parent, copy ordinals - these will be updated later, but this ensures that 
+      // annotations come out in order for following operations, despite crazy anchor values
       // TODO test case for this - insert Anew before Aold, they have same ordinals but Anew.start > original Aold.start
       Annotation anOriginal = GetCounterpart(anEdited);
+      Annotation anOriginalParent = anOriginal.getParent();
+      Annotation anEditedParent = anEdited.getParent();
+      if (anOriginalParent != null && anEdited != null) {
+        Annotation anEditedParentCounterpart = GetCounterpart(anEditedParent);
+        if (anEditedParentCounterpart != null
+            && anEditedParentCounterpart != anOriginalParent
+            && Annotation.NotDestroyed(anEditedParentCounterpart)
+            // the schema's might not totally agree, c.f. TestMerger#extractedFragmentMerge
+            && anEditedParentCounterpart.getLayerId().equals(layer.getParentId())) {
+          changeParentWithRelatedAnnotations(anOriginal, anEditedParentCounterpart);
+        } // parent has changed
+      } // there are parents in both graphs
       if (anOriginal.getOrdinal() != anEdited.getOrdinal()) {
-        Annotation anOriginalParent = anOriginal.getParent();
-        Annotation anEditedParent = anEdited.getParent();
-        if (anOriginalParent != null && anEdited != null) {
-          Annotation anEditedParentCounterpart = GetCounterpart(anEditedParent);
-          if (anEditedParentCounterpart != null
-              && anEditedParentCounterpart != anOriginalParent
-              && Annotation.NotDestroyed(anEditedParentCounterpart)
-              // the schema's might not totally agree, c.f. TestMerger#extractedFragmentMerge
-              && anEditedParentCounterpart.getLayerId().equals(layer.getParentId())) {
-            changeParentWithRelatedAnnotations(anOriginal, anEditedParentCounterpart);
-          } // parent has changed
-        } // there are parents in both graphs
         log(layerId, ": changing ordinal of: ", anOriginal,
             " from ", anOriginal.getOrdinal(), " to ", anEdited.getOrdinal());
         anOriginal.setOrdinal(anEdited.getOrdinal());
@@ -2114,22 +2114,44 @@ public class Merger extends Transform implements GraphTransformer {
               final Anchor finalMatchingMergedAnchor = matchingMergedAnchor.get();
               // this, and all parallel annotation on *unrelated* layers come with us
               anOriginal.getStart().startingAnnotations()
+                // not the same annotation
                 .filter(a -> a != anOriginal)
+                // not the same layer
+                .filter(a -> !a.getLayerId().equals(layerId))
                 // unrelated layer?
                 .filter(a -> {
                     Layer otherLayer = a.getLayer();
-                    if (!layer.getParentId().equals(otherLayer.getId())
-                        && !otherLayer.getParentId().equals(layerId)) {
-                      // if the layer is known to the edited graph,
-                      // only re-link if they share anchors in the edited graph too
-                      if (editedGraph.getLayer(a.getLayerId()) != null) {
-                        Annotation anEditedParallel = GetCounterpart(a);
-                        if (anEditedParallel == null
-                            || anEditedParallel.getStart() != anEdited.getStart()) 
-                          return false;
-                      } else { // non-edited layer
-                        // if it's already been changed, skip it
-                        if (a.getStart() != anOriginal.getStart()) return false;
+                    if (layer != null && otherLayer != null) {
+                      if (layer.getParentId().equals(otherLayer.getId())) {
+                        // other is parent layer to this
+                        
+                        // this belongs to another parent
+                        if (!a.getId().equals(anOriginal.getParentId())) return false;
+                        
+                      } else if (otherLayer.getParentId().equals(layer.getId())) {
+                        // this is parent layer to other
+                        
+                        // other belongs to another parent
+                        if (!anOriginal.getId().equals(a.getParentId())) return false;
+                      } else {
+                        // if the layer is known to the edited graph,
+                        // only re-link if they share anchors in the edited graph too
+                        if (editedGraph.getLayer(a.getLayerId()) != null) {
+                          Annotation anEditedParallel = GetCounterpart(a);
+                          if (anEditedParallel == null
+                              || anEditedParallel.getStart() != anEdited.getStart()) 
+                            return false;
+                        } else { // non-edited layer
+                          // if it's already been changed, skip it
+                          if (a.getStart() != anOriginal.getStart()) return false;
+                        }
+                        
+                        if (otherLayer.getParentId().equals(layer.getParentId())) {
+                          // these layers share a parent layer
+                          
+                          // avoid moving tags that (now) have a different parent
+                          if (!anOriginal.getParentId().equals(a.getParentId())) return false;
+                        }
                       }
                     }
                     return true;
@@ -2243,9 +2265,19 @@ public class Merger extends Transform implements GraphTransformer {
                     if (editedParallelAnnotation != null) {
                       // only if they're not linked in the edited graph
                       if (editedParallelAnnotation.getStart() != anEdited.getStart()) {
-                        parallelAnnotation.setStart(finalNewAnchor2);
                         log(layerId, ": Different start anchor for ", anOriginal,
-                            ": new anchor for starting ", parallelAnnotation);
+                            ": new anchor for starting ", parallelAnnotation,
+                            " (", finalNewAnchor2, ")");
+                        // tags too (which might not be in the edited graph)
+                        for (Annotation tag : parallelAnnotation.allTags()) {
+                          if (parallelAnnotation.getParentId().equals(tag.getParentId())
+                              && !HasCounterpart(tag)) {
+                            tag.setStart(finalNewAnchor2);
+                            log("Changing start of tag: ", tag, " too");
+                          }
+                        }
+                        parallelAnnotation.setStart(finalNewAnchor2);
+
                       } // they shouldn't be linked
                     } // there is a corresponding edited parallel annotation
                   });
@@ -2559,14 +2591,38 @@ public class Merger extends Transform implements GraphTransformer {
               if (finalMatchingMergedAnchor.isPresent()) {
                 // this, and all parallel annotation on *unrelated* layers come with us
                 anOriginal.getEnd().endingAnnotations()
+                  // not the same annotation
                   .filter(a -> a != anOriginal)
+                  // not the same layer
+                  .filter(a -> !a.getLayerId().equals(layerId))
                   // unrelated layer?
-                  .filter(a -> !layer.getParentId().equals(a.getLayerId())
-                          && a.getLayer().getParentId().equals(layerId))
+                  .filter(a -> {
+                      Layer otherLayer = a.getLayer();
+                      if (layer != null && otherLayer != null) {
+                        if (layer.getParentId().equals(otherLayer.getId())) {
+                          // other is parent layer to this
+                          
+                          // this belongs to another parent
+                          if (!a.getId().equals(anOriginal.getParentId())) return false;
+                          
+                        } else if (otherLayer.getParentId().equals(layer.getId())) {
+                          // this is parent layer to other
+                          
+                          // other belongs to another parent
+                          if (!anOriginal.getId().equals(a.getParentId())) return false;
+                        } else if (otherLayer.getParentId().equals(layer.getParentId())) {
+                          // these layers share a parent layer
+                          
+                          // avoid moving tags that (now) have a different parent
+                          if (!anOriginal.getParentId().equals(a.getParentId())) return false;
+                        }
+                      }
+                      return true;
+                    })
                   .collect(Collectors.toList()) // add to new collection to avoid concurrent mod.
                   .forEach(an -> {
                       log(layerId, ": Different end anchor for ", anOriginal,
-                          ": linking parallel ", an, " too");
+                          ": linking parallel ", an, "(", an.getLayerId(), ") too");
                       if (an.getInstantaneous()) { // instant
                         an.setStart(finalMatchingMergedAnchor.get());
                       }
