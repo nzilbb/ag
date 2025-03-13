@@ -512,6 +512,28 @@ public class HTKAligner extends Annotator {
   public HTKAligner setOverlapThreshold(Integer newOverlapThreshold) { overlapThreshold = newOverlapThreshold; return this; }
   
   /**
+   * Minimum duration for an utterance - shorter utterances will be ignored.
+   * Default is 0.001 (1 millisecond).
+   * @see #getMinimumUtteranceDuration()
+   * @see #setMinimumUtteranceDuration(Double)
+   */
+  protected Double minimumUtteranceDuration = Double.valueOf(0.001);
+  /**
+   * Getter for {@link #minimumUtteranceDuration}: Minimum duration for an utterance - 
+   * shorter utterances will be ignored. 
+   * Default is 0.001 (1 millisecond).
+   * @return Minimum duration for an utterance - shorter utterances will be ignored.
+   */
+  public Double getMinimumUtteranceDuration() { return minimumUtteranceDuration; }
+  /**
+   * Setter for {@link #minimumUtteranceDuration}: Minimum duration for an utterance -
+   * shorter utterances will be ignored. 
+   * @param newMinimumUtteranceDuration Minimum duration for an utterance - shorter
+   * utterances will be ignored. 
+   */
+  public HTKAligner setMinimumUtteranceDuration(Double newMinimumUtteranceDuration) { minimumUtteranceDuration = newMinimumUtteranceDuration; return this; }
+  
+  /**
    * What should happen with working files after training/alignment is finished.
    * <ul>
    *  <li> 100 - always delete files regardless of result </li>
@@ -1810,6 +1832,13 @@ public class HTKAligner extends Annotator {
                 +fragment.getId()+"\"");
               return;
             }
+            if (minimumUtteranceDuration != null
+                && fragment.getDuration() < minimumUtteranceDuration) {
+              setStatus(
+                "Fragment has a duration of only "+fragment.getDuration()+" and will be ignored: \""
+                +fragment.getId()+"\"");
+              return;
+            }            
             
             // simultaneous speech?
             if (overlapThreshold != null) {
