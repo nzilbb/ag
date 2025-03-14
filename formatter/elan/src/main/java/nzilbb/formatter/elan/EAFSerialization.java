@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -2275,12 +2275,15 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       .collect(Collectors.toList());
          
     boolean wordTokens
-      // if explicitly selected
-      = selectedLayers.contains(schema.getWordLayerId())
-      // or there are word tag layers selected
-      || wordTagLayers.size() > 0
+      // if there are word tag layers selected
+      = wordTagLayers.size() > 0
       // or there are segment layers selected
       || segmentLayers.size() > 0;
+
+    // ('word' is almost always explicitly selected by default, but if exporting
+    //  a transcript with no sub-word level annotations selected, most likely individual
+    //  word tokens are not wanted, and will cause problems if re-uploading later, so
+    //  we only include word tokens when word tags, segments, etc. are also selected)
 
     if (wordTokens) {
       // now word layer
