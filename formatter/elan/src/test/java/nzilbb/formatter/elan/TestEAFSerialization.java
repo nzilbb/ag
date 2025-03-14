@@ -1556,6 +1556,9 @@ public class TestEAFSerialization {
       new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(true)
       .setParentId("turn").setParentIncludes(true),
+      new Layer("language", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
       new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true),
@@ -1653,11 +1656,13 @@ public class TestEAFSerialization {
                                        graph.addAnchor(new Anchor("a8.5", 8.5)).getId(),
                                        "t2"));
 
-    // add some comments, noises, lexical and pronounce tags
+    // add some comments, noises, language, lexical, and pronounce tags
     // conventions are not (currently) reversed when serializing (i.e. they're only
     // supported during deserialization)
     graph.addAnnotation(new Annotation("comment1", "preamble", "comment", "a0", "a1"));
     graph.addAnnotation(new Annotation("noise1", "throat-clear", "noise", "a4", "a5"));
+    graph.addAnnotation(new Annotation("one-word-lang", "es", "language", "a2", "a3", "t1"));
+    graph.addAnnotation(new Annotation("multi-word-lang", "en", "language", "a6", "a8", "t1"));
     graph.addAnnotation(new Annotation("lex1", "lex-1-6", "lexical", "a6", "a7", "w1-6"));
     graph.addAnnotation(new Annotation("lex2", "lex-1-7", "lexical", "a7", "a8", "w1-7"));
     graph.addAnnotation(new Annotation("pron1", "pron-1-7", "pronounce", "a7", "a8", "w1-7"));
@@ -1693,8 +1698,8 @@ public class TestEAFSerialization {
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     assertEquals(11, serializer.configure(configuration, schema).size());
-    assertNull("phrase language",
-               configuration.get("phraseLanguageLayer").getValue());
+    assertEquals("phrase language", "language",
+                 ((Layer)configuration.get("phraseLanguageLayer").getValue()).getId());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("pronounce", "pronounce", 
@@ -1881,6 +1886,9 @@ public class TestEAFSerialization {
       new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(true)
       .setParentId("turn").setParentIncludes(true),
+      new Layer("language", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
       new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true),
@@ -1914,8 +1922,8 @@ public class TestEAFSerialization {
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     assertEquals(11, serializer.configure(configuration, schema).size());
-    assertNull("phrase language",
-               configuration.get("phraseLanguageLayer").getValue());
+    assertEquals("phrase language", "language",
+                 ((Layer)configuration.get("phraseLanguageLayer").getValue()).getId());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("pronounce", "pronounce", 

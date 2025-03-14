@@ -19,6 +19,8 @@
               "children":{
                 "utterance":{"description":"Utterances", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":true},
+                "language":{"description":"Phrase language", "alignment":2,
+                  "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false},
                 "word":{"description":"Words", "alignment":2,
                   "peers":true, "peersOverlap":false, "parentIncludes":true, "saturated":false,
                   "children":{

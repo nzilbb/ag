@@ -41,6 +41,7 @@ import java.util.Spliterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -2225,10 +2226,75 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       Element annotationValue = document.createElement("ANNOTATION_VALUE");
       alignableAnnotation.appendChild(annotationValue);
       StringBuffer sUtteranceText = new StringBuffer();
-         
+
+      Function<Annotation,String> tokenLabel = (word)->word.getLabel();
+      // transcription conventions?
+      if (bUseConventions != null && bUseConventions) {
+        tokenLabel = (word)->{
+          final StringBuilder label = new StringBuilder();
+          if (commentLayer != null) {
+            word.getStart().endingAnnotations(commentLayer.getId())
+              .filter(comment->!comment.containsKey("@serialized-with-token"))
+              .forEach((comment)->{
+                  label.append("{").append(comment.getLabel()).append("} ");
+                  comment.put("@serialized-with-token", word);
+                });
+          }
+          if (noiseLayer != null) {
+            word.getStart().endingAnnotations(noiseLayer.getId())
+              .filter(noise->!noise.containsKey("@serialized-with-token"))
+              .forEach((noise)->{
+                  label.append("[").append(noise.getLabel()).append("] ");
+                  noise.put("@serialized-with-token", word);
+                });
+          }
+          if (phraseLanguageLayer != null) {
+            word.getStart().startingAnnotations(phraseLanguageLayer.getId())
+              .filter((lang)->!lang.getEndId().equals(word.getEndId()))
+              .forEach((lang)->label.append("[CS:").append(lang.getLabel()).append("]"));
+          }
+          label.append(word.getLabel());
+          if (pronounceLayer != null) {
+            Annotation pronounce = word.first(pronounceLayer.getId());
+            if (pronounce != null) {
+              label.append("[").append(pronounce.getLabel()).append("]");
+            }
+          }
+          if (lexicalLayer != null) {
+            Annotation lexical = word.first(lexicalLayer.getId());
+            if (lexical != null) {
+              label.append("[").append(lexical.getLabel()).append("]");
+            }
+          }
+          if (phraseLanguageLayer != null) {
+            word.getEnd().endingAnnotations(phraseLanguageLayer.getId())
+              .forEach((lang)->label.append("[CS:"+lang.getLabel()+"]"));
+          }
+          if (noiseLayer != null) {
+            word.getEnd().startingAnnotations(noiseLayer.getId())
+              .filter(noise->!noise.containsKey("@serialized-with-token"))
+              .forEach((noise)->{
+                  label.append(" [").append(noise.getLabel()).append("]");
+                  noise.put("@serialized-with-token", word);
+                });
+          }
+          if (commentLayer != null) {
+            word.getEnd().startingAnnotations(commentLayer.getId())
+              .filter(comment->!comment.containsKey("@serialized-with-token"))
+              .forEach((comment)->{
+                  label.append(" {").append(comment.getLabel()).append("}");
+                  comment.put("@serialized-with-token", word);
+                });
+          }
+          return label.toString();
+        };
+      }
+
+      // for each word token
       for (Annotation word : utterance.all(wordLayer.getId())) {
         if (sUtteranceText.length() > 0) sUtteranceText.append(" ");
-        sUtteranceText.append(word.getLabel());
+        // append the label (with any convention tags as appropriate)
+        sUtteranceText.append(tokenLabel.apply(word));
             
         // link word to its utterance, so that words can be dependent on utterances
         word.put("@utterance", utterance);
