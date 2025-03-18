@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.javascript</artifactId>
   <name>nzilbb.annotator.javascript</name>
-  <version>2.0.1</version>
+  <version>2.1.0</version>
 
   <properties>
     <package.path>nzilbb/annotator/javascript/</package.path>
@@ -37,6 +37,12 @@
 
   <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <trimStackTrace>true</trimStackTrace>
+        </configuration>
+      </plugin>
       <!-- add manifest attributes required for identifying the annotator class -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

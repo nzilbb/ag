@@ -160,7 +160,12 @@ public class TestJavascriptAnnotator {
          +"\"transcriptLanguageLayerId\":\"\"," // no transcript language layer
          +"\"phraseLanguageLayerId\":null,"     // null phrase language layer
          +"\"language\":\"\","
-         +"\"script\":\"replace(/[^aeiou]/g,\\\"C\\\").replace(/[aeiou]/g,\\\"V\\\")\""
+         // non-voweles are C (exclude punctuation)
+         +"\"script\":\"replace(/[^aeiou',.?!]/g,\\\"C\\\")"
+         // vowels are V
+         +".replace(/[aeiou]/g,\\\"V\\\")"
+         // anything leftover (punctuation) is removed
+         +".replace(/[^CV]/g,\\\"\\\")\""
          +"}");
       
       assertEquals("source layer",
@@ -204,26 +209,27 @@ public class TestJavascriptAnnotator {
                    "ok,", firstWord.getLabel());
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
-                   37, g.all("word").length);
+                   38, g.all("word").length);
       assertEquals("double check there are no annotations: "+Arrays.asList(g.all("cv")),
                    0, g.all("pause").length);
       // run the annotator
       annotator.transform(g);
       Annotation[] words = g.all("word");
       Annotation[] annotations = g.all("cv");
-      assertEquals("Correct number of tokens "+Arrays.asList(annotations),
+      // last token has no vowels or consonants, so isn't annotated
+      assertEquals("One fewer annotations than tokens "+Arrays.asList(annotations),
                    37, annotations.length);
       String [] correct = {
-         "VCC","VCCV","VCVC","V","CVCV","CCVCV","CVC","V","CVCCVC","CCV","CVCC","V","CCVVC",
+         "VC","VCCV","VCVC","V","CVCV","CCVCV","CVC","V","CVCCVC","CCV","CVCC","V","CCVVC",
          "CVCV",
-         "VCC","CCVC","VCVCCVCV","CVCVC","CVCCVCC","VCVC","VCCVCC","CV","CVV","CVCC","CV","CVVC",
-         "VCC",
+         "VCC","CCVC","VCVCCVCV","CVCVC","CVCCVCC","VCVC","VCCVC","CV","CVV","CVCC","CV","CVVC",
+         "VC",
          "VC",
          "CCVCC","CCVCC",
-         "CCVCC","CCVCVC",
+         "CCVC","CCVCV",
          "CVCVC",
-         "CVCVC","CCVC",
-         "CCVCC","CCVCC"
+         "CVCVC","CCV",
+         "CCVCC","CCVCC" // one fewer because "!" results in an empty label, which is not saved
       };
       for (int i = 0; i < annotations.length; i++) {
          assertEquals("Annotation correct: " + i + " " + words[i],
@@ -257,7 +263,12 @@ public class TestJavascriptAnnotator {
          +"\"language\":\"\","
          +"\"script\":\"for each (word in transcript.all(\\\"word\\\"))"
          +" word.createTag(\\\"cv\\\", word.label"
-         +".replace(/[^aeiou]/g,\\\"C\\\").replace(/[aeiou]/g,\\\"V\\\"));\""
+         // non-voweles are C (exclude punctuation)
+         +".replace(/[^aeiou',.?!]/g,\\\"C\\\")"
+         // vowels are V
+         +".replace(/[aeiou]/g,\\\"V\\\")"
+         // anything leftover (punctuation) is removed
+         +".replace(/[^CV]/g,\\\"\\\"));\""
          +"}");
       
       assertFalse("labelMapping ok",
@@ -290,7 +301,7 @@ public class TestJavascriptAnnotator {
                    "ok,", firstWord.getLabel());
       
       assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
-                   37, g.all("word").length);
+                   38, g.all("word").length);
       assertEquals("double check there are no annotations: "+Arrays.asList(g.all("cv")),
                    0, g.all("pause").length);
       // run the annotator
@@ -298,18 +309,19 @@ public class TestJavascriptAnnotator {
       Annotation[] words = g.all("word");
       Annotation[] annotations = g.all("cv");
       assertEquals("Correct number of tokens "+Arrays.asList(annotations),
-                   37, annotations.length);
+                   38, annotations.length);
       String [] correct = {
-         "VCC","VCCV","VCVC","V","CVCV","CCVCV","CVC","V","CVCCVC","CCV","CVCC","V","CCVVC",
+         "VC","VCCV","VCVC","V","CVCV","CCVCV","CVC","V","CVCCVC","CCV","CVCC","V","CCVVC",
          "CVCV",
-         "VCC","CCVC","VCVCCVCV","CVCVC","CVCCVCC","VCVC","VCCVCC","CV","CVV","CVCC","CV","CVVC",
-         "VCC",
+         "VCC","CCVC","VCVCCVCV","CVCVC","CVCCVCC","VCVC","VCCVC","CV","CVV","CVCC","CV","CVVC",
+         "VC",
          "VC",
          "CCVCC","CCVCC",
-         "CCVCC","CCVCVC",
+         "CCVC","CCVCV",
          "CVCVC",
-         "CVCVC","CCVC",
-         "CCVCC","CCVCC"
+         "CVCVC","CCV",
+         "CCVCC","CCVCC",
+         "" // script doesn't avoid creating a blank-label annotation, so one is created
       };
       for (int i = 0; i < annotations.length; i++) {
          assertEquals("Annotation correct: " + i + " " + words[i],
@@ -551,7 +563,7 @@ public class TestJavascriptAnnotator {
       g.createTag(whosThere, "utterance",  "who's there?");
       g.createTag(dejav, "utterance",      "dejav");
       g.createTag(dejavWho, "utterance",   "dejav who?");
-      g.createTag(punchline, "utterance",  "knock knock");
+      g.createTag(punchline, "utterance",  "knock knock !");
 
       try {
          new SimpleTokenizer("utterance", "word").transform(g);

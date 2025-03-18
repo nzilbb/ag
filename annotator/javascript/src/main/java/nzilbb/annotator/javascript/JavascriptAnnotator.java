@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -547,11 +547,20 @@ public class JavascriptAnnotator extends Annotator {
          
       Annotation existingTag = token.first(destinationLayerId);
       if (existingTag != null)  { // existing tag to update
-        existingTag.setLabel(tagLabel);
+        if (tagLabel.length() > 0) { // blank labels are excluded
+          existingTag.setLabel(tagLabel);
+        } else { // no label
+          // so delete the annotation
+          existingTag.destroy();
+        }
       } else { // not tagged yet
-        existingTag = token.createTag(destinationLayerId, tagLabel);
+        if (tagLabel.length() > 0) { // blank labels are excluded
+          existingTag = token.createTag(destinationLayerId, tagLabel);
+        }
       }
-      existingTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      if (existingTag != null) {
+        existingTag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      }
       return existingTag;
     } catch(ScriptException exception) {
       System.out.println("JavascriptDataGenerator ERROR: " + exception);
@@ -630,6 +639,6 @@ public class JavascriptAnnotator extends Annotator {
     } catch (ScriptException exception) {
       throw new InvalidConfigurationException(this, exception);
     }      
-  } // end of mapLabels()
+  } // end of executeScript()
 
 } // end of class JavascriptAnnotator
