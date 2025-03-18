@@ -116,38 +116,43 @@ public class TestSchema {
 
    @Test public void arrayConstructor() {
       Layer[] layers = {
-         new Layer("topic", "Topics", Constants.ALIGNMENT_INTERVAL, 
-                   true, // peers
-                   false, // peersOverlap
-                   false), // saturated
-         new Layer("who", "Participants", Constants.ALIGNMENT_NONE, 
-                   true, // peers
-                   true, // peersOverlap
-                   true), // saturated
-         new Layer("turn", "Speaker turns", Constants.ALIGNMENT_INTERVAL,
-                   true, // peers
-                   false, // peersOverlap
-                   false, // saturated
-                   "who", // parentId
-                   true), // parentIncludes
-         new Layer("utterance", "Utterances", Constants.ALIGNMENT_INTERVAL,
-                   true, // peers
-                   false, // peersOverlap
-                   true, // saturated
-                   "turn", // parentId
-                   true), // parentIncludes
-         new Layer("word", "Words", Constants.ALIGNMENT_INTERVAL,
-                   true, // peers
-                   false, // peersOverlap
-                   false, // saturated
-                   "turn", // parentId
-                   true), // parentIncludes
-         new Layer("phone", "Phones", Constants.ALIGNMENT_INTERVAL,
-                   true, // peers
-                   false, // peersOverlap
-                   true, // saturated
-                   "word", // parentId
-                   true) // parentIncludes
+        new Layer("topic", "Topics").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true)
+        .setPeersOverlap(false)
+        .setSaturated(false)
+        .setCategory("Category1"),
+        new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+        .setPeers(true)
+        .setPeersOverlap(true)
+        .setSaturated(true),
+        new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true)
+        .setPeersOverlap(false)
+        .setSaturated(false)
+        .setParentId("who")
+        .setParentIncludes(true)
+        .setCategory("System"),
+        new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true)
+        .setPeersOverlap(false)
+        .setSaturated(true)
+        .setParentId("turn")
+        .setParentIncludes(true)
+        .setCategory("System"),
+        new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true)
+        .setPeersOverlap(false)
+        .setSaturated(false)
+        .setParentId("turn")
+        .setParentIncludes(true)
+        .setCategory("System"),
+        new Layer("phone", "Phones").setAlignment(Constants.ALIGNMENT_INTERVAL)
+        .setPeers(true)
+        .setPeersOverlap(false)
+        .setSaturated(true)
+        .setParentId("word")
+        .setParentIncludes(true)
+        .setCategory("Category2"),
       };
       Schema s = new Schema(layers, "who", "turn", "utterance", "word");
       
@@ -172,6 +177,15 @@ public class TestSchema {
 
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
+
+      assertEquals("categories - number "+s.getCategories().keySet(),
+                   3, s.getCategories().size());      
+      assertEquals("categories - System",
+                   "System", s.getCategories().get("System"));      
+      assertEquals("categories - Category1",
+                   "Category1", s.getCategories().get("Category1"));      
+      assertEquals("categories - Category2",
+                   "Category2", s.getCategories().get("Category2"));      
    }
 
    @Test public void collectionConstructor() {
@@ -231,6 +245,8 @@ public class TestSchema {
 
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("who").getParent());
       assertEquals("hierarchy - top level", s.getRoot(), s.getLayer("topic").getParent());      
+      assertEquals("categories - number "+s.getCategories().keySet(),
+                   0, s.getCategories().size());      
    }
 
    @Test public void ellipisConstructor() {
@@ -300,33 +316,38 @@ public class TestSchema {
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true)
          .setPeersOverlap(false)
-         .setSaturated(false),
+         .setSaturated(false)
+         .setCategory("Category1"),
          new Layer("who", "Participants")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true)
          .setPeersOverlap(true)
-         .setSaturated(true),
+         .setSaturated(true)
+         .setCategory("System"),
          new Layer("turn", "Speaker turns")
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true)
          .setPeersOverlap(false)
          .setSaturated(false)
          .setParentId("who")
-         .setParentIncludes(true),
+         .setParentIncludes(true)
+         .setCategory("System"),
          new Layer("word", "Words")
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true)
          .setPeersOverlap(false)
          .setSaturated(false)
          .setParentId("turn")
-         .setParentIncludes(true),
+         .setParentIncludes(true)
+         .setCategory("System"),
          new Layer("utterance", "Utterances")
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true)
          .setPeersOverlap(false)
          .setSaturated(true)
          .setParentId("turn")
-         .setParentIncludes(true),
+         .setParentIncludes(true)
+         .setCategory("System"),
          new Layer("phone", "Phones")
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true)
@@ -334,7 +355,10 @@ public class TestSchema {
          .setSaturated(true)
          .setParentId("word")
          .setParentIncludes(true)
+         .setCategory("Category2")
          );
+      s.getCategories().put("Category1","Category One");
+      s.getCategories().put("Category2","Category Two");
       Schema c = (Schema)s.clone();
 
       // check structure and relations
@@ -375,6 +399,15 @@ public class TestSchema {
       assertEquals("topic first", "topic", rootChildren.next());
       assertEquals("who last", "who", rootChildren.next());
 
+      // categories
+      assertEquals("categories - number "+c.getCategories().keySet(),
+                   3, c.getCategories().size());      
+      assertEquals("categories - System",
+                   "System", c.getCategories().get("System"));      
+      assertEquals("categories - Category1",
+                   "Category One", c.getCategories().get("Category1"));      
+      assertEquals("categories - Category2",
+                   "Category Two", c.getCategories().get("Category2"));      
    }
 
    @Test public void toJson() {
@@ -384,33 +417,38 @@ public class TestSchema {
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true)
          .setPeersOverlap(false)
-         .setSaturated(false),
+         .setSaturated(false)
+         .setCategory("Category1"),
          new Layer("who", "Participants")
          .setAlignment(Constants.ALIGNMENT_NONE)
          .setPeers(true)
          .setPeersOverlap(true)
-         .setSaturated(true),
+         .setSaturated(true)
+         .setCategory("System"),
          new Layer("turn", "Speaker turns")
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true)
          .setPeersOverlap(false)
          .setSaturated(false)
          .setParentId("who")
-         .setParentIncludes(true),
+         .setParentIncludes(true)
+         .setCategory("System"),
          new Layer("word", "Words")
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true)
          .setPeersOverlap(false)
          .setSaturated(false)
          .setParentId("turn")
-         .setParentIncludes(true),
+         .setParentIncludes(true)
+         .setCategory("System"),
          new Layer("utterance", "Utterances")
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true)
          .setPeersOverlap(false)
          .setSaturated(true)
          .setParentId("turn")
-         .setParentIncludes(true),
+         .setParentIncludes(true)
+         .setCategory("System"),
          new Layer("phone", "Phones")
          .setAlignment(Constants.ALIGNMENT_INTERVAL)
          .setPeers(true)
@@ -418,7 +456,10 @@ public class TestSchema {
          .setSaturated(true)
          .setParentId("word")
          .setParentIncludes(true)
+         .setCategory("Category2")
          );
+      s.getCategories().put("Category1","Category One");
+      s.getCategories().put("Category2","Category Two");
       JsonObject c = s.toJson();
 
       // check special layer IDs
@@ -444,6 +485,14 @@ public class TestSchema {
       assertEquals("root " + s.getRoot().getId(),
                    s.getRoot().getId(), jsonRoot.getString("id"));
       
+      // categories
+      JsonObject jsonCategories = c.getJsonObject("categories");
+      assertEquals("categories - System",
+                   "System", jsonCategories.getString("System"));      
+      assertEquals("categories - Category1",
+                   "Category One", jsonCategories.getString("Category1"));      
+      assertEquals("categories - Category2",
+                   "Category Two", jsonCategories.getString("Category2"));      
 
       // // check structure and relations
       // assertEquals("getLayer", "Topics", c.getLayer("topic").getDescription());

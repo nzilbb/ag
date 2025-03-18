@@ -69,6 +69,24 @@ public class Schema implements Cloneable, CloneableBean {
    */
   public Schema setLayers(LinkedHashMap<String,Layer> newLayers) {
     layers = newLayers; return this; }
+
+  /**
+   * An ordered map of category names to descriptions.
+   * @see #getCategories()
+   * @see #setCategories(LinkedHashMap<String,String>)
+   */
+  protected LinkedHashMap<String,String> categories = new LinkedHashMap<String,String>();
+  /**
+   * Getter for {@link #categories}: An ordered map of category names to descriptions.
+   * @return An ordered map of category names to descriptions.
+   */
+  @ClonedProperty
+  public LinkedHashMap<String,String> getCategories() { return categories; }
+  /**
+   * Setter for {@link #categories}: An ordered map of category names to descriptions.
+   * @param newCategories An ordered map of category names to descriptions.
+   */
+  public Schema setCategories(LinkedHashMap<String,String> newCategories) { categories = newCategories; return this; }
    
   /**
    * ID of the layer that contains participants.
@@ -366,6 +384,13 @@ public class Schema implements Cloneable, CloneableBean {
       }
       pendingParents.remove(layer.getId());
     }
+
+    // add category if required
+    if (layer.getCategory() != null && layer.getCategory().length() > 0) {
+      if (!categories.containsKey(layer.getCategory())) {
+        categories.put(layer.getCategory(), layer.getCategory());
+      }
+    }
     return layer;
   } // end of addLayer()
    
@@ -509,6 +534,9 @@ public class Schema implements Cloneable, CloneableBean {
           }
         }
       };
+
+    // copy categories
+    copy.categories = (LinkedHashMap)this.categories.clone();
     
     return copy;
   } // end of clone()
