@@ -294,7 +294,7 @@ function changeSourceLayer() {
         addLayerOptions(
             destinationLayerId, schema,
             // layers in the same scope
-            layer => layer.parentId == sourceLayer.parentId
+            layer => layer.parentId == (sourceLayer.id == "segment"?"segment":sourceLayer.parentId)
             // but not the layer itself
                 && layer.id != sourceLayer.id
             // nor any formal schema layers
