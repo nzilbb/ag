@@ -129,8 +129,41 @@ public class Parameter implements CloneableBean {
   /**
    * Setter for {@link #value}: The value (or default value) of the parameter.
    * @param newValue The value (or default value) of the parameter.
+   * <p> If <var>newWalue</var> is a String but {@link #getType()} is not
+   * <tt>java.lang.String</tt>, this method will endevor to coerce a value of the correct type.
    */
-  public Parameter setValue(Object newValue) { value = newValue; return this; }
+  public Parameter setValue(Object newValue) {
+    value = newValue;
+    if (newValue instanceof String && type != null && !type.equals(String.class)) {
+      // attempt to coerce a value of the correct type from the given string
+      String string = (String)newValue;
+      if (type.equals(Integer.class) || type.equals(int.class)) {
+        try {
+          value = new Integer(string);
+        } catch(Exception exception) {}
+      } else if (type.equals(Double.class) || type.equals(double.class)) {
+        try {
+          value = new Double(string);
+        } catch(Exception exception) {}
+      } else if (type.equals(Long.class) || type.equals(long.class)) {
+        try {
+          value = new Long(string);
+        } catch(Exception exception) {}
+      } else if (type.equals(Boolean.class) || type.equals(boolean.class)) {
+        if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase("t")
+            || string.equalsIgnoreCase("yes") || string.equalsIgnoreCase("y")
+            || string.equalsIgnoreCase("on") || string.equalsIgnoreCase("1")) {
+          value = Boolean.TRUE;
+        } else {
+          value = Boolean.FALSE;
+        }
+      } else if (type.equals(Layer.class)) {
+        // ID only of Layers
+        value = new Layer(string, string);
+      }
+    }
+    return this;
+  }
    
   /**
    * Whether the parameter is required (true) or optional (false - the default).

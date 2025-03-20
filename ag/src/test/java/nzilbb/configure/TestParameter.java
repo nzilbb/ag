@@ -36,6 +36,54 @@ import nzilbb.util.IO;
 /** Unit tests for {@link Parameter} */
 public class TestParameter {
 
+  /** Test that coercion of the value type from a String value works.
+   * This facilitates parsing Parameter values from HTTP request parameters. */
+  @Test public void coercionFromString() {
+    assertEquals("Integer",
+                 Integer.valueOf(1), new Parameter().setType(Integer.class)
+                 .setValue("1").getValue());
+    assertEquals("int",
+                 Integer.valueOf(1), new Parameter().setType(int.class)
+                 .setValue("1").getValue());
+    assertEquals("Double",
+                 Double.valueOf(1.5), new Parameter().setType(Double.class)
+                 .setValue("1.5").getValue());
+    assertEquals("double",
+                 Double.valueOf(1.5), new Parameter().setType(double.class)
+                 .setValue("1.5").getValue());
+    assertEquals("Long",
+                 Long.valueOf(1), new Parameter().setType(Long.class)
+                 .setValue("1").getValue());
+    assertEquals("long",
+                 Long.valueOf(1), new Parameter().setType(long.class)
+                 .setValue("1").getValue());
+    assertEquals("Boolean",
+                 Boolean.TRUE, new Parameter().setType(Boolean.class)
+                 .setValue("True").getValue());
+    assertEquals("Boolean",
+                 Boolean.TRUE, new Parameter().setType(boolean.class)
+                 .setValue("on").getValue());
+    assertEquals("Boolean",
+                 Boolean.TRUE, new Parameter().setType(Boolean.class)
+                 .setValue("Y").getValue());
+    assertEquals("boolean",
+                 Boolean.FALSE, new Parameter().setType(boolean.class)
+                 .setValue("false").getValue());
+    assertEquals("boolean",
+                 Boolean.FALSE, new Parameter().setType(Boolean.class)
+                 .setValue("F").getValue());
+    assertEquals("boolean",
+                 Boolean.FALSE, new Parameter().setType(boolean.class)
+                 .setValue("no").getValue());
+    assertEquals("Layer",
+                 "l1", ((Layer)new Parameter().setType(Layer.class)
+                        .setValue(new Layer("l1", "Layer 1")).getValue()).getId());
+
+    assertEquals("Failed coercion saves string value",
+                 "one", new Parameter().setType(Integer.class)
+                 .setValue("one").getValue());
+  }
+  
   /** Test that serialization to JSON works. */
   @Test public void toJson() {
     
