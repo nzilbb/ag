@@ -25,6 +25,9 @@ import java.util.LinkedHashMap;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.annotation.Annotation;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 
 /**
  * Set of parameters, being a map to Parameters keyed on parameter name.  Uses LinkedHashMap so
@@ -130,5 +133,28 @@ public class ParameterSet extends LinkedHashMap<String,Parameter> {
     }
     return invalid;
   } // end of invalidValueParameters()
+
+  /**
+   * Serializes the set as a JsonArray.
+   * @return A JSON representation of the parameters.
+   */
+  public JsonArray toJson() {
+    JsonArrayBuilder parameters = Json.createArrayBuilder();
+    for (Parameter p : values()) {
+      parameters.add(p.toJson());
+    }
+    return parameters.build();
+  }
+
+  /**
+   * Deserializes the set from a JsonArray.
+   * @return A JSON representation of the parameters.
+   */
+  public ParameterSet fromJson(JsonArray json) {
+    for (int p = 0; p < json.size(); p++) {
+      addParameter((Parameter)new Parameter().fromJson(json.getJsonObject(p)));
+    } 
+    return this;
+  }
 
 } // end of class ParameterSet
