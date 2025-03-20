@@ -21,16 +21,25 @@
 //
 package nzilbb.configure;
 
-import java.util.Collection;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Vector;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import nzilbb.ag.Layer;
+import nzilbb.util.CloneableBean;
+import nzilbb.util.ClonedProperty;
 
 /**
  * A parameter that needs to be set for a some operation or configuration.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("rawtypes")
-public class Parameter {
+public class Parameter implements CloneableBean {
    
   // Attributes:
 
@@ -44,6 +53,7 @@ public class Parameter {
    * Getter for {@link #name}: The paramater's name.
    * @return The paramater's name.
    */
+  @ClonedProperty
   public String getName() { return name; }
   /**
    * Setter for {@link #name}: The paramater's name.
@@ -61,6 +71,7 @@ public class Parameter {
    * Getter for {@link #label}: A label that might be presented to a user.
    * @return A label that might be presented to a user.
    */
+  @ClonedProperty
   public String getLabel() { if (label != null ) { return label; } else { return getName(); } }
   /**
    * Setter for {@link #label}: A label that might be presented to a user.
@@ -78,6 +89,7 @@ public class Parameter {
    * Getter for {@link #hint}: A text hint that might be displayed to a user.
    * @return A text hint that might be displayed to a user.
    */
+  @ClonedProperty
   public String getHint() { if (hint != null) { return hint; } else { return getLabel(); } }
   /**
    * Setter for {@link #hint}: A text hint that might be displayed to a user.
@@ -95,6 +107,7 @@ public class Parameter {
    * Getter for {@link #type}: The type of the parameter.
    * @return The type of the parameter.
    */
+  @ClonedProperty
   public Class getType() { return type; }
   /**
    * Setter for {@link #type}: The type of the parameter.
@@ -130,6 +143,7 @@ public class Parameter {
    * (false - the default). 
    * @return Whether the parameter is required (true) or optional (false).
    */
+  @ClonedProperty
   public boolean getRequired() { return required; }
   /**
    * Setter for {@link #required}: Whether the parameter is required (true) or optional (false).
@@ -316,7 +330,185 @@ public class Parameter {
   public void addPossibleValue(Object value) {
     getPossibleValues().add(value);
   } // end of addPossibleValue()
-   
+
+  /**
+   * Called at the end of the default implementation of {@link #toJson()}, this method
+   * allows the Parameter to use a String to represent Layer values.
+   * @param json The JSON object being built.
+   * @return The builder with any added properties.
+   */
+  @Override
+  public JsonObjectBuilder addExtraJsonAttributes(JsonObjectBuilder json) {
+    if (type.equals(String.class)) {
+      if (value != null) json.add("value", (String)value);
+      if (possibleValues != null && possibleValues.size() > 0) {
+        JsonArrayBuilder possibilities = Json.createArrayBuilder();          
+        for (String p : (Collection<String>)possibleValues) possibilities.add(p);
+        json.add("possibleValues", possibilities);
+      }
+    } else if (type.equals(Integer.class)) {
+      if (value != null) json.add("value", (Integer)value);
+      if (possibleValues != null && possibleValues.size() > 0) {
+        JsonArrayBuilder possibilities = Json.createArrayBuilder();          
+        for (Integer p : (Collection<Integer>)possibleValues) possibilities.add(p);
+        json.add("possibleValues", possibilities);
+      }
+    } else if (type.equals(int.class)) {
+      if (value != null) json.add("value", (int)value);
+      if (possibleValues != null && possibleValues.size() > 0) {
+        JsonArrayBuilder possibilities = Json.createArrayBuilder();          
+        for (Integer p : (Collection<Integer>)possibleValues) possibilities.add(p);
+        json.add("possibleValues", possibilities);
+      }
+    } else if (type.equals(Double.class)) {
+      if (value != null) json.add("value", (Double)value);
+      if (possibleValues != null && possibleValues.size() > 0) {
+        JsonArrayBuilder possibilities = Json.createArrayBuilder();          
+        for (Double p : (Collection<Double>)possibleValues) possibilities.add(p);
+        json.add("possibleValues", possibilities);
+      }
+    } else if (type.equals(double.class)) {
+      if (value != null) json.add("value", (Double)value);
+      if (possibleValues != null && possibleValues.size() > 0) {
+        JsonArrayBuilder possibilities = Json.createArrayBuilder();          
+        for (Double p : (Collection<Double>)possibleValues) possibilities.add(p);
+        json.add("possibleValues", possibilities);
+      }
+    } else if (type.equals(Long.class)) {
+      if (value != null) json.add("value", (Long)value);
+      if (possibleValues != null && possibleValues.size() > 0) {
+        JsonArrayBuilder possibilities = Json.createArrayBuilder();          
+        for (Long p : (Collection<Long>)possibleValues) possibilities.add(p);
+        json.add("possibleValues", possibilities);
+      }
+    } else if (type.equals(long.class)) {
+      if (value != null) json.add("value", (long)value);
+      if (possibleValues != null && possibleValues.size() > 0) {
+        JsonArrayBuilder possibilities = Json.createArrayBuilder();          
+        for (Long p : (Collection<Long>)possibleValues) possibilities.add(p);
+        json.add("possibleValues", possibilities);
+      }
+    } else if (type.equals(Boolean.class)) {
+      if (value != null) json.add("value", (Boolean)value);
+    } else if (type.equals(boolean.class)) {
+      if (value != null) json.add("value", (boolean)value);
+    } else if (type.equals(Layer.class)) {
+      // ID only of Layers
+      if (value != null) json.add("value", ((Layer)value).getId());
+      if (possibleValues != null && possibleValues.size() > 0) {
+        JsonArrayBuilder possibilities = Json.createArrayBuilder();
+        for (Layer p : (Collection<Layer>)possibleValues) possibilities.add(p.getId());
+        json.add("possibleValues", possibilities);
+        }
+    }
+    return json;
+  } // end of addExtraJsonAttributes()
+
+  /**
+   * Initializes the bean with the given JSON representation. 
+   * This method parses "value" and "possibleValues" before invoking the default
+   * implementation to parse the rest.
+   * @param json
+   * @return A reference to this bean.
+   */
+  @SuppressWarnings({"rawtypes","unchecked"})
+  @Override
+  public CloneableBean fromJson(JsonObject json) {
+    // call default meethod first, to ensure that 'type' is set
+    CloneableBean.super.fromJson(json);
+
+    // now parse value/possibleValues
+    if (type.equals(String.class)) {
+      if (json.containsKey("value")) setValue(json.getString("value"));
+      if (json.containsKey("possibleValues")) {
+        JsonArray possibilities = json.getJsonArray("possibleValues");
+        Vector<String> possibleValues = new Vector<String>();
+        for (int p = 0; p < possibilities.size(); p++) {
+          possibleValues.add(possibilities.getString(p));
+        } 
+        setPossibleValues(possibleValues);
+      }
+    } else if (type.equals(Integer.class)) {
+      if (json.containsKey("value")) setValue(json.getInt("value"));
+      if (json.containsKey("possibleValues")) {
+        JsonArray possibilities = json.getJsonArray("possibleValues");
+        Vector<Integer> possibleValues = new Vector<Integer>();
+        for (int p = 0; p < possibilities.size(); p++) {
+          possibleValues.add(possibilities.getInt(p));
+        } 
+        setPossibleValues(possibleValues);
+      }
+    } else if (type.equals(int.class)) {
+      if (json.containsKey("value")) setValue(json.getInt("value"));
+      if (json.containsKey("possibleValues")) {
+        JsonArray possibilities = json.getJsonArray("possibleValues");
+        Vector<Integer> possibleValues = new Vector<Integer>();
+        for (int p = 0; p < possibilities.size(); p++) {
+          possibleValues.add(possibilities.getInt(p));
+        } 
+        setPossibleValues(possibleValues);
+      }
+    } else if (type.equals(Double.class)) {
+      if (json.containsKey("value")) setValue(json.getJsonNumber("value").doubleValue());
+      if (json.containsKey("possibleValues")) {
+        JsonArray possibilities = json.getJsonArray("possibleValues");
+        Vector<Double> possibleValues = new Vector<Double>();
+        for (int p = 0; p < possibilities.size(); p++) {
+          possibleValues.add(possibilities.getJsonNumber(p).doubleValue());
+        } 
+        setPossibleValues(possibleValues);
+      }
+    } else if (type.equals(double.class)) {
+      if (json.containsKey("value")) setValue(json.getJsonNumber("value").doubleValue());
+      if (json.containsKey("possibleValues")) {
+        JsonArray possibilities = json.getJsonArray("possibleValues");
+        Vector<Double> possibleValues = new Vector<Double>();
+        for (int p = 0; p < possibilities.size(); p++) {
+          possibleValues.add(possibilities.getJsonNumber(p).doubleValue());
+        } 
+        setPossibleValues(possibleValues);
+      }
+    } else if (type.equals(Long.class)) {
+      if (json.containsKey("value")) setValue(json.getJsonNumber("value").longValue());
+      if (json.containsKey("possibleValues")) {
+        JsonArray possibilities = json.getJsonArray("possibleValues");
+        Vector<Long> possibleValues = new Vector<Long>();
+        for (int p = 0; p < possibilities.size(); p++) {
+          possibleValues.add(possibilities.getJsonNumber(p).longValue());
+        } 
+        setPossibleValues(possibleValues);
+      }
+    } else if (type.equals(long.class)) {
+      if (json.containsKey("value")) setValue(json.getJsonNumber("value").longValue());
+      if (json.containsKey("possibleValues")) {
+        JsonArray possibilities = json.getJsonArray("possibleValues");
+        Vector<Long> possibleValues = new Vector<Long>();
+        for (int p = 0; p < possibilities.size(); p++) {
+          possibleValues.add(possibilities.getJsonNumber(p).longValue());
+        } 
+        setPossibleValues(possibleValues);
+      }
+    } else if (type.equals(Boolean.class)) {
+      if (json.containsKey("value")) setValue(json.getBoolean("value"));
+    } else if (type.equals(boolean.class)) {
+      if (json.containsKey("value")) setValue(json.getBoolean("value"));
+    } else if (type.equals(Layer.class)) {
+      // ID only of Layers
+      if (json.containsKey("value")) {
+        setValue(new Layer(json.getString("value"), json.getString("value")));
+      }
+      if (json.containsKey("possibleValues")) {
+        JsonArray possibilities = json.getJsonArray("possibleValues");
+        Vector<Layer> possibleValues = new Vector<Layer>();
+        for (int p = 0; p < possibilities.size(); p++) {
+          possibleValues.add(new Layer(possibilities.getString(p), possibilities.getString(p)));
+        } 
+        setPossibleValues(possibleValues);
+      }
+    }
+    return this;
+  }
+
   /**
    * Sets the value of the attribute named after {@link #name} of the given bean with the
    * parameter's {@link value}. 

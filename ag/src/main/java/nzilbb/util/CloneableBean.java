@@ -160,6 +160,8 @@ public interface CloneableBean {
               }
             }
             json.add(key, map);
+          } else if (value instanceof Class) {
+            json.add(key, ((Class)value).getName());
           }
           // ignore any other types
         } // value isn't null
@@ -291,6 +293,12 @@ public interface CloneableBean {
                 } catch(ParseException exception) {
                   value = ((JsonString)value).getString();
                 }
+              } else if (parameterClass.equals(Class.class)) {
+                try {
+                  value = Class.forName(((JsonString)value).getString());
+                } catch(Exception exception) {
+                  value = String.class;
+                }
               } else {
                 value = ((JsonString)value).getString();
                 String s = (String)value;
@@ -416,7 +424,11 @@ public interface CloneableBean {
                       try {
                         return getClass().getMethod(setterName, URL.class); // SerializationDescriptor.icon
                       } catch(NoSuchMethodException x8) {
-                        return getClass().getMethod(setterName, Double.class); // Anchor.offset
+                        try {
+                          return getClass().getMethod(setterName, Double.class); // Anchor.offset
+                        } catch(NoSuchMethodException x9) {
+                          return getClass().getMethod(setterName, Class.class); // Parameter.type
+                        }
                       }
                     }
                   }

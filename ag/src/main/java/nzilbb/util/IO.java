@@ -140,7 +140,8 @@ public class IO
   } // end of copy()
    
   /**
-   * Renames a file.
+   * Renames a file. 
+   * If it can not be renamed directly, then it is copied and the source file deleted.
    * @param source The original file.
    * @param destination The new file.
    * @throws IOException On file IO error.
