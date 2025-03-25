@@ -275,6 +275,26 @@ public class Execution implements Runnable {
     environmentVariables.put(variable, value);
     return this;
   } // end of arg()
+  
+  /**
+   * Builder-pattern method for adding a stdout observer.
+   * @param observer
+   * @return This Execution.
+   */
+  public Execution addStdoutObserver(Consumer<String> observer) {
+    stdoutObservers.add(observer);
+    return this;
+  } // end of addStdoutObserver()
+
+  /**
+   * Builder-pattern method for adding a stderr observer.
+   * @param observer
+   * @return This Execution.
+   */
+  public Execution addStderrObserver(Consumer<String> observer) {
+    stderrObservers.add(observer);
+    return this;
+  } // end of addStderrObserver()
 
   /**
    * Runs the executable, monitors it, and returns when done.
