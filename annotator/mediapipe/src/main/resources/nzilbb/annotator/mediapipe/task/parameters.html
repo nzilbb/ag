@@ -1,0 +1,92 @@
+<h3>MediaPipeAnnotator</h3>
+
+<p> Mediapipe annotator integrates with 
+  <a href="https://github.com/google-ai-edge/mediapipe" target="mediapipe">mediapipe</a>
+  for processing of video to extract face landmark data. </p>
+<p> The annotator saves instantaneous
+  <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker"
+     target="mediapipe">blendshape</a>
+  score annotations, i.e. facial features that can be used to determine facial expression. </p>
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>numFaces=1&minFaceDetectionConfidence=0.48&minFacePresenceConfidence=0.5&minTrackingConfidence=0.5&noseSneerRight=noseSneerRight&eyeLookUpRight=eyeLookUpRight&browDownLeft=</samp> </p>
+
+<p> Parameters are: </p> <dl>
+  <dt> numFaces </dt> <dd> The num_faces configuration option: The maximum number of faces
+    that can be detected by the the FaceLandmarker. Smoothing is only applied when
+    num_faces is set to 1. </dd>
+  <dt> minFaceDetectionConfidence </dt> <dd> The min_face_detection_confidence
+    configuration option: The minimum confidence score for the face detection to be
+    considered successful. </dd>
+  <dt> minFacePresenceConfidence </dt> <dd> The min_face_presence_confidence configuration
+    option: The minimum confidence score of face presence score in the face landmark detection.</dd>
+  <dt> minTrackingConfidence </dt> <dd> The min_tracking_confidence configuration option:
+    The minimum confidence score for the face tracking to be considered successful. </dd> 
+</dl>
+
+<p> ...plus one parameter for each of the possible blendshape categories.</p> <dl>
+  <dt> parameter name </dt> <dd> the name of the blendshape category. </dd>
+  <dt> parameter value </dt> <dd> the ID of the layer the scores for this category should
+    be added to. This must be a top level ('spanning') layer with alignment set to 0. If
+    the layer specified does not already exist, it will be created.</dd>
+</dl>
+
+<p> If the category parameter value is empty, or the parameter is omitted, the blendshape
+  category is not included in the annotations produced by the annotator. </p>
+
+<p>Categories are:</p> <ul>
+    <li>_neutral</li>
+    <li>browDownLeft</li>
+    <li>browDownRight</li>
+    <li>browInnerUp</li>
+    <li>browOuterUpLeft</li>
+    <li>browOuterUpRight</li>
+    <li>cheekPuff</li>
+    <li>cheekSquintLeft</li>
+    <li>cheekSquintRight</li>
+    <li>eyeBlinkLeft</li>
+    <li>eyeBlinkRight</li>
+    <li>eyeLookDownLeft</li>
+    <li>eyeLookDownRight</li>
+    <li>eyeLookInLeft</li>
+    <li>eyeLookInRight</li>
+    <li>eyeLookOutLeft</li>
+    <li>eyeLookOutRight</li>
+    <li>eyeLookUpLeft</li>
+    <li>eyeLookUpRight</li>
+    <li>eyeSquintLeft</li>
+    <li>eyeSquintRight</li>
+    <li>eyeWideLeft</li>
+    <li>eyeWideRight</li>
+    <li>jawForward</li>
+    <li>jawLeft</li>
+    <li>jawOpen</li>
+    <li>jawRight</li>
+    <li>mouthClose</li>
+    <li>mouthDimpleLeft</li>
+    <li>mouthDimpleRight</li>
+    <li>mouthFrownLeft</li>
+    <li>mouthFrownRight</li>
+    <li>mouthFunnel</li>
+    <li>mouthLeft</li>
+    <li>mouthLowerDownLeft</li>
+    <li>mouthLowerDownRight</li>
+    <li>mouthPressLeft</li>
+    <li>mouthPressRight</li>
+    <li>mouthPucker</li>
+    <li>mouthRight</li>
+    <li>mouthRollLower</li>
+    <li>mouthRollUpper</li>
+    <li>mouthShrugLower</li>
+    <li>mouthShrugUpper</li>
+    <li>mouthSmileLeft</li>
+    <li>mouthSmileRight</li>
+    <li>mouthStretchLeft</li>
+    <li>mouthStretchRight</li>
+    <li>mouthUpperUpLeft</li>
+    <li>mouthUpperUpRight</li>
+    <li>noseSneerLeft</li>
+    <li>noseSneerRight</li>
+</ul>
+
+
