@@ -10,9 +10,14 @@ from mediapipe import solutions
 import cv2
 import csv
 import numpy as np
-print(sys.argv)
-if len(sys.argv) < 3:
-  print("Please supply a video file name, and an ID for file names")
+if len(sys.argv) < 6:
+  print("Please supply th followin parameters:")
+  print(" - video file name")
+  print(" - output files identifier")
+  print(" - num_faces setting (int)")
+  print(" - min_face_detection_confidence setting (float)")
+  print(" - min_face_presence_confidence setting (float)")
+  print(" - min_tracking_confidence setting (float)")
   exit()
 
 MODEL_PATH = 'face_landmarker.task'
@@ -20,6 +25,14 @@ INPUT_VIDEO_FILE = sys.argv[1]
 OUTPUT_VIDEO_FILE = sys.argv[2]+"_landmarks.mp4"
 OUTPUT_FRAME_FORMAT = sys.argv[2]+"-{0}.png"
 OUTPUT_CSV_FILE = sys.argv[2]+".csv"
+NUM_FACES = int(sys.argv[3])
+print("NUM_FACES " + str(NUM_FACES))
+MIN_FACE_DETECTION_CONFIDENCE = float(sys.argv[4])
+print("MIN_FACE_DETECTION_CONFIDENCE " + str(MIN_FACE_DETECTION_CONFIDENCE))
+MIN_FACE_PRESENCE_CONFIDENCE = float(sys.argv[5])
+print("MIN_FACE_PRESENCE_CONFIDENCE " + str(MIN_FACE_PRESENCE_CONFIDENCE))
+MIN_TRACKING_CONFIDENCE = float(sys.argv[5])
+print("MIN_TRACKING_CONFIDENCE " + str(MIN_TRACKING_CONFIDENCE))
 
 # Use OpenCV’s VideoCapture to load the input video.
 
@@ -32,7 +45,6 @@ video = cv2.VideoCapture(INPUT_VIDEO_FILE)
 fps = video.get(cv2.CAP_PROP_FPS)
 width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-print("Frames per second using video.get(cv2.CAP_PROP_FPS) : {0}, {1}x{2}".format(fps, width, height))
 
 def draw_landmarks_on_image(rgb_image, detection_result):
   face_landmarks_list = detection_result.face_landmarks
@@ -80,11 +92,14 @@ VisionRunningMode = mp.tasks.vision.RunningMode
 
 # Create a face landmarker instance with the video mode:
 options = FaceLandmarkerOptions(
-  base_options=BaseOptions(model_asset_path=MODEL_PATH),
-  output_face_blendshapes=True,
-  output_facial_transformation_matrixes=True,
-  num_faces=1,
-  running_mode=VisionRunningMode.VIDEO)
+    base_options=BaseOptions(model_asset_path=MODEL_PATH),
+    output_face_blendshapes=True,
+    output_facial_transformation_matrixes=True,
+    num_faces=NUM_FACES,
+    min_face_detection_confidence=MIN_FACE_DETECTION_CONFIDENCE,
+    min_face_presence_confidence=MIN_FACE_PRESENCE_CONFIDENCE,
+    min_tracking_confidence=MIN_TRACKING_CONFIDENCE,
+    running_mode=VisionRunningMode.VIDEO)
 
 codec_id = "mp4v" # ID for a video codec.
 fourcc = cv2.VideoWriter_fourcc(*codec_id)

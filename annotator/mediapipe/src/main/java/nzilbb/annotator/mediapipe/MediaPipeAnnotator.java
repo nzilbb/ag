@@ -535,7 +535,12 @@ public class MediaPipeAnnotator extends Annotator {
         // create an ID for the results (so that other graphs can be processed in parallel)
         String id = IO.WithoutExtension(transcript.getId());
 
-        Execution cmd = executeInEnvironment("./blendshapes.py '"+video.getPath()+"' '"+id+"'");
+        Execution cmd = executeInEnvironment(
+          "./blendshapes.py '"+video.getPath()+"' '"+id+"' "
+          +numFaces+" "
+          +minFaceDetectionConfidence+" "
+          +minFacePresenceConfidence+" "
+          +minTrackingConfidence);
         if (cmd.getProcess().exitValue() > 0) {
           setStatus("Could not execute blendshapes.py - status: " + cmd.getProcess().exitValue());
           throw new TransformationException(
