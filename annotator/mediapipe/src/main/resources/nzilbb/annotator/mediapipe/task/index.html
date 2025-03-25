@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> MediaPipeAnnotator </title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <p> Mediapipe annotator integrates with 
+      <a href="https://github.com/google-ai-edge/mediapipe" target="mediapipe">mediapipe</a>
+      for processing of video to extract face landmark data. </p>
+    <p> The annotator saves instantaneous
+      <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker"
+         target="mediapipe">blendshape</a>
+      score annotations, i.e. facial features that can be used to determine facial expression. </p>
+    
+    <form method="POST" action="setTaskParameters" id="form">
+      <div id="layerMappings"></div>
+      <div class="field" title="The maximum number of faces that can be detected by the the FaceLandmarker. Smoothing is only applied when num_faces is set to 1.">
+        <label for="numFaces"> num_faces </label>
+        <span><input id="numFaces" name="numFaces"
+                     type="number" min="0" step="1"></span>
+      </div>
+      <div class="field" title="The minimum confidence score for the face detection to be considered successful. ">
+        <label for="minFaceDetectionConfidence"> min_face_detection_confidence </label>
+        <span><input id="minFaceDetectionConfidence" name="minFaceDetectionConfidence"
+                     type="number" min="0" step="0.01"></span>
+      </div>
+      <div class="field" title="The minimum confidence score of face presence score in the face landmark detection. ">
+        <label for="minFacePresenceConfidence"> min_face_presence_confidence </label>
+        <span><input id="minFacePresenceConfidence"
+                     name="minFacePresenceConfidence" type="number" min="0" step="0.01"></span>
+      </div>
+      <div class="field" title="The minimum confidence score for the face tracking to be considered successful.">
+        <label for="minTrackingConfidence"> min_tracking_confidence </label>
+        <span><input id="minTrackingConfidence" name="minTrackingConfidence"
+                     type="number" min="0" step="0.01"></span>
+      </div>
+      <div class="controls"><input type="submit" value="Set Parameters"></div>
+    </form>
+    
+    <footer>
+      <div title="Version of this annotator module">
+        Mediapipe Annotator <small id="version"></small> </div>
+    </footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>
