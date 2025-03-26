@@ -32,5 +32,6 @@
     <module>basservices</module>
     <module>reaper</module>
     <module>unisyn</module>
+    <module>mediapipe</module>
   </modules>  
 </project>
