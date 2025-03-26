@@ -27,7 +27,7 @@ Modules that perform automatic annotation tasks on annotation graphs.
    - add the following to *dependencies*
    ```
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
       <version>[1.1.2,)</version>
       <scope>compile</scope>
