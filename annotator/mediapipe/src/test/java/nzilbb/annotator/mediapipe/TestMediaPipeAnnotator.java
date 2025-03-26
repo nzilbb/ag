@@ -26,14 +26,15 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.Vector;
 import java.util.stream.Collectors;
 import nzilbb.ag.Anchor;
@@ -44,6 +45,7 @@ import nzilbb.ag.Graph;
 import nzilbb.ag.GraphMediaProvider;
 import nzilbb.ag.Layer;
 import nzilbb.ag.MediaFile;
+import nzilbb.ag.MediaTrackDefinition;
 import nzilbb.ag.PermissionException;
 import nzilbb.ag.Schema;
 import nzilbb.ag.StoreException;
@@ -52,8 +54,8 @@ import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.sql.derby.DerbyConnectionFactory;
-import nzilbb.util.IO;
 import nzilbb.util.Execution;
+import nzilbb.util.IO;
 
 /**
  * Tests for the mediapipe integration annotator.
@@ -221,11 +223,12 @@ public class TestMediaPipeAnnotator {
 
     Set<String> outputLayers = new HashSet<String>(Arrays.asList(annotator.getOutputLayers()));
     assertEquals("Correct number of output layers: " + outputLayers,
-                 4, outputLayers.size());
+                 5, outputLayers.size());
     assertTrue("jawForward output", outputLayers.contains("jawForward"));
     assertTrue("jawLeft output", outputLayers.contains("jawLeft"));
     assertTrue("jawOpen output", outputLayers.contains("jawOpen"));
     assertTrue("jawRight output", outputLayers.contains("jawRight"));
+    assertTrue("annotatedImageLayerId output", outputLayers.contains("frames"));
 
   }
 
@@ -285,6 +288,14 @@ public class TestMediaPipeAnnotator {
     Schema schema = g.getSchema();
     annotator.setSchema(schema);
 
+    // test the annotator knows about media track definitions
+    List<MediaTrackDefinition> tracks = annotator.getMediaTracks();
+    assertNotNull("media tracks returned", tracks);
+    assertEquals("right number of tracks returned", 3, tracks.size());
+    assertEquals("first track correct", "", tracks.get(0).getSuffix());
+    assertEquals("second track correct", "-B", tracks.get(1).getSuffix());
+    assertEquals("third track correct", "-face-landmarks", tracks.get(2).getSuffix());
+
     String outputTrackSuffix = "-facial-features";
     
     annotator.setTaskParameters(
@@ -313,7 +324,6 @@ public class TestMediaPipeAnnotator {
     
     annotator.setTaskParameters(
       "annotatedImageLayerId=frame");
-    g.trackChanges();
     assertEquals("annotatedImageLayerId set", "frame", annotator.getAnnotatedImageLayerId());
     Layer layer = annotator.getSchema().getLayer("frame");
     assertNotNull("frame layer created", layer);
@@ -321,7 +331,12 @@ public class TestMediaPipeAnnotator {
     assertEquals("frame type", "image/png", layer.getType());
     assertTrue("frame peers", layer.getPeers());
     assertEquals("frame parent", schema.getRoot().getId(), layer.getParentId());
+    Set<String> outputLayers = new HashSet<String>(Arrays.asList(annotator.getOutputLayers()));
+    assertEquals("Correct number of output layers: " + outputLayers,
+                 1, outputLayers.size());
+    assertTrue("frame layer output", outputLayers.contains("frame"));
     
+    g.trackChanges();
     annotator.transform(g);   
 
     Annotation[] frames = g.all("frame");
@@ -332,15 +347,19 @@ public class TestMediaPipeAnnotator {
     assertTrue("First frame has correctly suffixed label: " + frames[0],
                frames[0].getLabel().endsWith(".png"));
     System.out.println("first frame: " + frames[0].getStart() + ": " + frames[0]);
-    File png = (File) frames[0].get("@File");
-    assertNotNull("First frame includes file for data", png);
-    System.out.println("first frame file: " + png.getPath());
+    String dataUrl = (String)frames[0].get("dataUrl");
+    assertNotNull("First frame includes URL for data", dataUrl);
+    System.out.println("first frame data URL: " + dataUrl);
+    File png = new File(new URI(dataUrl));
     assertTrue("File for data exists", png.exists());
     // tidily delete all files
     for (Annotation frame : frames) {
-      png = (File) frame.get("@File");
-      if (png != null && png.exists()) {
-        png.delete();
+      dataUrl = (String)frame.get("dataUrl");
+      if (dataUrl != null) {
+        png = new File(new URI(dataUrl));
+        if (png.exists()) {
+          png.delete();
+        }
       }
     } // next frame
     

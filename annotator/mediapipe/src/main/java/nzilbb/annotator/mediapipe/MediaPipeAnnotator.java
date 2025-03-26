@@ -86,7 +86,8 @@ import org.apache.commons.csv.CSVRecord;
  * Mediapipe annotator integrates with 
  * <a href="https://github.com/google-ai-edge/mediapipe">mediapipe</a>
  * for processing of video to extract face landmark data.
- * <p> The annotator saves an annotated <tt>.mp4</tt> file, and also saves instantaneous
+ * <p> The annotator can save an annotated <tt>.mp4</tt> file and annotated frame image
+ * annotations, and also saves instantaneous
  * <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker">blendshape</a>
  * score annotations, i.e. facial features that can be used to determine facial expression.
  * @author Robert Fromont robert@fromont.net.nz
@@ -95,6 +96,12 @@ import org.apache.commons.csv.CSVRecord;
 public class MediaPipeAnnotator extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
   public String getMinimumApiVersion() { return "1.0.7"; }
+
+  // In LaBB-CAT the Tomcat user may have a read-only home directory,
+  // so cache files etc. need to be stored somewhere else,
+  // specified by the MPLCONFIGDIR environment variable
+  // https://matplotlib.org/stable/install/environment_variables_faq.html#envvar-MPLCONFIGDIR
+  File MPLCONFIGDIR = null;
   
   /**
    * Python environment name.
@@ -258,6 +265,19 @@ public class MediaPipeAnnotator extends Annotator {
   } // end of getBlendshapeCategories()
   
   /**
+   * Returns a list of possible categories.
+   * @return A list of possible categories.
+   */
+  public List<MediaTrackDefinition> getMediaTracks() {
+    if (getStore() != null) {
+      try {
+        return Arrays.asList(getStore().getMediaTracks());
+      } catch(Exception exception) {}
+    } 
+    return new Vector<MediaTrackDefinition>();
+  } // end of getBlendshapeCategories()
+  
+  /**
    * A map of blend shape categories to layer IDs. 
    * @see #getBlendShapeLayerIds()
    * @see #setBlendShapeLayerIds(Map)
@@ -347,9 +367,14 @@ public class MediaPipeAnnotator extends Annotator {
   public MediaPipeAnnotator() {
      // This is the kind of schema we'd like (set here for testing purposes):
     Schema schema = new Schema("who", "turn", "utterance", "word");
+    schema.addLayer(
+      new Layer("frame", "Annotated frame images")
+      .setAlignment(Constants.ALIGNMENT_INSTANT)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setType("image/png"));
     for (String category : blendshapeCategories) {
       schema.addLayer(
-        new Layer(category, category + " score")
+        new Layer(category, category + " score from mediapipe")
         .setAlignment(Constants.ALIGNMENT_INSTANT)
         .setPeers(true).setPeersOverlap(false).setSaturated(false)
         .setType(Constants.TYPE_NUMBER));
@@ -406,6 +431,19 @@ public class MediaPipeAnnotator extends Annotator {
           +"\ne.g. on Ubuntu: apt install python3.10-venv");
       }
       setStatus(cmd.getInput().toString());
+
+      // In LaBB-CAT the Tomcat user may have a read-only home directory,
+      // so cache files etc. need to be stored somewhere else,
+      // specified by the MPLCONFIGDIR environment variable
+      // create directory used for MPLCONFIGDIR
+      // https://matplotlib.org/stable/install/environment_variables_faq.html#envvar-MPLCONFIGDIR
+      MPLCONFIGDIR = new File(getWorkingDirectory(), "matplotlib");
+      if (!MPLCONFIGDIR.exists()) {
+        setStatus("Creating directory " + MPLCONFIGDIR.getName());
+        if (MPLCONFIGDIR.mkdir()) {
+          setStatus("Could not create directory " + MPLCONFIGDIR.getPath());
+        }
+      }
       
       // install mediapipe 
       cmd = executeInEnvironment("pip install mediapipe");
@@ -452,24 +490,21 @@ public class MediaPipeAnnotator extends Annotator {
       } finally {
         scriptWriter.close();
       }
-      Execution chmod = new Execution()
-        .setExe("chmod")
-        .arg("u+x").arg(environmentName+"/bin/activate")
-        .setWorkingDirectory(getWorkingDirectory());        
-      chmod.run();
-      chmod = new Execution()
-        .setExe("chmod")
-        .arg("u+x").arg(script.getPath())
-        .setWorkingDirectory(getWorkingDirectory());
-      chmod.run();
-      Execution cmd = new Execution()
+      if (MPLCONFIGDIR == null) {
+        MPLCONFIGDIR = new File(getWorkingDirectory(), "matplotlib");
+      }
+      python = new Execution()
         .setExe("bash") // TODO windows interpreter
         .arg(script.getPath())
-        .setWorkingDirectory(getWorkingDirectory());
-      cmd.getStdoutObservers().add(m->setStatus(m));
-      cmd.getStderrObservers().add(m->setStatus(m));
-      cmd.run();
-      return cmd;
+        .setWorkingDirectory(getWorkingDirectory())
+        // In LaBB-CAT the Tomcat user may have a read-only home directory,
+        // so cache files etc. need to be stored somewhere else,
+        // specified by the MPLCONFIGDIR environment variable
+        .env("MPLCONFIGDIR", MPLCONFIGDIR.getPath());
+      python.getStdoutObservers().add(m->setStatus(m));
+      python.getStderrObservers().add(m->setStatus(m));
+      python.run();
+      return python;
     } finally {
       script.delete();
     }
@@ -554,7 +589,7 @@ public class MediaPipeAnnotator extends Annotator {
               .setPeers(true).setPeersOverlap(false).setSaturated(false)
               .setParentId(schema.getRoot().getId())
               .setType(Constants.TYPE_NUMBER)
-              .setDescription(category + " score"));
+              .setDescription(category + " score from mediapipe"));
           } else if (categoryLayer.getParent() == null
                      || !categoryLayer.getParent().getId().equals(schema.getRoot().getId())
                      || categoryLayer.getId().equals(schema.getParticipantLayerId())
@@ -595,11 +630,16 @@ public class MediaPipeAnnotator extends Annotator {
    * {@link #setSchema(Schema)} have not yet been called.
    */
   public String[] getOutputLayers() throws InvalidConfigurationException {
-    // TODO a layer for annotated frame images
-    return blendshapeLayerIds.values().stream()
+    Vector<String> layerIds = new Vector<String>(
+      blendshapeLayerIds.values().stream()
       .filter(Objects::nonNull)
       .filter(id->id.length() > 0)
-      .toArray(String[]::new);
+      .collect(Collectors.toList()));
+    // layer for annotated frame images?
+    if (annotatedImageLayerId != null && annotatedImageLayerId.length() > 0) {
+      layerIds.add(annotatedImageLayerId);
+    }    
+    return layerIds.toArray(String[]::new);
   }
 
   Execution python = null;
@@ -647,6 +687,13 @@ public class MediaPipeAnnotator extends Annotator {
       if (video == null) {
         setStatus("There is no video on track \""+inputTrackSuffix+"\" for " + transcript.getId());
       } else { // found video
+        setStatus("Deleting existing annotations...");
+        for (String layerId : getOutputLayers()) {
+          for (Annotation a : transcript.all(layerId)) {
+            a.destroy();
+          }
+        }
+        
         setStatus("Processing " + video.getName());
 
         // create an ID for the results (so that other graphs can be processed in parallel)
@@ -654,104 +701,116 @@ public class MediaPipeAnnotator extends Annotator {
 
         String scriptName = "blendshapes-"+getVersion()+".py";
         String csvName = id + ".csv";
+        File csv = new File(getWorkingDirectory(), csvName);
         String mp4Name = outputTrackSuffix.length()==0?"NA":id + outputTrackSuffix + ".mp4";
-        String pngPattern = annotatedImageLayerId.length()==0?"NA":id + "_{0}.png";
-        Execution cmd = executeInEnvironment(
-          "./"+scriptName
-          +" '"+video.getPath()+"'"
-          +" "+numFaces
-          +" "+minFaceDetectionConfidence
-          +" "+minFacePresenceConfidence
-          +" "+minTrackingConfidence
-          +" '"+csvName+"'"
-          +" '"+mp4Name+"'"
-          +" '"+pngPattern+"'");
-        if (cmd.getProcess().exitValue() > 0) {
-          setStatus("Could not execute "+scriptName+" - status: " + cmd.getProcess().exitValue());
-          throw new TransformationException(
-            this, "Could not execute "+scriptName+": " + cmd.getProcess().exitValue());
-        }
-        
-        File csv = new File(getWorkingDirectory(), id+".csv");
-        if (!csv.exists()) {
-          setStatus("No scores output by "+scriptName+".");
-          throw new TransformationException(this, "No scores output by "+scriptName+".");
-        }
-        boolean thereWereFaces = false;
+        File mp4 = new File(getWorkingDirectory(), mp4Name);
+        String pngPattern = annotatedImageLayerId.length()==0?"NA":id + "__{0}.png";
         try {
-          // which scores are we after?
-          TreeMap<String,String> categoryLayers = new TreeMap<String,String>();
-          for (String category : blendshapeLayerIds.keySet()) {
-            String layerId = blendshapeLayerIds.get(category);
-            if (layerId != null) categoryLayers.put(category, layerId);
-          } // next possible category
-
-          MessageFormat annotatedImageFilePattern = null;
-          MessageFormat destinationImageFilePattern = null;
-          if (!pngPattern.equals("NA")) {
-            annotatedImageFilePattern = new MessageFormat(pngPattern);
-            // {transcript}_{layer}__{offset}.png
-            destinationImageFilePattern = new MessageFormat("{0}_{1}__{2}.png");
+          Execution cmd = executeInEnvironment(
+            "./"+scriptName
+            +" '"+video.getPath()+"'"
+            +" "+numFaces
+            +" "+minFaceDetectionConfidence
+            +" "+minFacePresenceConfidence
+            +" "+minTrackingConfidence
+            +" '"+csvName+"'"
+            +" '"+mp4Name+"'"
+            +" '"+pngPattern+"'");
+          if (cmd.getProcess().exitValue() > 0 && !isCancelling()) {
+            setStatus("Could not execute "+scriptName+" - status: " + cmd.getProcess().exitValue());
+            throw new TransformationException(
+              this, "Could not execute "+scriptName+": " + cmd.getProcess().exitValue());
           }
-          String transcriptPrefix = IO.WithoutExtension(transcript.getId());
-          
-          // read scores
-          CSVParser parser = new CSVParser(
-            new FileReader(csv), CSVFormat.RFC4180.withFirstRecordAsHeader());
-          for (CSVRecord record : parser) {
-            thereWereFaces = true;
-            String offset = record.get("offset");
-            Anchor anchor = transcript.createAnchorAt​(Double.parseDouble(offset));
-            for (String category : categoryLayers.keySet()) {
+
+          if (!isCancelling()) {
+            setStatus(scriptName + " complete.");
+            if (!csv.exists()) {
+              setStatus("No scores output by "+scriptName+".");
+              throw new TransformationException(this, "No scores output by "+scriptName+".");
+            }
+            boolean thereWereFaces = false;
+            // which scores are we after?
+            TreeMap<String,String> categoryLayers = new TreeMap<String,String>();
+            for (String category : blendshapeLayerIds.keySet()) {
               String layerId = blendshapeLayerIds.get(category);
-              String label = record.get(category);
-              transcript.createAnnotation​(anchor, anchor, layerId, label, transcript);
+              if (layerId != null) categoryLayers.put(category, layerId);
             } // next possible category
-
-            if (annotatedImageFilePattern != null) {
-              // there should be an image file for this frame
-              File png = new File(
-                getWorkingDirectory(), annotatedImageFilePattern.format(
-                  new Object[]{ record.get("frame") }));
-              if (!png.exists()) {
-                setStatus("Frame image missing: " + png.getName());
-              } else {
-                String destinationName = destinationImageFilePattern.format(
-                  new Object[]{ transcriptPrefix, annotatedImageLayerId, offset });
-                Annotation blobAnnotation = transcript.createAnnotation​(
-                  anchor, anchor, annotatedImageLayerId, destinationName, transcript);
-                File dataFile = File.createTempFile("MediaPipeAnnotator-", "-"+destinationName);
-                dataFile.deleteOnExit();
-                IO.Rename(png, dataFile);
-                blobAnnotation.put("@File", dataFile);
+            
+            MessageFormat annotatedImageFilePattern = null;
+            MessageFormat destinationImageFilePattern = null;
+            if (!pngPattern.equals("NA")) {
+              annotatedImageFilePattern = new MessageFormat(pngPattern);
+              // {transcript}_{layer}__{offset}.png
+              destinationImageFilePattern = new MessageFormat("{0}_{1}__{2}.png");
+            }
+            String transcriptPrefix = IO.WithoutExtension(transcript.getId());
+            
+            // read scores
+            setStatus("Parsing blendshape data...");
+            CSVParser parser = new CSVParser(
+              new FileReader(csv), CSVFormat.RFC4180.withFirstRecordAsHeader());
+            for (CSVRecord record : parser) {
+              if (isCancelling()) break;
+              thereWereFaces = true;
+              String offset = record.get("offset");
+              Anchor anchor = transcript.createAnchorAt​(Double.parseDouble(offset));
+              for (String category : categoryLayers.keySet()) {
+                String layerId = blendshapeLayerIds.get(category);
+                String label = record.get(category);
+                transcript.createAnnotation​(anchor, anchor, layerId, label, transcript);
+              } // next possible category
+              
+              if (annotatedImageFilePattern != null) {
+                // there should be an image file for this frame
+                File png = new File(
+                  getWorkingDirectory(), annotatedImageFilePattern.format(
+                    new Object[]{ record.get("frame") }));
+                if (!png.exists()) {
+                  setStatus("Frame image missing: " + png.getName());
+                } else {
+                  String destinationName = destinationImageFilePattern.format(
+                    new Object[]{ transcriptPrefix, annotatedImageLayerId, offset });
+                  Annotation blobAnnotation = transcript.createAnnotation​(
+                    anchor, anchor, annotatedImageLayerId, "frame
+                    "+record.get("frame"), transcript);
+                  File dataFile = File.createTempFile("MediaPipeAnnotator-", "-"+destinationName);
+                  dataFile.deleteOnExit();
+                  IO.Rename(png, dataFile);
+                  blobAnnotation.put("dataUrl", dataFile.toURI().toString());
+                }
               }
-            }
-          } // next record
+            } // next record
+            
+            if (!mp4Name.equals("NA")) {
+              if (!mp4.exists()) {
+                if (thereWereFaces) {
+                  setStatus("No annotated video generated by "+scriptName+".");
+                  throw new TransformationException(
+                    this, "No annotated video generated by "+scriptName+".");
+                } else {
+                  setStatus(
+                    "No annotated video generated by "+scriptName+" - there were no faces found.");
+                }
+              } else { // mp4 exists
+                if (getStore() == null) {
+                  setStatus(
+                    "Annotated video generated by "+scriptName+" but no graph store to store it in.");
+                } else {
+                  setStatus("Saving annotated video...");
+                  getStore().saveMedia(transcript.getId(), mp4.toURI().toString(), outputTrackSuffix);
+                }
+              }
+            } // mp4Name set
+          } // not cancelling
         } finally {
-          csv.delete();
-        }
-
-        if (!mp4Name.equals("NA")) {
-          File mp4 = new File(getWorkingDirectory(), mp4Name);
-          if (!mp4.exists()) {
-            if (thereWereFaces) {
-              setStatus("No annotated video generated by "+scriptName+".");
-              throw new TransformationException(
-                this, "No annotated video generated by "+scriptName+".");
-            } else {
-              setStatus(
-                "No annotated video generated by "+scriptName+" - there were no faces found.");
-            }
-          } else { // mp4 exists
-            if (getStore() == null) {
-              setStatus(
-                "Annotated video generated by "+scriptName+" but no graph store to store it in.");
-            } else {
-              getStore().saveMedia(transcript.getId(), mp4.toURI().toString(), outputTrackSuffix);
-            }
-            mp4.delete();
+          if (csv.exists()) csv.delete();
+          if (mp4.exists()) mp4.delete();
+          File[] pngs = getWorkingDirectory().listFiles(
+            f->f.getName().startsWith(id + "__") && f.getName().endsWith(".png"));
+          if (pngs != null) {
+            for (File png : pngs) png.delete();
           }
-        } // mp4Name set
+        }
         
       } // found video        
       

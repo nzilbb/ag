@@ -118,6 +118,7 @@ with FaceLandmarker.create_from_options(options) as landmarker:
   
   # Loop through each frame in the video using VideoCapture#read()
   f = 0
+  framesWithBlendshapes = 0
   while video.isOpened():
     ret, frame = video.read()
     if not ret:
@@ -132,6 +133,7 @@ with FaceLandmarker.create_from_options(options) as landmarker:
     detection_result = landmarker.detect_for_video(mp_image, frame_timestamp_ms)
     
     if len(detection_result.face_blendshapes) > 0:
+      framesWithBlendshapes = framesWithBlendshapes + 1
       if OUTPUT_CSV_FILE != "NA":
         row = {}
         row["frame"] = f
@@ -148,6 +150,7 @@ with FaceLandmarker.create_from_options(options) as landmarker:
     f = f+1
 
 video.release()
+print("Frames with blendshapes: " + str(framesWithBlendshapes))
 if OUTPUT_VIDEO_FILE != "NA":
   print("Annotated video: " + OUTPUT_VIDEO_FILE)
 if OUTPUT_FRAME_FORMAT != "NA":

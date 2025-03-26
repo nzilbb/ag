@@ -11,13 +11,32 @@
     <p> Mediapipe annotator integrates with 
       <a href="https://github.com/google-ai-edge/mediapipe" target="mediapipe">mediapipe</a>
       for processing of video to extract face landmark data. </p>
-    <p> The annotator saves instantaneous
+    <p> The annotator can save an annotated <tt>.mp4</tt> file and annotated frame image
+      annotations, and also saves instantaneous
       <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker"
          target="mediapipe">blendshape</a>
       score annotations, i.e. facial features that can be used to determine facial expression. </p>
     
     <form method="POST" action="setTaskParameters" id="form">
-      <div id="layerMappings"></div>
+      <div class="field" title="The media track from which the video to analyse should be taken">
+        <label for="inputTrackSuffix"> Analyse Track </label>
+        <span><select id="inputTrackSuffix" name="inputTrackSuffix"></select></span>
+      </div>
+      <div class="field" title="The media track to which the a video annotated with face landmarks should be saved">
+        <label for="outputTrackSuffix"> Annotated Video Track </label>
+        <span><select id="outputTrackSuffix" name="outputTrackSuffix">
+            <option value="">[no annotated video output]</option>
+        </select></span>
+      </div>
+      <div class="field" title="The layer on which frame images annotated with face landmarks should be saved">
+        <label for="annotatedImageLayerId"> Annotated Images Layer </label>
+        <span><select id="annotatedImageLayerId" name="annotatedImageLayerId">
+            <option value="">[none]</option>
+            <option>[add new layer]</option>
+        </select></span>
+      </div>
+      <fieldset id="layerMappings"><legend>Face BlendShapes</legend>
+      </fieldset>
       <div class="field" title="The maximum number of faces that can be detected by the the FaceLandmarker. Smoothing is only applied when num_faces is set to 1.">
         <label for="numFaces"> num_faces </label>
         <span><input id="numFaces" name="numFaces"

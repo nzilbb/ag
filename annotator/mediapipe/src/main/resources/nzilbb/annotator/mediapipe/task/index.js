@@ -12,7 +12,7 @@ let schema = null;
 getSchema(s => {
   schema = s;
   
-  // set sensible defaults for optionsby asking the annotator
+  // set sensible defaults for options by asking the annotator
   getText("getNumFaces", value =>
     document.getElementById("numFaces").value = value);
   getText("getMinFaceDetectionConfidence", value =>
@@ -21,6 +21,44 @@ getSchema(s => {
     document.getElementById("minFacePresenceConfidence").value = value);
   getText("getMinTrackingConfidence", value =>
     document.getElementById("minTrackingConfidence").value = value);
+
+  // populate layer input select options...
+  addLayerOptions(
+    document.getElementById("annotatedImageLayerId"), schema,
+    // instantaneous top level layers
+    layer => layer.id == taskId
+      || (layer.alignment == 1 && layer.parentId == schema.root.id
+          // no system layers
+          && layer.id != schema.corpusLayerId
+          && layer.id != schema.episodeLayerId
+          && layer.id != schema.participantLayerId
+          && layer.id != schema.turnLayerId
+          && layer.id != schema.utteranceLayerId
+          && layer.id != schema.wordLayerId)
+  );
+
+  getJSON("getMediaTracks", tracks => {
+    var inputTrackSuffix = document.getElementById("inputTrackSuffix");
+    if (tracks.length == 0) tracks = [{
+      suffix: "", description: "Default track"
+    }];
+    for (var track of tracks) {
+      var option = document.createElement("option");
+      option.value = track.suffix;
+      option.appendChild(document.createTextNode(track.description));
+      inputTrackSuffix.appendChild(option);
+    } // next track
+    
+    var outputTrackSuffix = document.getElementById("outputTrackSuffix");
+    for (var track of tracks) {
+      if (track.suffix) { // skip blank default suffix
+        var option = document.createElement("option");
+        option.value = track.suffix;
+        option.appendChild(document.createTextNode(track.description));
+        outputTrackSuffix.appendChild(option);
+      }
+    } // next track
+  });
 
   // get blendshape category list - categories can be mapped to layers
   getJSON("getBlendshapeCategories", categories => {
@@ -54,6 +92,13 @@ getSchema(s => {
         select, schema,
         // instantaneous top level layers
         layer => layer.alignment == 1 && layer.parentId == schema.root.id
+        // no system layers
+          && layer.id != schema.corpusLayerId
+          && layer.id != schema.episodeLayerId
+          && layer.id != schema.participantLayerId
+          && layer.id != schema.turnLayerId
+          && layer.id != schema.utteranceLayerId
+          && layer.id != schema.wordLayerId
       );
 
       var addNew = document.createElement("option");
@@ -69,6 +114,7 @@ getSchema(s => {
     getText("getTaskParameters", parameters => {
       try {
         if (!parameters) { // new task
+          document.getElementById("annotatedImageLayerId").value = taskId;
           // default for score layers is to create them all
           for (category of categories) {
             document.getElementById(category).value = category;
@@ -125,3 +171,6 @@ function changedLayer(select, defaultNewLayerName) {
     }
   }
 }
+
+document.getElementById("annotatedImageLayerId").onchange = function(e) {
+  changedLayer(this, "annotatedFrame"); };

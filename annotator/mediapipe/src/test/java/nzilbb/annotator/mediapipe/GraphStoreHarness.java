@@ -71,6 +71,22 @@ public class GraphStoreHarness implements GraphStore {
   }
 
   /**
+   * List the predefined media tracks available for transcripts.
+   * @return An ordered list of media track definitions.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted. 
+   */
+  public MediaTrackDefinition[] getMediaTracks() 
+    throws StoreException, PermissionException {
+    return new MediaTrackDefinition[] {
+      new MediaTrackDefinition("", "Default media"),
+      new MediaTrackDefinition("-B", "Camera B"),
+      new MediaTrackDefinition("-face-landmarks", "Face landmarks"),
+    };
+  }
+   
+
+  /**
    * Constructor.
    */
   public GraphStoreHarness() {
@@ -611,17 +627,6 @@ public class GraphStoreHarness implements GraphStore {
    */
   public MonitorableSeries<Graph> getFragmentSeries(String seriesId, String[] layerIds) 
     throws StoreException, PermissionException, GraphNotFoundException {
-    throw new StoreException("Not implemented");
-  }
-   
-  /**
-   * List the predefined media tracks available for transcripts.
-   * @return An ordered list of media track definitions.
-   * @throws StoreException If an error occurs.
-   * @throws PermissionException If the operation is not permitted. 
-   */
-  public MediaTrackDefinition[] getMediaTracks() 
-    throws StoreException, PermissionException {
     throw new StoreException("Not implemented");
   }
    

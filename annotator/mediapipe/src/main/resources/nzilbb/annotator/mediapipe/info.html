@@ -2,7 +2,8 @@
 
 <p> Mediapipe annotator integrates with <a href="https://github.com/google-ai-edge/mediapipe" target="mediapipe">mediapipe</a>
   for processing of video to extract face landmark data. </p>
-<p> The annotator saves instantaneous <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker" target="mediapipe">blendshape</a>
+<p> The annotator can save an annotated <tt>.mp4</tt> file and annotated frame image
+  annotations, and also saves instantaneous <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker" target="mediapipe">blendshape</a>
   score annotations, i.e. facial features that can be used to determine facial expression. </p>
 
 <h2> Prerequisites </h2>
@@ -15,3 +16,10 @@ The following must already be installed on the same machine that LaBB-CAT runs o
 
 <p> Support for Python 'venv' can be installed on Ubuntu-like systems with the command:<br>
 <tt>apt install python3.10-venv</tt></p>
+
+<h2> Installation </h2>
+
+<p><b>NB:</b> During installation, the annotator needs to be able to connect to the
+  internet so that required Python packages and model files can be installed.</p>
+
+<p>Once installed, the annotator should function without an internet connection.</p>
