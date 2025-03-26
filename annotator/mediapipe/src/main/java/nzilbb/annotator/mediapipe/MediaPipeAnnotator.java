@@ -702,8 +702,10 @@ public class MediaPipeAnnotator extends Annotator {
         String scriptName = "blendshapes-"+getVersion()+".py";
         String csvName = id + ".csv";
         File csv = new File(getWorkingDirectory(), csvName);
+        csv.deleteOnExit();
         String mp4Name = outputTrackSuffix.length()==0?"NA":id + outputTrackSuffix + ".mp4";
         File mp4 = new File(getWorkingDirectory(), mp4Name);
+        mp4.deleteOnExit();
         String pngPattern = annotatedImageLayerId.length()==0?"NA":id + "__{0}.png";
         try {
           Execution cmd = executeInEnvironment(
@@ -771,8 +773,8 @@ public class MediaPipeAnnotator extends Annotator {
                   String destinationName = destinationImageFilePattern.format(
                     new Object[]{ transcriptPrefix, annotatedImageLayerId, offset });
                   Annotation blobAnnotation = transcript.createAnnotation​(
-                    anchor, anchor, annotatedImageLayerId, "frame
-                    "+record.get("frame"), transcript);
+                    anchor, anchor, annotatedImageLayerId,
+                    "frame"+record.get("frame"), transcript);
                   File dataFile = File.createTempFile("MediaPipeAnnotator-", "-"+destinationName);
                   dataFile.deleteOnExit();
                   IO.Rename(png, dataFile);
