@@ -78,11 +78,12 @@ public class TestMediaPipeAnnotator {
     // set the working directory
     annotator.setWorkingDirectory(dir);
     
-    // not setting the graph store, sorry
+    // set the graph store
+    annotator.setStore(new GraphStoreHarness());
     
-    if (annotator.getStatusObservers().size() == 0) {
-      annotator.getStatusObservers().add(status->System.out.println(status));
-    }
+    // if (annotator.getStatusObservers().size() == 0) {
+    //   annotator.getStatusObservers().add(status->System.out.println(status));
+    // }
     // set the annotator configuration
     annotator.setConfig("");
     
@@ -111,11 +112,44 @@ public class TestMediaPipeAnnotator {
     assertTrue("task file has been downloaded",
                new File(annotator.getWorkingDirectory(), "face_landmarker.task").exists());
     assertTrue("script file has been unpacked",
-               new File(annotator.getWorkingDirectory(), "blendshapes.py").exists());
+               new File(annotator.getWorkingDirectory(),
+                        "blendshapes-"+annotator.getVersion()+".py").exists());
   }   
 
+  /** Ensure invalid task parameters raise errors. */
+  @Test public void invalidTaskParameters() throws Exception {
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    try {
+      annotator.setTaskParameters(
+        "jawForward=word"); // non-top-level layer
+      fail("Non-top level layer is invalid for blendshape scores");
+    } catch(InvalidConfigurationException exception) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "jawForward="+schema.getParticipantLayerId()); // top-level layer but a system layer
+      fail("System layer is invalid for blendshape scores");
+    } catch(InvalidConfigurationException exception) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "annotatedImageLayerId=word"); // non-top-level layer
+      fail("Non-top level layer is invalid for annotated images");
+    } catch(InvalidConfigurationException exception) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "annotatedImageLayerId="+schema.getParticipantLayerId()); // top-level layer but a system layer
+      fail("System layer is invalid for annotated images");
+    } catch(InvalidConfigurationException exception) {
+    }
+  }
+    
   /** Ensure valid task parameters don't raise errors, and change the schema when appropriate. */
-  @Test public void setValidTaskParameters() throws Exception {
+  @Test public void validTaskParameters() throws Exception {
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -127,32 +161,58 @@ public class TestMediaPipeAnnotator {
       +"&jawOpen=jawOpen"
       +"&jawRight=jawRight"
       +"&mouthClose="         // some layers specified but unset
-      +"&mouthDimpleLeft=");
-    Layer layer = annotator.getSchema().getLayer("jawForward");
+      +"&mouthDimpleLeft="
+      +"&annotatedImageLayerId=frames"
+      +"&outputTrackSuffix=-face-landmarks"
+      );
+    
+    assertEquals("outputTrackSuffix", "-face-landmarks", annotator.getOutputTrackSuffix());
+    
+    assertEquals("annotatedImageLayerId", "frames", annotator.getAnnotatedImageLayerId());
+    Layer layer = annotator.getSchema().getLayer("frames");
+    assertNotNull("frames layer created", layer);
+    assertEquals("frames alignment", Constants.ALIGNMENT_INSTANT, layer.getAlignment());
+    assertEquals("frames type", "image/png", layer.getType());
+    assertTrue("frames peers", layer.getPeers());
+    assertEquals("frames parent", schema.getRoot().getId(), layer.getParentId());
+
+    assertEquals("jawForward layer",
+                 "jawForward", annotator.getBlendshapeLayerIds().get("jawForward"));
+    layer = annotator.getSchema().getLayer("jawForward");
     assertNotNull("jawForward layer created", layer);
     assertEquals("jawForward alignment", Constants.ALIGNMENT_INSTANT, layer.getAlignment());
     assertEquals("jawForward type", Constants.TYPE_NUMBER, layer.getType());
     assertTrue("jawForward peers", layer.getPeers());
     assertEquals("jawForward parent", schema.getRoot().getId(), layer.getParentId());
+    assertEquals("jawLeft layer",
+                 "jawLeft", annotator.getBlendshapeLayerIds().get("jawLeft"));
     layer = annotator.getSchema().getLayer("jawLeft");
     assertNotNull("jawLeft layer created", layer);
     assertEquals("jawLeft alignment", Constants.ALIGNMENT_INSTANT, layer.getAlignment());
     assertEquals("jawLeft type", Constants.TYPE_NUMBER, layer.getType());
     assertTrue("jawLeft peers", layer.getPeers());
     assertEquals("jawLeft parent", schema.getRoot().getId(), layer.getParentId());
+    assertEquals("jawOpen layer",
+                 "jawOpen", annotator.getBlendshapeLayerIds().get("jawOpen"));
     layer = annotator.getSchema().getLayer("jawOpen");
     assertNotNull("jawOpen layer created", layer);
     assertEquals("jawOpen alignment", Constants.ALIGNMENT_INSTANT, layer.getAlignment());
     assertEquals("jawOpen type", Constants.TYPE_NUMBER, layer.getType());
     assertTrue("jawOpen peers", layer.getPeers());
     assertEquals("jawOpen parent", schema.getRoot().getId(), layer.getParentId());
+    assertEquals("jawForward layer",
+                 "jawRight", annotator.getBlendshapeLayerIds().get("jawRight"));
     layer = annotator.getSchema().getLayer("jawRight");
     assertNotNull("jawRight layer created", layer);
     assertEquals("jawRight alignment", Constants.ALIGNMENT_INSTANT, layer.getAlignment());
     assertEquals("jawRight type", Constants.TYPE_NUMBER, layer.getType());
     assertTrue("jawRight peers", layer.getPeers());
     assertEquals("jawRight parent", schema.getRoot().getId(), layer.getParentId());
+    assertNull("no mouthClose layer id",
+                 annotator.getBlendshapeLayerIds().get("mouthClose"));
     assertNull("no mouthClose layer", annotator.getSchema().getLayer("mouthClose"));
+    assertNull("no mouthDimpleLeft layer id",
+               annotator.getBlendshapeLayerIds().get("mouthDimpleLeft"));
     assertNull("no mouthDimpleLeft layer", annotator.getSchema().getLayer("mouthDimpleLeft"));
 
     Set<String> requiredLayers = new HashSet<String>(Arrays.asList(annotator.getRequiredLayers()));
@@ -171,39 +231,123 @@ public class TestMediaPipeAnnotator {
 
   /** Facial feature score annotations are created. */
   @Test public void featureScoreAnnotations() throws Exception {
-    if (annotator.getStatusObservers().size() == 0) {
-      annotator.getStatusObservers().add(status->System.out.println(status));
-    }
+    // if (annotator.getStatusObservers().size() == 0) {
+    //   annotator.getStatusObservers().add(status->System.out.println(status));
+    // }
     
     Graph g = graph();
     Schema schema = g.getSchema();
     annotator.setSchema(schema);
     
     annotator.setTaskParameters(
-      "jawForward=jawForward" // partial set of layers
-      +"&jawLeft=jawLeft"
-      +"&jawOpen=jawOpen"
-      +"&jawRight=jawRight"
-      +"&mouthClose="         // some layers specified but unset
-      +"&mouthDimpleLeft=");
+      "jawForward=jawForwardLayer" // layer names aren't feature names
+      +"&jawLeft=jawLeftLayer"
+      +"&jawOpen=jawOpenLayer"
+      +"&jawRight=jawRightLayer");
+    assertEquals("jawForward layer",
+                 "jawForwardLayer", annotator.getBlendshapeLayerIds().get("jawForward"));
+    assertEquals("jawLeft layer",
+                 "jawLeftLayer", annotator.getBlendshapeLayerIds().get("jawLeft"));
+    assertEquals("jawOpen layer",
+                 "jawOpenLayer", annotator.getBlendshapeLayerIds().get("jawOpen"));
+    assertEquals("jawRight layer",
+                 "jawRightLayer", annotator.getBlendshapeLayerIds().get("jawRight"));
+    assertEquals("outputTrackSuffix not set", "", annotator.getOutputTrackSuffix());
+    assertEquals("annotatedImageLayerId not set", "", annotator.getAnnotatedImageLayerId());
 
     g.trackChanges();
     annotator.transform(g);
         
-    Annotation[] scores = g.all("jawForward");
+    Annotation[] scores = g.all("jawForwardLayer");
     assertTrue("There are jawForward scores", scores.length > 0);
     System.out.println("jawForward: " + scores[0].getStart() + ": " + scores[0]);
-    scores = g.all("jawLeft");
+    scores = g.all("jawLeftLayer");
     assertTrue("There are jawLeft scores", scores.length > 0);
     System.out.println("jawLeft: " + scores[0].getStart() + ": " + scores[0]);
-    scores = g.all("jawOpen");
+    scores = g.all("jawOpenLayer");
     assertTrue("There are jawOpen scores", scores.length > 0);
     System.out.println("jawOpen: " + scores[0].getStart() + ": " + scores[0]);
-    scores = g.all("jawRight");
+    scores = g.all("jawRightLayer");
     assertTrue("There are jawRight scores", scores.length > 0);
     System.out.println("jawRight: " + scores[0].getStart() + ": " + scores[0]);
+
+    assertNull("no annotated video generated",
+               ((GraphStoreHarness)annotator.getStore()).id);
   }
   
+  /** Annotated video is created. */
+  @Test public void annotatedVideo() throws Exception {
+    // if (annotator.getStatusObservers().size() == 0) {
+    //   annotator.getStatusObservers().add(status->System.out.println(status));
+    // }
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+
+    String outputTrackSuffix = "-facial-features";
+    
+    annotator.setTaskParameters(
+      "outputTrackSuffix="+outputTrackSuffix);
+    g.trackChanges();
+    assertEquals("outputTrackSuffix set", outputTrackSuffix, annotator.getOutputTrackSuffix());
+    annotator.transform(g);   
+
+    GraphStoreHarness store = (GraphStoreHarness)annotator.getStore();
+    assertEquals("annotated video generated", g.getId(), store.id);
+    assertEquals("annotated track suffix", outputTrackSuffix, store.trackSuffix);
+    assertNotNull("annotated track file", store.file);
+    // tidily delete the file
+    store.file.delete();
+  }
+  
+  /** Annotated frame images are created. */
+  @Test public void annotatedFrameImages() throws Exception {
+    // if (annotator.getStatusObservers().size() == 0) {
+    //   annotator.getStatusObservers().add(status->System.out.println(status));
+    // }
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    annotator.setTaskParameters(
+      "annotatedImageLayerId=frame");
+    g.trackChanges();
+    assertEquals("annotatedImageLayerId set", "frame", annotator.getAnnotatedImageLayerId());
+    Layer layer = annotator.getSchema().getLayer("frame");
+    assertNotNull("frame layer created", layer);
+    assertEquals("frame alignment", Constants.ALIGNMENT_INSTANT, layer.getAlignment());
+    assertEquals("frame type", "image/png", layer.getType());
+    assertTrue("frame peers", layer.getPeers());
+    assertEquals("frame parent", schema.getRoot().getId(), layer.getParentId());
+    
+    annotator.transform(g);   
+
+    Annotation[] frames = g.all("frame");
+    assertTrue("There are frame annotations", frames.length > 0);
+    // labels are formatted as fragment filenames: {transcript}_{layer}__{offset}.png
+    assertTrue("First frame has correctly named label: " + frames[0],
+               frames[0].getLabel().startsWith("test_frame__"));
+    assertTrue("First frame has correctly suffixed label: " + frames[0],
+               frames[0].getLabel().endsWith(".png"));
+    System.out.println("first frame: " + frames[0].getStart() + ": " + frames[0]);
+    File png = (File) frames[0].get("@File");
+    assertNotNull("First frame includes file for data", png);
+    System.out.println("first frame file: " + png.getPath());
+    assertTrue("File for data exists", png.exists());
+    // tidily delete all files
+    for (Annotation frame : frames) {
+      png = (File) frame.get("@File");
+      if (png != null && png.exists()) {
+        png.delete();
+      }
+    } // next frame
+    
+    assertNull("no annotated video generated",
+               ((GraphStoreHarness)annotator.getStore()).id);
+  }
+
   /**
    * Returns a graph for annotating.
    * @return The graph for testing with.
@@ -235,7 +379,7 @@ public class TestMediaPipeAnnotator {
     // annotate a graph
     Graph g = new Graph()
       .setSchema(schema);
-    g.setId("test");
+    g.setId("test.eaf");
     Anchor start = g.getOrCreateAnchorAt(10, Constants.CONFIDENCE_MANUAL);
     Anchor end = g.getOrCreateAnchorAt(14, Constants.CONFIDENCE_MANUAL);
     g.addAnnotation(

@@ -10,29 +10,31 @@ from mediapipe import solutions
 import cv2
 import csv
 import numpy as np
-if len(sys.argv) < 6:
+if len(sys.argv) < 9:
   print("Please supply th followin parameters:")
   print(" - video file name")
-  print(" - output files identifier")
   print(" - num_faces setting (int)")
   print(" - min_face_detection_confidence setting (float)")
   print(" - min_face_presence_confidence setting (float)")
   print(" - min_tracking_confidence setting (float)")
+  print(" - CSV file name for blendshape scores, or NA to not generate them")
+  print(" - Annotated video file name (must end in .mp4), or NA to not generate it")
+  print(" - Annotated frame image file pattern (e.g. frame-{0}.png), or NA to not generate them")
   exit()
 
 MODEL_PATH = 'face_landmarker.task'
 INPUT_VIDEO_FILE = sys.argv[1]
-OUTPUT_VIDEO_FILE = sys.argv[2]+"_landmarks.mp4"
-OUTPUT_FRAME_FORMAT = sys.argv[2]+"-{0}.png"
-OUTPUT_CSV_FILE = sys.argv[2]+".csv"
-NUM_FACES = int(sys.argv[3])
+NUM_FACES = int(sys.argv[2])
 print("NUM_FACES " + str(NUM_FACES))
-MIN_FACE_DETECTION_CONFIDENCE = float(sys.argv[4])
+MIN_FACE_DETECTION_CONFIDENCE = float(sys.argv[3])
 print("MIN_FACE_DETECTION_CONFIDENCE " + str(MIN_FACE_DETECTION_CONFIDENCE))
-MIN_FACE_PRESENCE_CONFIDENCE = float(sys.argv[5])
+MIN_FACE_PRESENCE_CONFIDENCE = float(sys.argv[4])
 print("MIN_FACE_PRESENCE_CONFIDENCE " + str(MIN_FACE_PRESENCE_CONFIDENCE))
 MIN_TRACKING_CONFIDENCE = float(sys.argv[5])
 print("MIN_TRACKING_CONFIDENCE " + str(MIN_TRACKING_CONFIDENCE))
+OUTPUT_CSV_FILE = sys.argv[6]
+OUTPUT_VIDEO_FILE = sys.argv[7]
+OUTPUT_FRAME_FORMAT = sys.argv[8]
 
 # Use OpenCV’s VideoCapture to load the input video.
 
@@ -103,44 +105,53 @@ options = FaceLandmarkerOptions(
 
 codec_id = "mp4v" # ID for a video codec.
 fourcc = cv2.VideoWriter_fourcc(*codec_id)
-#out = cv2.VideoWriter(OUTPUT_VIDEO_FILE, fourcc=fourcc, fps=fps, frameSize=(width, height))
+if OUTPUT_VIDEO_FILE != "NA":
+  out = cv2.VideoWriter(OUTPUT_VIDEO_FILE, fourcc=fourcc, fps=fps, frameSize=(width, height))
     
 with FaceLandmarker.create_from_options(options) as landmarker:
-  with open(OUTPUT_CSV_FILE, 'w') as csvFile:
+  if OUTPUT_CSV_FILE != "NA":
+    csvFile = open(OUTPUT_CSV_FILE, 'w')
     # The landmarker is initialized. Use it here.
     fieldnames = ["frame","offset","_neutral","browDownLeft","browDownRight","browInnerUp","browOuterUpLeft","browOuterUpRight","cheekPuff","cheekSquintLeft","cheekSquintRight","eyeBlinkLeft","eyeBlinkRight","eyeLookDownLeft","eyeLookDownRight","eyeLookInLeft","eyeLookInRight","eyeLookOutLeft","eyeLookOutRight","eyeLookUpLeft","eyeLookUpRight","eyeSquintLeft","eyeSquintRight","eyeWideLeft","eyeWideRight","jawForward","jawLeft","jawOpen","jawRight","mouthClose","mouthDimpleLeft","mouthDimpleRight","mouthFrownLeft","mouthFrownRight","mouthFunnel","mouthLeft","mouthLowerDownLeft","mouthLowerDownRight","mouthPressLeft","mouthPressRight","mouthPucker","mouthRight","mouthRollLower","mouthRollUpper","mouthShrugLower","mouthShrugUpper","mouthSmileLeft","mouthSmileRight","mouthStretchLeft","mouthStretchRight","mouthUpperUpLeft","mouthUpperUpRight","noseSneerLeft","noseSneerRight"]
     blendShapes = csv.DictWriter(csvFile, fieldnames=fieldnames)
     blendShapes.writeheader()
   
-    # Loop through each frame in the video using VideoCapture#read()
-    f = 0
-    while video.isOpened():
-      ret, frame = video.read()
-      if not ret:
-        break
+  # Loop through each frame in the video using VideoCapture#read()
+  f = 0
+  while video.isOpened():
+    ret, frame = video.read()
+    if not ret:
+      break
 
-      # timestamp
-      frame_timestamp_s = f/fps
-      frame_timestamp_ms = int(frame_timestamp_s * 1000)
-      
-      # Convert the frame received from OpenCV to a MediaPipe’s Image object.
-      mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
-      detection_result = landmarker.detect_for_video(mp_image, frame_timestamp_ms)
-      
-      if len(detection_result.face_blendshapes) > 0:
+    # timestamp
+    frame_timestamp_s = f/fps
+    frame_timestamp_ms = int(frame_timestamp_s * 1000)
+    
+    # Convert the frame received from OpenCV to a MediaPipe’s Image object.
+    mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
+    detection_result = landmarker.detect_for_video(mp_image, frame_timestamp_ms)
+    
+    if len(detection_result.face_blendshapes) > 0:
+      if OUTPUT_CSV_FILE != "NA":
         row = {}
         row["frame"] = f
         row["offset"] = frame_timestamp_s
         for category in detection_result.face_blendshapes[0]:
           row[category.category_name] = '{:f}'.format(category.score) # no scientific notation
         blendShapes.writerow(row)
-        frame = draw_landmarks_on_image(mp_image.numpy_view(), detection_result)
-      
-      #cv2.imwrite(OUTPUT_FRAME_FORMAT.format(str(f)), frame)
-      #out.write(frame)
-      f = f+1
+      if OUTPUT_FRAME_FORMAT != "NA":
+        frame = draw_landmarks_on_image(mp_image.numpy_view(), detection_result)      
+        cv2.imwrite(OUTPUT_FRAME_FORMAT.format(str(f)), frame)
+        
+    if OUTPUT_VIDEO_FILE != "NA":
+      out.write(frame)
+    f = f+1
 
 video.release()
-#print("Annotated video: " + OUTPUT_VIDEO_FILE)
-#print("Annotated frames: " + OUTPUT_FRAME_FORMAT)
-print("Blendshape data: " + OUTPUT_CSV_FILE)
+if OUTPUT_VIDEO_FILE != "NA":
+  print("Annotated video: " + OUTPUT_VIDEO_FILE)
+if OUTPUT_FRAME_FORMAT != "NA":
+  print("Annotated frames: " + OUTPUT_FRAME_FORMAT)
+if OUTPUT_CSV_FILE != "NA":
+  csvFile.close()
+  print("Blendshape data: " + OUTPUT_CSV_FILE)

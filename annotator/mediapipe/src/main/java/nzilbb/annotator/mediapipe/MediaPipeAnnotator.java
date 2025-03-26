@@ -41,6 +41,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,9 +78,9 @@ import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.util.Merger;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 
 /**
  * Mediapipe annotator integrates with 
@@ -274,6 +275,73 @@ public class MediaPipeAnnotator extends Annotator {
   public MediaPipeAnnotator setBlendshapeLayerIds(Map<String,String> newBlendshapeLayerIds) { blendshapeLayerIds = newBlendshapeLayerIds; return this; }
   
   /**
+   * The track suffix that the video to analyse should come from.
+   * @see #getInputTrackSuffix()
+   * @see #setInputTrackSuffix(String)
+   */
+  protected String inputTrackSuffix = "";
+  /**
+   * Getter for {@link #inputTrackSuffix}: The track suffix that the video to analyse
+   * should come from. 
+   * @return The track suffix that the video to analyse should come from.
+   */
+  public String getInputTrackSuffix() { return inputTrackSuffix; }
+  /**
+   * Setter for {@link #inputTrackSuffix}: The track suffix that the video to analyse
+   * should come from. 
+   * @param newInputTrackSuffix The track suffix that the video to analyse should come from.
+   */
+  public MediaPipeAnnotator setInputTrackSuffix(String newInputTrackSuffix) { inputTrackSuffix = newInputTrackSuffix; return this; }
+  
+  /**
+   * If a video file annotated with facial landmarks is desired, it should be saved with
+   * this track suffix. Empty string or null disables annotated video production. 
+   * @see #getOutputTrackSuffix()
+   * @see #setOutputTrackSuffix(String)
+   */
+  protected String outputTrackSuffix = "";
+  /**
+   * Getter for {@link #outputTrackSuffix}: If a video file annotated with facial
+   * landmarks is desired, it should be saved with this track suffix. Empty string or null
+   * disables annotated video production. 
+   * @return If a video file annotated with facial landmarks is desired, it should be
+   * saved with this track suffix. Empty string or null disables annotated video
+   * production. 
+   */
+  public String getOutputTrackSuffix() { return outputTrackSuffix; }
+  /**
+   * Setter for {@link #outputTrackSuffix}: If a video file annotated with facial
+   * landmarks is desired, it should be saved with this track suffix. Empty string or null
+   * disables annotated video production. 
+   * @param newOutputTrackSuffix If a video file annotated with facial landmarks is
+   * desired, it should be saved with this track suffix. Empty string or null disables
+   * annotated video production. 
+   */
+  public MediaPipeAnnotator setOutputTrackSuffix(String newOutputTrackSuffix) { outputTrackSuffix = newOutputTrackSuffix; return this; }
+  
+  /**
+   * If a frame images annotated with facial landmarks are desired, the images will be
+   * saved on a layer with this ID. 
+   * @see #getAnnotatedImageLayerId()
+   * @see #setAnnotatedImageLayerId(String)
+   */
+  protected String annotatedImageLayerId = "";
+  /**
+   * Getter for {@link #annotatedImageLayerId}: If a frame images annotated with facial
+   * landmarks are desired, the images will be saved on a layer with this ID. 
+   * @return If a frame images annotated with facial landmarks are desired, the images
+   * will be saved on a layer with this ID. 
+   */
+  public String getAnnotatedImageLayerId() { return annotatedImageLayerId; }
+  /**
+   * Setter for {@link #annotatedImageLayerId}: If a frame images annotated with facial
+   * landmarks are desired, the images will be saved on a layer with this ID. 
+   * @param newAnnotatedImageLayerId If a frame images annotated with facial landmarks are
+   * desired, the images will be saved on a layer with this ID. 
+   */
+  public MediaPipeAnnotator setAnnotatedImageLayerId(String newAnnotatedImageLayerId) { annotatedImageLayerId = newAnnotatedImageLayerId; return this; }
+  
+  /**
    * Default constructor.
    */
   public MediaPipeAnnotator() {
@@ -303,10 +371,9 @@ public class MediaPipeAnnotator extends Annotator {
 
       // extract scripts
       String script = "blendshapes.py";
-      setStatus("Unpacking " + script);
       URL urlSource = getClass().getResource(script);
-      setStatus("urlSource " + urlSource);
-      File destination = new File(getWorkingDirectory(), script);
+      File destination = new File(getWorkingDirectory(), "blendshapes-"+getVersion()+".py");
+      setStatus("Unpacking " + destination.getName());
       if (!destination.exists()) {
         IO.SaveInputStreamToFile​(urlSource.openStream(), destination);
         new Execution()
@@ -373,6 +440,7 @@ public class MediaPipeAnnotator extends Annotator {
    * @throws IOException, FileNotFoundException
    */
   public Execution executeInEnvironment(String command) throws IOException, FileNotFoundException {
+    setStatus("In " + environmentName + " executing: " + command);
     File script = File.createTempFile("MediaPipeAnnotator-", ".sh", getWorkingDirectory()); // TODO .bat on Windows
     script.deleteOnExit();
     try {
@@ -417,14 +485,57 @@ public class MediaPipeAnnotator extends Annotator {
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
 
+    // reset values
+    numFaces = 1;
+    minFaceDetectionConfidence = 0.5;
+    minFacePresenceConfidence = 0.5;
+    minTrackingConfidence = 0.5;
+    inputTrackSuffix = "";
+    outputTrackSuffix = "";
+    annotatedImageLayerId = "";
+    for (String category : blendshapeLayerIds.keySet()) blendshapeLayerIds.put(category, null);
+
     if (parameters != null) {
       beanPropertiesFromQueryString(parameters);
     }
 
     // parse/validate category score layer ID parameters
-    
-    // clear any previous blendshape layer IDs
-    for (String category : blendshapeLayerIds.keySet()) blendshapeLayerIds.put(category, null);
+    if (inputTrackSuffix == null) inputTrackSuffix = "";
+    if (outputTrackSuffix == null) outputTrackSuffix = "";
+
+    if (annotatedImageLayerId == null) annotatedImageLayerId = "";
+    if (annotatedImageLayerId.length() > 0) {
+      Layer annotatedImageLayer = schema.getLayer(annotatedImageLayerId);
+      if (annotatedImageLayer == null) { // layer doesn't exist
+        // create it
+        schema.addLayer(
+          new Layer(annotatedImageLayerId)
+          .setAlignment(Constants.ALIGNMENT_INSTANT)
+          .setPeers(true).setPeersOverlap(false).setSaturated(false)
+          .setParentId(schema.getRoot().getId())
+          .setType("image/png")
+          .setDescription("Frame images annotated with facial landmarks by mediapipe"));        
+      } else if (annotatedImageLayer.getParent() == null
+                 || !annotatedImageLayer.getParent().getId().equals(schema.getRoot().getId())
+                 || annotatedImageLayer.getId().equals(schema.getParticipantLayerId())
+                 || annotatedImageLayer.getId().equals(schema.getTurnLayerId())
+                 || annotatedImageLayer.getId().equals(schema.getUtteranceLayerId())
+                 || annotatedImageLayer.getId().equals(schema.getWordLayerId())
+                 || annotatedImageLayer.getId().equals(schema.getCorpusLayerId())
+                 || annotatedImageLayer.getId().equals(schema.getEpisodeLayerId())) {
+        throw new InvalidConfigurationException(
+          this, "annotatedImageLayer ("+annotatedImageLayerId
+          + ") must be a non-system span layer, but parent layer is "
+          + annotatedImageLayer.getParent());
+      } else {
+        if (annotatedImageLayer.getAlignment() != Constants.ALIGNMENT_INSTANT) {
+          annotatedImageLayer.setAlignment(Constants.ALIGNMENT_INSTANT);
+        }
+        if (!annotatedImageLayer.getType().equals("image/png")) {
+          annotatedImageLayer.setType("image/png");
+        }
+      }
+    }
     
     // set blendshape layer IDs from query string
     for (String parameter : parameters.split("&")) {
@@ -445,16 +556,21 @@ public class MediaPipeAnnotator extends Annotator {
               .setType(Constants.TYPE_NUMBER)
               .setDescription(category + " score"));
           } else if (categoryLayer.getParent() == null
-                     || !categoryLayer.getParent().getId().equals(schema.getRoot().getId())) {
+                     || !categoryLayer.getParent().getId().equals(schema.getRoot().getId())
+                     || categoryLayer.getId().equals(schema.getParticipantLayerId())
+                     || categoryLayer.getId().equals(schema.getTurnLayerId())
+                     || categoryLayer.getId().equals(schema.getUtteranceLayerId())
+                     || categoryLayer.getId().equals(schema.getWordLayerId())
+                     || categoryLayer.getId().equals(schema.getCorpusLayerId())
+                     || categoryLayer.getId().equals(schema.getEpisodeLayerId())) {
             throw new InvalidConfigurationException(
-              this, category + " layer ("+layerId+") must be a span layer, but parent layer is "
+              this, category + " layer ("+layerId
+              +") must be a non-system span layer, but parent layer is "
               + categoryLayer.getParent());
           }      
         } // a value is specified
       } // this is a category layer parameter
     } // next parameter
-
-    // TODO a layer for annotated frame images
   }
   
   /**
@@ -520,61 +636,122 @@ public class MediaPipeAnnotator extends Annotator {
       File video = null;
       for (MediaFile media : transcript.getMediaProvider().getAvailableMedia()) {
         if (media.getMimeType().startsWith("video/")
+            && Optional.ofNullable(media.getTrackSuffix()).orElse("").equals(inputTrackSuffix)
             && media.getFile() != null
             && media.getFile().exists()) {
           video = media.getFile();
           break;
-        } // if f0 file exists
+        } // if it's a video on the right track
       } // next media file
       
       if (video == null) {
-        setStatus("There is no video for " + transcript.getId());
+        setStatus("There is no video on track \""+inputTrackSuffix+"\" for " + transcript.getId());
       } else { // found video
         setStatus("Processing " + video.getName());
 
         // create an ID for the results (so that other graphs can be processed in parallel)
         String id = IO.WithoutExtension(transcript.getId());
 
+        String scriptName = "blendshapes-"+getVersion()+".py";
+        String csvName = id + ".csv";
+        String mp4Name = outputTrackSuffix.length()==0?"NA":id + outputTrackSuffix + ".mp4";
+        String pngPattern = annotatedImageLayerId.length()==0?"NA":id + "_{0}.png";
         Execution cmd = executeInEnvironment(
-          "./blendshapes.py '"+video.getPath()+"' '"+id+"' "
-          +numFaces+" "
-          +minFaceDetectionConfidence+" "
-          +minFacePresenceConfidence+" "
-          +minTrackingConfidence);
+          "./"+scriptName
+          +" '"+video.getPath()+"'"
+          +" "+numFaces
+          +" "+minFaceDetectionConfidence
+          +" "+minFacePresenceConfidence
+          +" "+minTrackingConfidence
+          +" '"+csvName+"'"
+          +" '"+mp4Name+"'"
+          +" '"+pngPattern+"'");
         if (cmd.getProcess().exitValue() > 0) {
-          setStatus("Could not execute blendshapes.py - status: " + cmd.getProcess().exitValue());
+          setStatus("Could not execute "+scriptName+" - status: " + cmd.getProcess().exitValue());
           throw new TransformationException(
-            this, "Could not execute blendshapes.py: " + cmd.getProcess().exitValue());
+            this, "Could not execute "+scriptName+": " + cmd.getProcess().exitValue());
         }
         
         File csv = new File(getWorkingDirectory(), id+".csv");
         if (!csv.exists()) {
-          setStatus("No scores output by blendshapes.py.");
-          throw new TransformationException(this, "No scores output by blendshapes.py.");
+          setStatus("No scores output by "+scriptName+".");
+          throw new TransformationException(this, "No scores output by "+scriptName+".");
         }
+        boolean thereWereFaces = false;
         try {
           // which scores are we after?
           TreeMap<String,String> categoryLayers = new TreeMap<String,String>();
           for (String category : blendshapeLayerIds.keySet()) {
             String layerId = blendshapeLayerIds.get(category);
             if (layerId != null) categoryLayers.put(category, layerId);
-          } // next possible category        
+          } // next possible category
+
+          MessageFormat annotatedImageFilePattern = null;
+          MessageFormat destinationImageFilePattern = null;
+          if (!pngPattern.equals("NA")) {
+            annotatedImageFilePattern = new MessageFormat(pngPattern);
+            // {transcript}_{layer}__{offset}.png
+            destinationImageFilePattern = new MessageFormat("{0}_{1}__{2}.png");
+          }
+          String transcriptPrefix = IO.WithoutExtension(transcript.getId());
           
           // read scores
           CSVParser parser = new CSVParser(
             new FileReader(csv), CSVFormat.RFC4180.withFirstRecordAsHeader());
           for (CSVRecord record : parser) {
+            thereWereFaces = true;
             String offset = record.get("offset");
-            Anchor anchor = transcript.getOrCreateAnchorAt​(Double.parseDouble(offset));
+            Anchor anchor = transcript.createAnchorAt​(Double.parseDouble(offset));
             for (String category : categoryLayers.keySet()) {
               String layerId = blendshapeLayerIds.get(category);
               String label = record.get(category);
               transcript.createAnnotation​(anchor, anchor, layerId, label, transcript);
             } // next possible category
+
+            if (annotatedImageFilePattern != null) {
+              // there should be an image file for this frame
+              File png = new File(
+                getWorkingDirectory(), annotatedImageFilePattern.format(
+                  new Object[]{ record.get("frame") }));
+              if (!png.exists()) {
+                setStatus("Frame image missing: " + png.getName());
+              } else {
+                String destinationName = destinationImageFilePattern.format(
+                  new Object[]{ transcriptPrefix, annotatedImageLayerId, offset });
+                Annotation blobAnnotation = transcript.createAnnotation​(
+                  anchor, anchor, annotatedImageLayerId, destinationName, transcript);
+                File dataFile = File.createTempFile("MediaPipeAnnotator-", "-"+destinationName);
+                dataFile.deleteOnExit();
+                IO.Rename(png, dataFile);
+                blobAnnotation.put("@File", dataFile);
+              }
+            }
           } // next record
         } finally {
           csv.delete();
         }
+
+        if (!mp4Name.equals("NA")) {
+          File mp4 = new File(getWorkingDirectory(), mp4Name);
+          if (!mp4.exists()) {
+            if (thereWereFaces) {
+              setStatus("No annotated video generated by "+scriptName+".");
+              throw new TransformationException(
+                this, "No annotated video generated by "+scriptName+".");
+            } else {
+              setStatus(
+                "No annotated video generated by "+scriptName+" - there were no faces found.");
+            }
+          } else { // mp4 exists
+            if (getStore() == null) {
+              setStatus(
+                "Annotated video generated by "+scriptName+" but no graph store to store it in.");
+            } else {
+              getStore().saveMedia(transcript.getId(), mp4.toURI().toString(), outputTrackSuffix);
+            }
+            mp4.delete();
+          }
+        } // mp4Name set
         
       } // found video        
       
