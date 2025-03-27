@@ -366,11 +366,15 @@ public class RequestRouter {
               object.add(k.toString(), (Integer)map.get(k));
             } else if (map.get(k) instanceof Boolean) {
               object.add(k.toString(), (Boolean)map.get(k));
+            } else if (map.get(k) instanceof CloneableBean) {
+              object.add(k.toString(), ((CloneableBean)map.get(k)).toJson());
             } else {             
               object.add(k.toString(), map.get(k) == null?null:map.get(k).toString());
             }
           }
           list.add(object);
+        } else if (e instanceof CloneableBean) {
+          list.add(((CloneableBean)e).toJson());
         } else {
           list.add(e.toString());
         }
