@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1204,9 +1204,18 @@ public class Graph extends Annotation {
       // parent of 'parent' is the real parent
       parentId = parent.getParentId();
     }
-
+    
     // create the span
     Annotation span = new Annotation(null, label, layerId, from.getStartId(), to.getEndId(), parentId);
+
+    if (parent.getAnnotations().containsKey(layerId)) { // parent has children on this layer
+      // set ordinal before adding to the graph,
+      // so that parent.correctOrdinals is not called during setParent
+      span.setOrdinal(parent.getAnnotations().get(layerId).size()
+                      + parent.ordinalMinimum(getLayerId())
+                      + 1);
+    }
+    
     // add it to the graph
     getGraph().addAnnotation(span);
     return span;
@@ -1315,6 +1324,17 @@ public class Graph extends Annotation {
       }
     }
     Annotation span = new Annotation(null, label, layerId, from.getId(), to.getId(), parent.getId());
+    
+    if (parent.getAnnotations().containsKey(layerId)) { // parent has children on this layer
+      // set ordinal before adding to the graph,
+      // so that parent.correctOrdinals is not called during setParent
+      if (timers != null) timers.start("Graph.createAnnotation: setOrdinal");
+      span.setOrdinal(parent.getAnnotations().get(layerId).size()
+                      + parent.ordinalMinimum(getLayerId())
+                      + 1);
+      if (timers != null) timers.end("Graph.createAnnotation: setOrdinal");
+    }
+    
     getGraph().addAnnotation(span);
     return span;
   } // end of createAnnotation()
