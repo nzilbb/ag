@@ -342,8 +342,11 @@ public class TestMediaPipeAnnotator {
     Annotation[] frames = g.all("frame");
     assertTrue("There are frame annotations", frames.length > 0);
     // labels are formatted as fragment filenames: {transcript}_{layer}__{offset}.png
-    assertTrue("First frame has correctly named label: " + frames[0],
-               frames[0].getLabel().startsWith("frame "));
+    try {
+      Integer.parseInt(frames[0].getLabel());
+    } catch(NumberFormatException exception) {
+      fail("First frame label is numeric (frame number): " + frames[0] + " - " + exception);
+    }
     System.out.println("first frame: " + frames[0].getStart() + ": " + frames[0]);
     String dataUrl = (String)frames[0].get("dataUrl");
     assertNotNull("First frame includes URL for data", dataUrl);

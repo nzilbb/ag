@@ -67,7 +67,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <trimStackTrace>false</trimStackTrace>
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>

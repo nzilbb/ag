@@ -790,7 +790,7 @@ public class MediaPipeAnnotator extends Annotator {
                 } else {
                   Annotation blobAnnotation = transcript.createAnnotation​(
                     anchor, anchor, annotatedImageLayerId,
-                    "frame "+record.get("frame"), transcript);
+                    record.get("frame"), transcript);
                   png.deleteOnExit();
                   blobAnnotation.put("dataUrl", png.toURI().toString());
                 }
