@@ -417,7 +417,6 @@ public class TestOrthographyClumper {
           assertEquals("anchor linking", words[o-1].getEnd(), words[o].getStart());
         }
       }
-      System.out.println(g.toJsonString());
       
     } catch(TransformationException exception) {
       fail(exception.toString());

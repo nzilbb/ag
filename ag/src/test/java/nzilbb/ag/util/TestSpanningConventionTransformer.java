@@ -479,7 +479,6 @@ public class TestSpanningConventionTransformer
            .transform(g);
          new Validator().transform(g); // doesn't throw any exceptions
          // g.commit();
-         System.out.println(g.toJsonString());
 
       }
       catch(TransformationException exception)
