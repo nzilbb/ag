@@ -343,9 +343,7 @@ public class TestMediaPipeAnnotator {
     assertTrue("There are frame annotations", frames.length > 0);
     // labels are formatted as fragment filenames: {transcript}_{layer}__{offset}.png
     assertTrue("First frame has correctly named label: " + frames[0],
-               frames[0].getLabel().startsWith("test_frame__"));
-    assertTrue("First frame has correctly suffixed label: " + frames[0],
-               frames[0].getLabel().endsWith(".png"));
+               frames[0].getLabel().startsWith("frame "));
     System.out.println("first frame: " + frames[0].getStart() + ": " + frames[0]);
     String dataUrl = (String)frames[0].get("dataUrl");
     assertNotNull("First frame includes URL for data", dataUrl);

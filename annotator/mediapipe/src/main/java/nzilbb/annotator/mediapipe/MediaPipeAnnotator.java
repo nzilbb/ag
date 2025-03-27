@@ -78,6 +78,7 @@ import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.util.Merger;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
+import nzilbb.util.Timers;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -667,6 +668,7 @@ public class MediaPipeAnnotator extends Annotator {
    */
   public Graph transform(Graph transcript) throws TransformationException {
     setRunning(true);
+    setPercentComplete(1);
     try {
       // this annotator only works on full graphs, not fragments
       if (transcript.isFragment()) throw new TransformationException(
@@ -688,16 +690,31 @@ public class MediaPipeAnnotator extends Annotator {
         setStatus("There is no video on track \""+inputTrackSuffix+"\" for " + transcript.getId());
       } else { // found video
         setStatus("Deleting existing annotations...");
+        boolean thereWereAnnotationsDeleted = false;
         for (String layerId : getOutputLayers()) {
+          boolean thereWereAnnotationsDeletedOnThisLayer = false;
           for (Annotation a : transcript.all(layerId)) {
             a.destroy();
+            thereWereAnnotationsDeletedOnThisLayer = true;
           }
+          if (getStore() != null && thereWereAnnotationsDeletedOnThisLayer) {
+            // much quicker to use store.deleteMatchingAnnotations...
+            getStore().deleteMatchingAnnotations(
+              "layer.id == '"+esc(layerId)+"' && graph.id == '"+esc(transcript.getId())+"'");
+          }
+          thereWereAnnotationsDeleted = thereWereAnnotationsDeleted
+            || thereWereAnnotationsDeletedOnThisLayer;
+        } // next output layer
+        if (thereWereAnnotationsDeleted && getStore() != null) {
+          // we deleted annotations in the store so we can get rid of them locally too
+          transcript.commit();
         }
         
         setStatus("Processing " + video.getName());
 
         // create an ID for the results (so that other graphs can be processed in parallel)
-        String id = IO.WithoutExtension(transcript.getId());
+        String id = IO.WithoutExtension(transcript.getId())
+          .replace("'","_"); // ensure that apostrophes won't spoil command line quoting
 
         String scriptName = "blendshapes-"+getVersion()+".py";
         String csvName = id + ".csv";
@@ -707,10 +724,12 @@ public class MediaPipeAnnotator extends Annotator {
         File mp4 = new File(getWorkingDirectory(), mp4Name);
         mp4.deleteOnExit();
         String pngPattern = annotatedImageLayerId.length()==0?"NA":id + "__{0}.png";
+        setPercentComplete(1);
         try {
           Execution cmd = executeInEnvironment(
             "./"+scriptName
-            +" '"+video.getPath()+"'"
+            // if there are apostrophes in the video path, make sure they get through ok
+            +" '"+video.getPath().replace("'","'\"'\"'")+"'"
             +" "+numFaces
             +" "+minFaceDetectionConfidence
             +" "+minFacePresenceConfidence
@@ -725,6 +744,7 @@ public class MediaPipeAnnotator extends Annotator {
           }
 
           if (!isCancelling()) {
+            setPercentComplete(50);
             setStatus(scriptName + " complete.");
             if (!csv.exists()) {
               setStatus("No scores output by "+scriptName+".");
@@ -739,11 +759,8 @@ public class MediaPipeAnnotator extends Annotator {
             } // next possible category
             
             MessageFormat annotatedImageFilePattern = null;
-            MessageFormat destinationImageFilePattern = null;
             if (!pngPattern.equals("NA")) {
               annotatedImageFilePattern = new MessageFormat(pngPattern);
-              // {transcript}_{layer}__{offset}.png
-              destinationImageFilePattern = new MessageFormat("{0}_{1}__{2}.png");
             }
             String transcriptPrefix = IO.WithoutExtension(transcript.getId());
             
@@ -751,6 +768,7 @@ public class MediaPipeAnnotator extends Annotator {
             setStatus("Parsing blendshape data...");
             CSVParser parser = new CSVParser(
               new FileReader(csv), CSVFormat.RFC4180.withFirstRecordAsHeader());
+            int r = 0;
             for (CSVRecord record : parser) {
               if (isCancelling()) break;
               thereWereFaces = true;
@@ -770,18 +788,15 @@ public class MediaPipeAnnotator extends Annotator {
                 if (!png.exists()) {
                   setStatus("Frame image missing: " + png.getName());
                 } else {
-                  String destinationName = destinationImageFilePattern.format(
-                    new Object[]{ transcriptPrefix, annotatedImageLayerId, offset });
                   Annotation blobAnnotation = transcript.createAnnotation​(
                     anchor, anchor, annotatedImageLayerId,
-                    "frame"+record.get("frame"), transcript);
-                  File dataFile = File.createTempFile("MediaPipeAnnotator-", "-"+destinationName);
-                  dataFile.deleteOnExit();
-                  IO.Rename(png, dataFile);
-                  blobAnnotation.put("dataUrl", dataFile.toURI().toString());
+                    "frame "+record.get("frame"), transcript);
+                  png.deleteOnExit();
+                  blobAnnotation.put("dataUrl", png.toURI().toString());
                 }
               }
             } // next record
+            transcript.put("@valid", Boolean.TRUE); // TODO remove this workaround
             
             if (!mp4Name.equals("NA")) {
               if (!mp4.exists()) {
@@ -807,10 +822,15 @@ public class MediaPipeAnnotator extends Annotator {
         } finally {
           if (csv.exists()) csv.delete();
           if (mp4.exists()) mp4.delete();
-          File[] pngs = getWorkingDirectory().listFiles(
-            f->f.getName().startsWith(id + "__") && f.getName().endsWith(".png"));
-          if (pngs != null) {
-            for (File png : pngs) png.delete();
+          // leave pngs where they are - they'll probably be moved during graph saving,
+          // and if not, they're marked for deletion anyway.
+          if (isCancelling()) { // except if we're cancelling
+            // in which case, delete the pngs
+            File[] pngs = getWorkingDirectory().listFiles(
+              f->f.getName().startsWith(id + "__") && f.getName().endsWith(".png"));
+            if (pngs != null) {
+              for (File png : pngs) png.delete();
+            }
           }
         }
         
@@ -828,8 +848,19 @@ public class MediaPipeAnnotator extends Annotator {
       setStatus("Cancelled.");
     } else {
       setStatus(transcript.getId() + " complete.");
+      setPercentComplete(100);
     }
     return transcript;
   }
+
+  /**
+   * Escapes quotes in the given string for inclusion in QL or SQL queries.
+   * @param s The string to escape.
+   * @return The given string, with quotes escapeed.
+   */
+  private String esc(String s) {
+    if (s == null) return "";
+    return s.replace("\\","\\\\").replace("'","\\'");
+  } // end of esc()
   
 } // end of class MediaPipeAnnotator

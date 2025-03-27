@@ -85,6 +85,26 @@ public class GraphStoreHarness implements GraphStore {
     };
   }
    
+  /**
+   * Deletes all annotations that match a particular pattern
+   * @param expression An expression that determines which annotations match.
+   * <p> The expression language is loosely based on JavaScript; expressions such as the
+   * following can be used: 
+   * <ul>
+   *  <li><code>layer.id == 'pronunciation' 
+   *       &amp;&amp; first('orthography').label == 'the'</code></li>
+   *  <li><code>first('language').label == 'en' &amp;&amp; layer.id == 'pronunciation' 
+   *       &amp;&amp; first('orthography').label == 'the'</code></li> 
+   * </ul>
+   * <p><em>NB</em> all expressions must match by either id or layer.id.
+   * @return The number of new annotations deleted.
+   * @throws StoreException If an error occurs.
+   * @throws PermissionException If the operation is not permitted.
+   */
+  public int deleteMatchingAnnotations(String expression)
+    throws StoreException, PermissionException {
+    throw new StoreException("deleteMatchingAnnotations Not implemented");
+  }
 
   /**
    * Constructor.
@@ -869,26 +889,5 @@ public class GraphStoreHarness implements GraphStore {
     throws StoreException, PermissionException, GraphNotFoundException {
     throw new StoreException("Not implemented");
   }
-   
-  /**
-   * Deletes all annotations that match a particular pattern
-   * @param expression An expression that determines which annotations match.
-   * <p> The expression language is loosely based on JavaScript; expressions such as the
-   * following can be used: 
-   * <ul>
-   *  <li><code>layer.id == 'pronunciation' 
-   *       &amp;&amp; first('orthography').label == 'the'</code></li>
-   *  <li><code>first('language').label == 'en' &amp;&amp; layer.id == 'pronunciation' 
-   *       &amp;&amp; first('orthography').label == 'the'</code></li> 
-   * </ul>
-   * <p><em>NB</em> all expressions must match by either id or layer.id.
-   * @return The number of new annotations deleted.
-   * @throws StoreException If an error occurs.
-   * @throws PermissionException If the operation is not permitted.
-   */
-  public int deleteMatchingAnnotations(String expression)
-    throws StoreException, PermissionException {
-    throw new StoreException("Not implemented");
-  }
-  
+     
 } // end of class GraphStoreHarness
