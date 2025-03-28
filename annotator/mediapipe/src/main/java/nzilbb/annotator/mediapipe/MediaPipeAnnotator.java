@@ -725,6 +725,7 @@ public class MediaPipeAnnotator extends Annotator {
         mp4.deleteOnExit();
         String pngPattern = annotatedImageLayerId.length()==0?"NA":id + "__{0}.png";
         setPercentComplete(1);
+        boolean finishedOk = false;
         try {
           Execution cmd = executeInEnvironment(
             "./"+scriptName
@@ -818,13 +819,14 @@ public class MediaPipeAnnotator extends Annotator {
                 }
               }
             } // mp4Name set
+            finishedOk = !isCancelling();
           } // not cancelling
         } finally {
           if (csv.exists()) csv.delete();
           if (mp4.exists()) mp4.delete();
           // leave pngs where they are - they'll probably be moved during graph saving,
           // and if not, they're marked for deletion anyway.
-          if (isCancelling()) { // except if we're cancelling
+          if (!finishedOk) { // except if we're cancelling or there was an exception
             // in which case, delete the pngs
             File[] pngs = getWorkingDirectory().listFiles(
               f->f.getName().startsWith(id + "__") && f.getName().endsWith(".png"));
