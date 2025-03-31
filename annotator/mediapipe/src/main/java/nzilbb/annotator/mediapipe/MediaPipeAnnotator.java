@@ -104,6 +104,10 @@ public class MediaPipeAnnotator extends Annotator {
   // https://matplotlib.org/stable/install/environment_variables_faq.html#envvar-MPLCONFIGDIR
   File MPLCONFIGDIR = null;
   
+  // pip needs a lot of temporary file space to install some dependencies
+  // it uses the TMPDIR environment variable to determine where
+  File TMPDIR = null;
+  
   /**
    * Python environment name.
    * @see #getEnvironmentName()
@@ -441,13 +445,26 @@ public class MediaPipeAnnotator extends Annotator {
       MPLCONFIGDIR = new File(getWorkingDirectory(), "matplotlib");
       if (!MPLCONFIGDIR.exists()) {
         setStatus("Creating directory " + MPLCONFIGDIR.getName());
-        if (MPLCONFIGDIR.mkdir()) {
+        if (!MPLCONFIGDIR.mkdir()) {
           setStatus("Could not create directory " + MPLCONFIGDIR.getPath());
         }
       }
-      
-      // install mediapipe 
-      cmd = executeInEnvironment("pip install mediapipe");
+
+      // pip needs a lot of temporary file space to install some dependencies
+      // it uses the TMPDIR environment variable to determine where
+      // we force this to be encapsulated under our working directory
+      TMPDIR = new File(getWorkingDirectory(), "tmp");
+      if (!TMPDIR.exists()) {
+        setStatus("Creating tmp directory " + TMPDIR.getName());
+        if (!TMPDIR.mkdir()) {
+          setStatus("Could not create tmp directory " + TMPDIR.getPath());
+        }
+      }
+
+      // install mediapipe
+      File cacheDir = new File(getWorkingDirectory(), "cache");
+      if (!cacheDir.mkdir()) setStatus("Could not create pip cache directory: "+cacheDir.getPath());
+      cmd = executeInEnvironment("pip install --cache-dir='"+cacheDir.getPath()+"' mediapipe");
       if (cmd.getProcess().exitValue() > 0) {
         setStatus("Cannot install mediapipe - status: " + cmd.getProcess().exitValue());
         throw new InvalidConfigurationException(
@@ -494,6 +511,9 @@ public class MediaPipeAnnotator extends Annotator {
       if (MPLCONFIGDIR == null) {
         MPLCONFIGDIR = new File(getWorkingDirectory(), "matplotlib");
       }
+      if (TMPDIR == null) {
+        TMPDIR = new File(getWorkingDirectory(), "tmp");
+      }
       python = new Execution()
         .setExe("bash") // TODO windows interpreter
         .arg(script.getPath())
@@ -501,7 +521,10 @@ public class MediaPipeAnnotator extends Annotator {
         // In LaBB-CAT the Tomcat user may have a read-only home directory,
         // so cache files etc. need to be stored somewhere else,
         // specified by the MPLCONFIGDIR environment variable
-        .env("MPLCONFIGDIR", MPLCONFIGDIR.getPath());
+        .env("MPLCONFIGDIR", MPLCONFIGDIR.getPath())
+        // pip needs a lot of temporary file space to install some dependencies
+        // it uses the TMPDIR environment variable to determine where
+        .env("TMPDIR", TMPDIR.getPath());
       python.getStdoutObservers().add(m->setStatus(m));
       python.getStderrObservers().add(m->setStatus(m));
       python.run();
