@@ -178,7 +178,7 @@ public class CsvSerializer implements GraphSerializer {
   public SerializationDescriptor getDescriptor() {
     return new SerializationDescriptor(
       "Comma Separated Values", getClass().getPackage().getImplementationVersion(),
-      "text/csv", ".csv", "1.0.0", getClass().getResource("icon.png"));
+      "text/csv", ".csv", "1.2.2", getClass().getResource("icon.png"));
   }
 
   /**
@@ -268,12 +268,14 @@ public class CsvSerializer implements GraphSerializer {
       Vector<Layer> temporalLayers = new Vector<Layer>();
       for (String layerId : layerIds) {
         Layer layer = schema.getLayer(layerId);
-        if ((layer.getParentId().equals(schema.getRoot().getId())
-             || layer.getParentId().equals(schema.getParticipantLayerId()))
-            && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
-          attributeLayers.add(layer);
-        } else {
-          temporalLayers.add(layer);
+        if (layer != null) {
+          if ((layer.getParentId().equals(schema.getRoot().getId())
+               || layer.getParentId().equals(schema.getParticipantLayerId()))
+              && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
+            attributeLayers.add(layer);
+          } else {
+            temporalLayers.add(layer);
+          }
         }
       } // next layerId
 
@@ -309,6 +311,8 @@ public class CsvSerializer implements GraphSerializer {
             for (Layer targetLayer : temporalLayers) {
               // there's one CSV row per annotation
               for (Annotation annotation : graph.all(targetLayer.getId())) {
+                if (annotation.containsKey("@serialized")) continue; // already output
+                
                 // graph ID
                 csv.print(graph.getId());
                         
@@ -343,16 +347,39 @@ public class CsvSerializer implements GraphSerializer {
                         csv.print(offset(annotation.getEnd()));
                         break;
                     }
-                  } else { // blank columns
-                    csv.print("");
-                    switch (columnLayer.getAlignment()) {
-                      case Constants.ALIGNMENT_INSTANT:
-                        csv.print("");
-                        break;
-                      default: // INTERVAL and NONE
-                        csv.print("");
-                        csv.print("");
-                        break;
+                  } else { // other layer columns
+                    // these will be blank EXCEPT in the case where there's an annotation
+                    // on this other layer that shares anchors with the current layer's annotation
+                    Optional<Annotation> parallellAnnotation = annotation.getStart()
+                      .startAnnotations(columnLayer.getId())
+                      .filter(a -> a.getEndId().equals(annotation.getEndId()))
+                      .filter(a -> !a.containsKey("@serialized"))
+                      .findAny();
+                    if (parallellAnnotation.isPresent()) { // there is a parallel annotation here
+                      // include its details too
+                      Annotation otherAnnotation = parallellAnnotation.get();
+                      csv.print(otherAnnotation.getLabel());
+                      switch (columnLayer.getAlignment()) {
+                        case Constants.ALIGNMENT_INSTANT:
+                          csv.print(offset(otherAnnotation.getStart()));
+                          break;
+                        default: // INTERVAL and NONE
+                          csv.print(offset(otherAnnotation.getStart()));
+                          csv.print(offset(otherAnnotation.getEnd()));
+                          break;
+                      }
+                      otherAnnotation.put("@serialized", Boolean.TRUE);
+                    } else {
+                      csv.print("");
+                      switch (columnLayer.getAlignment()) {
+                        case Constants.ALIGNMENT_INSTANT:
+                          csv.print("");
+                          break;
+                        default: // INTERVAL and NONE
+                          csv.print("");
+                          csv.print("");
+                          break;
+                      }
                     }
                   } // blank columns
                 } // next temporal layer
