@@ -36,6 +36,15 @@ getSchema(s => {
           && layer.id != schema.utteranceLayerId
           && layer.id != schema.wordLayerId)
   );
+  addLayerOptions(
+    document.getElementById("frameCountLayerId"), schema,
+    // instantaneous top level layers
+    layer => layer.alignment == 0 && layer.parentId == schema.root.id
+          // no system layers
+          && layer.id != schema.corpusLayerId
+          && layer.id != schema.episodeLayerId
+          && layer.id != schema.participantLayerId
+  );
 
   getJSON("getMediaTracks", tracks => {
     var inputTrackSuffix = document.getElementById("inputTrackSuffix");
@@ -115,6 +124,7 @@ getSchema(s => {
       try {
         if (!parameters) { // new task
           document.getElementById("annotatedImageLayerId").value = taskId;
+          document.getElementById("frameCountLayerId").value = "transcript_mediapipeFrameCount";
           // default for score layers is to create them all
           for (category of categories) {
             document.getElementById(category).value = category;
@@ -174,3 +184,5 @@ function changedLayer(select, defaultNewLayerName) {
 
 document.getElementById("annotatedImageLayerId").onchange = function(e) {
   changedLayer(this, "annotatedFrame"); };
+document.getElementById("frameCountLayerId").onchange = function(e) {
+  changedLayer(this, "transcript_mediapipeFrameCount"); };

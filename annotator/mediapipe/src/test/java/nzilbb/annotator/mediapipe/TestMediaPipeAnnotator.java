@@ -328,18 +328,28 @@ public class TestMediaPipeAnnotator {
     annotator.setSchema(schema);
     
     annotator.setTaskParameters(
-      "annotatedImageLayerId=frame");
+      "annotatedImageLayerId=frame"
+      +"&frameCountLayerId=transcript_frameCount");
     assertEquals("annotatedImageLayerId set", "frame", annotator.getAnnotatedImageLayerId());
+    
     Layer layer = annotator.getSchema().getLayer("frame");
     assertNotNull("frame layer created", layer);
     assertEquals("frame alignment", Constants.ALIGNMENT_INSTANT, layer.getAlignment());
     assertEquals("frame type", "image/png", layer.getType());
     assertTrue("frame peers", layer.getPeers());
     assertEquals("frame parent", schema.getRoot().getId(), layer.getParentId());
+    
+    layer = annotator.getSchema().getLayer("transcript_frameCount");
+    assertNotNull("frame count layer created", layer);
+    assertEquals("frame count alignment", Constants.ALIGNMENT_NONE, layer.getAlignment());
+    assertEquals("frame count type", Constants.TYPE_NUMBER, layer.getType());
+    assertFalse("frame count peers", layer.getPeers());
+    assertEquals("frame parent", schema.getRoot().getId(), layer.getParentId());
     Set<String> outputLayers = new HashSet<String>(Arrays.asList(annotator.getOutputLayers()));
     assertEquals("Correct number of output layers: " + outputLayers,
-                 1, outputLayers.size());
+                 2, outputLayers.size());
     assertTrue("frame layer output", outputLayers.contains("frame"));
+    assertTrue("frame count layer output", outputLayers.contains("transcript_frameCount"));
     
     g.trackChanges();
     annotator.transform(g);   
@@ -372,7 +382,21 @@ public class TestMediaPipeAnnotator {
         }
       }
     } // next frame
-    
+
+    Annotation[] frameCount = g.all("transcript_frameCount");
+    assertEquals("There is one frame count annotation", 1, frameCount.length);
+    assertEquals("Frame count annotation is high confidence",
+                 100, (int)frameCount[0].getConfidence());
+
+    try {
+      int count = Integer.parseInt(frameCount[0].getLabel());
+      assertEquals("Frame count is correct",
+                    frames.length, count);
+    } catch(NumberFormatException exception) {
+      fail("Frame count label is numeric (number of frames): " + frameCount[0]
+           + " - " + exception);
+    }
+
     assertNull("no annotated video generated",
                ((GraphStoreHarness)annotator.getStore()).id);
   }

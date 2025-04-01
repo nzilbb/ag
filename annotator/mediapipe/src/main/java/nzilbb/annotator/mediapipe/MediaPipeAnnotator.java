@@ -367,6 +367,26 @@ public class MediaPipeAnnotator extends Annotator {
   public MediaPipeAnnotator setAnnotatedImageLayerId(String newAnnotatedImageLayerId) { annotatedImageLayerId = newAnnotatedImageLayerId; return this; }
   
   /**
+   * ID of a transcript attribute layer to store a count of the annotated frames.
+   * @see #getFrameCountLayerId()
+   * @see #setFrameCountLayerId(String)
+   */
+  protected String frameCountLayerId;
+  /**
+   * Getter for {@link #frameCountLayerId}: ID of a transcript attribute layer to store a
+   * count of the annotated frames. 
+   * @return ID of a transcript attribute layer to store a count of the annotated frames.
+   */
+  public String getFrameCountLayerId() { return frameCountLayerId; }
+  /**
+   * Setter for {@link #frameCountLayerId}: ID of a transcript attribute layer to store a
+   * count of the annotated frames. 
+   * @param newFrameCountLayerId ID of a transcript attribute layer to store a count of
+   * the annotated frames. 
+   */
+  public MediaPipeAnnotator setFrameCountLayerId(String newFrameCountLayerId) { frameCountLayerId = newFrameCountLayerId; return this; }
+  
+  /**
    * Default constructor.
    */
   public MediaPipeAnnotator() {
@@ -552,6 +572,7 @@ public class MediaPipeAnnotator extends Annotator {
     inputTrackSuffix = "";
     outputTrackSuffix = "";
     annotatedImageLayerId = "";
+    frameCountLayerId = "";
     for (String category : blendshapeLayerIds.keySet()) blendshapeLayerIds.put(category, null);
 
     if (parameters != null) {
@@ -593,6 +614,34 @@ public class MediaPipeAnnotator extends Annotator {
         if (!annotatedImageLayer.getType().equals("image/png")) {
           annotatedImageLayer.setType("image/png");
         }
+      }
+    }
+    
+    if (frameCountLayerId == null) frameCountLayerId = "";
+    if (frameCountLayerId.length() > 0) {
+      Layer frameCountLayer = schema.getLayer(frameCountLayerId);
+      if (frameCountLayer == null) { // layer doesn't exist
+        // create it
+        schema.addLayer(
+          new Layer(frameCountLayerId)
+          .setAlignment(Constants.ALIGNMENT_NONE)
+          .setPeers(false).setPeersOverlap(false).setSaturated(true)
+          .setParentId(schema.getRoot().getId())
+          .setType(Constants.TYPE_NUMBER)
+          .setDescription("Number of frames annotated by mediapipe"));        
+      } else if (frameCountLayer.getParent() == null
+                 || !frameCountLayer.getParent().getId().equals(schema.getRoot().getId())
+                 || frameCountLayer.getAlignment() != Constants.ALIGNMENT_NONE
+                 || frameCountLayer.getId().equals(schema.getParticipantLayerId())
+                 || frameCountLayer.getId().equals(schema.getTurnLayerId())
+                 || frameCountLayer.getId().equals(schema.getUtteranceLayerId())
+                 || frameCountLayer.getId().equals(schema.getWordLayerId())
+                 || frameCountLayer.getId().equals(schema.getCorpusLayerId())
+                 || frameCountLayer.getId().equals(schema.getEpisodeLayerId())) {
+        throw new InvalidConfigurationException(
+          this, "frameCountLayer ("+frameCountLayerId
+          + ") must be a non-system transcript attribute layer, but parent layer is "
+          + frameCountLayer.getParent());
       }
     }
     
@@ -662,6 +711,10 @@ public class MediaPipeAnnotator extends Annotator {
     // layer for annotated frame images?
     if (annotatedImageLayerId != null && annotatedImageLayerId.length() > 0) {
       layerIds.add(annotatedImageLayerId);
+    }    
+    // layer for frame count?
+    if (frameCountLayerId != null && frameCountLayerId.length() > 0) {
+      layerIds.add(frameCountLayerId);
     }    
     return layerIds.toArray(String[]::new);
   }
@@ -802,9 +855,9 @@ public class MediaPipeAnnotator extends Annotator {
               for (String category : categoryLayers.keySet()) {
                 String layerId = blendshapeLayerIds.get(category);
                 String label = record.get(category);
-                Annotation score = transcript.createAnnotation​(
-                  anchor, anchor, layerId, label, transcript);
-                score.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                transcript.createAnnotation​(
+                  anchor, anchor, layerId, label, transcript)
+                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
               } // next possible category
               
               if (annotatedImageFilePattern != null) {
@@ -823,7 +876,14 @@ public class MediaPipeAnnotator extends Annotator {
                   blobAnnotation.put("dataUrl", png.toURI().toString());
                 }
               }
+              r++;
             } // next record
+            if (frameCountLayerId.length() > 0) {
+              transcript.createTag​(
+                transcript, frameCountLayerId, ""+r)
+                // high confidence because it's a direct count, not an inference
+                .setConfidence(Constants.CONFIDENCE_MANUAL); 
+            }
             transcript.put("@valid", Boolean.TRUE); // TODO remove this workaround
             
             if (!mp4Name.equals("NA")) {
