@@ -798,10 +798,13 @@ public class MediaPipeAnnotator extends Annotator {
               thereWereFaces = true;
               String offset = record.get("offset");
               Anchor anchor = transcript.createAnchorAt​(Double.parseDouble(offset));
+              anchor.setConfidence(Constants.CONFIDENCE_MANUAL); // not unsure about the time
               for (String category : categoryLayers.keySet()) {
                 String layerId = blendshapeLayerIds.get(category);
                 String label = record.get(category);
-                transcript.createAnnotation​(anchor, anchor, layerId, label, transcript);
+                Annotation score = transcript.createAnnotation​(
+                  anchor, anchor, layerId, label, transcript);
+                score.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
               } // next possible category
               
               if (annotatedImageFilePattern != null) {
@@ -815,6 +818,7 @@ public class MediaPipeAnnotator extends Annotator {
                   Annotation blobAnnotation = transcript.createAnnotation​(
                     anchor, anchor, annotatedImageLayerId,
                     record.get("frame"), transcript);
+                  blobAnnotation.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
                   png.deleteOnExit();
                   blobAnnotation.put("dataUrl", png.toURI().toString());
                 }

@@ -264,6 +264,11 @@ public class TestMediaPipeAnnotator {
     Annotation[] scores = g.all("jawForwardLayer");
     assertTrue("There are jawForward scores", scores.length > 0);
     System.out.println("jawForward: " + scores[0].getStart() + ": " + scores[0]);
+    assertEquals("Score annotations have medium confidence",
+                 50, (int)scores[0].getConfidence());
+    assertEquals("Score anchors have high confidence",
+                 100, (int)scores[0].getStart().getConfidence());
+    System.out.println("jawForward: " + scores[0].getStart() + ": " + scores[0]);
     scores = g.all("jawLeftLayer");
     assertTrue("There are jawLeft scores", scores.length > 0);
     System.out.println("jawLeft: " + scores[0].getStart() + ": " + scores[0]);
@@ -348,6 +353,10 @@ public class TestMediaPipeAnnotator {
       fail("First frame label is numeric (frame number): " + frames[0] + " - " + exception);
     }
     System.out.println("first frame: " + frames[0].getStart() + ": " + frames[0]);
+    assertEquals("Frame annotations have medium confidence",
+                 50, (int)frames[0].getConfidence());
+    assertEquals("Frame anchors have high confidence",
+                 100, (int)frames[0].getStart().getConfidence());
     String dataUrl = (String)frames[0].get("dataUrl");
     assertNotNull("First frame includes URL for data", dataUrl);
     System.out.println("first frame data URL: " + dataUrl);
