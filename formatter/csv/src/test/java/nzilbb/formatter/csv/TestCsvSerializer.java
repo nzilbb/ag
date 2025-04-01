@@ -74,7 +74,7 @@ public class TestCsvSerializer
       
       File actual = new File(dir, streams.elementAt(0).getName());
       String differences = diff(
-         new File(dir, "expected_" + streams.elementAt(0).getName()),
+         new File(dir, "expected_" + g.getId().replace(".trs",".csv")),
          actual);
       if (differences != null) {
          fail(differences);
@@ -119,7 +119,7 @@ public class TestCsvSerializer
       
       File actual = new File(dir, streams.elementAt(0).getName());
       String differences = diff(
-         new File(dir, "expected_" + streams.elementAt(0).getName()),
+         new File(dir, "expected_" + g.getId().replace(".trs",".csv")),
          actual);
       if (differences != null) {
          fail(differences);
@@ -159,8 +159,8 @@ public class TestCsvSerializer
 
       File actual = new File(dir, streams.elementAt(0).getName());
       String differences = diff(
-         new File(dir, "expected_" + streams.elementAt(0).getName()),
-         actual);
+        new File(dir, "expected_" + g.getId().replace(".trs",".csv")),
+        actual);
       if (differences != null) {
          fail(differences);
       } else {
@@ -199,7 +199,7 @@ public class TestCsvSerializer
 
       File actual = new File(dir, streams.elementAt(0).getName());
       String differences = diff(
-         new File(dir, "expected_" + streams.elementAt(0).getName()),
+         new File(dir, "expected_" + g.getId().replace(".trs",".csv")),
          actual);
       if (differences != null) {
          fail(differences);

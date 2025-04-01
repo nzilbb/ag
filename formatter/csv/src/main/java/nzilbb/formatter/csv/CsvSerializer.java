@@ -23,7 +23,10 @@ package nzilbb.formatter.csv;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -50,7 +53,7 @@ import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
 import nzilbb.configure.Parameter;
 import nzilbb.configure.ParameterSet;
-import nzilbb.util.TempFileInputStream;
+import nzilbb.util.IO;
 import org.apache.commons.csv.*;
 
 /**
@@ -257,12 +260,16 @@ public class CsvSerializer implements GraphSerializer {
     throws SerializerNotConfiguredException {
       
     graphCount = graphs.getExactSizeIfKnown();
+    
+    // create a pipe for CSV data
     try {
+      final PipedInputStream in = new PipedInputStream();
+      final PipedOutputStream out = new PipedOutputStream(in);
       final StringBuffer fileName = new StringBuffer();
-      File csvFile = File.createTempFile("annotations.",".csv");
+      
       final CSVPrinter csv = new CSVPrinter(
-        new OutputStreamWriter(new FileOutputStream(csvFile), "UTF-8"), CSVFormat.EXCEL);
-         
+        new OutputStreamWriter(out, "UTF-8"), CSVFormat.EXCEL);
+      
       csv.print("graph");
       Vector<Layer> attributeLayers = new Vector<Layer>();
       Vector<Layer> temporalLayers = new Vector<Layer>();
@@ -300,10 +307,16 @@ public class CsvSerializer implements GraphSerializer {
       csv.println();
       graphs.forEachRemaining(graph -> {
           if (getCancelling()) return;
+          System.out.println("graph: " + graph.getId() + " " + graphCount + " " + fileName);
           if (fileName.length() == 0) {
-            fileName.append(graph.getId().replaceAll("\\.[^.]+$",""));
-          } else if (!fileName.toString().endsWith("-etc")) {
-            fileName.append("-etc");
+            fileName.append(IO.WithoutExtension(graph.getId()));
+            if (graphCount != 1) { // only one graph, so we know the final name of the stream
+              fileName.append("-etc");
+            }
+            new Thread(() -> {
+                consumer.accept(
+                  new NamedStream(in, fileName+".csv", "text/csv"));
+            }).start();
           }
 
           try {
@@ -391,12 +404,14 @@ public class CsvSerializer implements GraphSerializer {
             errors.accept(new SerializationException(exception));
           }
         }); // next graph
+      if (fileName.length() == 0) { // there were no graphs
+        errors.accept(new SerializationException("There was nothing to serialize."));
+      }
       csv.flush();
-      csv.close();
-      consumer.accept(
-        new NamedStream(new TempFileInputStream(csvFile), fileName+".csv", "text/csv"));     
+      out.close();
     } catch(Exception exception) {
       errors.accept(new SerializationException(exception));
+      System.out.println(""+exception);
     }
   }
    
