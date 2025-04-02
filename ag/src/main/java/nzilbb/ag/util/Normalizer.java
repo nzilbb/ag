@@ -56,6 +56,7 @@ import nzilbb.util.Switch;
 public class Normalizer extends Transform implements GraphTransformer {
 
   // TODO widen turns/utterances with no duration
+  // TODO aligned layers should have ordinals in temporal order within their parent
   /**
    * The maximum length of a label, or null if there's no limit. Default is 255.
    * @see #getMaxLabelLength()

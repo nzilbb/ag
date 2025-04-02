@@ -178,7 +178,7 @@ public class OrthographyClumper implements GraphTransformer {
 	 
       for (Annotation token : parent.getAnnotations(getWordLayerId())) {
         if (token.getLabel().replaceAll(nonOrthoCharacterPattern, "").length() == 0) {
-          token.destroy();
+          token.bulkDestroy();
           if (last != null // not the first token
               // not already prepending
               && toPrepend == null 

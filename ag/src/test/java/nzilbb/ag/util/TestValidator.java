@@ -526,7 +526,8 @@ public class TestValidator {
     assertEquals(5, g.getAnnotation("word5").getAssignedOrdinal());
     assertEquals(5, g.getAnnotation("word5").getOrdinal());
     g.getAnnotation("word4").destroy();
-    assertEquals(5, g.getAnnotation("word5").getAssignedOrdinal());
+    assertEquals("Destroy updates the ordinal",
+                 4, g.getAnnotation("word5").getAssignedOrdinal());
 
     Validator v = new Validator();
     v.setFullValidation(true);

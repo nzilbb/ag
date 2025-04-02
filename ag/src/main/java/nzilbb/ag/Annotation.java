@@ -271,7 +271,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
    * @return The annotation's ordinal position amongst the parent's children.
    */
   @ClonedProperty @TrackedProperty
-  public int getOrdinal() { 
+  public int getOrdinal() {
     int ordinalToReturn = 0;
     if (ordinal > 0) {
       ordinalToReturn = ordinal;
@@ -282,7 +282,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
         SortedSet<Annotation> peers = parent.getAnnotations(getLayerId());
         if (peers != null) {
           SortedSet<Annotation> priorPeers = peers.headSet(this);
-          // weed out the deleted one
+          // weed out the deleted ones
           Iterator<Annotation> it = priorPeers.iterator();
           while (it.hasNext()) {
             Annotation p = it.next();
@@ -350,6 +350,43 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
     return this;
   } // end of correctOrdinals()
 
+  /**
+   * Marks the annotation for deletion. This override ensures that peer ordinals are corrected.
+   * @return The changes made during this operation.
+   */
+  @Override public Change destroy() {
+    Change change = super.destroy();
+    Annotation parent = getParent();
+    if (parent != null && parent.annotations.containsKey(layerId)) {
+      parent.correctOrdinals(parent.annotations.get(layerId));
+    } // the parent is set
+    return change;
+  } // end of destroy()
+  
+  /**
+   * Marks the annotation for deletion without resetting peer ordinals. This is a
+   * performance-enhanding helper method for using during bulk deletions. The caller must
+   * ensure that peer ordinals are corrected.
+   * @return The changes made during this operation.
+   */
+  public Change bulkDestroy() {
+    return super.destroy();
+  } // end of destroy()
+  
+  /**
+   * Rolls back changes since the object was created. 
+   * This override ensures that peer ordinals are corrected.
+   * @throws NullPointerException If {@link #getTracker()} is not set (changes can only be
+   * rolled back if there's a {@link ChangeTracker} that knows what has changed).
+   */
+  @Override public void rollback() {
+    super.rollback();
+    Annotation parent = getParent();
+    if (parent != null && parent.annotations.containsKey(layerId)) {
+      parent.correctOrdinals(parent.annotations.get(layerId));
+    } // the parent is set
+  } // end of rollback()
+  
   // Attributes stored outside HashMap, so that JSONifying the HashMap doesn't result in infinite recursion
 
   /**

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 import nzilbb.ag.*;
 
 /** Annotation Graph unit tests. */
@@ -668,6 +669,8 @@ public class TestGraph {
 
     assertEquals(Change.Operation.NoChange, g.getChange());
     assertEquals(0, g.getChanges().size());
+    assertEquals(0, g.getChangedAnchors().count());
+    assertEquals(0, g.getChangedAnnotations().count());
 
     // make some changes
     the.setLabel("The");
@@ -675,6 +678,8 @@ public class TestGraph {
     assertEquals(Change.Operation.Update, g.getChange());
     List<Change> changes = g.getChanges();
     assertEquals(2, changes.size());
+    assertEquals(1, g.getChangedAnchors().count());
+    assertEquals(1, g.getChangedAnnotations().count());
     assertEquals("Update a1: offset = 0.5 (was 1.0)", changes.get(0).toString());
     assertEquals("Update word1: label = The (was the)", changes.get(1).toString());
 
@@ -686,6 +691,8 @@ public class TestGraph {
     g.rollback();
     assertEquals(Change.Operation.NoChange, g.getChange());
     assertEquals(""+g.getChanges(), 0, g.getChanges().size());
+    assertEquals(0, g.getChangedAnchors().count());
+    assertEquals(0, g.getChangedAnnotations().count());
 
     assertNull("ensure created annotations are removed by rollback", g.getAnnotation("word5"));
 
@@ -738,6 +745,11 @@ public class TestGraph {
     assertEquals("word4 has ordinal 3 because word3 isn't there",
                  "Update word4: ordinal = 3 (was null)", changes.get(i++).toString());
     assertEquals(i, changes.size());
+    assertEquals("Create: Right number of changed anchors: " + g.getChangedAnchors(),
+                 g.getAnchors().size(), g.getChangedAnchors().count());
+    assertEquals("Create: Right number of changed annotations: " + g.getChangedAnnotations(),
+                 g.getAnnotationsById().size() - 1, // not including word3:brown
+                 g.getChangedAnnotations().count());
 
     g.commit(); // removes word3
     assertEquals(Change.Operation.NoChange, g.getChange());
@@ -762,6 +774,8 @@ public class TestGraph {
     assertEquals("Destroy turnEnd", changes.get(i++).toString());
     assertEquals("Destroy my graph", changes.get(i++).toString());
     assertEquals(i, changes.size());
+    assertEquals(g.getAnchors().size(), g.getChangedAnchors().count());
+    assertEquals(g.getAnnotationsById().size(), g.getChangedAnnotations().count());
 
   }
 
@@ -798,6 +812,8 @@ public class TestGraph {
 
     assertEquals(Change.Operation.NoChange, g.getChange());
     assertEquals(0, g.getChanges().size());
+    assertEquals("No changed anchors", 0, g.getChangedAnchors().count());
+    assertEquals("No changed annotations", 0, g.getChangedAnnotations().count());
 
     // new word
     g.addAnchor(new Anchor("a6", 5.9));
@@ -829,12 +845,16 @@ public class TestGraph {
     // delete after create
     assertEquals("Destroy word2", changes.get(i++).toString());
     assertEquals("" + changes, i, changes.size());
+    assertEquals("Changes: Right number of changed anchors: " + g.getChangedAnchors(),
+                 1, g.getChangedAnchors().count());
+    assertEquals("Changes: Right number of changed annotations: "
+                 + g.getChangedAnnotations().collect(Collectors.toList()),
+                 4, g.getChangedAnnotations().count());
 
     assertEquals(1, turn1.getOrdinal());
 
     // replace a parent
     Annotation newTurn = new Annotation("newTurn", "john smith", "turn", "turnStart", "turnEnd", "my graph");
-    assertEquals(0, newTurn.getOrdinal());
     g.addAnnotation(newTurn).create();
     turn1.destroy();
     the.setParentId("newTurn");
@@ -854,6 +874,8 @@ public class TestGraph {
     assertEquals("Update newTurn: startId = turnStart (was null)", changes.get(i++).toString());
     assertEquals("Update newTurn: endId = turnEnd (was null)", changes.get(i++).toString());
     assertEquals("Update newTurn: parentId = my graph (was null)", changes.get(i++).toString());
+    assertEquals(Change.Operation.Destroy, turn1.getChange());
+    assertEquals(1, newTurn.getOrdinal());
     assertEquals("Update newTurn: ordinal = 1 (was null)", changes.get(i++).toString());
     // new child is created after its parent, and before its peers are changed
     assertEquals("Create word5", changes.get(i++).toString());
@@ -873,6 +895,10 @@ public class TestGraph {
     // finally the old parent is deleted
     assertEquals("Destroy turn1", changes.get(i++).toString());
     assertEquals(i, changes.size());
+    assertEquals("Right number of changed anchors: " + g.getChangedAnchors(),
+                 1, g.getChangedAnchors().count());
+    assertEquals("Right number of changed annotations: " + g.getChangedAnnotations(),
+                 7, g.getChangedAnnotations().count());
 
     // delete an anchor
     g.getAnchor("a7").destroy();

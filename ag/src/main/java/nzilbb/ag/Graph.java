@@ -24,6 +24,7 @@ package nzilbb.ag;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +40,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nzilbb.ag.util.AnchorComparatorWithStructure;
 import nzilbb.ag.util.AnnotationComparatorByOrdinal;
 import nzilbb.ag.util.AnnotationsByAnchor;
@@ -1410,6 +1412,36 @@ public class Graph extends Annotation {
     }
     return before;
   } // end of insertBefore()
+  
+  /**
+   * Marks all annotations on the given layer for destruction/deletion.
+   * @param layerId The ID of the layer of annotations to delete.
+   * @return true if some annotations were destroyed, false otherwise
+   */
+  public boolean destroyAll(String layerId) {
+    Layer layer = getLayer(layerId);
+    boolean thereWereAnnotations = false;
+    if (layer != null) {
+      // for each parent layer annotation
+      for (Annotation parent : all(layer.getParentId())) {
+        if (parent.getAnnotations().containsKey(layerId)) {
+          for (Annotation child : parent.getAnnotations().get(layerId)) {
+            // all annotations are going, no peers need resetting, so use bulkDestroy
+            child.bulkDestroy();
+            thereWereAnnotations = true;
+          } // next child
+        } // parent has children on this layer
+      } // next parent annotation
+      if (orphans.containsKey(layerId)) { // there are orphans on this layer
+        // destroy them too
+        for (Annotation orphan : orphans.get(layerId)) {
+          orphan.bulkDestroy();
+          thereWereAnnotations = true;
+        } // next orphan
+      }
+    } // layer is valid
+    return thereWereAnnotations;
+  } // end of destroyAll()
 
   // query methods
    
@@ -2062,92 +2094,144 @@ public class Graph extends Annotation {
    * @return A list of individual changes for the object.
    */
   public List<Change> getChanges() {
-    Vector<Change> changes = new Vector<Change>(); // start with graph changes
-    if (tracker != null) {
-      if (super.getChange() == Change.Operation.Create) { 
-        // graph create before creating anchors/annotations
-        changes.addAll(super.getChanges());
-        // all anchors must be created
-        for (Anchor a : getAnchors().values()) {
-          if (a.getChange() != Change.Operation.Destroy) { // don't include destroyed objects
-            a.create();
-            changes.addAll(a.getChanges());
-          }
-        } // next anchor
-        // all annotations must be created
-        LayerTraversal<Vector<Change>> createTraversal
-          = new LayerTraversal<Vector<Change>>(changes, this, true) {
-              protected void pre(Annotation a) { // parents before children
-                if (a.getChange() != Change.Operation.Destroy) { // don't include destroyed objects
-                  a.create();
-                  result.addAll(a.getChanges());
-                }
-              }
-              protected void except(Annotation a) { pre(a); }
-            };
-      } else if (super.getChange() == Change.Operation.Destroy) {
-        // all annotations must be deleted before anchors are deleted
-        LayerTraversal<Vector<Change>> deleteTraversal
-          = new LayerTraversal<Vector<Change>>(changes, this, true) {
-              protected void post(Annotation a) { // parents after children
-                a.destroy();
-                result.addAll(a.getChanges());
-              }
-              protected void except(Annotation a) { post(a); }
-            };
-        // all anchors must be deleted
-        for (Anchor a : getAnchors().values()) {
-          a.destroy();
-          changes.addAll(a.getChanges());
-        } // next anchor
-        // graph delete after deleting anchors/annotations
-        changes.addAll(super.getChanges()); 
-      } else { // not creating or deleting the graph
-        changes.addAll(super.getChanges());
-        // add anchor changes
-        for (Anchor a : getAnchors().values()) {
-          if (a.getChange() != Change.Operation.NoChange) {
-            changes.addAll(a.getChanges());
-          }
-        } // next anchor
-            
-        // add annotation changes
-            
-        // ensure all possible parents are created before their children
-        LayerTraversal<Vector<Change>> createTraversal
-          = new LayerTraversal<Vector<Change>>(changes, this, true) {
-              protected void pre(Annotation a) { // parents created before children
-                if (a.getChange() == Change.Operation.Create) {
-                  result.addAll(a.getChanges());
-                }
-              }
-              protected void except(Annotation a) { pre(a); }
-            };
-            
-        // perform updates after creates and before deletes
-        LayerTraversal<Vector<Change>> updateTraversal
-          = new LayerTraversal<Vector<Change>>(changes, this, true) {
-              protected void pre(Annotation a) { // parents updated before children
-                if (a.getChange() == Change.Operation.Update) {
-                  result.addAll(a.getChanges());
-                }
-              }
-              protected void except(Annotation a) { pre(a); }
-            };
-            
-        // now perform deletes, children first
-        LayerTraversal<Vector<Change>> deleteTraversal
-          = new LayerTraversal<Vector<Change>>(changes, this, true) {
-              protected void post(Annotation a) { // parents deleted after children
-                if (a.getChange() == Change.Operation.Destroy) {
-                  result.addAll(a.getChanges());
-                }
-              }
-              protected void except(Annotation a) { post(a); }
-            };
-      }
-    } // changes were tracked
-    return changes;
+    final LinkedHashSet<TrackedMap> changed = new LinkedHashSet<TrackedMap>();
+    if (super.getChange() == Change.Operation.Create
+        || super.getChange() == Change.Operation.Update) {
+      // graph changes
+      changed.add(this);
+    }
+    // anchor creations/updates
+    getChangedAnchors()
+      .filter(anchor -> anchor.getChange() != Change.Operation.Destroy)
+      .forEach(anchor -> changed.add(anchor));
+    // annotations
+    for (Annotation annotation : getChangedAnnotationsOrdered()) {
+      changed.add(annotation);
+    }
+    // anchor deletions
+    getChangedAnchors()
+      .filter(anchor -> anchor.getChange() == Change.Operation.Destroy)
+      .forEach(anchor -> changed.add(anchor));
+    if (super.getChange() == Change.Operation.Destroy) {
+      // graph deletion at the end
+      changed.add(this);
+    }
+    return changed.stream()
+      .flatMap(a -> {
+          // don't infinitely recurse for graph changes
+          if (a == this) return super.getChanges().stream(); 
+          return a.getChanges().stream();
+        })
+      .collect(Collectors.toList());
   } // end of getChanges()
   
+  /**
+   * A stream of anchors that have registered changes, in no particular order.
+   * @return A stream of anchors that have registered changes, which will be empty if
+   * {@link #tracker} is not set.
+   */
+  public Stream<Anchor> getChangedAnchors() {
+    if (tracker == null) return Stream.empty();
+    if (super.getChange() == Change.Operation.Create) { 
+      // all anchors must be created
+      return getAnchors().values().stream()
+        .filter(a -> a.getChange() != Change.Operation.Destroy) // don't include destroyed anchors
+        .peek(a -> a.create());
+    } else if (super.getChange() == Change.Operation.Destroy) {
+      // all anchors must be destroyed
+      return getAnchors().values().stream()
+        .peek(a -> a.destroy());
+    }
+    return tracker.getChanges().stream()
+      .filter(change -> change.getObject() instanceof Anchor)
+      .map(change -> (Anchor)change.getObject())
+      .distinct();
+  } // end of getChangedAnchors()
+  
+  /**
+   * Produces a stream of annotations that have registered changes, in no particular order. 
+   * <p> This does <em>not</em> include changes to the graph itself.
+   * @return A stream of annotations that have registered changes, which will be empty if
+   * {@link #tracker} is not set.
+   */
+  public Stream<Annotation> getChangedAnnotations() {
+    if (tracker == null) return Stream.empty();
+    if (super.getChange() == Change.Operation.Create) { 
+      // all annotations must be created
+      return getAnnotationsById().values().stream()
+        .filter(a -> a.getChange() != Change.Operation.Destroy) // not destroyed annotations
+        .peek(a -> a.create());
+    } else if (super.getChange() == Change.Operation.Destroy) {
+      // all annotations must be destroyed
+      return getAnnotationsById().values().stream()
+        .peek(a -> a.bulkDestroy()); // no peer ordinals need resetting so use bulkDestroy
+    }
+    return tracker.getChanges().stream()
+      .filter(change -> change.getObject() instanceof Annotation)
+      .map(change -> (Annotation)change.getObject())
+      .filter(annotation -> annotation != this) // no graph changes
+      .distinct();
+  } // end of getChangedAnnotations()
+  
+  /**
+   * Produces a collection of annotations that have registered changes, ordered so that
+   * hierarchically higher created annotations are first and hierarchically lower deleted
+   * annotations are last. 
+   * @return A collection of annotations that have registered changes, ordered so that
+   * created annotations are first and deleted annotations are last. 
+   */
+   public List<Annotation> getChangedAnnotationsOrdered() {
+     final HashMap<String,List<Annotation>> layerToAnnotations
+       = new HashMap<String,List<Annotation>>();
+     getChangedAnnotations().forEach(annotation -> {
+         if (!layerToAnnotations.containsKey(annotation.getLayerId())) {
+           layerToAnnotations.put(annotation.getLayerId(), new Vector<Annotation>());
+         }
+         layerToAnnotations.get(annotation.getLayerId()).add(annotation);
+       }); // next changed annotation
+
+     Vector<Annotation> annotations = new Vector<Annotation>();
+     
+     if (getChange() != Change.Operation.Destroy) { // not deleting the graph
+       // ensure all possible parents are created before their children
+       new LayerHierarchyTraversal<Vector<Annotation>>(annotations, schema) {
+         protected void pre(Layer layer) { // parents created before children
+           if (layerToAnnotations.containsKey(layer.getId())) {
+             layerToAnnotations.get(layer.getId()).stream()
+               .filter(a -> a.getChange() == Change.Operation.Create)
+               .forEach(a -> result.add(a));
+           }
+         }
+       };
+     } // not deleting the graph
+     
+     if (getChange() == Change.Operation.Update) { // not creating/deleting the graph
+       // perform updates after creates and before deletes
+       new LayerHierarchyTraversal<Vector<Annotation>>(annotations, schema) {
+         protected void pre(Layer layer) { // parents updated before children
+           if (layerToAnnotations.containsKey(layer.getId())) {
+             layerToAnnotations.get(layer.getId()).stream()
+               .filter(a -> a.getChange() == Change.Operation.Update)
+               .forEach(a -> result.add(a));
+           }
+         }
+       };
+     } // not creating/deleting the graph
+     
+     if (getChange() != Change.Operation.Create) { // not creating the graph
+       // now perform deletes, children first
+       new LayerHierarchyTraversal<Vector<Annotation>>(annotations, schema) {
+         protected void post(Layer layer) { // parents deleted after children
+           if (layerToAnnotations.containsKey(layer.getId())) {
+             layerToAnnotations.get(layer.getId()).stream()
+               .filter(a -> a.getChange() == Change.Operation.Destroy)
+               .forEach(a -> result.add(a));
+           }
+         }
+       };
+     } // not creating the graph
+
+     return annotations;     
+   } // end of getChangedAnnotationsOrdered()
+    
 } // end of class Graph

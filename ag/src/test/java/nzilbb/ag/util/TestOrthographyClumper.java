@@ -370,19 +370,19 @@ public class TestOrthographyClumper {
     g.addAnnotation(new Annotation("line2", "john smith", "line", "a10", "a15", "turn1"));
     // (the leading "--" on the second line should not be joined to "fox" on the previous
 
-    g.addAnnotation(new Annotation("hyphen", "-", "word", "a1", "a2", "turn1"));
-    g.addAnnotation(new Annotation("openquote", "\"", "word", "a2", "a3", "turn1"));
-    g.addAnnotation(new Annotation("the", "the", "word", "a3", "a4", "turn1"));
-    g.addAnnotation(new Annotation("openscarequote", "'", "word", "a4", "a5", "turn1"));
-    g.addAnnotation(new Annotation("quick", "quick", "word", "a5", "a6", "turn1"));
-    g.addAnnotation(new Annotation("closescarequote", "'", "word", "a6", "a7", "turn1"));
-    g.addAnnotation(new Annotation("brown", "brown", "word", "a7", "a8", "turn1"));
-    g.addAnnotation(new Annotation("noise", "cough", "noise", "a8", "a9", "turn1"));
-    g.addAnnotation(new Annotation("longpause", "--", "word", "a9", "a10", "turn1"));
+    g.addAnnotation(new Annotation("hyphen",          "-", "word", "a1", "a2", "turn1"));
+    g.addAnnotation(new Annotation("openquote",       "\"", "word", "a2", "a3", "turn1"));
+    g.addAnnotation(new Annotation("the",             "the", "word", "a3", "a4", "turn1"));
+    g.addAnnotation(new Annotation("openscarequote",   "'", "word", "a4", "a5", "turn1"));
+    g.addAnnotation(new Annotation("quick", "quick",   "word", "a5", "a6", "turn1"));
+    g.addAnnotation(new Annotation("closescarequote",  "'", "word", "a6", "a7", "turn1"));
+    g.addAnnotation(new Annotation("brown",            "brown", "word", "a7", "a8", "turn1"));
+    g.addAnnotation(new Annotation("noise",            "cough", "noise", "a8", "a9", "turn1"));
+    g.addAnnotation(new Annotation("longpause",        "--", "word", "a9", "a10", "turn1"));
     // line break
-    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a10", "a11", "turn1"));
-    g.addAnnotation(new Annotation("over", "over", "word", "a11", "a12", "turn1"));
-    g.addAnnotation(new Annotation("noise2", "noise", "noise", "a12", "a13", "turn1"));
+    g.addAnnotation(new Annotation("jumps",            "jumps", "word", "a10", "a11", "turn1"));
+    g.addAnnotation(new Annotation("over",             "over", "word", "a11", "a12", "turn1"));
+    g.addAnnotation(new Annotation("noise2",           "noise", "noise", "a12", "a13", "turn1"));
     g.addAnnotation(new Annotation("closequote", "\"", "word", "a13", "a14", "turn1"));
 
     try {
@@ -394,7 +394,7 @@ public class TestOrthographyClumper {
       assertEquals("- \" the '", words[0].getLabel());
       assertEquals("quick '", words[1].getLabel());
       assertEquals("brown", words[2].getLabel());
-      assertEquals("pause is not clumped",
+      assertEquals("pause is not clumped " + Arrays.asList(words),
                    "--", words[3].getLabel());
       assertEquals("first word on second line unchanged",
                    "jumps", words[4].getLabel());
