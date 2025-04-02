@@ -768,11 +768,8 @@ public class MediaPipeAnnotator extends Annotator {
         setStatus("Deleting existing annotations...");
         boolean thereWereAnnotationsDeleted = false;
         for (String layerId : getOutputLayers()) {
-          boolean thereWereAnnotationsDeletedOnThisLayer = false;
-          for (Annotation a : transcript.all(layerId)) {
-            a.destroy();
-            thereWereAnnotationsDeletedOnThisLayer = true;
-          }
+          boolean thereWereAnnotationsDeletedOnThisLayer
+            = transcript.destroyAll(layerId);
           if (getStore() != null && thereWereAnnotationsDeletedOnThisLayer) {
             // much quicker to use store.deleteMatchingAnnotations...
             getStore().deleteMatchingAnnotations(
