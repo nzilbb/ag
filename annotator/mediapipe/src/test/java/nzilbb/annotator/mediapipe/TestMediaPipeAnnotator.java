@@ -186,6 +186,8 @@ public class TestMediaPipeAnnotator {
     assertEquals("jawForward type", Constants.TYPE_NUMBER, layer.getType());
     assertTrue("jawForward peers", layer.getPeers());
     assertEquals("jawForward parent", schema.getRoot().getId(), layer.getParentId());
+    assertEquals("jawForward category copied from frames",
+                 "media-frame-category", layer.getCategory());
     assertEquals("jawLeft layer",
                  "jawLeft", annotator.getBlendshapeLayerIds().get("jawLeft"));
     layer = annotator.getSchema().getLayer("jawLeft");
@@ -194,6 +196,8 @@ public class TestMediaPipeAnnotator {
     assertEquals("jawLeft type", Constants.TYPE_NUMBER, layer.getType());
     assertTrue("jawLeft peers", layer.getPeers());
     assertEquals("jawLeft parent", schema.getRoot().getId(), layer.getParentId());
+    assertEquals("jawLeft category copied from frames",
+                 "media-frame-category", layer.getCategory());
     assertEquals("jawOpen layer",
                  "jawOpen", annotator.getBlendshapeLayerIds().get("jawOpen"));
     layer = annotator.getSchema().getLayer("jawOpen");
@@ -202,6 +206,8 @@ public class TestMediaPipeAnnotator {
     assertEquals("jawOpen type", Constants.TYPE_NUMBER, layer.getType());
     assertTrue("jawOpen peers", layer.getPeers());
     assertEquals("jawOpen parent", schema.getRoot().getId(), layer.getParentId());
+    assertEquals("jawOpen category copied from frames",
+                 "media-frame-category", layer.getCategory());
     assertEquals("jawForward layer",
                  "jawRight", annotator.getBlendshapeLayerIds().get("jawRight"));
     layer = annotator.getSchema().getLayer("jawRight");
@@ -210,6 +216,8 @@ public class TestMediaPipeAnnotator {
     assertEquals("jawRight type", Constants.TYPE_NUMBER, layer.getType());
     assertTrue("jawRight peers", layer.getPeers());
     assertEquals("jawRight parent", schema.getRoot().getId(), layer.getParentId());
+    assertEquals("jawRight category copied from frames",
+                 "media-frame-category", layer.getCategory());
     assertNull("no mouthClose layer id",
                  annotator.getBlendshapeLayerIds().get("mouthClose"));
     assertNull("no mouthClose layer", annotator.getSchema().getLayer("mouthClose"));
@@ -328,7 +336,7 @@ public class TestMediaPipeAnnotator {
     annotator.setSchema(schema);
     
     annotator.setTaskParameters(
-      "annotatedImageLayerId=frame"
+      "annotatedImageLayerId=frame" // doesn't already exist
       +"&frameCountLayerId=transcript_frameCount");
     assertEquals("annotatedImageLayerId set", "frame", annotator.getAnnotatedImageLayerId());
     
@@ -338,6 +346,7 @@ public class TestMediaPipeAnnotator {
     assertEquals("frame type", "image/png", layer.getType());
     assertTrue("frame peers", layer.getPeers());
     assertEquals("frame parent", schema.getRoot().getId(), layer.getParentId());
+    assertNull("frame category unset", layer.getCategory());
     
     layer = annotator.getSchema().getLayer("transcript_frameCount");
     assertNotNull("frame count layer created", layer);
@@ -408,6 +417,9 @@ public class TestMediaPipeAnnotator {
   public static Graph graph() throws Exception {
     Schema schema = new Schema(
       "participant", "turn", "utterance", "word",
+      new Layer("frames", "Frames").setAlignment(Constants.ALIGNMENT_INSTANT)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setCategory("media-frame-category"),
       new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
       new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)

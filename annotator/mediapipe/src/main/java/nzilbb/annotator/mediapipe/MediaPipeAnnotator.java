@@ -75,6 +75,7 @@ import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesGraphStore;
 import nzilbb.ag.util.DefaultOffsetGenerator;
+import nzilbb.ag.ql.QL;
 import nzilbb.ag.util.Merger;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
@@ -96,7 +97,7 @@ import org.apache.commons.csv.CSVRecord;
 @UsesFileSystem @UsesGraphStore
 public class MediaPipeAnnotator extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.7"; }
+  public String getMinimumApiVersion() { return "1.2.3"; }
 
   // In LaBB-CAT the Tomcat user may have a read-only home directory,
   // so cache files etc. need to be stored somewhere else,
@@ -584,8 +585,9 @@ public class MediaPipeAnnotator extends Annotator {
     if (outputTrackSuffix == null) outputTrackSuffix = "";
 
     if (annotatedImageLayerId == null) annotatedImageLayerId = "";
+    Layer annotatedImageLayer = null;
     if (annotatedImageLayerId.length() > 0) {
-      Layer annotatedImageLayer = schema.getLayer(annotatedImageLayerId);
+      annotatedImageLayer = schema.getLayer(annotatedImageLayerId);
       if (annotatedImageLayer == null) { // layer doesn't exist
         // create it
         schema.addLayer(
@@ -656,13 +658,19 @@ public class MediaPipeAnnotator extends Annotator {
           blendshapeLayerIds.put(category, layerId);
           Layer categoryLayer = schema.getLayer(layerId);
           if (categoryLayer == null) {
-            schema.addLayer(
+            categoryLayer = schema.addLayer(
               new Layer(layerId)
               .setAlignment(Constants.ALIGNMENT_INSTANT)
               .setPeers(true).setPeersOverlap(false).setSaturated(false)
               .setParentId(schema.getRoot().getId())
               .setType(Constants.TYPE_NUMBER)
               .setDescription(category + " score from mediapipe"));
+            if (annotatedImageLayer != null
+                && Optional.ofNullable(annotatedImageLayer.getCategory()).orElse("").length()>0) {
+              // copy category of main layer to save manual work
+              categoryLayer.setCategory(annotatedImageLayer.getCategory());
+            }
+            
           } else if (categoryLayer.getParent() == null
                      || !categoryLayer.getParent().getId().equals(schema.getRoot().getId())
                      || categoryLayer.getId().equals(schema.getParticipantLayerId())
@@ -773,7 +781,7 @@ public class MediaPipeAnnotator extends Annotator {
           if (getStore() != null && thereWereAnnotationsDeletedOnThisLayer) {
             // much quicker to use store.deleteMatchingAnnotations...
             getStore().deleteMatchingAnnotations(
-              "layer.id == '"+esc(layerId)+"' && graph.id == '"+esc(transcript.getId())+"'");
+              "layer.id == '"+QL.Esc(layerId)+"' && graph.id == '"+QL.Esc(transcript.getId())+"'");
           }
           thereWereAnnotationsDeleted = thereWereAnnotationsDeleted
             || thereWereAnnotationsDeletedOnThisLayer;
@@ -847,7 +855,7 @@ public class MediaPipeAnnotator extends Annotator {
               if (isCancelling()) break;
               thereWereFaces = true;
               String offset = record.get("offset");
-              Anchor anchor = transcript.createAnchorAt​(Double.parseDouble(offset));
+              Anchor anchor = transcript.getOrCreateAnchorAt​(Double.parseDouble(offset));
               anchor.setConfidence(Constants.CONFIDENCE_MANUAL); // not unsure about the time
               for (String category : categoryLayers.keySet()) {
                 String layerId = blendshapeLayerIds.get(category);
@@ -881,7 +889,6 @@ public class MediaPipeAnnotator extends Annotator {
                 // high confidence because it's a direct count, not an inference
                 .setConfidence(Constants.CONFIDENCE_MANUAL); 
             }
-            transcript.put("@valid", Boolean.TRUE); // TODO remove this workaround
             
             if (!mp4Name.equals("NA")) {
               if (!mp4.exists()) {
@@ -938,15 +945,5 @@ public class MediaPipeAnnotator extends Annotator {
     }
     return transcript;
   }
-
-  /**
-   * Escapes quotes in the given string for inclusion in QL or SQL queries.
-   * @param s The string to escape.
-   * @return The given string, with quotes escapeed.
-   */
-  private String esc(String s) {
-    if (s == null) return "";
-    return s.replace("\\","\\\\").replace("'","\\'");
-  } // end of esc()
   
 } // end of class MediaPipeAnnotator
