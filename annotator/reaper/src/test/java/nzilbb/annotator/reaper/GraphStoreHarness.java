@@ -1,5 +1,5 @@
 //
-// Copyright 2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2022-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -60,7 +60,7 @@ public class GraphStoreHarness implements GraphStore {
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
    */
-  public void saveMedia(String id, String trackSuffix, String mediaUrl)
+  public MediaFile saveMedia(String id, String mediaUrl, String trackSuffix)
     throws StoreException, PermissionException, GraphNotFoundException {
     if (!mediaUrl.startsWith("file:")) {
       throw new StoreException("mediaUrl must be a file: URL - " + mediaUrl);
@@ -71,7 +71,7 @@ public class GraphStoreHarness implements GraphStore {
       //savedFile.deleteOnExit();
       IO.Copy(originalFile, savedFile);
       savedMedia.put(originalFile.getName(), savedFile);
-      
+      return new MediaFile(savedFile, trackSuffix);      
     } catch (Exception x) {
       throw new StoreException(x);
     }
@@ -131,7 +131,18 @@ public class GraphStoreHarness implements GraphStore {
   public String getId() throws StoreException, PermissionException {
     return getClass().getName();
   }
-   
+
+  /**
+   * Delete a given media or document file.
+   * @param id The associated transcript ID.
+   * @param fileName The media file name, e.g. {@link MediaFile#name}.
+   * @throws StoreException, PermissionException, GraphNotFoundException
+   */
+  public void deleteMedia(String id, String fileName)
+    throws StoreException, PermissionException, GraphNotFoundException {
+    throw new StoreException("Not implemented");
+  }
+  
   /**
    * Gets a list of layer IDs (annotation 'types').
    * @return A list of layer IDs.
@@ -838,7 +849,7 @@ public class GraphStoreHarness implements GraphStore {
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
    */
-  public void saveEpisodeDocument(String id, String url)
+  public MediaFile saveEpisodeDocument(String id, String url)
     throws StoreException, PermissionException, GraphNotFoundException {
     throw new StoreException("Not implemented");
   }

@@ -1,5 +1,5 @@
 //
-// Copyright 2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2022-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -72,6 +72,7 @@ import nzilbb.ag.automation.UsesGraphStore;
 import nzilbb.ag.serialize.GraphDeserializer;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
+import nzilbb.ag.ql.QL;
 import nzilbb.ag.util.DefaultOffsetGenerator;
 import nzilbb.ag.util.Merger;
 import nzilbb.configure.Parameter;
@@ -96,7 +97,7 @@ import nzilbb.util.IO;
 @UsesFileSystem @UsesGraphStore
 public class ReaperAnnotator extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.7"; }
+  public String getMinimumApiVersion() { return "1.2.3"; }
 
   /**
    * F0 Frame Interval - the -e command line option, specifies the output frame interval
@@ -331,8 +332,13 @@ public class ReaperAnnotator extends Annotator {
         if (annotations.length > 0) {          
           setStatus(
             "Delete existing "+annotations.length+" on "+f0LayerId+" for " + transcript.getId());
-          for (Annotation f0 : annotations) {
-            f0.destroy();
+          transcript.destroyAll(f0LayerId);
+          if (getStore() != null) {
+            // much quicker to use store.deleteMatchingAnnotations...
+            getStore().deleteMatchingAnnotations(
+              "layer.id == '"+QL.Esc(f0LayerId)+"' && graph.id == '"+QL.Esc(transcript.getId())+"'");
+            // we deleted annotations in the store so we can get rid of them locally too
+            transcript.commit();
           }
         } // there are existing annotations to delete
       } // f0LayerId != null
@@ -456,7 +462,7 @@ public class ReaperAnnotator extends Annotator {
             
             if (f0.exists()) {              
               setStatus("Saving " + f0.getName());
-              getStore().saveMedia(transcript.getId(), "", f0.toURI().toString());
+              getStore().saveMedia(transcript.getId(), f0.toURI().toString(), "");
               // remove temporary file
               f0.delete();
 
@@ -472,7 +478,7 @@ public class ReaperAnnotator extends Annotator {
             } // .f0
             if (pm.exists()) {
               setStatus("Saving " + pm.getName());
-              getStore().saveMedia(transcript.getId(), "", pm.toURI().toString());
+              getStore().saveMedia(transcript.getId(), pm.toURI().toString(), "");
               // remove temporary file
               pm.delete();
             } // .pm
@@ -518,7 +524,6 @@ public class ReaperAnnotator extends Annotator {
             transcript.createAnnotation(time, time, f0LayerId, a.getLabel(), transcript);
           } // next f0 annotation
           setStatus("Added "+f0Annotations.length+" annotations to " + transcript.getId());
-          transcript.put("@valid", Boolean.TRUE); // TODO remove this workaround
         }
       } // parse .f0 file to generate annotations
 

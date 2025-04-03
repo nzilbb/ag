@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.reaper</artifactId>
   <name>nzilbb.annotator.reaper</name>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <description>Annotator that executes Reaper on the transcript's sound file to analyse frequency.</description>
 
   <properties>
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.1.0</version>
+      <version>1.2.3-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
