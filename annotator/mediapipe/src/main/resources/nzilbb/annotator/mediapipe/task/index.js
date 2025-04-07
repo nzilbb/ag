@@ -125,6 +125,10 @@ getSchema(s => {
         if (!parameters) { // new task
           document.getElementById("annotatedImageLayerId").value = taskId;
           document.getElementById("frameCountLayerId").value = "transcript_mediapipeFrameCount";
+          document.getElementById("paintTesselation").checked
+            = document.getElementById("paintContours").checked
+            = document.getElementById("paintIrises").checked
+            = true;
           // default for score layers is to create them all
           for (category of categories) {
             document.getElementById(category).value = category;
@@ -149,7 +153,15 @@ getSchema(s => {
                 element.selectedIndex = element.children.length - 1;
               } catch (x) {}
             }
-          }
+          } // next parameter
+          
+          // set the checkboxes
+          document.getElementById("paintTesselation").checked
+            = parameters.get("paintTesselation");
+          document.getElementById("paintContours").checked
+            = parameters.get("paintContours");
+          document.getElementById("paintIrises").checked
+            = parameters.get("paintIrises");
         } // there are parameters
       } finally {
         finishedLoading();

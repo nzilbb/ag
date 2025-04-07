@@ -166,6 +166,9 @@ public class TestMediaPipeAnnotator {
       +"&mouthDimpleLeft="
       +"&annotatedImageLayerId=frames"
       +"&outputTrackSuffix=-face-landmarks"
+      +"&paintTesselation=on"
+      +"&paintContours=on"
+      +"&paintIrises=on"
       );
     
     assertEquals("outputTrackSuffix", "-face-landmarks", annotator.getOutputTrackSuffix());
@@ -225,6 +228,10 @@ public class TestMediaPipeAnnotator {
                annotator.getBlendshapeLayerIds().get("mouthDimpleLeft"));
     assertNull("no mouthDimpleLeft layer", annotator.getSchema().getLayer("mouthDimpleLeft"));
 
+    assertTrue("paintTesselation", annotator.getPaintTesselation());
+    assertTrue("paintContours", annotator.getPaintContours());
+    assertTrue("paintIrises", annotator.getPaintIrises());
+
     Set<String> requiredLayers = new HashSet<String>(Arrays.asList(annotator.getRequiredLayers()));
     assertEquals("Correct number of required layers: " + requiredLayers,
                  0, requiredLayers.size());
@@ -265,6 +272,9 @@ public class TestMediaPipeAnnotator {
                  "jawRightLayer", annotator.getBlendshapeLayerIds().get("jawRight"));
     assertEquals("outputTrackSuffix not set", "", annotator.getOutputTrackSuffix());
     assertEquals("annotatedImageLayerId not set", "", annotator.getAnnotatedImageLayerId());
+    assertFalse("paintTesselation", annotator.getPaintTesselation());
+    assertFalse("paintContours", annotator.getPaintContours());
+    assertFalse("paintIrises", annotator.getPaintIrises());
 
     g.trackChanges();
     annotator.transform(g);
@@ -296,6 +306,7 @@ public class TestMediaPipeAnnotator {
     // if (annotator.getStatusObservers().size() == 0) {
     //   annotator.getStatusObservers().add(status->System.out.println(status));
     // }
+    // annotator.keepGeneratedMedia = true; 
     
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -312,7 +323,12 @@ public class TestMediaPipeAnnotator {
     String outputTrackSuffix = "-facial-features";
     
     annotator.setTaskParameters(
-      "outputTrackSuffix="+outputTrackSuffix);
+      "outputTrackSuffix="+outputTrackSuffix
+      +"&paintTesselation=on"
+      );
+    assertTrue("paintTesselation", annotator.getPaintTesselation());
+    assertFalse("paintContours", annotator.getPaintContours());
+    assertFalse("paintIrises", annotator.getPaintIrises());
     g.trackChanges();
     assertEquals("outputTrackSuffix set", outputTrackSuffix, annotator.getOutputTrackSuffix());
     annotator.transform(g);   
@@ -321,8 +337,11 @@ public class TestMediaPipeAnnotator {
     assertEquals("annotated video generated", g.getId(), store.id);
     assertEquals("annotated track suffix", outputTrackSuffix, store.trackSuffix);
     assertNotNull("annotated track file", store.file);
+    System.out.println(store.file.getPath());
     // tidily delete the file
-    store.file.delete();
+    if (!annotator.keepGeneratedMedia) {
+      store.file.delete();
+    }
   }
   
   /** Annotated frame images are created. */
@@ -330,14 +349,15 @@ public class TestMediaPipeAnnotator {
     // if (annotator.getStatusObservers().size() == 0) {
     //   annotator.getStatusObservers().add(status->System.out.println(status));
     // }
-    
+    // annotator.keepGeneratedMedia = true; 
     Graph g = graph();
     Schema schema = g.getSchema();
     annotator.setSchema(schema);
     
     annotator.setTaskParameters(
       "annotatedImageLayerId=frame" // doesn't already exist
-      +"&frameCountLayerId=transcript_frameCount");
+      +"&frameCountLayerId=transcript_frameCount"
+      +"&paintContours=true");
     assertEquals("annotatedImageLayerId set", "frame", annotator.getAnnotatedImageLayerId());
     
     Layer layer = annotator.getSchema().getLayer("frame");
@@ -359,6 +379,9 @@ public class TestMediaPipeAnnotator {
                  2, outputLayers.size());
     assertTrue("frame layer output", outputLayers.contains("frame"));
     assertTrue("frame count layer output", outputLayers.contains("transcript_frameCount"));
+    assertFalse("paintTesselation", annotator.getPaintTesselation());
+    assertTrue("paintContours", annotator.getPaintContours());
+    assertFalse("paintIrises", annotator.getPaintIrises());
     
     g.trackChanges();
     annotator.transform(g);   
@@ -381,16 +404,18 @@ public class TestMediaPipeAnnotator {
     System.out.println("first frame data URL: " + dataUrl);
     File png = new File(new URI(dataUrl));
     assertTrue("File for data exists", png.exists());
-    // tidily delete all files
-    for (Annotation frame : frames) {
-      dataUrl = (String)frame.get("dataUrl");
-      if (dataUrl != null) {
-        png = new File(new URI(dataUrl));
-        if (png.exists()) {
-          png.delete();
+    if (!annotator.keepGeneratedMedia) {
+      // tidily delete all files
+      for (Annotation frame : frames) {
+        dataUrl = (String)frame.get("dataUrl");
+        if (dataUrl != null) {
+          png = new File(new URI(dataUrl));
+          if (png.exists()) {
+            png.delete();
+          }
         }
-      }
-    } // next frame
+      } // next frame
+    }
 
     Annotation[] frameCount = g.all("transcript_frameCount");
     assertEquals("There is one frame count annotation", 1, frameCount.length);

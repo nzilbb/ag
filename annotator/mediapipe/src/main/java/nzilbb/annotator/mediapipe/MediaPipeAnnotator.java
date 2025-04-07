@@ -109,6 +109,9 @@ public class MediaPipeAnnotator extends Annotator {
   // it uses the TMPDIR environment variable to determine where
   File TMPDIR = null;
   
+  // flag accessible to unit test for keeping generted PNG/MP4
+  boolean keepGeneratedMedia = false;
+  
   /**
    * Python environment name.
    * @see #getEnvironmentName()
@@ -368,6 +371,68 @@ public class MediaPipeAnnotator extends Annotator {
   public MediaPipeAnnotator setAnnotatedImageLayerId(String newAnnotatedImageLayerId) { annotatedImageLayerId = newAnnotatedImageLayerId; return this; }
   
   /**
+   * Whether to include the face landmarks tesselation on the annotated images/video.
+   * @see #getPaintTesselation()
+   * @see #setPaintTesselation(Boolean)
+   */
+  protected Boolean paintTesselation;
+  /**
+   * Getter for {@link #paintTesselation}: Whether to include the face landmarks
+   * tesselation on the annotated images/video. 
+   * @return Whether to include the face landmarks tesselation on the annotated images/video.
+   */
+  public Boolean getPaintTesselation() {
+    return Optional.ofNullable(paintTesselation).orElse(Boolean.FALSE);
+  }
+  /**
+   * Setter for {@link #paintTesselation}: Whether to include the face landmarks
+   * tesselation on the annotated images/video. 
+   * @param newPaintTesselation Whether to include the face landmarks tesselation on the
+   * annotated images/video. 
+   */
+  public MediaPipeAnnotator setPaintTesselation(Boolean newPaintTesselation) { paintTesselation = newPaintTesselation; return this; }
+
+  /**
+   * Whether to include the face contours on the annotated images/video.
+   * @see #getPaintContours()
+   * @see #setPaintContours(Boolean)
+   */
+  protected Boolean paintContours;
+  /**
+   * Getter for {@link #paintContours}: Whether to include the face contours on the
+   * annotated images/video. 
+   * @return Whether to include the face contours on the annotated images/video.
+   */
+  public Boolean getPaintContours() {
+    return Optional.ofNullable(paintContours).orElse(Boolean.FALSE);
+  }
+  /**
+   * Setter for {@link #paintContours}: Whether to include the face contours on the
+   * annotated images/video. 
+   * @param newPaintContours Whether to include the face contours on the annotated images/video.
+   */
+  public MediaPipeAnnotator setPaintContours(Boolean newPaintContours) { paintContours = newPaintContours; return this; }
+  
+  /**
+   * Whether to include the irises on the annotated images/video.
+   * @see #getPaintIrises()
+   * @see #setPaintIrises(Boolean)
+   */
+  protected Boolean paintIrises;
+  /**
+   * Getter for {@link #paintIrises}: Whether to include the irises on the annotated images/video.
+   * @return Whether to include the irises on the annotated images/video.
+   */
+  public Boolean getPaintIrises() {
+    return Optional.ofNullable(paintIrises).orElse(Boolean.FALSE);
+  }
+  /**
+   * Setter for {@link #paintIrises}: Whether to include the irises on the annotated images/video.
+   * @param newPaintIrises Whether to include the irises on the annotated images/video.
+   */
+  public MediaPipeAnnotator setPaintIrises(Boolean newPaintIrises) { paintIrises = newPaintIrises; return this; }
+  
+  /**
    * ID of a transcript attribute layer to store a count of the annotated frames.
    * @see #getFrameCountLayerId()
    * @see #setFrameCountLayerId(String)
@@ -424,15 +489,13 @@ public class MediaPipeAnnotator extends Annotator {
       String script = "blendshapes.py";
       URL urlSource = getClass().getResource(script);
       File destination = new File(getWorkingDirectory(), "blendshapes-"+getVersion()+".py");
-      setStatus("Unpacking " + destination.getName());
-      if (!destination.exists()) {
-        IO.SaveInputStreamToFile​(urlSource.openStream(), destination);
-        new Execution()
-          .setExe("chmod")
-          .arg("u+x").arg(destination.getPath())
-          .setWorkingDirectory(getWorkingDirectory())
-          .run();
-      }
+      setStatus("Unpacking " + destination.getName() + " from " + urlSource);
+      IO.SaveInputStreamToFile​(urlSource.openStream(), destination);
+      new Execution()
+        .setExe("chmod")
+        .arg("u+x").arg(destination.getPath())
+        .setWorkingDirectory(getWorkingDirectory())
+        .run();
       
       // can we run Python?
       File python3Path = Execution.Which("python3");
@@ -574,6 +637,9 @@ public class MediaPipeAnnotator extends Annotator {
     outputTrackSuffix = "";
     annotatedImageLayerId = "";
     frameCountLayerId = "";
+    paintTesselation = null;
+    paintContours = null;
+    paintIrises = null;
     for (String category : blendshapeLayerIds.keySet()) blendshapeLayerIds.put(category, null);
 
     if (parameters != null) {
@@ -800,10 +866,10 @@ public class MediaPipeAnnotator extends Annotator {
         String scriptName = "blendshapes-"+getVersion()+".py";
         String csvName = id + ".csv";
         File csv = new File(getWorkingDirectory(), csvName);
-        csv.deleteOnExit();
+        if (!keepGeneratedMedia) csv.deleteOnExit();
         String mp4Name = outputTrackSuffix.length()==0?"NA":id + outputTrackSuffix + ".mp4";
         File mp4 = new File(getWorkingDirectory(), mp4Name);
-        mp4.deleteOnExit();
+        if (!keepGeneratedMedia) mp4.deleteOnExit();
         String pngPattern = annotatedImageLayerId.length()==0?"NA":id + "__{0}.png";
         setPercentComplete(1);
         boolean finishedOk = false;
@@ -818,7 +884,10 @@ public class MediaPipeAnnotator extends Annotator {
             +" "+minTrackingConfidence
             +" '"+csvName+"'"
             +" '"+mp4Name+"'"
-            +" '"+pngPattern+"'");
+            +" '"+pngPattern+"'"
+            +" "+getPaintTesselation()
+            +" "+getPaintContours()
+            +" "+getPaintIrises());
           if (cmd.getProcess().exitValue() > 0 && !isCancelling()) {
             setStatus("Could not execute "+scriptName+" - status: " + cmd.getProcess().exitValue());
             throw new TransformationException(
@@ -877,7 +946,7 @@ public class MediaPipeAnnotator extends Annotator {
                     anchor, anchor, annotatedImageLayerId,
                     record.get("frame"), transcript);
                   blobAnnotation.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                  png.deleteOnExit();
+                  if (!keepGeneratedMedia) png.deleteOnExit();
                   blobAnnotation.put("dataUrl", png.toURI().toString());
                 }
               }
@@ -913,18 +982,20 @@ public class MediaPipeAnnotator extends Annotator {
             finishedOk = !isCancelling();
           } // not cancelling
         } finally {
-          if (csv.exists()) csv.delete();
-          if (mp4.exists()) mp4.delete();
-          // leave pngs where they are - they'll probably be moved during graph saving,
-          // and if not, they're marked for deletion anyway.
-          if (!finishedOk) { // except if we're cancelling or there was an exception
-            // in which case, delete the pngs
-            File[] pngs = getWorkingDirectory().listFiles(
-              f->f.getName().startsWith(id + "__") && f.getName().endsWith(".png"));
-            if (pngs != null) {
-              for (File png : pngs) png.delete();
+          if (!keepGeneratedMedia) {
+            if (csv.exists()) csv.delete();
+            if (mp4.exists()) mp4.delete();
+            // leave pngs where they are - they'll probably be moved during graph saving,
+            // and if not, they're marked for deletion anyway.
+            if (!finishedOk) { // except if we're cancelling or there was an exception
+              // in which case, delete the pngs
+              File[] pngs = getWorkingDirectory().listFiles(
+                f->f.getName().startsWith(id + "__") && f.getName().endsWith(".png"));
+              if (pngs != null) {
+                for (File png : pngs) png.delete();
+              }
             }
-          }
+          } // not keeping generated media
         }
         
       } // found video        

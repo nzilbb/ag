@@ -10,7 +10,7 @@ from mediapipe import solutions
 import cv2
 import csv
 import numpy as np
-if len(sys.argv) < 9:
+if len(sys.argv) < 12:
   print("Please supply th followin parameters:")
   print(" - video file name")
   print(" - num_faces setting (int)")
@@ -20,6 +20,9 @@ if len(sys.argv) < 9:
   print(" - CSV file name for blendshape scores, or NA to not generate them")
   print(" - Annotated video file name (must end in .mp4), or NA to not generate it")
   print(" - Annotated frame image file pattern (e.g. frame-{0}.png), or NA to not generate them")
+  print(" - Paint landmark tesselation: true or false")
+  print(" - Paint landmark contours: true or false")
+  print(" - Paint irises: true or false")
   exit()
 
 MODEL_PATH = 'face_landmarker.task'
@@ -35,6 +38,12 @@ print("MIN_TRACKING_CONFIDENCE " + str(MIN_TRACKING_CONFIDENCE))
 OUTPUT_CSV_FILE = sys.argv[6]
 OUTPUT_VIDEO_FILE = sys.argv[7]
 OUTPUT_FRAME_FORMAT = sys.argv[8]
+PAINT_TESSELATION = sys.argv[9].lower() == "true"
+print("PAINT_TESSELATION " + str(PAINT_TESSELATION))
+PAINT_CONTOURS = sys.argv[10].lower() == "true"
+print("PAINT_CONTOURS " + str(PAINT_CONTOURS))
+PAINT_IRISES = sys.argv[11].lower() == "true"
+print("PAINT_IRISES " + str(PAINT_IRISES))
 
 # Use OpenCV’s VideoCapture to load the input video.
 
@@ -62,21 +71,24 @@ def draw_landmarks_on_image(rgb_image, detection_result):
       landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in face_landmarks
     ])
 
-    solutions.drawing_utils.draw_landmarks(
+    if PAINT_TESSELATION:
+      solutions.drawing_utils.draw_landmarks(
         image=annotated_image,
         landmark_list=face_landmarks_proto,
         connections=mp.solutions.face_mesh.FACEMESH_TESSELATION,
         landmark_drawing_spec=None,
         connection_drawing_spec=mp.solutions.drawing_styles
         .get_default_face_mesh_tesselation_style())
-    solutions.drawing_utils.draw_landmarks(
+    if PAINT_CONTOURS:
+      solutions.drawing_utils.draw_landmarks(
         image=annotated_image,
         landmark_list=face_landmarks_proto,
         connections=mp.solutions.face_mesh.FACEMESH_CONTOURS,
         landmark_drawing_spec=None,
         connection_drawing_spec=mp.solutions.drawing_styles
         .get_default_face_mesh_contours_style())
-    solutions.drawing_utils.draw_landmarks(
+    if PAINT_IRISES:
+      solutions.drawing_utils.draw_landmarks(
         image=annotated_image,
         landmark_list=face_landmarks_proto,
         connections=mp.solutions.face_mesh.FACEMESH_IRISES,
@@ -141,9 +153,10 @@ with FaceLandmarker.create_from_options(options) as landmarker:
         for category in detection_result.face_blendshapes[0]:
           row[category.category_name] = '{:f}'.format(category.score) # no scientific notation
         blendShapes.writerow(row)
-      if OUTPUT_FRAME_FORMAT != "NA":
-        frame = draw_landmarks_on_image(mp_image.numpy_view(), detection_result)      
-        cv2.imwrite(OUTPUT_FRAME_FORMAT.format(str(f)), frame)
+      if OUTPUT_FRAME_FORMAT != "NA" or OUTPUT_VIDEO_FILE != "NA":
+        frame = draw_landmarks_on_image(mp_image.numpy_view(), detection_result)
+        if OUTPUT_FRAME_FORMAT != "NA":
+          cv2.imwrite(OUTPUT_FRAME_FORMAT.format(str(f)), frame)
         
     if OUTPUT_VIDEO_FILE != "NA":
       out.write(frame)
