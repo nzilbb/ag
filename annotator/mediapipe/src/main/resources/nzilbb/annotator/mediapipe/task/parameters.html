@@ -12,6 +12,22 @@
   <samp>numFaces=1&minFaceDetectionConfidence=0.48&minFacePresenceConfidence=0.5&minTrackingConfidence=0.5&noseSneerRight=noseSneerRight&eyeLookUpRight=eyeLookUpRight&browDownLeft=</samp> </p>
 
 <p> Parameters are: </p> <dl>
+  <dt> inputTrackSuffix </dt> <dd> The suffix of the media track from which the video of the
+    face will be taken. If not specified, the default suffix, "", will be used. </dd>
+  <dt> outputTrackSuffix </dt> <dd> If a video file annotated with facial landmarks is desired,
+    it will be saved with this track suffix. Specifying an empty string, or not including this
+    parameter at all, disables annotated video production.  </dd>
+  <dt> annotatedImageLayerId </dt> <dd> If frame images annotated with facial landmarks are
+    desired, the images will be saved as PNG files on a layer with this ID. </dd>
+  <dt> paintTesselation </dt> <dd> Whether to include the face landmarks tesselation on the
+    annotated images/video. Specify a value of <tt>on</tt> or <tt>true</tt> to enable this option
+    or omit the parameter to disable it.</dd>
+  <dt> paintContours </dt> <dd> Whether to include the face contours on the annotated
+    images/video. Specify a value of <tt>on</tt> or <tt>true</tt> to enable this option
+    or omit the parameter to disable it.</dd>
+  <dt> paintIrises </dt> <dd> Whether to include the irises on the annotated images/video.
+    Specify a value of <tt>on</tt> or <tt>true</tt> to enable this option or omit the parameter
+    to disable it.</dd>
   <dt> numFaces </dt> <dd> The num_faces configuration option: The maximum number of faces
     that can be detected by the the FaceLandmarker. Smoothing is only applied when
     num_faces is set to 1. </dd>
