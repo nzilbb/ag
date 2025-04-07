@@ -323,6 +323,28 @@ public class MediaPipeAnnotator extends Annotator {
   public MediaPipeAnnotator setInputTrackSuffix(String newInputTrackSuffix) { inputTrackSuffix = newInputTrackSuffix; return this; }
   
   /**
+   * If the full detection result for each frame is required, they will be saved as
+   * JSON-encoded files on the layer with this ID. 
+   * @see #getResultLayerId()
+   * @see #setResultLayerId(String)
+   */
+  protected String resultLayerId;
+  /**
+   * Getter for {@link #resultLayerId}: If the full detection result for each frame is
+   * required, they will be saved as JSON-encoded files on the layer with this ID. 
+   * @return If the full detection result for each frame is required, they will be saved
+   * as JSON-encoded files on the layer with this ID. q
+   */
+  public String getResultLayerId() { return resultLayerId; }
+  /**
+   * Setter for {@link #resultLayerId}: If the full detection result for each frame is
+   * required, they will be saved as JSON-encoded files on the layer with this ID. 
+   * @param newResultLayerId If the full detection result for each frame is required, they
+   * will be saved as JSON-encoded files on the layer with this ID. 
+   */
+  public MediaPipeAnnotator setResultLayerId(String newResultLayerId) { resultLayerId = newResultLayerId; return this; }
+  
+  /**
    * If a video file annotated with facial landmarks is desired, it should be saved with
    * this track suffix. Empty string or null disables annotated video production. 
    * @see #getOutputTrackSuffix()
@@ -349,23 +371,23 @@ public class MediaPipeAnnotator extends Annotator {
   public MediaPipeAnnotator setOutputTrackSuffix(String newOutputTrackSuffix) { outputTrackSuffix = newOutputTrackSuffix; return this; }
   
   /**
-   * If a frame images annotated with facial landmarks are desired, the images will be
+   * If frame images annotated with facial landmarks are desired, the images will be
    * saved on a layer with this ID. 
    * @see #getAnnotatedImageLayerId()
    * @see #setAnnotatedImageLayerId(String)
    */
   protected String annotatedImageLayerId = "";
   /**
-   * Getter for {@link #annotatedImageLayerId}: If a frame images annotated with facial
+   * Getter for {@link #annotatedImageLayerId}: If frame images annotated with facial
    * landmarks are desired, the images will be saved on a layer with this ID. 
-   * @return If a frame images annotated with facial landmarks are desired, the images
+   * @return If frame images annotated with facial landmarks are desired, the images
    * will be saved on a layer with this ID. 
    */
   public String getAnnotatedImageLayerId() { return annotatedImageLayerId; }
   /**
-   * Setter for {@link #annotatedImageLayerId}: If a frame images annotated with facial
+   * Setter for {@link #annotatedImageLayerId}: If frame images annotated with facial
    * landmarks are desired, the images will be saved on a layer with this ID. 
-   * @param newAnnotatedImageLayerId If a frame images annotated with facial landmarks are
+   * @param newAnnotatedImageLayerId If frame images annotated with facial landmarks are
    * desired, the images will be saved on a layer with this ID. 
    */
   public MediaPipeAnnotator setAnnotatedImageLayerId(String newAnnotatedImageLayerId) { annotatedImageLayerId = newAnnotatedImageLayerId; return this; }
@@ -458,6 +480,11 @@ public class MediaPipeAnnotator extends Annotator {
   public MediaPipeAnnotator() {
      // This is the kind of schema we'd like (set here for testing purposes):
     Schema schema = new Schema("who", "turn", "utterance", "word");
+    schema.addLayer(
+      new Layer("result", "JSON-encoded detection results")
+      .setAlignment(Constants.ALIGNMENT_INSTANT)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setType("application/json"));
     schema.addLayer(
       new Layer("frame", "Annotated frame images")
       .setAlignment(Constants.ALIGNMENT_INSTANT)
@@ -635,6 +662,7 @@ public class MediaPipeAnnotator extends Annotator {
     minTrackingConfidence = 0.5;
     inputTrackSuffix = "";
     outputTrackSuffix = "";
+    resultLayerId = "";
     annotatedImageLayerId = "";
     frameCountLayerId = "";
     paintTesselation = null;
@@ -650,7 +678,46 @@ public class MediaPipeAnnotator extends Annotator {
     if (inputTrackSuffix == null) inputTrackSuffix = "";
     if (outputTrackSuffix == null) outputTrackSuffix = "";
 
+    if (resultLayerId == null) resultLayerId = "";
     if (annotatedImageLayerId == null) annotatedImageLayerId = "";
+    if (resultLayerId.length() > 0 && resultLayerId.equals(annotatedImageLayerId)) {
+      throw new InvalidConfigurationException(
+        this, "resultLayer ("+resultLayerId+") cannot be the same as annotatedImageLayerId");
+    }
+    Layer resultLayer = null;
+    if (resultLayerId.length() > 0) {
+      resultLayer = schema.getLayer(resultLayerId);
+      if (resultLayer == null) { // layer doesn't exist
+        // create it
+        schema.addLayer(
+          new Layer(resultLayerId)
+          .setAlignment(Constants.ALIGNMENT_INSTANT)
+          .setPeers(true).setPeersOverlap(false).setSaturated(false)
+          .setParentId(schema.getRoot().getId())
+          .setType("application/json")
+          .setDescription("Frame images annotated with JSON-encoded detection results"));        
+      } else if (resultLayer.getParent() == null
+                 || !resultLayer.getParent().getId().equals(schema.getRoot().getId())
+                 || resultLayer.getId().equals(schema.getParticipantLayerId())
+                 || resultLayer.getId().equals(schema.getTurnLayerId())
+                 || resultLayer.getId().equals(schema.getUtteranceLayerId())
+                 || resultLayer.getId().equals(schema.getWordLayerId())
+                 || resultLayer.getId().equals(schema.getCorpusLayerId())
+                 || resultLayer.getId().equals(schema.getEpisodeLayerId())) {
+        throw new InvalidConfigurationException(
+          this, "resultLayer ("+resultLayerId
+          + ") must be a non-system span layer, but parent layer is "
+          + resultLayer.getParent());
+      } else {
+        if (resultLayer.getAlignment() != Constants.ALIGNMENT_INSTANT) {
+          resultLayer.setAlignment(Constants.ALIGNMENT_INSTANT);
+        }
+        if (!resultLayer.getType().equals("application/json")) {
+          resultLayer.setType("application/json");
+        }
+      }
+    }
+    
     Layer annotatedImageLayer = null;
     if (annotatedImageLayerId.length() > 0) {
       annotatedImageLayer = schema.getLayer(annotatedImageLayerId);
@@ -782,6 +849,10 @@ public class MediaPipeAnnotator extends Annotator {
       .filter(Objects::nonNull)
       .filter(id->id.length() > 0)
       .collect(Collectors.toList()));
+    // layer for results?
+    if (resultLayerId != null && resultLayerId.length() > 0) {
+      layerIds.add(resultLayerId);
+    }    
     // layer for annotated frame images?
     if (annotatedImageLayerId != null && annotatedImageLayerId.length() > 0) {
       layerIds.add(annotatedImageLayerId);
@@ -863,9 +934,11 @@ public class MediaPipeAnnotator extends Annotator {
         String id = IO.WithoutExtension(transcript.getId())
           .replace("'","_"); // ensure that apostrophes won't spoil command line quoting
 
+        setPercentComplete(1);
         String scriptName = "blendshapes-"+getVersion()+".py";
         String csvName = id + ".csv";
         File csv = new File(getWorkingDirectory(), csvName);
+        String jsonPattern = resultLayerId.length()==0?"NA":id + "__{0}.json";
         if (!keepGeneratedMedia) csv.deleteOnExit();
         String mp4Name = outputTrackSuffix.length()==0?"NA":id + outputTrackSuffix + ".mp4";
         File mp4 = new File(getWorkingDirectory(), mp4Name);
@@ -883,6 +956,7 @@ public class MediaPipeAnnotator extends Annotator {
             +" "+minFacePresenceConfidence
             +" "+minTrackingConfidence
             +" '"+csvName+"'"
+            +" '"+jsonPattern+"'"
             +" '"+mp4Name+"'"
             +" '"+pngPattern+"'"
             +" "+getPaintTesselation()
@@ -909,6 +983,10 @@ public class MediaPipeAnnotator extends Annotator {
               if (layerId != null) categoryLayers.put(category, layerId);
             } // next possible category
             
+            MessageFormat jsonResultFilePattern = null;
+            if (!jsonPattern.equals("NA")) {
+              jsonResultFilePattern = new MessageFormat(jsonPattern);
+            }
             MessageFormat annotatedImageFilePattern = null;
             if (!pngPattern.equals("NA")) {
               annotatedImageFilePattern = new MessageFormat(pngPattern);
@@ -933,6 +1011,23 @@ public class MediaPipeAnnotator extends Annotator {
                   anchor, anchor, layerId, label, transcript)
                   .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
               } // next possible category
+              
+              if (jsonResultFilePattern != null) {
+                // there should be an image file for this frame
+                File json = new File(
+                  getWorkingDirectory(), jsonResultFilePattern.format(
+                    new Object[]{ record.get("frame") }));
+                if (!json.exists()) {
+                  setStatus("Frame result missing: " + json.getName());
+                } else {
+                  Annotation blobAnnotation = transcript.createAnnotation​(
+                    anchor, anchor, resultLayerId,
+                    record.get("frame"), transcript);
+                  blobAnnotation.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                  if (!keepGeneratedMedia) json.deleteOnExit();
+                  blobAnnotation.put("dataUrl", json.toURI().toString());
+                }
+              }
               
               if (annotatedImageFilePattern != null) {
                 // there should be an image file for this frame
@@ -985,14 +1080,15 @@ public class MediaPipeAnnotator extends Annotator {
           if (!keepGeneratedMedia) {
             if (csv.exists()) csv.delete();
             if (mp4.exists()) mp4.delete();
-            // leave pngs where they are - they'll probably be moved during graph saving,
+            // leave pngs/json where they are - they'll probably be moved during graph saving,
             // and if not, they're marked for deletion anyway.
             if (!finishedOk) { // except if we're cancelling or there was an exception
               // in which case, delete the pngs
-              File[] pngs = getWorkingDirectory().listFiles(
-                f->f.getName().startsWith(id + "__") && f.getName().endsWith(".png"));
-              if (pngs != null) {
-                for (File png : pngs) png.delete();
+              File[] frames = getWorkingDirectory().listFiles(
+                f->f.getName().startsWith(id + "__")
+                && (f.getName().endsWith(".png") || f.getName().endsWith(".json")));
+              if (frames != null) {
+                for (File file : frames) file.delete();
               }
             }
           } // not keeping generated media

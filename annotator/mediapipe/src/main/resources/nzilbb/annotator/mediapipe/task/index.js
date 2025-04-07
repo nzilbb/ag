@@ -24,6 +24,19 @@ getSchema(s => {
 
   // populate layer input select options...
   addLayerOptions(
+    document.getElementById("resultLayerId"), schema,
+    // instantaneous top level layers
+    layer => layer.id == taskId
+      || (layer.alignment == 1 && layer.parentId == schema.root.id
+          // no system layers
+          && layer.id != schema.corpusLayerId
+          && layer.id != schema.episodeLayerId
+          && layer.id != schema.participantLayerId
+          && layer.id != schema.turnLayerId
+          && layer.id != schema.utteranceLayerId
+          && layer.id != schema.wordLayerId)
+  );
+  addLayerOptions(
     document.getElementById("annotatedImageLayerId"), schema,
     // instantaneous top level layers
     layer => layer.id == taskId
@@ -123,7 +136,8 @@ getSchema(s => {
     getText("getTaskParameters", parameters => {
       try {
         if (!parameters) { // new task
-          document.getElementById("annotatedImageLayerId").value = taskId;
+          document.getElementById("resultLayerId").value = taskId;
+          document.getElementById("annotatedImageLayerId").value = "mediapipeFrame";
           document.getElementById("frameCountLayerId").value = "transcript_mediapipeFrameCount";
           document.getElementById("paintTesselation").checked
             = document.getElementById("paintContours").checked
@@ -194,7 +208,9 @@ function changedLayer(select, defaultNewLayerName) {
   }
 }
 
+document.getElementById("resultLayerId").onchange = function(e) {
+  changedLayer(this, taskId||"mediapipe"); };
 document.getElementById("annotatedImageLayerId").onchange = function(e) {
-  changedLayer(this, "annotatedFrame"); };
+  changedLayer(this, "mediapipeFrame"); };
 document.getElementById("frameCountLayerId").onchange = function(e) {
   changedLayer(this, "transcript_mediapipeFrameCount"); };

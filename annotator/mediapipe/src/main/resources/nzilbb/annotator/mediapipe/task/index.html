@@ -22,6 +22,13 @@
         <label for="inputTrackSuffix"> Analyse Track </label>
         <span><select id="inputTrackSuffix" name="inputTrackSuffix"></select></span>
       </div>
+      <div class="field" title="The layer on which JSON-encoded frame detection results should be saved">
+        <label for="resultLayerId"> Detection Result Layer </label>
+        <span><select id="resultLayerId" name="resultLayerId">
+            <option value="">[none]</option>
+            <option>[add new layer]</option>
+        </select></span>
+      </div>
       <div class="field" title="The media track to which the a video annotated with face landmarks should be saved. If there are no options here, you need to create a new media track for annotated videos.">
         <label for="outputTrackSuffix"> Annotated Video Track </label>
         <span><select id="outputTrackSuffix" name="outputTrackSuffix">

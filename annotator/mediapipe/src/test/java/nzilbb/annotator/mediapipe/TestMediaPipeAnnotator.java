@@ -148,6 +148,12 @@ public class TestMediaPipeAnnotator {
       fail("System layer is invalid for annotated images");
     } catch(InvalidConfigurationException exception) {
     }
+    try {
+      annotator.setTaskParameters(
+        "annotatedImageLayerId=frame&resultLayerId=frame"); // output layers the same
+      fail("annotatedImageLayerId and resultLayerId are the same");
+    } catch(InvalidConfigurationException exception) {
+    }
   }
     
   /** Ensure valid task parameters don't raise errors, and change the schema when appropriate. */
@@ -433,6 +439,69 @@ public class TestMediaPipeAnnotator {
 
     assertNull("no annotated video generated",
                ((GraphStoreHarness)annotator.getStore()).id);
+  }
+
+  /** JSON results for each frame are created. */
+  @Test public void jsonResults() throws Exception {
+    // if (annotator.getStatusObservers().size() == 0) {
+    //   annotator.getStatusObservers().add(status->System.out.println(status));
+    // }
+    // annotator.keepGeneratedMedia = true; 
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    annotator.setTaskParameters(
+      "resultLayerId=frame" // doesn't already exist
+      );
+    assertEquals("resultLayerId set", "frame", annotator.getResultLayerId());
+    
+    Layer layer = annotator.getSchema().getLayer("frame");
+    assertNotNull("frame layer created", layer);
+    assertEquals("frame alignment", Constants.ALIGNMENT_INSTANT, layer.getAlignment());
+    assertEquals("frame type", "application/json", layer.getType());
+    assertTrue("frame peers", layer.getPeers());
+    assertEquals("frame parent", schema.getRoot().getId(), layer.getParentId());
+    assertNull("frame category unset", layer.getCategory());
+    
+    Set<String> outputLayers = new HashSet<String>(Arrays.asList(annotator.getOutputLayers()));
+    assertEquals("Correct number of output layers: " + outputLayers,
+                 1, outputLayers.size());
+    assertTrue("frame layer output", outputLayers.contains("frame"));
+    
+    g.trackChanges();
+    annotator.transform(g);   
+
+    Annotation[] frames = g.all("frame");
+    assertTrue("There are frame annotations", frames.length > 0);
+    // labels are formatted as fragment filenames: {transcript}_{layer}__{offset}.json
+    try {
+      Integer.parseInt(frames[0].getLabel());
+    } catch(NumberFormatException exception) {
+      fail("First frame label is numeric (frame number): " + frames[0] + " - " + exception);
+    }
+    System.out.println("first frame: " + frames[0].getStart() + ": " + frames[0]);
+    assertEquals("Frame annotations have medium confidence",
+                 50, (int)frames[0].getConfidence());
+    assertEquals("Frame anchors have high confidence",
+                 100, (int)frames[0].getStart().getConfidence());
+    String dataUrl = (String)frames[0].get("dataUrl");
+    assertNotNull("First frame includes URL for data", dataUrl);
+    System.out.println("first frame data URL: " + dataUrl);
+    File json = new File(new URI(dataUrl));
+    assertTrue("File for data exists", json.exists());
+    if (!annotator.keepGeneratedMedia) {
+      // tidily delete all files
+      for (Annotation frame : frames) {
+        dataUrl = (String)frame.get("dataUrl");
+        if (dataUrl != null) {
+          json = new File(new URI(dataUrl));
+          if (json.exists()) {
+            json.delete();
+          }
+        }
+      } // next frame
+    }
   }
 
   /**

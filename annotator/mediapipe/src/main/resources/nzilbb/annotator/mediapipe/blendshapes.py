@@ -2,6 +2,7 @@
 # code adapted from
 # https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker/python#video
 import sys
+import json
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
@@ -10,7 +11,7 @@ from mediapipe import solutions
 import cv2
 import csv
 import numpy as np
-if len(sys.argv) < 12:
+if len(sys.argv) < 13:
   print("Please supply th followin parameters:")
   print(" - video file name")
   print(" - num_faces setting (int)")
@@ -18,6 +19,7 @@ if len(sys.argv) < 12:
   print(" - min_face_presence_confidence setting (float)")
   print(" - min_tracking_confidence setting (float)")
   print(" - CSV file name for blendshape scores, or NA to not generate them")
+  print(" - JSON file pattern (e.g. frame-{0}.json), or NA to not generate them")
   print(" - Annotated video file name (must end in .mp4), or NA to not generate it")
   print(" - Annotated frame image file pattern (e.g. frame-{0}.png), or NA to not generate them")
   print(" - Paint landmark tesselation: true or false")
@@ -36,14 +38,12 @@ print("MIN_FACE_PRESENCE_CONFIDENCE " + str(MIN_FACE_PRESENCE_CONFIDENCE))
 MIN_TRACKING_CONFIDENCE = float(sys.argv[5])
 print("MIN_TRACKING_CONFIDENCE " + str(MIN_TRACKING_CONFIDENCE))
 OUTPUT_CSV_FILE = sys.argv[6]
-OUTPUT_VIDEO_FILE = sys.argv[7]
-OUTPUT_FRAME_FORMAT = sys.argv[8]
-PAINT_TESSELATION = sys.argv[9].lower() == "true"
-print("PAINT_TESSELATION " + str(PAINT_TESSELATION))
-PAINT_CONTOURS = sys.argv[10].lower() == "true"
-print("PAINT_CONTOURS " + str(PAINT_CONTOURS))
-PAINT_IRISES = sys.argv[11].lower() == "true"
-print("PAINT_IRISES " + str(PAINT_IRISES))
+OUTPUT_JSON_FORMAT = sys.argv[7]
+OUTPUT_VIDEO_FILE = sys.argv[8]
+OUTPUT_FRAME_FORMAT = sys.argv[9]
+PAINT_TESSELATION = sys.argv[10].lower() == "true"
+PAINT_CONTOURS = sys.argv[11].lower() == "true"
+PAINT_IRISES = sys.argv[12].lower() == "true"
 
 # Use OpenCV’s VideoCapture to load the input video.
 
@@ -98,6 +98,36 @@ def draw_landmarks_on_image(rgb_image, detection_result):
 
   return annotated_image
 
+# convert result to a plain dictionary that can be serialized
+def result_to_dict(detection_result):
+  face_landmarks = []
+  for face in detection_result.face_landmarks:
+    landmarks = []
+    for landmark in face:
+      landmarks.append({
+        "x": landmark.x, "y": landmark.y, "z": landmark.z
+      })
+    face_landmarks.append(landmarks)
+  face_blendshapes = []
+  for face in detection_result.face_blendshapes:
+    blendshapes = {}
+    for category in face:
+      blendshapes[category.category_name] = category.score
+    face_blendshapes.append(blendshapes)
+  facial_transformation_matrixes = []
+  for face in detection_result.facial_transformation_matrixes:
+    matrices = []
+    for matrix in face:
+      row = []
+      for value in matrix:
+        row.append(value)
+      matrices.append(row)
+    facial_transformation_matrixes.append(matrices)
+  return ({
+    "face_landmarks": face_landmarks,
+    "face_blendshapes": face_blendshapes,
+    "facial_transformation_matrixes": facial_transformation_matrixes
+  })
 
 BaseOptions = mp.tasks.BaseOptions
 FaceLandmarker = mp.tasks.vision.FaceLandmarker
@@ -153,6 +183,11 @@ with FaceLandmarker.create_from_options(options) as landmarker:
         for category in detection_result.face_blendshapes[0]:
           row[category.category_name] = '{:f}'.format(category.score) # no scientific notation
         blendShapes.writerow(row)
+      
+      if OUTPUT_JSON_FORMAT != "NA":
+        with open(OUTPUT_JSON_FORMAT.format(str(f)), 'w') as jsonFile:
+          json.dump(result_to_dict(detection_result), jsonFile)
+      
       if OUTPUT_FRAME_FORMAT != "NA" or OUTPUT_VIDEO_FILE != "NA":
         frame = draw_landmarks_on_image(mp_image.numpy_view(), detection_result)
         if OUTPUT_FRAME_FORMAT != "NA":
