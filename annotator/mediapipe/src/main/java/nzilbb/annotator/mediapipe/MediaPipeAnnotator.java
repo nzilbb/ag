@@ -511,6 +511,10 @@ public class MediaPipeAnnotator extends Annotator {
     setRunning(true);
     try {
       setStatus(""); // clear any residual status from the last run...
+      if (System.getProperty("os.name").startsWith("Windows")) {
+        throw new InvalidConfigurationException(
+          this, "Sorry, this annotator currently doesn't work on Windows systems.");
+      }
 
       // extract scripts
       String script = "blendshapes.py";
@@ -541,10 +545,33 @@ public class MediaPipeAnnotator extends Annotator {
       cmd.getStderrObservers().add(m->setStatus(m));
       cmd.run();
       if (cmd.getProcess().exitValue() > 0) {
-        setStatus("Cannot run 'venv' module - status: " + cmd.getProcess().exitValue());
-        throw new InvalidConfigurationException(
-          this, "Cannot run 'venv' module; Please install support for python environments."
-          +"\ne.g. on Ubuntu: apt install python3.10-venv");
+        setStatus("Cannot run 'venv' module ("
+                  + cmd.getProcess().exitValue() + ") attempting to install it...");
+
+        // try installing python3-all-venv (we might be running in Docker, where we're allowed)
+        cmd = new Execution()
+          .setExe("apt")
+          .arg("install").arg("-y").arg("python3-all-venv");
+        cmd.getStdoutObservers().add(m->setStatus(m));
+        cmd.getStderrObservers().add(m->setStatus(m));
+        cmd.run();
+        if (cmd.getProcess().exitValue() == 0) { // seems to have succeeded
+          // try running venv again
+          setStatus("Trying 'venv' again...");
+          cmd = new Execution()
+            .setExe(python3Path)
+            .arg("-m").arg("venv").arg(environmentName)
+            .setWorkingDirectory(getWorkingDirectory());
+          cmd.getStdoutObservers().add(m->setStatus(m));
+          cmd.getStderrObservers().add(m->setStatus(m));
+          cmd.run();
+        }
+        if (cmd.getProcess().exitValue() > 0) {
+          setStatus("Cannot install 'venv' module (" + cmd.getProcess().exitValue() + ")");
+          throw new InvalidConfigurationException(
+            this, "Cannot run 'venv' module; Please install support for python environments."
+            +"\ne.g. on Ubuntu: apt install python3.10-venv");
+        }
       }
       setStatus(cmd.getInput().toString());
 
@@ -625,7 +652,7 @@ public class MediaPipeAnnotator extends Annotator {
       if (TMPDIR == null) {
         TMPDIR = new File(getWorkingDirectory(), "tmp");
       }
-      python = new Execution()
+      Execution py = new Execution()
         .setExe("bash") // TODO windows interpreter
         .arg(script.getPath())
         .setWorkingDirectory(getWorkingDirectory())
@@ -636,10 +663,15 @@ public class MediaPipeAnnotator extends Annotator {
         // pip needs a lot of temporary file space to install some dependencies
         // it uses the TMPDIR environment variable to determine where
         .env("TMPDIR", TMPDIR.getPath());
-      python.getStdoutObservers().add(m->setStatus(m));
-      python.getStderrObservers().add(m->setStatus(m));
-      python.run();
-      return python;
+      py.getStdoutObservers().add(m->setStatus(m));
+      py.getStderrObservers().add(m->setStatus(m));
+      try {
+        python.add(py);
+        py.run();
+        return py;
+      } finally {
+        python.remove(py);
+      }
     } finally {
       script.delete();
     }
@@ -723,13 +755,18 @@ public class MediaPipeAnnotator extends Annotator {
       annotatedImageLayer = schema.getLayer(annotatedImageLayerId);
       if (annotatedImageLayer == null) { // layer doesn't exist
         // create it
-        schema.addLayer(
+        annotatedImageLayer = schema.addLayer(
           new Layer(annotatedImageLayerId)
           .setAlignment(Constants.ALIGNMENT_INSTANT)
           .setPeers(true).setPeersOverlap(false).setSaturated(false)
           .setParentId(schema.getRoot().getId())
           .setType("image/png")
           .setDescription("Frame images annotated with facial landmarks by mediapipe"));        
+        if (resultLayer != null
+            && Optional.ofNullable(resultLayer.getCategory()).orElse("").length()>0) {
+          // copy category of main layer to save manual work
+          annotatedImageLayer.setCategory(resultLayer.getCategory());
+        }
       } else if (annotatedImageLayer.getParent() == null
                  || !annotatedImageLayer.getParent().getId().equals(schema.getRoot().getId())
                  || annotatedImageLayer.getId().equals(schema.getParticipantLayerId())
@@ -798,7 +835,11 @@ public class MediaPipeAnnotator extends Annotator {
               .setParentId(schema.getRoot().getId())
               .setType(Constants.TYPE_NUMBER)
               .setDescription(category + " score from mediapipe"));
-            if (annotatedImageLayer != null
+            if (resultLayer != null
+                && Optional.ofNullable(resultLayer.getCategory()).orElse("").length()>0) {
+              // copy category of main layer to save manual work
+              categoryLayer.setCategory(resultLayer.getCategory());
+            } else if (annotatedImageLayer != null
                 && Optional.ofNullable(annotatedImageLayer.getCategory()).orElse("").length()>0) {
               // copy category of main layer to save manual work
               categoryLayer.setCategory(annotatedImageLayer.getCategory());
@@ -864,19 +905,22 @@ public class MediaPipeAnnotator extends Annotator {
     return layerIds.toArray(String[]::new);
   }
 
-  Execution python = null;
+  // could be multiple scripts executing simultaneously, if they cancel, we need to kill them
+  HashSet<Execution> python = new HashSet<Execution>();
   
   /**
    * If reaper is running, kills the process.
    */
   public void cancel() {
-    if (python != null && python.getProcess() != null) {
-      if (!isCancelling()) { // first time
-        python.getProcess().destroy();
-      } else { // multiple cancel requests, kill -9
-        python.getProcess().destroyForcibly();
-      }
-    }
+    python.stream()
+      .filter(py -> py.getProcess() != null)
+      .forEach(py -> {
+          if (!isCancelling()) { // first time
+            py.getProcess().destroy();
+          } else { // multiple cancel requests, kill -9
+            py.getProcess().destroyForcibly();
+          }
+        });
     super.cancel();
   } // end of cancel()
 
