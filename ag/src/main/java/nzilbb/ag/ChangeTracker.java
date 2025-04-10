@@ -33,160 +33,161 @@ import java.util.function.Consumer;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class ChangeTracker implements Consumer<Change> {
-   // map of object IDs to attribute maps, which are keyed by attribute key
-   private HashMap<String,HashMap<String,Change>> idToChanges
-   = new HashMap<String,HashMap<String,Change>>();
+  // map of object IDs to attribute maps, which are keyed by attribute key
+  private HashMap<String,HashMap<String,Change>> idToChanges
+  = new HashMap<String,HashMap<String,Change>>();
 
-   /**
-    * Consumers to pass the events to.
-    * @see #getOthers()
-    * @see #setOthers(LinkedHashSet)
-    */
-   protected LinkedHashSet<Consumer<Change>> others = new LinkedHashSet<Consumer<Change>>();
-   /**
-    * Getter for {@link #others}: Consumers to pass the events to.
-    * @return Consumers to pass the events to.
-    */
-   public LinkedHashSet<Consumer<Change>> getOthers() { return others; }
-   /**
-    * Setter for {@link #others}: Consumers to pass the events to.
-    * @param newOthers Consumers to pass the events to.
-    */
-   public ChangeTracker setOthers(LinkedHashSet<Consumer<Change>> newOthers) { others = newOthers; return this; }
+  /**
+   * Consumers to pass the events to.
+   * @see #getOthers()
+   * @see #setOthers(LinkedHashSet)
+   */
+  protected LinkedHashSet<Consumer<Change>> others = new LinkedHashSet<Consumer<Change>>();
+  /**
+   * Getter for {@link #others}: Consumers to pass the events to.
+   * @return Consumers to pass the events to.
+   */
+  public LinkedHashSet<Consumer<Change>> getOthers() { return others; }
+  /**
+   * Setter for {@link #others}: Consumers to pass the events to.
+   * @param newOthers Consumers to pass the events to.
+   */
+  public ChangeTracker setOthers(LinkedHashSet<Consumer<Change>> newOthers) { others = newOthers; return this; }
    
-   /**
-    * Register a {@link TrackedMap} object {@link Change}.
-    * @param change The change, which includes information about the object that is
-    * changing, which attribute, what the old value was, and what the new value is.
-    */
-   public void accept(Change change) {
-      final Change changeForListeners = change;
-      if (change != null) {
-         String id = change.getObject().getId();
-         if (id != null) {
-            if (!idToChanges.containsKey(id)) idToChanges.put(id, new HashMap<String,Change>());
-
-            HashMap<String,Change> attributeMap = idToChanges.get(id);
-            if (attributeMap.containsKey(change.getKey())) { // attribute has changed previously
-               // take a copy of the change, so that listeners get an unaltered version
-               change = (Change)change.clone();
-               
-               // conserve the original old value
-               Change earlierChange = attributeMap.get(change.getKey());
-               change.setOldValue(earlierChange.getOldValue());
-            }
-            // System.out.println("ChangeTracker.accept: " + change);
-            attributeMap.put(change.getKey(), change);
-         } // id != null
-      } // change != null
-      // pass on the change to any listeners that are interested
-      others.forEach(o -> o.accept(changeForListeners));
-   }
-   
-   /**
-    * De-register a {@link TrackedMap} object {@link Change}.
-    * @param change The change, which should have been previously registered via 
-    * {@link #accept(Change)}. 
-    */
-   public void reject(Change change) {
-      if (change == null) return;
-      
+  /**
+   * Register a {@link TrackedMap} object {@link Change}.
+   * @param change The change, which includes information about the object that is
+   * changing, which attribute, what the old value was, and what the new value is.
+   */
+  public void accept(Change change) {
+    final Change changeForListeners = change;
+    if (change != null) {
       String id = change.getObject().getId();
-      if (id == null) return;
-
-      if (!idToChanges.containsKey(id)) return;
-      
-      HashMap<String,Change> attributeMap = idToChanges.get(id);
-      attributeMap.remove(change.getKey());
-
-      // ensure that, if all changes are rejected, idToChanges is empty
-      if (attributeMap.size() == 0) idToChanges.remove(id);
-   }
-   
-   /**
-    * Gets all the changes for the given attribute of the given object.
-    * @param id The {@link TrackedMap#getId()} of the changed object. 
-    * @param key The key of the changed attribute, or null for Create/Destroy changes.
-    * @return A (possibly empty) set of changes that were registered.
-    */
-   public Optional<Change> getChange(String id, String key) {
-      if (id == null) return Optional.empty();
-      
-      if (!idToChanges.containsKey(id)) return Optional.empty();
-      
-      HashMap<String,Change> attributeMap = idToChanges.get(id);
-      if (!attributeMap.containsKey(key)) return Optional.empty();
-      
-      return Optional.ofNullable(attributeMap.get(key));
-   }
-   
-   /**
-    * Gets all the changes for the identified object.
-    * @param id The {@link TrackedMap#getId()} of the changed object. 
-    * @return A (possibly empty) set of changes that were registered.
-    */
-   public Set<Change> getChanges(String id) {
-      final LinkedHashSet<Change> changes = new LinkedHashSet<Change>();
       if (id != null) {
-         if (idToChanges.containsKey(id)) {
-            // creates first
-            idToChanges.get(id).values().stream()
-               .filter(c->c.getOperation() == Change.Operation.Create)
-               .forEach(c -> changes.add(c));
-            // then updates
-            idToChanges.get(id).values().stream()
-               .filter(c->c.getOperation() == Change.Operation.Update)
-               .forEach(c -> changes.add(c));
-            // then deletes
-            idToChanges.get(id).values().stream()
-               .filter(c->c.getOperation() == Change.Operation.Destroy)
-               .forEach(c -> changes.add(c));
-         } // idToChanges.containsKey(id)
+        if (!idToChanges.containsKey(id)) idToChanges.put(id, new HashMap<String,Change>());
+
+        HashMap<String,Change> attributeMap = idToChanges.get(id);
+        if (attributeMap.containsKey(change.getKey())) { // attribute has changed previously
+              
+          // take a copy of the change, so that listeners get an unaltered version
+          change = (Change)change.clone();
+               
+          // conserve the original old value
+          Change earlierChange = attributeMap.get(change.getKey());
+          change.setOldValue(earlierChange.getOldValue());
+        }
+        // System.out.println("ChangeTracker.accept: " + change);
+        attributeMap.put(change.getKey(), change);
       } // id != null
+    } // change != null
+      // pass on the change to any listeners that are interested
+    others.forEach(o -> o.accept(changeForListeners));
+  }
+   
+  /**
+   * De-register a {@link TrackedMap} object {@link Change}.
+   * @param change The change, which should have been previously registered via 
+   * {@link #accept(Change)}. 
+   */
+  public void reject(Change change) {
+    if (change == null) return;
+      
+    String id = change.getObject().getId();
+    if (id == null) return;
+
+    if (!idToChanges.containsKey(id)) return;
+      
+    HashMap<String,Change> attributeMap = idToChanges.get(id);
+    attributeMap.remove(change.getKey());
+
+    // ensure that, if all changes are rejected, idToChanges is empty
+    if (attributeMap.size() == 0) idToChanges.remove(id);
+  }
+   
+  /**
+   * Gets all the changes for the given attribute of the given object.
+   * @param id The {@link TrackedMap#getId()} of the changed object. 
+   * @param key The key of the changed attribute, or null for Create/Destroy changes.
+   * @return A (possibly empty) set of changes that were registered.
+   */
+  public Optional<Change> getChange(String id, String key) {
+    if (id == null) return Optional.empty();
+      
+    if (!idToChanges.containsKey(id)) return Optional.empty();
+      
+    HashMap<String,Change> attributeMap = idToChanges.get(id);
+    if (!attributeMap.containsKey(key)) return Optional.empty();
+      
+    return Optional.ofNullable(attributeMap.get(key));
+  }
+   
+  /**
+   * Gets all the changes for the identified object.
+   * @param id The {@link TrackedMap#getId()} of the changed object. 
+   * @return A (possibly empty) set of changes that were registered.
+   */
+  public Set<Change> getChanges(String id) {
+    final LinkedHashSet<Change> changes = new LinkedHashSet<Change>();
+    if (id != null) {
+      if (idToChanges.containsKey(id)) {
+        // creates first
+        idToChanges.get(id).values().stream()
+          .filter(c->c.getOperation() == Change.Operation.Create)
+          .forEach(c -> changes.add(c));
+        // then updates
+        idToChanges.get(id).values().stream()
+          .filter(c->c.getOperation() == Change.Operation.Update)
+          .forEach(c -> changes.add(c));
+        // then deletes
+        idToChanges.get(id).values().stream()
+          .filter(c->c.getOperation() == Change.Operation.Destroy)
+          .forEach(c -> changes.add(c));
+      } // idToChanges.containsKey(id)
+    } // id != null
       // System.out.println("Changes for " + id + ": " + changes);
-      return changes;
-   }
+    return changes;
+  }
    
-   /**
-    * Determines whether there are any changes.
-    * @return true if there are any changes registered, false otherwise.
-    */
-   public boolean hasChanges() {
-      return idToChanges.size() > 0;
-   } // end of hasChanges()
+  /**
+   * Determines whether there are any changes.
+   * @return true if there are any changes registered, false otherwise.
+   */
+  public boolean hasChanges() {
+    return idToChanges.size() > 0;
+  } // end of hasChanges()
 
-   /**
-    * Gets all the changes.
-    * @return A (possibly empty) set of changes that were registered.
-    */
-   public Set<Change> getChanges() {
-      final LinkedHashSet<Change> changes = new LinkedHashSet<Change>();
-      idToChanges.keySet().forEach(id -> changes.addAll(getChanges(id)));
-      return changes;
-   }
+  /**
+   * Gets all the changes.
+   * @return A (possibly empty) set of changes that were registered.
+   */
+  public Set<Change> getChanges() {
+    final LinkedHashSet<Change> changes = new LinkedHashSet<Change>();
+    idToChanges.keySet().forEach(id -> changes.addAll(getChanges(id)));
+    return changes;
+  }
    
-   /**
-    * Clear all tracked changes. After calling this, previously registered changes cannot
-    * be rolled back.
-    */
-   public void reset() {
-      idToChanges = new HashMap<String,HashMap<String,Change>>();
-   } // end of reset()
+  /**
+   * Clear all tracked changes. After calling this, previously registered changes cannot
+   * be rolled back.
+   */
+  public void reset() {
+    idToChanges = new HashMap<String,HashMap<String,Change>>();
+  } // end of reset()
 
-   /**
-    * Add another consumer to also receive the changes.
-    * @param other
-    */
-   public void addListener(Consumer<Change> other) {
-      if (other != null) others.add(other);
-   } // end of addListener()   
+  /**
+   * Add another consumer to also receive the changes.
+   * @param other
+   */
+  public void addListener(Consumer<Change> other) {
+    if (other != null) others.add(other);
+  } // end of addListener()   
 
-   /**
-    * Stop a registered consumer receiving further the changes.
-    * @param other
-    */
-   public void removeListener(Consumer<Change> other) {
-      if (other != null) others.remove(other);
-   } // end of removeListener()
+  /**
+   * Stop a registered consumer receiving further the changes.
+   * @param other
+   */
+  public void removeListener(Consumer<Change> other) {
+    if (other != null) others.remove(other);
+  } // end of removeListener()
 
 } // end of ChangeTracker
