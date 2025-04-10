@@ -1,5 +1,5 @@
 //
-// Copyright 2020 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -32,10 +32,7 @@ import java.util.function.Consumer;
  * Something that listens for {@link Change}s to {@link TrackedMap} objects. 
  * @author Robert Fromont robert@fromont.net.nz
  */
-
-public class ChangeTracker
-   implements Consumer<Change>
-{
+public class ChangeTracker implements Consumer<Change> {
    // map of object IDs to attribute maps, which are keyed by attribute key
    private HashMap<String,HashMap<String,Change>> idToChanges
    = new HashMap<String,HashMap<String,Change>>();
@@ -62,19 +59,15 @@ public class ChangeTracker
     * @param change The change, which includes information about the object that is
     * changing, which attribute, what the old value was, and what the new value is.
     */
-   public void accept(Change change)
-   {
+   public void accept(Change change) {
       final Change changeForListeners = change;
-      if (change != null)
-      {      
+      if (change != null) {
          String id = change.getObject().getId();
-         if (id != null)
-         {
+         if (id != null) {
             if (!idToChanges.containsKey(id)) idToChanges.put(id, new HashMap<String,Change>());
 
             HashMap<String,Change> attributeMap = idToChanges.get(id);
-            if (attributeMap.containsKey(change.getKey()))
-            { // attribute has changed previously
+            if (attributeMap.containsKey(change.getKey())) { // attribute has changed previously
                // take a copy of the change, so that listeners get an unaltered version
                change = (Change)change.clone();
                
@@ -95,8 +88,7 @@ public class ChangeTracker
     * @param change The change, which should have been previously registered via 
     * {@link #accept(Change)}. 
     */
-   public void reject(Change change)
-   {
+   public void reject(Change change) {
       if (change == null) return;
       
       String id = change.getObject().getId();
@@ -117,8 +109,7 @@ public class ChangeTracker
     * @param key The key of the changed attribute, or null for Create/Destroy changes.
     * @return A (possibly empty) set of changes that were registered.
     */
-   public Optional<Change> getChange(String id, String key)
-   {      
+   public Optional<Change> getChange(String id, String key) {
       if (id == null) return Optional.empty();
       
       if (!idToChanges.containsKey(id)) return Optional.empty();
@@ -134,13 +125,10 @@ public class ChangeTracker
     * @param id The {@link TrackedMap#getId()} of the changed object. 
     * @return A (possibly empty) set of changes that were registered.
     */
-   public Set<Change> getChanges(String id)
-   {
+   public Set<Change> getChanges(String id) {
       final LinkedHashSet<Change> changes = new LinkedHashSet<Change>();
-      if (id != null)
-      {
-         if (idToChanges.containsKey(id))
-         {
+      if (id != null) {
+         if (idToChanges.containsKey(id)) {
             // creates first
             idToChanges.get(id).values().stream()
                .filter(c->c.getOperation() == Change.Operation.Create)
@@ -163,8 +151,7 @@ public class ChangeTracker
     * Determines whether there are any changes.
     * @return true if there are any changes registered, false otherwise.
     */
-   public boolean hasChanges()
-   {
+   public boolean hasChanges() {
       return idToChanges.size() > 0;
    } // end of hasChanges()
 
@@ -172,8 +159,7 @@ public class ChangeTracker
     * Gets all the changes.
     * @return A (possibly empty) set of changes that were registered.
     */
-   public Set<Change> getChanges()
-   {
+   public Set<Change> getChanges() {
       final LinkedHashSet<Change> changes = new LinkedHashSet<Change>();
       idToChanges.keySet().forEach(id -> changes.addAll(getChanges(id)));
       return changes;
@@ -183,8 +169,7 @@ public class ChangeTracker
     * Clear all tracked changes. After calling this, previously registered changes cannot
     * be rolled back.
     */
-   public void reset()
-   {
+   public void reset() {
       idToChanges = new HashMap<String,HashMap<String,Change>>();
    } // end of reset()
 
@@ -192,8 +177,7 @@ public class ChangeTracker
     * Add another consumer to also receive the changes.
     * @param other
     */
-   public void addListener(Consumer<Change> other)
-   {
+   public void addListener(Consumer<Change> other) {
       if (other != null) others.add(other);
    } // end of addListener()   
 
@@ -201,8 +185,7 @@ public class ChangeTracker
     * Stop a registered consumer receiving further the changes.
     * @param other
     */
-   public void removeListener(Consumer<Change> other)
-   {
+   public void removeListener(Consumer<Change> other) {
       if (other != null) others.remove(other);
    } // end of removeListener()
 
