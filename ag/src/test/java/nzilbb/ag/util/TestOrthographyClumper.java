@@ -383,10 +383,12 @@ public class TestOrthographyClumper {
     g.addAnnotation(new Annotation("jumps",            "jumps", "word", "a10", "a11", "turn1"));
     g.addAnnotation(new Annotation("over",             "over", "word", "a11", "a12", "turn1"));
     g.addAnnotation(new Annotation("noise2",           "noise", "noise", "a12", "a13", "turn1"));
-    g.addAnnotation(new Annotation("closequote", "\"", "word", "a13", "a14", "turn1"));
+    g.addAnnotation(new Annotation("closequote", "'", "word", "a13", "a14", "turn1"));
 
     try {
       g.setTracker(new ChangeTracker());
+      // make an unrelated change to the annotation that won't be clumped (should be preserved)
+      g.getAnnotation("closequote").setLabel("\"");
       OrthographyClumper transformer = new OrthographyClumper("word", "line");
       transformer.transform(g);
       g.commit();
@@ -399,7 +401,8 @@ public class TestOrthographyClumper {
       assertEquals("first word on second line unchanged",
                    "jumps", words[4].getLabel());
       assertEquals("over", words[5].getLabel());
-      assertEquals("\"", words[6].getLabel());
+      assertEquals("unrelated changes are not rolled back",
+                   "\"", words[6].getLabel());
       assertEquals(7, words.length);
 
       Annotation lines[] = g.list("line");

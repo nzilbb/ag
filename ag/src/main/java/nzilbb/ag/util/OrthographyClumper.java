@@ -156,7 +156,6 @@ public class OrthographyClumper implements GraphTransformer {
     Layer wordLayer = graph.getLayer(getWordLayerId());
     if (wordLayer == null) 
       throw new TransformationException(this, "No layer: " + getWordLayerId());
-
     Pattern clumpForward = null;
     if (clumpForwardPattern != null && clumpForwardPattern.length() > 0) {
       try {
@@ -175,10 +174,12 @@ public class OrthographyClumper implements GraphTransformer {
       // we'll build a new list of children in the right order
       Vector<Annotation> newChildren = new Vector<Annotation>();
       boolean changedOrdinals = false;
-	 
-      for (Annotation token : parent.getAnnotations(getWordLayerId())) {
+
+      List<Annotation> tokens = new Vector<Annotation>(parent.getAnnotations(getWordLayerId()));
+      for (Annotation token : tokens) {
         if (token.getLabel().replaceAll(nonOrthoCharacterPattern, "").length() == 0) {
-          token.bulkDestroy();
+          // mark the token for destruction (we might change our minds)
+          token.put("@toDestroy", Boolean.TRUE);
           if (last != null // not the first token
               // not already prepending
               && toPrepend == null 
@@ -206,8 +207,7 @@ public class OrthographyClumper implements GraphTransformer {
             }
 		  
           } else { // this is the first token, or anchors aren't shared with the last
-            if (toPrepend == null) 
-            { // prepend this to the next real word
+            if (toPrepend == null) { // prepend this to the next real word
               toPrepend = token;
             } else { // already something to prepend
               // if there are no intervening annotations or gaps
@@ -231,8 +231,8 @@ public class OrthographyClumper implements GraphTransformer {
                 }
               } else { // there's a gap or intervening annotation
                 // so what we were going to prepend before can't be prepended to what follows
-                toPrepend.rollback(); // TODO remove the change
-                // System.out.println("unremoving " + token);
+                // unmark the token for destruction
+                token.remove("@toDestroy");
                 last = toPrepend;
                 // but maybe we can prepend this to what follows...
                 toPrepend = token;
@@ -264,7 +264,8 @@ public class OrthographyClumper implements GraphTransformer {
                 }
               }
             } else { // we're going to keep toPrepend in the end, so don't delete it
-              toPrepend.rollback(); // TODO remove the change
+              // unmark the token for destruction
+              toPrepend.remove("@toDestroy");
             }
             toPrepend = null;
           } else if (last != null) {
@@ -274,7 +275,7 @@ public class OrthographyClumper implements GraphTransformer {
           last = token;
         } //orthographic 'word'
       } // next token
-	 
+
       if (toPrepend != null) { // something to prepend, but we haven't prepended it yet
         // there's more than one token
         if (last != null
@@ -283,27 +284,32 @@ public class OrthographyClumper implements GraphTransformer {
             // and no partition annotations ending here
             && (partitionLayerId == null || !toPrepend.getStart().isEndOn(partitionLayerId))) {
           // can just append to last token
-          System.out.println("appending " + last.getLabel() + " " + toPrepend);
           last.setLabel(last.getLabel() + " " + toPrepend);
         } else { // no last token
           // so don't delete it
-          toPrepend.rollback(); // TODO remove the change
-          // System.out.println("unremoving final " + toPrepend);
+          // unmark the token for destruction
+          toPrepend.remove("@toDestroy");
         }
       }
 
-      if (changedOrdinals) {
-        // correct ordinals
-        for (Annotation child : newChildren) child.setParent(null);
-        for (Annotation child : newChildren) {
-          child.setParent(null);
-          child.setOrdinal((Integer)child.get("@newOrdinal"));
-          child.setParent(parent, false);
+      // now really mark tokens for destruction, and correct ordinals as we go
+      int o = 1;
+      for (Annotation token : tokens) {
+        if (token.containsKey("@toDestroy")) {
+          // destroy but don't cascade ordinal corrections, we're not finished yet
+          token.bulkDestroy(); 
+          token.remove("@toDestroy");
+        } else {
+          // prevent parent.correctOrdinals
+          token.setParent(null);
+          // set and increment ordinal
+          token.setOrdinal(o++);
+          // re-set parent
+          token.setParent(parent, false);
         }
       }
-
     } // next utterance
     return graph;
   }   
    
-} // end of class GraphTransformer
+} // end of class OrthographyClumper
