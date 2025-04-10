@@ -912,6 +912,35 @@ public class TestGraph {
                  0, g.getAnchor("a3").endOf("word").size());
     assertNull("commit removes deleted annotations", g.getAnnotation("turn1"));
     assertNull("commit removes deleted anchors", g.getAnchor("a7"));
+
+    // create then delete
+    g.addAnchor(new Anchor("create-delete", 100.0));
+    g.getAnchor("create-delete").create();
+    g.getAnchor("create-delete").setOffset(101.0); // this will also be lost
+    changes = g.getChanges();
+    i = 0;
+    assertEquals("Create create-delete", changes.get(i++).toString());
+    assertEquals("Update create-delete: offset = 101.0 (was null)", changes.get(i++).toString());
+    assertEquals("Correct number of changes " + changes,
+                 i, changes.size());
+    g.getAnchor("create-delete").destroy();
+    changes = g.getChanges();
+    assertEquals("No changes " + changes,
+                 0, changes.size());
+
+    // delete then create
+    g.getAnchor("a5").setOffset(5.5); // this will also be lost
+    g.getAnchor("a5").destroy();
+    changes = g.getChanges();
+    i = 0;
+    assertEquals("Destroy a5", changes.get(i++).toString());
+    assertEquals("Correct number of changes " + changes,
+                 i, changes.size());
+    g.getAnchor("a5").create();
+    changes = g.getChanges();
+    i = 0;
+    assertEquals("No changes " + changes,
+                 0, changes.size());
   }
 
   /** Ensure order of creation of Anchors/Annotations is unimportant. */

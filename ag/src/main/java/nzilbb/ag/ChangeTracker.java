@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Vector;
 import java.util.function.Consumer;
 
 /**
@@ -65,22 +66,31 @@ public class ChangeTracker implements Consumer<Change> {
       String id = change.getObject().getId();
       if (id != null) {
         if (!idToChanges.containsKey(id)) idToChanges.put(id, new HashMap<String,Change>());
-
         HashMap<String,Change> attributeMap = idToChanges.get(id);
-        if (attributeMap.containsKey(change.getKey())) { // attribute has changed previously
-              
-          // take a copy of the change, so that listeners get an unaltered version
-          change = (Change)change.clone();
-               
-          // conserve the original old value
-          Change earlierChange = attributeMap.get(change.getKey());
-          change.setOldValue(earlierChange.getOldValue());
+
+        if ((change.getOperation() == Change.Operation.Create
+             || change.getOperation() == Change.Operation.Destroy)
+            && attributeMap.containsKey(change.getKey()) 
+            && attributeMap.get(change.getKey()).getOperation() != change.getOperation()) {
+          // create and destroy cancel each other out, and all other changes
+          for (Change priorChange : new Vector<Change>(attributeMap.values())) {
+            reject(priorChange);
+          }
+        } else {
+          if (attributeMap.containsKey(change.getKey())) { // attribute has changed previously
+            // take a copy of the change, so that listeners get an unaltered version
+            change = (Change)change.clone();
+            
+            // conserve the original old value
+            Change earlierChange = attributeMap.get(change.getKey());
+            change.setOldValue(earlierChange.getOldValue());
+          }
+          // System.out.println("ChangeTracker.accept: " + change);
+          attributeMap.put(change.getKey(), change);
         }
-        // System.out.println("ChangeTracker.accept: " + change);
-        attributeMap.put(change.getKey(), change);
       } // id != null
     } // change != null
-      // pass on the change to any listeners that are interested
+    // pass on the change to any listeners that are interested
     others.forEach(o -> o.accept(changeForListeners));
   }
    
