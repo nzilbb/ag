@@ -1771,7 +1771,7 @@ public class Graph extends Annotation {
    * utterance boundaries.
    * <p> However, there are circumstances where it's convenient to process words by
    * utterance instead of by turn. Under such circumstances, this method can be used to
-   * efficiently link all utterances to the word that contain them.
+   * efficiently link all words to the utterance that contain them.
    * <p>Each utterance is assigned a new "@words" key, which is a List&lt;Annotation&gt;,
    * which contains the words that start within the bounds of the utterance, or at the end
    * is not within the bounds of the next utterance.
