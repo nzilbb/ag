@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -269,11 +269,8 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
       // assign words to each utterance
       graph.assignWordsToUtterances();
         
-      for (Annotation utterance : graph.list(graph.getSchema().getUtteranceLayerId())) {
-        if (utterance.getStart() == null
-            || utterance.getStart().getOffset() == null
-            || utterance.getEnd() == null
-            || utterance.getEnd().getOffset() == null) continue;
+      for (Annotation utterance : graph.all(graph.getSchema().getUtteranceLayerId())) {
+        if (!utterance.getAnchored()) continue;
         if (utterance.getChange() == Change.Operation.Destroy) continue;
         log("utterance ", utterance, " words ", utterance.get("@words"));
         
@@ -317,7 +314,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
           // add the word's start anchor
           sequence.add(word.getStart());
           // find the anchor chain that moves forward from here, until the end of the utterance
-          // this will catch any words with unset offsets (not returned by utterance.list()
+          // this will catch any words with unset offsets (not returned by utterance.all()
           // and also words with intervening noise/comment chains
           log(" word ", word, " chainForwardUntil ", utterance.getEnd());
           AnchorChain wordChain = AnchorChain.ChainForwardUntil(
@@ -325,8 +322,10 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
             annotation -> // only follow annotations...
             !annotation.getLayer().isAncestor(turnLayerId) // ... that have no turn
             || annotation.first(turnLayerId) == turn, // ... or are in the same turn as utterance
-            anchor ->        // stop when we get beyond the bounds of the utterance
-            (anchor == word.getEnd()
+            anchor ->
+            // stop when we get to the end of the word
+            (anchor == word.getEnd() 
+             // or if we get beyond the bounds of the utterance
              || (anchor.getOffset() != null
                  && anchor.getOffset() >= utterance.getEnd().getOffset())));
           log(" chain ", wordChain);
@@ -352,7 +351,9 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
         // tag the anchors, so that the become bounds for future chaining
         // e.g. word's are evenly spread through utterances,
         // and then phones are evenly spread through words without changing word bounds
-        sequence.stream().forEach(a->a.put("@offsetGenerated", Boolean.TRUE));
+        sequence.stream()
+          .filter(a->a.getOffset() != null) // there's an outside chance the offset wasn't set
+          .forEach(a->a.put("@offsetGenerated", Boolean.TRUE));
         
       } // next utterance
       // remove links from utterances to their words
@@ -440,7 +441,9 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
             // tag the anchors, so that the become bounds for future chaining
             // e.g. word's are evenly spread through utterances,
             // and then phones are evenly spread through words without changing word bounds
-            chain.stream().forEach(a->a.put("@offsetGenerated", Boolean.TRUE));
+            chain.stream()
+              .filter(a->a.getOffset() != null) // there's an outside chance the offset wasn't set
+              .forEach(a->a.put("@offsetGenerated", Boolean.TRUE));
             
           } // can interpolate
         }
@@ -457,7 +460,17 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
       .filter(anchor -> anchor.getOffset() == null)
       .collect(Collectors.toList());
     if (unsetOffsets.size() > 0) {
-      throw new TransformationException(this, "Could not determine offsets: " + unsetOffsets);
+      String description = unsetOffsets.stream()
+        .map(a->"["
+             +a.endingAnnotations()
+             .filter(ann->ann.getEndId().equals(a.getId())) // really is the end
+             .map(ann->ann.getLayerId()+":"+ann.getId()+":"+ann.getLabel()).collect(Collectors.joining(","))
+             +"]->"+a.getId()+"->["
+             +a.startingAnnotations()
+             .filter(ann->ann.getStartId().equals(a.getId())) // really is the start
+             .map(ann->ann.getLayerId()+":"+ann.getId()+":"+ann.getLabel()).collect(Collectors.joining(","))
+             +"]").collect(Collectors.joining("\n"));
+      throw new TransformationException(this, "Could not determine offsets: " + description);
     }
 
     return graph;
@@ -562,7 +575,7 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
             if (dDuration < 0) {
               String message = "Negative duration from " + logAnchor(lastSetAnchor)
                 + " to " + logAnchor(nextSetAnchor);
-              //System.out.println(message);
+              //System.err.println(message);
               log("ERROR: ", message);
               //TODO make this optional? throw new TransformationException(this, message);
             } else {
