@@ -365,7 +365,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
   
   /**
    * Marks the annotation for deletion without resetting peer ordinals. This is a
-   * performance-enhanding helper method for using during bulk deletions. The caller must
+   * performance-enhancing helper method for using during bulk deletions. The caller must
    * ensure that peer ordinals are corrected.
    * @return The changes made during this operation.
    */
@@ -1832,7 +1832,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
      for (var i in this.start.startOf[layerId])
      {
      var other = this.start.startOf[layerId][i];
-     if (this.startsWith(other)) tags.push(other);
+     if (this.endsWith(other)) tags.push(other);
      } // next annotation that starts here
      return tags;
      },
