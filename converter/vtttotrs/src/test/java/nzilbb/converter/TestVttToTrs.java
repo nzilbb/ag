@@ -51,6 +51,21 @@ public class TestVttToTrs {
       }
    }
 
+   @Test public void webvttWithVoices() throws Exception {
+      File dir = getDir();
+      File input = new File(dir, "voices_class_only.vtt");
+      VttToTrs converter = new VttToTrs();
+      converter.convert(input);
+      File actual = new File(dir, "voices_class_only.trs");
+      File expected = new File(dir, "expected_voices_class_only.trs");
+      String differences = diff(expected, actual, ".*version_date.*");
+      if (differences != null) {
+         fail(differences);
+      } else {
+         actual.delete();
+      }
+   }
+
    /**
     * Diffs two files.
     * @param expected

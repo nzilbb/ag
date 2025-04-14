@@ -10,14 +10,14 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>vtt-to-trs</artifactId>
   <name>nzilbb.converter.vtttotrs</name>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <description>WebVTT subtitles to Transcriber transcript converter</description>
 
   <properties>
     
     <input.package>nzilbb.formatter.webvtt</input.package>
     <input.path>nzilbb/formatter/webvtt/</input.path>
-    <input.version>0.7.0</input.version>
+    <input.version>0.7.2</input.version>
     
     <output.package>nzilbb.formatter.transcriber</output.package>
     <output.path>nzilbb/formatter/transcriber/</output.path>
