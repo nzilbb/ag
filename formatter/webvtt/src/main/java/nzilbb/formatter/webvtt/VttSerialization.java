@@ -767,6 +767,7 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
                   // create a new participant
                   participant = graph.addAnnotation(
                     new Annotation(null, voice, schema.getParticipantLayerId()));
+                  participantsByName.put(voice, participant);
                 }
 
                 // the last turn ends at the start of this utterance
