@@ -511,7 +511,9 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
     MessageFormat metaDataFormat = new MessageFormat("{0}:{1}");
     setMetaData(new HashMap<String,String>());
     String line = vtt.readLine();
-    while (line != null && line.length() > 0) {
+    while (line != null // while there are lines
+           && line.length() > 0 // but drop out at the first blank line
+           && !line.equals("1")) { // or the first utterance
       try {
         Object[] oMetaData = metaDataFormat.parse(line);
         String key = ((String)oMetaData[0]).trim();
@@ -631,7 +633,7 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
 
     // speakers are specified by voice spans like <v.loud John Smith>Hello!
     Pattern voiceSpan = Pattern.compile(
-      "^\\s*<v(?<class>\\.\\S+)? (?<voice>[^>]+)>(?<utterance>.*)$");
+      "^\\s*<v\\.(?<class>[^> ]+)?(?<voice> [^>]+)?>(?<utterance>.*)$");
 
     // create a default speaker
     graph.addAnnotation(new Annotation(null, "", schema.getParticipantLayerId()));
@@ -736,10 +738,15 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
           
           // not an interval definition, so add the text to the utterance
 
-          // look for voice span something like <v.load John Smith>Hello!
+          // look for voice span something like <v.load John Smith>Hello!          
           Matcher matchVoiceSpan = voiceSpan.matcher(line);
           if (matchVoiceSpan.matches()) {
             String voice = matchVoiceSpan.group("voice");
+            if (voice == null || voice.length() == 0) {
+              voice = matchVoiceSpan.group("class");
+            } else {
+              voice = voice.trim();
+            }
             line = matchVoiceSpan.group("utterance")
               // strip of closing tag if any
               .trim().replaceAll("</v>$","");

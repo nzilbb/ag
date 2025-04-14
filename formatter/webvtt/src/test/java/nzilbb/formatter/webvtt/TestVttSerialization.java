@@ -643,6 +643,104 @@ public class TestVttSerialization {
 
   }
 
+  /** Test parsing of voice tags works when only the class is present. */
+  @Test public void parseClassOnlyVoiceTags()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("transcript_language", "Language", 0, true, true, true),
+      new Layer("kind", "Kind", 0, false, false, true),
+      new Layer("who", "Participants", 0, true, true, true),
+      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+      new Layer("word", "Words", 2, true, false, false, "turn", true));
+      
+    // access file
+    NamedStream[] streams = {
+      new NamedStream(new File(getDir(), "voices_class_only.vtt")) };
+      
+    // create deserializer
+    VttSerialization deserializer = new VttSerialization();
+
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals("Configuration parameters" + configuration, 0,
+                 deserializer.configure(configuration, schema).size());      
+
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    //for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals("No meta-data "+defaultParameters, 0, defaultParameters.size());
+      
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+      
+    assertEquals("voices_class_only.vtt", g.getId());
+    assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
+
+    // participants     
+    Annotation[] authors = g.all("who"); 
+    assertEquals("identify two voices: " + authors[0], 2, authors.length);
+    assertEquals("Speaker 1 ID", "speaker1", authors[0].getLabel());
+    assertEquals("Speaker 1 high confidence",
+                 Constants.CONFIDENCE_MANUAL, authors[0].getConfidence().byteValue());
+    assertEquals("Speaker 2 ID", "speaker2", authors[1].getLabel());
+    assertEquals("Speaker 2 high confidence",
+                 Constants.CONFIDENCE_MANUAL, authors[1].getConfidence().byteValue());
+
+    // turns
+    Annotation[] turns = g.all("turn");
+    assertEquals(3, turns.length);
+    assertEquals("speaker1", turns[0].getLabel());
+    assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+    assertEquals(Double.valueOf(10.0), turns[0].getEnd().getOffset());
+    assertEquals("speaker2", turns[1].getLabel());
+    assertEquals(Double.valueOf(5.0), turns[1].getStart().getOffset());
+    assertEquals(Double.valueOf(10.0), turns[1].getEnd().getOffset());
+    assertEquals("speaker1", turns[2].getLabel());
+    assertEquals(Double.valueOf(10.0), turns[2].getStart().getOffset());
+    assertEquals(Double.valueOf(15.0), turns[2].getEnd().getOffset());
+
+    // utterances
+    Annotation[] utterances = g.all("utterance");
+    assertEquals(4, utterances.length);
+    assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
+    assertEquals(Double.valueOf(5.0), utterances[0].getEnd().getOffset());
+
+    assertEquals(Double.valueOf(5.0), utterances[1].getStart().getOffset());
+    assertEquals(Double.valueOf(10.0), utterances[1].getEnd().getOffset());
+
+    assertEquals(Double.valueOf(10.0), utterances[utterances.length-1].getStart().getOffset());
+    assertEquals(Double.valueOf(15.0), utterances[utterances.length-1].getEnd().getOffset());
+
+    // words
+    String[] expectedWords = {
+      "w1-1", "w1-2", "w1-3",
+      "w1-6", "w1-7", "w1-8",
+      "w2-6.5", "w2-7.5",
+      "w1-11", "w1-12", "w1-13"
+    };
+
+    String[] actualWords = g.labels("word");
+    for (int w = 0; w < expectedWords.length; w++) {
+      assertEquals("Word label " + w, expectedWords[w], actualWords[w]);
+    }
+      
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+    }
+
+  }
+
   /**
    * Diffs two files.
    * @param expected
