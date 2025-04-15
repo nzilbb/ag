@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -32,6 +32,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.*;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Vector;
@@ -293,6 +294,46 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
    * @return Listeners for status updates.
    */
   public List<Consumer<String>> getStatusObservers() { return statusObservers; }
+  
+  // if an implementor wants to prevent two threads from simultaneously accessing the same resource
+  // they can call lock/release to enforce this
+  private static final HashSet<String> lockIds = new HashSet<String>();
+  
+  /**
+   * Request a lock on a resource represented by the given ID. Blocks while the resource is
+   * locked by another thread.
+   * <p><em>NB</em> lock IDs are managed by a static collection, so work across all annotators.
+   * @param id The identifier for the resource.
+   * @return true if a lock on the ID was obtained, false otherwise (e.g. if cancelling)
+   * @see unlock(String)
+   */
+  protected boolean lock(String id) {
+    boolean waiting = false;
+    while (true) { // but not really forever
+      synchronized (lockIds) {
+        boolean otherThread = lockIds.contains(id);
+        if (!otherThread) {
+          lockIds.add(id);
+          return true;
+        }
+      }
+      if (!waiting) setStatus("Waiting for lock on " + id); // only set this status once
+      waiting = true;
+      try {Thread.sleep(1000); } catch(Exception exception) {}
+      if (isCancelling()) return false;
+    } // next loop around
+  } // end of lock()
+  
+  /**
+   * Ends the lock for the given ID
+   * @param id The ID that update has ended for.
+   * @see lock(String)
+   */
+  protected void unlock(String id) {
+    synchronized (lockIds) {
+      lockIds.remove(id);
+    }
+  } // end of unlock()
   
   /**
    * The layer schema.

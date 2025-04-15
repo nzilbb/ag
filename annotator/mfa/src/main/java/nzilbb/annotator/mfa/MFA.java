@@ -94,7 +94,7 @@ import nzilbb.util.IO;
 @UsesFileSystem @UsesGraphStore
 public class MFA extends Annotator { 
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.7"; }
+  public String getMinimumApiVersion() { return "1.2.3"; }
 
   /**
    * The version of the montreal-forced-aligner package that the aligner will attempt to
@@ -2081,69 +2081,93 @@ public class MFA extends Annotator {
             merger.getNoChangeLayers().add(schema.getUtteranceLayerId());
             merger.getNoChangeLayers().add(schema.getWordLayerId());
             merger.setIgnoreOffsetConfidence(ignoreAlignmentStatuses);
-            fragment.trackChanges();
-            // merge changes
-            merger.transform(fragment);
-            if (merger.getLog() != null) merger.getLog().forEach(l -> setStatus(l));
-           
-            if (utteranceTagLayerId != null) { // add timestamp tag?
-              Annotation[] timestamps = fragment.tagsOn​(utteranceTagLayerId);
-              if (timestamps.length > 0) { // update the existing tag
-                timestamps[0].setLabel(sTimestamp);
-                timestamps[0].setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-              } else { // add new tag
-                Annotation timestamp = new Annotation()
-                  .setLayerId(utteranceTagLayerId)
-                  .setLabel(sTimestamp)
-                  .setStart(utterance.getStart())
-                  .setEnd(utterance.getEnd())
-                  .setParentId(utterance.getParentId());
-                timestamp.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                fragment.addAnnotation(timestamp);
-              } // add new tag            
-            }
-
-            // ensure the utterance boundaries are unchanged (e.g. even by rounding)
-            utterance.getStart().rollback();
-            utterance.getEnd().rollback();
-
-            if (dependentLayerIds.size() > 0) { // if there are aligned child layers
-              // ensure their anchors are recomputed if they've got low-confidence alignments
-              defaultOffsetGenerator.transform(fragment);
-              
-              // now scan the dependent layers and fix up any child anchors that are out of bounds
-              // TODO fix merge/defaultOffsetGenerator so that this hack isn't necessary
-              // TODO AnnotatorWrapperManager rolls back these changes anyway!
-              for (String layerId : dependentLayerIds) {
-                for (Annotation a : fragment.all(layerId)) {
-
-                  // start anchor:
-                  // was it originally connected to the parent?
-                  if (!a.getStartId().equals(a.getParent().getStartId())
-                      && a.getOriginalStartId().equals(a.getParent().getOriginalStartId())) {
-                    a.setStart(a.getParent().getStart());
-                  } else if (a.getStart().getOffset() < a.getParent().getStart().getOffset()) {
-                    // is the start now too early?
-                    a.setStart(a.getParent().getStart());
-                  }
-
-                  // end anchor:
-                  // was it originally connected to the parent?
-                  if (!a.getEndId().equals(a.getParent().getEndId())
-                      && a.getOriginalEndId().equals(a.getParent().getOriginalEndId())) {
-                    a.setEnd(a.getParent().getEnd());
-                  } else if (a.getEnd().getOffset() > a.getParent().getEnd().getOffset()) {
-                    // is the end now too late?
-                    a.setEnd(a.getParent().getEnd());
-                  }
-                } // next sub-word annotation
-              } // next dependent layer
-            }
             
-            Set<Change> changes = fragment.getTracker().getChanges();
-            if (merger.getLog() != null) for (String l : merger.getLog()) setStatus(l);
-            if (isCancelling()) break;
-            if (consumer != null) consumer.accept(fragment);
+            // we want to prevent two threads from simultaneously loading/updating the same utterance
+            final String lockId = fragment.getId();
+            try { // only one thread at a time can update the same fragment
+              if (!lock(lockId)) {
+                if (isCancelling()) break;
+                setStatus("Could not process " + lockId + ": could not obtain lock!");
+                continue;
+              }
+              if (getStore() != null) { // if we have a graph store
+                // get the latest version of the fragment, because it might have changed since
+                // e.g. when a whole episode is uploaded and forced alignment is automatic,
+                // multiple processes can be aligning the same fragments, and as forced alignment
+                // can take a while, once process may have changed the fragment after another process
+                // loaded it but befor it saves it
+                fragment = getStore().getFragment( 
+                  fragment.sourceGraph().getId(),
+                  fragment.first(schema.getUtteranceLayerId()).getId(),
+                  fragment.getSchema().getLayers().keySet().toArray(new String[0]));
+                setStatus("Got latest version of " + fragment.getId());
+              }
+              fragment.trackChanges();
+              // merge changes
+              merger.transform(fragment);
+              if (merger.getLog() != null) merger.getLog().forEach(l -> setStatus(l));
+              
+              if (utteranceTagLayerId != null) { // add timestamp tag?
+                Annotation[] timestamps = fragment.tagsOn​(utteranceTagLayerId);
+                if (timestamps.length > 0) { // update the existing tag
+                  timestamps[0].setLabel(sTimestamp);
+                  timestamps[0].setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                } else { // add new tag
+                  Annotation timestamp = new Annotation()
+                    .setLayerId(utteranceTagLayerId)
+                    .setLabel(sTimestamp)
+                    .setStart(utterance.getStart())
+                    .setEnd(utterance.getEnd())
+                    .setParentId(utterance.getParentId());
+                  timestamp.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                  fragment.addAnnotation(timestamp);
+                } // add new tag            
+              }
+              
+              // ensure the utterance boundaries are unchanged (e.g. even by rounding)
+              utterance.getStart().rollback();
+              utterance.getEnd().rollback();
+              
+              if (dependentLayerIds.size() > 0) { // if there are aligned child layers
+                // ensure their anchors are recomputed if they've got low-confidence alignments
+                defaultOffsetGenerator.transform(fragment);
+                
+                // now scan the dependent layers and fix up any child anchors that are out of bounds
+                // TODO fix merge/defaultOffsetGenerator so that this hack isn't necessary
+                // TODO AnnotatorWrapperManager rolls back these changes anyway!
+                for (String layerId : dependentLayerIds) {
+                  for (Annotation a : fragment.all(layerId)) {
+                    
+                    // start anchor:
+                    // was it originally connected to the parent?
+                    if (!a.getStartId().equals(a.getParent().getStartId())
+                        && a.getOriginalStartId().equals(a.getParent().getOriginalStartId())) {
+                      a.setStart(a.getParent().getStart());
+                    } else if (a.getStart().getOffset() < a.getParent().getStart().getOffset()) {
+                      // is the start now too early?
+                      a.setStart(a.getParent().getStart());
+                    }
+                    
+                    // end anchor:
+                    // was it originally connected to the parent?
+                    if (!a.getEndId().equals(a.getParent().getEndId())
+                        && a.getOriginalEndId().equals(a.getParent().getOriginalEndId())) {
+                      a.setEnd(a.getParent().getEnd());
+                    } else if (a.getEnd().getOffset() > a.getParent().getEnd().getOffset()) {
+                      // is the end now too late?
+                      a.setEnd(a.getParent().getEnd());
+                    }
+                  } // next sub-word annotation
+                } // next dependent layer
+              }
+              
+              Set<Change> changes = fragment.getTracker().getChanges();
+              if (merger.getLog() != null) for (String l : merger.getLog()) setStatus(l);
+              if (isCancelling()) break;
+              if (consumer != null) consumer.accept(fragment);
+            } finally { // return the lock on this fragment ID
+              unlock(lockId);
+            }
           } catch (Exception x) {
             setStatus("Could not process " + alignedFragment.getId() + ": " + x);
             StringWriter sw = new StringWriter();

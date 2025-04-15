@@ -87,7 +87,7 @@ import nzilbb.util.IO;
 @UsesFileSystem @UsesGraphStore
 public class HTKAligner extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.0.5"; }
+  public String getMinimumApiVersion() { return "1.2.3"; }
   
   /**
    * Path to HTK tools.
@@ -3413,48 +3413,77 @@ public class HTKAligner extends Annotator {
           merger.getNoChangeLayers().add(schema.getUtteranceLayerId());
           merger.getNoChangeLayers().add(schema.getWordLayerId());
           merger.setIgnoreOffsetConfidence(ignoreAlignmentStatuses);
-          fragment.trackChanges();
-          // merge changes
-          // merger.setDebug(true);
-          // merger.getLogObservers().add(l->System.out.println(l));
-          merger.transform(fragment);
-          // ensure the utterance boundaries are unchanged (e.g. even by rounding)
-          utterance.getStart().rollback();
-          utterance.getEnd().rollback();
-          
-          if (dependentLayerIds.size() > 0) { // if there are aligned child layers
-            // ensure their anchors are recomputed if they've got low-confidence alignments
-            defaultOffsetGenerator.transform(fragment);
+
+          // we want to prevent two threads from simultaneously loading/updating the same utterance
+          final String lockId = fragment.getId();
+          try { // only one thread at a time can update the same fragment
+            if (!lock(lockId)) {
+              if (isCancelling()) break;
+              setStatus("Could not process " + lockId + ": could not obtain lock!");
+              continue;
+            }
             
-            // now scan the dependent layers and fix up any child anchors that are out of bounds
-            // TODO fix merge/defaultOffsetGenerator so that this hack isn't necessary
-            for (String layerId : dependentLayerIds) {
-              for (Annotation a : fragment.all(layerId)) {
-                // was it originally connected to the parent?
-                if (!a.getStartId().equals(a.getParent().getStartId())
-                    && a.getOriginalStartId().equals(a.getParent().getOriginalStartId())) {
-                  a.setStart(a.getParent().getStart());
-                } else if (a.getStart().getOffset() < a.getParent().getStart().getOffset()) {
-                  // is the start now too early?
-                  a.setStart(a.getParent().getStart());
-                }
-                
-                // was it originally connected to the parent?
-                if (!a.getEndId().equals(a.getParent().getEndId())
-                    && a.getOriginalEndId().equals(a.getParent().getOriginalEndId())) {
-                  a.setEnd(a.getParent().getEnd());
-                } else if (a.getEnd().getOffset() > a.getParent().getEnd().getOffset()) {
-                  // is the end now too early?
-                  a.setEnd(a.getParent().getEnd());
-                }
-              } // next sub-word annotation
-            } // next dependent layer
+            // merge changes
+            // merger.setDebug(true);
+            // merger.getLogObservers().add(l->System.out.println(l));
+            if (getStore() != null) { // if we have a graph store
+              // get the latest version of the fragment, because it might have changed since
+              // e.g. when a whole episode is uploaded and forced alignment is automatic,
+              // multiple processes can be aligning the same fragments, and as forced alignment
+              // can take a while, once process may have changed the fragment after another process
+              // loaded it but befor it saves it
+              fragment = getStore().getFragment( 
+                fragment.sourceGraph().getId(),
+                fragment.first(schema.getUtteranceLayerId()).getId(),
+                fragment.getSchema().getLayers().keySet().toArray(new String[0]));
+              setStatus("Got latest version of " + fragment.getId());
+              utterance = fragment.first(schema.getUtteranceLayerId());
+            }
+            fragment.trackChanges();
+            merger.transform(fragment);
+            // ensure the utterance boundaries are unchanged (e.g. even by rounding)
+            utterance.getStart().rollback();
+            utterance.getEnd().rollback();
+            
+            if (dependentLayerIds.size() > 0) { // if there are aligned child layers
+              // ensure their anchors are recomputed if they've got low-confidence alignments
+              defaultOffsetGenerator.transform(fragment);
+              
+              // now scan the dependent layers and fix up any child anchors that are out of bounds
+              // TODO fix merge/defaultOffsetGenerator so that this hack isn't necessary
+              for (String layerId : dependentLayerIds) {
+                for (Annotation a : fragment.all(layerId)) {
+                  // was it originally connected to the parent?
+                  if (!a.getStartId().equals(a.getParent().getStartId())
+                      && a.getOriginalStartId().equals(a.getParent().getOriginalStartId())) {
+                    a.setStart(a.getParent().getStart());
+                  } else if (a.getStart().getOffset() < a.getParent().getStart().getOffset()) {
+                    // is the start now too early?
+                    a.setStart(a.getParent().getStart());
+                  }
+                  
+                  // was it originally connected to the parent?
+                  if (!a.getEndId().equals(a.getParent().getEndId())
+                      && a.getOriginalEndId().equals(a.getParent().getOriginalEndId())) {
+                    a.setEnd(a.getParent().getEnd());
+                  } else if (a.getEnd().getOffset() > a.getParent().getEnd().getOffset()) {
+                    // is the end now too early?
+                    a.setEnd(a.getParent().getEnd());
+                  }
+                } // next sub-word annotation
+              } // next dependent layer
+            }
+            
+            Set<Change> changes = fragment.getTracker().getChanges();
+            if (merger.getLog() != null) for (String l : merger.getLog()) setStatus(l);
+            if (isCancelling()) break;
+            if (consumer != null) {
+              setStatus("Updating alignments of " + fragment.getId());
+              consumer.accept(fragment);
+            }
+          } finally { // return the lock on this fragment ID
+            unlock(lockId);
           }
-          
-          Set<Change> changes = fragment.getTracker().getChanges();
-          if (merger.getLog() != null) for (String l : merger.getLog()) setStatus(l);
-          if (isCancelling()) break;
-          if (consumer != null) consumer.accept(fragment);
         } catch (Throwable x) {
           setStatus("Could not process " + alignedFragment.getId() + ": " + x);
           StringWriter sw = new StringWriter();

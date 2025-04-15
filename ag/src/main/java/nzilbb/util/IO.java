@@ -40,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.text.Normalizer;
 import java.util.Base64;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.function.IntConsumer;
@@ -352,6 +353,10 @@ public class IO
     }
   }
 
+  // ensure that we only create a singe classloader for each jar file
+  private static final HashMap<File,URLClassLoader> jarToClassLoader = new HashMap<File,URLClassLoader>();
+  private static final HashMap<File,Long> jarToLastModified = new HashMap<File,Long>();
+
   /**
    * Scans the given jar file for instances of a particular class/interface.
    * The implementors must be registered in the jar file, by way of a manifest attribute named
@@ -376,7 +381,18 @@ public class IO
     Vector implementors = new Vector();
     try {
       JarFile jar = new JarFile(file);
-      URL[] url = new URL[] { file.toURI().toURL() };
+      URLClassLoader classLoader = null;
+      synchronized (jarToClassLoader) {
+        classLoader = jarToClassLoader.get(file);
+        Long lastModified = jarToLastModified.get(file);
+        if (classLoader == null || lastModified == null // haven't seen this file yet
+            || lastModified.longValue() < file.lastModified()) { // or it has changed
+          URL[] url = new URL[] { file.toURI().toURL() };
+          classLoader = URLClassLoader.newInstance(url, parentLoader);
+          jarToClassLoader.put(file, classLoader);
+          jarToLastModified.put(file, file.lastModified());
+        }
+      }
       Manifest manifest = jar.getManifest();
       if (manifest != null) {
         Attributes attributes = manifest.getMainAttributes();
@@ -384,7 +400,6 @@ public class IO
           new Attributes.Name(c.getName().replace('.','-')));
         if (convertersAtt != null) {
           for (String className : convertersAtt.toString().split(" ")) {
-            URLClassLoader classLoader = URLClassLoader.newInstance(url, parentLoader);
             try {
               Object instance = classLoader.loadClass(className)
                 .getDeclaredConstructor().newInstance();

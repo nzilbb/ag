@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.htk</artifactId>
-  <version>6.0.10</version>
+  <version>6.0.11</version>
 
   <name>nzilbb.annotator.htk</name>
 
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.1.0</version>
+      <version>1.2.3-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
