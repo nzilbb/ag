@@ -2164,7 +2164,10 @@ public class MFA extends Annotator {
               Set<Change> changes = fragment.getTracker().getChanges();
               if (merger.getLog() != null) for (String l : merger.getLog()) setStatus(l);
               if (isCancelling()) break;
-              if (consumer != null) consumer.accept(fragment);
+              if (consumer != null) {
+                setStatus("Updating alignments of " + fragment.getId());
+                consumer.accept(fragment);
+              }
             } finally { // return the lock on this fragment ID
               unlock(lockId);
             }
