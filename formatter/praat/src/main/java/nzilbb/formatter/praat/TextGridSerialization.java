@@ -770,16 +770,18 @@ public class TextGridSerialization
           || sName.equalsIgnoreCase("turn")) {
         sName = getTurnLayer().getId();
       }
-      if (sName.equalsIgnoreCase("phones")
-          || sName.equalsIgnoreCase("phone")
-          || sName.startsWith("phone ")
-          || sName.startsWith("phones ")) {
-        // possibly an MFA alignment textGrid
-        // in LaBB-CAT, the phones are on a layer called 'segment'
-        if (getSchema().getLayer("segment") != null) {
-          sName = "segment";
-        }
-      }
+      // if (sName.equalsIgnoreCase("phones")
+      //     || sName.equalsIgnoreCase("phone")
+      //     || sName.startsWith("phone ")
+      //     || sName.startsWith("phones ")
+      //     || sName.equals("MAU") // WebMAUS output?
+      //     || sName.startsWith("MAU-")) { // WebMAUS output?
+      //   // possibly an MFA alignment textGrid
+      //   // in LaBB-CAT, the phones are on a layer called 'segment'
+      //   if (getSchema().getLayer("segment") != null) {
+      //     sName = "segment";
+      //   }
+      // }
       Layer layer = getSchema().getLayer(sName);
       if (layer == null) { // no exact match
         // try a prefix-match - i.e. "word - John Smith" should map to the "word" layer
@@ -798,15 +800,33 @@ public class TextGridSerialization
         } else { // point layer?
           if (layer.getAlignment() == 1) p.setValue(layer);
         }
-      } else if (tier instanceof IntervalTier) {
-        // no name match, assume it's a tier named after a speaker
-        if (sName.equalsIgnoreCase("word") || sName.equalsIgnoreCase("words")
+      } else if (tier instanceof IntervalTier) { // no name match and it's got intervals
+        // could be an output from a forced aligner for similar?
+        if ((sName.equalsIgnoreCase("word") || sName.equalsIgnoreCase("words") // MFA?
+             || sName.equals("ORT") || sName.startsWith("ORT-")) // WebMAUS output?
             && getWordLayer() != null) {
           // make the wordLayer the default
           p.setValue(getWordLayer());
-        } else {
-          // make the utteranceLayer the default
-          p.setValue(getUtteranceLayer());
+        } else if (getSchema().getLayer("segment") != null
+                   && (sName.equalsIgnoreCase("phones") // MFA alignment TextGrid?
+                       || sName.equalsIgnoreCase("phone")
+                       || sName.startsWith("phone ")
+                       || sName.startsWith("phones ")
+                       || sName.equals("MAU") || sName.startsWith("MAU-"))) { // WebMAUS output?
+          // make the segment the default
+          p.setValue(getSchema().getLayer("segment"));
+        } else if (getSchema().getLayer("phone") != null
+                   && (sName.equalsIgnoreCase("phones") // MFA alignment TextGrid?
+                       || sName.startsWith("phone ")
+                       || sName.startsWith("phones ")
+                       || sName.equals("MAU") || sName.startsWith("MAU-"))) { // WebMAUS output?
+          // make the phone the default
+          p.setValue(getSchema().getLayer("phone"));
+        } else { // assume it's a tier named after a speaker
+          if (!sName.equals("KAN") && !sName.startsWith("KAN-")) {// not WebMAUS pronunciation tier
+            // make the utteranceLayer the default
+            p.setValue(getUtteranceLayer());
+          }
         }
       }
       p.setPossibleValues(vPossiblLayers);

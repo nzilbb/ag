@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1408,9 +1408,13 @@ public class TestTextGridSerialization {
     //for (Parameter p : parameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
     assertEquals(3, parameters.size());
 
-    parameters.get("tier0").setValue(schema.getWordLayer()); // ORT
-    parameters.get("tier1").setValue(null); // KAN
-    parameters.get("tier2").setValue(schema.getLayer("phone")); // MAU TODO configurable
+    assertEquals("ORT tier automatically mapped",
+                 "word", ((Layer)parameters.get("tier0").getValue()).getId()); // ORT
+    assertNull("KAN tier not mapped",
+               parameters.get("tier1").getValue()); // KAN
+    assertEquals("MAU tier automatically mapped",
+                 "phone", ((Layer)parameters.get("tier2").getValue()).getId()); // MAU TODO configurable
+
     // for (Parameter p : parameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
 
     // configure the deserialization
