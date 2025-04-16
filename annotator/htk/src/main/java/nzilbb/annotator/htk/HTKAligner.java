@@ -952,8 +952,9 @@ public class HTKAligner extends Annotator {
     if (noiseLayerId != null && schema.getLayer(noiseLayerId) == null)
       throw new InvalidConfigurationException(this, "Noise layer not found: " + noiseLayerId);
 
+    Layer utteranceTagLayer = null;
     if (utteranceTagLayerId != null) {
-      Layer utteranceTagLayer = schema.getLayer(utteranceTagLayerId);
+      utteranceTagLayer = schema.getLayer(utteranceTagLayerId);
       if (utteranceTagLayer == null) {
         schema.addLayer(
           new Layer(utteranceTagLayerId)
@@ -1005,11 +1006,17 @@ public class HTKAligner extends Annotator {
 
     Layer wordAlignmentLayer = schema.getLayer(wordAlignmentLayerId);
     if (wordAlignmentLayer == null) {
-      wordAlignmentLayer = new Layer(wordAlignmentLayerId)
+      wordAlignmentLayer = new Layer(wordAlignmentLayerId) // TODO copy category of utterance tag layer
         .setAlignment(Constants.ALIGNMENT_INTERVAL)
         .setPeers(true).setPeersOverlap(false).setSaturated(false)
         .setParentId(schema.getTurnLayerId())
         .setDescription("HTK word alignments.");
+      if (utteranceTagLayer != null
+          && utteranceTagLayer.getCategory() != null
+          && utteranceTagLayer.getCategory().length() > 0) {
+        // use the same category as the utterance tag layer
+        wordAlignmentLayer.setCategory(utteranceTagLayer.getCategory());
+      }
       schema.addLayer(wordAlignmentLayer);
     } else if (wordAlignmentLayerId.equals(pronunciationLayerId)
                || wordAlignmentLayerId.equals(noiseLayerId)
@@ -1026,12 +1033,23 @@ public class HTKAligner extends Annotator {
     
     Layer phoneAlignmentLayer = schema.getLayer(phoneAlignmentLayerId);
     if (phoneAlignmentLayer == null) {
-      phoneAlignmentLayer = new Layer(phoneAlignmentLayerId)
+      phoneAlignmentLayer = new Layer(phoneAlignmentLayerId) // TODO copy category of word alignment layer
         .setAlignment(Constants.ALIGNMENT_INTERVAL)
         .setPeers(true).setPeersOverlap(false).setSaturated(false)
         .setParentId(schema.getTurnLayerId())
         .setDescription("HTK phone alignments.")
         .setType(schema.getLayer(pronunciationLayerId).getType());
+      if (utteranceTagLayer != null
+          && utteranceTagLayer.getCategory() != null
+          && utteranceTagLayer.getCategory().length() > 0) {
+        // use the same category as the utterance tag layer
+        phoneAlignmentLayer.setCategory(utteranceTagLayer.getCategory());
+      } else if (wordAlignmentLayer != null
+          && wordAlignmentLayer.getCategory() != null
+                 && wordAlignmentLayer.getCategory().length() > 0) {
+        // use the same category as the word alignment layer
+        phoneAlignmentLayer.setCategory(wordAlignmentLayer.getCategory());
+      }
       schema.addLayer(phoneAlignmentLayer);
     } else if (phoneAlignmentLayerId.equals(wordAlignmentLayerId)
                || phoneAlignmentLayerId.equals(pronunciationLayerId)
@@ -1080,22 +1098,36 @@ public class HTKAligner extends Annotator {
       if (scoreLayer == null) {
         if (phoneAlignmentLayer.getParentId().equals(schema.getWordLayerId())) { // segment layer
           // segment tag layer
-          schema.addLayer(
-            new Layer(scoreLayerId)
+          scoreLayer =          
+            new Layer(scoreLayerId) // TODO copy category of phone alignment layer
             .setAlignment(Constants.ALIGNMENT_NONE)
             .setPeers(false).setSaturated(true)
             .setParentId(phoneAlignmentLayer.getId())
             .setType(Constants.TYPE_NUMBER)
-            .setDescription("HTK phone confidence scores."));
+            .setDescription("HTK phone confidence scores.");
+          if (phoneAlignmentLayer != null
+              && phoneAlignmentLayer.getCategory() != null
+              && phoneAlignmentLayer.getCategory().length() > 0) {
+            // use the same category as the utterance tag layer
+            scoreLayer.setCategory(phoneAlignmentLayer.getCategory());
+          }
+          schema.addLayer(scoreLayer);
         } else {
           // 'phrase' layer - i.e. aligned child of turn
-          schema.addLayer(
-            new Layer(scoreLayerId)
+          scoreLayer = 
+            new Layer(scoreLayerId) // TODO copy category of phone alignment layer
             .setAlignment(Constants.ALIGNMENT_INTERVAL)
             .setPeers(true).setSaturated(false)
             .setParentId(schema.getTurnLayerId())
             .setType(Constants.TYPE_NUMBER)
-            .setDescription("HTK phone confidence scores."));
+            .setDescription("HTK phone confidence scores.");
+          if (phoneAlignmentLayer != null
+              && phoneAlignmentLayer.getCategory() != null
+              && phoneAlignmentLayer.getCategory().length() > 0) {
+            // use the same category as the utterance tag layer
+            scoreLayer.setCategory(phoneAlignmentLayer.getCategory());
+          } 
+          schema.addLayer(scoreLayer);
         }
       } else if (scoreLayerId.equals(orthographyLayerId)
                  || scoreLayerId.equals(pronunciationLayerId)

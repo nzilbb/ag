@@ -983,8 +983,9 @@ public class MFA extends Annotator {
       throw new InvalidConfigurationException(
         this, "Pronunciation layer not found: " + pronunciationLayerId);
 
+    Layer utteranceTagLayer = null;
     if (utteranceTagLayerId != null) {
-      Layer utteranceTagLayer = schema.getLayer(utteranceTagLayerId);
+      utteranceTagLayer = schema.getLayer(utteranceTagLayerId);
       if (utteranceTagLayer == null) {
         schema.addLayer(
           new Layer(utteranceTagLayerId)
@@ -1039,6 +1040,12 @@ public class MFA extends Annotator {
         .setPeers(true).setPeersOverlap(false).setSaturated(false)
         .setParentId(schema.getTurnLayerId())
         .setDescription("MFA word alignments.");
+      if (utteranceTagLayer != null
+          && utteranceTagLayer.getCategory() != null
+          && utteranceTagLayer.getCategory().length() > 0) {
+        // use the same category as the utterance tag layer
+        wordAlignmentLayer.setCategory(utteranceTagLayer.getCategory());
+      }
       schema.addLayer(wordAlignmentLayer);
     } else if (wordAlignmentLayerId.equals(pronunciationLayerId)
                || wordAlignmentLayerId.equals(schema.getTurnLayerId())
@@ -1062,6 +1069,18 @@ public class MFA extends Annotator {
       if (pronunciationLayerId != null) {
         phoneAlignmentLayer.setType(schema.getLayer(pronunciationLayerId).getType());
       }
+      if (utteranceTagLayer != null
+          && utteranceTagLayer.getCategory() != null
+          && utteranceTagLayer.getCategory().length() > 0) {
+        // use the same category as the utterance tag layer
+        phoneAlignmentLayer.setCategory(utteranceTagLayer.getCategory());
+      } else if (wordAlignmentLayer != null
+          && wordAlignmentLayer.getCategory() != null
+          && wordAlignmentLayer.getCategory().length() > 0) {
+        // use the same category as the word alignment layer
+        phoneAlignmentLayer.setCategory(wordAlignmentLayer.getCategory());
+      }
+
       schema.addLayer(phoneAlignmentLayer);
     } else if (phoneAlignmentLayerId.equals(wordAlignmentLayerId)
                || phoneAlignmentLayerId.equals(pronunciationLayerId)
@@ -1098,7 +1117,7 @@ public class MFA extends Annotator {
    * Determines which layers the annotator requires in order to annotate a graph.
    * @return A list of layer IDs. In this case, the annotator only requires the schema's
    * word layer.
-   * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
+   * @throws InvalidConfigurationException If {@link #setTasPkarameters(String)} or 
    * {@link #setSchema(Schema)} have not yet been called.
    */
   public String[] getRequiredLayers() throws InvalidConfigurationException {
