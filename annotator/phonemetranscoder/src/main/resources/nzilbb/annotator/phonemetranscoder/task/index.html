@@ -169,7 +169,12 @@
       
           <p> For characters in the source layer that don't match any value in the Source
             Characters column, the <b>Characters with no mapping</b> setting determines
-            whether they are copied as-is, or ignored.</p>
+            whether they are copied as-is, or ignored. </p>
+
+          <p> You can export the custom mappings to a tab-separated text file by pressing
+            the bottom button on the right. This can be useful for documentation purposes,
+            and the exported file can also be imported into another layer configuration,
+            using <i>Browse</i> button on the top right. </p>
 
         </details>
         
@@ -250,6 +255,10 @@
         <h4>Mappings</h4>
         <div id="mappings"></div>
         <div id="controls">
+          <div id="import" style="display: table-row;" class="file-chooser">
+            <input id="importButton" type="file" title="Import mappings from file"
+                   accept=".tsv,.csv,text/tsv,text/csv">
+          </div>
           <div id="add" style="display: table-row;">
 	    <button id="addButton"
                     title="Add a mapping">
@@ -272,6 +281,12 @@
 	    <button id="removeButton"
 		    title="Remove selected mapping">
 	      <img src="remove.svg" alt="remove" />
+	    </button>
+          </div>
+          <div id="export" style="display: table-row;">
+	    <button id="exportButton"
+		    title="Export mappings to file">
+	      <img src="export.svg" alt="export" />
 	    </button>
           </div>
         </div>

@@ -140,7 +140,7 @@ function changedLayer(select, previousSourceValue) {
     var destinationLayer = schema.layers[select.value];
     // clear existing options (except the first)
     while (sourceLayerId.options.length > 1) sourceLayerId.options.remove(1);
-    if (destinationLayer.parentId == "segment") {
+    if (destinationLayer && destinationLayer.parentId == "segment") {
       addLayerOptions(
         sourceLayerId, schema,
         layer => (layer.id == "segment" || layer.parentId == "segment")
@@ -150,7 +150,7 @@ function changedLayer(select, previousSourceValue) {
         sourceLayerId, schema,
         layer => (layer.id == schema.wordLayerId
                   || (layer.parentId == schema.wordLayerId && layer.id != "segment"))
-          && layer.id != destinationLayer.id);
+          && (!destinationLayer || layer.id != destinationLayer.id));
     }
     sourceLayerId.value = previousSourceValue;
     
@@ -232,16 +232,20 @@ var language = document.getElementById("language");
 language.onkeyup = function() { validateRegularExpression(language); };
 
 var lastMapping = null;
+var mappingId = 1;
 
 // Manage mappings
 
 function newMapping(pattern, label) {
   
   var divMapping = document.createElement("div");
+  divMapping.id = "mapping-"+mappingId;
   
   var sourceInput = document.createElement("input");
+  sourceInput.id = "source-"+mappingId;
   sourceInput.type = "text";
   sourceInput.dataset.role = "pattern";
+  sourceInput.className = "pattern";
   sourceInput.value = pattern;
   sourceInput.title = "Character or characters to match in source labels";
   sourceInput.placeholder = "Source Characters";
@@ -250,8 +254,10 @@ function newMapping(pattern, label) {
   sourceInput.onfocus = function() { lastMapping = this.parentNode; };
   
   var destinationInput = document.createElement("input");
+  destinationInput.id = "destination-"+mappingId;
   destinationInput.type = "text";
   destinationInput.dataset.role = "label";
+  destinationInput.className = "label";
   destinationInput.title = "Character or characters to copy into destination labels."
     +"\nLeaving this blank causes the source characters to be ignored.";
   destinationInput.placeholder = "Destination Characters";
@@ -259,7 +265,7 @@ function newMapping(pattern, label) {
   destinationInput.style.width = "25%";
   destinationInput.style.textAlign = "center";
   destinationInput.onfocus = function() { lastMapping = this.parentNode; };
-  
+    
   var arrow = document.createElement("span");
   arrow.innerHTML = " → ";
   
@@ -273,6 +279,8 @@ function newMapping(pattern, label) {
   sourceInput.focus();
   
   enableRemoveButton();
+
+  mappingId++;
   
   return false; // so form doesn't submit
 }
@@ -361,11 +369,80 @@ function setTaskParameters(form) {
   return convertFormBodyToJSON(form, parameters);
 }
 
+function importMappings() {
+  const input = document.getElementById("importButton");
+  if (input.files.length == 0) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  const component = this;  
+  reader.onload = function() {  
+    const data = reader.result;  
+    records = data.split(/\r\n|\n/);
+    // remove blank lines
+    records = records.filter(l=>l.length>0);
+    if (records.length == 0) {
+      alert("File is empty: " + file.name);
+    } else {
+      
+      let sourceInputs = document.getElementsByClassName("pattern");
+      if (sourceInputs.length == 1 && !sourceInputs[0].value) {
+        // there's only one empty mapping - i.e. they just started
+        // so remove it
+        lastMapping = sourceInputs[0].parentNode;
+        removeMapping();
+      }
+      
+      // get headers...
+      const firstLine = records[0];
+      // split the line into fields
+      let delimiter = ",";
+      if (firstLine.match(/.*\t.*/)) delimiter = "\t";
+      else if (firstLine.match(/.;.*/)) delimiter = ";";
+      let parseFields = row => row.split(fieldDelimiter);
+      for (var r = 1; r < records.length; r++) {
+        const record = records[r];
+        let fields = record.split(delimiter);
+        // strip quotes
+        fields = fields.map(f=>f.replace(/^"(.*)"$/, "$1"));
+        newMapping(fields[0], fields[1]);
+      } // next mapping row
+    } // not an empty file
+    input.value = null;
+  };
+  reader.onerror = function () {  
+    alert("Error reading " + file.name);
+  };
+  reader.readAsText(file);
+  return false; // so the form doesn't submit
+}
+function exportMappings() {
+  let tsv = "data:text/tsv;charset=utf-8,";
+  tsv += "Pattern\tLabel";
+  let sourceInputs = document.getElementsByClassName("pattern");
+  for (let sourceInput of sourceInputs) {
+    let destinationInput = document.getElementById(
+      sourceInput.id.replace("source-", "destination-"));
+    tsv += `\n${sourceInput.value}\t${destinationInput.value}`;
+  } // mapping
+  const encodedUri = encodeURI(tsv);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  const now = new Date();
+  link.setAttribute("download", `mappings-${taskId}.tsv`);
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  return false; // so the form doesn't submit
+}
+
 // add event handlers
 document.getElementById("addButton").onclick = e=>newMapping('','');
 document.getElementById("upButton").onclick = e=>moveMappingUp();
 document.getElementById("downButton").onclick = e=>moveMappingDown();
 document.getElementById("removeButton").onclick = e=>removeMapping();
+document.getElementById("importButton").onchange = e=>importMappings();
+document.getElementById("exportButton").onclick = e=>exportMappings();
 document.getElementById("destinationLayerId").onchange = function(e) { changedLayer(this); };
 document.getElementById("translation").onchange = function(e) { changeTranslation(); };
 document.getElementById("form").onsubmit = function(e) { setTaskParameters(this); };

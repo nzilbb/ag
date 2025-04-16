@@ -81,10 +81,11 @@ button img {
     vertical-align: top;
 }
 #mappings {
-    width: 85%;
+    width: 75%;
 }
 #controls {
     height: 100%;
+    width: 20%;
 }
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
