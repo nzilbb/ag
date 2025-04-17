@@ -44,7 +44,7 @@ public class IPA2IPAComparator<E> implements EditComparator<E> {
     Arrays.asList(
       "c","ŋ̩","ɛ","m̩","n̩","i","iː","ɪ","l̩","ɑ̃ː","ɒ","ɒː","ɒ̃ː","u","uː","ʉː","ʊ","ʌ","æ̃ː",
       "ɑ","ɑː","æ","ɔː","ɔ","ǝ","ə","y","yː","œ","ɜː","ɜ","ɛ","œː","ɛː","ɨ","ʉ","ɯ","ʏ",
-      "ø","ɵ","ɘ","ɞ","ɶ","ɐ"));
+      "ø","ɵ","ɘ","ɞ","ɶ","ɐ", "e", "eː"));
   Set<String> consonants;
   Set<String> plosives = new HashSet<String>(
     Arrays.asList(
@@ -82,7 +82,7 @@ public class IPA2IPAComparator<E> implements EditComparator<E> {
       "t͡s","t͡ʃ","t͡ɕ","ʈ͡ʂ","d͡z","d͡ʒ","d͡ʑ","ɖ͡ʐ ",
       // MFA
       "dʒ","tʃ"));
-  Set<String> typesOfR = new HashSet<String>(Arrays.asList("ɹ","r","ɾ","ɽ"));
+  Set<String> typesOfR = new HashSet<String>(Arrays.asList("ɹ","r","ɾ","ɽ","ʁ","ʀ"));
   Set<String> flapTD = new HashSet<String>(Arrays.asList("t","d","ɾ"));
   Set<String> stopFricativeD = new HashSet<String>(Arrays.asList("ð","d"));
   Set<String> vocalisedNG = new HashSet<String>(Arrays.asList("ŋ","ŋ̩"));

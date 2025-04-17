@@ -171,6 +171,23 @@ public class TestComparators {
     assertEquals(pathToString(path), "ɪ", path.get(i).getFrom());
     assertEquals(pathToString(path), "i", path.get(i++).getTo());
 
+    from = "b ɛ ɹ ə n";
+    to = "b eː ʁ ə n";
+    path = mp.minimumEditPath(arpabetToVector(from), arpabetToVector(to));
+    System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 5, path.size());
+    i = 0;
+    assertEquals(pathToString(path), "b", path.get(i).getFrom());
+    assertEquals(pathToString(path), "b", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ɛ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "eː", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ɹ", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ʁ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "ə", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ə", path.get(i++).getTo());
+    assertEquals(pathToString(path), "n", path.get(i).getFrom());
+    assertEquals(pathToString(path), "n", path.get(i++).getTo());
+
   }
   
   @Test public void DISCToIPAMapping() {
@@ -737,6 +754,27 @@ public class TestComparators {
     assertEquals(pathToString(path), "fox", path.get(i).getFrom());
     assertEquals(pathToString(path), "Fox", path.get(i++).getTo());    
   }
+  
+  @Test public void XSAMPAToIPAMapping() {
+    XSAMPA2IPAComparator comparator = new XSAMPA2IPAComparator();
+    MinimumEditPath<String> mp = new MinimumEditPath<String>(comparator);
+    String from = "b E: r @ n";
+    String to = "b eː ʁ ə n";
+    List<EditStep<String>> path = mp.minimumEditPath(arpabetToVector(from), arpabetToVector(to));
+    //System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 5, path.size());
+    int i = 0;
+    assertEquals(pathToString(path), "b", path.get(i).getFrom());
+    assertEquals(pathToString(path), "b", path.get(i++).getTo());
+    assertEquals(pathToString(path), "E:", path.get(i).getFrom());
+    assertEquals(pathToString(path), "eː", path.get(i++).getTo());
+    assertEquals(pathToString(path), "r", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ʁ", path.get(i++).getTo());
+    assertEquals(pathToString(path), "@", path.get(i).getFrom());
+    assertEquals(pathToString(path), "ə", path.get(i++).getTo());
+    assertEquals(pathToString(path), "n", path.get(i).getFrom());
+    assertEquals(pathToString(path), "n", path.get(i++).getTo());
+  }  
   
   /**
    * Not to be confused with the famous Google algorithm, this method simply breaks the

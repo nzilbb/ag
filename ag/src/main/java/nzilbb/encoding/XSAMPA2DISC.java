@@ -139,6 +139,20 @@ public class XSAMPA2DISC extends PhonemeTranslator {
          map.put("o:",'$');
          map.put("O", 'Q');
          map.put("4", 'L'); // flap - this is an extension to DISC
+         map.put("E:",'E');
+         map.put("a:",'a');
+         map.put("U:",'U');
+         map.put("y:",'y');
+         map.put("):",')');
+         map.put("|:",'|');
+         map.put("^:",'^');
+         map.put("/:",'/');
+         map.put("{:",'{');
+         map.put("$:",'$');
+         map.put("I:",'I');
+         map.put("Y:",'Y');
+         map.put("V:",'V');
+         map.put("Q:",'Q');
          
          // different from SAMPA
          map.put("}:",'}');

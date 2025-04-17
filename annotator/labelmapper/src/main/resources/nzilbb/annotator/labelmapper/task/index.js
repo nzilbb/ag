@@ -304,6 +304,11 @@ function setComparatorExamples() {
             exampleMapping = "? ? ? ? ? ? ? ? ? ? ? ?"; // mapping
             exampleTarget  = "t r { n s k r I p S V n"; // DISC
             break;
+        case "XSAMPAToIPA":
+            exampleSource  = "t r\\ { n s k r I p S V n"; // DISC
+            exampleMapping = "? ?   ? ? ? ? ? ? ? ? ? ?"; // mapping
+            exampleTarget  = "t ɹ   æ n s k ɹ ɪ p ʃ ə n"; // IPA
+            break;
         }
     } else { // sub-mapping - two pairs of layers
         comparator = document.getElementById("subComparator");
@@ -340,6 +345,11 @@ function setComparatorExamples() {
             exampleSubSource  = "w 3 d      t  5 k @ n z"; // DISC
             exampleSubMapping = "? ?  ?      ?  ? ? ? ? ?"; // mapping
             exampleSubTarget  = "w ɜː d      t əʊ k ǝ n z"; // IPA
+            break;
+        case "XSAMPAToIPA":
+            exampleSubSource  = "w 3: d      t  @U k @ n z"; // DISC
+            exampleSubMapping = "? ?  ?      ?  ?  ? ? ? ?"; // mapping
+            exampleSubTarget  = "w ɜː  d      t əʊ  k ǝ n z"; // IPA
             break;
         }
     }

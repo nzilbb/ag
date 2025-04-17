@@ -71,7 +71,7 @@ import org.apache.commons.csv.CSVPrinter;
 public class LabelMapper extends Annotator {
 
   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-  public String getMinimumApiVersion() { return "1.0.5"; }
+  public String getMinimumApiVersion() { return "1.2.3"; }
   
   /** Layer ID for the layer to chunk labels and tokens. */
   protected String scopeLayerId;
@@ -157,25 +157,30 @@ public class LabelMapper extends Annotator {
   public LabelMapper setTargetLayerId(String newTargetLayerId) { targetLayerId = newTargetLayerId; return this; }
 
   /**
-   * How to compare the label and token layers. Valid options are "CharacterToCharacter",
-   * "OrthographyToDISC", "OrthographyToArpabet", or "DISCToDISC". 
+   * How to compare the label and token layers. 
+   * Valid options are "CharacterToCharacter", "OrthographyToDISC",
+   * "OrthographyToArpabet", "DISCToArpabet", "ArpabetToDISC", "IPAToIPA",
+   * "IPAToDISC", "DISCToIPA", "XSAMPAToIPA", or "DISCToDISC".
    * @see #getComparator()
    * @see #setComparator(String)
    */
   protected String comparator;
   /**
-   * Getter for {@link #comparator}: How to compare the label and token layers. Valid
-   * options are "CharacterToCharacter", "OrthographyToDISC", "OrthographyToArpabet", or
-   * "DISCToDISC". 
-   * @return How to compare the label and token layers. Valid options are
-   * "CharacterToCharacter", "OrthographyToDISC", "OrthographyToArpabet", or "DISCToDISC".
+   * Getter for {@link #comparator}: How to compare the label and token layers. 
+   * Valid options are "CharacterToCharacter", "OrthographyToDISC",
+   * "OrthographyToArpabet", "DISCToArpabet", "ArpabetToDISC", "IPAToIPA",
+   * "IPAToDISC", "DISCToIPA", "XSAMPAToIPA", or "DISCToDISC".
+   * @return How to compare the label and token layers. 
+   * Valid options are "CharacterToCharacter", "OrthographyToDISC",
+   * "OrthographyToArpabet", "DISCToArpabet", "ArpabetToDISC", "IPAToIPA",
+   * "IPAToDISC", "DISCToIPA", "XSAMPAToIPA", or "DISCToDISC".
    */
   public String getComparator() { return comparator; }
   /**
-   * Setter for {@link #comparator}: How to compare the label and token layers. Valid options 
-   * are "CharacterToCharacter", "OrthographyToDISC", "OrthographyToArpabet", or "DISCToDISC". 
-   * @param newComparator How to compare the label and token layers. Valid options are 
-   * "CharacterToCharacter", "OrthographyToDISC", "OrthographyToArpabet", or "DISCToDISC".
+   * Setter for {@link #comparator}: How to compare the label and token layers. 
+   * Valid options are "CharacterToCharacter", "OrthographyToDISC",
+   * "OrthographyToArpabet", "DISCToArpabet", "ArpabetToDISC", "IPAToIPA",
+   * "IPAToDISC", "DISCToIPA", "XSAMPAToIPA", or "DISCToDISC".
    */
   public LabelMapper setComparator(String newComparator) { comparator = newComparator; return this; }
   
@@ -269,25 +274,34 @@ public class LabelMapper extends Annotator {
    *  <li> Words on {@link #targetLayerId} have phones on {@link #subTargetLayerId}. </li>
    * </ul>
    * Valid options are "CharacterToCharacter", "OrthographyToDISC",
-   * "OrthographyToArpabet", or "DISCToDISC".
+   * "OrthographyToArpabet", "DISCToArpabet", "ArpabetToDISC", "IPAToIPA",
+   * "IPAToDISC", "DISCToIPA", "XSAMPAToIPA", or "DISCToDISC".
    * @see #getSubComparator()
    * @see #setSubComparator(String)
    */
   protected String subComparator;
   /**
    * Getter for {@link #subComparator}: How to compare the label and token layers in the
-   * sub-mapping. Valid options are "CharacterToCharacter", "OrthographyToDISC",
-   * "OrthographyToArpabet", or "DISCToDISC". 
-   * @return How to compare the label and token layers. Valid options are
-   * "CharacterToCharacter", "OrthographyToDISC", "OrthographyToArpabet", or "DISCToDISC".
+   * sub-mapping. 
+   * Valid options are "CharacterToCharacter", "OrthographyToDISC",
+   * "OrthographyToArpabet", "DISCToArpabet", "ArpabetToDISC", "IPAToIPA",
+   * "IPAToDISC", "DISCToIPA", "XSAMPAToIPA", or "DISCToDISC".
+   * @return How to compare the label and token layers. 
+   * Valid options are "CharacterToCharacter", "OrthographyToDISC",
+   * "OrthographyToArpabet", "DISCToArpabet", "ArpabetToDISC", "IPAToIPA",
+   * "IPAToDISC", "DISCToIPA", "XSAMPAToIPA", or "DISCToDISC".
    */
   public String getSubComparator() { return subComparator; }
   /**
    * Setter for {@link #subComparator}: How to compare the label and token layers in the
-   * sub-mapping. Valid options  are "CharacterToCharacter", "OrthographyToDISC",
-   * "OrthographyToArpabet", or "DISCToDISC". 
-   * @param newSubComparator How to compare the label and token layers. Valid options are 
-   * "CharacterToCharacter", "OrthographyToDISC", "OrthographyToArpabet", or "DISCToDISC".
+   * sub-mapping.
+   * Valid options are "CharacterToCharacter", "OrthographyToDISC",
+   * "OrthographyToArpabet", "DISCToArpabet", "ArpabetToDISC", "IPAToIPA",
+   * "IPAToDISC", "DISCToIPA", "XSAMPAToIPA", or "DISCToDISC".
+   * @param newSubComparator How to compare the label and token layers. 
+   * Valid options are "CharacterToCharacter", "OrthographyToDISC",
+   * "OrthographyToArpabet", "DISCToArpabet", "ArpabetToDISC", "IPAToIPA",
+   * "IPAToDISC", "DISCToIPA", "XSAMPAToIPA", or "DISCToDISC".
    */
   public LabelMapper setSubComparator(String newSubComparator) { subComparator = newSubComparator; return this; }
   
@@ -667,6 +681,8 @@ public class LabelMapper extends Annotator {
       comparator = new IPA2DISCComparator<LabelElement>();
     } else if (getComparator().equalsIgnoreCase("DISCToIPA")) {
       comparator = new DISC2IPAComparator<LabelElement>();
+    } else if (getComparator().equalsIgnoreCase("XSAMPAToIPA")) {
+      comparator = new XSAMPA2IPAComparator<LabelElement>();
     } else if (splitLabels.equalsIgnoreCase("char")) {
       // Char2Char only makes sense if splitting by char
       comparator = new Char2CharComparator<LabelElement>();
@@ -703,6 +719,8 @@ public class LabelMapper extends Annotator {
             subMappingComparator = new IPA2DISCComparator<LabelElement>();
           } else if (getSubComparator().equalsIgnoreCase("DISCToIPA")) {
             subMappingComparator = new DISC2IPAComparator<LabelElement>();
+          } else if (getSubComparator().equalsIgnoreCase("XSAMPAToIPA")) {
+            subMappingComparator = new XSAMPA2IPAComparator<LabelElement>();
           }
           
           // delete prior edit steps in relational database
