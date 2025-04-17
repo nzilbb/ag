@@ -28,6 +28,8 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -351,7 +353,33 @@ public class TextGridSerialization
       "text/praat-textgrid", ".textgrid", "1.0.0",
       getClass().getResource("icon.png"));
   }
-   
+
+  /**
+   * Regular expression for annotation labels to ignore.
+   * @see #getIgnoreLabels()
+   * @see #setIgnoreLabels(String)
+   */
+  protected String ignoreLabels = "";
+  /**
+   * Getter for {@link #ignoreLabels}: Regular expression for annotation labels to ignore.
+   * @return Regular expression for annotation labels to ignore.
+   */
+  public String getIgnoreLabels() { return ignoreLabels; }
+  /**
+   * Setter for {@link #ignoreLabels}: Regular expression for annotation labels to ignore.
+   * @param newIgnoreLabels Regular expression for annotation labels to ignore.
+   */
+  public TextGridSerialization setIgnoreLabels(String newIgnoreLabels)
+    throws PatternSyntaxException {
+    if (newIgnoreLabels != null && newIgnoreLabels.length() > 0) {
+      // ensure it's a valid pattern
+      Pattern.compile(newIgnoreLabels);
+    }
+    
+    ignoreLabels = newIgnoreLabels;
+    return this;
+  }
+  
   /**
    * Graph ID.
    * @see #getId()
@@ -477,7 +505,13 @@ public class TextGridSerialization
     setWordLayer(schema.getWordLayer());
 
     // set any values that have been passed in
-    for (Parameter p : configuration.values()) try { p.apply(this); } catch(Exception x) {}
+    for (Parameter p : configuration.values()) {
+      try {
+        p.apply(this);
+      } catch(Exception x) {
+        System.err.println("TextGridSerialization.configure: " + x);
+      }
+    }
 
     // create a list of layers we need and possible matching layer names
     LinkedHashMap<Parameter,List<String>> layerToPossibilities
@@ -648,6 +682,15 @@ public class TextGridSerialization
       configuration.get("useConventions").setValue(Boolean.FALSE);
     }
 
+    if (!configuration.containsKey("ignoreLabels")) {
+      configuration.addParameter(
+        new Parameter(
+          "ignoreLabels", String.class, 
+          "Ignore Labels",
+          "Regular expression for annotation to ignore, e.g. <p:> to ignore MAUS pauses",
+          true));
+    }
+    
     return configuration;
   }   
 
@@ -770,18 +813,6 @@ public class TextGridSerialization
           || sName.equalsIgnoreCase("turn")) {
         sName = getTurnLayer().getId();
       }
-      // if (sName.equalsIgnoreCase("phones")
-      //     || sName.equalsIgnoreCase("phone")
-      //     || sName.startsWith("phone ")
-      //     || sName.startsWith("phones ")
-      //     || sName.equals("MAU") // WebMAUS output?
-      //     || sName.startsWith("MAU-")) { // WebMAUS output?
-      //   // possibly an MFA alignment textGrid
-      //   // in LaBB-CAT, the phones are on a layer called 'segment'
-      //   if (getSchema().getLayer("segment") != null) {
-      //     sName = "segment";
-      //   }
-      // }
       Layer layer = getSchema().getLayer(sName);
       if (layer == null) { // no exact match
         // try a prefix-match - i.e. "word - John Smith" should map to the "word" layer
@@ -822,11 +853,11 @@ public class TextGridSerialization
                        || sName.equals("MAU") || sName.startsWith("MAU-"))) { // WebMAUS output?
           // make the phone the default
           p.setValue(getSchema().getLayer("phone"));
-        } else { // assume it's a tier named after a speaker
-          if (!sName.equals("KAN") && !sName.startsWith("KAN-")) {// not WebMAUS pronunciation tier
-            // make the utteranceLayer the default
-            p.setValue(getUtteranceLayer());
-          }
+        } else if (sName.equals("KAN") || sName.startsWith("KAN-")) {// WebMAUS pronunciation tier
+          p.setValue(ignore);
+        } else { // assume it's a tier named after a speaker          
+          // make the utteranceLayer the default
+          p.setValue(getUtteranceLayer());
         }
       }
       p.setPossibleValues(vPossiblLayers);
@@ -975,6 +1006,11 @@ public class TextGridSerialization
     } // textGrid is a transcript
     
     int iLastWordOrdinal = 0;
+
+    Pattern ignoreLabelsPattern = null;
+    if (ignoreLabels != null && ignoreLabels.length() > 0) {
+      ignoreLabelsPattern = Pattern.compile(ignoreLabels);
+    }
       
     // turn tiers of annotations into layers of annotations
     for (int t = 0; t < getTiers().size(); t++) {
@@ -997,6 +1033,11 @@ public class TextGridSerialization
             Interval interval = itIntervals.next();
             // ignore empty intervals...
             if (interval.getText() == null || interval.getText().trim().length() == 0) continue;
+            // ignore other labels?
+            if (ignoreLabelsPattern != null
+                && ignoreLabelsPattern.matcher(interval.getText()).matches()) {
+              continue;
+            }
 		  
             if (timers != null) timers.start("getOrCreateAnchorAt " + tier.getName());
             Anchor start = graph.getOrCreateAnchorAt(
@@ -1020,6 +1061,11 @@ public class TextGridSerialization
           for (Point point : points.getPoints()) {			
             // ignore empty points
             if (point.getMark() == null || point.getMark().trim().length() == 0) continue;
+            // ignore other labels?
+            if (ignoreLabelsPattern != null
+                && ignoreLabelsPattern.matcher(point.getMark()).matches()) {
+              continue;
+            }
 
             Anchor anchor = graph.getOrCreateAnchorAt(
               point.getTime(), Constants.CONFIDENCE_MANUAL);
