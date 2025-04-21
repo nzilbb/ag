@@ -4,6 +4,9 @@
     <fileDesc>
       <titleStmt>
 	<title type='main'>Test test</title>
+        <author>
+          <persName role="Sender" gender="Female"><forename>Jane</forename><surname>Doe</surname>J D</persName>
+        </author>
       </titleStmt>
       <publicationStmt>
 	<publisher>tranScriptorium</publisher>
@@ -36,7 +39,7 @@
 	  <l facs='#facs_2_tr_1_tl_15'>shirting, stays for the children</l>
 	  <l facs='#facs_2_tr_1_tl_16'>Jane and Alice would like dolls</l>
 	  <l facs='#facs_2_tr_1_tl_17'>and beads.</l>
-	  <l facs='#facs_2_tr_1_tl_18'>This letter is a copy of one written</l>
+	  <l facs='#facs_2_tr_1_tl_18'>This <Language Scots='Yes' NZE='No'>letter is</Language> a copy of one written</l>
 	  <l facs='#facs_2_tr_1_tl_19'>by John Doe to his sisters</l>
 	  <l facs='#facs_2_tr_1_tl_20'>and brothers in Edinburgh</l>
 	  <l facs='#facs_2_tr_1_tl_21'><country>Scotland</country> about his arrival in</l>

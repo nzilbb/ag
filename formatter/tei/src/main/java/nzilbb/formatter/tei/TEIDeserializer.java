@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -79,15 +79,20 @@ import nzilbb.configure.ParameterSet;
  *        is taken to be the value of the "availability" transcript attribute</li>
  *      <li>
  *        the text in <code>&lt;publicationStmt&gt;&lt;date&gt;</code>…
- *        is taken to be the value of the "air_date" transcript attribute</li>
+ *        is taken to be the value of the "date" or "air_date" transcript attribute</li>
  *      <li>
  *        the text in <code>&lt;publicationStmt&gt;&lt;distributor&gt;</code>…
  *        is taken to be the value of the "distributor" transcript attribute</li>
  *      <li>
  *        the text in
  *        <code>&lt;sourceDesc&gt;&lt;bibleStruct&gt;&lt;monogr&gt;&lt;author&gt;</code>…
- *        is taken to be the value of the "scribe" transcript attribute
- *        (i.e. the name of the transcriber)</li>
+ *        is taken to be the value of the "author" transcript attribute
+ *        (who is created as the sole 'participant' of the transcript)</li>
+ *      <li>
+ *        alternatively the text in
+ *        <code>&lt;sourceDesc&gt;&lt;titleStmt&gt;&lt;author&gt;</code>…
+ *        is taken to be the value of the "author" transcript attribute
+ *        (who is created as the sole 'participant' of the transcript)</li>
  *      <li>
  *        the text in
  *        <code>&lt;sourceDesc&gt;&lt;bibl&gt;&lt;publisher&gt;</code>…
@@ -103,7 +108,7 @@ import nzilbb.configure.ParameterSet;
  *        is taken to be the value of the "creation_date" transcript attribute</li>
  *      <li>
  *        the value of the <code>&lt;langUsage&gt;&lt;language ident="</code>…<code>"&gt;</code>
- *        attribute is taken to be the value of the "creation_date" transcript attribute</li>
+ *        attribute is taken to be the value of the "language" transcript attribute</li>
  *      <li>
  *        the <code>&lt;particDesc&gt;&lt;person</code><code>&gt;</code> tags
  *        are taken to be participants, whose &lt;idno&gt; tag specifies the
@@ -809,7 +814,7 @@ public class TEIDeserializer implements GraphDeserializer {
 
     layerToPossibilities.put(
       new Parameter("publicationDateLayer", Layer.class, "Publication date layer", "Date the source document was published"), 
-      Arrays.asList("transcriptpublicationdate", "publicationdate","transcriptairdate","airdate", "transcriptrecordingdate","recordingdate"));
+      Arrays.asList("transcriptpublicationdate", "publicationdate","transcriptairdate","airdate", "transcriptrecordingdate","recordingdate","date"));
     layerToCandidates.put("publicationDateLayer", graphTagLayers);
 
     layerToPossibilities.put(
@@ -1515,16 +1520,52 @@ public class TEIDeserializer implements GraphDeserializer {
         } else { // no participants, so use an "author"
           participant = new Annotation(null, "author", schema.getParticipantLayerId());
           participant.setConfidence(Constants.CONFIDENCE_MANUAL);
-          // maybe the author is named
-          sResult = xpath.evaluate("fileDesc/sourceDesc/biblStruct/monogr/author/text()", header);
-          if (sResult != null && sResult.length() > 0) {
-            participant.setLabel(sResult);
-          } else {
-            sResult = xpath.evaluate("fileDesc/titleStmt/author/text()", header);
-            if (sResult != null && sResult.length() > 0) participant.setLabel(sResult);
-          }
           participant.setParentId(graph.getId());
           graph.addAnnotation(participant);
+          // maybe the author is named
+          Element author = (Element) xpath.evaluate(
+            "fileDesc/sourceDesc/biblStruct/monogr/author", header, XPathConstants.NODE);
+          if (author == null) {
+            author = (Element) xpath.evaluate(
+              "fileDesc/titleStmt/author", header, XPathConstants.NODE);
+          }
+          if (author != null) {
+            participant.setLabel(author.getTextContent());
+            // if there are forename/surname tags, use those
+            String forename = xpath.evaluate("persName/forename/text()", author);
+            String surname = xpath.evaluate("persName/surname/text()", author);
+            if (forename != null && forename.length() > 0) {
+              participant.setLabel(forename);
+            }
+            if (surname != null && surname.length() > 0) {
+              if (forename != null && forename.length() > 0) {
+                participant.setLabel(forename + " " + surname);
+              } else {
+                participant.setLabel(surname);
+              }
+            }
+
+            // now that they're added, we can tag them with more info...
+	    
+            // sex/gender
+            String gender = xpath.evaluate(".//@sex", author);
+            if (gender == null || gender.length() == 0) {
+              gender = xpath.evaluate(".//@gender", author);
+            }
+            if (gender != null && gender.length() > 0
+                && getSexLayer() != null) {
+              graph.createTag(participant, sexLayer.getId(), gender)
+                .setConfidence(Constants.CONFIDENCE_MANUAL);
+            }
+            
+            // age
+            sResult = xpath.evaluate(".//@age", author);
+            if (sResult != null && sResult.length() > 0
+                && getAgeLayer() != null) {
+              graph.createTag(participant, ageLayer.getId(), sResult)
+                .setConfidence(Constants.CONFIDENCE_MANUAL);;
+            }
+          } // author found
         }
         if (graph.all(getParticipantLayer().getId()).length > 1) {
           // don't default to the single participant
@@ -1793,6 +1834,18 @@ public class TEIDeserializer implements GraphDeserializer {
                       anEntity.setLabel(att.getValue());
                     } else {
                       anEntity.setLabel(anEntity.getLabel() + ": " + att.getValue());
+                    }
+                  } else {
+                    // if there are other attributes, use their key:value as the label
+                    NamedNodeMap attributes = n.getAttributes();
+                    StringBuilder lbl = new StringBuilder();
+                    for (int a = 0; a < attributes.getLength(); a++) {
+                      att = (Attr)attributes.item(a);
+                      if (lbl.length() > 0) lbl.append(";");
+                      lbl.append(att.getName()).append(":").append(att.getValue());
+                    } // next attribute
+                    if (lbl.length() > 0) {
+                      anEntity.setLabel(lbl.toString());
                     }
                   }
                 } // not "orig" nor "note" nor "foreign" nor "unclear"

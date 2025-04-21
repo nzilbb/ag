@@ -437,7 +437,7 @@ public class TestTEIDeserializer {
     assertEquals("addressing words", "rctatman", addressee.getLabel());      
     assertEquals("addressMarker", entities[0].getLabel());
     assertTrue("addressMarker tags @", entities[0].tags(at));
-    assertEquals("addressee", entities[1].getLabel());
+    assertEquals("who:#rctatman", entities[1].getLabel());
     assertTrue("addressee tags person", entities[1].tags(addressee));
     assertEquals("addressingTerm", entities[2].getLabel());
     assertEquals("addressingTerm starts at addressMarker",
@@ -451,7 +451,7 @@ public class TestTEIDeserializer {
     assertEquals("addressing words", "VerbingNouns", addressee.getLabel());      
     assertEquals("addressMarker", entities[3].getLabel());
     assertTrue("addressMarker tags @", entities[3].tags(at));
-    assertEquals("addressee", entities[4].getLabel());
+    assertEquals("who:#VerbingNouns", entities[4].getLabel());
     assertTrue("addressee tags person", entities[4].tags(addressee));
     assertEquals("addressingTerm", entities[5].getLabel());
     assertEquals("addressingTerm starts at addressMarker",
@@ -465,7 +465,7 @@ public class TestTEIDeserializer {
     assertEquals("addressing words", "rctatman", addressee.getLabel());      
     assertEquals("addressMarker", entities[6].getLabel());
     assertTrue("addressMarker tags @", entities[6].tags(at));
-    assertEquals("addressee", entities[7].getLabel());
+    assertEquals("who:#rctatman", entities[7].getLabel());
     assertTrue("addressee tags person", entities[7].tags(addressee));
     assertEquals("addressingTerm", entities[8].getLabel());
     assertEquals("addressingTerm starts at addressMarker",
@@ -1124,6 +1124,9 @@ public class TestTEIDeserializer {
       .setAlignment(1).setPeers(true).setPeersOverlap(false).setSaturated(false),
       new Layer("who", "Participants")
       .setAlignment(0).setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("participant_gender", "Gender")
+      .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("who").setParentIncludes(true),
       new Layer("turn", "Speaker turns")
       .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("who").setParentIncludes(true),
@@ -1166,7 +1169,7 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("graphXpath").setValue("//p");
-    //for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());      
     assertEquals("graphXpath parameter", "//p", 
                  (String)configuration.get("graphXpath").getValue());
@@ -1177,11 +1180,15 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("titleLayer").getValue()).getId());
     assertEquals("scribe", "scribe", 
                  ((Layer)configuration.get("scribeLayer").getValue()).getId());
+    assertEquals("sex/gender", "participant_gender", 
+                 ((Layer)configuration.get("sexLayer").getValue()).getId());
+    assertEquals("phrase language", "language", 
+                 ((Layer)configuration.get("languageLayer").getValue()).getId());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
-    //for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals(6, defaultParameters.size());
+    // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals(7, defaultParameters.size());
     assertEquals("pb", "pb", 
                  ((Layer)defaultParameters.get("pb").getValue()).getId());
     assertNull("lg", 
@@ -1194,6 +1201,8 @@ public class TestTEIDeserializer {
                  ((Layer)defaultParameters.get("strike-through").getValue()).getId());
     assertEquals("hi", "hi", 
                  ((Layer)defaultParameters.get("hi").getValue()).getId());
+    assertEquals("language", "language", 
+                 ((Layer)defaultParameters.get("Language").getValue()).getId());
       
     // configure the deserialization
     deserializer.setParameters(defaultParameters);
@@ -1218,14 +1227,19 @@ public class TestTEIDeserializer {
     // participants     
     Annotation[] author = g.all("who"); 
     assertEquals(1, author.length);
-    assertEquals("Participant name defaults to ID", "author", author[0].getLabel());
+    assertEquals("Participant name", "Jane Doe", author[0].getLabel());
+
+    // participant attributes
+    Annotation[] gender = g.all("participant_gender"); 
+    assertEquals("Gender present", 1, gender.length);
+    assertEquals("Participant gender", "Female", gender[0].getLabel());
 
     // turns
     Annotation[] turns = g.all("turn");
     assertEquals("turns", 1, turns.length);
     assertEquals("turn start", Double.valueOf(0.0), turns[0].getStart().getOffset());
     //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
-    assertEquals("turn label", "author", turns[0].getLabel());
+    assertEquals("turn label", "Jane Doe", turns[0].getLabel());
     assertEquals("turn parent", author[0], turns[0].getParent());
 
     // utterances
@@ -1233,7 +1247,7 @@ public class TestTEIDeserializer {
     assertEquals("utterances", 23, utterances.length);
     assertEquals("first utterance start", Double.valueOf(0.0), utterances[0].getStart().getOffset());
     assertEquals("inter-line space", Double.valueOf(40.0), utterances[0].getEnd().getOffset());
-    assertEquals("utterance label", "author", utterances[0].getParent().getLabel());
+    assertEquals("utterance label", "Jane Doe", utterances[0].getParent().getLabel());
     assertEquals("turn parent", turns[0], utterances[0].getParent());
 
     Annotation[] words = g.all("word");
@@ -1293,6 +1307,15 @@ public class TestTEIDeserializer {
                  Arrays.stream(highlight[0].all("word"))
                  .map(annotation->annotation.getLabel())
                  .collect(Collectors.joining(" ")));
+
+    Annotation[] language = g.all("language");
+    assertEquals("language", 1, language.length);
+    assertEquals("language label", "NZE:No;Scots:Yes", language[0].getLabel());
+    assertEquals("language content",
+                 "letter is",
+                 Arrays.stream(language[0].all("word"))
+                 .map(annotation->annotation.getLabel())
+                 .collect(Collectors.joining(" ")));
     
     Annotation[] pb = g.all("pb");
     assertEquals("page breaks", 0, pb.length);
@@ -1315,14 +1338,14 @@ public class TestTEIDeserializer {
     // participants     
     author = g.all("who"); 
     assertEquals(1, author.length);
-    assertEquals("Participant name defaults to ID", "author", author[0].getLabel());
+    assertEquals("Participant name defaults to ID", "Jane Doe", author[0].getLabel());
 
     // turns
     turns = g.all("turn");
     assertEquals("turns", 1, turns.length);
     assertEquals("turn start", Double.valueOf(0.0), turns[0].getStart().getOffset());
     //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
-    assertEquals("turn label", "author", turns[0].getLabel());
+    assertEquals("turn label", "Jane Doe", turns[0].getLabel());
     assertEquals("turn parent", author[0], turns[0].getParent());
 
     // utterances
@@ -1330,7 +1353,7 @@ public class TestTEIDeserializer {
     assertEquals("utterances", 26, utterances.length);
     assertEquals("first utterance start", Double.valueOf(0.0), utterances[0].getStart().getOffset());
     assertEquals("inter-line space", Double.valueOf(36.0), utterances[0].getEnd().getOffset());
-    assertEquals("utterance label", "author", utterances[0].getParent().getLabel());
+    assertEquals("utterance label", "Jane Doe", utterances[0].getParent().getLabel());
     assertEquals("turn parent", turns[0], utterances[0].getParent());
 
     words = g.all("word");
@@ -1390,14 +1413,14 @@ public class TestTEIDeserializer {
     // participants     
     author = g.all("who"); 
     assertEquals(1, author.length);
-    assertEquals("Participant name defaults to ID", "author", author[0].getLabel());
+    assertEquals("Participant name defaults to ID", "Jane Doe", author[0].getLabel());
 
     // turns
     turns = g.all("turn");
     assertEquals("turns", 1, turns.length);
     assertEquals("turn start", Double.valueOf(0.0), turns[0].getStart().getOffset());
     //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
-    assertEquals("turn label", "author", turns[0].getLabel());
+    assertEquals("turn label", "Jane Doe", turns[0].getLabel());
     assertEquals("turn parent", author[0], turns[0].getParent());
 
     // utterances
@@ -1405,7 +1428,7 @@ public class TestTEIDeserializer {
     assertEquals("utterances", 25, utterances.length);
     assertEquals("first utterance start", Double.valueOf(0.0), utterances[0].getStart().getOffset());
     assertEquals("inter-line space", Double.valueOf(42.0), utterances[0].getEnd().getOffset());
-    assertEquals("utterance label", "author", utterances[0].getParent().getLabel());
+    assertEquals("utterance label", "Jane Doe", utterances[0].getParent().getLabel());
     assertEquals("turn parent", turns[0], utterances[0].getParent());
 
     words = g.all("word");
