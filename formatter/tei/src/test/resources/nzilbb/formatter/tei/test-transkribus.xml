@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<TEI xmlns='http://www.tei-c.org/ns/1.0'>
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+	<title type='main'>Test test</title>
+        <author>
+          <persName role="Sender" gender="Female"><forename>Jane</forename><surname>Doe</surname>J D</persName>
+        </author>
+      </titleStmt>
+      <publicationStmt>
+	<publisher>tranScriptorium</publisher>
+      </publicationStmt>
+      <sourceDesc>
+	<bibl><publisher>transcriber's details</publisher></bibl>
+      </sourceDesc>
+    </fileDesc>
+  </teiHeader>
+  <text>
+    <body>
+      <pb facs='#facs_1' n='1'/>
+      <pb facs='#facs_2' n='2'/>
+      <p facs='#facs_2_tr_1'>
+	<lg>
+	  <l facs='#facs_2_l'>at <placeName placeName='Home'><country>Scotland</country>Home</placeName>. Remember me to all my friends</l>
+	  <l facs='#facs_2_tr_1_tl_3'>and acquaintances and believe me
+          </l>
+	  <l facs='#facs_2_tr_1_tl_4'>Truely yours</l>
+	  <l facs='#facs_2_tr_1_tl_5'>John Doe</l>
+	  <l facs='#facs_2_tr_1_tl_6'>P.S.</l>
+	  <l facs='#facs_2_tr_1_tl_7'>I would feel <strike-through>much</strike-through> indebted to you</l>
+	  <l facs='#facs_2_tr_1_tl_8'>for the following articles.</l>
+	  <l facs='#facs_2_tr_1_tl_9'>A few yards of blue flannel or</l>
+	  <l facs='#facs_2_tr_1_tl_10'>Plaiding, Course stocking yarn.</l>
+	  <l facs='#facs_2_tr_1_tl_11'>a few pairs of socks, stockings</l>
+	  <l facs='#facs_2_tr_1_tl_12'>for the wife and children also</l>
+	  <l facs='#facs_2_tr_1_tl_13'>apair of shoes for each of us</l>
+	  <l facs='#facs_2_tr_1_tl_14'>likewise <hi rend='strikethrough:true;'>a quantity of</hi> striped</l>
+	  <l facs='#facs_2_tr_1_tl_15'>shirting, stays for the children</l>
+	  <l facs='#facs_2_tr_1_tl_16'>Jane and Alice would like dolls</l>
+	  <l facs='#facs_2_tr_1_tl_17'>and beads.</l>
+	  <l facs='#facs_2_tr_1_tl_18'>This <Language Scots='Yes' NZE='No'>letter is</Language> a copy of one written</l>
+	  <l facs='#facs_2_tr_1_tl_19'>by John Doe to his sisters</l>
+	  <l facs='#facs_2_tr_1_tl_20'>and brothers in Edinburgh</l>
+	  <l facs='#facs_2_tr_1_tl_21'><country>Scotland</country> about his arrival in</l>
+	  <l facs='#facs_2_l_148'>Otago N.Z. in January 1900</l>
+	  <l facs='#facs_2_tr_1_tl_24'>for some unknown reason the</l>
+	  <l facs='#facs_2_tr_1_tl_25'>letter had not been posted home</l>
+	</lg>
+      </p>
+      <pb facs='#facs_3' n='3'/>
+      <p facs='#facs_3_tr_1'>
+	<lg>
+	  <l facs='#facs_3_tr_1_tl_1'>fencing and draining. I wrought for</l>
+	  <l facs='#facs_3_tr_1_tl_2'>about a month of this time along with</l>
+	  <l facs='#facs_3_tr_1_tl_3'>Jane Doe of Something.
+          </l>
+	  <l facs='#facs_3_tr_1_tl_4'>A little before this time I went to the</l>
+	  <l facs='#facs_3_tr_1_tl_5'>Captain and got a grant of a free site</l>
+	  <l facs='#facs_3_tr_1_tl_6'>for a house on the Company&apos;s Reserve</l>
+	  <l facs='#facs_3_tr_1_tl_7'>situated about 1/4 of a mile from <placeName><country>New Zealand</country>Dunedin</placeName> in</l>
+	  <l facs='#facs_3_tr_1_tl_8'>the bush being well privileged with wood</l>
+	  <l facs='#facs_3_tr_1_tl_9'>and water. After great perserverance and</l>
+	  <l facs='#facs_3_tr_1_tl_10'>difficulty I have at length succeeded</l>
+	  <l facs='#facs_3_tr_1_tl_11'>erecting a house single handed with the</l>
+	  <l facs='#facs_3_tr_1_tl_12'>exception of 2 half days which I got from</l>
+	  <l facs='#facs_3_tr_1_tl_13'>Joe Bloggs. The house consists of</l>
+	  <l facs='#facs_3_tr_1_tl_14'>one apartment about 12 feet square, the sides</l>
+	  <l facs='#facs_3_tr_1_tl_15'>upwards of 7 feet high are posted, the posts</l>
+	  <l facs='#facs_3_tr_1_tl_16'>being about a yard asunder are wattled</l>
+	  <l facs='#facs_3_tr_1_tl_17'>across and clayed betwix the wattles.</l>
+	  <l facs='#facs_3_tr_1_tl_18'>It is roofed with grass and I have a clay</l>
+	  <l facs='#facs_3_tr_1_tl_19'>chimney attached to it. I have got a garden</l>
+	  <l facs='#facs_3_tr_1_tl_20'>cleared out of about 24 yards by 30 yards</l>
+	  <l facs='#facs_3_tr_1_tl_21'>It consists of potatoes and cabbages which</l>
+	  <l facs='#facs_3_tr_1_tl_22'>are looking well also peas and a few</l>
+	  <l facs='#facs_3_tr_1_tl_23'>garden seeds but they are not looking so well</l>
+	  <l facs='#facs_3_tr_1_tl_24'>Bruce Wayne wishes me to give his</l>
+	  <l facs='#facs_3_tr_1_tl_25'>kind respects to brothers Jorge Borges and</l>
+	  <l facs='#facs_3_tr_1_tl_26'>Lupin also John Green, and all his kind friends</l>
+	</lg>
+      </p>
+      <pb facs='#facs_4' n='4'/>
+      <p facs='#facs_4_tr_1'>
+	<lg>
+	  <l facs='#facs_4_tr_1_tl_1'>great difficulty in reaching the Barracks</l>
+	  <l facs='#facs_4_tr_1_tl_2'>our luggage having to remain on the quay</l>
+	  <l facs='#facs_4_tr_1_tl_3'>for a day or two in the dirt before we</l>
+	  <l facs='#facs_4_tr_1_tl_4'>could get it removed. I stopped for a</l>
+	  <l facs='#facs_4_tr_1_tl_5'>few days at <placeName placeName='home'><country>New Zealand</country>home</placeName> and then went</l>
+	  <l facs='#facs_4_tr_1_tl_6'>doun the river taking along with me</l>
+	  <l facs='#facs_4_tr_1_tl_7'>a weeks provisions) to join Smiths&apos;</l>
+	  <l facs='#facs_4_tr_1_tl_8'>party in the bush. The place we resided in</l>
+	  <l facs='#facs_4_tr_1_tl_9'>was a house posted and wattled and roofed</l>
+	  <l facs='#facs_4_tr_1_tl_10'>with rashes the fire being in the centre</l>
+	  <l facs='#facs_4_tr_1_tl_11'>the smoke ascending through an opening</l>
+	  <l facs='#facs_4_tr_1_tl_12'>in the roof. We all sat round the fire</l>
+	  <l facs='#facs_4_tr_1_tl_13'>telling stories and recounting our</l>
+	  <l facs='#facs_4_tr_1_tl_14'>adventures. We continued for about 7
+          </l>
+	  <l facs='#facs_4_tr_1_tl_15'>weeks when Captain America thinking the</l>
+	  <l facs='#facs_4_tr_1_tl_16'>timber cost too much broke up the</l>
+	  <l facs='#facs_4_tr_1_tl_17'>whole concern. After this event I</l>
+	  <l facs='#facs_4_tr_1_tl_18'>remained for more than a week at</l>
+	  <l facs='#facs_4_tr_1_tl_19'>home. I again went to the Captain</l>
+	  <l facs='#facs_4_tr_1_tl_20'>and got permission to go onto the</l>
+	  <l facs='#facs_4_tr_1_tl_21'>roads, the wages for which being 3 /- perday</l>
+	  <l facs='#facs_4_l'>for 8 hours labour the same as above
+          </l>
+	  <l facs='#facs_4_tr_1_tl_24'>I have laboured to the Company ever</l>
+	  <l facs='#facs_4_l_89'>since with the exception of 2 months that I</l>
+	  <l facs='#facs_4_tr_1_tl_27'>wrought in the <placeName placeName='Dunedin'><country>New Zealand</country>N. E. Valley</placeName> in clearing land</l>
+	</lg>
+      </p>
+      <pb facs='#facs_761' n='761'/>
+      <pb facs='#facs_762' n='762'/>
+    </body>
+  </text>
+</TEI>

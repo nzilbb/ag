@@ -1221,7 +1221,9 @@ public class TEIDeserializer implements GraphDeserializer {
   } // end of distinctNonPWNodeTypes()
 
   /**
-   * Traverses the given node recursively to build a set of distinct node types that are children of a &lt;person&gt; node, excluding idno, persName, sex, age, and birth, which are globally configured.
+   * Traverses the given node recursively to build a set of distinct node types that are
+   * children of a &lt;person&gt; node, excluding idno, persName, sex, age, and birth,
+   * which are globally configured. 
    * @param n Note to traverse.
    * @return Set of node type names
    */
@@ -1431,6 +1433,7 @@ public class TEIDeserializer implements GraphDeserializer {
 	 
         // participants - teiHeader/profileDesc/particDesc[/listPerson]/person
         Annotation participant = null;
+        Annotation authorRole = null; // in case we see one that's probably the author
         items = (NodeList) xpath.evaluate(
           // person may be a child of listPerson or directly of particDesc
           "profileDesc/particDesc/listPerson/person|profileDesc/particDesc/person",
@@ -1445,6 +1448,8 @@ public class TEIDeserializer implements GraphDeserializer {
             // set ID
             if (person.getAttribute("xml:id").length() > 0) { // @id attribute
               participant.setId(person.getAttribute("xml:id"));
+            } else if (person.getAttribute("id").length() > 0) { // @id attribute
+              participant.setId(person.getAttribute("id"));
             } else { // no @id, so look for idno element
               sResult = xpath.evaluate("idno/text()", person);
               if (sResult != null && sResult.length() > 0) {
@@ -1458,16 +1463,54 @@ public class TEIDeserializer implements GraphDeserializer {
             } else if (participant.getId() != null) { // no name, so use the ID as the name
               participant.setLabel(participant.getId());
             }
+            // if there are forename/surname tags, use those
+            String forename = xpath.evaluate("persName/forename/text()", person);
+            String surname = xpath.evaluate("persName/surname/text()", person);
+            if (forename != null && forename.length() > 0) {
+              participant.setLabel(forename);
+            }
+            if (surname != null && surname.length() > 0) {
+              if (forename != null && forename.length() > 0) {
+                participant.setLabel(forename + " " + surname);
+              } else {
+                participant.setLabel(surname);
+              }
+            }
             participant.setParentId(graph.getId());
             graph.addAnnotation(participant);
-	       
+
+            // is it an "Author" or "Sender"?
+            sResult = xpath.evaluate(".//@role", person);
+            if (sResult != null
+                && (sResult.equalsIgnoreCase("author") || sResult.equalsIgnoreCase("sender"))) {
+              // they'll be the participant for all the utterances/turns
+              authorRole = participant;
+            }
+
             // now that they're added, we can tag them with more info...
 	       
-            // sex
-            if (person.getAttribute("sex").length() > 0
+            // sex/gender
+            String gender = xpath.evaluate(".//@sex", person);
+            if (gender == null || gender.length() == 0) {
+              gender = xpath.evaluate(".//@gender", person);
+            }
+            if (gender != null && gender.length() > 0
                 && getSexLayer() != null) {
-              graph.createTag(participant, sexLayer.getId(), person.getAttribute("sex"))
-                .setConfidence(Constants.CONFIDENCE_MANUAL);;
+              LinkedHashMap<String,String> validLabels = sexLayer.getValidLabels();
+              if (validLabels.size() > 0 // there are valid labels
+                  // and the "type" isn't one of them
+                  && !validLabels.containsKey(gender)) {
+                // normalize label if possible
+                for (String key : validLabels.keySet()) {
+                  if (key.equalsIgnoreCase(gender)
+                      || validLabels.get(key).equalsIgnoreCase(gender)) {
+                    gender = key;
+                    break;
+                  }
+                } // next label
+              } // normalize label if possible
+              graph.createTag(participant, sexLayer.getId(), gender)
+                .setConfidence(Constants.CONFIDENCE_MANUAL);
             }
             // age
             sResult = xpath.evaluate("age/text()", person);
@@ -1571,6 +1614,8 @@ public class TEIDeserializer implements GraphDeserializer {
           // don't default to the single participant
           participant = null;
         }
+        // unless we found a likely candidate
+        if (authorRole != null) participant = authorRole;
 	 
         // graph
         Annotation turn = new Annotation(

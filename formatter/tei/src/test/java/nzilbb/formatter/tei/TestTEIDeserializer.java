@@ -1162,7 +1162,7 @@ public class TestTEIDeserializer {
       .setParentId("word").setParentIncludes(true));
 
     // access file
-    NamedStream[] streams = { new NamedStream(new File(getDir(), "test-scone.xml")) };
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "test-transkribus.xml")) };
       
     // create deserializer
     TEIDeserializer deserializer = new TEIDeserializer();
@@ -1218,7 +1218,7 @@ public class TestTEIDeserializer {
     // first graph
     Graph g = graphs[0];
     
-    assertEquals("test-scone.xml-1", g.getId());
+    assertEquals("test-transkribus.xml-1", g.getId());
     String[] title = g.labels("title"); 
     assertEquals(1, title.length);
     assertEquals("Test test", title[0]);
@@ -1329,7 +1329,7 @@ public class TestTEIDeserializer {
     // second graph
     g = graphs[1];
     
-    assertEquals("test-scone.xml-2", g.getId());
+    assertEquals("test-transkribus.xml-2", g.getId());
     title = g.labels("title"); 
     assertEquals(1, title.length);
     assertEquals("Test test", title[0]);
@@ -1404,7 +1404,7 @@ public class TestTEIDeserializer {
     // third graph
     g = graphs[2];
     
-    assertEquals("test-scone.xml-3", g.getId());
+    assertEquals("test-transkribus.xml-3", g.getId());
     title = g.labels("title"); 
     assertEquals(1, title.length);
     assertEquals("Test test", title[0]);
@@ -1473,6 +1473,237 @@ public class TestTEIDeserializer {
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
 
+  }
+
+  /** Ensure deserializer works with TEI for the SCONE corpus. */
+  @Test public void scone()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("scribe", "Transcriber")
+      .setAlignment(0).setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("transcript_language", "Graph language")
+      .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("transcript_version_date", "Version Date")
+      .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("transcript_type", "Transcript Type")
+      .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("title", "Title")
+      .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("topic", "Topic")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false),
+      new Layer("comment", "Comment")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("noise", "Noise")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("figure", "Picture")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false),
+      new Layer("pb", "Page Break")
+      .setAlignment(1).setPeers(true).setPeersOverlap(false).setSaturated(false),
+      new Layer("who", "Participants")
+      .setAlignment(0).setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("participant_gender", "Gender")
+      .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("placeName", "Place")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("country", "Country")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("strike-through", "Correction")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("hi", "Highlight")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("pc", "Punctuation")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("emoticon", "Emoticon")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("language", "Language")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("utterance", "Utterances")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words")
+      .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("lexical", "Lexical")
+      .setAlignment(0).setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("word").setParentIncludes(true));
+
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "test-scone.xml")) };
+      
+    // create deserializer
+    TEIDeserializer deserializer = new TEIDeserializer();
+
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    configuration.get("graphXpath").setValue("//p");
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());      
+    assertEquals("graphXpath parameter", "//p", 
+                 (String)configuration.get("graphXpath").getValue());
+    assertEquals("graphXpath attrinbute", "//p", deserializer.getGraphXpath());
+    assertEquals("comment", "comment", 
+                 ((Layer)configuration.get("commentLayer").getValue()).getId());
+    assertEquals("title", "title", 
+                 ((Layer)configuration.get("titleLayer").getValue()).getId());
+    assertEquals("scribe", "scribe", 
+                 ((Layer)configuration.get("scribeLayer").getValue()).getId());
+    assertEquals("sex/gender", "participant_gender", 
+                 ((Layer)configuration.get("sexLayer").getValue()).getId());
+    assertEquals("phrase language", "language", 
+                 ((Layer)configuration.get("languageLayer").getValue()).getId());
+
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals(6, defaultParameters.size());
+    assertNull("lg", 
+               defaultParameters.get("lg").getValue());
+    assertEquals("placeName", "placeName", 
+                 ((Layer)defaultParameters.get("placeName").getValue()).getId());
+    assertEquals("country", "country", 
+                 ((Layer)defaultParameters.get("country").getValue()).getId());
+    assertEquals("strike-through", "strike-through", 
+                 ((Layer)defaultParameters.get("strike-through").getValue()).getId());
+    assertEquals("hi", "hi", 
+                 ((Layer)defaultParameters.get("hi").getValue()).getId());
+    assertEquals("language", "language", 
+                 ((Layer)defaultParameters.get("Language").getValue()).getId());
+      
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    assertEquals("One graph", 1, graphs.length);
+
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+
+    // first graph
+    Graph g = graphs[0];
+    
+    assertEquals("test-scone.xml", g.getId());
+    String[] title = g.labels("title"); 
+    assertEquals(1, title.length);
+    assertEquals("Test test", title[0]);
+    assertEquals("transcriber's details", g.first("scribe").getLabel());
+
+    // participants     
+    Annotation[] who = g.all("who"); 
+    assertEquals("Two participants", 2, who.length);
+    assertEquals("Participant name", "Ms Smith", who[0].getLabel());
+    assertEquals("Participant name", "John Doe", who[1].getLabel());
+
+    // participant attributes
+    Annotation[] gender = who[0].all("participant_gender"); 
+    assertEquals("Gender present", 1, gender.length);
+    assertEquals("Participant gender", "Female", gender[0].getLabel());
+    gender = who[1].all("participant_gender"); 
+    assertEquals("Another gender present", 1, gender.length);
+    assertEquals("Participant gender", "Male", gender[0].getLabel());
+
+    // turns
+    Annotation[] turns = g.all("turn");
+    assertEquals("turns", 1, turns.length);
+    assertEquals("turn start", Double.valueOf(0.0), turns[0].getStart().getOffset());
+    //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
+    assertEquals("turn label", "John Doe", turns[0].getLabel());
+    assertEquals("turn parent", who[1], turns[0].getParent());
+
+    // utterances
+    Annotation[] utterances = g.all("utterance");
+    assertEquals("utterances", 23, utterances.length);
+    assertEquals("first utterance start", Double.valueOf(0.0), utterances[0].getStart().getOffset());
+    assertEquals("inter-line space", Double.valueOf(40.0), utterances[0].getEnd().getOffset());
+    assertEquals("utterance label", "John Doe", utterances[0].getParent().getLabel());
+    assertEquals("turn parent", turns[0], utterances[0].getParent());
+
+    Annotation[] words = g.all("word");
+    assertEquals("word count", 116, words.length);
+    assertEquals("first word start", Double.valueOf(0), words[0].getStart().getOffset());
+    // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
+    assertEquals("first word label", "at", words[0].getLabel());
+    assertEquals("inter-word space", Double.valueOf(3), words[0].getEnd().getOffset());
+    assertEquals("next word start where last ends",
+                 Double.valueOf(3), words[1].getStart().getOffset());
+    assertEquals("next word linked to last", words[0].getEnd(), words[1].getStart());
+    assertEquals("second word label not country", "Home .", words[1].getLabel());
+
+    // entities
+    Annotation[] placeNames = g.all("placeName");
+    assertEquals("placeName count", 1, placeNames.length);
+    assertEquals("placeName label", "Home", placeNames[0].getLabel());
+    assertTrue("placeName bounds: " + placeNames[0].getStart() + "-" + placeNames[0].getEnd(),
+               placeNames[0].tags(words[1])); // home
+    // assertEquals("placeName 2 has no placeName attribute", "placeName", placeNames[1].getLabel());
+    // assertEquals("placeName 2 content", "Dunedin", placeNames[1].first("word").getLabel());    
+    // assertEquals("placeName 3 label", "home", placeNames[2].getLabel());
+    // assertEquals("placeName 3 content", "home", placeNames[2].first("word").getLabel());
+    // assertEquals("placeName 4 label", "Dunedin", placeNames[3].getLabel());
+    // assertEquals("placeName 4 content",
+    //              "N. E. Valley",
+    //              Arrays.stream(placeNames[3].all("word"))
+    //              .map(annotation->annotation.getLabel())
+    //              .collect(Collectors.joining(" ")));
+
+    // country
+    Annotation[] countries = g.all("country");
+    assertEquals("countries", 2, countries.length);
+    assertEquals("country 1 label", "Scotland", countries[0].getLabel());
+    assertTrue("country 1 bounds", countries[0].tags(words[1]));
+    assertEquals("country 2 label", "Scotland", countries[1].getLabel());
+    // assertEquals("country 3 label", "New Zealand", countries[2].getLabel());
+    // assertEquals("country 4 label", "New Zealand", countries[3].getLabel());
+    // assertEquals("country 5 label", "New Zealand", countries[4].getLabel());
+
+    // strike-through
+    Annotation[] strikeThrough = g.all("strike-through");
+    assertEquals("strikeThrough", 1, strikeThrough.length);
+    assertEquals("strike-through label", "strike-through", strikeThrough[0].getLabel());
+    assertEquals("strike-through content",
+                 "much",
+                 Arrays.stream(strikeThrough[0].all("word"))
+                 .map(annotation->annotation.getLabel())
+                 .collect(Collectors.joining(" ")));
+    
+    // hi
+    Annotation[] highlight = g.all("hi");
+    assertEquals("highlight", 1, highlight.length);
+    assertEquals("highlight label", "strikethrough:true;", highlight[0].getLabel());
+    assertEquals("highlight content",
+                 "a quantity of",
+                 Arrays.stream(highlight[0].all("word"))
+                 .map(annotation->annotation.getLabel())
+                 .collect(Collectors.joining(" ")));
+
+    Annotation[] language = g.all("language");
+    assertEquals("language", 1, language.length);
+    assertEquals("language label", "NZE:No;Scots:Yes", language[0].getLabel());
+    assertEquals("language content",
+                 "letter is",
+                 Arrays.stream(language[0].all("word"))
+                 .map(annotation->annotation.getLabel())
+                 .collect(Collectors.joining(" ")));
+    
+    Annotation[] pb = g.all("pb");
+    assertEquals("page breaks", 0, pb.length);
+      
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+    }
   }
 
   /**
