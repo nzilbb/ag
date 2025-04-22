@@ -71,7 +71,8 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());
+    assertEquals("Configuration parameters" + configuration,
+                 14, deserializer.configure(configuration, schema).size());
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -91,6 +92,7 @@ public class TestTEIDeserializer {
     assertEquals("transcript_language", "transcript_language", 
                  ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
     assertNull("sex", configuration.get("sexLayer").getValue());
+    assertNull("role", configuration.get("roleLayer").getValue());
     assertNull("age", configuration.get("ageLayer").getValue());
     assertNull("birth", configuration.get("birthLayer").getValue());
 
@@ -245,7 +247,7 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 14, deserializer.configure(configuration, schema).size());      
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -266,6 +268,7 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
     assertEquals("sex", "sex", 
                  ((Layer)configuration.get("sexLayer").getValue()).getId());
+    assertNull("role", configuration.get("roleLayer").getValue());
     assertEquals("age", "age", 
                  ((Layer)configuration.get("ageLayer").getValue()).getId());
     assertEquals("birthdate", "dob", 
@@ -508,7 +511,8 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());
+    assertEquals("Configuration parameters" + configuration,
+                 14, deserializer.configure(configuration, schema).size());
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -529,6 +533,7 @@ public class TestTEIDeserializer {
                configuration.get("transcriptLanguageLayer").getValue());
     assertNull("sex not mapped",
                configuration.get("sexLayer").getValue());
+    assertNull("role", configuration.get("roleLayer").getValue());
     assertNull("age not mapped",
                configuration.get("ageLayer").getValue());
     assertNull("birthdate not mapped",
@@ -670,7 +675,8 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());
+    assertEquals("Configuration parameters" + configuration,
+                 14, deserializer.configure(configuration, schema).size());
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -691,6 +697,7 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
     assertEquals("sex", "sex", 
                  ((Layer)configuration.get("sexLayer").getValue()).getId());
+    assertNull("role", configuration.get("roleLayer").getValue());
     assertEquals("age", "age", 
                  ((Layer)configuration.get("ageLayer").getValue()).getId());
     assertEquals("birthdate", "dob", 
@@ -929,7 +936,8 @@ public class TestTEIDeserializer {
     
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());
+    assertEquals("Configuration parameters" + configuration,
+                 14, deserializer.configure(configuration, schema).size());
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -950,6 +958,7 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
     assertEquals("sex", "sex", 
                  ((Layer)configuration.get("sexLayer").getValue()).getId());
+    assertNull("role", configuration.get("roleLayer").getValue());
     assertEquals("age", "age", 
                  ((Layer)configuration.get("ageLayer").getValue()).getId());
     assertEquals("birthdate", "dob", 
@@ -1034,7 +1043,8 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());
+    assertEquals("Configuration parameters" + configuration,
+                 14, deserializer.configure(configuration, schema).size());
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -1055,6 +1065,7 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("transcriptLanguageLayer").getValue()).getId());
     assertEquals("sex", "sex", 
                  ((Layer)configuration.get("sexLayer").getValue()).getId());
+    assertNull("role", configuration.get("roleLayer").getValue());
     assertEquals("age", "age", 
                  ((Layer)configuration.get("ageLayer").getValue()).getId());
     assertEquals("birthdate", "dob", 
@@ -1170,7 +1181,7 @@ public class TestTEIDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("graphXpath").setValue("//p");
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 14, deserializer.configure(configuration, schema).size());      
     assertEquals("graphXpath parameter", "//p", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("graphXpath attrinbute", "//p", deserializer.getGraphXpath());
@@ -1182,6 +1193,7 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("scribeLayer").getValue()).getId());
     assertEquals("sex/gender", "participant_gender", 
                  ((Layer)configuration.get("sexLayer").getValue()).getId());
+    assertNull("role", configuration.get("roleLayer").getValue());
     assertEquals("phrase language", "language", 
                  ((Layer)configuration.get("languageLayer").getValue()).getId());
 
@@ -1504,6 +1516,9 @@ public class TestTEIDeserializer {
       new Layer("participant_gender", "Gender")
       .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("who").setParentIncludes(true),
+      new Layer("participant_role", "Role")
+      .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("who").setParentIncludes(true),
       new Layer("turn", "Speaker turns")
       .setAlignment(2).setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("who").setParentIncludes(true),
@@ -1547,7 +1562,7 @@ public class TestTEIDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("graphXpath").setValue("//p");
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 14, deserializer.configure(configuration, schema).size());      
     assertEquals("graphXpath parameter", "//p", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("graphXpath attrinbute", "//p", deserializer.getGraphXpath());
@@ -1559,6 +1574,8 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("scribeLayer").getValue()).getId());
     assertEquals("sex/gender", "participant_gender", 
                  ((Layer)configuration.get("sexLayer").getValue()).getId());
+    assertEquals("role", "participant_role", 
+                 ((Layer)configuration.get("roleLayer").getValue()).getId());
     assertEquals("phrase language", "language", 
                  ((Layer)configuration.get("languageLayer").getValue()).getId());
 
@@ -1612,6 +1629,13 @@ public class TestTEIDeserializer {
     gender = who[1].all("participant_gender"); 
     assertEquals("Another gender present", 1, gender.length);
     assertEquals("Participant gender", "Male", gender[0].getLabel());
+    
+    Annotation[] role = who[0].all("participant_role"); 
+    assertEquals("Role present", 1, role.length);
+    assertEquals("Participant role", "Recipient", role[0].getLabel());
+    role = who[1].all("participant_role"); 
+    assertEquals("Another role present", 1, role.length);
+    assertEquals("Participant role", "Sender", role[0].getLabel());
 
     // turns
     Annotation[] turns = g.all("turn");

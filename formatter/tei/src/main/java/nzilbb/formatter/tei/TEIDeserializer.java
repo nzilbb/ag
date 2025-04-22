@@ -509,6 +509,23 @@ public class TEIDeserializer implements GraphDeserializer {
    * @param newSexLayer Participant tag layer for sex attribute.
    */
   public TEIDeserializer setSexLayer(Layer newSexLayer) { sexLayer = newSexLayer; return this; }
+  
+  /**
+   * Participant role layer.
+   * @see #getRoleLayer()
+   * @see #setRoleLayer(Layer)
+   */
+  protected Layer roleLayer;
+  /**
+   * Getter for {@link #roleLayer}: Participant role layer.
+   * @return Participant role layer.
+   */
+  public Layer getRoleLayer() { return roleLayer; }
+  /**
+   * Setter for {@link #roleLayer}: Participant role layer.
+   * @param newRoleLayer Participant role layer.
+   */
+  public TEIDeserializer setRoleLayer(Layer newRoleLayer) { roleLayer = newRoleLayer; return this; }
 
   /**
    * Participant tag laye for age attribute.
@@ -814,7 +831,7 @@ public class TEIDeserializer implements GraphDeserializer {
 
     layerToPossibilities.put(
       new Parameter("publicationDateLayer", Layer.class, "Publication date layer", "Date the source document was published"), 
-      Arrays.asList("transcriptpublicationdate", "publicationdate","transcriptairdate","airdate", "transcriptrecordingdate","recordingdate","date"));
+      Arrays.asList("transcriptpublicationdate", "publicationdate","transcriptairdate","airdate", "transcriptrecordingdate","recordingdate","transcriptdate","date"));
     layerToCandidates.put("publicationDateLayer", graphTagLayers);
 
     layerToPossibilities.put(
@@ -829,6 +846,12 @@ public class TEIDeserializer implements GraphDeserializer {
                     "Sex"), 
       Arrays.asList("participantgender","participantsex","gender","sex"));
     layerToCandidates.put("sexLayer", participantTagLayers);
+
+    layerToPossibilities.put(
+      new Parameter("roleLayer", Layer.class, "Participant role layer", 
+                    "Role"), 
+      Arrays.asList("participantrole","role"));
+    layerToCandidates.put("roleLayer", participantTagLayers);
 
     layerToPossibilities.put(
       new Parameter("ageLayer", Layer.class, "Age layer", 
@@ -1331,6 +1354,7 @@ public class TEIDeserializer implements GraphDeserializer {
       if (publicationDateLayer != null) graph.addLayer((Layer)publicationDateLayer.clone());
       if (transcriptLanguageLayer != null) graph.addLayer((Layer)transcriptLanguageLayer.clone());
       if (sexLayer != null) graph.addLayer((Layer)sexLayer.clone());
+      if (roleLayer != null) graph.addLayer((Layer)roleLayer.clone());
       if (ageLayer != null) graph.addLayer((Layer)ageLayer.clone());
       if (birthLayer != null) graph.addLayer((Layer)birthLayer.clone());
       if (parameters == null) setParameters(new ParameterSet());
@@ -1481,11 +1505,28 @@ public class TEIDeserializer implements GraphDeserializer {
 
             // is it an "Author" or "Sender"?
             sResult = xpath.evaluate(".//@role", person);
-            if (sResult != null
-                && (sResult.equalsIgnoreCase("author") || sResult.equalsIgnoreCase("sender"))) {
-              // they'll be the participant for all the utterances/turns
-              authorRole = participant;
-            }
+            if (sResult != null && sResult.length() > 0) {
+              if (sResult.equalsIgnoreCase("author") || sResult.equalsIgnoreCase("sender")) {
+                // they'll be the participant for all the utterances/turns
+                authorRole = participant;
+              }
+              if (getRoleLayer() != null) {
+                LinkedHashMap<String,String> validLabels = roleLayer.getValidLabels();
+                if (validLabels.size() > 0 // there are valid labels
+                    && !validLabels.containsKey(sResult)) {
+                  // normalize label if possible
+                  for (String key : validLabels.keySet()) {
+                    if (key.equalsIgnoreCase(sResult)
+                        || validLabels.get(key).equalsIgnoreCase(sResult)) {
+                      sResult = key;
+                      break;
+                    }
+                  } // next label
+                } // normalize label if possible
+                graph.createTag(participant, roleLayer.getId(), sResult)
+                  .setConfidence(Constants.CONFIDENCE_MANUAL);
+              }
+            } // there is an attribute
 
             // now that they're added, we can tag them with more info...
 	       
