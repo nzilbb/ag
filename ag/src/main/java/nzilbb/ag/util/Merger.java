@@ -1703,7 +1703,8 @@ public class Merger extends Transform implements GraphTransformer {
               // these layers share a parent layer
               
               // avoid moving tags that (now) have a different parent
-              if (!annotation.getParentId().equals(a.getParentId())) return false;
+              if (annotation.getParentId() != null
+                  && !annotation.getParentId().equals(a.getParentId())) return false;
             }
           }
           return true;
