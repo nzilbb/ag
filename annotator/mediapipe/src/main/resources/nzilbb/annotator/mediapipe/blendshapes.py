@@ -20,7 +20,7 @@ if len(sys.argv) < 13:
   print(" - min_tracking_confidence setting (float)")
   print(" - CSV file name for blendshape scores, or NA to not generate them")
   print(" - JSON file pattern (e.g. frame-{0}.json), or NA to not generate them")
-  print(" - Annotated video file name (must end in .mp4), or NA to not generate it")
+  print(" - Annotated video file name (must end in .webm), or NA to not generate it")
   print(" - Annotated frame image file pattern (e.g. frame-{0}.png), or NA to not generate them")
   print(" - Paint landmark tesselation: true or false")
   print(" - Paint landmark contours: true or false")
@@ -145,7 +145,7 @@ options = FaceLandmarkerOptions(
     min_tracking_confidence=MIN_TRACKING_CONFIDENCE,
     running_mode=VisionRunningMode.VIDEO)
 
-codec_id = "mp4v" # ID for a video codec.
+codec_id = "vp80" # ID for a video codec.
 fourcc = cv2.VideoWriter_fourcc(*codec_id)
 if OUTPUT_VIDEO_FILE != "NA":
   out = cv2.VideoWriter(OUTPUT_VIDEO_FILE, fourcc=fourcc, fps=fps, frameSize=(width, height))
