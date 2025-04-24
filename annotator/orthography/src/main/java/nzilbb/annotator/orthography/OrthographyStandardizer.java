@@ -335,8 +335,7 @@ public class OrthographyStandardizer extends Annotator {
   }
    
   /**
-   * Transforms the graph. In this case, the graph is simply summarized, by counting all
-   * tokens of each word type, and printing out the result to stdout.
+   * Transforms the given graph. 
    * @param graph The graph to transform.
    * @return The changes introduced by the tranformation.
    * @throws TransformationException If the transformation cannot be completed.
