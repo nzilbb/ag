@@ -57,7 +57,7 @@ public class Orthography2OrthographyComparator<E> implements EditComparator<E> {
       String toOrth = to.toString();
       String toOrthLower = toOrth.toLowerCase();
       String toOrthLettersOnly = toOrthLower.replaceAll("\\P{IsLetter}","");
-      int iDistance = Math.abs(fromOrth.compareTo(toOrth)) * 3; // (ensure it's greater than 2)
+      int iDistance = Math.abs(fromOrth.compareTo(toOrth)) * 3; // (ensure it's greater than 2) // TODO use levenstien distance instead of compareTo
       if (fromOrth.equals(toOrth)) {
         // the same string
         iDistance = 0;

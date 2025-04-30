@@ -6,7 +6,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.ag</artifactId>
-  <version>1.2.2</version>
+  <version>1.2.3</version>
   <name>Annotation Graphs</name>
   <packaging>jar</packaging>
   <description>Implementation of an Annotation Graph API for linguistic annotations.</description>

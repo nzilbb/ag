@@ -5,6 +5,7 @@ nzilbb.ag.ql
 nzilbb.ag.serialize
 nzilbb.ag.serialize.json
 nzilbb.ag.util
+nzilbb.configure
 nzilbb.editpath
 nzilbb.encoding
 nzilbb.encoding.comparator

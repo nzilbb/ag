@@ -1,3 +1,14 @@
+# nzilbb.ag 1.2.3
+
+- Add category order/description to Schema.
+- Add "tree" layer type.
+- Improve annotation graph change tracking.
+- Include offsetUnits are serialized to JSON.
+- Performance improvements to annotation graph change merging
+- Improvements to graph validation.
+
+For LaBB-CAT version 20250430.1200
+
 # nzilbb.ag 1.2.2
 
 - Larger buffer for downloads.

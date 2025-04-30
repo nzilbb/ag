@@ -73,7 +73,7 @@ public class Schema implements Cloneable, CloneableBean {
   /**
    * An ordered map of category names to descriptions.
    * @see #getCategories()
-   * @see #setCategories(LinkedHashMap<String,String>)
+   * @see #setCategories(LinkedHashMap)
    */
   protected LinkedHashMap<String,String> categories = new LinkedHashMap<String,String>();
   /**
