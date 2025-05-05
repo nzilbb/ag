@@ -1,5 +1,5 @@
 //
-// Copyright 2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -24,11 +24,23 @@ package nzilbb.encoding.comparator;
 	      
 import nzilbb.editpath.EditComparator;
 import nzilbb.editpath.EditStep;
+import nzilbb.editpath.MinimumEditPathString;
 
 /**
  * Comparator that maps one plain-text full word orthography to another.
+ * <p> <em>NB</em> distances are 10x what might normally be expected:
+ * <ul>
+ *  <li>Delete: 20.0</li>
+ *  <li>Insert: 20.0</li>
+ *  <li>Change case only: 1.0</li>
+ *  <li>Change case/punctuation: 5.0</li>
+ *  <li>Any other change: 20.0 + Levenshtein distance</li>
+ * </ul>
  */
 public class Orthography2OrthographyComparator<E> implements EditComparator<E> {
+
+  MinimumEditPathString mpString = new MinimumEditPathString();
+  
   /**
    * Compares two sequence elements, and evaluates the distance between them.
    * @param from The element from the source sequence, which may be null,
@@ -57,16 +69,24 @@ public class Orthography2OrthographyComparator<E> implements EditComparator<E> {
       String toOrth = to.toString();
       String toOrthLower = toOrth.toLowerCase();
       String toOrthLettersOnly = toOrthLower.replaceAll("\\P{IsLetter}","");
-      int iDistance = Math.abs(fromOrth.compareTo(toOrth)) * 3; // (ensure it's greater than 2) // TODO use levenstien distance instead of compareTo
+      double distance = 99;
       if (fromOrth.equals(toOrth)) {
         // the same string
-        iDistance = 0;
-      } else if (fromOrthLower.equals(toOrthLower)) {
+        distance = 0;
+      } else if (toOrthLettersOnly.length() > 0 // (only if there are letters)
+                 && fromOrthLower.equals(toOrthLower)) {
         // the same but different case
-        iDistance = 1;
+        distance = 1;
+      } else if (toOrthLettersOnly.length() > 0 // (only if there are letters)
+                 && fromOrthLettersOnly.equals(toOrthLettersOnly)) {
+        // the same but different case and different punctuation
+        distance = 5;
+      } else {
+        distance = mpString.levenshteinDistance(fromOrth, toOrth)
+          + 20; // (ensure it's greater than 20)
       }
-      step.setStepDistance(iDistance);
-      if (iDistance != 0) step.setOperation(EditStep.StepOperation.CHANGE);
+      step.setStepDistance(distance);
+      if (distance != 0) step.setOperation(EditStep.StepOperation.CHANGE);
     }
     return step;
   }

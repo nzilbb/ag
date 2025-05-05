@@ -1,5 +1,5 @@
 //
-// Copyright 2018-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2018-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -730,7 +730,7 @@ public class TestComparators {
     String[] from = {"the", "THE", "quick", "quick!", "!", "?", "brown", "fox" };
     String[] to = {"THE", "the", "quick?", "quick", ".", ".", "BROWN", "Fox" };
     List<EditStep<String>> path = mp.minimumEditPath(Arrays.asList(from), Arrays.asList(to));
-    System.out.println(pathToString(path));
+    // System.out.println(pathToString(path));
     assertEquals(pathToString(path), 10, path.size());
     int i = 0;
     assertEquals(pathToString(path), "the", path.get(i).getFrom());
@@ -751,6 +751,53 @@ public class TestComparators {
     assertNull(pathToString(path), path.get(i++).getTo());
     assertEquals(pathToString(path), "brown", path.get(i).getFrom());
     assertEquals(pathToString(path), "BROWN", path.get(i++).getTo());
+    assertEquals(pathToString(path), "fox", path.get(i).getFrom());
+    assertEquals(pathToString(path), "Fox", path.get(i++).getTo());
+    
+    // nearer misses
+    
+    from = new String[]{"the", "quik", "quick!", "!", "?", "browns", "fox" };
+    to = new String[]{"THE", "the", "quick?", "quick", "!", ".", "BROWN", "Fox" };
+    path = mp.minimumEditPath(Arrays.asList(from), Arrays.asList(to));
+    // System.out.println(pathToString(path));
+    assertEquals(pathToString(path), 11, path.size());
+    i = 0;
+    assertNull("Prefer lowercase match:" + pathToString(path), path.get(i).getFrom());
+    assertEquals("Prefer lowercase match:" + pathToString(path), "THE", path.get(i++).getTo());
+
+    assertEquals("Prefer lowercase match:" + pathToString(path), "the", path.get(i).getFrom());
+    assertEquals("Prefer lowercase match:" + pathToString(path), "the", path.get(i++).getTo());
+    
+    assertEquals("One letter different is too many:" + pathToString(path),
+                 "quik", path.get(i).getFrom());
+    assertNull("One letter different is too many:" + pathToString(path),
+               path.get(i++).getTo());
+    
+    assertEquals("One punctuation mark different is enough:" + pathToString(path),
+                 "quick!", path.get(i).getFrom());
+    assertEquals("One punctuation mark different is enough:" + pathToString(path),
+                 "quick?", path.get(i++).getTo());
+    
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), "quick", path.get(i++).getTo());
+    
+    assertEquals(pathToString(path), "!", path.get(i).getFrom());
+    assertEquals(pathToString(path), "!", path.get(i++).getTo());
+    
+    assertNull(pathToString(path), path.get(i).getFrom());
+    assertEquals(pathToString(path), ".", path.get(i++).getTo());
+
+    assertNull("browns doesn't match BROWN:" + pathToString(path), path.get(i).getFrom());
+    assertEquals("browns doesn't match BROWN:" + pathToString(path),
+                 "BROWN", path.get(i++).getTo());
+    
+    assertEquals(pathToString(path), "?", path.get(i).getFrom());
+    assertNull(pathToString(path), path.get(i++).getTo());
+    
+    assertEquals("browns doesn't match BROWN:" + pathToString(path),
+                 "browns", path.get(i).getFrom());
+    assertNull("browns doesn't match BROWN:" + pathToString(path), path.get(i++).getTo());
+    
     assertEquals(pathToString(path), "fox", path.get(i).getFrom());
     assertEquals(pathToString(path), "Fox", path.get(i++).getTo());    
   }
