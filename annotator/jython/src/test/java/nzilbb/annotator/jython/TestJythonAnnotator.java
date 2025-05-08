@@ -173,19 +173,24 @@ public class TestJythonAnnotator {
     annotator.newLayer("len", schema.getWordLayerId(), Constants.ALIGNMENT_NONE);
 
     String[] scripts = {
-      "for each (w in transcript.all(\\\"word\\\")) w.createTag('len', 'test');",
-      "for each (w in transcript.list(\\\"word\\\")) w.createTag('len', 'test');",
-      "transcript.first(\\\"word\\\").createTag('len', 'test');",
-      "transcript.last(\\\"word\\\").createTag('len', 'test');",
-      "transcript.my(\\\"word\\\").createTag('len', 'test');",
-      "for each (w in transcript.getAnnotations(\\\"word\\\")) w.createTag('len', 'test');",
-      "for each (w in transcript.annotations(\\\"word\\\")) w.createTag('len', 'test');",
-      "for each (w in transcript.includingAnnotationsOn(\\\"word\\\")) w.createTag('len', 'test');",
-      "for each (w in transcript.includedAnnotationsOn(\\\"word\\\")) w.createTag('len', 'test');",
-      "for each (w in transcript.midpointIncludingAnnotationsOn(\\\"word\\\")) w.createTag('len', 'test');",
-      "for each (w in transcript.tagsOn(\\\"word\\\")) w.createTag('len', 'test');",
-      "for each (w in transcript.getAncestor(\\\"word\\\")) w.createTag('len', 'test');",
-      "for each (w in transcript.overlappingAnnotations(transcript, \\\"word\\\")) w.createTag('len', 'test');",
+      "for w in transcript.all(\\\"word\\\"): w.createTag('len', 'test');",
+      "for w in transcript.list(\\\"word\\\"): w.createTag('len', 'test');",
+      "transcript.first(\\\"word\\\").createTag('len', 'test')",
+      "transcript.last(\\\"word\\\").createTag('len', 'test')",
+      "transcript.my(\\\"word\\\").createTag('len', 'test')",
+      "for w in transcript.getAnnotations(\\\"word\\\"): w.createTag('len', 'test')",
+      "for w in transcript.getAnnotations(\\\"word\\\"): transcript.createTag(w, 'len', 'test')",
+      "for w in transcript.getAnnotations(\\\"word\\\"): transcript.createSubdivision(w, 'len', 'test')",
+      "for w in transcript.annotations(\\\"word\\\"): w.createTag('len', 'test')",
+      "for w in transcript.includingAnnotationsOn(\\\"word\\\"): w.createTag('len', 'test')",
+      "for w in transcript.includedAnnotationsOn(\\\"word\\\"): w.createTag('len', 'test')",
+      "for w in transcript.midpointIncludingAnnotationsOn(\\\"word\\\"): w.createTag('len', 'test')",
+      "for w in transcript.tagsOn(\\\"word\\\"): w.createTag('len', 'test')",
+      "for w in transcript.getAncestor(\\\"word\\\"): w.createTag('len', 'test')",
+      "for w in transcript.overlappingAnnotations(transcript, \\\"word\\\"): w.createTag('len', 'test')",
+      // delete input layer annotations first
+      "for w in transcript.all(\\\"len\\\"): w.destroy()"
+      +"\\nfor w in transcript.all(\\\"word\\\"): w.createTag('len', 'test')",
     };
          
     for (String script : scripts) {
@@ -205,9 +210,9 @@ public class TestJythonAnnotator {
         fail("Double-quotes: setTaskParameters: "+script+" : "+x);
       }
       String[] requiredLayers = annotator.getRequiredLayers();
-      assertEquals("Double-quotes: 1 required layer: "+script+" : "+requiredLayers,
+      assertEquals("Double-quotes: 1 required layer: "+script+" : "+Arrays.asList(requiredLayers),
                    1, requiredLayers.length);
-      assertEquals("Double-quotes: word required: "+script+" : "+requiredLayers,
+      assertEquals("Double-quotes: word required: "+script+" : "+Arrays.asList(requiredLayers),
                    "word", requiredLayers[0]);
 
       // single-quotes version
@@ -227,9 +232,9 @@ public class TestJythonAnnotator {
       }
          
       requiredLayers = annotator.getRequiredLayers();
-      assertEquals("Single-quotes: 1 required layer: "+script+" : "+requiredLayers,
+      assertEquals("Single-quotes: 1 required layer: "+script+" : "+Arrays.asList(requiredLayers),
                    1, requiredLayers.length);
-      assertEquals("Single-quotes: word required: "+script+" : "+requiredLayers,
+      assertEquals("Single-quotes: word required: "+script+" : "+Arrays.asList(requiredLayers),
                    "word", requiredLayers[0]);
          
     } // next script
@@ -244,14 +249,14 @@ public class TestJythonAnnotator {
     annotator.setSchema(schema);
 
     String[] scripts = {
-      "for each (w in transcript.all('word')) w.createTag(\\\"test\\\", \\\"l\\\");",
-      "for each (w in transcript.all('word')) transcript.createTag(w, \\\"test\\\", \\\"l\\\");",
-      "for each (w in transcript.all('word')) transcript.addTag(w, \\\"test\\\", \\\"l\\\");",
-      "for each (w in transcript.all('word')) transcript.createSpan(w, w, \\\"test\\\", \\\"l\\\");",
-      "for each (w in transcript.all('word')) transcript.createSpan(w, w, \\\"test\\\", \\\"l\\\", transcript);",
-      "for each (w in transcript.all('word')) transcript.addSpan(w, w, \\\"test\\\", \\\"l\\\", transcript);",
-      "for each (w in transcript.all('word')) transcript.createAnnotation(w.getStart(), w.getEnd(), \\\"test\\\", \\\"l\\\");",
-      "for each (w in transcript.all('word')) transcript.addAnnotation(w.getStart(), w.getEnd(), \\\"test\\\", \\\"l\\\");",
+      "for w in transcript.all('word'): w.createTag(\\\"test\\\", \\\"l\\\")",
+      "for w in transcript.all('word'): transcript.createTag(w, \\\"test\\\", \\\"l\\\")",
+      "for w in transcript.all('word'): transcript.addTag(w, \\\"test\\\", \\\"l\\\")",
+      "for w in transcript.all('word'): transcript.createSpan(w, w, \\\"test\\\", \\\"l\\\")",
+      "for w in transcript.all('word'): transcript.createSpan(w, w, \\\"test\\\", \\\"l\\\", transcript)",
+      "for w in transcript.all('word'): transcript.addSpan(w, w, \\\"test\\\", \\\"l\\\", transcript)",
+      "for w in transcript.all('word'): transcript.createAnnotation(w.getStart(), w.getEnd(), \\\"test\\\", \\\"l\\\")",
+      "for w in transcript.all('word'): transcript.addAnnotation(w.getStart(), w.getEnd(), \\\"test\\\", \\\"l\\\")",
     };
          
     for (String script : scripts) {

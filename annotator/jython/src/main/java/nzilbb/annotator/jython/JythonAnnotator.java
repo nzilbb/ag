@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -278,6 +278,10 @@ public class JythonAnnotator extends Annotator {
         requiredLayers.add(matcher.group(1));
       } // next match
     } // next pattern
+    
+    // the script might get it's own output layers (e.g. to delete previous annotations)
+    // we don't want to declare those as input layers
+    requiredLayers.removeAll(Arrays.asList(getOutputLayers()));
     return requiredLayers.toArray(new String[0]);
   }
 
@@ -304,6 +308,9 @@ public class JythonAnnotator extends Annotator {
       // Graph.addTag(annotation, layerId, label)
       "\\.addTag\\([^,]+,\\s*\"([^\"]+)\",[^)]+\\)",
       "\\.addTag\\([^,]+,\\s*'([^']+)',[^)]+\\)",
+      // Graph.createSubdivision(annotaiton, layerId, label)
+      "\\.createSubdivision\\(\"([^\"]+)\",[^)]+\\)", 
+      "\\.createSubdivision\\('([^']+)',[^)]+\\)",
       // Graph.createSpan(from, to, layerId, label[, parent])
       "\\.createSpan\\([^)\"]+,\\s*\"([^\"]+)\"[^)]*\\)", 
       "\\.createSpan\\([^)']+,\\s*'([^']+)'[^)]*\\)", 

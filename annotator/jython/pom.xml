@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.jython</artifactId>
   <name>nzilbb.annotator.jython</name>
-  <version>1.0.4</version>
+  <version>1.0.5</version>
 
   <properties>
     <package.path>nzilbb/annotator/jython/</package.path>
