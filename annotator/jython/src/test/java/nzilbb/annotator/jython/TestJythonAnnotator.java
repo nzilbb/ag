@@ -251,6 +251,7 @@ public class TestJythonAnnotator {
     String[] scripts = {
       "for w in transcript.all('word'): w.createTag(\\\"test\\\", \\\"l\\\")",
       "for w in transcript.all('word'): transcript.createTag(w, \\\"test\\\", \\\"l\\\")",
+      "for w in transcript.all('word'): transcript.createSubdivision(w, \\\"test\\\", \\\"l\\\")",
       "for w in transcript.all('word'): transcript.addTag(w, \\\"test\\\", \\\"l\\\")",
       "for w in transcript.all('word'): transcript.createSpan(w, w, \\\"test\\\", \\\"l\\\")",
       "for w in transcript.all('word'): transcript.createSpan(w, w, \\\"test\\\", \\\"l\\\", transcript)",

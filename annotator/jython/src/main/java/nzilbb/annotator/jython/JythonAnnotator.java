@@ -309,8 +309,8 @@ public class JythonAnnotator extends Annotator {
       "\\.addTag\\([^,]+,\\s*\"([^\"]+)\",[^)]+\\)",
       "\\.addTag\\([^,]+,\\s*'([^']+)',[^)]+\\)",
       // Graph.createSubdivision(annotaiton, layerId, label)
-      "\\.createSubdivision\\(\"([^\"]+)\",[^)]+\\)", 
-      "\\.createSubdivision\\('([^']+)',[^)]+\\)",
+      "transcript\\.createSubdivision\\([^,]+,\\s*\"([^\"]+)\",[^)]+\\)", 
+      "transcript\\.createSubdivision\\([^,]+,\\s*'([^']+)',[^)]+\\)",
       // Graph.createSpan(from, to, layerId, label[, parent])
       "\\.createSpan\\([^)\"]+,\\s*\"([^\"]+)\"[^)]*\\)", 
       "\\.createSpan\\([^)']+,\\s*'([^']+)'[^)]*\\)", 
