@@ -128,6 +128,9 @@ var outputLayerPatterns = [
   // Graph.createTag(annotation, layerId, label)
   new RegExp("transcript\\.createTag\\([^,]+,\\s*\"([^\"]+)\",[^)]+\\)", "g"), 
   new RegExp("transcript\\.createTag\\([^,]+,\\s*'([^']+)',[^)]+\\)", "g"),
+  // Graph.createTag(annotation, layerId, label)
+  new RegExp("transcript\\.createSubdivision\\([^,]+,\\s*\"([^\"]+)\",[^)]+\\)", "g"), 
+  new RegExp("transcript\\.createSubdivision\\([^,]+,\\s*'([^']+)',[^)]+\\)", "g"),
   // Graph.addTag(annotation, layerId, label)
   new RegExp("\\.addTag\\([^,]+,\\s*\"([^\"]+)\",[^)]+\\)", "g"),
   new RegExp("\\.addTag\\([^,]+,\\s*'([^']+)',[^)]+\\)", "g"),
@@ -149,26 +152,29 @@ function addShebangs(script) {
 
   // look for input/output layers...
   
-  var inputLayers = [];
-  for (var p in inputLayerPatterns) {
-    var match = inputLayerPatterns[p].exec(script);
-    while (match) {
-      inputLayers.push(match[1]);      
-      // try for another match
-      match = inputLayerPatterns[p].exec(script);
-    } // next match
-  } // next pattern
-  
   var outputLayers = [];
   for (var p in outputLayerPatterns) {
     var match = outputLayerPatterns[p].exec(script);
     while (match) {
-      outputLayers.push(match[1]);      
+      outputLayers.push(match[1]);
       // try for another match
       match = outputLayerPatterns[p].exec(script);
     } // next match
   } // next pattern
 
+  var inputLayers = [];
+  for (var p in inputLayerPatterns) {
+    var match = inputLayerPatterns[p].exec(script);
+    while (match) {
+      // only if it's not also an output layer (e.g. they might remove old annotations from there)
+      if (outputLayers.indexOf(match[1]) < 0) {
+        inputLayers.push(match[1]);
+      }
+      // try for another match
+      match = inputLayerPatterns[p].exec(script);
+    } // next match
+  } // next pattern
+  
   // ensure the script has corresponding shebangs
   // (processed in reverse order because shebangs are prepended to the script)
   outputLayers.reverse()
