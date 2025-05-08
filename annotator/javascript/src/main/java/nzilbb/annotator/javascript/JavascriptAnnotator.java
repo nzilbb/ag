@@ -374,6 +374,10 @@ public class JavascriptAnnotator extends Annotator {
           requiredLayers.add(matcher.group(1));
         } // next match
       } // next pattern
+      
+      // the script might get it's own output layers (e.g. to delete previous annotations)
+      // we don't want to declare those as input layers
+      requiredLayers.removeAll(Arrays.asList(getOutputLayers()));
     }
     return requiredLayers.toArray(new String[0]);
   }
@@ -401,6 +405,9 @@ public class JavascriptAnnotator extends Annotator {
         // Graph.createTag(annotation, layerId, label)
         "transcript\\.createTag\\([^,]+,\\s*\"([^\"]+)\",[^)]+\\)", 
         "transcript\\.createTag\\([^,]+,\\s*'([^']+)',[^)]+\\)",
+        // Graph.createSubdivision(annotation, layerId, label)
+        "transcript\\.createSubdivision\\([^,]+,\\s*\"([^\"]+)\",[^)]+\\)", 
+        "transcript\\.createSubdivision\\([^,]+,\\s*'([^']+)',[^)]+\\)",
         // Graph.addTag(annotation, layerId, label)
         "\\.addTag\\([^,]+,\\s*\"([^\"]+)\",[^)]+\\)",
         "\\.addTag\\([^,]+,\\s*'([^']+)',[^)]+\\)",

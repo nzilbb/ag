@@ -352,12 +352,16 @@ public class TestJavascriptAnnotator {
          "transcript.my(\\\"word\\\").createTag('cv', 'test');",
          "for each (w in transcript.getAnnotations(\\\"word\\\")) w.createTag('cv', 'test');",
          "for each (w in transcript.annotations(\\\"word\\\")) w.createTag('cv', 'test');",
+         "for each (w in transcript.annotations(\\\"word\\\")) transcript.createTag(w, 'cv', 'test');",
          "for each (w in transcript.includingAnnotationsOn(\\\"word\\\")) w.createTag('cv', 'test');",
          "for each (w in transcript.includedAnnotationsOn(\\\"word\\\")) w.createTag('cv', 'test');",
          "for each (w in transcript.midpointIncludingAnnotationsOn(\\\"word\\\")) w.createTag('cv', 'test');",
          "for each (w in transcript.tagsOn(\\\"word\\\")) w.createTag('cv', 'test');",
          "for each (w in transcript.getAncestor(\\\"word\\\")) w.createTag('cv', 'test');",
          "for each (w in transcript.overlappingAnnotations(transcript, \\\"word\\\")) w.createTag('cv', 'test');",
+         // delete input layer annotations first
+         "for each (l in transcript.all(\\\"cv\\\")) l.destroy();"
+         +"for each (w in transcript.list(\\\"word\\\")) w.createTag('cv', 'test');",
       };
          
       for (String script : scripts) {
@@ -377,9 +381,10 @@ public class TestJavascriptAnnotator {
             fail("Double-quotes: setTaskParameters: "+script+" : "+x);
          }
          String[] requiredLayers = annotator.getRequiredLayers();
-         assertEquals("Double-quotes: 1 required layer: "+script+" : "+requiredLayers,
+         assertEquals("Double-quotes: 1 required layer: "+script+" : "
+                      +Arrays.asList(requiredLayers),
                       1, requiredLayers.length);
-         assertEquals("Double-quotes: word required: "+script+" : "+requiredLayers,
+         assertEquals("Double-quotes: word required: "+script+" : "+Arrays.asList(requiredLayers),
                       "word", requiredLayers[0]);
 
          // single-quotes version
@@ -399,9 +404,10 @@ public class TestJavascriptAnnotator {
          }
          
          requiredLayers = annotator.getRequiredLayers();
-         assertEquals("Single-quotes: 1 required layer: "+script+" : "+requiredLayers,
+         assertEquals("Single-quotes: 1 required layer: "+script+" : "
+                      +Arrays.asList(requiredLayers),
                       1, requiredLayers.length);
-         assertEquals("Single-quotes: word required: "+script+" : "+requiredLayers,
+         assertEquals("Single-quotes: word required: "+script+" : "+Arrays.asList(requiredLayers),
                       "word", requiredLayers[0]);
          
       } // next script
@@ -418,6 +424,7 @@ public class TestJavascriptAnnotator {
       String[] scripts = {
          "for each (w in transcript.all('word')) w.createTag(\\\"test\\\", \\\"l\\\");",
          "for each (w in transcript.all('word')) transcript.createTag(w, \\\"test\\\", \\\"l\\\");",
+         "for each (w in transcript.all('word')) transcript.createSubdivision(w, \\\"test\\\", \\\"l\\\");",
          "for each (w in transcript.all('word')) transcript.addTag(w, \\\"test\\\", \\\"l\\\");",
          "for each (w in transcript.all('word')) transcript.createSpan(w, w, \\\"test\\\", \\\"l\\\");",
          "for each (w in transcript.all('word')) transcript.createSpan(w, w, \\\"test\\\", \\\"l\\\", transcript);",
