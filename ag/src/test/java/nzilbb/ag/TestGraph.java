@@ -553,6 +553,9 @@ public class TestGraph {
     g.addLayer(new Layer("pos", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
                .setPeers(true).setPeersOverlap(false).setSaturated(true)
                .setParentId("word").setParentIncludes(true));
+    g.addLayer(new Layer("role", "Grammatical role").setAlignment(Constants.ALIGNMENT_NONE)
+               .setPeers(true).setPeersOverlap(false).setSaturated(true)
+               .setParentId("word").setParentIncludes(true));
 
     g.getOrCreateAnchorAt(0.0);
     Annotation Im = g.addAnnotation(
@@ -576,7 +579,7 @@ public class TestGraph {
       .setStartId(g.getOrCreateAnchorAt(0.0).getId())
       .setId("turn").setLayerId("turn").setLabel("john smith")
       .setEndId(g.getOrCreateAnchorAt(4.0).getId()));
-
+    
     // verify initial graph structure
     assertEquals("parent - I'm",     "turn", Im.getParentId());
     assertEquals("parent - forever", "turn", forever.getParentId());
@@ -591,6 +594,8 @@ public class TestGraph {
 
     // add POS annotations - womtimes multiple per token
     Annotation pron = g.createSubdivision(Im, "pos", "PRON");
+    Annotation subject = g.createTag(pron, "role", "subject");
+    assertTrue("subject - pron", subject.tags(pron));
     Annotation v = g.createSubdivision(Im, "pos", "V");
     Annotation adv = g.createSubdivision(forever, "pos", "ADV");
     Annotation hyph = g.createSubdivision(yours, "pos", "HYPH");
@@ -635,6 +640,7 @@ public class TestGraph {
     assertEquals("anchor - I'm/forever",      Im.getEndId(),      forever.getStartId());
     assertNotEquals("anchor - forever/yours", forever.getEndId(), yours.getStartId());
     assertEquals("anchor - yours/turn",       yours.getEndId(),   turn.getEndId());
+    assertTrue("subject still - pron", subject.tags(pron));
   }
 
   /** Test graph correctly tracks Annotation/Anchor changes. */

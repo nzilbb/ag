@@ -25,6 +25,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1166,6 +1167,8 @@ public class Graph extends Annotation {
    * new annotation that shares both start and end annotations with the given
    * annotation. Subsequent calls for the same annotation will chain new annotations
    * across the given annotation, using {@link #insertAfter(Annotation,String,String)}.
+   * <p> Peer-layered tags for the last pre-existing annotation will have their end anchors 
+   * updated, so they continue to share end anchors as before.
    * @param toSubdivide The annotation to subdivide.
    * @param layerId The new annotation's layer ID.
    * @param label The new annotation's label.
@@ -1178,7 +1181,22 @@ public class Graph extends Annotation {
     if (existingTags.size() == 0) { // there are no subdividers yet
       return createTag(toSubdivide, layerId, label);
     } else { // there's aleady at least one subdivider, so insert another after it
-      return insertAfter(existingTags.iterator().next(), layerId, label);
+      Annotation before = existingTags.iterator().next();
+      List<Annotation> peerLayerTags = Collections.EMPTY_LIST;
+      if (before.getLayer() != null && before.getLayer().getParentId() != null) {
+        final String parentLayerId = before.getLayer().getParentId();
+        // identify peer-layered tags
+        peerLayerTags = Arrays.stream(before.allTags())
+          .filter(a -> a.getLayer() != null) // valid layer
+          .filter(a -> parentLayerId.equals(a.getLayer().getParentId())) // peer layer
+          .collect(Collectors.toList());
+      }
+      Annotation after = insertAfter(before, layerId, label);
+      // ensure peer-layered tags continue to share end anchor
+      for (Annotation tag : peerLayerTags) {
+        tag.setEnd(before.getEnd());
+      }
+      return after;
     }
   } // end of createSubdivision()  
 
