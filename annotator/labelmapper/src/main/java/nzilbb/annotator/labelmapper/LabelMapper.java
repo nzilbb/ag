@@ -185,6 +185,42 @@ public class LabelMapper extends Annotator {
   public LabelMapper setComparator(String newComparator) { comparator = newComparator; return this; }
   
   /**
+   * Whether to disable collapsing of insert/delete sequences (TRUE) or not (FALSE). If
+   * FALSE or NULL, main-layer edit paths are 'collapsed' after they are computed, so an
+   * 'insert' step followed immediately by a 'delete' step are collapsed into a single
+   * 'change' step (as long as the source and target labels are relatively similar). 
+   * @see #getNoCollapse()
+   * @see #setNoCollapse(Boolean)
+   */
+  protected Boolean noCollapse = Boolean.FALSE;
+  /**
+   * Getter for {@link #noCollapse}: Whether to disable collapsing of insert/delete sequences
+   * (TRUE) or not (FALSE). If FALSE or NULL, main-layer edit paths are 'collapsed' after they 
+   * are computed, so an 'insert' step followed immediately by a 'delete' step are
+   * collapsed into a single 'change' step (as long as the source and target labels are
+   * relatively similar).  
+   * @return Whether to disable collapsing of insert/delete sequences (TRUE) or not
+   * (FALSE). If FALSE or NULL, main-layer edit paths are 'collapsed' after they are
+   * computed, so an 'insert' step followed immediately by a 'delete' step are collapsed
+   * into a single 'change' step (as long as the source and target labels are relatively
+   * similar). 
+   */
+  public Boolean getNoCollapse() { return noCollapse; }
+  /**
+   * Setter for {@link #noCollapse}: Whether to disable collapsing of insert/delete
+   * sequences (TRUE) or not (FALSE). If FALSE or NULL, main-layer edit paths are
+   * 'collapsed' after they are computed, so an 'insert' step followed immediately by a
+   * 'delete' step are collapsed into a single 'change' step (as long as the source and
+   * target labels are relatively similar). 
+   * @param newNoCollapse Whether to disable collapsing of insert/delete sequences (TRUE)
+   * or not (FALSE). If FALSE or NULL, main-layer edit paths are 'collapsed' after they
+   * are computed, so an 'insert' step followed immediately by a 'delete' step are
+   * collapsed into a single 'change' step (as long as the source and target labels are
+   * relatively similar). 
+   */
+  public LabelMapper setNoCollapse(Boolean newNoCollapse) { noCollapse = newNoCollapse; return this; }
+  
+  /**
    * Label layer for sub-mapping.
    * <p> A sub-mapping is available when {@link #sourceLayerId} and {@link #targetLayerId}
    * are two word token layers, {@link #comparator} is set to "CharacterToCharacter", and 
@@ -304,6 +340,40 @@ public class LabelMapper extends Annotator {
    * "IPAToDISC", "DISCToIPA", "XSAMPAToIPA", or "DISCToDISC".
    */
   public LabelMapper setSubComparator(String newSubComparator) { subComparator = newSubComparator; return this; }
+
+  /**
+   * Whether to disable collapsing of insert/delete sequences (TRUE) or not (FALSE). If
+   * FALSE or NULL, sub-layer edit paths are 'collapsed' after they are computed, so an
+   * 'insert' step followed immediately by a 'delete' step are collapsed into a single
+   * 'change' step (as long as the source and target labels are relatively similar). 
+   * @see #getNoSubCollapse()
+   * @see #setNoSubCollapse(Boolean)
+   */
+  protected Boolean noSubCollapse = Boolean.FALSE;
+  /**
+   * Getter for {@link #noSubCollapse}: Whether to disable collapsing of insert/delete sequences 
+   * (TRUE) or not (FALSE). If FALSE or NULL, sub-layer edit paths are 'collapsed' after they 
+   * are computed, so an 'insert' step followed immediately by a 'delete' step are collapsed
+   * into a single 'change' step (as long as the source and target labels are relatively similar). 
+   * @return Whether to disable collapsing of insert/delete sequences (TRUE) or not (FALSE). 
+   * If FALSE or NULL, sub-layer edit paths are 'collapsed' after they are computed, so an
+   * 'insert' step followed immediately by a 'delete' step are collapsed into a single 'change'
+   * step (as long as the source and target labels are relatively similar). 
+   */
+  public Boolean getNoSubCollapse() { return noSubCollapse; }
+  /**
+   * Setter for {@link #noSubCollapse}: Whether to disable collapsing of insert/delete
+   * sequences (TRUE) or not (FALSE). If FALSE or NULL, sub-layer edit paths are
+   * 'collapsed' after they are computed, so an 'insert' step followed immediately by a
+   * 'delete' step are collapsed into a single 'change' step (as long as the source and
+   * target labels are relatively similar). 
+   * @param newNoSubCollapse Whether to disable collapsing of insert/delete sequences
+   * (TRUE) or not (FALSE). If FALSE or NULL, sub-layer edit paths are 'collapsed' after
+   * they are computed, so an 'insert' step followed immediately by a 'delete' step are
+   * collapsed into a single 'change' step (as long as the source and target labels are
+   * relatively similar).
+   */
+  public LabelMapper setNoSubCollapse(Boolean newNoSubCollapse) { noSubCollapse = newNoSubCollapse; return this; }
   
   /**
    * {@link UsesRelationalDatabase} method that sets the information required for
@@ -827,8 +897,10 @@ public class LabelMapper extends Annotator {
           for (Vector<LabelElement> vLabels : labelSets) {
             // find the minimum edit path between them
             List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
-            // collapse INSERT-then-DELETE into just CHANGE
-            path = mp.collapse(path);
+            if (noCollapse == null || !noCollapse) {
+              // collapse INSERT-then-DELETE into just CHANGE
+              path = mp.collapse(path); // TODO don't collapse if it's strict
+            }
             if (bestPath == null // first one, or a shorter path
                 || path.get(path.size()-1).totalDistance()
                 < bestPath.get(bestPath.size()-1).totalDistance()) {
@@ -1027,8 +1099,10 @@ public class LabelMapper extends Annotator {
       } else { // both have sub annotations
         // find the minimum edit path between then
         List<EditStep<LabelElement>> path = mp.minimumEditPath(vLabels, vTokens);
-        // collapse INSERT-then-DELETE into just CHANGE
-        path = mp.collapse(path);
+        if (noSubCollapse == null || !noSubCollapse) {
+          // collapse INSERT-then-DELETE into just CHANGE
+          path = mp.collapse(path);
+        }
         setStatus(
           mainSource.getLabel()+" ("+mainSource.getStart()+") edit path: "+path.size());
         

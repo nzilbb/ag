@@ -401,6 +401,60 @@ public class TestLabelMapper {
                  14, g.all("disc").length);
   }   
 
+  /** Test mapping of phoneme word labels to phones, using strict 'no-collapse' comparison. */
+  @Test public void DISCToDISCStrict() throws Exception {
+    LabelMapper annotator = newAnnotator();
+    // annotator.getStatusObservers().add(status->System.out.println(status));
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    
+    // layers are created as required
+    annotator.setTaskParameters(
+      "sourceLayerId=phonemes"
+      +"&splitLabels=char"
+      +"&targetLayerId=phone"
+      +"&comparator=DISCToDISC"
+      +"&noCollapse=on"
+      +"&mappingLayerId=disc"); // nonexistent
+    Layer layer = annotator.getSchema().getLayer("disc");
+    assertNotNull("disc layer created", layer);
+    assertEquals("disc layer correct type", Constants.TYPE_IPA, layer.getType());
+    assertEquals("disc layer correct parent", "phone", layer.getParentId());
+    assertEquals("disc layer alignment", Constants.ALIGNMENT_NONE, layer.getAlignment());
+
+    // create a 'pre-existing' tag to ensure it's deleted or changed
+    layer.setPeers(true); // fool the API into allowing more than one tag
+    g.all("phone")[0].createTag("disc", "to-delete");
+    g.commit();
+
+    g.trackChanges();
+    annotator.transform(g);
+    g.commit(); // remove destroyed annotations
+    
+    Annotation[] phones = g.all("phone");
+    assertEquals("Right number of phones " + Arrays.asList(phones), 15, phones.length);
+    String[] phoneLabels = { "@", "d","I","f","@", "r","H","t",  "f","2","@","f","2","t","@" };
+    //                                                           @ does not map to r
+    String[] discLabels = {  "1", "d","I","f",null,"r","H","t",  "f","2r",null,"f","2","L","@r" };
+    for (int p = 0; p < phones.length; p++) {
+      assertEquals("Phone label " + p, phoneLabels[p], phones[p].getLabel());
+      Annotation[] tags = phones[p].all("disc");
+      if (discLabels[p] != null) {
+        assertEquals("One tag " + p + " " + Arrays.asList(tags), 1, tags.length);
+        assertNotNull("Tagged " + p, phones[p].first("disc"));
+        assertEquals("Tag label " + p, discLabels[p], phones[p].first("disc").getLabel());
+        assertEquals("Tag confidence " + p,
+                     Constants.CONFIDENCE_AUTOMATIC,
+                     phones[p].first("disc").getConfidence().intValue());
+      } else {
+        assertEquals("No tag " + p, 0, tags.length);
+      }
+    }
+    assertEquals("Right number of tags " + Arrays.asList(g.all("disc")),
+                 13, g.all("disc").length);
+  }   
 
   /** Test mapping of Te Ara Dictionary style phoneme word labels to phones. In this case,
    * diphtongs are multiple characters, but should be collapsed into the same phone, not
@@ -1251,7 +1305,7 @@ public class TestLabelMapper {
           throws StoreException, PermissionException {
           throw new StoreException();
         }
-        public void saveMedia(String id, String trackSuffix, String mediaUrl)
+        public MediaFile saveMedia(String id, String mediaUrl, String trackSuffix)
           throws StoreException, PermissionException, GraphNotFoundException {
           throw new StoreException();
         }
@@ -1259,7 +1313,7 @@ public class TestLabelMapper {
           throws StoreException, PermissionException, GraphNotFoundException {
           throw new StoreException();
         }
-        public void saveEpisodeDocument(String id, String url)
+        public MediaFile saveEpisodeDocument(String id, String url)
           throws StoreException, PermissionException, GraphNotFoundException {
           throw new StoreException();
         }
@@ -1280,6 +1334,11 @@ public class TestLabelMapper {
           throws StoreException, PermissionException {
           throw new StoreException();
         }
+        public void deleteMedia(String id, String fileName)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
+
       });     
     // use derby for relational database
     annotator.setRdbConnectionFactory(new DerbyConnectionFactory(dir));

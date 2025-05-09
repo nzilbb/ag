@@ -70,6 +70,14 @@
           layer.</details> 
       </details>
       
+      <details><summary> Strict Mapping </summary>
+        <p> Only link strictly matching labels. If unticked, then similar but not totally
+          matching labels may be linked during mapping. If ticked, then source and target
+          labels must 'strictly' correspond to each other (although 'strictly' can, with
+          some comparators, tolerate uppercase/lowercase or punctuation differences,
+          spelling/symbol differences, even if they're similar, will not be mapped.  </p> 
+      </details>
+
       <details><summary> Target Layer </summary>
         <p> This layer defines which tokens will be tagged. Each annotation on this layer
           will have one tag added, with one or more labels from the <em>Source Layer</em>,
@@ -305,6 +313,11 @@
         </span>
         <span id="exampleMapping">↓</span>
       </div>
+      <div class="field" title="Only link strictly matching labels; if unticked, then similar but not totally matching labels may be linked during mapping.">
+        <label for="noCollapse"> Strict mapping </label>
+        <span><input type="checkbox" id="noCollapse" name="noCollapse"></span>
+        <span>&nbsp;</span>
+      </div>
       <div class="field" title="Which tokens will be tagged">
         <label for="targetLayerId"> Target Layer </label>
         <span>
@@ -352,6 +365,11 @@
           </select>
         </span>
         <span id="exampleSubMapping"></span>
+      </div>
+      <div class="field" title="Only link strictly matching labels; if unticked, then similar but not totally matching labels may be linked during mapping.">
+        <label for="noSubCollapse"> Strict mapping </label>
+        <span><input type="checkbox" id="noSubCollapse" name="noSubCollapse"></span>
+        <span>&nbsp;</span>
       </div>
       <div class="field" title="Which tokens will be tagged for the sub-mapping">
         <label for="subTargetLayerId"> Sub-mapping Target Layer </label>

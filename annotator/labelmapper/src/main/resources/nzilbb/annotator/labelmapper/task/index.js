@@ -68,6 +68,9 @@ getSchema(s => {
         } catch(x) {
         }
       }
+      // set the checkboxes
+      document.getElementById("noCollapse").checked = parameters.get("noCollapse");
+      document.getElementById("noSubCollapse").checked = parameters.get("noSubCollapse");
       
       // fill out sub layer options
       changedSourceLayer(sourceLayerId);
