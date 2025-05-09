@@ -2263,7 +2263,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
           if (lexicalLayer != null) {
             Annotation lexical = word.first(lexicalLayer.getId());
             if (lexical != null) {
-              label.append("[").append(lexical.getLabel()).append("]");
+              label.append("(").append(lexical.getLabel()).append(")");
             }
           }
           if (phraseLanguageLayer != null) {
