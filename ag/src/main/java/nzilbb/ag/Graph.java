@@ -1187,7 +1187,10 @@ public class Graph extends Annotation {
         final String parentLayerId = before.getLayer().getParentId();
         // identify peer-layered tags
         peerLayerTags = Arrays.stream(before.allTags())
+          .filter(a -> a.getChange() != Change.Operation.Destroy) // not deleted annotations
           .filter(a -> a.getLayer() != null) // valid layer
+          .filter(a -> !a.getLayerId().equals(layerId)) // not the layer we're adding to
+          .filter(a -> !a.getLayerId().equals(toSubdivide.getLayerId())) // not the layer we're annotating
           .filter(a -> parentLayerId.equals(a.getLayer().getParentId())) // peer layer
           .collect(Collectors.toList());
       }
