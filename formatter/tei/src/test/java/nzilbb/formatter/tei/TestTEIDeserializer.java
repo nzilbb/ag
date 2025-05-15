@@ -1506,6 +1506,10 @@ public class TestTEIDeserializer {
       .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("transcript_location", "Place of Origin")
       .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("transcript_recipient", "Recipient of the communication")
+      .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("transcript_recipientGender", "Recipient's gender")
+      .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("transcript_type", "Transcript Type")
       .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("title", "Title")
@@ -1593,7 +1597,7 @@ public class TestTEIDeserializer {
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
     // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals(6, defaultParameters.size());
+    assertEquals(8, defaultParameters.size());
     assertNull("lg", 
                defaultParameters.get("lg").getValue());
     assertEquals("placeName", "placeName", 
@@ -1606,6 +1610,12 @@ public class TestTEIDeserializer {
                  ((Layer)defaultParameters.get("hi").getValue()).getId());
     assertEquals("language", "language", 
                  ((Layer)defaultParameters.get("Language").getValue()).getId());
+    assertEquals(
+      "recipient", "transcript_recipient", 
+      ((Layer)defaultParameters.get("header_person_role_Recipient").getValue()).getId());
+    assertEquals(
+      "recipient gender", "transcript_recipientGender", 
+      ((Layer)defaultParameters.get("header_person_role_Recipient_gender").getValue()).getId());
       
     // configure the deserialization
     deserializer.setParameters(defaultParameters);
@@ -1629,6 +1639,12 @@ public class TestTEIDeserializer {
     String[] place = g.labels("transcript_location"); 
     assertEquals(1, place.length);
     assertEquals("Wanganui", place[0]);
+    String[] recipient = g.labels("transcript_recipient"); 
+    assertEquals(1, recipient.length);
+    assertEquals("Ms Smith", recipient[0]);
+    String[] recipientGender = g.labels("transcript_recipientGender"); 
+    assertEquals(1, recipientGender.length);
+    assertEquals("Female", recipientGender[0]);
 
     // participants     
     Annotation[] who = g.all("who"); 

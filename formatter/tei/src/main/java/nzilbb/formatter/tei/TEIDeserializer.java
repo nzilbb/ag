@@ -123,6 +123,16 @@ import nzilbb.configure.ParameterSet;
  *        is converted to a single number (in years) if the text is formatted
  *        as <samp><var>y</var>;<var>m</var>.<var>d</var></samp>
  *        or as <samp><var>y</var> years <var>m</var> months <var>d</var> days</samp></li>
+ *      <li>
+ *        the <code>&lt;particDesc&gt;&lt;person&gt;&lt;persName&gt;</code> tags
+ *        with a "role" attribute can be mapped to a transcript attribute, by the value of
+ *        the attribute. For example if <code>role="Recipient"</code> then a "recipient"
+ *        transcript attribute can receive the tag content - either the <tt>id</tt> of the
+ *        parent <code>&lt;person&gt;</code> tag, or else the text content of the 
+ *        <code>&lt;persName&gt;</code> tag. 
+ *        <br> Additionally, if the <code>&lt;persName&gt;</code> has a <tt>gender</tt> attribute,
+ *        the value can be mapped to a transcript attribute for gender.
+ *        </li>
  *    </ul>
  *  </li>
  *  <li>
@@ -1080,6 +1090,38 @@ public class TEIDeserializer implements GraphDeserializer {
         } // next pc type
       } // there are pc types
 
+      Node persNameWithRole = (Node) xpath.evaluate(
+        "//profileDesc/particDesc/person/persName[@role]", header,
+        XPathConstants.NODE);
+      if (persNameWithRole != null) {
+        Attr role = (Attr)persNameWithRole.getAttributes().getNamedItem("role");
+        if (role != null) {
+          String keyName = "header_person_role_"+role.getValue();
+          if (!layerToCandidates.containsKey(keyName)) {
+            Vector<String> possibleMatches = new Vector<String>();
+            possibleMatches.add(role.getValue());
+            possibleMatches.add("transcript" + role.getValue());
+            layerToPossibilities.put(
+              new Parameter(keyName, Layer.class, "Document Person: " + role.getValue()), 
+              possibleMatches);
+            layerToCandidates.put(keyName, graphTagLayers);
+          } // not already specified
+          Attr gender = (Attr)persNameWithRole.getAttributes().getNamedItem("gender");
+          if (gender != null) {
+            keyName = "header_person_role_"+role.getValue()+"_gender";
+            if (!layerToCandidates.containsKey(keyName)) {
+              Vector<String> possibleMatches = new Vector<String>();
+              possibleMatches.add(role.getValue() + "gender");
+              possibleMatches.add("transcript" + role.getValue() + "gender");
+              layerToPossibilities.put(
+              new Parameter(
+                keyName, Layer.class, "Document Note Type: " + role.getValue() + " gender"), 
+              possibleMatches);
+              layerToCandidates.put(keyName, graphTagLayers);
+            } // not already specified
+          } // person role has gender attribute
+        } // person has role
+      } // there's a persName
       LinkedHashMap<String,Layer> instantLayers = new LinkedHashMap<String,Layer>();
       LinkedHashMap<String,Layer> intervalTurnPeerAndChildLayers = new LinkedHashMap<String,Layer>();
       for (Layer layer : schema.getRoot().getChildren().values()) {
@@ -1480,6 +1522,66 @@ public class TEIDeserializer implements GraphDeserializer {
             }
           } // there's a value
         }
+        Node persNameWithRole = (Node) xpath.evaluate(
+          "//profileDesc/particDesc/person/persName[@role]", header,
+          XPathConstants.NODE);
+        if (persNameWithRole != null) {
+          Attr role = (Attr)persNameWithRole.getAttributes().getNamedItem("role");
+          if (role != null) {
+            String value = role.getValue();
+            if (value != null) value = value.trim();
+            if (value != null && value.length() > 0) { // there's value
+              String keyName = "header_person_role_"+value;
+              Layer layer = null;	       
+              if (parameters.containsKey(keyName)) {
+                layer = (Layer) parameters.get(keyName).getValue();
+              }
+              if (layer != null) { // it's mapped to a layer
+                // use the text content by default
+                String label = persNameWithRole.getTextContent();
+                // ...but use the parent @id if there is one
+                Attr parentId = (Attr)persNameWithRole.getParentNode().getAttributes()
+                  .getNamedItem("xml:id");
+                if (parentId == null) { // should be xml:id, but might be just id
+                  parentId = (Attr)persNameWithRole.getParentNode().getAttributes()
+                    .getNamedItem("id");
+                }
+                if (parentId != null) label = parentId.getValue();
+                graph.createTag(graph, layer.getId(), label)
+                  .setConfidence(Constants.CONFIDENCE_MANUAL);
+              }
+              Attr gender = (Attr)persNameWithRole.getAttributes().getNamedItem("gender");
+              if (gender != null) {
+                value = gender.getValue();
+                if (value != null) value = value.trim();
+                if (value != null && value.length() > 0) { // there's value
+                  keyName = "header_person_role_"+role.getValue()+"_gender";
+                  layer = null;	       
+                  if (parameters.containsKey(keyName)) {
+                    layer = (Layer) parameters.get(keyName).getValue();
+                  }
+                  if (layer != null) { // it's mapped to a layer
+                    LinkedHashMap<String,String> validLabels = layer.getValidLabels();
+                    if (validLabels.size() > 0 // there are valid labels
+                        // and the value isn't one of them
+                        && !validLabels.containsKey(value)) {
+                      // normalize label if possible
+                      for (String key : validLabels.keySet()) {
+                        if (key.equalsIgnoreCase(value)
+                            || validLabels.get(key).equalsIgnoreCase(value)) {
+                          value = key;
+                          break;
+                        }
+                      } // next label
+                    } // normalize label if possible
+                    graph.createTag(graph, layer.getId(), value)
+                      .setConfidence(Constants.CONFIDENCE_MANUAL);
+                  }
+                } // there's a value
+              } // there's a gender attribute
+            } // the role attribute has a value
+          } // there's a role attribute
+        } // there's a persName
 
         items = (NodeList) xpath.evaluate("//note[@type]", header, XPathConstants.NODESET);
         if (items != null && items.getLength() > 0) {
