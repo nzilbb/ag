@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -72,7 +72,7 @@ public class TestTEIDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 14, deserializer.configure(configuration, schema).size());
+                 15, deserializer.configure(configuration, schema).size());
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -95,6 +95,7 @@ public class TestTEIDeserializer {
     assertNull("role", configuration.get("roleLayer").getValue());
     assertNull("age", configuration.get("ageLayer").getValue());
     assertNull("birth", configuration.get("birthLayer").getValue());
+    assertNull("place", configuration.get("publicationPlaceLayer").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -247,7 +248,7 @@ public class TestTEIDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 14, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 15, deserializer.configure(configuration, schema).size());      
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -273,6 +274,7 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("ageLayer").getValue()).getId());
     assertEquals("birthdate", "dob", 
                  ((Layer)configuration.get("birthLayer").getValue()).getId());
+    assertNull("place", configuration.get("publicationPlaceLayer").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -512,7 +514,7 @@ public class TestTEIDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 14, deserializer.configure(configuration, schema).size());
+                 15, deserializer.configure(configuration, schema).size());
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -538,6 +540,7 @@ public class TestTEIDeserializer {
                configuration.get("ageLayer").getValue());
     assertNull("birthdate not mapped",
                configuration.get("birthLayer").getValue());
+    assertNull("place", configuration.get("publicationPlaceLayer").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -676,7 +679,7 @@ public class TestTEIDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 14, deserializer.configure(configuration, schema).size());
+                 15, deserializer.configure(configuration, schema).size());
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -702,6 +705,7 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("ageLayer").getValue()).getId());
     assertEquals("birthdate", "dob", 
                  ((Layer)configuration.get("birthLayer").getValue()).getId());
+    assertNull("place", configuration.get("publicationPlaceLayer").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -937,7 +941,7 @@ public class TestTEIDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 14, deserializer.configure(configuration, schema).size());
+                 15, deserializer.configure(configuration, schema).size());
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -963,6 +967,7 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("ageLayer").getValue()).getId());
     assertEquals("birthdate", "dob", 
                  ((Layer)configuration.get("birthLayer").getValue()).getId());
+    assertNull("place", configuration.get("publicationPlaceLayer").getValue());
     
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -1044,7 +1049,7 @@ public class TestTEIDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 14, deserializer.configure(configuration, schema).size());
+                 15, deserializer.configure(configuration, schema).size());
     assertEquals("graphXpath", "//text", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("comment", "comment", 
@@ -1070,6 +1075,7 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("ageLayer").getValue()).getId());
     assertEquals("birthdate", "dob", 
                  ((Layer)configuration.get("birthLayer").getValue()).getId());
+    assertNull("place", configuration.get("publicationPlaceLayer").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -1181,7 +1187,7 @@ public class TestTEIDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("graphXpath").setValue("//p");
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 14, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 15, deserializer.configure(configuration, schema).size());      
     assertEquals("graphXpath parameter", "//p", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("graphXpath attrinbute", "//p", deserializer.getGraphXpath());
@@ -1196,6 +1202,7 @@ public class TestTEIDeserializer {
     assertNull("role", configuration.get("roleLayer").getValue());
     assertEquals("phrase language", "language", 
                  ((Layer)configuration.get("languageLayer").getValue()).getId());
+    assertNull("place", configuration.get("publicationPlaceLayer").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -1497,6 +1504,8 @@ public class TestTEIDeserializer {
       .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("transcript_version_date", "Version Date")
       .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("transcript_location", "Place of Origin")
+      .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("transcript_type", "Transcript Type")
       .setAlignment(0).setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("title", "Title")
@@ -1562,7 +1571,7 @@ public class TestTEIDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("graphXpath").setValue("//p");
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 14, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 15, deserializer.configure(configuration, schema).size());      
     assertEquals("graphXpath parameter", "//p", 
                  (String)configuration.get("graphXpath").getValue());
     assertEquals("graphXpath attrinbute", "//p", deserializer.getGraphXpath());
@@ -1578,6 +1587,8 @@ public class TestTEIDeserializer {
                  ((Layer)configuration.get("roleLayer").getValue()).getId());
     assertEquals("phrase language", "language", 
                  ((Layer)configuration.get("languageLayer").getValue()).getId());
+    assertEquals("place", "transcript_location", 
+                 ((Layer)configuration.get("publicationPlaceLayer").getValue()).getId());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -1615,6 +1626,9 @@ public class TestTEIDeserializer {
     assertEquals(1, title.length);
     assertEquals("Test test", title[0]);
     assertEquals("transcriber's details", g.first("scribe").getLabel());
+    String[] place = g.labels("transcript_location"); 
+    assertEquals(1, place.length);
+    assertEquals("Wanganui", place[0]);
 
     // participants     
     Annotation[] who = g.all("who"); 
