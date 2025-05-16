@@ -840,6 +840,7 @@ public class TextGridSerialization
           p.setValue(getWordLayer());
         } else if (getSchema().getLayer("segment") != null
                    && (sName.equalsIgnoreCase("phones") // MFA alignment TextGrid?
+                       || sName.equalsIgnoreCase("mfa") // renamed MFA output?
                        || sName.equalsIgnoreCase("phone")
                        || sName.startsWith("phone ")
                        || sName.startsWith("phones ")
@@ -848,6 +849,7 @@ public class TextGridSerialization
           p.setValue(getSchema().getLayer("segment"));
         } else if (getSchema().getLayer("phone") != null
                    && (sName.equalsIgnoreCase("phones") // MFA alignment TextGrid?
+                       || sName.equalsIgnoreCase("mfa") // renamed MFA output?
                        || sName.startsWith("phone ")
                        || sName.startsWith("phones ")
                        || sName.equals("MAU") || sName.startsWith("MAU-"))) { // WebMAUS output?
