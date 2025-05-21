@@ -1641,7 +1641,7 @@ public class TestTEIDeserializer {
     assertEquals("Wanganui", place[0]);
     String[] recipient = g.labels("transcript_recipient"); 
     assertEquals(1, recipient.length);
-    assertEquals("Ms Smith", recipient[0]);
+    assertEquals("Ms Smith Sister", recipient[0]);
     String[] recipientGender = g.labels("transcript_recipientGender"); 
     assertEquals(1, recipientGender.length);
     assertEquals("Female", recipientGender[0]);
