@@ -1115,7 +1115,7 @@ public class TEIDeserializer implements GraphDeserializer {
               possibleMatches.add("transcript" + role.getValue() + "gender");
               layerToPossibilities.put(
               new Parameter(
-                keyName, Layer.class, "Document Note Type: " + role.getValue() + " gender"), 
+                keyName, Layer.class, "Document Person: " + role.getValue() + " gender"), 
               possibleMatches);
               layerToCandidates.put(keyName, graphTagLayers);
             } // not already specified
