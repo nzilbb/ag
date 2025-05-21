@@ -27,8 +27,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -127,9 +129,7 @@ import nzilbb.configure.ParameterSet;
  *        the <code>&lt;particDesc&gt;&lt;person&gt;&lt;persName&gt;</code> tags
  *        with a "role" attribute can be mapped to a transcript attribute, by the value of
  *        the attribute. For example if <code>role="Recipient"</code> then a "recipient"
- *        transcript attribute can receive the tag content - either the <tt>id</tt> of the
- *        parent <code>&lt;person&gt;</code> tag, or else the text content of the 
- *        <code>&lt;persName&gt;</code> tag. 
+ *        transcript attribute can receive the tag content. 
  *        <br> Additionally, if the <code>&lt;persName&gt;</code> has a <tt>gender</tt> attribute,
  *        the value can be mapped to a transcript attribute for gender.
  *        </li>
@@ -1538,15 +1538,8 @@ public class TEIDeserializer implements GraphDeserializer {
               }
               if (layer != null) { // it's mapped to a layer
                 // use the text content by default
-                String label = persNameWithRole.getTextContent();
-                // ...but use the parent @id if there is one
-                Attr parentId = (Attr)persNameWithRole.getParentNode().getAttributes()
-                  .getNamedItem("xml:id");
-                if (parentId == null) { // should be xml:id, but might be just id
-                  parentId = (Attr)persNameWithRole.getParentNode().getAttributes()
-                    .getNamedItem("id");
-                }
-                if (parentId != null) label = parentId.getValue();
+                String label = textContent((Element)persNameWithRole).stream()
+                  .collect(Collectors.joining(" "));
                 graph.createTag(graph, layer.getId(), label)
                   .setConfidence(Constants.CONFIDENCE_MANUAL);
               }
@@ -2246,6 +2239,29 @@ public class TEIDeserializer implements GraphDeserializer {
     } // next child
     return vNodes;
   } // end of getWords()
+
+  /**
+   * Traverses the given node recursively to build a list of text elements.
+   * @param e Element to traverse.
+   * @return An ordered list of strings representing the text content of the element and all its
+   * descendant elements.
+   */
+  protected Vector<String> textContent(Element e) {
+    Vector<String> text = new Vector<String>();
+    NodeList children = e.getChildNodes();
+    for (int c = 0; c < children.getLength(); c++) {
+      Node child = children.item(c);
+      if (child instanceof Text) {
+        String value = Optional.ofNullable(child.getNodeValue()).orElse("").trim();
+        if (value.length() > 0) {
+          text.add(value);
+        }
+      } else if (child instanceof Element) {
+        text.addAll(textContent((Element)child));
+      } // element
+    } // next child
+    return text;
+  } // end of textContent()
 
   /**
    * Returns any warnings that may have arisen during the last execution of {@link #deserialize()}.
