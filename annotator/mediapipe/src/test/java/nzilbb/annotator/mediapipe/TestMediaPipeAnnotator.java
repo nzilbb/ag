@@ -362,7 +362,7 @@ public class TestMediaPipeAnnotator {
     
     annotator.setTaskParameters(
       "annotatedImageLayerId=frame" // doesn't already exist
-      +"&frameCountLayerId=transcript_frameCount"
+      +"&frameCountLayerId=frameCount" // will be prefixed with "transcript_"
       +"&paintContours=true");
     assertEquals("annotatedImageLayerId set", "frame", annotator.getAnnotatedImageLayerId());
     

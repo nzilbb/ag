@@ -472,7 +472,14 @@ public class MediaPipeAnnotator extends Annotator {
    * @param newFrameCountLayerId ID of a transcript attribute layer to store a count of
    * the annotated frames. 
    */
-  public MediaPipeAnnotator setFrameCountLayerId(String newFrameCountLayerId) { frameCountLayerId = newFrameCountLayerId; return this; }
+  public MediaPipeAnnotator setFrameCountLayerId(String newFrameCountLayerId) {
+    if (newFrameCountLayerId != null && !newFrameCountLayerId.startsWith("transcript_")) {
+      // for LaBB-CAT at least, transcript attributes must be prefixed "transcript_"
+      newFrameCountLayerId = "transcript_"+newFrameCountLayerId;
+    }
+    frameCountLayerId = newFrameCountLayerId;
+    return this;
+  }
   
   /**
    * Default constructor.

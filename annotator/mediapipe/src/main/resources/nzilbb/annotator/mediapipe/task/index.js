@@ -185,10 +185,14 @@ getSchema(s => {
 }); // getSchema
                 
 // this function detects when the user selects [add new layer]:
-function changedLayer(select, defaultNewLayerName) {
+function changedLayer(select, defaultNewLayerName, transcriptAttribute) {
   if (select.value == "[add new layer]") {
-    const newLayer = prompt("Please enter the new layer ID", defaultNewLayerName);
+    let newLayer = prompt("Please enter the new layer ID", defaultNewLayerName);    
     if (newLayer) { // they didn't cancel
+      if (transcriptAttribute && !newLayer.startsWith("transcript_")) {
+        // for LaBB-CAT at least, transcript attributes must be prefixed transcript_
+        newLayer = `transcript_${newLayer}`;
+      }
       // check there's not already a layer with that name
       for (let l in schema.layers) {
         var layer = schema.layers[l];
@@ -213,4 +217,4 @@ document.getElementById("resultLayerId").onchange = function(e) {
 document.getElementById("annotatedImageLayerId").onchange = function(e) {
   changedLayer(this, "mediapipeFrame"); };
 document.getElementById("frameCountLayerId").onchange = function(e) {
-  changedLayer(this, "transcript_mediapipeFrameCount"); };
+  changedLayer(this, "transcript_mediapipeFrameCount", true); };
