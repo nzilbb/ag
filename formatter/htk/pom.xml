@@ -10,6 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.htk.mlf</artifactId>
   <name>nzilbb.formatter.htk.mlf</name>
+  <description>Serializer/Deserializer of files for use with the HMM Toolkit (HTK).</description>
   <version>1.4.0</version>
 
   <properties>

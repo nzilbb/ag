@@ -10,6 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.latex</artifactId>
   <name>nzilbb.formatter.latex</name>
+  <description>Serializer for producing LaTeX documents.</description>
   <version>0.3.1</version>
 
   <properties>

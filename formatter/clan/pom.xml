@@ -10,6 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.clan</artifactId>
   <name>nzilbb.formatter.clan</name>
+  <description>Serialization for CHAT files produced by CLAN.</description>
   <version>1.3.1</version>
 
   <properties>

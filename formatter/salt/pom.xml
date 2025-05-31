@@ -10,6 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.salt</artifactId>
   <name>nzilbb.formatter.salt</name>
+  <description>Serializer/Deserializer for SALT transcripts.</description>
   <version>0.3.1</version>
 
   <properties>

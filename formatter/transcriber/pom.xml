@@ -10,6 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.transcriber</artifactId>
   <name>nzilbb.formatter.transcriber</name>
+  <description>Serializer/Deserializer for Transriber .trs transcripts.</description>
   <version>2.0.5</version>
 
   <properties>

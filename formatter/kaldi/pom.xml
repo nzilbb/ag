@@ -10,6 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.kaldi</artifactId>
   <name>nzilbb.formatter.kaldi</name>
+  <description>Serializer/Deserializer of files for use with the Kaldi ASR toolkit.</description>
   <version>1.3.2</version>
 
   <properties> 

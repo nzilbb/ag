@@ -10,6 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.praat</artifactId>
   <name>nzilbb.formatter.praat</name>
+  <description>Serializer/Deserializer for Praat TextGrids.</description>
   <version>2.7.1</version>
 
   <properties>

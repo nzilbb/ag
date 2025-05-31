@@ -10,6 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.pdf</artifactId>
   <name>nzilbb.formatter.pdf</name>
+  <description>Serializer for producing PDFs.</description>
   <version>0.5.2</version>
 
   <properties>

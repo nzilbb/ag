@@ -10,6 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.emusdms</artifactId>
   <name>nzilbb.formatter.emusdms</name>
+  <description>Serializer/Deserializer for EMU-SDMS files.</description>
   <version>1.5.1</version>
 
   <properties>
