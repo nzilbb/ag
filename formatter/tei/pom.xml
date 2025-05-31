@@ -10,6 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.tei</artifactId>
   <name>nzilbb.formatter.tei</name>
+  <description>Serializer/Deserializer for TEI P5 XML files.</description>
   <version>0.6.1</version>
 
   <properties>
@@ -107,4 +108,13 @@
       </plugins>
     </pluginManagement>
   </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>3.9.0</version>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>

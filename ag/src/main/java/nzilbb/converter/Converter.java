@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -108,6 +109,24 @@ public abstract class Converter extends GuiProgram {
    */
   @Switch(value="Display help info about available serialization parameters",compulsory=false)
   public Converter setHelp(Boolean newHelp) { help = newHelp; return this; }
+  
+  /**
+   * File to write help information in markdown format.
+   * @see #getHelpMarkDown()
+   * @see #setHelpMarkDown(File)
+   */
+  protected File helpMarkDown;
+  /**
+   * Getter for {@link #helpMarkDown}: File to write help information in markdown format.
+   * @return File to write help information in markdown format.
+    */
+  public File getHelpMarkDown() { return helpMarkDown; }
+  /**
+   * Setter for {@link #helpMarkDown}: File to write help information in markdown format.
+   * @param newHelpMarkDown File to write help information in markdown format.
+   */
+  @Switch(value="File to write help information in markdown format",compulsory=false)
+  public Converter setHelpMarkDown(File newHelpMarkDown) { helpMarkDown = newHelpMarkDown; return this; }
    
   /**
    * Whether detailed verbose output is printed or not.
@@ -780,12 +799,22 @@ public abstract class Converter extends GuiProgram {
   @SuppressWarnings("unchecked")
   public void start() {
       
-    if (arguments.size() == 0) {
+    if (arguments.size() == 0 && !getHelp() && getHelpMarkDown() == null) {
       System.err.println("Nothing to do yet. (Try using --usage command line switch)");
     }
     if (getHelp()) {
       System.err.println(help());
       System.exit(1);
+    }
+    if (getHelpMarkDown() != null) {
+      try (PrintStream md = new PrintStream(getHelpMarkDown())) {
+        helpMarkdown(md);
+        System.err.println("Wrote documentation to " + getHelpMarkDown().getPath());
+      } catch (Exception x) {
+        System.err.println("ERROR writing " + getHelpMarkDown().getPath());
+        x.printStackTrace(System.err);
+      }
+      System.exit(0);
     }
 
     FileNameExtensionFilter fileFilter = getFileFilter();
@@ -817,11 +846,12 @@ public abstract class Converter extends GuiProgram {
   public String help() {
     StringBuilder helpInfo = new StringBuilder();
     helpInfo.append(getClass().getSimpleName() + " ("+(v==null?"version unknown":v)+")");
-    helpInfo.append("\n");
+    helpInfo.append("\n==="); // heading if interpreted as markdown
     @SuppressWarnings("unchecked")
       ProgramDescription myAnnotation 
       = (ProgramDescription)getClass().getAnnotation(ProgramDescription.class);
     if (myAnnotation != null) {
+      helpInfo.append("\n");
       helpInfo.append(myAnnotation.value());
       helpInfo.append("\n");
     }
@@ -835,12 +865,13 @@ public abstract class Converter extends GuiProgram {
     Schema schema = getSchema();
     GraphDeserializer deserializer = getDeserializer();
     helpInfo.append("\nDeserializing from " + deserializer.getDescriptor());
-    helpInfo.append("\n");
+    helpInfo.append("\n---\n"); // subhead inf interpreted as markdown
     ParameterSet config = deserializer.configure(new ParameterSet(), schema);
     if (config.size() == 0) {
       helpInfo.append(" There are no configuration parameters for deserialization\n");      
     } else {
       helpInfo.append(" Command-line configuration parameters for deserialization:\n");
+      helpInfo.append("\n"); // preformatted block if interpreted as markdown
       for (Parameter p : config.values()) {
         helpInfo.append(
           wrap("\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint()));
@@ -849,12 +880,13 @@ public abstract class Converter extends GuiProgram {
     }
     GraphSerializer serializer = getSerializer();
     helpInfo.append("\nSerializing to " + serializer.getDescriptor());
-    helpInfo.append("\n");
+    helpInfo.append("\n---\n"); // subheading if interpreted as markdown
     config = serializer.configure(new ParameterSet(), schema);
     if (config.size() == 0) {
       helpInfo.append(" There are no configuration parameters for serialization\n");
     } else {
       helpInfo.append(" Command-line configuration parameters for serialization:\n");
+      helpInfo.append("\n"); // preformatted block if interpreted as markdown
       for (Parameter p : config.values()) {
         helpInfo.append(
           wrap("\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint()));
@@ -863,6 +895,61 @@ public abstract class Converter extends GuiProgram {
     }
     return helpInfo.toString();
   } // end of help()
+   
+  /**
+   * Writes help information for this converter, including general info, and info
+   * about the deserializer and serializer information in markdown format,
+   * output to the given print stream.
+   */
+  public void helpMarkdown(PrintStream md) {    
+    md.println("# " + getClass().getSimpleName() + (v==null?"":"("+v+")"));
+    @SuppressWarnings("unchecked")
+      ProgramDescription myAnnotation 
+      = (ProgramDescription)getClass().getAnnotation(ProgramDescription.class);
+    if (myAnnotation != null) {
+      md.println();
+      md.println(myAnnotation.value());
+    }
+    // display general info, if there is any
+    if (info != null) {
+      md.println();
+      md.println(info);
+    }
+    // display info about serialization parameters
+    Schema schema = getSchema();
+    md.println();
+    GraphDeserializer deserializer = getDeserializer();
+    md.println("## Deserializing from " + deserializer.getDescriptor());
+    md.println();
+    ParameterSet config = deserializer.configure(new ParameterSet(), schema);
+    if (config.size() == 0) {
+      md.println("There are no configuration parameters for deserialization.");
+    } else {
+      md.println("Command-line configuration parameters for deserialization:");
+      md.println();
+      md.println("|   |   |"); // markdown table
+      md.println("|:--|:--|");
+      for (Parameter p : config.values()) {
+        md.println("| `--"+p.getName()+"=`*" + p.getType().getSimpleName()+"* | "+p.getHint()+" |");
+      }
+    }
+    GraphSerializer serializer = getSerializer();
+    md.println();
+    md.println("## Serializing to " + serializer.getDescriptor());
+    md.println();
+    config = serializer.configure(new ParameterSet(), schema);
+    if (config.size() == 0) {
+      md.println("There are no configuration parameters for serialization.");
+    } else {
+      md.println("Command-line configuration parameters for serialization:");
+      md.println();
+      md.println("|   |   |"); // markdown table
+      md.println("|:--|:--|");
+      for (Parameter p : config.values()) {
+        md.println("| `--"+p.getName()+"=`*" + p.getType().getSimpleName()+"* | "+p.getHint()+" |");
+      }
+    }
+  } // end of helpMarkdown()
    
   /**
    * Converts the files in the <var>files</var> list.

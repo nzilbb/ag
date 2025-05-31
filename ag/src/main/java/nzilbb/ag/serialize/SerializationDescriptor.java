@@ -372,7 +372,12 @@ public class SerializationDescriptor implements CloneableBean {
     */
    @Override
    public String toString() {
-      return "\""+getName()+"\" " + getMimeType() + " ("+getVersion()+")";
+     String version = getVersion();
+     if (version != null) {
+       return "\""+getName()+"\" " + getMimeType() + " ("+getVersion()+")";
+     } else {
+       return "\""+getName()+"\" " + getMimeType();
+     }
    } // end of toString()
    
 } // end of class SerializationDescriptor

@@ -50,7 +50,7 @@
     <module>textgridtovtt</module>
     <module>textgridtopdf</module>
     <module>textgridtotex</module>
-    <module>transcriber-validator</module>
+    <!--module>transcriber-validator</module-->
     <module>trstokaldi</module>
     <module>eaftokaldi</module>
     <module>textgridtokaldi</module>

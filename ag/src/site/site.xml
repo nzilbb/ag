@@ -4,6 +4,10 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 https://maven.apache.org/xsd/decoration-1.8.0.xsd"
     name="nzilbb.ag">
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+  </skin>
   <bannerLeft>
     <name>nzilbb.ag</name>
     <src>https://nzilbb.github.io/ag/images/labbcat.png</src>
