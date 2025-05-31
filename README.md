@@ -110,12 +110,10 @@ The documentation site, deployed in the `docs` subdirectory, includes:
 - Javadoc class documentation.
 - Documentation about sub-modules, including format converters, etc.
 
-The site should be built after a `clean package` build of the code, to ensure
-that all resources are available, and all old documentation has been purged.
+The command to ensure a clean build of the documentation is:
 
 ```
-mvn site
-mvn site:deploy
+mvn clean package site site:deploy -Dmaven.test.skip
 ```
 
 ## Deploying to OSSRH

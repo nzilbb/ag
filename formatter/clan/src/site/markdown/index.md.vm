@@ -1,0 +1,24 @@
+# ${project.name} (${project.version})
+
+${project.description}
+
+**NB** the current implementation is <em>not exhaustive</em>; it only covers:
+
+- Time synchronization codes, including mid-line synchronization.\
+  Overlapping utterances in the same speaker turn are handled as follows:
+  - If overlap is partial, the start of the second utterance is set to the end of the first.  
+  - If overlap is total, the two utterances are chained together with a non-aligned anchor between them.  
+ 
+- Disfluency marking with &+ - e.g. `so &+sund Sunday` 
+- Non-standard form expansion - e.g. `gonna [: going to]` 
+- Incomplete word completion - e.g. `dinner doin(g) all` 
+- Acronym/proper name joining with _ - e.g. `no T_V in my room` 
+- Retracing - e.g. `<some friends and I> [//] uh` or `and sit [//]
+      sets him`  
+- Repetition/stuttered false starts - e.g. `the <picnic> [/] picnic`
+      or `the Saturday [/] in the morning`  
+- Errors - e.g. `they've <work up a hunger> [* s:r]` or `they got
+      [* m] to`  
+- Pauses - untimed, (e.g. `(.)`, `(...)`), 
+      or timed (e.g. `(0.15)`, `(2.)`, `(1:05.15)`)  
+- `%mor` line annotations (or %pos line annotations, if present) 

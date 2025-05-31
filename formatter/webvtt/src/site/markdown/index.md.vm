@@ -1,0 +1,15 @@
+# ${project.name} (${project.version})
+
+${project.description}
+
+(De)serializes VTT subtitle/caption files.
+
+ Whole-line voice spans, if present are parsed to identify participants, i.e.
+utterances formatted: `<v.speaker1 John Smith>The quick brown fox.`
+will result in an utterance "The quick brown fox." uttered by a participant called
+"John Smith".
+
+ Output captions include such voice spans which include the participant label, and each
+is identified with a class like "speaker1" to allow different speakers to be styled
+differently.
+

@@ -1,0 +1,39 @@
+# ${project.name} (${project.version})
+
+${project.description}
+
+Deserializer for
+[Edinburgh Speech Tools (EST)](http://festvox.org/docs/speech_tools-2.4.0/index.html)
+Track files produced by EST, or other tools like [Reaper](https://github.com/google/REAPER).
+
+**Track** files are ASCII encoded and start with a small number of header lines like this:
+
+```
+EST_File Track
+DataType ascii
+NumFrames 60117
+NumChannels 1
+FrameShift 0.00000
+VoicingEnabled true
+EST_Header_End
+```
+
+After this, the rest of the file's lines consist of three columns like this:
+
+```
+0.000000 0 -1.000000
+0.005000 0 -1.000000
+0.010000 0 -1.000000
+0.015000 0 -1.000000
+0.020000 0 -1.000000
+0.025000 0 -1.000000
+0.030000 0 -1.000000
+...
+```
+
+The columns are:
+
+1. The time in seconds
+2. `1` (data present in third column) or `0` (ignore data in third columns)
+3. The label for the time point (e.g. in a Reaper .f0 file, it's the estimated value for F0 in Hz)
+

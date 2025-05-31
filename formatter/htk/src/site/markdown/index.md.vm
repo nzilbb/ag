@@ -1,0 +1,55 @@
+# ${project.name} (${project.version})
+
+${project.description}
+
+Deserializer for Master Label File (MLF) files produced by HTK.
+
+**.mlf** files are ASCII encoded and can contain multiple graphs and multiple layers:
+
+```
+#!MLF!#
+".../AP511_MikeThorpe.eaf_1.373_7.131.lab"
+0 700000 sil SILENCE
+700000 1900000 _# ah
+1900000 1900000 sp
+1900000 3300000 _w w~
+3300000 4000000 _@
+4000000 4000000 sp
+4000000 5700000 sil SILENCE
+5700000 6700000 _w well
+6700000 7000000 _E
+7000000 7300000 _l
+7300000 7300000 sp
+7300000 8300000 _2 i
+8300000 8300000 sp
+12400000 20100000 sil SILENCE
+.
+".../AP511_MikeThorpe.eaf_7.131_13.887.lab"
+0 500000 sil SILENCE
+500000 800000 _D the
+800000 1100000 _i
+1100000 1100000 sp
+1100000 2200000 _f first
+2200000 3100000 _3
+3100000 3500000 _s
+3500000 3800000 _t
+3800000 3800000 sp
+3800000 4100000 _w one
+4100000 4500000 _V
+4500000 5100000 _n
+5100000 5100000 sp
+5100000 5500000 _b being
+5500000 5900000 _i
+5900000 6200000 _I
+6200000 6900000 _N
+6900000 6900000 sp
+...
+```
+
+The space-separated columns are:
+
+1. Start time (in 100ns)
+2. End time (in 100ns)
+3. The label for the phone
+4. The label for the word (optional)
+

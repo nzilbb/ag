@@ -11,7 +11,7 @@
   <name>nzilbb.formatter</name>
   <version>1.0.0</version>
   <description>
-    Modules that convert annotation graphs to and from various tool-specific formats.
+    Formatters are modules that convert annotation graphs to and from various tool-specific formats.
   </description>
     
   <packaging>pom</packaging>
