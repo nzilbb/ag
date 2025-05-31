@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -54,13 +54,13 @@ public class ChaToTrs extends Converter {
       +" i.e. all lines include time alignment bullets."
       +"\n "
       +"\nThe CLAN parser is *not exhaustive*; it one parses:"
-      +"\n- Disfluency marking with &+ - e.g. \"so &+sund Sunday\""
-      +"\n- Non-standard form expansion - e.g. \"gonna [: going to]\""
-      +"\n- Incomplete word completion - e.g. \"dinner doin(g) all\""
-      +"\n- Acronym/proper name joining with _ - e.g. \"no T_V in my room\""
-      +"\n- Retracing - e.g. \"<some friends and I> [//] uh\" or \"and sit [//] sets him\""
-      +"\n- Repetition/stuttered false starts - e.g. \"the <picnic> [/] picnic\" or \"the Saturday [/] in the morning\""
-      +"\n- Errors - e.g. \"they've <work up a hunger> [* s:r]\" or \"they got [* m] to\"";
+      +"\n- Disfluency marking with &+ - e.g. `so &+sund Sunday`"
+      +"\n- Non-standard form expansion - e.g. `gonna [: going to]`"
+      +"\n- Incomplete word completion - e.g. `dinner doin(g) all`"
+      +"\n- Acronym/proper name joining with _ - e.g. `no T_V in my room`"
+      +"\n- Retracing - e.g. `<some friends and I> [//] uh` or `and sit [//] sets him`"
+      +"\n- Repetition/stuttered false starts - e.g. `the <picnic> [/] picnic` or `the Saturday [/] in the morning`"
+      +"\n- Errors - e.g. `they've <work up a hunger> [* s:r]` or `they got [* m] to`";
   } // end of constructor
   
   public static void main(String argv[]) {
