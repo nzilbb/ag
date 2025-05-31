@@ -3,14 +3,23 @@
 Converts Transcriber .trs files to SALT .slt transcripts
 
 The Transcriber 'Program' becomes the SALT 'Context' header.
+
 The first Transcriber 'Topic' becomes the SALT 'Subgroup' header.
+
 Comments at the beginning of transcript that start with + become SALT meta-data headers.
+
 By default  Transcriber 'pronounce' and 'lexical' events are converted to be  certain SALT word codes, of the form "[PRONOUNCE:...]" and "[LEXICAL:...]" respectively. Noise events are converted to comments of the form "{NOISE:...}". Use the command-line switches --pronounceCodePattern, --lexicalCodePattern, and --noiseCommentPattern to control this behaviour.
+
 e.g. if you specify --pronounceCodePattern=WP:{0} then all pronounce events will become word codes like [WP:...]
+
 Similarly if you specify --pronounceCodePattern=WL:{0} then all lexical events will become word codes like [WL:...].
+
 To disable these conversions, use "--pronounceCodePattern= --lexicalCodePattern= --noiseCommentPattern=" on the command line.
+
 Named entity annotations are assumed to be proper names, which are underscore-delimited in the resulting SALT transcript.
+
 Phrase language annnotations are lost during conversion, as there is no corresponding entity in the SALT conventions.
+
 The format for dates is taken from your system settings; to override this, use the --dateFormat command line setting.
 
 ## Deserializing from "Transcriber transcript" text/xml-transcriber

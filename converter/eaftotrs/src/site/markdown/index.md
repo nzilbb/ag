@@ -11,7 +11,9 @@ ELAN has no direct mechanism for marking non-speech annotations in their positio
  …sometimes me [laughs] not always but sometimes…
  - To insert a comment annotation within the text, enclose it in curly braces (surrounded by spaces), e.g.: 
  …beautifully warm {softly} but its…
+
 To disable these transcription conventions, use the --useConventions=false command-line switch.
+
 
 All tiers will be interpreted as transcription of participant speech. If some tiers contain other annotations, use the --ignoreTiers command line switch to exclude them from the conversion using a regular expression, e.g.:
  --ignoreTiers=Noise|Topic

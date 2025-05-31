@@ -104,9 +104,18 @@ mvn test
 
 ## Build documentation site
 
+The documentation site, deployed in the `docs` subdirectory, includes:
+
+- General information about annotation graphs, and the nzilbb.ag implementation.
+- Javadoc class documentation.
+- Documentation about sub-modules, including format converters, etc.
+
+The site should be built after a `clean package` build of the code, to ensure
+that all resources are available, and all old documentation has been purged.
+
 ```
-cd ag
 mvn site
+mvn site:deploy
 ```
 
 ## Deploying to OSSRH

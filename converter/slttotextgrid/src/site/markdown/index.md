@@ -3,6 +3,7 @@
 Converts SALT .slt transcripts to Praat .TextGrid files
 
 Praat doesn't support meta-data like Dob, Doe, Ethnicity, etc. so almost all SALT header meta-data is lost when converting to .eaf.
+
 By default, inline annotations (mazes, codes, bound morphemes, etc.) are not interpreted and appear as-is in the TextGrid. If you want them to be parse (i.e. annotations removed to yield more standard orthography), use --parseInlineConventions
 
 ## Deserializing from "SALT transcript" text/x-salt

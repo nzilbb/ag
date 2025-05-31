@@ -8,25 +8,31 @@ The following participant meta-data is lost during conversion:
 - accent
 - scope
  
+
 If the --metaData command-line switch is used, then the following Transcriber meta-data will be included as a header to the file:
 - version
 - version date
 - air date
 - scribe
 - language
+
 Otherwise, this meta-data is lost during conversion
  
+
 The following Transcriber annotations are lost during conversion:
 - phrase language annotations
 - named entity annotations
  
+
 The following Transcriber annotations are converted using bracketed, inline text conventions:
 - comments
 - noises
 - lexical tags
 - pronounce tags
+
 To disable these conventions (and thus lose these annotations during conversion) use the --useConventions=false command line switch.
  
+
 If the --textOnly command-line switch is used, then the output text includes only the transcribed speech, and all annotations and meta-data are lost.
 
 ## Deserializing from "Transcriber transcript" text/xml-transcriber

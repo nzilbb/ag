@@ -9,14 +9,18 @@ The Praat TextGrid format is extremely flexible and there are many different
 - all tiers are labelled intervals
 - the interval labels are utterance transcripts - i.e. contain multiple word orthographies
  
+
 All tiers will be interpreted as transcription of participant speech. If some tiers contain other annotations, use the --ignoreTiers command line switch to exclude them from the conversion using a regular expression, e.g.:
  --ignoreTiers=(segments.*)|(target)
  
+
 By default, all words are converted to lowercase, and extraneous punctuation is removed.
  To disable this behaviour, use the --cleanOrthography=false command line switch.
  
+
 Praat doesn't support participant meta-data, so the 'spk2gender' file is not generated.
  
+
 Praat has no direct mechanism for marking non-speech annotations in their position within the transcript text.  However, this converter supports the use of textual conventions in various ways to make certain annotations: 
  - To tag a word with its pronunciation, enter the pronunciation in square brackets, directly following the word (i.e. with no intervening space), e.g.: 
  …this was at Wingatui[wIN@tui]…
@@ -26,6 +30,7 @@ Praat has no direct mechanism for marking non-speech annotations in their positi
  …sometimes me [laughs] not always but sometimes…
  - To insert a comment annotation within the text, enclose it in curly braces (surrounded by spaces), e.g.: 
  …beautifully warm {softly} but its…
+
 To enable these transcription conventions, use the --useConventions command-line switch.
 
 ## Deserializing from "Praat TextGrid" text/praat-textgrid

@@ -846,7 +846,7 @@ public abstract class Converter extends GuiProgram {
   public String help() {
     StringBuilder helpInfo = new StringBuilder();
     helpInfo.append(getClass().getSimpleName() + " ("+(v==null?"version unknown":v)+")");
-    helpInfo.append("\n==="); // heading if interpreted as markdown
+    helpInfo.append("\n");
     @SuppressWarnings("unchecked")
       ProgramDescription myAnnotation 
       = (ProgramDescription)getClass().getAnnotation(ProgramDescription.class);
@@ -865,13 +865,12 @@ public abstract class Converter extends GuiProgram {
     Schema schema = getSchema();
     GraphDeserializer deserializer = getDeserializer();
     helpInfo.append("\nDeserializing from " + deserializer.getDescriptor());
-    helpInfo.append("\n---\n"); // subhead inf interpreted as markdown
+    helpInfo.append("\n");
     ParameterSet config = deserializer.configure(new ParameterSet(), schema);
     if (config.size() == 0) {
       helpInfo.append(" There are no configuration parameters for deserialization\n");      
     } else {
       helpInfo.append(" Command-line configuration parameters for deserialization:\n");
-      helpInfo.append("\n"); // preformatted block if interpreted as markdown
       for (Parameter p : config.values()) {
         helpInfo.append(
           wrap("\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint()));
@@ -880,13 +879,12 @@ public abstract class Converter extends GuiProgram {
     }
     GraphSerializer serializer = getSerializer();
     helpInfo.append("\nSerializing to " + serializer.getDescriptor());
-    helpInfo.append("\n---\n"); // subheading if interpreted as markdown
+    helpInfo.append("\n");
     config = serializer.configure(new ParameterSet(), schema);
     if (config.size() == 0) {
       helpInfo.append(" There are no configuration parameters for serialization\n");
     } else {
       helpInfo.append(" Command-line configuration parameters for serialization:\n");
-      helpInfo.append("\n"); // preformatted block if interpreted as markdown
       for (Parameter p : config.values()) {
         helpInfo.append(
           wrap("\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint()));
@@ -913,7 +911,7 @@ public abstract class Converter extends GuiProgram {
     // display general info, if there is any
     if (info != null) {
       md.println();
-      md.println(info);
+      md.println(info.replaceAll("\n[^- ]", "\n$0"));
     }
     // display info about serialization parameters
     Schema schema = getSchema();

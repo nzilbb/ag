@@ -3,8 +3,10 @@
 Converts SALT transcripts to LaTeX documents
 
 Almost all SALT header meta-data is lost when converting to .tex.
+
 By default, inline annotations (mazes, codes, bound morphemes, etc.) are parsed (and thus removed). If you want them to be included in the output as-is, use the --parseInlineConventions=false command line switch.
  
+
 The resulting .tex files each include a definition for a new '	urn' command which is used throughout the trancript to format speaker turns; this can be customized directly in the .tex files after conversion, or with the --texTurnCommand command line switch. e.g. "--texTurnCommand=\item[#1:] #2"
  (#1 = Speaker ID, #2 = Turn Text)
 

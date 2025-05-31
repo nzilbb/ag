@@ -5,6 +5,7 @@ Converts ELAN .eaf files to LaTeX .tex files
 All tiers will be interpreted as transcription of participant speech. If some tiers contain other annotations, use the --ignoreTiers command line switch to exclude them from the conversion using a regular expression, e.g.:
  --ignoreTiers=Noise|Topic
  
+
 ELAN has no direct mechanism for marking non-speech annotations in their position within the transcript text. However, this converter can assume the use of textual conventions in various ways to make certain annotations: 
  - To tag a word with its pronunciation, enter the pronunciation in square brackets, directly following the word (i.e. with no intervening space), e.g.: 
  …this was at Wingatui[wIN@tui]…
@@ -14,9 +15,12 @@ ELAN has no direct mechanism for marking non-speech annotations in their positio
  …sometimes me [laughs] not always but sometimes…
  - To insert a comment annotation within the text, enclose it in curly braces (surrounded by spaces), e.g.: 
  …beautifully warm {softly} but its…
+
 To enable these transcription conventions, use the --useConventions command-line switch.
  
+
 The resulting .tex files each include a definition for a new '	urn' command which is used throughout the trancript to format speaker turns; this can be customized directly in the .tex files after conversion, or with the --texTurnCommand command line switch.
+
 e.g. "--texTurnCommand=\item[#1:] #2"
  (#1 = Speaker ID, #2 = Turn Text)
 

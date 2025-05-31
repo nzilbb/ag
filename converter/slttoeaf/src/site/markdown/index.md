@@ -3,6 +3,7 @@
 Converts SALT .slt transcripts to ELAN .eaf files
 
 ELAN doesn't natively support meta-data like Dob, Doe, Ethnicity, etc. however this data is added to the .eaf HEADER in PROPERTY tags, which are preserved by ELAN.
+
 By default, inline annotations (mazes, codes, bound morphemes, etc.) are not interpreted. If you want them to be processed, use --parseInlineConventions
 
 ## Deserializing from "SALT transcript" text/x-salt

@@ -4,6 +4,7 @@ Converts CLAN CHAT transcripts to WebVTT subtitles
 
 This conversion will only work well for CHAT transcripts that are fully aligned; i.e. all lines include time alignment bullets.
  
+
 The CLAN parser is *not exhaustive*; it one parses:
 - Disfluency marking with &+ - e.g. `so &+sund Sunday`
 - Non-standard form expansion - e.g. `gonna [: going to]`

@@ -3,6 +3,7 @@
 Converts SALT transcripts to PDF documents
 
 PDF doesn't support meta-data like Dob, Doe, Ethnicity, etc. so all SALT header meta-data is lost when converting to .vtt.
+
 Also, inline annotations (mazes, codes, bound morphemes, etc.) are parsed out so that the text uses normal orthography with no transcription conventions.
 
 ## Deserializing from "SALT transcript" text/x-salt

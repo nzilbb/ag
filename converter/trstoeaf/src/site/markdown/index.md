@@ -12,15 +12,19 @@ ELAN does not support the same meta-data that Transcriber does, so the following
 - participant dialect
 - participant accent
 - participant scope
+
 The following Transcriber annotations are not supported by ELAN, and are lost:
 - phrase language annotations
 - named entity annotations
+
 The following Transcriber annotations are not directly supported by ELAN, and are converted using bracketed, inline conventions within annotation labels:
 - comments
 - noises
 - lexical tags
 - pronounce tags
+
 To disable these conventions (and thus lose these annotations during conversion) use the --useConventions=false command line switch.
+
 If the Transcriber transcript includes topic tags, these are included in the ELAN file on their own tier.
 
 ## Deserializing from "Transcriber transcript" text/xml-transcriber

@@ -4,10 +4,14 @@ Converts time-aligned plain text .txt transcripts to ELAN .eaf files
 
 The plain text transcript must include synchronisation information
 - i.e. time codes - and must end in a timecode, indicating the end time
+
 of the last utterance.
 
+
 Check the --timestampFormat setting matches your time codes.
+
 This setting uses Java SimpleDateFormat format:
+
 https://docs.oracle.com/javase/8/docs/api/index.html?java/text/SimpleDateFormat.html
 
 ## Deserializing from "Plain Text Document" text/plain

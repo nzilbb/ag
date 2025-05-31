@@ -1,6 +1,6 @@
 # Converters
 
-Standalone programs that convert transcripts from one tool format to another, e.g.
+These are standalone programs that convert transcripts from one tool format to another, e.g.
 
 * trs - [Transcriber](http://trans.sourceforge.net/en/presentation.php) transcripts
 * eaf - [ELAN](https://archive.mpi.nl/tla/elan) files

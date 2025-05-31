@@ -11,6 +11,7 @@ As WebVTT is a subtitle format, not related to a linguistic annotation tool, all
 - lexical tags
 - pronounce tags
  
+
 Although WebVTT does not support meta-data, the meta-data that is present in the Transcriber transcript is included in the .vtt file as NOTEs, including:
 - version
 - version date

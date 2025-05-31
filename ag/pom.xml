@@ -49,8 +49,8 @@
       <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
     <site>
-      <id>www.yourcompany.com</id>
-      <url>scp://www.yourcompany.com/www/docs/project/</url>
+      <id>docs</id>
+      <url>file://${user.home}/nzilbb/ag/docs</url>
     </site>
   </distributionManagement>
 
@@ -168,9 +168,6 @@
         <configuration>
           <trimStackTrace>true</trimStackTrace>
         </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-site-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.sonatype.plugins</groupId>

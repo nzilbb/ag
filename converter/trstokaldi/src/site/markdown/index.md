@@ -13,6 +13,7 @@ The participant genders from the Transcriber transcripts are used, if present, t
 - scribe
 - language
  
+
 The following Transcriber annotations are lost during conversion:
 - phrase language annotations
 - named entity annotations
@@ -21,6 +22,7 @@ The following Transcriber annotations are lost during conversion:
 - lexical tags
 - pronounce tags
  
+
 By default, all words are converted to lowercase, and extraneous punctuation is removed.
  To disable this behaviour, use the --cleanOrthography=false command line switch.
 

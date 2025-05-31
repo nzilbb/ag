@@ -3,6 +3,7 @@
 Converts ELAN .eaf files to Praat .TextGrid files
 
 ELAN tiers are converted directly to Praat tiers as-is.
+
 Tiers have the same names, unless the ELAN tier has the 'Participant' attribute set in which case, the resulting TextGrid tier will be named after the participant
 
 ## Deserializing from "ELAN EAF Transcript" text/x-eaf+xml

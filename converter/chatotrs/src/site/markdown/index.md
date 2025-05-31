@@ -4,8 +4,10 @@ Converts CLAN CHAT transcripts to Transcriber files
 
 Transcriber doesn't support meta-data like @Recording Quality, @Location, etc. so CHAT header meta-data is instead included as comments at the beginning of the Transcriber transcript.
  
+
 This conversion will only work well for CHAT transcripts that are fully aligned; i.e. all lines include time alignment bullets.
  
+
 The CLAN parser is *not exhaustive*; it one parses:
 - Disfluency marking with &+ - e.g. `so &+sund Sunday`
 - Non-standard form expansion - e.g. `gonna [: going to]`

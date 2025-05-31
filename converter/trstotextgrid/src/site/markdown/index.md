@@ -12,15 +12,18 @@ Praat does not support meta-data as Transcriber does, so the following meta-data
 - participant dialect
 - participant accent
 - participant scope
+
 The following Transcriber annotations are not supported by Praat, and are lost:
 - phrase language annotations
 - named entity annotations
 - topic tags
+
 The following Transcriber annotations are not directly supported by Praat, and are converted using bracketed, inline conventions within annotation labels:
 - comments
 - noises
 - lexical tags
 - pronounce tags
+
 To disable these conventions (and thus lose these annotations during conversion) use the --useConventions=false command line switch.
 
 ## Deserializing from "Transcriber transcript" text/xml-transcriber

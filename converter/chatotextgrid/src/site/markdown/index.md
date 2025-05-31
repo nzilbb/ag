@@ -4,8 +4,10 @@ Converts CLAN CHAT transcripts to Praat TextGrids
 
 Praat doesn't support any meta-data like @Date, @Location, etc. so all CHAT header meta-data is lost when converting to .TextGrid.
  
+
 This conversion will only work well for CHAT transcripts that are fully aligned; i.e. all lines include time alignment bullets.
  
+
 The CLAN parser is *not exhaustive*; it one parses:
 - Disfluency marking with &+ - e.g. `so &+sund Sunday`
 - Non-standard form expansion - e.g. `gonna [: going to]`

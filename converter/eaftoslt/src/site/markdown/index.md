@@ -3,7 +3,9 @@
 Converts ELAN .eaf files SALT .slt transcripts
 
 ELAN doesn't natively support meta-data like Dob, Doe, Ethnicity, etc. however if this data is present in the .eaf HEADER in PROPERTY tags, named "metadata:Doe" etc. then they will be copied to the .slt header.
+
 By default, inline SALT annotations (mazes, codes, bound morphemes, etc.) are not interpreted. If you want them to be processed, use --parseInlineConventions
+
 All tiers will be interpreted as transcription of participant speech. If some tiers contain other annotations, use the --ignoreTiers command line switch to exclude them from the conversion using a regular expression, e.g.:
  --ignoreTiers=Noise|Topic
 
