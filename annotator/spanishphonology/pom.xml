@@ -11,7 +11,9 @@
   <artifactId>nzilbb.annotator.spanishphonology</artifactId>
   <name>nzilbb.annotator.spanishphonology</name>
   <version>0.6.1</version>
-
+  <description>This annotator tags Spanish words their phonemic transcription, based on rules
+  that map orthography to phonology.</description>
+  
   <properties>
     <package.path>nzilbb/annotator/spanishphonology/</package.path>
     <annotator.class>nzilbb.annotator.spanishphonology.SpanishPhonologyTagger</annotator.class>
@@ -54,6 +56,38 @@
           </archive>
           <outputDirectory>../../bin</outputDirectory>
         </configuration>
+      </plugin>
+    <!-- copy info.html as the 'site' index (wrapping it in html/body tags) -->
+      <plugin>
+        <groupId>com.github.mike10004</groupId>
+        <artifactId>concatenate-maven-plugin</artifactId>
+        <version>0.4</version>
+        <executions>
+          <execution>
+            <id>assemble-xhtml-index</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>cat</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <fileset>
+                  <directory>${project.basedir}/src/site/resources/xhtml/</directory>
+                  <includes><include>prefix.xhtml</include></includes>
+                </fileset>
+                <fileset>
+                  <directory>${project.basedir}/src/main/resources/${package.path}</directory>
+                  <includes><include>info.html</include></includes>
+                </fileset>
+                <fileset>
+                  <directory>${project.basedir}/src/site/resources/xhtml/</directory>
+                  <includes><include>suffix.xhtml</include></includes>
+                </fileset>
+              </sources>
+              <outputFile>${project.basedir}/src/site/xhtml/index.xhtml</outputFile>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
 

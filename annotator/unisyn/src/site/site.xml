@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xmlns="http://maven.apache.org/DECORATION/1.8.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 https://maven.apache.org/xsd/decoration-1.8.0.xsd"
+    name="${project.artifactId}">
+  <bannerLeft>
+    <name>${project.name}</name>
+    <src>https://nzilbb.github.io/ag/images/labbcat.png</src>
+    <href>https://nzilbb.github.io/ag/</href>
+  </bannerLeft>
+  <bannerRight>
+    
+    <src>https://nzilbb.github.io/ag/images/nzilbb.svg</src>
+    <href>https://www.canterbury.ac.nz/nzilbb/</href>
+  </bannerRight>
+  
+  <body>
+    <breadcrumbs>
+      <item name="Annotation Graphs" href="../../index.html"/>
+      <item name="Annotators" href="../index.html"/>
+    </breadcrumbs>
+    <links>
+      <item name="CC-BY-SA" href="http://creativecommons.org/licenses/by-sa/2.0/"/>
+      <item name="LaBB-CAT" href="https://labbcat.canterbury.ac.nz/"/>
+      <item name="Fromont (2017)" href="http://dx.doi.org/10.1016/j.csl.2017.01.004"/>
+    </links>
+
+    <menu name="${project.artifactId}">
+      <item name="Download"
+            href="https://raw.githubusercontent.com/nzilbb/ag/refs/heads/main/bin/${project.artifactId}.jar"/>
+    </menu>
+
+    <footer>&lt;a rel='license' href='http://creativecommons.org/licenses/by-sa/2.0/'&gt;&lt;img alt='CC-BY-SA Creative Commons Licence ' src='/ag/images/cc-by-sa.svg' title='This work is licensed under a Creative Commons Attribution-ShareAlike 2.0 Generic License' /&gt;&lt;/a&gt;&lt;a rel='author' href='https://www.canterbury.ac.nz/nzilbb/'&gt;&lt;img src='/ag/images/nzilbb.svg' alt='Te Kāhui Roro Reo | The New Zealand Institute of Language, Brain and Behaviour' title='🄯 NZILBB'&gt;&lt;/a&gt;</footer>
+  </body>
+</project>

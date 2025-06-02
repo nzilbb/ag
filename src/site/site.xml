@@ -29,6 +29,7 @@
       <item name="Introduction" href="index.html"/>
       <item name="API Documentation" href="apidocs/nzilbb/ag/package-summary.html"/>
       <item name="All Classes" href="apidocs/index.html"/>
+      <item name="Annotators" href="nzilbb.annotator/index.html"/>
       <item name="File Formatters" href="nzilbb.formatter/index.html"/>
       <item name="File Converters" href="nzilbb.converter/index.html"/>
     </menu>

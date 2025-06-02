@@ -11,27 +11,28 @@
   <name>nzilbb.annotator</name>
   <version>1.0.0</version>
   <description>
-    Modules that perform automatic annotation tasks on annotation graphs.
+    Annotators are modules that perform specialized automatic annotation tasks on annotation graphs.
   </description>
   <packaging>pom</packaging>
   <modules>
-    <module>cmudict</module>
-    <module>javascript</module>
     <module>orthography</module>
+    <module>cmudict</module>
+    <module>flatlexicon</module>
+    <module>javascript</module>
     <module>patterntagger</module>
     <module>porterstemmer</module>
     <module>jython</module>
     <module>spanishphonology</module>
     <module>labelmapper</module>
     <module>stanfordpos</module>
-    <module>mor</module>
-    <module>htk</module>
-    <module>mfa</module>
     <module>phonemetranscoder</module>
-    <module>flatlexicon</module>
     <module>basservices</module>
     <module>reaper</module>
     <module>unisyn</module>
     <module>mediapipe</module>
+    <!-- These require manual 3rd party software installation so are disabled by default: -->
+    <!--module>htk</module-->
+    <!--module>mfa</module-->
+    <!--module>mor</module-->
   </modules>  
 </project>

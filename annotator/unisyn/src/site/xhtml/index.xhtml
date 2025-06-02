@@ -1,0 +1,96 @@
+<html><body>
+<h2>Unisyn Tagger</h2>
+
+<p>The Unisyn Tagger tags word tokens with data from
+  <a href="http://www.cstr.ed.ac.uk/projects/unisyn/">Unisyn</a>,
+  a lexicon produced by the Centre for Speech Technology Research at the University of Edinburgh.</p> 
+
+<p>Unisyn is a 'master lexicon' of English, which contains:</p>
+<ul>
+  <li>orthography</li>
+  <li>part-of-speech</li>
+  <li>pronunciation, in an 'accent neutral' form</li>
+  <li>'enriched orthography' showing morphological information</li>
+  <li>frequency, as derived from various sources, including the British National Corpus, Time articles, Gutenberg, etc.</li>
+</ul>
+
+<p>The pronunciations in the lexicon can be converted into an accent-specific form using
+  perl scripts that are included with the lexicon. </p> 
+
+<h3 id="getting">Getting Unisyn</h3>
+
+<p>Unisyn is available under a non-commercial license, and must be acquired seperately
+  from this layer manager. To acquire Unisyn, you must first register on the the Unisyn
+  website and accept the terms of their license.  The Unisyn website is here:<br/> 
+  <a href="http://www.cstr.ed.ac.uk/projects/unisyn/">http://www.cstr.ed.ac.uk/projects/unisyn/</a>
+</p> 
+
+<p>(This layer manager has been tested with version 1.3 of Unisyn)</p>
+
+<h3 id="using">Using Unisyn with this annotator</h3>
+
+<p>Once you've got Unisyn, you can use it to produce accent-specific lexicons, and provide
+  these lexicons to the annotator, which then uses them to tag word tokens in your transcripts.</p> 
+
+<p>For example, if you want to annotate your transcripts with 'General American English' pronunciations:</p>
+
+<ol>
+  <li>Generate the General American English (<i>gam</i>) lexicon by running the following Unisyn commands:
+    <ol>
+      <li><code>get-exceptions.pl -a gam -f unilex &gt; gam.1</code></li>
+      <li><code>post-lex-rules.pl -a gam -f gam.1 &gt; gam.2</code></li>
+      <li><code>map-unique.pl -a gam -f gam.2 &gt; gam.unisyn</code></li>
+    </ol>
+    This gives you the file <samp>gam.unisyn</samp>, which is the lexicon file you need for the next step.
+  </li>
+  <li>Create the layer for your pronunciation annotations</li>
+  <li>Upload the accent-specific lexicon on the layer configuration page</li>
+</ol>
+
+<h3 id="mapping">Mapping Unisyn pronunciations to the DISC phoneme set</h3>
+
+<p>Some processing of phonological layers assumes that the annotations use the DISC phoneme set
+  designed for the CELEX phonemic transcriptions.  This set is used because each phoneme is
+  expressed by precisely one ASCII character, including phonemes usually expressed using a
+  digraph - e.g. affricates like <code>/t&#x0283;/</code> (which is <code>/J/</code> in
+  DISC) and diphthongs like <code>/a&#x026A;/</code> (which is <code>/2/</code> in
+  DISC)</p> 
+
+<p>Unisyn transcriptions use a set of phones that is greater that the set of phones
+  available in DISC, and the transcriptions are designed to be broadly phonetic, not
+  phonemic.</p> 
+
+<p>This means that using the DISC representation of the transcripts is imperfect, as there
+  is a certain amount of loss of information when mapping Unisyn phones to DISC
+  phonemes.</p> 
+
+<p>If having the original transcriptions precisely as defined in the Unisyn lexicon is
+  very important, you can instead create a layer that uses the original transcription as
+  contained in the file you uploaded. This has the advantage that the transcriptions are
+  not filtered through the above mapping, and the disadvantage that LaBB-CAT won't be able
+  to display the transcriptions using IPA symbols, nor help you when creating search
+  patterns for the layer. </p> 
+
+<p>If you decide to do this, Unisyn offers you two possible representations:</p>
+<ul>
+  <li>Unisyn transcriptions - e.g. <samp>{ p r @ . n ~ uh n s $}.&lt; ii . * ei . sh n!&lt;</samp>
+    - these are already present in the file that you generated if you followed the
+    instructions above (i.e. <samp>gam.unisyn</samp>)</li> 
+  <li>SAM-PA transcriptions - e.g. <samp>pr\@%nVns$i"e$Sn=$@5</samp> - these can be
+    obtained by running an extra Unisyn command, and uploading the
+    resulting <samp>gam.sampa</samp> file: 
+    <br/><code>output-sam.pl -a gam -f gam.unisyn &gt; gam.sampa</code>
+  </li>
+</ul>
+<p>(Unisyn has a third script called <code>output-ipa.pl</code> which produces
+  transcriptions for displaying in HTML -
+  e.g. <samp>p&amp;#633;&amp;#601;&amp;#716;n&amp;#652;ns.i&amp;#712;e.&amp;#643;n
+    &amp;#809</samp> - which are not suitable for search, analysis, or
+  forced-alignment)</p> 
+
+<p>In order to prevent the DISC mapping from applying on your layer:</p>
+<ul>
+  <li>When creating the layer, set the layer type to <i>Text</i> rather than <i>Phonological</i>.</li>
+  <li>When configuring the layer, set the field to <i>Phonemes (original file)</i> rather than <i>Phonemes (DISC)</i>.</li>
+</ul>
+</body></html>

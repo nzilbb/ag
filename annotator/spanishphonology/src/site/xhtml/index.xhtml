@@ -1,0 +1,65 @@
+<html><body>
+<h2>Spanish Phonology Tagger</h2>
+<p> This annotator tags Spanish words their phonemic transcription, based on rules
+  that map orthography to phonology </p> 
+
+<p> Rule-based conversion is based on 
+  <a href="https://github.com/easypronunciation/spanish-pronunciation-rules-php"
+     target="spanish-pronunciation-rules-php">
+    spanish-pronunciation-rules-php</a>,
+  an open-source PHP function that converts a Spanish word into IPA phonetic
+  transcription symbols, written by Timur Baytukalov,
+  <a href="http://easypronunciation.com/en/" target="easypronunciation">
+    http://easypronunciation.com/en/</a> 
+</p>
+<p> The annotator's spelling-to-pronuncation rules are context-sensitive within the
+  word. Some example transcriptions are: </p>
+<table>
+  <tr><td><b> word </b></td><td> </td><td><b> phonemes </b></td>
+      <td><b> word </b></td><td> </td><td><b> phonemes </b></td>
+      <td><b> word </b></td><td> </td><td><b> phonemes </b></td></tr>
+  <tr><td> año       </td><td>→</td><td> aɲo </td>
+      <td> qué       </td><td>→</td><td> kE </td>
+      <td> mi        </td><td>→</td><td> mi </td></tr>
+  <tr><td> mí        </td><td>→</td><td> mi </td>
+      <td> jaja      </td><td>→</td><td> xaxa </td>
+      <td> baño      </td><td>→</td><td> baɲo </td></tr>
+  <tr><td> abajo     </td><td>→</td><td> aβaxo </td>
+      <td> vaso      </td><td>→</td><td> baso </td>
+      <td> oveja     </td><td>→</td><td> oβexa </td></tr>
+  <tr><td> harto     </td><td>→</td><td> aɾto </td>
+      <td> charla    </td><td>→</td><td> ʧaɾla </td>
+      <td> dedo      </td><td>→</td><td> deðo </td></tr>
+  <tr><td> agua      </td><td>→</td><td> aɣwa </td>
+      <td> gesto     </td><td>→</td><td> xesto </td>
+      <td> grande    </td><td>→</td><td> gɾande </td></tr>
+  <tr><td> colgar    </td><td>→</td><td> kolgaɾ </td>
+      <td> tango     </td><td>→</td><td> taŋgo </td>
+      <td> tanto     </td><td>→</td><td> tanto </td></tr>
+  <tr><td> Danbo     </td><td>→</td><td> dambo </td>
+      <td> nínfa     </td><td>→</td><td> nimfa </td>
+      <td> convenir  </td><td>→</td><td> kombeniɾ </td></tr>
+  <tr><td> conllevar </td><td>→</td><td> koɲʎeβaɾ </td>
+      <td> conyugal  </td><td>→</td><td> koɲʝuɣal </td>
+      <td> ala       </td><td>→</td><td> ala </td></tr>
+  <tr><td> allá      </td><td>→</td><td> aʎa </td>
+      <td> rollo     </td><td>→</td><td> roʎo </td>
+      <td> pero      </td><td>→</td><td> peɾo </td></tr>
+  <tr><td> perro     </td><td>→</td><td> pero </td>
+      <td> enredo    </td><td>→</td><td> enreðo </td>
+      <td> alrededor </td><td>→</td><td> alreðeðoɾ </td></tr>
+  <tr><td> éxito     </td><td>→</td><td> eksito </td>
+      <td> México    </td><td>→</td><td> mexiko </td></tr>
+</table>
+
+<p> The annotator currently supports two varieties of Spanish; Spain and Mexico. Some
+  illustrative examples of the differences in transcription are given below: </p>    
+
+<table>
+  <tr><td><b> word   </b></td><td> </td><td><b> Spain  </b></td><td><b> Mexico </b></td></tr>      
+  <tr><td> hacia         </td><td>→</td><td> aθja          </td><td> asja </td></tr>
+  <tr><td> Jacinta       </td><td>→</td><td> xaθinta       </td><td> xasinta </td></tr>
+  <tr><td> desregulación </td><td>→</td><td> desreɣulaθjon </td><td> desreɣulasjon </td></tr>
+  <tr><td> vergüenza     </td><td>→</td><td> beɾɣwenθa      </td><td> beɾɣwensa </td></tr>
+</table>
+</body></html>
