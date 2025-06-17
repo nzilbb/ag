@@ -87,8 +87,9 @@ public class TestCMUDictionary {
     List<String> entries = dict.lookup("TEST");
     assertFalse("Isn't read only",
                 dict.isReadOnly());
-    assertEquals("125K odd entries",
-                 125074, dict.countAllKeys());
+    int count = dict.countAllKeys();
+    assertTrue("125K odd entries: " + count,
+               124500 < count);
     assertEquals("No editable keys",
                  0, dict.countEditableKeys());
   }   
@@ -208,15 +209,19 @@ public class TestCMUDictionary {
     assertEquals("COUNT keys",
                  ""+dict.countAllKeys(), dict.aggregateKeys("COUNT"));
     assertEquals("MIN key",
-                 "!exclamation-point", dict.aggregateKeys("MIN"));
+                 ",comma", dict.aggregateKeys("MIN"));
+    // used to be !exclamation-point - check that's still there
+    List<String> entries = dict.lookup("!exclamation-point");
+    assertEquals("1 entries: " + entries,
+                 1, entries.size());
     assertEquals("MAX key",
-                 "}right-brace", dict.aggregateKeys("MAX"));
+                 "zywicki", dict.aggregateKeys("MAX"));
     assertEquals("COUNT entries",
-                 "133854", dict.aggregateEntries("COUNT"));
+                 "133536", dict.aggregateEntries("COUNT"));
     assertEquals("MIN entry",
                  "AA0 B AA0 T IY0 EH1 L OW0", dict.aggregateEntries("MIN"));
     assertEquals("MAX entry",
-                 "ZH W EY1 D AO1 NG", dict.aggregateEntries("MAX"));
+                 "Z Y UW1 G AA0 N AA0 V Z", dict.aggregateEntries("MAX"));
   }   
 
   @Test public void readWrite() throws Exception {

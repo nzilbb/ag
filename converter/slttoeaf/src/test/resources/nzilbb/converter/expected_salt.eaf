@@ -59,7 +59,7 @@
   <TIER LANG_REF="eng" LINGUISTIC_TYPE_REF="default-lt" PARTICIPANT="ADAL-Child" TIER_ID="ADAL-Child">
     <ANNOTATION>
       <ALIGNABLE_ANNOTATION ANNOTATION_ID="a7" TIME_SLOT_REF1="ts13" TIME_SLOT_REF2="ts14">
-        <ANNOTATION_VALUE>Um the kids the kids, they quickly put their gumboots on.</ANNOTATION_VALUE>
+        <ANNOTATION_VALUE>Um the kids the kids, {in-situ comment} they quickly put their gumboots on.</ANNOTATION_VALUE>
       </ALIGNABLE_ANNOTATION>
     </ANNOTATION>
     <ANNOTATION>

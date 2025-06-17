@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>eaf-to-kaldi</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <name>nzilbb.converter.eaftokaldi</name>
   <description>ELAN .eaf file to Kaldi converter</description>
 
@@ -17,7 +17,7 @@
 
     <input.package>nzilbb.formatter.elan</input.package>
     <input.path>nzilbb/formatter/elan/</input.path>
-    <input.version>1.7.8</input.version>
+    <input.version>1.8.2</input.version>
     
     <output.package>nzilbb.formatter.kaldi</output.package>
     <output.path>nzilbb/formatter/kaldi/</output.path>

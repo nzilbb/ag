@@ -1,6 +1,7 @@
 
 {
     "id": "doccano-test-1",
+    "offsetUnits": "s",
     "schema": {
         "participantLayerId": "who",
         "turnLayerId": "turn",

@@ -61,9 +61,9 @@ More format conversions are available
 
 ### Prerequisites
 
-* The JDK for at least Java 8
+* The JDK for at least Java 11
   ```
-  sudo apt install default-jdk
+  sudo apt install openjdk-11-jdk-headless
   ```
 * Maven
   ```

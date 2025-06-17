@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>slt-to-tex</artifactId>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
   <name>nzilbb.converter.slttotex</name>
   <description>SALT transcript to LaTeX document converter</description>
 
@@ -17,7 +17,7 @@
 
     <input.package>nzilbb.formatter.salt</input.package>
     <input.path>nzilbb/formatter/salt/</input.path>
-    <input.version>0.3.0</input.version>
+    <input.version>0.3.1</input.version>
     
     <output.package>nzilbb.formatter.latex</output.package>
     <output.path>nzilbb/formatter/latex/</output.path>

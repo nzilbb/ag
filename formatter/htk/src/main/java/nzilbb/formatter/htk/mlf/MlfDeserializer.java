@@ -449,7 +449,7 @@ public class MlfDeserializer implements GraphDeserializer {
     // noiseIdentifiers
     if (!configuration.containsKey("noiseIdentifiersString")) {
       configuration.addParameter(
-        new Parameter("noiseIdentifiersString", Boolean.class, 
+        new Parameter("noiseIdentifiersString", String.class, 
                       "Noise identifiers",
                       "Space-separated list of noise labels",
                       true));

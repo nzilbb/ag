@@ -82,9 +82,9 @@
   <modules>
     <module>ag</module>
     <!--module>transcriber</module-->
-    <module>annotator</module>
     <module>formatter</module>
     <module>converter</module>
+    <module>annotator</module>
   </modules>
 
   <reporting>

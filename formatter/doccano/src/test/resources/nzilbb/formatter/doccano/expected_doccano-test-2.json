@@ -1,6 +1,7 @@
 
 {
     "id": "doccano-test-2",
+    "offsetUnits": "char",
     "schema": {
         "participantLayerId": "who",
         "turnLayerId": "turn",
@@ -79,6 +80,10 @@
             "offset": 45.0,
             "confidence": 100
         },
+        "e": {
+            "offset": null,
+            "confidence": 10
+        },
         "g": {
             "offset": null,
             "confidence": 10
@@ -92,6 +97,10 @@
             "confidence": 10
         },
         "m": {
+            "offset": null,
+            "confidence": 10
+        },
+        "t": {
             "offset": null,
             "confidence": 10
         },
@@ -143,7 +152,7 @@
                         {
                             "id": "h",
                             "label": "The",
-                            "startId": "1",
+                            "startId": "e",
                             "endId": "g",
                             "confidence": 100
                         },
@@ -237,7 +246,7 @@
                         {
                             "id": "w",
                             "label": "over",
-                            "startId": "5",
+                            "startId": "t",
                             "endId": "v",
                             "confidence": 100
                         },

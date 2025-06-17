@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Trans SYSTEM "trans-14.dtd">
-<Trans scribe="&quot;Transcriber transcript&quot; text/xml-transcriber (v1.62)" audio_filename="" version="0" version_date="200312" xml:lang="">
+<Trans scribe="&quot;Transcriber transcript&quot; text/xml-transcriber" audio_filename="" version="0" version_date="250617" xml:lang="">
 <Topics>
 <Topic id="to5" desc="teen-decadeplus-me-general"/>
 <Topic id="to4" desc="adult-now-me-event"/>
@@ -193,10 +193,9 @@
 </Section>
 <Section type="report" topic="to5" startTime="285.864" endTime="295.115">
 <Turn speaker="spk1" startTime="285.864" endTime="295.115">
-<Sync time="285.864"/>I don't really know it at all --
-<Sync time="288.646"/>
-<Who nb="1"/>so after all that you said that .
-<Who nb="1"/>so
+<Sync time="285.864"/>I don't really know it at all
+<Sync time="287.177"/>--
+<Sync time="288.646"/>so after all that you said that .
 <Sync time="289.677"/>you said that .
 <Sync time="290.709"/>grandpop didn't let you.
 <Sync time="292.490"/>like he kept the family together - how

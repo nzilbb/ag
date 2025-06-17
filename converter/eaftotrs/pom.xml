@@ -17,7 +17,7 @@
     
     <input.package>nzilbb.formatter.elan</input.package>
     <input.path>nzilbb/formatter/elan/</input.path>
-    <input.version>1.7.8</input.version>
+    <input.version>1.8.2</input.version>
     
     <output.package>nzilbb.formatter.transcriber</output.package>
     <output.path>nzilbb/formatter/transcriber/</output.path>
@@ -157,7 +157,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <!--trimStackTrace>false</trimStackTrace-->
+          <trimStackTrace>false</trimStackTrace>
         </configuration>
         </plugin>
     </plugins>

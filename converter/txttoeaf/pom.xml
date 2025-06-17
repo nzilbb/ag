@@ -25,7 +25,7 @@
     
     <output.package>nzilbb.formatter.elan</output.package>
     <output.path>nzilbb/formatter/elan/</output.path>
-    <output.version>1.7.8</output.version>    
+    <output.version>1.8.2</output.version>    
   </properties>
 
   <dependencies>
@@ -126,7 +126,7 @@
                 <artifactItem>
                   <groupId>nz.ilbb.ag</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>1.2.4-SNAPSHOT</version>
+      <version>1.2.4-SNAPSHOT</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

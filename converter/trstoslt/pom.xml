@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>trs-to-slt</artifactId>
   <name>nzilbb.converter.trstoslt</name>
-  <version>0.1.5</version>
+  <version>0.1.6</version>
   <description>Transcriber transcript to SALT transcript converter</description>
 
   <properties>
@@ -21,7 +21,7 @@
     
     <output.package>nzilbb.formatter.salt</output.package>
     <output.path>nzilbb/formatter/salt/</output.path>
-    <output.version>0.3.0</output.version>
+    <output.version>0.3.1</output.version>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

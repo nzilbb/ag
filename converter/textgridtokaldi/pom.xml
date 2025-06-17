@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>textgrid-to-kaldi</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <name>nzilbb.converter.textgridtokaldi</name>
   <description>Praat TextGrid to Kaldi converter</description>
 
@@ -17,7 +17,7 @@
 
     <input.package>nzilbb.formatter.praat</input.package>
     <input.path>nzilbb/formatter/praat/</input.path>
-    <input.version>2.6.5</input.version>
+    <input.version>2.7.1</input.version>
     
     <output.package>nzilbb.formatter.kaldi</output.package>
     <output.path>nzilbb/formatter/kaldi/</output.path>

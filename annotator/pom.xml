@@ -24,12 +24,14 @@
     <module>jython</module>
     <module>spanishphonology</module>
     <module>labelmapper</module>
-    <module>stanfordpos</module>
     <module>phonemetranscoder</module>
     <module>basservices</module>
     <module>reaper</module>
     <module>unisyn</module>
-    <module>mediapipe</module>
+    <!-- only on Ubuntu, and requires `sudo apt install python3-venv` first: -->
+    <!-- <module>mediapipe</module> -->
+    <!-- there's currently a problem with standford's SSL certificate:
+         <module>stanfordpos</module> -->
     <!-- These require manual 3rd party software installation so are disabled by default: -->
     <!--module>htk</module-->
     <!--module>mfa</module-->

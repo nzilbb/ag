@@ -122,7 +122,7 @@ public class TestEafToVtt {
       while (line != null) {
         actualLines.add(line);
         line = reader.readLine();
-         }
+      }
       Vector<String> expectedLines = new Vector<String>();
       reader = new BufferedReader(new FileReader(expected));
       line = reader.readLine();
@@ -135,7 +135,8 @@ public class TestEafToVtt {
       for (EditStep<String> step : path) {
 
         // ignore this difference?
-        if (ignorePattern != null && step.getFrom().matches(ignorePattern)) continue;
+        if (ignorePattern != null && step.getFrom() != null
+            && step.getFrom().matches(ignorePattern)) continue;
 
         // report the difference
         switch (step.getOperation()) {

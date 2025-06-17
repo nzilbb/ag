@@ -1,5 +1,5 @@
 //
-// Copyright 2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2022-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -82,7 +82,7 @@ public class GraphStoreHarness implements GraphStore {
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
    */
-  public void saveMedia(String id, String trackSuffix, String mediaUrl)
+  public MediaFile saveMedia(String id, String trackSuffix, String mediaUrl)
     throws StoreException, PermissionException, GraphNotFoundException {
     throw new StoreException("saveMedia not supported");
   }
@@ -822,7 +822,7 @@ public class GraphStoreHarness implements GraphStore {
    * @throws PermissionException If saving the media is not permitted.
    * @throws GraphNotFoundException If the transcript doesn't exist.
    */
-  public void saveEpisodeDocument(String id, String url)
+  public MediaFile saveEpisodeDocument(String id, String url)
     throws StoreException, PermissionException, GraphNotFoundException {
     throw new StoreException("Not implemented");
   }
@@ -871,5 +871,17 @@ public class GraphStoreHarness implements GraphStore {
     throws StoreException, PermissionException {
     throw new StoreException("Not implemented");
   }
+  
+  /**
+   * Delete a given media or document file.
+   * @param id The associated transcript ID.
+   * @param fileName The media file name, e.g. {@link MediaFile#name}.
+   * @throws StoreException, PermissionException, GraphNotFoundException
+   */
+  public void deleteMedia(String id, String fileName)
+    throws StoreException, PermissionException, GraphNotFoundException{
+    throw new StoreException("deleteMedia not supported");
+  }
+
   
 } // end of class GraphStoreHarness

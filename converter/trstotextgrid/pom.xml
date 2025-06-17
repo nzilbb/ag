@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>trs-to-textgrid</artifactId>
   <name>nzilbb.converter.trstotextgrid</name>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <description>Transcriber transcript to Praat TextGrid converter</description>
 
   <properties>
@@ -21,7 +21,7 @@
     
     <output.package>nzilbb.formatter.praat</output.package>
     <output.path>nzilbb/formatter/praat/</output.path>
-    <output.version>2.6.5</output.version>
+    <output.version>2.7.1</output.version>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

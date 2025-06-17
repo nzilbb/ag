@@ -10,17 +10,17 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>eaf-to-slt</artifactId>
   <name>nzilbb.converter.eaftoslt</name>
-  <version>0.2.1</version>
+  <version>0.2.3</version>
   <description>ELAN file to SALT transcript converter</description>
 
   <properties>
     <input.package>nzilbb.formatter.elan</input.package>
     <input.path>nzilbb/formatter/elan/</input.path>
-    <input.version>1.7.8</input.version>
+    <input.version>1.8.2</input.version>
     
     <output.package>nzilbb.formatter.salt</output.package>
     <output.path>nzilbb/formatter/salt/</output.path>
-    <output.version>0.3.0</output.version>    
+    <output.version>0.3.1</output.version>    
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

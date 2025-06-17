@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>textgrid-to-vtt</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.3</version>
   <name>nzilbb.converter.textgridtovtt</name>
   <description>Praat TextGrid to WebVTT subtitles converter</description>
 
@@ -17,11 +17,11 @@
 
     <input.package>nzilbb.formatter.praat</input.package>
     <input.path>nzilbb/formatter/praat/</input.path>
-    <input.version>2.6.5</input.version>
+    <input.version>2.7.1</input.version>
     
     <output.package>nzilbb.formatter.webvtt</output.package>
     <output.path>nzilbb/formatter/webvtt/</output.path>
-    <output.version>0.7.0</output.version>    
+    <output.version>0.7.2</output.version>    
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

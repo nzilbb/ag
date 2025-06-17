@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>trs-to-eaf</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <name>nzilbb.converter.trstoeaf</name>
   <description>Transcriber transcript to ELAN file converter</description>
 
@@ -21,7 +21,7 @@
     
     <output.package>nzilbb.formatter.elan</output.package>
     <output.path>nzilbb/formatter/elan/</output.path>
-    <output.version>1.7.8</output.version>
+    <output.version>1.8.2</output.version>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

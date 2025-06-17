@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Trans SYSTEM "trans-14.dtd">
-<Trans scribe="&quot;Transcriber transcript&quot; text/xml-transcriber (null)" audio_filename="" version="0" version_date="210427" xml:lang="">
+<Trans scribe="&quot;Transcriber transcript&quot; text/xml-transcriber" audio_filename="" version="0" version_date="250617" xml:lang="">
 <Speakers>
 <Speaker id="spk1" name="participant" check="" type="" dialect="" accent="" scope=""/>
 <Speaker id="spk2" name="interviewer" check="" type="" dialect="" accent="" scope=""/>
@@ -36,12 +36,12 @@
 <Turn speaker="spk1" startTime="45.505" endTime="107.804">
 <Sync time="45.505"/>he was you know -- so -
 <Sync time="50.006"/>I don't know how we got back there
-<Sync time="51.631"/>whether we got a taxi or . -- and
-<Sync time="53.225"/>the priests ran us up . -- and
-<Sync time="54.319"/>you know because . -- and
-<Sync time="55.444"/>the township's quite a long from where we lived in -- and
-<Comment desc="unclear"/>
-<Sync time="62.835"/>ah -- shit --
+<Sync time="51.631"/>whether we got a taxi or .
+<Sync time="53.225"/>the priests ran us up .
+<Sync time="54.319"/>you know because .
+<Sync time="55.444"/>the township's quite a long from where we lived in
+<Comment desc="unclear"/>--
+<Sync time="60.101"/>and ah -- shit --
 <Sync time="64.851"/>and I remember -
 <Sync time="66.664"/>she came home and tried to console Dad and -
 <Sync time="70.195"/>he said oh she's just cooked me a cake
@@ -79,27 +79,27 @@
 <Sync time="136.673"/>he . he was there -
 <Sync time="138.642"/>and he arrived back -
 <Sync time="140.111"/>with one of his friends .
-<Sync time="141.579"/>and I remember going out to the . front - -- learned
-<Sync time="145.610"/>ah of the house -- learned
-<Sync time="146.891"/>beside the garage -- learned
-<Sync time="147.797"/>and of course you know he'd just come in . -- learned
-<Sync time="149.828"/>to Wanganui and . -- learned
-<Sync time="151.734"/>didn't know a bloody thing -- learned
-<Sync time="152.796"/>and I said to him -- learned
-<Sync time="153.796"/>Barry Barry come in . -- learned
-<Sync time="155.140"/>Dad wants to talk to you -- -- learned
-<Sync time="158.264"/>and so his friend said oh . well . -- learned
-<Sync time="160.108"/>oh see you later you know and . -- learned
-<Sync time="161.951"/>rode away on his bike or whatever he had . -- learned
-<Sync time="164.200"/>a motorbike or something - -- learned
-<Sync time="165.700"/>or a car - -- learned
-<Sync time="167.012"/>and of course . you know . -- learned
-<Sync time="168.887"/>it was just Barry and I -- learned
-<Sync time="170.074"/>there were no other children at that time - &lt;mmm&gt; -- -- learned
-<Sync time="174.168"/>so he came in and - -- learned
+<Sync time="141.579"/>and I remember going out to the . front -
+<Sync time="145.610"/>ah of the house
+<Sync time="146.891"/>beside the garage
+<Sync time="147.797"/>and of course you know he'd just come in .
+<Sync time="149.828"/>to Wanganui and .
+<Sync time="151.734"/>didn't know a bloody thing
+<Sync time="152.796"/>and I said to him
+<Sync time="153.796"/>Barry Barry come in .
+<Sync time="155.140"/>Dad wants to talk to you --
+<Sync time="158.264"/>and so his friend said oh . well .
+<Sync time="160.108"/>oh see you later you know and .
+<Sync time="161.951"/>rode away on his bike or whatever he had .
+<Sync time="164.200"/>a motorbike or something -
+<Sync time="165.700"/>or a car -
+<Sync time="167.012"/>and of course . you know .
+<Sync time="168.887"/>it was just Barry and I
+<Sync time="170.074"/>there were no other children at that time - &lt;mmm&gt; --
+<Sync time="174.168"/>so he came in and -
 <Event desc="interviewer: clears throat" type="noise" extent="instantaneous"/>
-
-<Sync time="178.658"/>all the . disaster --
+--
+<Sync time="177.590"/>learned all the . disaster --
 </Turn>
 <Turn speaker="spk2" startTime="181.652" endTime="183.995">
 <Sync time="181.652"/>goodness
@@ -137,9 +137,14 @@
 <Sync time="211.837"/>you bloody find out
 <Sync time="212.806"/>that the microphone is malfunctioning
 </Turn>
+<Turn speaker="spk2 spk1" startTime="214.822" endTime="218.290">
+<Sync time="214.822"/>
+<Who nb="2"/>or some and there's nothing much on it or
+<Who nb="1"/>yeah yeah
+<Comment desc="unclear"/>yeah -- well that's right
+</Turn>
 <Turn speaker="spk1" startTime="218.290" endTime="220.696">
-<Sync time="218.290"/>
-<Comment desc="unclear"/>now where is it in the back left ?
+<Sync time="218.290"/>now where is it in the back left ?
 </Turn>
 <Turn speaker="spk2" startTime="220.696" endTime="223.227">
 <Sync time="220.696"/>ah yeah just turn left there
@@ -148,12 +153,11 @@
 </Turn>
 <Turn speaker="spk1" startTime="229.852" endTime="285.864">
 <Sync time="229.852"/>that - Mum and Dad had looked at a house.
-<Sync time="233.727"/>in the country -- on the main road which
+<Sync time="233.727"/>in the country
 <Event desc="microphone movement noise" type="noise" extent="instantaneous"/>
-
-<Sync time="239.039"/>
-<Who nb="1"/>was
-<Who nb="1"/>was driving towards Taranaki --
+--
+<Sync time="236.946"/>on the main road which
+<Sync time="239.039"/>was driving towards Taranaki --
 <Sync time="242.788"/>and it was a . country house -
 <Sync time="245.069"/>with a long drive in
 <Sync time="246.413"/>you know over the field and .
@@ -178,9 +182,8 @@
 <Turn speaker="spk2" startTime="285.864" endTime="295.115">
 <Sync time="285.864"/>I don't really know it at all
 <Comment desc="participant: sits down"/>
-<Sync time="287.177"/>
-<Who nb="1"/>-- so
-<Who nb="1"/>-- so after all that you said that .
+<Sync time="287.177"/>--
+<Sync time="288.646"/>so after all that you said that .
 <Sync time="289.677"/>you said that .
 <Sync time="290.709"/>grandpop didn't let you.
 <Sync time="292.490"/>like he kept the family together - how
@@ -191,13 +194,9 @@
 <Sync time="300.553"/>and offer to take .
 <Sync time="301.678"/>some of the children
 </Turn>
-<Turn speaker="spk2" startTime="214.822" endTime="304.334">
+<Turn speaker="spk2" startTime="302.834" endTime="304.334">
 <Sync time="302.834"/>yeah . how many of . how many were there ?
 <Comment desc="interviewer: unclear"/>
-<Sync time="214.822"/>
-<Who nb="2"/>or some and there's nothing much on it or
-<Who nb="1"/>yeah yeah
-<Comment desc="unclear"/>yeah -- well that's right
 </Turn>
 <Turn speaker="spk1" startTime="304.334" endTime="306.920">
 <Sync time="304.334"/>well there was five of us &lt;five&gt;

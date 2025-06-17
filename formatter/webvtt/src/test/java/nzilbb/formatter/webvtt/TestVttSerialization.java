@@ -141,8 +141,13 @@ public class TestVttSerialization {
     for (int w = 0; w < checkWords.length; w++) {
       assertEquals("check word " + w + ": " + checkWords[w], checkWords[w], words[w].getLabel());
     } // next word
+
+    // clumping works
+    for (Annotation word: words) {
+      assertNotEquals("Not leftover clump " + word, "...", word.getLabel());
+    }
       
-      // check all annotations have 'manual' confidence
+    // check all annotations have 'manual' confidence
     for (Annotation a : g.getAnnotationsById().values()) {
       // except maybe participants, which we check independently
       if (a.getLayerId().equals("who")) continue;

@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>slt-to-textgrid</artifactId>
-  <version>0.1.2</version>
+  <version>0.1.4</version>
   <name>nzilbb.converter.slttotextgrid</name>
   <description>SALT transcript to Praat TextGrid converter</description>
 
@@ -17,11 +17,11 @@
     
     <input.package>nzilbb.formatter.salt</input.package>
     <input.path>nzilbb/formatter/salt/</input.path>
-    <input.version>0.3.0</input.version>
+    <input.version>0.3.1</input.version>
     
     <output.package>nzilbb.formatter.praat</output.package>
     <output.path>nzilbb/formatter/praat/</output.path>
-    <output.version>2.6.5</output.version>    
+    <output.version>2.7.1</output.version>    
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

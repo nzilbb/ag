@@ -1221,15 +1221,13 @@ public class TestPlainTextSerialization
       }
     }
 
-    Normalizer normalizer = new Normalizer();
-    normalizer.setMinimumTurnPauseLength(0.5); // TODO this should be configurable
-    normalizer.transform(g);
-
     for (Anchor a : g.getAnchors().values()) {
       if (a.getStartingAnnotations().size() + a.getEndingAnnotations().size() > 0) {
         assertNotNull("ensure all anchors have confidence: " + a + ": " + a.getEndingAnnotations() + "." + a.getStartingAnnotations(),
                       a.getConfidence());
-        assertEquals("ensure all anchors have high confidence: " + a, Constants.CONFIDENCE_MANUAL, a.getConfidence().longValue());
+        assertEquals("ensure all anchors have high confidence: " + a
+                     + ": " + a.getEndingAnnotations() + "->" + a.getStartingAnnotations(),
+                     Constants.CONFIDENCE_MANUAL, a.getConfidence().longValue());
       }
     }
       

@@ -127,8 +127,8 @@ public class TestOrthographyStandardizer {
     assertEquals("one more orthography: "+orthographyLabels,
                  10, orthographyLabels.size());
     orthographies = orthographyLabels.iterator();
-    assertEquals("changed label not re-annotated",
-                 "why", orthographies.next());
+    assertEquals("changed label re-annotated",
+                 "porqué", orthographies.next());
     assertEquals("previous orthography unchanged", "hasn't", orthographies.next());
     assertEquals("previous orthography unchanged", "inés", orthographies.next());
     assertEquals("previous orthography unchanged", "d~", orthographies.next());

@@ -355,15 +355,14 @@ public class OrthographyStandardizer extends Annotator {
     }
 
     for (Annotation token : graph.all(tokenLayerId)) {
-      // tag only tokens that are not already tagged
-//      if (token.first(orthographyLayerId) == null) { // not tagged yet
-        String orthography = orthography(token.getLabel(), lowerCase, replacements);
-        // only add an annotation if there's actually a label
-        if (orthography.length() > 0) {
-          token.createTag(orthographyLayerId, orthography)
-            .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-        }
-//      } // not tagged yet
+      // tag all tokens, whether they've already been tagged or not
+      // (otherwise in-situ word corrections don't updated orthographies and thus lookups)
+      String orthography = orthography(token.getLabel(), lowerCase, replacements);
+      // only add an annotation if there's actually a label
+      if (orthography.length() > 0) {
+        token.createTag(orthographyLayerId, orthography)
+          .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      }
     } // next token
 
     setRunning(false);

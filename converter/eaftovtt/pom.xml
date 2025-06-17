@@ -17,11 +17,11 @@
 
     <input.package>nzilbb.formatter.elan</input.package>
     <input.path>nzilbb/formatter/elan/</input.path>
-    <input.version>1.7.8</input.version>
+    <input.version>1.8.2</input.version>
     
     <output.package>nzilbb.formatter.webvtt</output.package>
     <output.path>nzilbb/formatter/webvtt/</output.path>
-    <output.version>0.7.0</output.version>    
+    <output.version>0.7.2</output.version>    
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -154,6 +154,12 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <trimStackTrace>false</trimStackTrace>
+        </configuration>
       </plugin>
     </plugins>
 
