@@ -931,22 +931,24 @@ public class TestGraph {
                  i, changes.size());
     g.getAnchor("create-delete").destroy();
     changes = g.getChanges();
-    assertEquals("No changes " + changes,
-                 0, changes.size());
+    assertEquals("Destroy " + changes,
+                 1, changes.size());
 
     // delete then create
     g.getAnchor("a5").setOffset(5.5); // this will also be lost
     g.getAnchor("a5").destroy();
     changes = g.getChanges();
     i = 0;
+    assertEquals("Destroy create-delete", changes.get(i++).toString());
     assertEquals("Destroy a5", changes.get(i++).toString());
     assertEquals("Correct number of changes " + changes,
                  i, changes.size());
     g.getAnchor("a5").create();
     changes = g.getChanges();
     i = 0;
-    assertEquals("No changes " + changes,
-                 0, changes.size());
+    assertEquals("Destroy create-delete", changes.get(i++).toString());
+    assertEquals("No more changes " + changes,
+                 1, changes.size());
   }
 
   /** Ensure order of creation of Anchors/Annotations is unimportant. */

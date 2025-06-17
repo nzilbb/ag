@@ -151,8 +151,8 @@ public class TestTrackedMap
                    m.getChanges().get(3).toString());
       
       m.destroy();
-      assertEquals("Destroy / Create cancel each other out",
-                   Change.Operation.NoChange, m.getChange());
+      assertEquals("Create then Destroy amounts to Destroy",
+                   Change.Operation.Destroy, m.getChange());
       m.rollback();
 
       m.create();

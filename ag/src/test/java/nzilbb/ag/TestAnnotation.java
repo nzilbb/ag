@@ -199,7 +199,7 @@ public class TestAnnotation
       assertEquals("Create trumps Update as a change", Change.Operation.Create, a.getChange());
 
       a.destroy();
-      assertEquals("Destroy cancels out Create", Change.Operation.NoChange, a.getChange());
+      assertEquals("Destroy after Create means Destroy", Change.Operation.Destroy, a.getChange());
       a.rollback();
       
       a.create();
