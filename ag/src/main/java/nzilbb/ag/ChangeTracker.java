@@ -68,8 +68,7 @@ public class ChangeTracker implements Consumer<Change> {
         if (!idToChanges.containsKey(id)) idToChanges.put(id, new HashMap<String,Change>());
         HashMap<String,Change> attributeMap = idToChanges.get(id);
 
-        if ((change.getOperation() == Change.Operation.Create
-             || change.getOperation() == Change.Operation.Destroy)
+        if ((change.getOperation() == Change.Operation.Create)
             && attributeMap.containsKey(change.getKey()) 
             && attributeMap.get(change.getKey()).getOperation() != change.getOperation()) {
           // create and destroy cancel each other out, and all other changes
