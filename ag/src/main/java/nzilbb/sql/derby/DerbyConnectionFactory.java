@@ -97,6 +97,11 @@ public class DerbyConnectionFactory implements ConnectionFactory {
     // TODO Can't register functions implemented in a jar that's not on the classpath
     // return DerbySQLTranslator.CreateFunctions(
     //   DriverManager.getConnection(connectionURL, null, null));
+    try {
+      Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+    } catch(Throwable exception) {
+      System.err.println(""+exception);
+    }
     return DriverManager.getConnection(connectionURL, null, null);
   }
    
