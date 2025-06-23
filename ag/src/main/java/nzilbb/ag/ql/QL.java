@@ -21,19 +21,34 @@
 //
 package nzilbb.ag.ql;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Useful functions relating to QL.
  * @author Robert Fromont robert@fromont.net.nz
  */
 
 public class QL {
+  static Pattern quotePattern = Pattern.compile("(^|[^\\\\])'");
+  
   /**
-   * Escapes quotes in the given string for inclusion in QL or SQL queries.
+   * Escapes single quotes (only) in the given string for inclusion in QL or SQL queries.
    * @param s The string to escape.
-   * @return The given string, with quotes escapeed.
+   * @return The given string, with quotes escaped.
    */
   public static String Esc(String s) {
     if (s == null) return "";
-    return s.replace("\\","\\\\").replace("'","\\'");
+    String escaped = s;
+    // ensure that any single quotes are escaped
+    // replaceAll() doesn't work for consecutive quotes so we need to create
+    // a new match for each replacement
+    Matcher matcher = quotePattern.matcher(escaped);
+    while (matcher.find()) {
+      escaped = matcher.replaceFirst("$1\\\\'");
+      // look again, including replacement we just match
+      matcher = quotePattern.matcher(escaped);
+    }
+    return escaped;
   } // end of esc()
 } // end of class QL
