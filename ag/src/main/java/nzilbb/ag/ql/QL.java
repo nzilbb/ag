@@ -38,17 +38,39 @@ public class QL {
    * @return The given string, with quotes escaped.
    */
   public static String Esc(String s) {
-    if (s == null) return "";
-    String escaped = s;
-    // ensure that any single quotes are escaped
-    // replaceAll() doesn't work for consecutive quotes so we need to create
-    // a new match for each replacement
-    Matcher matcher = quotePattern.matcher(escaped);
-    while (matcher.find()) {
-      escaped = matcher.replaceFirst("$1\\\\'");
-      // look again, including replacement we just match
-      matcher = quotePattern.matcher(escaped);
+    // if (s == null) return "";
+    // String escaped = s;
+    // // ensure that any single quotes are escaped
+    // // replaceAll() doesn't work for consecutive quotes so we need to create
+    // // a new match for each replacement
+    // Matcher matcher = quotePattern.matcher(escaped);
+    // while (matcher.find()) {
+    //   escaped = matcher.replaceFirst("$1\\\\'");
+    //   // look again, including replacement we just match
+    //   matcher = quotePattern.matcher(escaped);
+    // }
+    StringBuilder escaped = new StringBuilder();
+    if (s != null) {
+      // move through character by character looking for ' and \
+      for (int c = 0; c < s.length(); c++) {
+        char thisChar = s.charAt(c);
+        char nextChar = c < s.length()-1?s.charAt(c+1):'\0';
+        if (thisChar == '\\') { // backslash
+          if (nextChar == '\\' || nextChar == '\'') { // it's quoting a backslash or quote
+            escaped.append(thisChar); // pass through the backslash
+            escaped.append(nextChar); // and what it's escaping
+            c++; // and skip the next char
+          } else {
+            escaped.append(thisChar); // just pass it through
+          }
+        } else if (thisChar == '\'') { // single quote
+          escaped.append('\\'); // escape it
+          escaped.append(thisChar); // pass through the quote
+        } else {
+          escaped.append(thisChar); // just pass it through
+        }
+      } // next character
     }
-    return escaped;
+    return escaped.toString();
   } // end of esc()
 } // end of class QL
