@@ -71,7 +71,7 @@ public class ChangeTracker implements Consumer<Change> {
         if ((change.getOperation() == Change.Operation.Create)
             && attributeMap.containsKey(change.getKey()) 
             && attributeMap.get(change.getKey()).getOperation() != change.getOperation()) {
-          // create and destroy cancel each other out, and all other changes
+          // create followed by destroy cancel out, and all other changes
           for (Change priorChange : new Vector<Change>(attributeMap.values())) {
             reject(priorChange);
           }
@@ -153,7 +153,7 @@ public class ChangeTracker implements Consumer<Change> {
           .forEach(c -> changes.add(c));
       } // idToChanges.containsKey(id)
     } // id != null
-      // System.out.println("Changes for " + id + ": " + changes);
+    // System.out.println("Changes for " + id + ": " + changes);
     return changes;
   }
    
