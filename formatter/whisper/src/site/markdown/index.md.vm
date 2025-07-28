@@ -1,6 +1,4 @@
 # ${project.name} (${project.version})
 
-${project.description}
-
 Parser for transcriptions output by the [Whisper](https://github.com/openai/whisper) ASR system.
 
