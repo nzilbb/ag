@@ -29,9 +29,9 @@ the file extension, e.g `nzilbb.formatter.praat.TextGridSerialization`
    - add the following to *dependencies*
    ```
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.0.7,)</version>
+      <version>1.2.3</version>
       <scope>compile</scope>
     </dependency>
    ```
@@ -63,7 +63,7 @@ the file extension, e.g `nzilbb.formatter.praat.TextGridSerialization`
           <trimStackTrace>false</trimStackTrace>
         </configuration>
       </plugin>
-    </plugins>    
+    </plugins>
    ```
 3. Add directory structure for the formatter code:
    ```
