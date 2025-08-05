@@ -49,7 +49,7 @@ public class TestTrmParserCsv {
     
     ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(5, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals(6, serializer.configure(configuration, g.getSchema()).size());
     assertEquals("chunk layer",
                  "utterance",
                  ((Layer)configuration.get("chunkLayer").getValue()).getId());
@@ -63,8 +63,11 @@ public class TestTrmParserCsv {
                  Double.valueOf(1.0),
                  (Double)configuration.get("pauseSeconds").getValue());
     assertEquals("pause marker pattern",
-                 ".+[.-]",
+                 ".+[-.].*",
                  (String)configuration.get("pauseMarkerPattern").getValue());
+    assertEquals("code switch brackets",
+                 "[]",
+                 (String)configuration.get("codeSwitchBrackets").getValue());
     
     // two layers required
     String[] requiredLayers = serializer.getRequiredLayers();
@@ -107,7 +110,11 @@ public class TestTrmParserCsv {
     ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     configuration.get("pauseSeconds").setValue(Double.valueOf(0.5));
-    assertEquals(5, serializer.configure(configuration, g.getSchema()).size());
+    // also don't count hyphen as pause 
+    configuration.get("pauseMarkerPattern").setValue(".+[.].*");
+    // also use a single character for code-switching
+    configuration.get("codeSwitchBrackets").setValue("|");
+    assertEquals(6, serializer.configure(configuration, g.getSchema()).size());
     assertEquals("chunk layer",
                  "utterance",
                  ((Layer)configuration.get("chunkLayer").getValue()).getId());
@@ -121,8 +128,11 @@ public class TestTrmParserCsv {
                  Double.valueOf(0.5),
                  (Double)configuration.get("pauseSeconds").getValue());
     assertEquals("pause marker pattern",
-                 ".+[.-]",
+                 ".+[.].*",
                  (String)configuration.get("pauseMarkerPattern").getValue());
+    assertEquals("code switch brackets",
+                 "|",
+                 (String)configuration.get("codeSwitchBrackets").getValue());
     
     // two layers required
     String[] requiredLayers = serializer.getRequiredLayers();
@@ -165,7 +175,7 @@ public class TestTrmParserCsv {
     ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     configuration.get("pauseMarkerPattern").setValue("");
-    assertEquals(5, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals(6, serializer.configure(configuration, g.getSchema()).size());
     assertEquals("chunk layer",
                  "utterance",
                  ((Layer)configuration.get("chunkLayer").getValue()).getId());
@@ -181,6 +191,70 @@ public class TestTrmParserCsv {
     assertEquals("pause marker pattern",
                  "",
                  (String)configuration.get("pauseMarkerPattern").getValue());
+    assertEquals("code switch brackets",
+                 "[]",
+                 (String)configuration.get("codeSwitchBrackets").getValue());
+    
+    // two layers required
+    String[] requiredLayers = serializer.getRequiredLayers();
+    assertEquals("Right number of required layers " + Arrays.asList(requiredLayers),
+                 3, requiredLayers.length);
+    assertEquals("utterance", requiredLayers[0]);
+    assertEquals("word", requiredLayers[1]);
+    assertEquals("language", requiredLayers[2]);
+      
+    // serialize
+    Graph[] graphs = { g };
+    File dir = getDir();
+    String[] layerIds = {"who", "word"};
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(Arrays.spliterator(graphs), layerIds,
+                         stream -> streams.add(stream),
+                         warning -> System.out.println(warning),
+                         exception -> exceptions.add(exception));
+    assertEquals(1, streams.size());
+    streams.elementAt(0).save(dir);
+    
+    File actual = new File(dir, streams.elementAt(0).getName());
+    String differences = diff(
+      new File(dir, "expected_" + g.getId().replace(".trs",".csv")),
+      actual);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      actual.delete();
+    }
+  }
+  
+  @Test public void noCodeSwitchBrackets()  throws Exception {
+    Graph g = createGraph("noCodeSwitchBrackets.trs");
+    
+    // create deserializer
+    TrmParserCsv serializer = new TrmParserCsv();
+    
+    ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
+    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    configuration.get("codeSwitchBrackets").setValue("");
+    assertEquals(6, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals("chunk layer",
+                 "utterance",
+                 ((Layer)configuration.get("chunkLayer").getValue()).getId());
+    assertEquals("token layer",
+                 "word",
+                 ((Layer)configuration.get("tokenLayer").getValue()).getId());
+    assertEquals("language layer",
+                 "language",
+                 ((Layer)configuration.get("languageLayer").getValue()).getId());
+    assertEquals("pause threshold",
+                 Double.valueOf(1.0),
+                 (Double)configuration.get("pauseSeconds").getValue());
+    assertEquals("pause marker pattern",
+                 ".+[-.].*",
+                 (String)configuration.get("pauseMarkerPattern").getValue());
+    assertEquals("no code switch brackets",
+                 "",
+                 (String)configuration.get("codeSwitchBrackets").getValue());
     
     // two layers required
     String[] requiredLayers = serializer.getRequiredLayers();
@@ -284,7 +358,7 @@ public class TestTrmParserCsv {
 
 
     g.addAnnotation(new Annotation("word1", "NO:.", "word", "a0", "a1", "turn1"));
-    g.addAnnotation(new Annotation("word2", "um - ", "word", "a1", "a2", "turn1"));
+    g.addAnnotation(new Annotation("word2", "um -", "word", "a1", "a2", "turn1"));
     g.addAnnotation(new Annotation("cs", "en", "language", "a1", "a2", "turn1"));
     g.addAnnotation(new Annotation("word3", "Wïwi - ", "word", "a2", "a3a", "turn1"));
     g.addAnnotation(new Annotation("word4", "aku", "word", "a3b", "a41", "turn1"));

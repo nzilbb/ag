@@ -205,9 +205,26 @@ public class TrmParserCsv implements GraphSerializer {
    * this counts as the end of an utterance. 
    * @param newPauseSeconds An inter-word pause longer than this
    * counts as the end of an utterance. 
-    */
-   public TrmParserCsv setPauseSeconds(Double newPauseSeconds) { pauseSeconds = newPauseSeconds; return this; }
+   */
+  public TrmParserCsv setPauseSeconds(Double newPauseSeconds) { pauseSeconds = newPauseSeconds; return this; }
 
+  /**
+   * Parentheses used to mark tokens in another language.
+   * @see #getCodeSwitchBrackets()
+   * @see #setCodeSwitchBrackets(String)
+   */
+  protected String codeSwitchBrackets;
+  /**
+   * Getter for {@link #codeSwitchBrackets}: Parentheses used to mark tokens in another language.
+   * @return Parentheses used to mark tokens in another language.
+   */
+  public String getCodeSwitchBrackets() { return codeSwitchBrackets; }
+  /**
+   * Setter for {@link #codeSwitchBrackets}: Parentheses used to mark tokens in another language.
+   * @param newCodeSwitchBrackets Parentheses used to mark tokens in another language.
+   */
+  public TrmParserCsv setCodeSwitchBrackets(String newCodeSwitchBrackets) { codeSwitchBrackets = newCodeSwitchBrackets; return this; }
+  
   private long graphCount = 0;
   private long consumedGraphCount = 0;
   
@@ -282,6 +299,7 @@ public class TrmParserCsv implements GraphSerializer {
     languageLayer = null;
     pauseSeconds = null;
     pauseMarkerPattern = null;
+    codeSwitchBrackets = null;
     if (configuration.size() > 0) {
       configuration.apply(this);
     }
@@ -353,8 +371,16 @@ public class TrmParserCsv implements GraphSerializer {
       :configuration.addParameter(
         new Parameter(
           "pauseMarkerPattern", String.class, "Pause Marker Pattern",
-          "Regular expression identifying tokens with a pause marker, e.g. \".+[.-]\".",
-          ".+[.-]"));
+          "Regular expression identifying tokens with a pause marker, e.g. \".+[-.].*\".",
+          ".+[-.].*"));
+
+    Parameter pCodeSwitchBrackets = configuration.containsKey("codeSwitchBrackets")?
+      configuration.get("codeSwitchBrackets")
+      :configuration.addParameter(
+        new Parameter(
+          "codeSwitchBrackets", String.class, "Code-switch Brackets",
+          "Parentheses used to mark tokens in another language, e.g. \"[]\".",
+          "[]"));
 
     return configuration;
   }   
@@ -537,8 +563,12 @@ public class TrmParserCsv implements GraphSerializer {
    * @return A standardized version of the given token's label.
    */
   public String standardize(Annotation token) {
-    if (languageLayer != null && token.first(languageLayer.getId()) != null) {
-      return "["+token.getLabel().trim()+"]";
+    if (codeSwitchBrackets != null && codeSwitchBrackets.length() > 0
+        && languageLayer != null
+        && token.first(languageLayer.getId()) != null) {
+      return codeSwitchBrackets.charAt(0)
+        +token.getLabel().trim()
+        +codeSwitchBrackets.charAt(codeSwitchBrackets.length() - 1);
     } 
     return token.getLabel()
       .replace("ä","ā").replace("ë","ē").replace("ï","ī").replace("ö","ō").replace("ü","ū")
