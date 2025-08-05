@@ -1,5 +1,5 @@
 Document,Speaker,MatchId,ID,Original,WithPauses,Terminator,Fragment
-pauseThreshold.trs,john smith,g_999;utterance1;turnStart-a1;who1;#=word1;[0]=word1;[1]=word1,pauseThreshold__0.000-1.000,NO:.,NŌ_._ 0.000,marker,NŌ .
-pauseThreshold.trs,john smith,g_999;utterance1;a1-utterance;who1;#=word2;[0]=word2;[1]=word3,pauseThreshold__1.000-3.000,"um - Wïwi - ",|um_-| 0.000 Wīwi_-_ 0.100,utterance,|um -| Wīwi -
+pauseThreshold.trs,john smith,g_999;utterance1;turnStart-a1;who1;#=word1;[0]=word1;[1]=word1,pauseThreshold__0.000-1.000,NO:.,NŌ. 0.000,marker,NŌ.
+pauseThreshold.trs,john smith,g_999;utterance1;a1-utterance;who1;#=word2;[0]=word2;[1]=word3,pauseThreshold__1.000-3.000,"um - Wïwi - ",|um-| 0.000 Wīwi- 0.100,utterance,|um-| Wīwi-
 pauseThreshold.trs,john smith,g_999;utterance2;utterance-a41;who1;#=word4;[0]=word4;[1]=word4,pauseThreshold__3.000-4.100,aku,aku 0.900,0.900,aku
 pauseThreshold.trs,john smith,g_999;utterance2;a5-turnEnd;who1;#=word5;[0]=word5;[1]=word5,pauseThreshold__5.000-6.000,tu:puna,tūpuna 0.000,turn,tūpuna

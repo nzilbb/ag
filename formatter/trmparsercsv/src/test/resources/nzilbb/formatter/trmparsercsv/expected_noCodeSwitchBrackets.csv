@@ -1,5 +1,5 @@
 Document,Speaker,MatchId,ID,Original,WithPauses,Terminator,Fragment
-noCodeSwitchBrackets.trs,john smith,g_999;utterance1;turnStart-a1;who1;#=word1;[0]=word1;[1]=word1,noCodeSwitchBrackets__0.000-1.000,NO:.,NŌ_._ 0.000,.,NŌ .
-noCodeSwitchBrackets.trs,john smith,g_999;utterance1;a1-a2;who1;#=word2;[0]=word2;[1]=word2,noCodeSwitchBrackets__1.000-2.000,um -,um_- 0.000,-,um -
-noCodeSwitchBrackets.trs,john smith,g_999;utterance1;a2-utterance;who1;#=word3;[0]=word3;[1]=word3,noCodeSwitchBrackets__2.000-3.000,"Wïwi - ",Wīwi_-_ 0.100,-,Wīwi -
+noCodeSwitchBrackets.trs,john smith,g_999;utterance1;turnStart-a1;who1;#=word1;[0]=word1;[1]=word1,noCodeSwitchBrackets__0.000-1.000,NO:.,NŌ 0.000,.,NŌ
+noCodeSwitchBrackets.trs,john smith,g_999;utterance1;a1-a2;who1;#=word2;[0]=word2;[1]=word2,noCodeSwitchBrackets__1.000-2.000,um -,um 0.000,-,um
+noCodeSwitchBrackets.trs,john smith,g_999;utterance1;a2-utterance;who1;#=word3;[0]=word3;[1]=word3,noCodeSwitchBrackets__2.000-3.000,"Wïwi - ",Wīwi 0.100,-,Wīwi
 noCodeSwitchBrackets.trs,john smith,g_999;utterance2;utterance-turnEnd;who1;#=word4;[0]=word4;[1]=word5,noCodeSwitchBrackets__3.000-6.000,aku tu:puna,aku 0.900 tūpuna 0.000,turn,aku tūpuna

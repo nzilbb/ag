@@ -71,6 +71,7 @@ import org.apache.commons.csv.*;
  *  <li>English words are enclosed in square brackets. </li>
  *  <li>Utterances are split on full stops and pauses of 1000ms or longer,
  *      creating two fragments per utterance. </li>
+ *  <li>Pause markers (<tt>.</tt> and <tt>-</tt> by default) removed. </li>
  * </ul>
  * <p> A CSV file is generated with the following columns:
  * <ul>
@@ -201,7 +202,9 @@ public class TrmParserCsv implements GraphSerializer {
    * identifying tokens with a pause marker. 
    * @param newPauseMarkerPattern Regular expression identifying tokens with a pause marker.
    */
-  public TrmParserCsv setPauseMarkerPattern(String newPauseMarkerPattern) { pauseMarkerPattern = newPauseMarkerPattern; return this; }  
+  public TrmParserCsv setPauseMarkerPattern(String newPauseMarkerPattern) { pauseMarkerPattern = newPauseMarkerPattern; return this; }
+
+  private Pattern markerExtractor;
   
   /**
    * An inter-word pause longer than this counts as the end of an utterance.
@@ -454,6 +457,23 @@ public class TrmParserCsv implements GraphSerializer {
       pauseMarkerPattern = Optional.ofNullable(pauseMarkerPattern).orElse("");
       Pattern pauseMarkerExp = pauseMarkerPattern == null?null:
         Pattern.compile(pauseMarkerPattern);
+      if (pauseMarkerExp != null
+          && pauseMarkerPattern.indexOf('(') >= 0 // pauseMarkerPattern captures a group
+          && pauseMarkerPattern.indexOf(')') > pauseMarkerPattern.indexOf('(')) {
+        int groupStart = pauseMarkerPattern.indexOf('(');
+        int groupEnd = pauseMarkerPattern.indexOf(')');
+        String prefix = pauseMarkerPattern.substring(0,groupStart);
+        String markerGroup = pauseMarkerPattern.substring(groupStart, groupEnd + 1);
+        String suffix = pauseMarkerPattern.substring(groupEnd + 1);
+        // capture a prefix and a suffix group, so we can remove pause markers
+        try {
+          markerExtractor = Pattern.compile("("+prefix+")"+markerGroup+"("+suffix+")");
+        } catch(Exception exception) {
+          errors.accept(new SerializationException(exception));
+        }
+      } else {
+        markerExtractor = null;
+      }
       
       final CSVPrinter csv = new CSVPrinter(
         new OutputStreamWriter(out, "UTF-8"), CSVFormat.EXCEL);
@@ -657,20 +677,25 @@ public class TrmParserCsv implements GraphSerializer {
    * @return A standardized version of the given token's label.
    */
   public String standardize(Annotation token) {
+    String label = null;
     if (codeSwitchBrackets != null && codeSwitchBrackets.length() > 0
         && languageLayer != null
         && token.first(languageLayer.getId()) != null) {
-      return codeSwitchBrackets.charAt(0)
+      label = codeSwitchBrackets.charAt(0)
         +token.getLabel().trim()
         +codeSwitchBrackets.charAt(codeSwitchBrackets.length() - 1);
-    } 
-    return token.getLabel()
-      .replace("ä","ā").replace("ë","ē").replace("ï","ī").replace("ö","ō").replace("ü","ū")
-      .replace("Ä","Ā").replace("Ë","Ē").replace("Ï","Ī").replace("Ö","Ō").replace("Ü","Ū")
-      .replace("a:","ā").replace("e:","ē").replace("i:","ī").replace("o:","ō").replace("u:","ū")
-      .replace("A:","Ā").replace("E:","Ē").replace("I:","Ī").replace("O:","Ō").replace("U:","Ū")
-      // ensure space is isolated
-      .replace(".", " . ");
+    } else {
+      label = token.getLabel()
+        .replace("ä","ā").replace("ë","ē").replace("ï","ī").replace("ö","ō").replace("ü","ū")
+        .replace("Ä","Ā").replace("Ë","Ē").replace("Ï","Ī").replace("Ö","Ō").replace("Ü","Ū")
+        .replace("a:","ā").replace("e:","ē").replace("i:","ī").replace("o:","ō").replace("u:","ū")
+        .replace("A:","Ā").replace("E:","Ē").replace("I:","Ī").replace("O:","Ō").replace("U:","Ū");
+    }
+    if (markerExtractor != null) { // remove the pause markers
+      label = markerExtractor.matcher(label).replaceFirst("$1$3");
+    }
+    // remove spaces
+    return label.replace(" ",""); 
   } // end of standardize()
 
 } // end of class TrmParserCsv
