@@ -1,4 +1,30 @@
 # ${project.name} (${project.version})
 
-${project.description}
+Generates CSV files specificially for export/import of data for the
+[trm-parser](https://github.com/connor-taylorbrown/trm-parser)
+implemented by [Connor Talyor-Brown](https://github.com/connor-taylorbrown)
+for Māori data.
+
+When serializing fragments, the following transformations are made:
+
+- Vowels with umlauts or followed by a colon are macronized.
+- English words are enclosed in square brackets.
+- Utterances are split on full stops and pauses of 1000ms or longer,
+  creating two fragments per utterance.
+
+A CSV file is generated with the following columns:
+
+- `Document` - the transcript ID.
+- `Speaker` - the participant ID.
+- `MatchId` - the MatchId-encoded identifier for the fragment.
+- `ID` - the unique identifier for the fragment.
+- `Original` - the original, unstandardized text of the fragment.
+- `WithPauses` - the standardized fragment text with pause length (in seconds)
+  between each token.
+- `Terminator` - the reason for terminating the fragment, which can be:
+  + `.` or `-` : there was a pause marker,
+  + A number like `1.234` : there was an inter-token pause,
+  + `utterance` : it was the end of the utterance, or
+  + `turn` : it was the end of the speaker turn.
+- `Fragment` - the standardized fragment text.
 
