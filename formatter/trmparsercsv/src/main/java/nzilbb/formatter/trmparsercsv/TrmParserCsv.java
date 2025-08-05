@@ -41,6 +41,8 @@ import java.util.Spliterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nzilbb.ag.*;
@@ -371,8 +373,8 @@ public class TrmParserCsv implements GraphSerializer {
       :configuration.addParameter(
         new Parameter(
           "pauseMarkerPattern", String.class, "Pause Marker Pattern",
-          "Regular expression identifying tokens with a pause marker, e.g. \".+[-.].*\".",
-          ".+[-.].*"));
+          "Regular expression identifying tokens with a pause marker, e.g. \".+([-.]).*\".",
+          ".+([-.]).*"));
 
     Parameter pCodeSwitchBrackets = configuration.containsKey("codeSwitchBrackets")?
       configuration.get("codeSwitchBrackets")
@@ -437,6 +439,8 @@ public class TrmParserCsv implements GraphSerializer {
       final StringBuffer fileName = new StringBuffer();
       final double pauseThreshold = Optional.ofNullable(pauseSeconds).orElse(0.0);
       pauseMarkerPattern = Optional.ofNullable(pauseMarkerPattern).orElse("");
+      Pattern pauseMarkerExp = pauseMarkerPattern == null?null:
+        Pattern.compile(pauseMarkerPattern);
       
       final CSVPrinter csv = new CSVPrinter(
         new OutputStreamWriter(out, "UTF-8"), CSVFormat.EXCEL);
@@ -445,6 +449,7 @@ public class TrmParserCsv implements GraphSerializer {
       csv.print("Document");
       csv.print("Speaker");
       csv.print("ID");
+      csv.print("Terminator");
       csv.print("Utterance");
       
       graphs.forEachRemaining(graph -> {
@@ -471,11 +476,11 @@ public class TrmParserCsv implements GraphSerializer {
             }
           }
 
-          // create a chunk layer that divides utterances int parts on fullstops as required
+          // create a temporary chunk layer that divides utterances
+          // into parts on pauses as required
           Layer tempLayer = (Layer)schema.getLayer(chunkLayer.getId()).clone();
           tempLayer.setId("@trm-parser-chunk");
-          graph.getSchema().addLayer(tempLayer);
-          
+          graph.getSchema().addLayer(tempLayer);          
           try {
             for (Annotation utterance : graph.all(chunkLayer.getId())) {
               Anchor start = utterance.getStart();
@@ -484,12 +489,18 @@ public class TrmParserCsv implements GraphSerializer {
               boolean previousTokenWasLast = false;
               for (Annotation token : utterance.all(tokenLayer.getId())) {
                 Annotation nextToken = token.getNext();
-                if (pauseMarkerPattern.length() > 0
-                    && token.getLabel().matches(pauseMarkerPattern)) {
+                Matcher pauseMarkerMatch = pauseMarkerExp==null?null:
+                  pauseMarkerExp.matcher(token.getLabel());
+                if (pauseMarkerMatch != null && pauseMarkerMatch.matches()) {
                   // there's a pause marker
                   previousChunk = graph.createAnnotation(
                     start, token.getEnd(), tempLayer.getId(), utterance.getLabel(),
                     utterance.getParent());
+                  try {
+                    previousChunk.put("@terminator", pauseMarkerMatch.group(1));
+                  } catch(Exception exception) { // no group 1
+                    previousChunk.put("@terminator", "marker");
+                  }
                   start = token.getEnd();
                   previousTokenWasLast = true;
                 } else if (pauseThreshold > 0.0
@@ -501,6 +512,9 @@ public class TrmParserCsv implements GraphSerializer {
                   previousChunk = graph.createAnnotation(
                     start, token.getEnd(), tempLayer.getId(), utterance.getLabel(),
                     utterance.getParent());
+                  previousChunk.put(
+                    "@terminator", // terminator = pause duration
+                    ""+(nextToken.getStart().getOffset() - token.getEnd().getOffset()));
                   start = nextToken.getStart();
                   previousTokenWasLast = true;
                 } else {                  
@@ -512,9 +526,16 @@ public class TrmParserCsv implements GraphSerializer {
                 previousChunk.setEnd(utterance.getEnd());
               } else { // there are leftover tokens
                 // finish off last chunk
-                graph.createAnnotation(
+                previousChunk = graph.createAnnotation(
                   start, utterance.getEnd(), tempLayer.getId(), utterance.getLabel(),
                   utterance.getParent());
+                if (utterance.getEndId().equals(utterance.getParent().getEndId())) {
+                  // turn end
+                  previousChunk.put("@terminator", utterance.getParent().getLayerId());
+                } else {
+                  // utterance end
+                  previousChunk.put("@terminator", utterance.getLayerId());
+                }
               }
             } // next utterance
             
@@ -533,6 +554,7 @@ public class TrmParserCsv implements GraphSerializer {
                             graph.sourceGraph(),
                             offsetAdjustment + chunk.getStart().getOffset(),
                             offsetAdjustment + chunk.getEnd().getOffset()));
+                csv.print(chunk.get("@terminator"));     // Terminator
                 csv.print(text);
               }
             } // next utterance

@@ -1,5 +1,5 @@
-Document,Speaker,ID,Utterance
-noCodeSwitchBrackets.trs,john smith,noCodeSwitchBrackets__0.000-1.000,NŌ .
-noCodeSwitchBrackets.trs,john smith,noCodeSwitchBrackets__1.000-2.000,um -
-noCodeSwitchBrackets.trs,john smith,noCodeSwitchBrackets__2.000-3.000,Wīwi -
-noCodeSwitchBrackets.trs,john smith,noCodeSwitchBrackets__3.000-6.000,aku tūpuna
+Document,Speaker,ID,Terminator,Utterance
+noCodeSwitchBrackets.trs,john smith,noCodeSwitchBrackets__0.000-1.000,.,NŌ .
+noCodeSwitchBrackets.trs,john smith,noCodeSwitchBrackets__1.000-2.000,-,um -
+noCodeSwitchBrackets.trs,john smith,noCodeSwitchBrackets__2.000-3.000,-,Wīwi -
+noCodeSwitchBrackets.trs,john smith,noCodeSwitchBrackets__3.000-6.000,turn,aku tūpuna

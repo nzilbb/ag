@@ -63,7 +63,7 @@ public class TestTrmParserCsv {
                  Double.valueOf(1.0),
                  (Double)configuration.get("pauseSeconds").getValue());
     assertEquals("pause marker pattern",
-                 ".+[-.].*",
+                 ".+([-.]).*",
                  (String)configuration.get("pauseMarkerPattern").getValue());
     assertEquals("code switch brackets",
                  "[]",
@@ -87,6 +87,7 @@ public class TestTrmParserCsv {
                          stream -> streams.add(stream),
                          warning -> System.out.println(warning),
                          exception -> exceptions.add(exception));
+    assertEquals("No errors: "+exceptions, 0, exceptions.size());
     assertEquals(1, streams.size());
     streams.elementAt(0).save(dir);
     
@@ -152,6 +153,7 @@ public class TestTrmParserCsv {
                          stream -> streams.add(stream),
                          warning -> System.out.println(warning),
                          exception -> exceptions.add(exception));
+    assertEquals("No errors: "+exceptions, 0, exceptions.size());
     assertEquals(1, streams.size());
     streams.elementAt(0).save(dir);
     
@@ -213,6 +215,7 @@ public class TestTrmParserCsv {
                          stream -> streams.add(stream),
                          warning -> System.out.println(warning),
                          exception -> exceptions.add(exception));
+    assertEquals("No errors: "+exceptions, 0, exceptions.size());
     assertEquals(1, streams.size());
     streams.elementAt(0).save(dir);
     
@@ -250,7 +253,7 @@ public class TestTrmParserCsv {
                  Double.valueOf(1.0),
                  (Double)configuration.get("pauseSeconds").getValue());
     assertEquals("pause marker pattern",
-                 ".+[-.].*",
+                 ".+([-.]).*",
                  (String)configuration.get("pauseMarkerPattern").getValue());
     assertEquals("no code switch brackets",
                  "",
@@ -274,6 +277,7 @@ public class TestTrmParserCsv {
                          stream -> streams.add(stream),
                          warning -> System.out.println(warning),
                          exception -> exceptions.add(exception));
+    assertEquals("No errors: "+exceptions, 0, exceptions.size());
     assertEquals(1, streams.size());
     streams.elementAt(0).save(dir);
     
