@@ -49,7 +49,16 @@ public class TestTrmParserCsv {
     
     ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(0, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals(3, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals("chunk layer",
+                 "utterance",
+                 ((Layer)configuration.get("chunkLayer").getValue()).getId());
+    assertEquals("token layer",
+                 "word",
+                 ((Layer)configuration.get("tokenLayer").getValue()).getId());
+    assertEquals("language layer",
+                 "language",
+                 ((Layer)configuration.get("languageLayer").getValue()).getId());
     
     // two layers required
     String[] requiredLayers = serializer.getRequiredLayers();

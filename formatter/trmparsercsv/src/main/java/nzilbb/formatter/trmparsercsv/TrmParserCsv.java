@@ -56,6 +56,8 @@ import nzilbb.configure.ParameterSet;
 import nzilbb.util.IO;
 import org.apache.commons.csv.*;
 
+// TODO graph parsing, maybe with: https://graphstream-project.org/doc/Install/
+
 /**
  * Generates CSV files specificially for export/import of data for the
  * <a href="https://github.com/connor-taylorbrown/trm-parser">trm-parser</a>
@@ -113,67 +115,59 @@ public class TrmParserCsv implements GraphSerializer {
    */
   public TrmParserCsv setSchema(Schema newSchema) {
     schema = newSchema;
-    if (schema != null) {
-      if (schema.getWordLayerId() != null) {
-        setTokenLayerId(schema.getWordLayerId());
-      }
-      if (schema.getUtteranceLayerId() != null) {
-        setUtteranceLayerId(schema.getUtteranceLayerId());
-      }
-    }
     return this;
   }
-
+  
   /**
    * Layer that partitions tokens into utterances.
-   * @see #getUtteranceLayerId()
-   * @see #setUtteranceLayerId(String)
+   * @see #getChunkLayer()
+   * @see #setChunkLayer(Layer)
    */
-  protected String utteranceLayerId = "utterance";
+  protected Layer chunkLayer;
   /**
-   * Getter for {@link #utteranceLayerId}: Layer that partitions tokens into utterances.
+   * Getter for {@link #chunkLayer}: Layer that partitions tokens into utterances.
    * @return Layer that partitions tokens into utterances.
    */
-  public String getUtteranceLayerId() { return utteranceLayerId; }
+  public Layer getChunkLayer() { return chunkLayer; }
   /**
-   * Setter for {@link #utteranceLayerId}: Layer that partitions tokens into utterances.
-   * @param newUtteranceLayerId Layer that partitions tokens into utterances.
+   * Setter for {@link #chunkLayer}: Layer that partitions tokens into utterances.
+   * @param newChunkLayer Layer that partitions tokens into utterances.
    */
-  public TrmParserCsv setUtteranceLayerId(String newUtteranceLayerId) { utteranceLayerId = newUtteranceLayerId; return this; }
+  public TrmParserCsv setChunkLayer(Layer newChunkLayer) { chunkLayer = newChunkLayer; return this; }
   
   /**
    * Layer that tokens come from.
-   * @see #getTokenLayerId()
-   * @see #setTokenLayerId(String)
+   * @see #getTokenLayer()
+   * @see #setTokenLayer(Layer)
    */
-  protected String tokenLayerId = "word";
+  protected Layer tokenLayer;
   /**
-   * Getter for {@link #tokenLayerId}: Layer that tokens come from.
+   * Getter for {@link #tokenLayer}: Layer that tokens come from.
    * @return Layer that tokens come from.
    */
-  public String getTokenLayerId() { return tokenLayerId; }
+  public Layer getTokenLayer() { return tokenLayer; }
   /**
-   * Setter for {@link #tokenLayerId}: Layer that tokens come from.
-   * @param newTokenLayerId Layer that tokens come from.
+   * Setter for {@link #tokenLayer}: Layer that tokens come from.
+   * @param newTokenLayer Layer that tokens come from.
    */
-  public TrmParserCsv setTokenLayerId(String newTokenLayerId) { tokenLayerId = newTokenLayerId; return this; }
-  
+  public TrmParserCsv setTokenLayer(Layer newTokenLayer) { tokenLayer = newTokenLayer; return this; }
+
   /**
    * Layer that tags tokens in a different language.
-   * @see #getLanguageLayerId()
-   * @see #setLanguageLayerId(String)
+   * @see #getLanguageLayer()
+   * @see #setLanguageLayer(Layer)
    */
-  protected String languageLayerId = "language";
+  protected Layer languageLayer;
   /**
-   * Getter for {@link #languageLayerId}: Layer that tags tokens in a different language.
+   * Getter for {@link #languageLayer}: Layer that tags tokens in a different language.
    * @return Layer that tags tokens in a different language.
    */
-  public String getLanguageLayerId() { return languageLayerId; }
+  public Layer getLanguageLayer() { return languageLayer; }
   /**
-   * Setter for {@link #languageLayerId}: Layer that tags tokens in a different language.
-   * @param newLanguageLayerId Layer that tags tokens in a different language.
+   * Setter for {@link #languageLayer}: Layer that tags tokens in a different language.
+   * @param newLanguageLayer Layer that tags tokens in a different language.
    */
-  public TrmParserCsv setLanguageLayerId(String newLanguageLayerId) { languageLayerId = newLanguageLayerId; return this; }
+  public TrmParserCsv setLanguageLayer(Layer newLanguageLayer) { languageLayer = newLanguageLayer; return this; }
    
   private long graphCount = 0;
   private long consumedGraphCount = 0;
@@ -243,6 +237,68 @@ public class TrmParserCsv implements GraphSerializer {
    */
   public ParameterSet configure(ParameterSet configuration, Schema schema) {
     setSchema(schema);
+
+    chunkLayer = null;
+    tokenLayer = null;
+    languageLayer = null;
+    if (configuration.size() > 0) {
+      configuration.apply(this);
+    }
+
+    LinkedHashMap<String,Layer> possibleChunkLayers = new LinkedHashMap<String,Layer>();
+    possibleChunkLayers.put(schema.getTurnLayerId(), schema.getTurnLayer());
+    for (Layer turnChild : schema.getTurnLayer().getChildren().values()) {
+      if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL
+          && !turnChild.getId().equals(schema.getWordLayerId())) {
+        possibleChunkLayers.put(turnChild.getId(), turnChild);
+      }
+    } // next turn child layer
+    Parameter pChunkLayer = configuration.containsKey("chunkLayer")?
+      configuration.get("chunkLayer")
+      :configuration.addParameter(
+        new Parameter("chunkLayer", Layer.class, "Chunk layer",
+                      "Layer that partitions tokens into utterances."));
+    String[] possibilitiesC = {"sentence","clause","utterance","turn"};
+    pChunkLayer.setValue(
+      Utility.FindLayerById(possibleChunkLayers, Arrays.asList(possibilitiesC)));
+    pChunkLayer.setPossibleValues(possibleChunkLayers.values());
+
+    LinkedHashMap<String,Layer> possibleTokenLayers = new LinkedHashMap<String,Layer>();
+    possibleTokenLayers.put(schema.getWordLayerId(), schema.getWordLayer());
+    for (Layer wordChild : schema.getWordLayer().getChildren().values()) {
+      if (wordChild.getAlignment() != Constants.ALIGNMENT_INSTANT
+          && !wordChild.getId().equals("segment")) {
+        possibleTokenLayers.put(wordChild.getId(), wordChild);
+      }
+    } // next turn child layer
+    Parameter pTokenLayer = configuration.containsKey("tokenLayer")?
+      configuration.get("tokenLayer")
+      :configuration.addParameter(
+        new Parameter("tokenLayer", Layer.class, "Token layer",
+                      "Layer that tokens are taken from."));
+    String[] possibilitiesT = {"token","word","orthography"};
+    pTokenLayer.setValue(
+      Utility.FindLayerById(possibleTokenLayers, Arrays.asList(possibilitiesT)));
+    pTokenLayer.setPossibleValues(possibleTokenLayers.values());
+    
+    LinkedHashMap<String,Layer> possibleLanguageLayers = new LinkedHashMap<String,Layer>();
+    for (Layer turnChild : schema.getTurnLayer().getChildren().values()) {
+      if (turnChild.getAlignment() == Constants.ALIGNMENT_INTERVAL
+          && !turnChild.getId().equals(schema.getWordLayerId())
+          && !turnChild.getId().equals(schema.getUtteranceLayerId())) {
+        possibleLanguageLayers.put(turnChild.getId(), turnChild);
+      }
+    } // next turn child layer
+    Parameter pLanguageLayer = configuration.containsKey("languageLayer")?
+      configuration.get("languageLayer")
+      :configuration.addParameter(
+        new Parameter("languageLayer", Layer.class, "Language layer",
+                      "Layer that tags tokens in a different language."));
+    String[] possibilitiesL = {"lang","language","codeswitch","cs"};
+    pLanguageLayer.setValue(
+      Utility.FindLayerById(possibleLanguageLayers, Arrays.asList(possibilitiesL)));
+    pLanguageLayer.setPossibleValues(possibleLanguageLayers.values());
+    
     return configuration;
   }   
 
@@ -253,8 +309,11 @@ public class TrmParserCsv implements GraphSerializer {
    * @throws SerializationParametersMissingException If not all required parameters have a value.
    */
   public String[] getRequiredLayers() throws SerializationParametersMissingException {
-    
-    return new String[] { utteranceLayerId, tokenLayerId, languageLayerId };
+    if (languageLayer != null) {
+      return new String[] { chunkLayer.getId(), tokenLayer.getId(), languageLayer.getId() };
+    } else {
+      return new String[] { chunkLayer.getId(), tokenLayer.getId() };
+    }
   }
 
   /**
@@ -328,20 +387,20 @@ public class TrmParserCsv implements GraphSerializer {
           }
 
           // create a chunk layer that divides utterances int parts on fullstops as required
-          Layer chunkLayer = (Layer)schema.getLayer(utteranceLayerId).clone();
-          chunkLayer.setId("@trm-parser-chunk");
-          graph.getSchema().addLayer(chunkLayer);
+          Layer tempLayer = (Layer)schema.getLayer(chunkLayer.getId()).clone();
+          tempLayer.setId("@trm-parser-chunk");
+          graph.getSchema().addLayer(tempLayer);
           
           try {
-            for (Annotation utterance : graph.all(utteranceLayerId)) {
+            for (Annotation utterance : graph.all(chunkLayer.getId())) {
               Anchor start = utterance.getStart();
               // look for tokens with full-stops
               Annotation previousChunk = null;
               boolean previousTokenWasLast = false;
-              for (Annotation token : utterance.all(tokenLayerId)) {
+              for (Annotation token : utterance.all(tokenLayer.getId())) {
                 if (token.getLabel().matches(".+[.-]")) {
                   previousChunk = graph.createAnnotation(
-                    start, token.getEnd(), chunkLayer.getId(), utterance.getLabel(),
+                    start, token.getEnd(), tempLayer.getId(), utterance.getLabel(),
                     utterance.getParent());
                   start = token.getEnd();
                   previousTokenWasLast = true;
@@ -355,14 +414,14 @@ public class TrmParserCsv implements GraphSerializer {
               } else { // there are leftover tokens
                 // finish off last chunk
                 graph.createAnnotation(
-                  start, utterance.getEnd(), chunkLayer.getId(), utterance.getLabel(),
+                  start, utterance.getEnd(), tempLayer.getId(), utterance.getLabel(),
                   utterance.getParent());
               }
             } // next utterance
             
             // there's one CSV row per chunk
-            for (Annotation chunk : graph.all(chunkLayer.getId())) {
-              String text = chunk.every(tokenLayerId)
+            for (Annotation chunk : graph.all(tempLayer.getId())) {
+              String text = chunk.every(tokenLayer.getId())
                 .map(token -> standardize(token))
                 .collect(Collectors.joining(" "))
                 // eliminate excess spaces
@@ -405,7 +464,7 @@ public class TrmParserCsv implements GraphSerializer {
    * @return A standardized version of the given token's label.
    */
   public String standardize(Annotation token) {
-    if (token.first(languageLayerId) != null) {
+    if (languageLayer != null && token.first(languageLayer.getId()) != null) {
       return "["+token.getLabel().trim()+"]";
     } 
     return token.getLabel()
