@@ -65,18 +65,27 @@ import org.apache.commons.csv.*;
  * <a href="https://github.com/connor-taylorbrown/trm-parser">trm-parser</a>
  * implemented by <a href="https://github.com/connor-taylorbrown">Connor Talyor-Brown</a>
  * for Māori data.
- * <p> When serializing utterances, the following transformations are made:
+ * <p> When serializing fragments, the following transformations are made:
  * <ul>
  *  <li>Vowels with umlauts or followed by a colon are macronized.</li>
  *  <li>English words are enclosed in square brackets. </li>
- *  <li>Utterances are split on full stops, creating two utterances. </li>
+ *  <li>Utterances are split on full stops and pauses of 1000ms or longer,
+ *      creating two fragments per utterance. </li>
  * </ul>
- * <p> A CSV file is generated with the folling columns:
+ * <p> A CSV file is generated with the following columns:
  * <ul>
  *  <li><q>Document</q> - the transcript ID</li>
  *  <li><q>Speaker</q> - the participant ID</li>
  *  <li><q>ID</q> - the unique identifier for the utterance</li>
- *  <li><q>Utterance</q> - transcript text ending in a punctuation mark or newline</li>
+ *  <li><q>Terminator</q> - the reason for terminating the fragment, which can be:
+ *      <ul>
+ *       <li><tt>.</tt> or <tt>-</tt> : there was a pause marker,</li>
+ *       <li>A number like <tt>1.234</tt> : there was an inter-token pause,</li>
+ *       <li><tt>utterance</tt> : it was the end of the utterance, or</li>
+ *       <li><tt>turn</tt> : it was the end of the speaker turn.</li>
+ *      <ul>
+ *  </li>
+ *  <li><q>Fragment</q> - transcript text ending in a punctuation mark or newline</li>
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
@@ -450,7 +459,7 @@ public class TrmParserCsv implements GraphSerializer {
       csv.print("Speaker");
       csv.print("ID");
       csv.print("Terminator");
-      csv.print("Utterance");
+      csv.print("Fragment");
       
       graphs.forEachRemaining(graph -> {
           if (getCancelling()) return;
