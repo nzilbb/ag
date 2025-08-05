@@ -49,7 +49,7 @@ public class TestTrmParserCsv {
     
     ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(3, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals(5, serializer.configure(configuration, g.getSchema()).size());
     assertEquals("chunk layer",
                  "utterance",
                  ((Layer)configuration.get("chunkLayer").getValue()).getId());
@@ -59,6 +59,128 @@ public class TestTrmParserCsv {
     assertEquals("language layer",
                  "language",
                  ((Layer)configuration.get("languageLayer").getValue()).getId());
+    assertEquals("pause threshold",
+                 Double.valueOf(1.0),
+                 (Double)configuration.get("pauseSeconds").getValue());
+    assertEquals("pause marker pattern",
+                 ".+[.-]",
+                 (String)configuration.get("pauseMarkerPattern").getValue());
+    
+    // two layers required
+    String[] requiredLayers = serializer.getRequiredLayers();
+    assertEquals("Right number of required layers " + Arrays.asList(requiredLayers),
+                 3, requiredLayers.length);
+    assertEquals("utterance", requiredLayers[0]);
+    assertEquals("word", requiredLayers[1]);
+    assertEquals("language", requiredLayers[2]);
+      
+    // serialize
+    Graph[] graphs = { g };
+    File dir = getDir();
+    String[] layerIds = {"who", "word"};
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(Arrays.spliterator(graphs), layerIds,
+                         stream -> streams.add(stream),
+                         warning -> System.out.println(warning),
+                         exception -> exceptions.add(exception));
+    assertEquals(1, streams.size());
+    streams.elementAt(0).save(dir);
+    
+    File actual = new File(dir, streams.elementAt(0).getName());
+    String differences = diff(
+      new File(dir, "expected_" + g.getId().replace(".trs",".csv")),
+      actual);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      actual.delete();
+    }
+  }
+   
+  @Test public void pauseThreshold()  throws Exception {
+    Graph g = createGraph("pauseThreshold.trs");
+    
+    // create deserializer
+    TrmParserCsv serializer = new TrmParserCsv();
+    
+    ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
+    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    configuration.get("pauseSeconds").setValue(Double.valueOf(0.5));
+    assertEquals(5, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals("chunk layer",
+                 "utterance",
+                 ((Layer)configuration.get("chunkLayer").getValue()).getId());
+    assertEquals("token layer",
+                 "word",
+                 ((Layer)configuration.get("tokenLayer").getValue()).getId());
+    assertEquals("language layer",
+                 "language",
+                 ((Layer)configuration.get("languageLayer").getValue()).getId());
+    assertEquals("pause threshold",
+                 Double.valueOf(0.5),
+                 (Double)configuration.get("pauseSeconds").getValue());
+    assertEquals("pause marker pattern",
+                 ".+[.-]",
+                 (String)configuration.get("pauseMarkerPattern").getValue());
+    
+    // two layers required
+    String[] requiredLayers = serializer.getRequiredLayers();
+    assertEquals("Right number of required layers " + Arrays.asList(requiredLayers),
+                 3, requiredLayers.length);
+    assertEquals("utterance", requiredLayers[0]);
+    assertEquals("word", requiredLayers[1]);
+    assertEquals("language", requiredLayers[2]);
+      
+    // serialize
+    Graph[] graphs = { g };
+    File dir = getDir();
+    String[] layerIds = {"who", "word"};
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(Arrays.spliterator(graphs), layerIds,
+                         stream -> streams.add(stream),
+                         warning -> System.out.println(warning),
+                         exception -> exceptions.add(exception));
+    assertEquals(1, streams.size());
+    streams.elementAt(0).save(dir);
+    
+    File actual = new File(dir, streams.elementAt(0).getName());
+    String differences = diff(
+      new File(dir, "expected_" + g.getId().replace(".trs",".csv")),
+      actual);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      actual.delete();
+    }
+  }
+   
+  @Test public void noPauseMarkers()  throws Exception {
+    Graph g = createGraph("noPauseMarkers.trs");
+    
+    // create deserializer
+    TrmParserCsv serializer = new TrmParserCsv();
+    
+    ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
+    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    configuration.get("pauseMarkerPattern").setValue("");
+    assertEquals(5, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals("chunk layer",
+                 "utterance",
+                 ((Layer)configuration.get("chunkLayer").getValue()).getId());
+    assertEquals("token layer",
+                 "word",
+                 ((Layer)configuration.get("tokenLayer").getValue()).getId());
+    assertEquals("language layer",
+                 "language",
+                 ((Layer)configuration.get("languageLayer").getValue()).getId());
+    assertEquals("pause threshold",
+                 Double.valueOf(1.0),
+                 (Double)configuration.get("pauseSeconds").getValue());
+    assertEquals("pause marker pattern",
+                 "",
+                 (String)configuration.get("pauseMarkerPattern").getValue());
     
     // two layers required
     String[] requiredLayers = serializer.getRequiredLayers();
@@ -144,9 +266,10 @@ public class TestTrmParserCsv {
     g.addAnchor(new Anchor("a2", 2.0, Constants.CONFIDENCE_AUTOMATIC));
     g.addAnchor(new Anchor("a3a", 3.0, Constants.CONFIDENCE_AUTOMATIC));
     g.addAnchor(new Anchor("utterance", 3.0, Constants.CONFIDENCE_MANUAL));
-    g.addAnchor(new Anchor("a3b", 4.0, Constants.CONFIDENCE_DEFAULT));
-    g.addAnchor(new Anchor("a4", 5.0, Constants.CONFIDENCE_DEFAULT));
-    g.addAnchor(new Anchor("a5", 6.0, Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("a3b", 3.1, Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("a41", 4.1, Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("a5", 5.0, Constants.CONFIDENCE_DEFAULT));
+    g.addAnchor(new Anchor("a6", 6.0, Constants.CONFIDENCE_DEFAULT));
     g.addAnchor(new Anchor("turnEnd", 6.0, Constants.CONFIDENCE_MANUAL));
     
     g.addAnnotation(new Annotation("who1", "john smith", "who", "turnStart", "turnEnd", "test.trs"));
@@ -164,9 +287,8 @@ public class TestTrmParserCsv {
     g.addAnnotation(new Annotation("word2", "um - ", "word", "a1", "a2", "turn1"));
     g.addAnnotation(new Annotation("cs", "en", "language", "a1", "a2", "turn1"));
     g.addAnnotation(new Annotation("word3", "Wïwi - ", "word", "a2", "a3a", "turn1"));
-    g.addAnnotation(new Annotation("word4", "aku", "word", "a3b", "a4", "turn1"));
-    g.addAnnotation(new Annotation("word5", "tu:puna", "word", "a4", "a5", "turn1"));
-    
+    g.addAnnotation(new Annotation("word4", "aku", "word", "a3b", "a41", "turn1"));
+    g.addAnnotation(new Annotation("word5", "tu:puna", "word", "a5", "a6", "turn1"));
     
     return g;
   } // end of createGraph()

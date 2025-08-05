@@ -168,7 +168,46 @@ public class TrmParserCsv implements GraphSerializer {
    * @param newLanguageLayer Layer that tags tokens in a different language.
    */
   public TrmParserCsv setLanguageLayer(Layer newLanguageLayer) { languageLayer = newLanguageLayer; return this; }
-   
+  
+  /**
+   * Regular expression identifying tokens with a pause marker.
+   * @see #getPauseMarkerPattern()
+   * @see #setPauseMarkerPattern(String)
+   */
+  protected String pauseMarkerPattern;
+  /**
+   * Getter for {@link #pauseMarkerPattern}: Regular expression
+   * identifying tokens with a pause marker. 
+   * @return Regular expression identifying tokens with a pause marker.
+   */
+  public String getPauseMarkerPattern() { return pauseMarkerPattern; }
+  /**
+   * Setter for {@link #pauseMarkerPattern}: Regular expression
+   * identifying tokens with a pause marker. 
+   * @param newPauseMarkerPattern Regular expression identifying tokens with a pause marker.
+   */
+  public TrmParserCsv setPauseMarkerPattern(String newPauseMarkerPattern) { pauseMarkerPattern = newPauseMarkerPattern; return this; }  
+  
+  /**
+   * An inter-word pause longer than this counts as the end of an utterance.
+   * @see #getPauseSeconds()
+   * @see #setPauseSeconds(Double)
+   */
+  protected Double pauseSeconds;
+  /**
+   * Getter for {@link #pauseSeconds}: An inter-word pause longer than
+   * this counts as the end of an utterance. 
+   * @return An inter-word pause longer than this counts as the end of an utterance.
+   */
+  public Double getPauseSeconds() { return pauseSeconds; }
+  /**
+   * Setter for {@link #pauseSeconds}: An inter-word pause longer than
+   * this counts as the end of an utterance. 
+   * @param newPauseSeconds An inter-word pause longer than this
+   * counts as the end of an utterance. 
+    */
+   public TrmParserCsv setPauseSeconds(Double newPauseSeconds) { pauseSeconds = newPauseSeconds; return this; }
+
   private long graphCount = 0;
   private long consumedGraphCount = 0;
   
@@ -241,6 +280,8 @@ public class TrmParserCsv implements GraphSerializer {
     chunkLayer = null;
     tokenLayer = null;
     languageLayer = null;
+    pauseSeconds = null;
+    pauseMarkerPattern = null;
     if (configuration.size() > 0) {
       configuration.apply(this);
     }
@@ -298,7 +339,23 @@ public class TrmParserCsv implements GraphSerializer {
     pLanguageLayer.setValue(
       Utility.FindLayerById(possibleLanguageLayers, Arrays.asList(possibilitiesL)));
     pLanguageLayer.setPossibleValues(possibleLanguageLayers.values());
-    
+
+    Parameter pPauseSeconds = configuration.containsKey("pauseSeconds")?
+      configuration.get("pauseSeconds")
+      :configuration.addParameter(
+        new Parameter(
+          "pauseSeconds", Double.class, "Pause Threshold (seconds)",
+          "An inter-word pause longer than this counts as the end of an utterance (0 to not break on pauses).",
+          Double.valueOf(1.0)));
+
+    Parameter pPauseMarkerPattern = configuration.containsKey("pauseMarkerPattern")?
+      configuration.get("pauseMarkerPattern")
+      :configuration.addParameter(
+        new Parameter(
+          "pauseMarkerPattern", String.class, "Pause Marker Pattern",
+          "Regular expression identifying tokens with a pause marker, e.g. \".+[.-]\".",
+          ".+[.-]"));
+
     return configuration;
   }   
 
@@ -352,6 +409,8 @@ public class TrmParserCsv implements GraphSerializer {
       final PipedInputStream in = new PipedInputStream();
       final PipedOutputStream out = new PipedOutputStream(in);
       final StringBuffer fileName = new StringBuffer();
+      final double pauseThreshold = Optional.ofNullable(pauseSeconds).orElse(0.0);
+      pauseMarkerPattern = Optional.ofNullable(pauseMarkerPattern).orElse("");
       
       final CSVPrinter csv = new CSVPrinter(
         new OutputStreamWriter(out, "UTF-8"), CSVFormat.EXCEL);
@@ -398,13 +457,27 @@ public class TrmParserCsv implements GraphSerializer {
               Annotation previousChunk = null;
               boolean previousTokenWasLast = false;
               for (Annotation token : utterance.all(tokenLayer.getId())) {
-                if (token.getLabel().matches(".+[.-]")) {
+                Annotation nextToken = token.getNext();
+                if (pauseMarkerPattern.length() > 0
+                    && token.getLabel().matches(pauseMarkerPattern)) {
+                  // there's a pause marker
                   previousChunk = graph.createAnnotation(
                     start, token.getEnd(), tempLayer.getId(), utterance.getLabel(),
                     utterance.getParent());
                   start = token.getEnd();
                   previousTokenWasLast = true;
-                } else {
+                } else if (pauseThreshold > 0.0
+                           && nextToken != null
+                           && token.getAnchored() && nextToken.getAnchored()
+                           && nextToken.getStart().getOffset() - token.getEnd().getOffset()
+                           >= pauseThreshold) {
+                  // there's a pause following the token
+                  previousChunk = graph.createAnnotation(
+                    start, token.getEnd(), tempLayer.getId(), utterance.getLabel(),
+                    utterance.getParent());
+                  start = nextToken.getStart();
+                  previousTokenWasLast = true;
+                } else {                  
                   previousTokenWasLast = false;
                 }
               } // next token
