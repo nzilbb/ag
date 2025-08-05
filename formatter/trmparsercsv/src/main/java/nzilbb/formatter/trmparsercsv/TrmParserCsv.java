@@ -556,6 +556,16 @@ public class TrmParserCsv implements GraphSerializer {
             
             // there's one CSV row per chunk
             for (Annotation chunk : graph.all(tempLayer.getId())) {
+
+              // avoid outputing fragments that have only other-language tokens
+              boolean thereAreTokens = true;
+              if (codeSwitchBrackets != null && codeSwitchBrackets.length() > 0
+                  && languageLayer != null) {
+                thereAreTokens = chunk.every(tokenLayer.getId())
+                  .filter(token -> token.first(languageLayer.getId()) == null)
+                  .findAny().isPresent();
+              }
+              if (!thereAreTokens) continue; // all other-language, so skip it
               
               // pass through original, unstandardized text for re-import purposes
               String originalText = chunk.every(tokenLayer.getId())
