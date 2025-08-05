@@ -76,6 +76,7 @@ import org.apache.commons.csv.*;
  * <ul>
  *  <li><q>Document</q> - the transcript ID.</li>
  *  <li><q>Speaker</q> - the participant ID.</li>
+ *  <li><q>MatchId</q> - the MatchId-encoded identifier for the fragment.</li>
  *  <li><q>ID</q> - the unique identifier for the fragment.</li>
  *  <li><q>Original</q> - the original, unstandardized text of the fragment.</li>
  *  <li><q>WithPauses</q> - the standardized fragment text with pause length (in seconds)
@@ -460,6 +461,7 @@ public class TrmParserCsv implements GraphSerializer {
       // print headers
       csv.print("Document");
       csv.print("Speaker");
+      csv.print("MatchId");
       csv.print("ID");
       csv.print("Original");
       csv.print("WithPauses");
@@ -600,15 +602,28 @@ public class TrmParserCsv implements GraphSerializer {
                 .collect(Collectors.joining(" "))
                 // eliminate excess spaces
                 .replaceAll(" +"," ").trim();
-              
+
               if (fragment.length() > 0) { // there is something to output
+                String id = Graph.FragmentId​(
+                  graph.sourceGraph(),
+                  offsetAdjustment + chunk.getStart().getOffset(),
+                  offsetAdjustment + chunk.getEnd().getOffset());
+                Annotation firstToken = chunk.every(tokenLayer.getId()).findFirst().get();
+                Annotation lastToken = chunk.every(tokenLayer.getId())
+                  .reduce((first, second) -> second).get();
+                String matchId = "g_"+graph.get("@ag_id")+";"
+                  +chunk.first(schema.getUtteranceLayerId()).getId()+";"
+                  +chunk.getStartId()+"-"+chunk.getEndId()+";"
+                  +chunk.first(schema.getParticipantLayerId())
+                  .getId().replace("m_-2_", "p_");
+                matchId += ";#"+firstToken.getId()+";"
+                  +"[0]="+firstToken.getId()+";"
+                  +"[1]="+lastToken.getId();
                 csv.println();
                 csv.print(graph.sourceGraph().getId()); // Document
                 csv.print(chunk.getLabel());            // Speaker              
-                csv.print(Graph.FragmentId​(             // ID
-                            graph.sourceGraph(),
-                            offsetAdjustment + chunk.getStart().getOffset(),
-                            offsetAdjustment + chunk.getEnd().getOffset()));
+                csv.print(matchId);                     // MatchId              
+                csv.print(id);                          // ID
                 csv.print(originalText);                // Original
                 csv.print(withPauses);                  // WithPauses
                 csv.print(chunk.get("@terminator"));    // Terminator

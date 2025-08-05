@@ -299,6 +299,7 @@ public class TestTrmParserCsv {
   public Graph createGraph(String id) {
     Graph g = new Graph();
     g.setId(id);
+    g.put("@ag_id", "999");
     
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
