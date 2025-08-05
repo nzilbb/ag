@@ -1,5 +1,5 @@
-Document,Speaker,ID,Original,Terminator,Fragment
-pauseThreshold.trs,john smith,pauseThreshold__0.000-1.000,NO:.,marker,NŌ .
-pauseThreshold.trs,john smith,pauseThreshold__1.000-3.000,"um - Wïwi - ",utterance,|um -| Wīwi -
-pauseThreshold.trs,john smith,pauseThreshold__3.000-4.100,aku,0.9000000000000004,aku
-pauseThreshold.trs,john smith,pauseThreshold__5.000-6.000,tu:puna,turn,tūpuna
+Document,Speaker,ID,Original,WithPauses,Terminator,Fragment
+pauseThreshold.trs,john smith,pauseThreshold__0.000-1.000,NO:.,NŌ_._ 0.000,marker,NŌ .
+pauseThreshold.trs,john smith,pauseThreshold__1.000-3.000,"um - Wïwi - ",|um_-| 0.000 Wīwi_-_ 0.100,utterance,|um -| Wīwi -
+pauseThreshold.trs,john smith,pauseThreshold__3.000-4.100,aku,aku 0.900,0.900,aku
+pauseThreshold.trs,john smith,pauseThreshold__5.000-6.000,tu:puna,tūpuna 0.000,turn,tūpuna

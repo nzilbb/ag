@@ -1,3 +1,3 @@
-Document,Speaker,ID,Original,Terminator,Fragment
-noPauseMarkers.trs,john smith,noPauseMarkers__0.000-3.000,"NO:. um - Wïwi - ",utterance,NŌ . [um -] Wīwi -
-noPauseMarkers.trs,john smith,noPauseMarkers__3.000-6.000,aku tu:puna,turn,aku tūpuna
+Document,Speaker,ID,Original,WithPauses,Terminator,Fragment
+noPauseMarkers.trs,john smith,noPauseMarkers__0.000-3.000,"NO:. um - Wïwi - ",NŌ_._ 0.000 [um_-] 0.000 Wīwi_-_ 0.100,utterance,NŌ . [um -] Wīwi -
+noPauseMarkers.trs,john smith,noPauseMarkers__3.000-6.000,aku tu:puna,aku 0.900 tūpuna 0.000,turn,aku tūpuna

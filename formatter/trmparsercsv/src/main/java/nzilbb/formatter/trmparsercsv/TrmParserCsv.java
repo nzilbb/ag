@@ -74,10 +74,12 @@ import org.apache.commons.csv.*;
  * </ul>
  * <p> A CSV file is generated with the following columns:
  * <ul>
- *  <li><q>Document</q> - the transcript ID</li>
- *  <li><q>Speaker</q> - the participant ID</li>
- *  <li><q>ID</q> - the unique identifier for the fragment</li>
- *  <li><q>Original</q> -  the original, unstandardized text of the fragment</li>
+ *  <li><q>Document</q> - the transcript ID.</li>
+ *  <li><q>Speaker</q> - the participant ID.</li>
+ *  <li><q>ID</q> - the unique identifier for the fragment.</li>
+ *  <li><q>Original</q> - the original, unstandardized text of the fragment.</li>
+ *  <li><q>WithPauses</q> - the standardized fragment text with pause length (in seconds)
+ *      between each token.</li>
  *  <li><q>Terminator</q> - the reason for terminating the fragment, which can be:
  *      <ul>
  *       <li><tt>.</tt> or <tt>-</tt> : there was a pause marker,</li>
@@ -86,7 +88,7 @@ import org.apache.commons.csv.*;
  *       <li><tt>turn</tt> : it was the end of the speaker turn.</li>
  *      <ul>
  *  </li>
- *  <li><q>Fragment</q> - transcript text ending in a punctuation mark or newline</li>
+ *  <li><q>Fragment</q> - the standardized fragment text.</li>
  * </ul>
  * @author Robert Fromont robert@fromont.net.nz
  */
@@ -460,6 +462,7 @@ public class TrmParserCsv implements GraphSerializer {
       csv.print("Speaker");
       csv.print("ID");
       csv.print("Original");
+      csv.print("WithPauses");
       csv.print("Terminator");
       csv.print("Fragment");
       
@@ -525,7 +528,8 @@ public class TrmParserCsv implements GraphSerializer {
                     utterance.getParent());
                   previousChunk.put(
                     "@terminator", // terminator = pause duration
-                    ""+(nextToken.getStart().getOffset() - token.getEnd().getOffset()));
+                    fmt.format(
+                      nextToken.getStart().getOffset() - token.getEnd().getOffset()));
                   start = nextToken.getStart();
                   previousTokenWasLast = true;
                 } else {                  
@@ -552,13 +556,37 @@ public class TrmParserCsv implements GraphSerializer {
             
             // there's one CSV row per chunk
             for (Annotation chunk : graph.all(tempLayer.getId())) {
+              
               // pass through original, unstandardized text for re-import purposes
               String originalText = chunk.every(tokenLayer.getId())
                 .map(token -> token.getLabel())
                 .collect(Collectors.joining(" "));
+              
               // standardize tokens for easier parsing
               String fragment = chunk.every(tokenLayer.getId())
                 .map(token -> standardize(token))
+                .collect(Collectors.joining(" "))
+                // eliminate excess spaces
+                .replaceAll(" +"," ").trim();
+              
+              // include standardized text with inter-token pause lengths
+              String withPauses = chunk.every(tokenLayer.getId())
+                .map(token -> {
+                    StringBuilder t = new StringBuilder(
+                      standardize(token)
+                      // make it easy to tokenize on spaces by ensuring tokens have none
+                      .replace(" ","_"));
+                    Annotation nextToken = token.getNext();
+                    t.append(" ");
+                    if (nextToken != null) {
+                      t.append(
+                        fmt.format(
+                          nextToken.getStart().getOffset() - token.getEnd().getOffset()));
+                    } else { // ensure even turn-final words are paired with a pause length
+                      t.append("0.000");
+                    }
+                    return t.toString();
+                  })
                 .collect(Collectors.joining(" "))
                 // eliminate excess spaces
                 .replaceAll(" +"," ").trim();
@@ -572,6 +600,7 @@ public class TrmParserCsv implements GraphSerializer {
                             offsetAdjustment + chunk.getStart().getOffset(),
                             offsetAdjustment + chunk.getEnd().getOffset()));
                 csv.print(originalText);                // Original
+                csv.print(withPauses);                  // WithPauses
                 csv.print(chunk.get("@terminator"));    // Terminator
                 csv.print(fragment);
               }
