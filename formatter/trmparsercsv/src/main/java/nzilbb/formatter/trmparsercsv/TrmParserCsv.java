@@ -616,7 +616,7 @@ public class TrmParserCsv implements GraphSerializer {
                   +chunk.getStartId()+"-"+chunk.getEndId()+";"
                   +chunk.first(schema.getParticipantLayerId())
                   .getId().replace("m_-2_", "p_");
-                matchId += ";#"+firstToken.getId()+";"
+                matchId += ";#="+firstToken.getId()+";"
                   +"[0]="+firstToken.getId()+";"
                   +"[1]="+lastToken.getId();
                 csv.println();
