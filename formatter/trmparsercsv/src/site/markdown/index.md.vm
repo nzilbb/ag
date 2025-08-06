@@ -11,7 +11,7 @@ When serializing fragments, the following transformations are made:
 - English words are enclosed in square brackets.
 - Utterances are split on full stops and pauses of 1000ms or longer,
   creating two fragments per utterance.
-- Pause markers (`.` and `-` by default) removed.
+- All punctuation is removed.
 
 A CSV file is generated with the following columns:
 
