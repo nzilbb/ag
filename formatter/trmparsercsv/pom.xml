@@ -36,6 +36,12 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>nz.ilbb.labbcat</groupId>
+      <artifactId>nzilbb.labbcat</artifactId>
+      <version>1.4.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
@@ -51,7 +57,9 @@
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
-            <manifest addDefaultImplementationEntries="true" />
+            <manifest addDefaultImplementationEntries="true">
+              <mainClass>nzilbb.formatter.trmparsercsv.ParseGloss</mainClass>
+            </manifest>
             <manifestEntries>
               <nzilbb-ag-serialize-GraphSerializer>${formatter.class}</nzilbb-ag-serialize-GraphSerializer>
               <nzilbb-ag-serialize-GraphDeserializer>${formatter.class}</nzilbb-ag-serialize-GraphDeserializer>

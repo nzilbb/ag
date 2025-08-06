@@ -58,8 +58,6 @@ import nzilbb.configure.ParameterSet;
 import nzilbb.util.IO;
 import org.apache.commons.csv.*;
 
-// TODO graph parsing, maybe with: https://graphstream-project.org/doc/Install/
-
 /**
  * Generates CSV files specificially for export/import of data for the
  * <a href="https://github.com/connor-taylorbrown/trm-parser">trm-parser</a>
