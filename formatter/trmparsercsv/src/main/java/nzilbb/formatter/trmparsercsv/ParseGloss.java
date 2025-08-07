@@ -270,10 +270,10 @@ public class ParseGloss extends CommandLineProgram {
       
       // write headers
       out.print("Transcript");
-      out.print("Participant");
+      out.print("Speaker");
       out.print("FragmentID");
       out.print("MatchId");
-      out.print("word");
+      out.print("Target word");
       out.print("FragmentToken");
       out.print("trmPOS");
       out.print("biggsianFinal");
