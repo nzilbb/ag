@@ -671,7 +671,7 @@ public class TrmParserCsv implements GraphSerializer {
         .replace("A:","Ā").replace("E:","Ē").replace("I:","Ī").replace("O:","Ō").replace("U:","Ū");
     }
     // remove all punctuation and spaces
-    return label.replaceAll("[ .\\-?!;:'\"]",""); 
+    return label.replaceAll("[ .\\-?!;:'\",]",""); 
   } // end of standardize()
 
 } // end of class TrmParserCsv
