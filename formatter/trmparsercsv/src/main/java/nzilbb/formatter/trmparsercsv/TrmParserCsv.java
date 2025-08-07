@@ -61,7 +61,7 @@ import org.apache.commons.csv.*;
 /**
  * Generates CSV files specificially for export/import of data for the
  * <a href="https://github.com/connor-taylorbrown/trm-parser">trm-parser</a>
- * implemented by <a href="https://github.com/connor-taylorbrown">Connor Talyor-Brown</a>
+ * implemented by <a href="https://github.com/connor-taylorbrown">Connor Taylor-Brown</a>
  * for Māori data.
  * <p> When serializing fragments, the following transformations are made:
  * <ul>
@@ -671,7 +671,7 @@ public class TrmParserCsv implements GraphSerializer {
         .replace("A:","Ā").replace("E:","Ē").replace("I:","Ī").replace("O:","Ō").replace("U:","Ū");
     }
     // remove all punctuation and spaces
-    return label.replaceAll("[ .\\-?!;:'\",]",""); 
+    return label.replaceAll("[ .\\-?!;:'\",><]",""); 
   } // end of standardize()
 
 } // end of class TrmParserCsv
