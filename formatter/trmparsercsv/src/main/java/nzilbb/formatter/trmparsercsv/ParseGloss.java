@@ -26,6 +26,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Graph;
 import nzilbb.labbcat.LabbcatView;
@@ -232,13 +236,15 @@ public class ParseGloss extends CommandLineProgram {
         try {       
           File outputFile = new File(
             inputFile.getParentFile(), IO.WithoutExtension(inputFile) + "-tokens.csv");
-          processFile(inputFile, outputFile);
+          File rejectsFile = new File(
+            inputFile.getParentFile(), IO.WithoutExtension(inputFile) + "-error.csv");
+          processFile(inputFile, outputFile, rejectsFile);
         } catch(Exception exception) {
           System.err.println(fragmentCsv + ": " + exception);
         }
       } // input file exists
     } // next argument
-  }
+  }  
   
   /**
    * Read fragment records from the given input file, and write
@@ -247,24 +253,31 @@ public class ParseGloss extends CommandLineProgram {
    * @param outputFile
    * @throws IOException
    */
-  public void processFile(File inputFile, File outputFile) throws IOException {
-    System.out.println("processFile("+inputFile.getPath()+", "+outputFile.getPath()+")");
+  public void processFile(File inputFile, File outputFile, File rejectsFile)
+    throws IOException {
+    System.out.println(
+      "processFile("+inputFile.getPath()+", "+outputFile.getPath()+", "
+      +rejectsFile.getPath()+")");
+    long rejectCount = 0;
+    MessageFormat fragmentIdFormat = new MessageFormat(
+      "{0}__{1,number,#.###}-{2,number,#.###}");
+    MessageFormat matchIdFormat = new MessageFormat(
+      "{0};{1};{2}-{3};{4};#={5};[0]={6};[1]={7}");
     CSVFormat format = CSVFormat.EXCEL;
     try (CSVParser in = new CSVParser(new FileReader(inputFile), format.withHeader());
-         CSVPrinter out = new CSVPrinter(new FileWriter(outputFile), format)) {
+         CSVPrinter out = new CSVPrinter(new FileWriter(outputFile), format);
+         CSVPrinter err = new CSVPrinter(new FileWriter(rejectsFile), format)) {
+      
+      // write headers
       out.print("Transcript");
       out.print("Participant");
       out.print("FragmentID");
       out.print("MatchId");
       out.print("word");
       out.print("FragmentToken");
-      out.print("GlossToken");
       out.print("trmPOS");
       out.print("biggsianFinal");
-      MessageFormat fragmentIdFormat = new MessageFormat(
-        "{0}__{1,number,#.###}-{2,number,#.###}");
-      MessageFormat matchIdFormat = new MessageFormat(
-        "{0};{1};{2}-{3};{4};#={5};[0]={6};[1]={7}");
+      
       String[] layers = {"word"};
       long r = 0;
       for (CSVRecord fragment : in) {
@@ -292,55 +305,77 @@ public class ParseGloss extends CommandLineProgram {
           Graph graph = labbcat.getFragment(transcriptId, start, end, layers);
           Annotation[] words = graph.all("word");
           if (words.length == 0) {
-            System.err.println(
-              "Record " + r + " ("+fragmentId+"):"
-              +" no words retrieved from " + url +" - skipping.");
+            rejectCount = rejectFragment(
+              rejectCount, fragment, err, "No words retrieved from " + url);
             continue;
           }
 
           // check the token IDs match
           if (!words[0].getId().equals(matchIdParts[6])) {
-            System.err.println(
-              "Record " + r + " ("+fragmentId+"):"
-              +" first token should be "+matchIdParts[6]+" but is "+words[0].getId()
-              +" - skipping.");
+            rejectCount = rejectFragment(
+              rejectCount, fragment, err,
+              "First token should be "+matchIdParts[6]+" but is "+words[0].getId());
             continue;
           }
           if (!words[words.length-1].getId().equals(matchIdParts[7])) {
-            System.err.println(
-              "Record " + r + " ("+fragmentId+"):"
-              +" last token should be "+matchIdParts[6]+" but is "+words[0].getId()
-              +" - skipping.");
+            rejectCount = rejectFragment(
+              rejectCount, fragment, err,
+              "Last token should be "+matchIdParts[6]+" but is "+words[0].getId());
             continue;
           }
 
           String tokens[] = fragmentText.split(" ");
           if (tokens.length != words.length) {
-            System.err.println(
-              "Record " + r + " ("+fragmentId+"):"
-              +" there are "+words.length+" LaBB-CAT words but "+tokens.length
-              +" fragment tokens - skipping.");
+            rejectCount = rejectFragment(
+              rejectCount, fragment, err,
+              "There are "+words.length+" LaBB-CAT words but "+tokens.length
+              +" fragment tokens");
             continue;
           }
 
           String pos[] = gloss.split("/");
           if (tokens.length > pos.length) {
-            System.err.println(
-              "Record " + r + " ("+fragmentId+"):"
-              +" more tokens ("+tokens.length+") than parts of speech ("+pos.length+")"
-              +" - skipping.");
-            // System.err.println(fragmentText);
-            // System.err.println(gloss);
+            rejectCount = rejectFragment(
+              rejectCount, fragment, err,
+              "More tokens ("+tokens.length+") than parts of speech ("+pos.length+")");
             continue;
           }
+          if (pos.length % tokens.length != 0) {
+            rejectCount = rejectFragment(
+              rejectCount, fragment, err,
+              "POS count ("+pos.length+") not a multiple of token count ("+pos.length+")");
+            continue;
+          }
+
+          // there may be multiple sets of POS tags for the tokens
+          // when a token has multiple distinct POS's, concatenate them together
+          Set<String>[] tokenPOS = new LinkedHashSet[tokens.length];
+          Set<String>[] tokenFinal = new LinkedHashSet[tokens.length];
+          for (int t = 0; t < tokens.length; t++) {
+            tokenPOS[t] = new LinkedHashSet<String>();
+            tokenFinal[t] = new LinkedHashSet<String>();
+          }
+
+          // determine the aggregate POS/Biggsian tags
+          for (int t = 0, p = 0; p < pos.length; t++, p++) {
+            if (t > tokenPOS.length - 1) t = 0; // start a new set of POS tags
+            
+            tokenPOS[t].add(pos[p].replace("$",""));
+            
+            // Biggsian final if it's just before a $ or the last token
+            boolean isFinal = false;
+            if (t == tokens.length - 1 // it's the last token or
+                || pos[p+1].startsWith("$")) { // the next POS is a Biggsian start
+              isFinal = true;
+            }
+            tokenFinal[t].add(isFinal?"yes":"no");
+          } // next POS
           
           for (int t = 0; t < tokens.length; t++) {
-            String tmrPOS = pos[t].replace("$","");
-            String biggsianFinal = "no";
-            if (t == tokens.length - 1 // it's the last token or
-                || tokens[t+1].startsWith("$")) { // the next token is a biggsian start
-              biggsianFinal = "yes";
-            }
+            // the POS/Biggsian tags are all the distinct labels we found, delimited by _
+            String tmrPOS = tokenPOS[t].stream().collect(Collectors.joining("_"));
+            String isFinal = tokenFinal[t].stream().collect(Collectors.joining("_"));
+            
             matchIdParts[5] = matchIdParts[6] = matchIdParts[7] = words[t].getId();
             String tokenMatchId = matchIdFormat.format(matchIdParts);
             out.println();
@@ -350,18 +385,54 @@ public class ParseGloss extends CommandLineProgram {
             out.print(tokenMatchId);
             out.print(words[t].getLabel()); // word
             out.print(tokens[t]); // FragmentToken
-            out.print(pos[t]); // GlossToken
             out.print(tmrPOS); // trmPOS
-            out.print(biggsianFinal); // biggsianFinal
+            out.print(isFinal); // biggsianFinal
           }
         } catch (Exception x) {
-          System.err.println("Record " + r + " ("+fragmentId+"): " + x);
+          rejectCount = rejectFragment(
+            rejectCount, fragment, err, x.toString());
           x.printStackTrace(System.err);
         }
+
+        if (r % 1000 == 0) System.out.println("Fragments: "+r);
         
       } // next fragment
-      System.out.println("Finished " + outputFile.getName());
+    } // close files
+    
+    System.out.println("Finished " + outputFile.getName());
+    if (rejectCount > 0) {
+      System.out.println(""+rejectCount+" rejects written to " + rejectsFile.getName());
+    } else {
+      rejectsFile.delete();
     }
   } // end of processFile()
   
+  /**
+   * Saves a row to the rejects file for later analysis.
+   * @param rejectCount Current number of rejects.
+   * @param fragment The rejected row.
+   * @param err Where to write the rejected row.
+   * @param reason The reason for rejection.
+   * @return The new value of rejectsCount.
+   * @throws IOException
+   */
+  public long rejectFragment(
+    long rejectCount, CSVRecord fragment, CSVPrinter err, String reason)
+    throws IOException {
+    List<String> columns = fragment.getParser().getHeaderNames();
+    if (rejectCount == 0) { // no rejects yet
+      // write the headers to the rejects file
+      for (String header : columns) {
+        err.print(header);
+      } // next source header
+      err.print("Error");
+    } // write headers
+    err.println();
+    for (String column : columns) {
+      err.print(fragment.get(column));
+    }
+    err.print(reason);
+    return rejectCount + 1;
+  } // end of rejectFragment()
+
 }
