@@ -25,10 +25,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Vector;
 import java.util.stream.Collectors;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Graph;
@@ -178,7 +184,7 @@ public class ParseGloss extends CommandLineProgram {
    * Setter for {@link #url}: LaBB-CAT URL.
    * @param newUrl LaBB-CAT URL.
    */
-  @Switch(value="URL for LaBB-CAT that will identify token IDs",compulsory=true)
+  @Switch(value="URL for LaBB-CAT database (either http for web API, or jdbc for direct SQL connection and direct tag insertion)",compulsory=true)
   public ParseGloss setUrl(String newUrl) { url = newUrl; return this; }
   
   /**
@@ -218,15 +224,74 @@ public class ParseGloss extends CommandLineProgram {
   public ParseGloss setPassword(String newPassword) { password = newPassword; return this; }
 
   private LabbcatView labbcat;
+  private Connection db;
+  private PreparedStatement sql;
+  private PreparedStatement insert;
+  private int trmPOSLayerId = -1;
+  private int biggsianFinalLayerId = -1;
   
   public void start() {
     try {
-      labbcat = new LabbcatView(url, username, password);
+      if (url.startsWith("jdbc")) { // connect directly to the database
+        db = DriverManager.getConnection(url, username, password);
+        
+        // get layer_id's for add annotations
+        sql = db.prepareStatement("SELECT layer_id FROM layer WHERE short_description = ?");
+        sql.setString(1, "trmPOS");
+        ResultSet rs = sql.executeQuery();
+        if (rs.next()) {
+          trmPOSLayerId = rs.getInt("layer_id");
+          System.out.println("Tags will be added directly into the trmPOS layer.");
+        } else {
+          System.out.println("There is no trmPOS layer, tags will be output to CSV only.");
+        }
+        rs.close();
+        sql.setString(1, "biggsianFinal");
+        rs = sql.executeQuery();
+        if (rs.next()) {
+          biggsianFinalLayerId = rs.getInt("layer_id");
+          System.out.println("Tags will be added directly into the biggsianFinal layer.");
+        } else {
+          System.out.println(
+            "There is no biggsianFinal layer, tags will be output to CSV only.");
+        }
+        rs.close();
+        sql.close();
+
+        // query for finding fragment words:
+        sql = db.prepareStatement(
+          "SELECT CONCAT('ew_0_', word.annotation_id) AS id, word.label"
+          +" FROM annotation_layer_0 first_word"
+          +" INNER JOIN annotation_layer_0 last_word"
+          +" ON first_word.turn_annotation_id = last_word.turn_annotation_id"
+          +" INNER JOIN annotation_layer_0 word"
+          +" ON word.turn_annotation_id = first_word.turn_annotation_id"
+          +" AND word.ordinal_in_turn >= first_word.ordinal_in_turn"
+          +" AND word.ordinal_in_turn <= last_word.ordinal_in_turn"
+          +" WHERE first_word.annotation_id = ? AND last_word.annotation_id = ?"
+          // exclude pause-only 'words':
+          +" AND word.label REGEXP '.*[a-zA-Z<>].*'"
+          +" ORDER BY word.ordinal_in_turn");
+
+        // update for creating tags:
+        insert = db.prepareStatement(
+          "INSERT INTO annotation_layer_?"
+          +"(ag_id, label, label_status, start_anchor_id, end_anchor_id,"
+          +" turn_annotation_id, ordinal_in_turn, word_annotation_id, parent_id,"
+          +" ordinal, annotated_when)"
+          +" SELECT ag_id, ?, 50, start_anchor_id, end_anchor_id,"
+          +" turn_annotation_id, ordinal_in_turn, annotation_id, annotation_id,"
+          +" 1, Now()"
+          +" FROM annotation_layer_0 word"
+          +" WHERE word.annotation_id = ?");
+      } else {
+        labbcat = new LabbcatView(url, username, password);
+      }
     } catch(Exception exception) {
       System.err.println("Could not connect to " + url + " : " + exception);
       return;
     }
-
+    
     for (String fragmentCsv: arguments) {
       System.out.println(fragmentCsv);
       File inputFile = new File(fragmentCsv);
@@ -244,6 +309,10 @@ public class ParseGloss extends CommandLineProgram {
         }
       } // input file exists
     } // next argument
+
+    if (sql != null) try { sql.close(); } catch(SQLException exception) {}
+    if (insert != null) try { insert.close(); } catch(SQLException exception) {}
+    if (db != null) try { db.close(); } catch(SQLException exception) {}
   }  
   
   /**
@@ -278,7 +347,6 @@ public class ParseGloss extends CommandLineProgram {
       out.print("trmPOS");
       out.print("biggsianFinal");
       
-      String[] layers = {"word"};
       long r = 0;
       for (CSVRecord fragment : in) {
         r++;
@@ -292,7 +360,12 @@ public class ParseGloss extends CommandLineProgram {
         // g_165;em_12_1564;n_41146-n_41154;p_194;#=ew_0_26828;[0]=ew_0_26828;[1]=ew_0_26828
         String fragmentMatchId = fragment.get("MatchId");
         
-        String fragmentText = fragment.get("Fragment");
+        //String fragmentText = fragment.get("Fragment");
+        // the incoming Fragment column is truncated in some cases,
+        // but the WithPauses column is correct, so we use that, removing the pauses
+        String fragmentText = fragment.get("WithPauses")
+          .replaceAll("(\\w*) -?\\d+\\.\\d{3}","$1");
+        
         String gloss = fragment.get("Gloss");
         try {
           // parse the IDs
@@ -304,8 +377,8 @@ public class ParseGloss extends CommandLineProgram {
             (Double)idParts[1];
           Double end = (idParts[2] instanceof Long)?((Long)idParts[2]).doubleValue():
             (Double)idParts[2];
-          Graph graph = labbcat.getFragment(transcriptId, start, end, layers);
-          Annotation[] words = graph.all("word");
+          Annotation[] words = retrieveWords(
+            transcriptId, start, end, (String)matchIdParts[6], (String)matchIdParts[7]);
           if (words.length == 0) {
             rejectCount = rejectFragment(
               rejectCount, fragment, err, "No words retrieved from " + url);
@@ -322,7 +395,7 @@ public class ParseGloss extends CommandLineProgram {
           if (!words[words.length-1].getId().equals(matchIdParts[7])) {
             rejectCount = rejectFragment(
               rejectCount, fragment, err,
-              "Last token should be "+matchIdParts[6]+" but is "+words[0].getId());
+              "Last token should be "+matchIdParts[7]+" but is "+words[0].getId());
             continue;
           }
 
@@ -375,20 +448,14 @@ public class ParseGloss extends CommandLineProgram {
           
           for (int t = 0; t < tokens.length; t++) {
             // the POS/Biggsian tags are all the distinct labels we found, delimited by _
-            String tmrPOS = tokenPOS[t].stream().collect(Collectors.joining("_"));
+            String trmPOS = tokenPOS[t].stream().collect(Collectors.joining("_"));
             String isFinal = tokenFinal[t].stream().collect(Collectors.joining("_"));
             
             matchIdParts[5] = matchIdParts[6] = matchIdParts[7] = words[t].getId();
             String tokenMatchId = matchIdFormat.format(matchIdParts);
-            out.println();
-            out.print(transcriptId);
-            out.print(participantId);
-            out.print(fragmentId);
-            out.print(tokenMatchId);
-            out.print(words[t].getLabel()); // word
-            out.print(tokens[t]); // FragmentToken
-            out.print(tmrPOS); // trmPOS
-            out.print(isFinal); // biggsianFinal
+            saveToken(
+              out, transcriptId, participantId, fragmentId, tokenMatchId,
+              words[t], tokens[t], trmPOS, isFinal);
           }
         } catch (Exception x) {
           rejectCount = rejectFragment(
@@ -396,7 +463,9 @@ public class ParseGloss extends CommandLineProgram {
           x.printStackTrace(System.err);
         }
 
-        if (r % 1000 == 0) System.out.println("Fragments: "+r);
+        if (r % 100 == 0) {
+          System.out.println(new java.util.Date().toString() + " - Fragments: "+r);
+        }
         
       } // next fragment
     } // close files
@@ -408,6 +477,77 @@ public class ParseGloss extends CommandLineProgram {
       rejectsFile.delete();
     }
   } // end of processFile()
+  
+  /**
+   * Gets the fragment words from the LaBB-CAT database.
+   * @param transcriptId The ID of the transcript.
+   * @param start The fragment start offset.
+   * @param end The fragment end offset.
+   * @param firstWordId The ID of the fragment's first word.
+   * @param lastWordId The ID of the fragment's last word.
+   * @return The word token annotations from the database.
+   * @throws Exception
+   */
+  public Annotation[] retrieveWords(
+    String transcriptId, Double start, Double end, String firstWordId, String lastWordId)
+    throws Exception {
+    if (labbcat != null) {
+      Graph graph = labbcat.getFragment(transcriptId, start, end, new String[] {"word"});
+      return graph.all("word");
+    } else { // use SQL
+      sql.setLong(1, Long.parseLong(firstWordId.replace("ew_0_","")));
+      sql.setLong(2, Long.parseLong(lastWordId.replace("ew_0_","")));
+      try (ResultSet rs = sql.executeQuery()) {      
+        Vector<Annotation> words = new Vector<Annotation>();
+        while (rs.next()) {
+          words.add(new Annotation(rs.getString("id"), rs.getString("label"), "word"));
+        } // next word
+        return words.toArray(new Annotation[words.size()]);
+      }
+    }
+  } // end of retrieveWords()
+
+  /**
+   * Saves the given token to the output file, and if connected directly to the database, creates annotations in the database as well.
+   * @param transcriptId
+   * @param participantId
+   * @param fragmentId
+   * @param tokenMatchId
+   * @param word
+   * @param fragmentToken
+   * @param trmPOS
+   * @param biggsianFinal
+   * @throws Exception
+   */
+  public void saveToken(
+    CSVPrinter out,
+    String transcriptId, String participantId, String fragmentId, String tokenMatchId,
+    Annotation word, String fragmentToken, String trmPOS, String biggsianFinal)
+    throws Exception {
+    out.println();
+    out.print(transcriptId);
+    out.print(participantId);
+    out.print(fragmentId);
+    out.print(tokenMatchId);
+    out.print(word.getLabel());
+    out.print(fragmentToken);
+    out.print(trmPOS);
+    out.print(biggsianFinal);
+
+    if (insert != null) {
+      insert.setLong(3, Long.parseLong(word.getId().replace("ew_0_","")));
+      if (trmPOSLayerId > 0) {
+        insert.setLong(1, trmPOSLayerId);
+        insert.setString(2, trmPOS);
+        insert.executeUpdate();
+      }
+      if (biggsianFinalLayerId > 0) {
+        insert.setLong(1, biggsianFinalLayerId);
+        insert.setString(2, biggsianFinal);
+        insert.executeUpdate();
+      }
+    }
+  } // end of saveToken()
   
   /**
    * Saves a row to the rejects file for later analysis.
