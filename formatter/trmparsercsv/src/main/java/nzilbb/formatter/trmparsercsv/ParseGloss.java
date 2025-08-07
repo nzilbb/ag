@@ -260,7 +260,7 @@ public class ParseGloss extends CommandLineProgram {
       +rejectsFile.getPath()+")");
     long rejectCount = 0;
     MessageFormat fragmentIdFormat = new MessageFormat(
-      "{0}__{1,number,#.###}-{2,number,#.###}");
+      "{0}__{1,number,#.###}-{2,number,0.000}");
     MessageFormat matchIdFormat = new MessageFormat(
       "{0};{1};{2}-{3};{4};#={5};[0]={6};[1]={7}");
     CSVFormat format = CSVFormat.EXCEL;
@@ -300,8 +300,10 @@ public class ParseGloss extends CommandLineProgram {
           Object[] idParts = fragmentIdFormat.parse(fragmentId);
 
           // get the fragment from LaBB-CAT
-          Double start = (Double)idParts[1]; 
-          Double end = (Double)idParts[2]; 
+          Double start = (idParts[1] instanceof Long)?((Long)idParts[1]).doubleValue():
+            (Double)idParts[1];
+          Double end = (idParts[2] instanceof Long)?((Long)idParts[2]).doubleValue():
+            (Double)idParts[2];
           Graph graph = labbcat.getFragment(transcriptId, start, end, layers);
           Annotation[] words = graph.all("word");
           if (words.length == 0) {
