@@ -2,3 +2,123 @@
 
 ${project.description}
 
+Support for plain-text transcripts includes both import and export of
+transcripts as .txt files. Transcripts can be textual documents, or
+transcriptions of speech attributable to different speakers.
+
+For importing/parsing files, the document structure is assumed to be a
+meta-data 'header' followed by speaker turns introduced by speaker
+IDs. Each line in the speaker turn is taken to be an utterances.
+
+The speaker ID of a turn is a word followed by a colon, by default
+(this is configurable); that marks the beginning of utterances by that
+speaker, and all subsequent lines are assumed to belong to that
+speaker/turn, until the next speaker ID is encountered.
+
+All lines before the first speaker ID are assumed to be part of the
+'header', each line possibly containing meta-data of the form
+*key*=*value* (this form is also configurable).
+
+If there are no speaker IDs found, the entire transcript is assumed to
+be a text rather than a transcript, and all lines are attributed to a
+single person called "author".
+
+<h2>Synchronization</h2>
+
+Utterances can be synchronized to a separate recording by including
+time-stamp lines throughout the text.
+
+A time-stamp must occur on a line by itself, and is assumed to use the
+following format by default (the format is configurable):\
+`HH:mm:ss.SSS`
+
+If time-stamps are found in the tex, or it is loaded with a sound
+file, the document is assumed to be a transcript of a recording, and
+offsets are in seconds. Otherwise, the document is assumed to be a
+written text, and offsets are in characters.
+
+<h2>Annotation Conventions</h2>
+
+A number of textual annotation conventions are supported:
+
+Non-speech commentary
+: enclosed in curly braces (surrounded by spaces), e.g.\
+  `the he went {pointing} over there`
+  
+Noises
+: enclosed in square brackets (surrounded by spaces), e.g.\
+  `now [door slamming] let's start`
+
+Pronunciation
+: enclosed in square brackets, immediately following the word it's
+  annotating, with no intervening space, e.g.\
+  `this was at Wingatui[wIN@tui]`
+
+Lexical tags
+: enclosed in round parentheses, immediately following the word it's
+  annotating, with no intervening space, e.g.\
+  `I can't remem~(remember)`
+
+<h2>Configuration</h2>
+
+The following parameters can be specified for the formatter:
+
+participantLayer
+: Layer for speaker/participant identification ("participant" by default)
+
+turnLayer
+: Layer for speaker turns ("turn" by default)
+
+utteranceLayer
+: Layer for speaker utterances or text lines ("utterance" by default)
+
+wordLayer
+: Layer for individual word tokens ("word" by default)
+
+commentLayer
+: Annotation layer for commentary ("comment" by default)
+
+noiseLayer
+: Annotation layer for Background noises ("noise" by default)
+
+lexicalLayer
+: Word annotation layer for lexical tags ("lexical" by default)
+
+pronounceLayer
+: Word annotation layer for non-standard pronunciation tags
+  ("pronounce" by default)
+
+orthographyLayer
+: Word token orthography layer (excluding punctuation etc.) used for
+  when exporting texts with other word tags ("orthography" by default)
+
+useConventions
+: Whether to use text conventions for comment, noise, lexical, and
+  pronounce annotations
+
+maxParticipantLength
+: The maximum length of a participant name/ID, when starting a speaker
+  turn (20 characters by default)
+
+maxHeaderLines
+: The maximum number of lines in a meta-data header (50 by default)
+
+participantFormat
+: Format for marking a change of turn within the transcript body -
+  e.g. `{0}:`, where `{0}` is a place-holder for the participant
+  ID/name
+
+metaDataFormat
+: Format for a meta-data line in the header - e.g. `{0}={1}`, where `{0}`
+  is a place-holder for the attribute name or key, and `{1}` is a
+  place-holder for the attribute value
+
+timestampFormat
+: Format for a time stamp - e.g. `HH:mm:ss.SSS`
+
+<h2>Exporting texts with word tags</h2>
+
+If an annotation graph is exported with an orthography layer and one
+or more word-tag layers (e.g. POS tags, etc.), then in the output
+text, each word token has its annotation tags appended, with
+underscore `_` as the delimiter between token/tags.
