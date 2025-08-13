@@ -105,7 +105,7 @@ maxHeaderLines
 
 participantFormat
 : Format for marking a change of turn within the transcript body -
-  e.g. `{0}:`, where `{0}` is a place-holder for the participant
+  e.g. `{0}: `, where `{0}` is a place-holder for the participant
   ID/name
 
 metaDataFormat
