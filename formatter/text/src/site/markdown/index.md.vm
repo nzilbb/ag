@@ -17,7 +17,9 @@ speaker/turn, until the next speaker ID is encountered.
 
 All lines before the first speaker ID are assumed to be part of the
 'header', each line possibly containing meta-data of the form
-*key*=*value* (this form is also configurable).
+*key*=*value* (this form is also configurable). Header lines that
+don't conform to the meta-data pattern are prepended to the transcript
+as comment annotations.
 
 If there are no speaker IDs found, the entire transcript is assumed to
 be a text rather than a transcript, and all lines are attributed to a
