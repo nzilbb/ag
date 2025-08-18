@@ -9,6 +9,5 @@ nzilbb.configure
 nzilbb.editpath
 nzilbb.encoding
 nzilbb.encoding.comparator
-nzilbb.sql.derby
 nzilbb.sql.mysql
 nzilbb.util

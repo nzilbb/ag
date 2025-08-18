@@ -1,10 +1,17 @@
+# nzilbb.ag 1.2.4
+
+- Improvements to processing and ordering of graph change reporting.
+- Improvements to Graph.createSubdivision() in multi-layer linking structures.
+
+For LaBB-CAT version 20250819.1200
+
 # nzilbb.ag 1.2.3
 
 - Add category order/description to Schema.
 - Add "tree" layer type.
 - Improve annotation graph change tracking.
 - Include offsetUnits are serialized to JSON.
-- Performance improvements to annotation graph change merging
+- Performance improvements to annotation graph change merging.
 - Improvements to graph validation.
 
 For LaBB-CAT version 20250430.1200

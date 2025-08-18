@@ -155,6 +155,7 @@ To perform a release deployment:
    ```
    mvn nexus-staging:release -P release -pl :nzilbb.ag
    ```
+   (Or Publish via web interface: <https://central.sonatype.com/publishing/deployments>)\
    Otherwise:
    ```
    mvn nexus-staging:drop -P release -pl :nzilbb.ag
