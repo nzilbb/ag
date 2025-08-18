@@ -3470,7 +3470,7 @@ item []:
             text = "<five>" 
     item [4]:
         class = "IntervalTier" 
-        name = "word - interviewer" 
+        name = "Word - interviewer" 
         xmin = 0 
         xmax = 306.92 
         intervals: size = 105 

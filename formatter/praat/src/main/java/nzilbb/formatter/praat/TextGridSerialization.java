@@ -819,7 +819,8 @@ public class TextGridSerialization
         // ignore spaces too
         String sNameNoWhitespace = sName.replaceAll("\\s","");
         for (Layer mappableLayer : vPossiblLayers) {
-          if (sNameNoWhitespace.startsWith(mappableLayer.getId().replaceAll("\\s",""))) {
+          if (sNameNoWhitespace.toLowerCase().startsWith(
+                mappableLayer.getId().replaceAll("\\s","").toLowerCase())) {
             layer = mappableLayer;
             break;
           }
@@ -842,16 +843,16 @@ public class TextGridSerialization
                    && (sName.equalsIgnoreCase("phones") // MFA alignment TextGrid?
                        || sName.equalsIgnoreCase("mfa") // renamed MFA output?
                        || sName.equalsIgnoreCase("phone")
-                       || sName.startsWith("phone ")
-                       || sName.startsWith("phones ")
+                       || sName.toLowerCase().startsWith("phone ")
+                       || sName.toLowerCase().startsWith("phones ")
                        || sName.equals("MAU") || sName.startsWith("MAU-"))) { // WebMAUS output?
           // make the segment the default
           p.setValue(getSchema().getLayer("segment"));
         } else if (getSchema().getLayer("phone") != null
                    && (sName.equalsIgnoreCase("phones") // MFA alignment TextGrid?
                        || sName.equalsIgnoreCase("mfa") // renamed MFA output?
-                       || sName.startsWith("phone ")
-                       || sName.startsWith("phones ")
+                       || sName.toLowerCase().startsWith("phone ")
+                       || sName.toLowerCase().startsWith("phones ")
                        || sName.equals("MAU") || sName.startsWith("MAU-"))) { // WebMAUS output?
           // make the phone the default
           p.setValue(getSchema().getLayer("phone"));
@@ -1100,7 +1101,8 @@ public class TextGridSerialization
         
         String participantName = ((Tier)word.get("@tier")).getName();
         // if the tier name is something like "transcript - foo"...
-        if (participantName.startsWith(word.getLayerId())) { // ... strip off the prefix
+        if (participantName.toLowerCase().startsWith(
+              word.getLayerId().toLowerCase())) { // ... strip off the prefix
           participantName = participantName
             // strip off layer ID
             .substring(word.getLayerId().length());
