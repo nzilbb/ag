@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.formatter.trmparsercsv</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 
   <name>nzilbb.formatter.trmparsercsv</name>
   <description>Serialized specifically for export/import of data for the trm-parser for Māori data: https://github.com/connor-taylorbrown/trm-parser</description>

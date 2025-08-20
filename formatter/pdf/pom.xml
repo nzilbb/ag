@@ -25,7 +25,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4-SNAPSHOT</version>
+      <version>1.2.4</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
