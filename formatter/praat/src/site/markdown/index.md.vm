@@ -2,3 +2,96 @@
 
 ${project.description}
 
+When parsing a Praat TextGrid, the general assumption is that each
+TextGrid tier corresponds to an annotation layer, and before being
+fully processed, correspondences between tiers and layers need to be
+specified. The formatter tries to select sensible defaults for these
+correspondences; as a general rule, if the name of the tier matches
+the name of an existing annotation layer, then the tier will be mapped
+to the layer with the same name.
+
+If no automatic correspondence is obvious, the formatter assumes that
+interval tiers contain the transcript of the speech of one speaker;
+the tier is mapped to the "utterance" layer, and the speaker's name/ID
+is assumed to be the name of the tier.
+
+While determining default tier-to-layer mappings, the following
+special cases also apply:
+
+- tiers named *lines* or *utterance[s]* are mapped to the *utterance* layer.
+- tiers named *speaker[s]*, *turn[s]*, or "utterances" are mapped to the
+  *turn* (speaker turn) layer.
+- tiers named *ORT[-...]* or *word[...]* are mapped to the *word* layer.
+- tiers named *mfa*, *phone[s][...]*, or *MAU[-...]*, are mapped to
+  the *segment* (phone) layer.
+
+<h2 id="structure">TextGrid Structure</h2>
+
+Assumin the TextGrid is a transcripts, the speaker of each utterance
+in the TextGrid must be systematically identifiable.  There are two
+possible structures for the TextGrid to facilitate this: 
+
+- One tier per speaker, tier name = speaker name
+- Turns tier and utterances tier, turns tier containing speaker names 
+
+<h2 id="conventions">Transcription Conventions</h2>
+
+Praat has no direct mechanism for marking non-speech annotations in
+their position within the transcript text.  However, LaBB-CAT supports
+the use of textual conventions in various ways to make certain
+annotations: 
+
+- To tag a word with its pronunciation, enter the pronunciation in
+    square brackets, directly following the word (i.e. with no
+    intervening space), e.g.:\
+    `…this was at Wingatui[wIN@tui]…`
+- To tag a word with its full orthography (if the transcript doesn't
+    include it), enter the orthography in round parentheses, directly
+    following the word (i.e. with no intervening space), e.g.:\
+    `…I can't remem~(remember)…`
+- To insert a noise annotation within the text, enclose it in square
+    brackets (surrounded by spaces so it's not taken as a
+    pronunciation annotation), e.g.:\
+    `…sometimes me [laughs] not always but sometimes…`
+- To insert a comment annotation within the text, enclose it in curly
+    braces (surrounded by spaces), e.g.:\
+    `…beautifully warm {softly} but its…`
+
+<h2>Configuration</h2>
+
+The following parameters can be specified for the formatter:
+
+useConventions
+: `true` to use transcript conventions to identify comment, noise,
+lexical and pronuncation annotations. (see [Transcription Conventions](#conventions)).
+
+commentLayer
+: ID of layer for commentary (see [Transcription Conventions](#conventions)),
+
+noiseLayer
+: ID of layer for background/non-verbal noises
+(see [Transcription Conventions](#conventions)).
+
+lexicalLayer
+: ID of layer for lexical tags which identify to lexical item if the token orthography
+doesn't do so (see [Transcription Conventions](#conventions)).
+
+pronounceLayer
+: ID of layer for manual pronunciation tags
+(see [Transcription Conventions](#conventions)).
+
+renameShortNumericSpeakers
+: If `true`, short speaker names like 'S1' will be prefixed with the transcript name
+during import.
+
+allowPeerOverlap
+: If `true`, allows TextGrids with, for example, multiple segment tiers,
+if the underlying annotations are invalid and have overlapping segments. 
+
+utteranceThreshold
+: Minimum inter-word pause (in seconds) to trigger an utterance boundary,
+when no utterance layer is mapped. 0 means 'do not infer utterance boundaries'.
+
+ignoreLabels
+: Regular expression for annotation to ignore, e.g. `<p:>` to ignore MAUS pauses.
+
