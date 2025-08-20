@@ -820,7 +820,10 @@ public class TextGridSerialization
         String sNameNoWhitespace = sName.replaceAll("\\s","");
         for (Layer mappableLayer : vPossiblLayers) {
           if (sNameNoWhitespace.toLowerCase().startsWith(
-                mappableLayer.getId().replaceAll("\\s","").toLowerCase())) {
+                mappableLayer.getId().replaceAll("\\s","").toLowerCase())
+              && (mappableLayer.get("layer_manager_id") == null // not managed layers
+                  // ...except the word layer, that might have a transcriber module
+                  || mappableLayer.getId().equals(schema.getWordLayerId()))) {
             layer = mappableLayer;
             break;
           }
