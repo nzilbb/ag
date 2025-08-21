@@ -27,7 +27,7 @@ special cases also apply:
 
 <h2 id="structure">TextGrid Structure</h2>
 
-Assumin the TextGrid is a transcripts, the speaker of each utterance
+Assuming the TextGrid is a transcripts, the speaker of each utterance
 in the TextGrid must be systematically identifiable.  There are two
 possible structures for the TextGrid to facilitate this: 
 
@@ -57,7 +57,7 @@ annotations:
     braces (surrounded by spaces), e.g.:\
     `…beautifully warm {softly} but its…`
 
-<h2>Configuration</h2>
+<h2 id="configuration">Configuration</h2>
 
 The following parameters can be specified for the formatter:
 
