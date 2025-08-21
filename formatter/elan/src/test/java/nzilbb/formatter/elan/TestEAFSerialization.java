@@ -85,6 +85,9 @@ public class TestEAFSerialization {
       new Layer("lexical", "Lexical").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("word").setParentIncludes(true),
+      new Layer("uns", "Unsure of token").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
       new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("word").setParentIncludes(true));
@@ -130,7 +133,7 @@ public class TestEAFSerialization {
     ParameterSet defaultParameters = deserializer.load(streams, schema);
     //for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
     assertEquals("Number of parameters: " + defaultParameters.values(),
-                 4, defaultParameters.size());
+                 6, defaultParameters.size());
     assertEquals("utterance mapping", "utterance", 
                  ((Layer)defaultParameters.get("tier0").getValue()).getId());
     assertEquals("utterance mapping", "utterance", 
@@ -139,6 +142,18 @@ public class TestEAFSerialization {
                  ((Layer)defaultParameters.get("metadata:location").getValue()).getId());
     assertEquals("participant attribute mapping, case insensitive", "participant_GENDER", 
                  ((Layer)defaultParameters.get("metadata:Gender").getValue()).getId());
+    assertEquals("code-switch code mapping", "language", 
+                 ((Layer)defaultParameters.get("code:CS").getValue()).getId());
+    assertTrue("code-switch possible values not just word tag layers: "
+               +defaultParameters.get("code:CS").getPossibleValues(), 
+               defaultParameters.get("code:CS").getPossibleValues().size()
+               > 4); // including [ignore]
+    assertEquals("UNS (three-letter, case-insensitive) code mapping", "uns",
+                 ((Layer)defaultParameters.get("code:UNS").getValue()).getId());
+    assertTrue("UNS possible values only word tag layers: "
+               +defaultParameters.get("code:UNS").getPossibleValues(), 
+               defaultParameters.get("code:UNS").getPossibleValues().size()
+               == 4); // including [ignore]
 
     // configure the deserialization
     deserializer.setParameters(defaultParameters);
@@ -329,6 +344,14 @@ public class TestEAFSerialization {
     assertEquals("third language tag word",
                  "Pimienta", language[2].tagsOn("word")[0].getLabel());
 
+    // other code
+    Annotation[] uns = g.all("uns");
+    assertEquals("two UNS tags", 2, uns.length);
+    assertEquals("first UNS tag", "did", uns[0].getLabel());
+    assertEquals("first UNS tag word", "X", uns[0].tagsOn("word")[0].getLabel());
+    assertEquals("second UNS tag (no explicit label)", "uns", uns[1].getLabel());
+    assertEquals("second UNS tag word", "XX", uns[1].tagsOn("word")[0].getLabel());
+    
     // pronounce
     Annotation[] pronounce = g.all("pronounce");
     assertEquals("f{mli", pronounce[0].getLabel());
@@ -448,6 +471,7 @@ public class TestEAFSerialization {
                  ((Layer)defaultParameters.get("metadata:location").getValue()).getId());
     assertEquals("participant attribute mapping, case insensitive", "participant_GENDER", 
                  ((Layer)defaultParameters.get("metadata:Gender").getValue()).getId());
+    // not using conventions, so no code->layer mapping
 
     // configure the deserialization
     deserializer.setParameters(defaultParameters);
@@ -1330,9 +1354,10 @@ public class TestEAFSerialization {
     assertEquals("utterance mapping", "p", 
                  ((Layer)defaultParameters.get("tier1").getValue()).getId());
     assertNull("no transcript attribute mapping", 
-                 defaultParameters.get("metadata:location").getValue());
+               defaultParameters.get("metadata:location").getValue());
     assertNull("no participant attribute mapping",
-                 defaultParameters.get("metadata:Gender").getValue());
+               defaultParameters.get("metadata:Gender").getValue());
+    // not using conventions, so no code->layer mapping
 
     // configure the deserialization
     deserializer.setParameters(defaultParameters);

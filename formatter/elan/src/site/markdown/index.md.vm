@@ -2,3 +2,160 @@
 
 ${project.description}
 
+ELAN (EUDICO Linguistic Annotator -
+<http://www.lat-mpi.eu/tools/elan/>) is a tier-based media annotation
+tool developed by the Max Planck Institute for Psycholinguistics,
+which can be used both for orthographic transcription, and also
+extensive annotation on different tiers. It can be used to annotate
+multiple video files, and/or an audio file.
+
+For parsing ELAN (.eaf) files the general assumption is that there is
+one tier per speaker that includes orthographic transcription of their
+speech (there can be other non-transcript annotation tiers). 
+
+<h2 id="mapping">Tier to Layer correspondences</h2>
+
+When parsing an ELAN file, the general assumption is that each
+TextGrid tier corresponds to an annotation layer, and before being
+fully processed, correspondences between tiers and layers need to be
+specified. The formatter tries to select sensible defaults for these
+correspondences; as a general rule, if the name of the tier matches
+the name of an existing annotation layer, then the tier will be mapped
+to the layer with the same name.
+
+If no automatic correspondence is obvious, the formatter assumes that
+the tier contains the transcript of the speech of one speaker;
+the tier is mapped to the "utterance" layer, and the tier's
+*Participant* attribute  (or the tier name if the *Participant*
+attribute is blank) is used as the speaker's name/ID. 
+
+While determining default tier-to-layer mappings, the following
+special cases also apply:
+
+- tiers named *lines* or *utterances* are mapped to the *utterance* layer.
+- tiers named *speaker[s]*, *turn[s]*, or "utterances" are mapped to the
+  *turn* (speaker turn) layer.
+- tiers with names that include *word* are mapped to the *word* layer.
+
+<h2 id="metadata">Meta-data</h2>
+
+The *Content Language* attribute of the tiers, if set, is used for
+setting the transcript language. 
+
+The *AUTHOR* attribute of the transcript, if set, can be mapped to an
+author/transcriber attribute layer. 
+
+The *DATE* attribute of the transcript, if set, can be mapped to an
+date attribute layer. 
+
+If `PROPERTY` tags in the .eaf file's XML code include have a `NAME`
+attribute that is prefixed `metadata:`, then the formatter will
+attempt to parse the meta-data values into corresponding attribute
+layers. For example:
+
+- `<PROPERTY NAME="metadata:location">Flores</PROPERTY>` will map to
+  the *location* annotation layer by default, and create an annotation
+  labelled "Flores".
+- `<PROPERTY NAME="metadata:Gender:Anne">F</PROPERTY>` will map
+  to the *Gender* participant annotation layer by default, and tag the
+  participant labelled "Anne" with an annotation labelled "F".
+
+
+<h2 id="conventions">Conventions for non-speech annotations within the transcript</h2>
+
+ELAN has no direct mechanism for marking non-speech annotations in their position within the transcript text.  However, LaBB-CAT supports the use of textual conventions in various ways to make certain annotations:
+
+- To tag a word with its pronunciation, enter the pronunciation in
+    square brackets, directly following the word (i.e. with no
+    intervening space), e.g.:\ 
+    `…this was at Wingatui[wIN@tui]…`
+- To tag a word with its full orthography (if the transcript doesn't
+    include it), enter the orthography in round parentheses, directly
+    following the word (i.e. with no intervening space), e.g.:\ 
+    `…I can't remem~(remember)…`
+- To insert a noise annotation within the text, enclose it in square
+    brackets (surrounded by spaces so it's not taken as a
+    pronunciation annotation), e.g.:\ 
+    `…sometimes me [laughs] not always but sometimes…`
+- To insert a comment annotation within the text, enclose it in curly
+    braces (surrounded by spaces), e.g.:\ 
+    `…beautifully warm {softly} but its…`
+- To tag a word as being in a different language, enter the code CS:
+    (for 'code switch') followed by the the ISO 639 3-letter code for
+    the language, in square brackets, directly following the word
+    (i.e. with no intervening space), e.g.:\ 
+    `…me mudé de New[CS:eng] Zealand[CS:eng] en 2004…`
+- For longer phrases, the code-switch tag can be placed immediately
+    before the first word and immediately after the last word, to mark
+    those and all intervening words as being in a different
+    language. e.g.:\ 
+    `…has a certain [CS:fre]je ne sais quoi[CS:fre] I think…`
+
+The 'code switch' example above is a specific case of a general coding
+mechanism that can be used; any 'SALT style' code can be used to tag a
+word or phrase in this manner, as long as the code:
+
+- is up to three uppercase ASCII letters long,
+- is followed by a colon followed by the annotation label with no
+  spaces (if the label is omitted, the layer ID is used for the
+  annotation label),
+- is enclosed in square brackets, and
+- has no white-space between it and the token it is tagging.
+
+If there are such codes in the transcript, then the code must be
+assigned to an annotation layer before the transcript is processed; by
+default a code will be mapped to an annotation layer with the same
+name (either upper- or lower-case).
+
+For example, given a word-tag layer called *ep*, the following
+transcript would create an *ep*-layer tag labelled "they":\
+`And them[EP:they] found the frog.`
+
+During processing, any of these annotations will be extracted from the transcript text and inserted into corresponding LaBB-CAT layers.
+
+<h2 id="configuration">Configuration</h2>
+
+The following parameters can be specified for the formatter:
+
+ignoreBlankAnnotations
+: If `true`, annotations with no label are skipped.
+
+useConventions
+: `true` to use transcript conventions to identify comment, noise,
+lexical and pronuncation annotations. (see [Transcription Conventions](#conventions)).
+
+commentLayer
+: ID of layer for commentary (see [Transcription Conventions](#conventions)),
+
+noiseLayer
+: ID of layer for background/non-verbal noises
+(see [Transcription Conventions](#conventions)).
+
+lexicalLayer
+: ID of layer for lexical tags which identify to lexical item if the token orthography
+doesn't do so (see [Transcription Conventions](#conventions)).
+
+pronounceLayer
+: ID of layer for manual pronunciation tags
+(see [Transcription Conventions](#conventions)).
+
+authorLayer
+: ID of the transcript attribute layer for the name of transcriber
+  (see [Meta-data](#metadata)). 
+
+dateLayer
+: ID of the transcript attribute layer for the document date (see [Meta-data](#metadata)).
+
+languageLayer
+: ID of the transcript attribute layer for the transcript language
+  (see [Meta-data](#metadata)). 
+
+phraseLanguageLayer
+: ID of the aligned phrase layer for tagging groups of words as being
+  in a different language (see [Transcript Conventions](#conventions)).
+
+minimumTurnPauseLength
+: Minimum amount of time (in seconds) between two turns by the same
+  speaker, with no intervening speaker, for which the inter-turn
+  pausecounts as a turn change boundary. If the pause is shorter than
+  this, the turns are merged into one. 

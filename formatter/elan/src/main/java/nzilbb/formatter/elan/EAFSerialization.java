@@ -42,6 +42,8 @@ import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -732,7 +734,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       Arrays.asList("phraselanguage","language","phraselang","lang"));
     layerToCandidates.put("phraseLanguageLayer", possiblePhraseLayers);
 
-    // add parameters that aren't in the configuration yet, and set possibile/default values
+    // add parameters that aren't in the configuration yet, and set possible/default values
     for (Parameter p : layerToPossibilities.keySet()) {
       List<String> possibleNames = layerToPossibilities.get(p);
       LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
@@ -836,6 +838,15 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
           }
         }
       } // next layer
+      Vector<Layer> vWordTagLayers = new Vector<Layer>();
+      if (getSchema().getWordLayer() != null) {
+        for (Layer layer : getSchema().getMatchingLayers(
+               layer -> getSchema().getWordLayerId().equals(layer.getParentId())
+               && layer.getAlignment() == Constants.ALIGNMENT_NONE
+               && !layer.getId().equals("orthography"))) {
+          vWordTagLayers.add(layer);
+        } 
+      } // there is a word layer
 
       boolean foundTimeOrder = false;
       boolean foundTiers = false;
@@ -846,6 +857,13 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       in = new FileInputStream(eafFile);
       XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(in);
       int t = 0;
+      // also look for codes like [KKK:v]
+      Pattern[] codePatterns = {
+        // phrase tag e.g. [CS:lang]word word[CS:lang]
+        Pattern.compile("\\[(?<code>[A-Z]{1,3}):(?<label>[^\\]]*)\\]\\w.*\\w\\[\\1:\\2\\]"),
+        // token tag e.g. word[CS:lang]
+        Pattern.compile("\\w\\[(?<code>[A-Z]{1,3}):(?<label>[^\\]]*)\\]")
+      };
       while (parser.hasNext()) {
         int event = parser.next();
         if (event == XMLStreamConstants.START_ELEMENT) {
@@ -876,8 +894,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                        || tierName.equalsIgnoreCase("turns")
                        || tierName.equalsIgnoreCase("turn")) {
               tierName = getTurnLayer().getId();
-            } else if (tierName.toLowerCase().indexOf("word") >= 0
-                       || tierName.toLowerCase().indexOf("word") >= 0) {
+            } else if (tierName.toLowerCase().indexOf("word") >= 0) {
               tierName = getWordLayer().getId();
             }
             Layer layer = getSchema().getLayer(tierName);
@@ -954,7 +971,46 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                 mappings.addParameter(p);
               }
             } // metadata:...
-          }
+          } else if (parser.getLocalName().equals("ANNOTATION_VALUE")) { // annotation label
+            if (getUseConventions()) {
+              String text = parser.getElementText();
+              // look for phrase and token codes
+              for (Pattern codePattern : codePatterns) {
+                Matcher codeMatcher = codePattern.matcher(text);
+                while (codeMatcher.find()) {
+                  String code = codeMatcher.group("code");
+                  String parameterName = "code:"+code;
+                  if (!mappings.containsKey(parameterName)) {
+                    mappings.addParameter(
+                      new Parameter(
+                        parameterName, Layer.class, parameterName,
+                        "Layer for " + code + " codes", true));
+                  } // need to add a new parameter                  
+                  Parameter p = mappings.get(parameterName);
+                  Vector<Layer> vPossibleLayers = new Vector<Layer>();
+                  vPossibleLayers.add(ignore);
+                  if (codePattern == codePatterns[0]) { // the phrase pattern
+                    vPossibleLayers.addAll(vIntervalLayers);
+                  }
+                  vPossibleLayers.addAll(vWordTagLayers);
+                  if (p.getPossibleValues() == null // no values yet
+                      // or there are now more possible values (because it's a phrase code)
+                      || p.getPossibleValues().size() < vPossibleLayers.size()) {
+                    p.setPossibleValues(vPossibleLayers);
+                  }
+                  Layer matchingLayer = getSchema().getLayer(code);
+                  if (matchingLayer == null) {
+                    matchingLayer = getSchema().getLayer(code.toLowerCase());
+                  }
+                  if (matchingLayer == null // special case- code-switch -> language
+                      && code.equals("CS") && phraseLanguageLayer != null) {
+                    matchingLayer = phraseLanguageLayer;
+                  }
+                  p.setValue(matchingLayer);
+                } // next match
+              } // next code pattern
+            } // using transcript conventions
+          } // ANNOTATION_VALUE
         } // START_ELEMENT
       } // next event
 
@@ -1094,7 +1150,16 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
     boolean utteranceLayerMapped = false;
     boolean wordLayerMapped = false;
 
+    HashMap<String,Layer> codeToLayer = new HashMap<String,Layer>();
     for (Parameter p : mappings.values()) {
+      
+      String code = null; // is it a code mapping?
+      if (p.getName().startsWith("code:")) {
+        code = p.getName().substring("code:".length());
+        codeToLayer.put(code, null);
+      }
+
+      // is it a layer mapping?
       if (p.getValue() != null && p.getValue() instanceof Layer) {
         Layer layer = (Layer)p.getValue();
         if (!layer.getId().equals("[ignore]")) {
@@ -1108,7 +1173,11 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
           // ensure the layer is added to the graph
           if (graph.getLayer(layer.getId()) == null) {
             graph.addLayer((Layer)layer.clone());
-          }          
+          }
+
+          if (code != null) { // if it's a code mapping, map it
+            codeToLayer.put(code, layer);
+          }
         } // mapped to a layer
       } // Layer value
     } // next mapping
@@ -1544,21 +1613,34 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
               commentLayer==null?null:commentLayer.getId(), "$1", "$1", false, false);
             commentTransformer.transform(graph);
             graph.commit();
+
+            // parse out codes
+            for (String code : codeToLayer.keySet()) {
+              // [CS:lang]word word[CS:lang] - i.e. phrase tag
+              Layer codeLayer = codeToLayer.get(code);
+              SpanningConventionTransformer phraseLanguageTransformer
+                = new SpanningConventionTransformer(
+                  getWordLayer().getId(),
+                  "\\["+code+":([^\\]]*)\\](.*)", "(.+)\\["+code+":([^\\]]+)\\](\\p{Punct}*)",
+                  false, "$2", "$1$3", 
+                  codeLayer==null?null:codeLayer.getId(), null, "$2",
+                  false, false);
+              phraseLanguageTransformer.transform(graph);
 		  
-            // [CS:lang]word word[CS:lang] - i.e. phrase tag
-            SpanningConventionTransformer phraseLanguageTransformer
-              = new SpanningConventionTransformer(
-                getWordLayer().getId(), "\\[CS:([^\\]]+)\\](.*)", "(.+)\\[CS:([^\\]]+)\\](\\p{Punct}*)",
-                false, "$2", "$1$3", 
-                phraseLanguageLayer==null?null:phraseLanguageLayer.getId(), null, "$2",
-                false, false);
-            phraseLanguageTransformer.transform(graph);
-		  
-            // word[CS:lang] - i.e. word tag
-            ConventionTransformer wordLanguageTransformer = new ConventionTransformer(
-              getWordLayer().getId(), "(.+)\\[CS:([^\\]]+)\\](\\p{Punct}*)", "$1$3", 
-              phraseLanguageLayer==null?null:phraseLanguageLayer.getId(), "$2");
-            wordLanguageTransformer.transform(graph);
+              // word[CS:lang] - i.e. word tag
+              ConventionTransformer wordLanguageTransformer = new ConventionTransformer(
+                getWordLayer().getId(),
+                "(.+)\\["+code+":([^\\]]*)\\](\\p{Punct}*)", "$1$3", 
+                codeLayer==null?null:codeLayer.getId(), "$2");
+              wordLanguageTransformer.transform(graph);
+              
+              if (codeLayer != null) {
+                // ensure empty labels (e.g. word[CS:]) are set to layer ID
+                for (Annotation c : graph.all(codeLayer.getId())) {
+                  if (c.getLabel().length() == 0) c.setLabel(codeLayer.getId());
+                }
+              }
+            } // next code mapping
 
             if (phraseLanguageLayer != null) {
               // as there are two phases for language tagging (phrase, then single word)

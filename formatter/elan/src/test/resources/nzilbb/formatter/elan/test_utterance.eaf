@@ -221,12 +221,12 @@
         </ANNOTATION>
         <ANNOTATION>
             <ALIGNABLE_ANNOTATION ANNOTATION_ID="a67" TIME_SLOT_REF1="ts70" TIME_SLOT_REF2="ts71">
-                <ANNOTATION_VALUE> what did they used to call them </ANNOTATION_VALUE>
+                <ANNOTATION_VALUE> what X[UNS:did] they used to call them </ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
         <ANNOTATION>
             <ALIGNABLE_ANNOTATION ANNOTATION_ID="a68" TIME_SLOT_REF1="ts71" TIME_SLOT_REF2="ts72">
-                <ANNOTATION_VALUE> not a fitter and turner </ANNOTATION_VALUE>
+                <ANNOTATION_VALUE> not a XX[UNS:] and turner </ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>
         <ANNOTATION>
