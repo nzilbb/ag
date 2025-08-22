@@ -943,9 +943,6 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
             if (isCancelling()) break;
             boolean found = false;
             for (String entry : dictionary.lookup(type)) {
-              
-              if (!found) setStatus("Tagging: " + type); // (log this only once)
-              found = true;
               if (strip.length() > 0) {
                 entry = entry.replaceAll(
                   // replace characters in this class
@@ -956,6 +953,10 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
                   // extra spaces aren't left behind
                   +"] *","");
               }
+              if (entry.length() == 0) continue; // no blank labels
+              
+              if (!found) setStatus("Tagging: " + type); // (log this only once)
+              found = true;
               for (Annotation token : toAnnotate.get(type)) {
                 token.createTag(tagLayerId, entry)
                   .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
@@ -1045,6 +1046,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       HashSet<String> soFar = new HashSet<String>(); // only unique entries
       for (String tag : dictionary.lookup(sourceLabel)) {
         if (strip.length() > 0) tag = tag.replaceAll("["+strip+"]","");
+        if (tag.length() == 0) continue; // no blank labels
         if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
           store.tagMatchingAnnotations(
             tokenExpression, tagLayerId, tag, Constants.CONFIDENCE_AUTOMATIC);
@@ -1147,6 +1149,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           timers.end("dictionary.lookup");
           if (isCancelling()) break;
           if (strip.length() > 0) tag = tag.replaceAll("["+strip+"]","");
+          if (tag.length() == 0) continue; // no blank labels
           if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
             StringBuilder tokenExpression = new StringBuilder(labelExpression);
             tokenExpression.append(" && label ")
