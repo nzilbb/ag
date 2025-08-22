@@ -260,7 +260,9 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
         StringBuilder columnDefinitions = new StringBuilder();
         Vector<String> columnIndexDefinitions = new Vector<String>();
         int columnCount = 0;
-        for (String column : fieldNames.split(fieldDelimiter)) {
+        String splitPattern = fieldDelimiter;
+        if (splitPattern.equals("\\")) splitPattern = "\\\\";
+        for (String column : fieldNames.split(splitPattern)) {
           if (column.length() == 0) column = "Field" + columnCount;
           columnList.append(", ").append(sqlQuote).append(column).append(sqlQuote);
           argumentList.append(",?");
