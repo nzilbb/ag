@@ -732,7 +732,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
 
         // default output layer
         candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId && layer.alignment == 0" // word tag
+          "layer.parentId == schema.wordLayerId" // word tag
           +" && (/.*phoneme.*/.test(layer.id) || /.*pronunciation.*/.test(layer.id))");
         if (candidates.length > 0) {
           tagLayerId = candidates[0].getId();
@@ -752,8 +752,9 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
     }
     if (firstVariantOnly == null) firstVariantOnly = Boolean.FALSE;
     if (exactMatch == null) exactMatch = Boolean.FALSE;
-      
-    if (schema.getLayer(tokenLayerId) == null)
+
+    Layer tokenLayer = schema.getLayer(tokenLayerId);
+    if (tokenLayer == null)
       throw new InvalidConfigurationException(this, "Token layer not found: " + tokenLayerId);
     if (transcriptLanguageLayerId != null && schema.getLayer(transcriptLanguageLayerId) == null) 
       throw new InvalidConfigurationException(
@@ -776,14 +777,19 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           this, "Invalid Target Language \""+targetLanguagePattern+"\": " + x.getMessage());
       }
     }
-    if (strip == null) strip = "";
+    if (strip == null) strip = "";    
       
     // does the outputLayer need to be added to the schema?
     Layer tagLayer = schema.getLayer(tagLayerId);
+    int tagLayerAlignment = Constants.ALIGNMENT_NONE;
+    if (!tokenLayerId.equals(schema.getWordLayerId())) {
+      // the tokens might be morphemes or sum sub-word element
+      tagLayerAlignment = tokenLayer.getAlignment();
+    }
     if (tagLayer == null) {
       schema.addLayer(
         new Layer(tagLayerId)
-        .setAlignment(Constants.ALIGNMENT_NONE)
+        .setAlignment(tagLayerAlignment)
         .setPeers(!firstVariantOnly)
         .setParentId(schema.getWordLayerId()));
     } else {
@@ -799,8 +805,8 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           + " doesn't allow peer annotations; using first variant only.");
         firstVariantOnly = true;
       }
-      if (tagLayer.getAlignment() != Constants.ALIGNMENT_NONE) {
-        tagLayer.setAlignment(Constants.ALIGNMENT_NONE);
+      if (tagLayer.getAlignment() != tagLayerAlignment) {
+        tagLayer.setAlignment(tagLayerAlignment);
       }
     }
   }

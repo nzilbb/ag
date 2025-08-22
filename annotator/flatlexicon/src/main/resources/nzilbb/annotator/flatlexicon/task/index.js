@@ -18,7 +18,7 @@ getSchema(s => {
     tokenLayerId, schema,
     // this is a function that takes a layer and returns true for the ones we want
     layer => layer.id == schema.wordLayerId
-      || (layer.parentId == schema.wordLayerId && layer.alignment == 0));
+      || (layer.parentId == schema.wordLayerId));
   // default value:
   if (schema.layers["orthography"]) {
     tokenLayerId.value = "orthography";
@@ -48,7 +48,7 @@ getSchema(s => {
   var tagLayerId = document.getElementById("tagLayerId");
   addLayerOptions(
     tagLayerId, schema,
-    layer => layer.parentId == schema.wordLayerId && layer.alignment == 0);
+    layer => layer.parentId == schema.wordLayerId);
   tagLayerId.selectedIndex = 0;
   
   loadDictionaryOptions(() => {
