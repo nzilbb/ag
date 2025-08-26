@@ -794,7 +794,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
     if (getUtteranceLayer() == null) {
       layerToPossibilities.put(
         new Parameter("utteranceLayer", Layer.class, "Utterance layer", 
-                      "Layer for speaker utterances", true), 
+                      "Layer for speaker utterances or text lines", true), 
         Arrays.asList("utterance","utterances","line","lines"));
       layerToCandidates.put("utteranceLayer", possibleTurnChildLayers);
     }
