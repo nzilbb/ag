@@ -36,7 +36,7 @@ getSchema(s => {
 	    +"  # for each word\n"
 	    +"  for word in turn.all(\""+schema.wordLayerId+"\"):\n"
 	    +"    # change the following line to tag the word as desired \n"
-	    +"    transcript.createTag(word, \""+taskId+"\", \"length: \" + str(len(word.label))\n"
+	    +"    transcript.createTag(word, \""+taskId+"\", \"length: \" + str(len(word.label)))\n"
 	    +"    log(\"Tagged word \" + word.label)\n");
       } else {
         
