@@ -27,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.IntConsumer;
@@ -58,7 +59,7 @@ public class JythonAnnotator extends Annotator {
    * @see #getJythonUrl()
    * @see #setJythonUrl(String)
    */
-  protected String jythonUrl = "https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.2/jython-standalone-2.7.2.jar";
+  protected String jythonUrl = "https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.4/jython-standalone-2.7.4.jar";
   /**
    * Getter for {@link #jythonUrl}: The URL for downloading Jython.
    * @return The URL for downloading Jython.
@@ -343,6 +344,10 @@ public class JythonAnnotator extends Annotator {
     return isCancelling();
   } // end of isCancelling()
 
+  // ensure engines are re-used, as they're apparently never disposed of from memory
+  static HashMap<String,ScriptEngine> engines = new HashMap<String,ScriptEngine>();
+  static ScriptEngineManager manager = null;
+  
   /**
    * Transforms the graph. In this case, the graph is simply summarized, by counting all
    * tokens of each word type, and printing out the result to stdout.
@@ -352,37 +357,36 @@ public class JythonAnnotator extends Annotator {
    */
   public Graph transform(Graph graph) throws TransformationException {
     setRunning(true);
-     
-    ScriptEngine engine = null;
-    File jythonJar = new File(getWorkingDirectory(), "jython.jar");
-    if (!jythonJar.exists()) {
-      throw new TransformationException(
-        this, "Jython is not available, please configured the annotator again.");
-    } else {
-      try {
-        // load jython classes in jar
-        ClassLoader loader = URLClassLoader.newInstance(
-          new URL[] { jythonJar.toURI().toURL() },
-          getClass().getClassLoader()
-          );
-        ScriptEngineManager manager = new ScriptEngineManager(loader);
-        engine = manager.getEngineByExtension("py");
-      } catch (MalformedURLException x) {
-        throw new TransformationException(this, x);
-      }
+    
+    String scriptName = IO.SafeFileNameUrl(
+      Arrays.asList(getOutputLayers()).toString()) + ".py";
+    ScriptEngine engine = engines.get(scriptName);
+    if (engine == null) { // no engine for this configuration yet
+      if (manager == null) { // haven't loaded jython at all yet
+        File jythonJar = new File(getWorkingDirectory(), "jython.jar");
+        if (!jythonJar.exists()) {
+          throw new TransformationException(
+            this, "Jython is not available, please configured the annotator again.");
+        } 
+        try {
+          // load jython classes in jar
+          ClassLoader loader = URLClassLoader.newInstance(
+            new URL[] { jythonJar.toURI().toURL() },
+            getClass().getClassLoader()
+            );
+          manager = new ScriptEngineManager(loader);
+        } catch (MalformedURLException x) {
+          throw new TransformationException(this, x);
+        }
+      } // loaded jython
+      engine = manager.getEngineByExtension("py");
+      engine.put(ScriptEngine.FILENAME, scriptName);
+      engines.put(scriptName, engine);
       if (engine == null) {
         throw new TransformationException(
           this, "Jython engine is not available, please configured the annotator again.");
       }
-    }
-
-    // create script engine
-    ScriptEngineFactory factory = engine.getFactory();
-    setStatus(
-      factory.getEngineName() + " ("+factory.getEngineVersion()+") for " 
-      + factory.getLanguageName() + " ("+factory.getLanguageVersion()+")");
-    engine.put(
-      ScriptEngine.FILENAME, IO.SafeFileNameUrl(Arrays.asList(getOutputLayers()).toString()) + ".py");
+    } // create engine
 
     Bindings bindings = new SimpleBindings();
     bindings.put("annotator", this);
