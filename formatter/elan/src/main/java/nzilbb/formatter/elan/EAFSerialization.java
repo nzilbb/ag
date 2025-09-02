@@ -1846,7 +1846,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
           Annotation parentWho = null;
           for (Annotation possibleParent : possibleParents) {
             // is the label (the speaker) a part of the utterance's tier name?
-            Annotation who = possibleParent.first("who");
+            Annotation who = possibleParent.first(turnLayer.getId());
             if (who != null) {
               if (tier.indexOf(who.getLabel()) >= 0
                   || participant.equals(who.getLabel())) {
