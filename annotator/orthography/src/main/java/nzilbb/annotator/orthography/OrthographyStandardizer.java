@@ -188,7 +188,8 @@ public class OrthographyStandardizer extends Annotator {
       exactMatch = false;
          
     } else {
-      exactMatch = false; // new setting defaults to false
+      lowerCase = false; // default 'checkboxes' to false unless they're explicitly set
+      exactMatch = false;
       
       JsonObject json = beanPropertiesFromJSON(parameters);
 

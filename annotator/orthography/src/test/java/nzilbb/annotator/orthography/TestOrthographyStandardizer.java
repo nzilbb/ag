@@ -49,7 +49,7 @@ public class TestOrthographyStandardizer {
     annotator.setSchema(schema);
       
     // stem to a new layer
-    annotator.setTaskParameters("{\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orth\"}");
+    annotator.setTaskParameters("{\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orth\",\"lowerCase\":\"on\"}");
       
     assertTrue("lowerCase true",
                annotator.getLowerCase());
@@ -197,7 +197,7 @@ public class TestOrthographyStandardizer {
     assertEquals("one orthography per token: "+orthographyLabels,
                  9, orthographyLabels.size());
     Iterator<String> orthographies = orthographyLabels.iterator();
-    assertEquals("down-case",
+    assertEquals("no down-case",
                  "Why", orthographies.next());
     assertEquals("internal apostrophes",
                  "hasn't", orthographies.next());
@@ -317,7 +317,7 @@ public class TestOrthographyStandardizer {
       +"\"[-']+$\":\"\""
       +"}}");
       
-    assertTrue("lowerCase true",
+    assertFalse("lowerCase false",
                annotator.getLowerCase());
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
@@ -360,19 +360,19 @@ public class TestOrthographyStandardizer {
     assertEquals("one orthography per token: "+orthographyLabels,
                  9, orthographyLabels.size());
     Iterator<String> orthographies = orthographyLabels.iterator();
-    assertEquals("down-case",
-                 "\"'why", orthographies.next());
+    assertEquals("no down-case",
+                 "\"'Why", orthographies.next());
     assertEquals("internal apostrophes",
                  "hasn't", orthographies.next());
     assertEquals("accented characters",
-                 "inés", orthographies.next());
+                 "Inés", orthographies.next());
     assertEquals("hesitations are retained",
                  "d~", orthographies.next());
     assertEquals("dashes removed",
                  "got", orthographies.next());
     assertEquals("her", orthographies.next());
     assertEquals("internal hyphens retained",
-                 "x-ray", orthographies.next());
+                 "X-ray", orthographies.next());
     assertEquals("punctuation stripped",
                  "yet?'\"", orthographies.next());
     assertEquals("Hyphen-only omitted, Emoji conserved",
