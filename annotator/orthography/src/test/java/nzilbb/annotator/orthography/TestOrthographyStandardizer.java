@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -36,6 +36,7 @@ import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
+import nzilbb.ag.TrackedMap;
 import nzilbb.annotator.orthography.OrthographyStandardizer;
 
 public class TestOrthographyStandardizer {
@@ -380,6 +381,152 @@ public class TestOrthographyStandardizer {
 
   }
 
+  /** Ensure that filtering in by a pattern on another layer works. */
+  @Test public void filterIn() throws Exception {
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    OrthographyStandardizer annotator = new OrthographyStandardizer();
+    annotator.setSchema(schema);
+    
+    // filter out tokens not within matching 'lang' annotations
+    annotator.setTaskParameters(
+      "{\"tokenLayerId\":\"word\","
+      +"\"orthographyLayerId\":\"orth\","
+      +"\"lowerCase\":\"on\","
+      +"\"filters\":{\"lang\":\"f.*\"}"
+      +"}");
+      
+    assertEquals("only one filter " + annotator.getFilters(),
+                 1, annotator.getFilters().size());
+    assertEquals("filter correct " + annotator.getFilters(),
+                 "f.*", annotator.getFilters().get("lang"));
+    assertTrue("lowerCase true", annotator.getLowerCase());
+    assertEquals("token layer", "word", annotator.getTokenLayerId());
+    assertEquals("orthography layer", "orth", annotator.getOrthographyLayerId());
+    assertNotNull("orthography layer was created",
+                  schema.getLayer(annotator.getOrthographyLayerId()));
+    assertEquals("orthography layer child of word",
+                 "word", schema.getLayer(annotator.getOrthographyLayerId()).getParentId());
+    assertEquals("orthography layer not aligned",
+                 Constants.ALIGNMENT_NONE,
+                 schema.getLayer(annotator.getOrthographyLayerId()).getAlignment());
+    assertEquals("orthography layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getOrthographyLayerId()).getType());
+    String[] layers = annotator.getRequiredLayers();
+    assertEquals("2 required layers: "+Arrays.asList(layers),
+                 2, layers.length);
+    assertEquals("required input layer correct "+Arrays.asList(layers),
+                 "word", layers[0]);
+    assertEquals("required filter layer correct "+Arrays.asList(layers),
+                 "lang", layers[1]);
+    layers = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(layers),
+                 1, layers.length);
+    assertEquals("output layer correct "+Arrays.asList(layers),
+                 "orth", layers[0]);
+      
+    // run the annotator
+    annotator.transform(g);
+    List<Annotation> orthographyAnnotations = Arrays.stream(g.all("orth"))
+      .collect(Collectors.toList());
+    assertEquals("two orthography tokens: "+orthographyAnnotations,
+                 2, orthographyAnnotations.size());
+    Iterator<Annotation> orthographies = orthographyAnnotations.iterator();
+    assertEquals("first word in matching phrase",
+                 "inés", orthographies.next().getLabel());
+    assertEquals("last word in matching phrase",
+                 "d~", orthographies.next().getLabel());
+
+    // reconfigure annotator to filter out those tokens, but filter in others
+    annotator.setTaskParameters(
+      "{\"tokenLayerId\":\"word\","
+      +"\"orthographyLayerId\":\"orth\","
+      +"\"lowerCase\":\"on\","
+      +"\"filters\":{\"lang\":\"emoji\"}"
+      +"}");
+    
+    // run the annotator again
+    annotator.transform(g);
+    orthographyAnnotations = Arrays.stream(g.all("orth")).collect(Collectors.toList());
+    assertEquals("one more orthography: "+orthographyAnnotations,
+                 3, orthographyAnnotations.size());
+    orthographies = orthographyAnnotations.iterator();
+    assertTrue("first one deleted",
+               TrackedMap.Destroyed(orthographies.next()));
+    assertTrue("second one deleted",
+               TrackedMap.Destroyed(orthographies.next()));
+    assertEquals("Emoji added", "😉", orthographies.next().getLabel());
+
+  }
+
+  /** Ensure that filtering out tokens by another layer works. */
+  @Test public void filterOut() throws Exception {
+    
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    OrthographyStandardizer annotator = new OrthographyStandardizer();
+    annotator.setSchema(schema);
+    
+    // filter out tokens not within matching 'lang' annotations
+    annotator.setTaskParameters(
+      "{\"tokenLayerId\":\"word\","
+      +"\"orthographyLayerId\":\"orth\","
+      +"\"lowerCase\":\"on\","
+      +"\"filters\":{\"lang\":\"\"}"
+      +"}");
+      
+    assertEquals("only one filter " + annotator.getFilters(),
+                 1, annotator.getFilters().size());
+    assertEquals("filter correct " + annotator.getFilters(),
+                 "", annotator.getFilters().get("lang"));
+    assertTrue("lowerCase true", annotator.getLowerCase());
+    assertEquals("token layer", "word", annotator.getTokenLayerId());
+    assertEquals("orthography layer", "orth", annotator.getOrthographyLayerId());
+    assertNotNull("orthography layer was created",
+                  schema.getLayer(annotator.getOrthographyLayerId()));
+    assertEquals("orthography layer child of word",
+                 "word", schema.getLayer(annotator.getOrthographyLayerId()).getParentId());
+    assertEquals("orthography layer not aligned",
+                 Constants.ALIGNMENT_NONE,
+                 schema.getLayer(annotator.getOrthographyLayerId()).getAlignment());
+    assertEquals("orthography layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getOrthographyLayerId()).getType());
+    String[] layers = annotator.getRequiredLayers();
+    assertEquals("2 required layers: "+Arrays.asList(layers),
+                 2, layers.length);
+    assertEquals("required input layer correct "+Arrays.asList(layers),
+                 "word", layers[0]);
+    assertEquals("required filter layer correct "+Arrays.asList(layers),
+                 "lang", layers[1]);
+    layers = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(layers),
+                 1, layers.length);
+    assertEquals("output layer correct "+Arrays.asList(layers),
+                 "orth", layers[0]);
+      
+    // run the annotator
+    annotator.transform(g);
+    List<String> orthographyLabels = Arrays.stream(g.all("orth"))
+      .map(annotation->annotation.getLabel()).collect(Collectors.toList());
+    assertEquals("one orthography per token: "+orthographyLabels,
+                 6, orthographyLabels.size());
+    Iterator<String> orthographies = orthographyLabels.iterator();
+    assertEquals("down-case",
+                 "why", orthographies.next());
+    assertEquals("internal apostrophes",
+                 "hasn't", orthographies.next());
+    assertEquals("dashes removed",
+                 "got", orthographies.next());
+    assertEquals("her", orthographies.next());
+    assertEquals("internal hyphens retained",
+                 "x-ray", orthographies.next());
+    assertEquals("punctuation stripped",
+                 "yet", orthographies.next());
+  }
+
   /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly */
   @Test public void transformTranscripts() {
     GraphStoreHarness store = new GraphStoreHarness();
@@ -431,6 +578,71 @@ public class TestOrthographyStandardizer {
                    "layer.id == 'word' && label == ' \\'bar\\''"));    
   }
    
+  /** Test whole-layer generation, including filters, uses
+   * GraphStore.tagMatchingAnnotations correctly */
+  @Test public void transformTranscriptsWithFilters() {
+    GraphStoreHarness store = new GraphStoreHarness();
+    Schema schema = schema();
+    OrthographyStandardizer annotator = new OrthographyStandardizer();
+    annotator.setSchema(schema);
+    try {
+      annotator.setTaskParameters(
+        "{\"tokenLayerId\":\"word\","
+        +"\"orthographyLayerId\":\"orthography\","
+        +"\"lowerCase\":\"on\","
+        +"\"filters\":{\"main_participant\":\"\",\"lang\":\"en\"}"
+        +"}");
+      
+      // call tagMatchingAnnotations
+      annotator.transformTranscripts(store, null);
+    } catch(Exception exception) {
+      fail(""+exception);
+    }
+    
+    // check the right calls were made to the graph store
+    assertEquals("aggregateMatchingAnnotations operation",
+                 "DISTINCT", store.aggregateMatchingAnnotationsOperation);
+    assertEquals("aggregateMatchingAnnotations expression",
+                 "layer.id == 'word' && /en/.test(first('lang').label)",
+                 store.aggregateMatchingAnnotationsExpression);
+    
+    assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
+                 2, store.tagMatchingAnnotationsLabels.size());
+    assertEquals("tagMatchingAnnotations layerId foo back-slash: "
+                 + store.tagMatchingAnnotationsLabels,
+                 "foo", store.tagMatchingAnnotationsLabels.get(
+                   // TODO update these when exclusion works via AGQL
+                   "layer.id == 'word' && /en/.test(first('lang').label) && label == 'Foo\\\\'"));
+    assertEquals("tagMatchingAnnotations layerId bar: " + store.tagMatchingAnnotationsLabels,
+                 "bar", store.tagMatchingAnnotationsLabels.get(
+                   "layer.id == 'word' && /en/.test(first('lang').label) && label == ' \\'bar\\''"));
+    
+    assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
+                 2, store.tagMatchingAnnotationsLayerIds.size());
+    assertEquals("tagMatchingAnnotations layerId foo back-slash",
+                 "orthography", store.tagMatchingAnnotationsLayerIds.get(
+                   "layer.id == 'word' && /en/.test(first('lang').label) && label == 'Foo\\\\'"));
+    assertEquals("tagMatchingAnnotations layerId bar",
+                 "orthography", store.tagMatchingAnnotationsLayerIds.get(
+                   "layer.id == 'word' && /en/.test(first('lang').label) && label == ' \\'bar\\''"));
+    
+    assertEquals("tagMatchingAnnotations num confidences: "
+                 + store.tagMatchingAnnotationsConfidences,
+                 2, store.tagMatchingAnnotationsConfidences.size());
+    assertEquals("tagMatchingAnnotations layerId foo back-slash",
+                 Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+                   "layer.id == 'word' && /en/.test(first('lang').label) && label == 'Foo\\\\'"));
+    assertEquals("tagMatchingAnnotations layerId bar",
+                 Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+                   "layer.id == 'word' && /en/.test(first('lang').label) && label == ' \\'bar\\''"));
+
+    assertEquals("deleteMatchingAnnotations expression",
+                 "layer.id == 'orthography'"
+                 +" && /en/.test(first('lang').label)"
+                 +" && first('main_participant').label ≠ ''",
+                 store.deleteMatchingAnnotationsExpression);    
+  }
+   
   /**
    * Returns a layer schema for testing.
    * @return A valid schema.
@@ -443,6 +655,9 @@ public class TestOrthographyStandardizer {
       .setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("main_participant", "Main speakers").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("participant").setParentIncludes(true),
       new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("participant").setParentIncludes(true),
@@ -510,6 +725,14 @@ public class TestOrthographyStandardizer {
     g.addAnnotation(new Annotation().setLayerId("word").setLabel("😉")
                     .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(95))
                     .setParent(turn));
+
+    g.addAnnotation(new Annotation().setLayerId("lang").setLabel("fr")
+                    .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(50))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("lang").setLabel("emoji")
+                    .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(95))
+                    .setParent(turn));
+    
     return g;
   } // end of graph()
 

@@ -75,17 +75,30 @@ button img {
 .label-processing {
     max-width: 40%;
 }
-#replacements, #controls {
+#replacements, #controls, #filters, #filterControls {
     display: inline-block;
     vertical-align: top;
 }
 #replacements {
     width: 85%;
 }
-#controls {
+#controls, #filterControls {
     height: 100%;
 }
 
+#filterControls {
+    & > div {
+        display: table-row;
+        & button img {
+            height: 10px;
+        }
+    }
+}
+#filters > div {
+    white-space: nowrap;
+    & select { width: 30%; }
+    & input { width: 50%; text-align: center; }
+}
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
     .field { flex-direction: column; }

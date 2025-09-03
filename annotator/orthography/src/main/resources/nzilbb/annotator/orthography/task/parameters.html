@@ -25,10 +25,19 @@
 <p> The parameters are: </p>
 <dl>
   <dt> tokenLayerId </dt> <dd> Input layer from which raw word tokens are selected. </dd>
-  <dt> lowerCase </dt> <dd> "true" or "on" for conversion to lowercase, absent otherwise. </dd>
+  <dt> tokenLayerId </dt> <dd> Input layer from which raw word tokens are selected. </dd>
   <dt> exactMatch</dt> <dd> "true" or "on" to ensure accented letters are always treated
     as distinct from  unaccented letters. When turned on, full-layer generation may be slower. </dd> 
   <dt> orthographyLayerId </dt> <dd> Output layer on which new annotations are added. </dd>
   <dt> replacements </dt> <dd> An object in which the keys are regular expressions to
     match and the values are what to replace the corresponding matches with. </dd>
+  <dt> filters </dt> <dd> An optional object in which the keys are layer IDs and the values
+    are regular expressions to match against labels of annotations on th given layer.
+    Filters allow a set of annotations from other layer to include or exclude tokens.
+    If the value for a given layer is empty string "", then all tokens that fall within the
+    bounds of any annotation on that layer will be excluded from the output. If the value
+    is any other string, it's a regular expression that's matched against the label of any
+    annotations on that layer; if the expression matches the label, then tokens falling
+    within the bounds of the annotation are included in the output, and all other tokens
+    are excluded.</dd>
 </dl>

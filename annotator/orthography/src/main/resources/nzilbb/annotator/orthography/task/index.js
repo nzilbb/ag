@@ -80,6 +80,11 @@ getSchema(s => {
                 for (var replacement in parameters.replacements) {
                     newReplacement(replacement, parameters.replacements[replacement]);
                 } // next mapping
+                if (parameters.filters) {
+                  for (var filter in parameters.filters) {
+                    newFilter(filter, parameters.filters[filter]);
+                  } // next filter
+                } // there are filters
                 // if there's no option for the output layer, add one
                 if (orthographyLayerId.value != parameters.orthographyLayerId) {
                     var layerOption = document.createElement("option");
@@ -119,10 +124,8 @@ function changedLayer(select) {
     }
 }
 
-var lastReplacement = null;
-
 // Manage replacements
-
+var lastReplacement = null;
 function newReplacement(pattern, label) {
     
     var divReplacement = document.createElement("div");
@@ -165,12 +168,10 @@ function newReplacement(pattern, label) {
     
     return false; // so form doesn't submit
 }
-
 function enableRemoveButton() {
     document.getElementById("removeButton").disabled = 
         document.getElementById("replacements").childElementCount <= 1;
 }
-
 function removeReplacement() {
     if (lastReplacement) { 
         document.getElementById("replacements").removeChild(lastReplacement);
@@ -179,7 +180,6 @@ function removeReplacement() {
     }
     return false; // so form doesn't submit
 }
-
 function moveReplacementUp() {
     if (lastReplacement) { 
         var replacements = document.getElementById("replacements");
@@ -191,7 +191,6 @@ function moveReplacementUp() {
     }
     return false; // so form doesn't submit
 }
-
 function moveReplacementDown() {
     if (lastReplacement) { 
         var replacements = document.getElementById("replacements");
@@ -205,6 +204,63 @@ function moveReplacementDown() {
                 replacements.appendChild(lastReplacement);
             }
         }
+    }
+    return false; // so form doesn't submit
+}
+
+// Manage filters
+var lastFilter = null;
+function newFilter(layerId, pattern) {
+    
+    var divFilter = document.createElement("div");
+    
+    var layerSelect = document.createElement("select");
+    layerSelect.dataset.role = "layer";
+    layerSelect.title = "Which layer to filter by";
+    addLayerOptions(
+      layerSelect, schema,
+      // this is a function that takes a layer and returns true for the ones we want
+      layer => layer.parentId == schema.turnLayerId
+        || (layer.parentId == schema.wordLayerId && layer.alignment == 0)
+        || (layer.parentId == schema.root.id && layer.alignment == 2)
+        || layer.id == "main_participant");
+    layerSelect.value = layerId;
+    layerSelect.onfocus = function() { lastFilter = this.parentNode; };
+    
+    var patternInput = document.createElement("input");
+    patternInput.type = "text";
+    patternInput.dataset.role = "pattern";
+    patternInput.value = pattern;
+  patternInput.title = "Regular-expression to match against filter layer,\nor blank to exclude all tokens that fall within an annotation on this layer.";
+    patternInput.placeholder = "Exclude all tokens (or enter a pattern to include some)";
+    patternInput.style.textAlign = "center";
+    patternInput.onfocus = function() { lastFilter = this.parentNode; };
+    patternInput.onkeyup = function() { validateRegularExpression(patternInput); };
+    
+    var arrow = document.createElement("span");
+    arrow.innerHTML = " → ";
+    
+    divFilter.appendChild(layerSelect);
+    divFilter.layerSelect = layerSelect;
+    divFilter.appendChild(arrow);
+    divFilter.appendChild(patternInput);
+    divFilter.patternInput = patternInput;
+
+    document.getElementById("filters").appendChild(divFilter);    
+    enableRemoveFilterButton();
+  
+    return false; // so form doesn't submit
+}
+function enableRemoveFilterButton() {
+    document.getElementById("removeFilter").style.display = null;
+    document.getElementById("removeFilterButton").disabled = 
+        document.getElementById("filters").childElementCount == 0;
+}
+function removeFilter() {
+    if (lastFilter) { 
+        document.getElementById("filters").removeChild(lastFilter);
+        lastFilter = null;
+        enableRemoveFilterButton();
     }
     return false; // so form doesn't submit
 }
@@ -230,19 +286,26 @@ function validateRegularExpression(input) {
 
 function setTaskParameters(form) {
 
-    // we use the convertFormBodyToJSON from util.js to send the form as JSON, but we want to
-    // to add the replacements as an array of objects, so we add them to the parameters 
-    // (convertFormBodyToJSON will take care of the rest of the form inputs)
-    var parameters = {
-        replacements: {}
-    };
-    var replacementDivs = document.getElementById("replacements").children;
-    for (var m = 0; m < replacementDivs.length; m++) {
-        var div = replacementDivs[m];
-        parameters.replacements[div.patternInput.value] = div.labelInput.value;
-    }
-    
-    return convertFormBodyToJSON(form, parameters);
+  // we use the convertFormBodyToJSON from util.js to send the form as JSON,
+  // but we want to add the replacements and filters as lists of objects,
+  // so we add them to the parameters 
+  // (convertFormBodyToJSON will take care of the rest of the form inputs)
+  var parameters = {
+    replacements: {},
+    filters: {}
+  };
+  var replacementDivs = document.getElementById("replacements").children;
+  for (var m = 0; m < replacementDivs.length; m++) {
+    var div = replacementDivs[m];
+    parameters.replacements[div.patternInput.value] = div.labelInput.value;
+  }
+  var filterDivs = document.getElementById("filters").children;
+  for (var m = 0; m < filterDivs.length; m++) {
+    var div = filterDivs[m];
+    parameters.filters[div.layerSelect.value] = div.patternInput.value;
+  }
+  
+  return convertFormBodyToJSON(form, parameters);
 }
 
 // add event handlers
@@ -250,6 +313,8 @@ document.getElementById("addButton").onclick = e=>newReplacement('','');
 document.getElementById("upButton").onclick = e=>moveReplacementUp();
 document.getElementById("downButton").onclick = e=>moveReplacementDown();
 document.getElementById("removeButton").onclick = e=>removeReplacement();
+document.getElementById("addFilterButton").onclick = e=>newFilter('','');
+document.getElementById("removeFilterButton").onclick = e=>removeFilter();
 document.getElementById("orthographyLayerId").onchange = function(e) { changedLayer(this); };
 document.getElementById("form").onsubmit = function(e) { setTaskParameters(this); };
 

@@ -48,6 +48,34 @@
       <details><summary><b> Token Layer </b></summary>       
         <p> The <i> Token Layer </i> setting determines which layer raw word tokens come from. </p>
       </details>
+      <details><summary><b> Filters </b></summary>
+        <p> Filters allow a set of annotations from other layer to include or exclude
+          tokens. </p>
+        <p> This can be useful if the annotator is being used to copy/transform tokens
+          from one layer to another, and not all tokens from the input layer are wanted
+          in the output layer; annotations on one or more 'filter' layers can be used to
+          decide which tokens to include, based on whether the tokens fall within the
+          bounds of an annotation on the filter layer, and what the label of that
+          annotation is. </p>
+        <p> For example, if you wanted to exclude any tokens that are enclosed within
+          an annotation on a layer called <i>passage</i>, then you would add a filter
+          (using the ➕ button) with the <i>passage</i> layer selected, and leave the
+          pattern text box next to it empty.
+        <p> If on the other hand you wanted to <b>include only</b> tokens that are enclosed
+          within an annotation on the layer called <i>passage</i>, then you would add a
+          filter with the <i>passage</i> layer selected, and set the pattern text box
+          next to it to be <tt>.*</tt> (which is the regular expression to match all
+          annotation labels).
+        <p> If you wanted to include only tokens that are enclosed
+          within a <i>passage</i> annotation, <b>but only</b> if the <i>passage</i>
+          annotation's label is <q>word list</q>, then you would add a
+          filter with the <i>passage</i> layer selected, and set the pattern text box
+          next to it to be <tt>word list</tt>.
+        </p>
+        <p> Multiple filters can be defined, but a layer must only be included in one
+          filter. If multiple filters are defined, then for a token to be included in
+          the output, <i>all</i> the filter conditions must be met.</p>
+      </details>
       <details><summary><b> Lower-case </b></summary>
         <p> Whether to convert token labels to lowercase before processing replacements. </p>
       </details>
@@ -409,6 +437,23 @@
         <label for="tokenLayerId">Token Layer</label>
         <span><select id="tokenLayerId" name="tokenLayerId" required></select></span>
       </div>
+      <div class="field" id="filtersDiv"
+           title="Input annotations can be filtered by whether they are within the bounds of an annotation on another layer">
+        <label>Filters</label>
+        <div id="filters"></div>
+        <div id="filterControls">
+          <div id="addFilter">
+	    <button id="addFilterButton" title="Add a filter">
+	      <img src="add.svg" alt="➕" />
+	    </button>
+          </div>
+          <div id="removeFilter" style="display: none;">
+	    <button id="removeFilterButton" title="Remove selected filter">
+	      <img src="remove.svg" alt="➖" />
+	    </button>
+          </div>
+        </div>
+      </div><!-- filtersDiv -->
       <div class="field" title="Convert to lower-case">
         <label for="lowerCase">Lower-case</label>
         <span><input id="lowerCase" name="lowerCase" type="checkbox"></span>

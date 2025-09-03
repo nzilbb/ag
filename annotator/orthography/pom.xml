@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.orthography</artifactId>
   <name>nzilbb.annotator.orthography</name>
-  <version>0.1.6</version>
+  <version>0.2.1</version>
   <description>This anotator creates 'cleaned up' word labels
   - e.g. downcase, with extraneous punctuation removed - 
   which should be optimal for looking up lexicons, frequency computation, etc.</description>

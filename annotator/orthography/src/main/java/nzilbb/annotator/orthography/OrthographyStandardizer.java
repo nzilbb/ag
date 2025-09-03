@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -22,6 +22,7 @@
 package nzilbb.annotator.orthography;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -152,6 +153,36 @@ public class OrthographyStandardizer extends Annotator {
   public OrthographyStandardizer setReplacements(LinkedHashMap<String,String> newReplacements) { replacements = newReplacements; return this; }
 
   /**
+   * List of layers to filter by, with a regular expression to match
+   * against the given layer's label, to include (or blank to exclude)
+   * tokens within annotations on the given layer. 
+   * @see #getFilters()
+   * @see #setFilters(HashMap)
+   */
+  protected HashMap<String,String> filters = new HashMap<String,String>();
+  /**
+   * Getter for {@link #filters}: List of layers to filter by, with a
+   * regular expression to match against the given layer's label, to
+   * include (or blank to exclude) tokens within annotations on the
+   * given layer. 
+   * @return List of layers to filter by, with a regular expression to
+   * match against the given layer's label, to include (or blank to
+   * exclude) tokens within annotations on the given layer. 
+   */
+  public HashMap<String,String> getFilters() { return filters; }
+  /**
+   * Setter for {@link #filters}: List of layers to filter by, with a
+   * regular expression to match against the given layer's label, to
+   * include (or blank to exclude) tokens within annotations on the
+   * given layer.
+   * @param newFilters List of layers to filter by, with a regular
+   * expression to match against the given layer's label, to include
+   * (or blank to exclude) tokens within annotations on the given
+   * layer. 
+   */
+  public OrthographyStandardizer setFilters(HashMap<String,String> newFilters) { filters = newFilters; return this; }
+
+  /**
    * ID of the output layer containing standardized orthography layers.
    * @see #getOrthographyLayerId()
    * @see #setOrthographyLayerId(String)
@@ -178,7 +209,6 @@ public class OrthographyStandardizer extends Annotator {
   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
-
     
     if (parameters == null) { // apply default configuration
          
@@ -186,6 +216,7 @@ public class OrthographyStandardizer extends Annotator {
       orthographyLayerId = "orthography";
       lowerCase = true;
       exactMatch = false;
+      filters.clear();
          
     } else {
       lowerCase = false; // default 'checkboxes' to false unless they're explicitly set
@@ -200,8 +231,15 @@ public class OrthographyStandardizer extends Annotator {
           replacements.put(key, jsonReplacements.getString(key));
         }
       }
+      JsonObject jsonFilters = json.getJsonObject("filters");
+      if (jsonFilters != null) {
+        filters.clear();
+        for (String key : jsonFilters.keySet()) {
+          filters.put(key, jsonFilters.getString(key));
+        }
+      }
 
-      // validate removalPatterns
+      // validate replacement patterns
       for (String pattern : replacements.keySet()) {
         try {
           Pattern.compile(pattern);
@@ -209,6 +247,31 @@ public class OrthographyStandardizer extends Annotator {
           throw new InvalidConfigurationException(
             this, "Pattern \""+pattern+"\" is not a valid regular expression: "
             + exception.getMessage());
+        }
+      }
+      // validate filters
+      for (String layerId : filters.keySet()) {
+        if (schema.getLayer(layerId) == null) {
+          throw new InvalidConfigurationException(
+            this, "Filter for unknown layer: \""+layerId+"\"");
+        }
+        if (layerId.equals(tokenLayerId)) {
+          throw new InvalidConfigurationException(
+            this, "Filters can't include input layer: \""+layerId+"\"");
+        }
+        if (layerId.equals(orthographyLayerId)) {
+          throw new InvalidConfigurationException(
+            this, "Filters can't include output layer: \""+layerId+"\"");
+        }
+        String pattern = filters.get(layerId);
+        if (pattern != null && pattern.length() > 0) {
+          try {
+            Pattern.compile(pattern);
+          } catch(PatternSyntaxException exception) {
+            throw new InvalidConfigurationException(
+              this, "Filter for \""+layerId+"\" pattern \""+pattern
+              +"\" is not a valid regular expression: " + exception.getMessage());
+          }
         }
       }
     }
@@ -245,6 +308,7 @@ public class OrthographyStandardizer extends Annotator {
       throw new InvalidConfigurationException(this, "No input token layer set.");
     Vector<String> requiredLayers = new Vector<String>();
     requiredLayers.add(tokenLayerId);
+    requiredLayers.addAll(filters.keySet());
     return requiredLayers.toArray(new String[0]);
   }
 
@@ -292,9 +356,21 @@ public class OrthographyStandardizer extends Annotator {
       }    
       
       StringBuilder labelExpression = new StringBuilder();
-      labelExpression.append("layer.id == '");
-      labelExpression.append(esc(tokenLayer.getId()));
-      labelExpression.append("'");
+      // filters by other layers
+      for (String layerId : filters.keySet()) {
+        String pattern = filters.get(layerId);
+        if (pattern == null || pattern.length() == 0) {
+          // TODO get this working, it doesn't yet
+          // labelExpression.append(" && all('").append(esc(layerId))
+          //   .append("').length == 0");
+        } else {
+          labelExpression.append(" && /")
+            .append(pattern.replace("/","\\/"))
+            .append("/.test(")
+            .append("first('").append(esc(layerId))
+            .append("').label)");
+        }
+      }
       if (expression != null && expression.trim().length() > 0) {
         labelExpression.append(" && [");
         String[] ids = store.getMatchingTranscriptIds(expression);
@@ -312,6 +388,23 @@ public class OrthographyStandardizer extends Annotator {
           labelExpression.append("].includes(graphId)");
         }
       }
+      StringBuilder excludeExpression = new StringBuilder();
+      excludeExpression.append("layer.id == '"+esc(orthographyLayerId)+"'")
+        .append(labelExpression);
+      boolean excludeAfterTag = false;
+      // identify annotations to remove because they're blanket filtered out
+      // TODO remove this when it can be done directly with the query above
+      for (String layerId : filters.keySet()) {
+        String pattern = filters.get(layerId);
+        if (pattern == null || pattern.length() == 0) { // no pattern, exclude all
+          excludeAfterTag = true;
+          excludeExpression.append(" && first('").append(esc(layerId))
+            .append("').label ≠ ''");
+        } // no pattern, exclude all
+      } // next filter
+
+      labelExpression.insert(0, "layer.id == '"+esc(tokenLayer.getId())+"'");
+
       setStatus("Getting distinct token labels: " + labelExpression);
       String[] distinctWords = store.aggregateMatchingAnnotations(
         exactMatch?"DISTINCT BINARY":"DISTINCT", labelExpression.toString());
@@ -328,6 +421,11 @@ public class OrthographyStandardizer extends Annotator {
           orthographyLayerId, orthography, Constants.CONFIDENCE_AUTOMATIC);
         setPercentComplete((++soFar * 100) / distinctWords.length);
       } // next word
+      if (excludeAfterTag) { // TODO remove this when no longer necessary
+        setPercentComplete(99);
+        setStatus("Excluding " + excludeExpression);
+        store.deleteMatchingAnnotations(excludeExpression.toString());
+      }
       setPercentComplete(100);
       setStatus("Finished.");
     } finally {
@@ -355,14 +453,60 @@ public class OrthographyStandardizer extends Annotator {
         this, "Invalid output orthography layer: " + orthographyLayerId);
     }
 
+    HashMap<String,Pattern> layerToFilterPattern = new HashMap<String,Pattern>();
+    for (String layerId : filters.keySet()) {
+      String pattern = filters.get(layerId);
+      if (pattern == null || pattern.length() == 0) {
+        layerToFilterPattern.put(layerId, null);
+      } else {
+        layerToFilterPattern.put(layerId, Pattern.compile(pattern));
+      }
+    }
+
     for (Annotation token : graph.all(tokenLayerId)) {
       // tag all tokens, whether they've already been tagged or not
       // (otherwise in-situ word corrections don't updated orthographies and thus lookups)
-      String orthography = orthography(token.getLabel(), lowerCase, replacements);
-      // only add an annotation if there's actually a label
-      if (orthography.length() > 0) {
-        token.createTag(orthographyLayerId, orthography)
-          .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+
+      // check filters
+      boolean includeToken = true;
+      for (String layerId : layerToFilterPattern.keySet()) {
+        Pattern filterPattern = layerToFilterPattern.get(layerId);
+        Annotation[] annotations = token.all(layerId);
+        if (annotations == null || annotations.length == 0) { // no filter layer annotation
+          if (filterPattern != null) { // pattern cannot match nonexistent annotation
+            includeToken = false;
+          }
+        } else { // there is at least one annotation on the filter layer
+          if (filterPattern == null) { // we don't want any match
+            includeToken = false;
+          } else {// at least one of the annotations must match for inclusion
+            boolean matchingLabelExists = false;
+            for (Annotation annotation : annotations) {
+              if (filterPattern.matcher(annotation.getLabel()).matches()) {
+                matchingLabelExists = true;
+                break;
+              }
+            } // next annotation on filter layer
+            if (!matchingLabelExists) includeToken = false;
+          } // filterPattern is set
+        } // there is at least one annotation on the filter layer
+        // all filters must be satisfied, give up in any fail
+        if (!includeToken) break;
+      } // next filter layer
+
+      if (includeToken) {
+        String orthography = orthography(token.getLabel(), lowerCase, replacements);
+        // only add an annotation if there's actually a label
+        if (orthography.length() > 0) {
+          token.createTag(orthographyLayerId, orthography)
+            .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+        }
+      } else { // don't include token
+        // remove any existing annotation(s)
+        Annotation[] existing = token.all(orthographyLayerId);
+        if (existing != null && existing.length > 0) {
+          for (Annotation orth : existing) orth.destroy();
+        }
       }
     } // next token
 
@@ -371,7 +515,7 @@ public class OrthographyStandardizer extends Annotator {
   }
   
   /**
-   * Returns the orthography of the given string, using the given removal pattern.
+   * Returns the orthography of the given string, using the given replacements.
    * @param word
    * @param lowerCase
    * @param replacements
