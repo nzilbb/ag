@@ -44,7 +44,7 @@ import nzilbb.ag.automation.InvalidConfigurationException;
 public class OrthographyStandardizer extends Annotator {
    
   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-  public String getMinimumApiVersion() { return "1.2.2"; }
+  public String getMinimumApiVersion() { return "1.2.4"; }
    
   /**
    * ID of the input layer containing word tokens.
@@ -356,13 +356,13 @@ public class OrthographyStandardizer extends Annotator {
       }    
       
       StringBuilder labelExpression = new StringBuilder();
+      labelExpression.append("layer.id == '").append(esc(tokenLayer.getId())).append("'");
       // filters by other layers
       for (String layerId : filters.keySet()) {
         String pattern = filters.get(layerId);
         if (pattern == null || pattern.length() == 0) {
-          // TODO get this working, it doesn't yet
-          // labelExpression.append(" && all('").append(esc(layerId))
-          //   .append("').length == 0");
+          labelExpression.append(" && all('").append(esc(layerId))
+            .append("').length == 0");
         } else {
           labelExpression.append(" && /")
             .append(pattern.replace("/","\\/"))
@@ -388,22 +388,6 @@ public class OrthographyStandardizer extends Annotator {
           labelExpression.append("].includes(graphId)");
         }
       }
-      StringBuilder excludeExpression = new StringBuilder();
-      excludeExpression.append("layer.id == '"+esc(orthographyLayerId)+"'")
-        .append(labelExpression);
-      boolean excludeAfterTag = false;
-      // identify annotations to remove because they're blanket filtered out
-      // TODO remove this when it can be done directly with the query above
-      for (String layerId : filters.keySet()) {
-        String pattern = filters.get(layerId);
-        if (pattern == null || pattern.length() == 0) { // no pattern, exclude all
-          excludeAfterTag = true;
-          excludeExpression.append(" && first('").append(esc(layerId))
-            .append("').label ≠ ''");
-        } // no pattern, exclude all
-      } // next filter
-
-      labelExpression.insert(0, "layer.id == '"+esc(tokenLayer.getId())+"'");
 
       setStatus("Getting distinct token labels: " + labelExpression);
       String[] distinctWords = store.aggregateMatchingAnnotations(
@@ -421,11 +405,6 @@ public class OrthographyStandardizer extends Annotator {
           orthographyLayerId, orthography, Constants.CONFIDENCE_AUTOMATIC);
         setPercentComplete((++soFar * 100) / distinctWords.length);
       } // next word
-      if (excludeAfterTag) { // TODO remove this when no longer necessary
-        setPercentComplete(99);
-        setStatus("Excluding " + excludeExpression);
-        store.deleteMatchingAnnotations(excludeExpression.toString());
-      }
       setPercentComplete(100);
       setStatus("Finished.");
     } finally {

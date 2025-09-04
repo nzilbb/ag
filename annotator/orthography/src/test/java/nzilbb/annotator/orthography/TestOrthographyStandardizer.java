@@ -603,7 +603,9 @@ public class TestOrthographyStandardizer {
     assertEquals("aggregateMatchingAnnotations operation",
                  "DISTINCT", store.aggregateMatchingAnnotationsOperation);
     assertEquals("aggregateMatchingAnnotations expression",
-                 "layer.id == 'word' && /en/.test(first('lang').label)",
+                 "layer.id == 'word'"
+                 +" && all('main_participant').length == 0"
+                 +" && /en/.test(first('lang').label)",
                  store.aggregateMatchingAnnotationsExpression);
     
     assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
@@ -612,34 +614,49 @@ public class TestOrthographyStandardizer {
                  + store.tagMatchingAnnotationsLabels,
                  "foo", store.tagMatchingAnnotationsLabels.get(
                    // TODO update these when exclusion works via AGQL
-                   "layer.id == 'word' && /en/.test(first('lang').label) && label == 'Foo\\\\'"));
+                   "layer.id == 'word'"
+                   +" && all('main_participant').length == 0"
+                   +" && /en/.test(first('lang').label)"
+                   +" && label == 'Foo\\\\'"));
     assertEquals("tagMatchingAnnotations layerId bar: " + store.tagMatchingAnnotationsLabels,
                  "bar", store.tagMatchingAnnotationsLabels.get(
-                   "layer.id == 'word' && /en/.test(first('lang').label) && label == ' \\'bar\\''"));
+                   "layer.id == 'word'"
+                   +" && all('main_participant').length == 0"
+                   +" && /en/.test(first('lang').label)"
+                   +" && label == ' \\'bar\\''"));
     
     assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
                  2, store.tagMatchingAnnotationsLayerIds.size());
     assertEquals("tagMatchingAnnotations layerId foo back-slash",
                  "orthography", store.tagMatchingAnnotationsLayerIds.get(
-                   "layer.id == 'word' && /en/.test(first('lang').label) && label == 'Foo\\\\'"));
+                   "layer.id == 'word'"
+                   +" && all('main_participant').length == 0"
+                   +" && /en/.test(first('lang').label)"
+                   +" && label == 'Foo\\\\'"));
     assertEquals("tagMatchingAnnotations layerId bar",
                  "orthography", store.tagMatchingAnnotationsLayerIds.get(
-                   "layer.id == 'word' && /en/.test(first('lang').label) && label == ' \\'bar\\''"));
+                   "layer.id == 'word'"
+                   +" && all('main_participant').length == 0"
+                   +" && /en/.test(first('lang').label)"
+                   +" && label == ' \\'bar\\''"));
     
     assertEquals("tagMatchingAnnotations num confidences: "
                  + store.tagMatchingAnnotationsConfidences,
                  2, store.tagMatchingAnnotationsConfidences.size());
     assertEquals("tagMatchingAnnotations layerId foo back-slash",
                  Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
-                   "layer.id == 'word' && /en/.test(first('lang').label) && label == 'Foo\\\\'"));
+                   "layer.id == 'word'"
+                   +" && all('main_participant').length == 0"
+                   +" && /en/.test(first('lang').label)"
+                   +" && label == 'Foo\\\\'"));
     assertEquals("tagMatchingAnnotations layerId bar",
                  Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
-                   "layer.id == 'word' && /en/.test(first('lang').label) && label == ' \\'bar\\''"));
+                   "layer.id == 'word'"
+                   +" && all('main_participant').length == 0"
+                   +" && /en/.test(first('lang').label)"
+                   +" && label == ' \\'bar\\''"));
 
-    assertEquals("deleteMatchingAnnotations expression",
-                 "layer.id == 'orthography'"
-                 +" && /en/.test(first('lang').label)"
-                 +" && first('main_participant').label ≠ ''",
+    assertNull("not calling deleteMatchingAnnotations any more",
                  store.deleteMatchingAnnotationsExpression);    
   }
    
