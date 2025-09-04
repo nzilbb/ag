@@ -66,11 +66,11 @@ layers. For example:
 ELAN has no direct mechanism for marking non-speech annotations in their position within the transcript text.  However, LaBB-CAT supports the use of textual conventions in various ways to make certain annotations:
 
 - To tag a word with its pronunciation, enter the pronunciation in
-    square brackets, directly following the word (i.e. with no
+    square brackets (with no spaces), directly following the word (i.e. with no
     intervening space), e.g.:\ 
     `…this was at Wingatui[wIN@tui]…`
 - To tag a word with its full orthography (if the transcript doesn't
-    include it), enter the orthography in round parentheses, directly
+    include it), enter the orthography (with no spaces) in round parentheses, directly
     following the word (i.e. with no intervening space), e.g.:\ 
     `…I can't remem~(remember)…`
 - To insert a noise annotation within the text, enclose it in square
@@ -82,7 +82,7 @@ ELAN has no direct mechanism for marking non-speech annotations in their positio
     `…beautifully warm {softly} but its…`
 - To tag a word as being in a different language, enter the code CS:
     (for 'code switch') followed by the the ISO 639 3-letter code for
-    the language, in square brackets, directly following the word
+    the language, in square brackets (with no spaces), directly following the word
     (i.e. with no intervening space), e.g.:\ 
     `…me mudé de New[CS:eng] Zealand[CS:eng] en 2004…`
 - For longer phrases, the code-switch tag can be placed immediately
