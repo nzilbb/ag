@@ -42,11 +42,11 @@ the use of textual conventions in various ways to make certain
 annotations: 
 
 - To tag a word with its pronunciation, enter the pronunciation in
-    square brackets, directly following the word (i.e. with no
+    square brackets (with no spaces), directly following the word (i.e. with no
     intervening space), e.g.:\
     `…this was at Wingatui[wIN@tui]…`
 - To tag a word with its full orthography (if the transcript doesn't
-    include it), enter the orthography in round parentheses, directly
+    include it), enter the orthography (with no spaces) in round parentheses, directly
     following the word (i.e. with no intervening space), e.g.:\
     `…I can't remem~(remember)…`
 - To insert a noise annotation within the text, enclose it in square
