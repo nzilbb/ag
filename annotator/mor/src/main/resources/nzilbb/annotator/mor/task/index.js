@@ -41,7 +41,8 @@ getSchema(s => {
   var utteranceLayerId = document.getElementById("utteranceLayerId");
   addLayerOptions(
     utteranceLayerId, schema,
-    layer => layer.parentId == schema.turnLayerId && layer.alignment == 2
+    layer => (layer.parentId == schema.turnLayerId || layer.parentId == schema.root.id)
+      && layer.alignment == 2
       && layer.id != schema.wordLayerId);
   // schema's utterance layer by default
   utteranceLayerId.value = schema.utteranceLayerId;
@@ -149,6 +150,14 @@ getSchema(s => {
     }
   });
 });
+
+// maybe warn user about selecting a spanning utterance layer
+function changedUtteranceLayer(select) {
+  var layer = schema.layers[select.value];
+  if (layer && layer.parentId != schema.turnLayerId) {
+    alert(`WARNING: '${layer.id}' is a span layer which doesn't in itself guarantee that all tokens are from the same speaker.\nIn order to ensure that tokens from different speakers are not mixed together in the same c-unit, please check that the token layer only targets a single speaker per transcript.`);
+  }
+}
 
 // this function detects when the user selects [add new layer]:
 function changedLayer(select) {

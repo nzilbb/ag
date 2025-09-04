@@ -149,7 +149,8 @@
       <div class="field" title="Layer for chunking words into utterances for MOR to parse">
         <label for="utteranceLayerId"> Utterance Partition Layer </label>
         <span>
-          <select id="utteranceLayerId" name="utteranceLayerId">
+          <select id="utteranceLayerId" name="utteranceLayerId"
+                  onChange="changedUtteranceLayer(this);">
           </select>
         </span>
       </div>

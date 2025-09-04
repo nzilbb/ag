@@ -745,9 +745,10 @@ public class MorTagger extends Annotator {
       throw new InvalidConfigurationException(
         this, "Utterance layer not found: " + utteranceLayerId);
     else if (utteranceLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL
-             || !schema.getTurnLayerId().equals(utteranceLayer.getParentId())) 
+             || (!schema.getTurnLayerId().equals(utteranceLayer.getParentId())
+                 && !schema.getRoot().getId().equals(utteranceLayer.getParentId()))) 
       throw new InvalidConfigurationException(
-        this, "Utterance layer must be a phrase layer: " + utteranceLayerId);
+        this, "Utterance layer must be a phrase/span layer: " + utteranceLayerId);
     
     if (languagesLayerId != null && schema.getLayer(languagesLayerId) == null) 
       throw new InvalidConfigurationException(
@@ -1396,14 +1397,29 @@ public class MorTagger extends Annotator {
       setStatus("Grammar: " + grammar.getPath());
       
       // save the transcript in CHAT format
-      ChatSerialization converter = new ChatSerialization();
+      ChatSerialization serializer = new ChatSerialization();
+      // and load from CHAT format, with a separate converter
+      ChatSerialization deserializer = new ChatSerialization();
 
       // ensure serialization uses the utterance partitioning specified by this.utteranceLayerId
       // (not schema.utteranceLayerId, which might be different)
-      Schema serializationSchema = (Schema)schema.clone(); 
+      Schema serializationSchema = (Schema)schema.clone();
+      Layer utteranceLayer = serializationSchema.getLayer(utteranceLayerId);
+      // is the c-unit partition layer a top-level span (rather than phrase) layer?
+      boolean topLevelUtteranceLayer = false;
+      if (!schema.getTurnLayerId().equals(utteranceLayer.getParentId())) {
+        topLevelUtteranceLayer = true;
+        setStatus("Utterance partition layer ("+utteranceLayerId+") is a top-level layer.");
+        // the serializer relies on being able to identify the partcipant,
+        // which it can't for top level span layers
+        // so make it a child of participant instead of the graph as a whole
+        utteranceLayer.setParentId(schema.getParticipantLayerId());
+        // (need to setParent to ensure the new parent knows about its new child)
+        utteranceLayer.setParent(schema.getParticipantLayer());
+      }
       serializationSchema.setUtteranceLayerId(utteranceLayerId);
       
-      ParameterSet configuration = converter.configure(new ParameterSet(), serializationSchema);
+      ParameterSet configuration = serializer.configure(new ParameterSet(), serializationSchema);
       configuration.get("tokenLayer").setValue(
         graph.getSchema().getLayer(tokenLayerId));
       configuration.get("morLayer").setValue(
@@ -1428,13 +1444,17 @@ public class MorTagger extends Annotator {
         Boolean.valueOf(splitMorTagGroups));
       configuration.get("splitMorWordGroups").setValue(
         Boolean.valueOf(splitMorWordGroups));
-      
-      configuration = converter.configure(configuration, serializationSchema);
+
+      // the CHAT-file writer uses the modified serializationSchema...
+      configuration = serializer.configure(configuration, serializationSchema);
+      // the CHAT-file reader uses the original schema...
+      configuration = deserializer.configure(configuration, schema);
       // no 'cUnitLayer' setting, even if the schema looks like there is one
       // e.g. the user might have a layer called "CUnit", which might be set as our
       // utteranceLayerId for chunking purposes.
       // If the serializer selects that as 'cUnitLayer' by default, then things break.
-      converter.setCUnitLayer(null);
+      serializer.setCUnitLayer(null);
+      deserializer.setCUnitLayer(null);
 
       // remove any existing annotations
       destroyAnnotations(morLayerId, graph);
@@ -1457,13 +1477,22 @@ public class MorTagger extends Annotator {
         if (isCancelling()) break;
         Graph fragment = graph.getFragment(utterance, fragmentLayers);
         fragment.setSchema(serializationSchema);
+        if (topLevelUtteranceLayer) {
+          // the serializer relies on each utterance having a participant,
+          // so ensure they're all set
+          for (Annotation utt : fragment.all(utteranceLayerId)) {
+            if (utt.first(schema.getParticipantLayerId()) == null) {
+              utt.setParent(fragment.first(tokenLayerId).getParent());
+            }
+          } // next utterance
+        } // topLevelUtteranceLayer
         
         final Vector<SerializationException> exceptions = new Vector<SerializationException>();
         final Vector<NamedStream> serializeStreams = new Vector<NamedStream>();
         String[] serializationLayers = { schema.getWordLayerId(), tokenLayerId, languagesLayerId };
         Graph[] graphs = { fragment };
         try {
-          converter.serialize(Arrays.spliterator(graphs), serializationLayers,
+          serializer.serialize(Arrays.spliterator(graphs), serializationLayers,
                               stream -> serializeStreams.add(stream),
                               warning -> setStatus(fragment.getId() + " : " + warning),
                               exception -> exceptions.add(exception));
@@ -1527,12 +1556,12 @@ public class MorTagger extends Annotator {
             // parse the CHAT file
             NamedStream[] deserializeStreams = {
               new NamedStream(new FileInputStream(cha), fragment.getId()+".cha") };
-            ParameterSet defaultParamaters = converter.load(
+            ParameterSet defaultParamaters = deserializer.load(
               deserializeStreams, graph.getSchema());
-            converter.setParameters(defaultParamaters);
+            deserializer.setParameters(defaultParamaters);
             try {
-              graphs = converter.deserialize();
-              for (String warning : converter.getWarnings()) {
+              graphs = deserializer.deserialize();
+              for (String warning : deserializer.getWarnings()) {
                 setStatus(fragment.getId() + " : " + warning);
               }
               Graph tagged = graphs[0];
