@@ -99,6 +99,16 @@ button img {
     & select { width: 30%; }
     & input { width: 50%; text-align: center; }
 }
+
+.bracket {
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    border-top-left-radius: 50%;
+    border-bottom-left-radius: 50%;
+    margin: 3px;
+    padding: 3px;
+}
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
     .field { flex-direction: column; }

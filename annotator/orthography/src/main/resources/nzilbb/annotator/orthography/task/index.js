@@ -237,12 +237,13 @@ function newFilter(layerId, pattern) {
     patternInput.onfocus = function() { lastFilter = this.parentNode; };
     patternInput.onkeyup = function() { validateRegularExpression(patternInput); };
     
-    var arrow = document.createElement("span");
-    arrow.innerHTML = " { ";
+  var bracket = document.createElement("span");
+  bracket.className = "bracket";
+  bracket.innerHTML = " ";
     
     divFilter.appendChild(layerSelect);
     divFilter.layerSelect = layerSelect;
-    divFilter.appendChild(arrow);
+    divFilter.appendChild(bracket);
     divFilter.appendChild(patternInput);
     divFilter.patternInput = patternInput;
 
