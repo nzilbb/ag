@@ -209,6 +209,14 @@ public class OrthographyStandardizer extends Annotator {
   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
+
+    // reset any previous config
+    tokenLayerId = schema.getWordLayerId();
+    orthographyLayerId = "orthography";
+    lowerCase = true;
+    exactMatch = false;
+    // allow default replacements specified above
+    filters.clear();
     
     if (parameters == null) { // apply default configuration
          
@@ -239,8 +247,22 @@ public class OrthographyStandardizer extends Annotator {
         }
       }
 
+      // validate input/output layers
+      if (tokenLayerId == null || tokenLayerId.equals("")) {
+        throw new InvalidConfigurationException(this, "No input token layer set.");
+      }
+      Layer tokenLayer = schema.getLayer(tokenLayerId);
+      if (tokenLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid input token layer: " + tokenLayerId);
+      }
+      
       // validate replacement patterns
       for (String pattern : replacements.keySet()) {
+        if (pattern == null || pattern.length() == 0) {
+          throw new InvalidConfigurationException(
+            this, "Replacement patterns cannot be blank.");
+        }
         try {
           Pattern.compile(pattern);
         } catch(PatternSyntaxException exception) {
@@ -277,6 +299,13 @@ public class OrthographyStandardizer extends Annotator {
     }
       
     // does the outputLayer need to be added to the schema?
+    if (orthographyLayerId == null || orthographyLayerId.equals("")) {
+      throw new InvalidConfigurationException(this, "Orthography layer not set.");
+    }
+    if (orthographyLayerId.equals(tokenLayerId)) {
+      throw new InvalidConfigurationException(
+        this, "Input and output layers cannot be the same.");
+    }
     Layer layer = schema.getLayer(orthographyLayerId);
     if (layer == null) {
       schema.addLayer(

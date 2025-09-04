@@ -231,14 +231,14 @@ function newFilter(layerId, pattern) {
     patternInput.type = "text";
     patternInput.dataset.role = "pattern";
     patternInput.value = pattern;
-  patternInput.title = "Regular-expression to match against filter layer,\nor blank to exclude all tokens that fall within an annotation on this layer.";
-    patternInput.placeholder = "Exclude all tokens (or enter a pattern to include some)";
+  patternInput.title = "Regular-expression to match against filter layer to include tokens within the bounds of the annotation,\nor blank to exclude all tokens that fall within an annotation on this layer.";
+    patternInput.placeholder = "Exclude all tokens";
     patternInput.style.textAlign = "center";
     patternInput.onfocus = function() { lastFilter = this.parentNode; };
     patternInput.onkeyup = function() { validateRegularExpression(patternInput); };
     
     var arrow = document.createElement("span");
-    arrow.innerHTML = " → ";
+    arrow.innerHTML = " { ";
     
     divFilter.appendChild(layerSelect);
     divFilter.layerSelect = layerSelect;
@@ -302,6 +302,11 @@ function setTaskParameters(form) {
   var filterDivs = document.getElementById("filters").children;
   for (var m = 0; m < filterDivs.length; m++) {
     var div = filterDivs[m];
+    if (parameters.filters[div.layerSelect.value] != null) { // layer filtered twice
+      alert(`Cannot filter by the same layer (${div.layerSelect.value}) more than once.`);
+      div.layerSelect.focus();
+      return false;
+    }
     parameters.filters[div.layerSelect.value] = div.patternInput.value;
   }
   
@@ -316,6 +321,6 @@ document.getElementById("removeButton").onclick = e=>removeReplacement();
 document.getElementById("addFilterButton").onclick = e=>newFilter('','');
 document.getElementById("removeFilterButton").onclick = e=>removeFilter();
 document.getElementById("orthographyLayerId").onchange = function(e) { changedLayer(this); };
-document.getElementById("form").onsubmit = function(e) { setTaskParameters(this); };
+document.getElementById("form").onsubmit = function(e) { return setTaskParameters(this); };
 
 

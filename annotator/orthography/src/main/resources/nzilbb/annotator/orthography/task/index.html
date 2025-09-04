@@ -57,21 +57,26 @@
           decide which tokens to include, based on whether the tokens fall within the
           bounds of an annotation on the filter layer, and what the label of that
           annotation is. </p>
-        <p> For example, if you wanted to exclude any tokens that are enclosed within
-          an annotation on a layer called <i>passage</i>, then you would add a filter
-          (using the ➕ button) with the <i>passage</i> layer selected, and leave the
-          pattern text box next to it empty.
-        <p> If on the other hand you wanted to <b>include only</b> tokens that are enclosed
-          within an annotation on the layer called <i>passage</i>, then you would add a
-          filter with the <i>passage</i> layer selected, and set the pattern text box
-          next to it to be <tt>.*</tt> (which is the regular expression to match all
-          annotation labels).
-        <p> If you wanted to include only tokens that are enclosed
-          within a <i>passage</i> annotation, <b>but only</b> if the <i>passage</i>
-          annotation's label is <q>word list</q>, then you would add a
-          filter with the <i>passage</i> layer selected, and set the pattern text box
-          next to it to be <tt>word list</tt>.
-        </p>
+        <p> Some examples: </p>
+        <dl>
+          <dt> Exclude all tokens annotated as <i>passage</i> </dt>
+          <dd> If you wanted to <b>exclude</b> any tokens that are enclosed within
+            an annotation on a layer called <i>passage</i>, then you would add a filter
+            (using the ➕ button) with the <i>passage</i> layer selected, and leave the
+            pattern text box next to it empty. </dd>
+          <dt> Include only tokens annotated as <i>passage</i> </dt>
+          <dd> If on the other hand you wanted to <b>include only</b> tokens that are
+            enclosed within an annotation on the layer called <i>passage</i>, then you
+            would add a filter with the <i>passage</i> layer selected, and set the pattern
+            text box next to it to be <tt>.*</tt> (which is the regular expression to
+            match all annotation labels). </dd>
+          <dt> Include only tokens in certain <i>passage</i>s </dt>
+          <dd> If you wanted to include only tokens that are enclosed
+            within a <i>passage</i> annotation, <b>but only</b> if the <i>passage</i>
+            annotation's label is <q>word list</q>, then you would add a
+            filter with the <i>passage</i> layer selected, and set the pattern text box
+            next to it to be <tt>word list</tt>. </dd>
+        </dl>
         <p> Multiple filters can be defined, but a layer must only be included in one
           filter. If multiple filters are defined, then for a token to be included in
           the output, <i>all</i> the filter conditions must be met.</p>

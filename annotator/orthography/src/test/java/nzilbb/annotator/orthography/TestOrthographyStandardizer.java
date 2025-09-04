@@ -37,9 +37,161 @@ import nzilbb.ag.Graph;
 import nzilbb.ag.Layer;
 import nzilbb.ag.Schema;
 import nzilbb.ag.TrackedMap;
+import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.annotator.orthography.OrthographyStandardizer;
 
 public class TestOrthographyStandardizer {
+
+  /** Test parameter validation */
+  @Test public void invalidTaskParameters() throws Exception {
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    OrthographyStandardizer annotator = new OrthographyStandardizer();
+    annotator.setSchema(schema);
+
+    try {
+      annotator.setTaskParameters(
+        "{"
+        // specified as blank
+        +"\"tokenLayerId\":\"\","
+        +"\"orthographyLayerId\":\"orthography\","
+        +"\"lowerCase\":\"on\","
+        +"\"exactMatch\":\"on\","
+        +"\"replacements\":{\"\\\\s\":\"\"},"
+        +"\"filters\":{\"main_participant\":\"\",\"lang\":\"en\"}"
+        +"}");
+      fail("Should fail with unset orthographyLayerId");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "{"
+        +"\"tokenLayerId\":\"word\","
+        // specified as blank
+        +"\"orthographyLayerId\":\"\","
+        +"\"lowerCase\":\"on\","
+        +"\"exactMatch\":\"on\","
+        +"\"replacements\":{\"\\\\s\":\"\"},"
+        +"\"filters\":{\"main_participant\":\"\",\"lang\":\"en\"}"
+        +"}");
+      fail("Should fail with unset orthographyLayerId");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "{"
+        // doesn't exist in the schema:
+        +"\"tokenLayerId\":\"nonexistent\","
+        +"\"orthographyLayerId\":\"orthography\","
+        +"\"lowerCase\":\"on\","
+        +"\"exactMatch\":\"on\","
+        +"\"replacements\":{\"\\\\s\":\"\"},"
+        +"\"filters\":{\"main_participant\":\"\",\"lang\":\"en\"}"
+        +"}");
+      fail("Should fail with nonexistent tokenLayerId");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "{"
+        +"\"tokenLayerId\":\"word\","
+        // output same as input:
+        +"\"orthographyLayerId\":\"word\","
+        +"\"lowerCase\":\"on\","
+        +"\"exactMatch\":\"on\","
+        +"\"replacements\":{\"\\\\s\":\"\"},"
+        +"\"filters\":{\"main_participant\":\"\",\"lang\":\"en\"}"
+        +"}");
+      fail("Should fail with tokenLayerId == orthographyLayerId");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "{"
+        +"\"tokenLayerId\":\"word\","
+        +"\"orthographyLayerId\":\"orthography\","
+        +"\"lowerCase\":\"on\","
+        +"\"exactMatch\":\"on\","
+        // blank regexp:
+        +"\"replacements\":{\"\":\"\"},"
+        +"\"filters\":{\"main_participant\":\"\",\"lang\":\"en\"}"
+        +"}");
+      fail("Should fail with blank replacement regexp");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "{"
+        +"\"tokenLayerId\":\"word\","
+        +"\"orthographyLayerId\":\"orthography\","
+        +"\"lowerCase\":\"on\","
+        +"\"exactMatch\":\"on\","
+        // invalid regexp:
+        +"\"replacements\":{\"[\":\"\"},"
+        +"\"filters\":{\"main_participant\":\"\",\"lang\":\"en\"}"
+        +"}");
+      fail("Should fail with invalid replacement regexp");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "{"
+        +"\"tokenLayerId\":\"word\","
+        +"\"orthographyLayerId\":\"orthography\","
+        +"\"lowerCase\":\"on\","
+        +"\"exactMatch\":\"on\","
+        +"\"replacements\":{\"\\\\s\":\"\"},"
+        // invalid layer:
+        +"\"filters\":{\"nonexistent\":\"\",\"lang\":\"en\"}"
+        +"}");
+      fail("Should fail with invalid filter layer");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "{"
+        +"\"tokenLayerId\":\"word\","
+        +"\"orthographyLayerId\":\"orthography\","
+        +"\"lowerCase\":\"on\","
+        +"\"exactMatch\":\"on\","
+        +"\"replacements\":{\"\\\\s\":\"\"},"
+        // input layer:
+        +"\"filters\":{\"nonexistent\":\"\",\"word\":\"en\"}"
+        +"}");
+      fail("Should fail with invalid filter layer");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "{"
+        +"\"tokenLayerId\":\"word\","
+        +"\"orthographyLayerId\":\"orthography\","
+        +"\"lowerCase\":\"on\","
+        +"\"exactMatch\":\"on\","
+        +"\"replacements\":{\"\\\\s\":\"\"},"
+        // output layer:
+        +"\"filters\":{\"nonexistent\":\"\",\"orthography\":\"en\"}"
+        +"}");
+      fail("Should fail with invalid filter layer");
+    } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "{"
+        +"\"tokenLayerId\":\"word\","
+        +"\"orthographyLayerId\":\"orthography\","
+        +"\"lowerCase\":\"on\","
+        +"\"exactMatch\":\"on\","
+        +"\"replacements\":{\"\\\\s\":\"\"},"
+        // invalid regexp:
+        +"\"filters\":{\"main_participant\":\"[\",\"lang\":\"en\"}"
+        +"}");
+      fail("Should fail with invalid filter regexp");
+    } catch (InvalidConfigurationException x) {
+    }
+    // can't validate for repeated filter layer, sorry
+  }   
+
 
   /** Test normal configuration works. */
   @Test public void transform() throws Exception {
@@ -50,7 +202,8 @@ public class TestOrthographyStandardizer {
     annotator.setSchema(schema);
       
     // stem to a new layer
-    annotator.setTaskParameters("{\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orth\",\"lowerCase\":\"on\"}");
+    annotator.setTaskParameters(
+      "{\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orth\",\"lowerCase\":\"on\"}");
       
     assertTrue("lowerCase true",
                annotator.getLowerCase());
@@ -153,11 +306,11 @@ public class TestOrthographyStandardizer {
       
     // stem to a new layer
     annotator.setTaskParameters(
-      "{\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orth\",\"lowerCase\":\"false\"}");
+      "{\"orthographyLayerId\":\"orth\",\"lowerCase\":\"false\"}");
       
     assertFalse("lowerCase false",
                 annotator.getLowerCase());
-    assertEquals("token layer",
+    assertEquals("omitted token layer defaults to word layer",
                  "word", annotator.getTokenLayerId());
     assertEquals("orthography layer",
                  "orth", annotator.getOrthographyLayerId());
@@ -307,7 +460,7 @@ public class TestOrthographyStandardizer {
       
     // use specific configuration
     annotator.setTaskParameters(
-      "{\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orthography\","
+      "{\"tokenLayerId\":\"word\","
       +"\"replacements\":{"
       +"\"\\\\s\":\"\","
       +"\"’\":\"'\","
@@ -322,7 +475,7 @@ public class TestOrthographyStandardizer {
                annotator.getLowerCase());
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
-    assertEquals("orthography layer",
+    assertEquals("omitted orthography layer defaults to \"orthography\"",
                  "orthography", annotator.getOrthographyLayerId());
     assertNotNull("orthography layer was created",
                   schema.getLayer(annotator.getOrthographyLayerId()));
