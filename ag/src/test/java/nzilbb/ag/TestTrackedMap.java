@@ -336,6 +336,30 @@ public class TestTrackedMap
                    +",\"a-tag\":\"yes\"}", a.toJsonString());
    }
 
+   @Test public void toJsonWithTrackedMapAttribute() 
+   {
+      Annotation a = new Annotation("123", null, "layer", "value1", "value2");
+      a.put("a-tag", "yes");
+      a.put("@transient", "no");
+      a.setAnnotator("TestTrackedMap");
+      a.setWhen(new java.util.Date(72, 8, 26, 12, 0, 0));
+      a.put("start", new Anchor("anchorId", 123.456));
+      assertEquals("{"
+                   // alphabetical order for bean properties
+                   +"\"annotator\":\"TestTrackedMap\""
+                   +",\"endId\":\"value2\""
+                   +",\"id\":\"123\""
+                   +",\"layerId\":\"layer\""
+                   +",\"ordinal\":0" // not explicitly set
+                   +",\"startId\":\"value1\""
+                   +",\"when\":\"1972-09-26T12:00:00.000\""
+                   // map entries have unpredictable order
+                   +",\"a-tag\":\"yes\""
+                   +",\"start\":{"
+                   +"\"id\":\"anchorId\",\"offset\":123.456,\"startOf\":{},\"endOf\":{}}}",
+                   a.toJsonString());
+   }
+
    @Test public void fromJsonWithMapAttribute() 
    {
       // Layer has an attribute that's a map, so we need to ensure it's interpreted

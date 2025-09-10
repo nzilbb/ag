@@ -164,6 +164,8 @@ public class TrackedMap
                   json.add(key, (Long)value);
                } else if (parameterClass.equals(Boolean.class)) {
                   json.add(key, (Boolean)value);
+               } else if (value instanceof TrackedMap) {
+                 json.add(key, ((TrackedMap)value).toJson());
                } else if (value instanceof List) {
                  JsonArrayBuilder array = Json.createArrayBuilder();
                  for (Object v : ((List)value)) {
