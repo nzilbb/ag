@@ -1448,7 +1448,7 @@ public class TextGridSerialization
           Annotation parentWho = null;
           for (Annotation possibleParent : possibleParents) {
             // is the label (the speaker) a part of the utterance's tier name?
-            Annotation who = possibleParent.first("who");
+            Annotation who = possibleParent.first(schema.getParticipantLayerId());
             if (who != null) {
               if (tier.getName().indexOf(who.getLabel()) >= 0) {
                 // multiple parents could match 
