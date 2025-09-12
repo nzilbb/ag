@@ -188,8 +188,10 @@ public class TestMorTagger {
     assertEquals("Correct number of tokens (disfluent w~ is skipped) "+morAnnotations,
                  9, morAnnotations.size());
     Iterator<Annotation> mors = morAnnotations.iterator();
-    assertEquals("I'll", "pro:sub|I", mors.next().getLabel());
-    assertEquals("I'll", "mod|will", mors.next().getLabel());
+    Annotation iMor = mors.next();
+    assertEquals("I'll", "pro:sub|I", iMor.getLabel());
+    Annotation willMor = mors.next();
+    assertEquals("I'll", "mod|will", willMor.getLabel());
     assertEquals("sing", "v|sing", mors.next().getLabel());
     assertEquals("and", "coord|and", mors.next().getLabel());
     assertEquals("walk", "n|walk", mors.next().getLabel());
@@ -247,8 +249,10 @@ public class TestMorTagger {
     assertEquals("Correct number of POS tags "+morAnnotations,
                  9, morAnnotations.size());
     mors = morAnnotations.iterator();
-    assertEquals("I'll", "pro", mors.next().getLabel());
-    assertEquals("I'll", "mod", mors.next().getLabel());
+    Annotation iPOS = mors.next();
+    assertEquals("I'll", "pro", iPOS.getLabel());
+    Annotation willPOS = mors.next();
+    assertEquals("I'll", "mod", willPOS.getLabel());
     assertEquals("sing", "v", mors.next().getLabel());
     assertEquals("and", "coord", mors.next().getLabel());
     assertEquals("walk", "n", mors.next().getLabel());
@@ -256,6 +260,16 @@ public class TestMorTagger {
     assertEquals("my", "det", mors.next().getLabel());
     assertEquals("blogging-morting", "?", mors.next().getLabel());
     assertEquals("lazily", "adv", mors.next().getLabel());
+
+    // sub-word tags share anchors
+    assertEquals("I mor and pos share starts",
+                 iMor.getStart().getId(), iPOS.getStart().getId());
+    assertEquals("I mor and pos share ends",
+                 iMor.getEnd().getId(), iPOS.getEnd().getId());
+    assertEquals("'ll mor and pos share starts",
+                 willMor.getStart().getId(), willPOS.getStart().getId());
+    assertEquals("'ll mor and pos share ends",
+                 willMor.getEnd().getId(), willPOS.getEnd().getId());    
 
     // POS subcategory
     morAnnotations = Arrays.stream(g.all("morPOSSubcategory"))
@@ -524,7 +538,10 @@ public class TestMorTagger {
 
   }
 
-  /** Configuring a different input layer works */
+  /**
+   * Configuring a different input layer works, and many-to-one cha-to-token
+   * correspondences.
+   */
   @Test public void otherInputLayer() throws Exception {
     
     Graph g = graph();
@@ -538,13 +555,16 @@ public class TestMorTagger {
     // add tokens
     for (Annotation word : g.all(schema.getWordLayerId())) {
       if (!word.getLabel().endsWith("~")) { // skip hesitations
-        g.createTag(word, "token", word.getLabel().replaceAll("\\W","").toLowerCase());
+        if (word.getLabel().equals("blogging-morting")) {
+          g.createTag(word, "token", "twenty three");
+        } else {
+          g.createTag(word, "token", word.getLabel().replaceAll("\\W","").toLowerCase());
+        }
       }
     }
     
     annotator.setSchema(schema);
     
-    // use default configuration
     annotator.setTaskParameters(
       "tokenLayerId=token"
       +"&languagesLayerId=transcript_language"
@@ -637,18 +657,42 @@ public class TestMorTagger {
                  0, g.all("part-of-speech").length);
     // run the annotator
     annotator.transform(g);
+    System.out.println(""+Arrays.asList(g.all("stem")));
     List<Annotation> morAnnotations = Arrays.asList(g.all("part-of-speech"));
-    assertEquals("Correct number of tokens (disfluent w~ is skipped) "+morAnnotations,
-                 8, morAnnotations.size());
+    assertEquals("Correct number of tokens"+morAnnotations,
+                 9, morAnnotations.size());
     Iterator<Annotation> mors = morAnnotations.iterator();
     assertEquals("ill", "adv", mors.next().getLabel());
     assertEquals("sing", "v", mors.next().getLabel());
     assertEquals("and", "coord", mors.next().getLabel());
-    assertEquals("walk", "n", mors.next().getLabel());
+    assertEquals("walk (disfluent w~ is skipped)", "n", mors.next().getLabel());
     assertEquals("about", "prep", mors.next().getLabel());
     assertEquals("my", "det", mors.next().getLabel());
-    assertEquals("bloggingmorting", "?", mors.next().getLabel());
+    Annotation firstHalfPOS = mors.next();
+    Annotation firstHalfWord = firstHalfPOS.first("word");
+    assertEquals("twenty", "det", firstHalfPOS.getLabel());
+    Annotation secondHalfPOS = mors.next();
+    Annotation secondHalfWord = secondHalfPOS.first("word");
+    assertEquals("three", "det", secondHalfPOS.getLabel());
     assertEquals("lazily", "adv", mors.next().getLabel());
+
+    // twenty three should be chained between start and end of same word
+    assertEquals("twenty and three annotate the same token "
+                 + firstHalfWord + " " +secondHalfWord,
+                 firstHalfWord.getId(), secondHalfWord.getId());
+    assertEquals("twenty starts with token "
+                 + firstHalfPOS.getStart() + " " + firstHalfWord.getStart(),
+                 firstHalfPOS.getStart().getId(), firstHalfWord.getStart().getId());
+    assertNotEquals("twenty doesn't end with token "
+                    + firstHalfPOS.getEnd() + " " + firstHalfWord.getEnd(),
+                    firstHalfPOS.getEnd().getId(), firstHalfWord.getEnd().getId());
+    assertEquals("three starts with twenty's end"
+                 + firstHalfPOS.getEnd() + " " + secondHalfPOS.getStart(),
+                 firstHalfPOS.getEnd().getId(), secondHalfPOS.getStart().getId());
+    assertEquals("three ends with token "
+                 + secondHalfPOS.getEnd() + " " + secondHalfWord.getEnd(),
+                 secondHalfPOS.getEnd().getId(), secondHalfWord.getEnd().getId());
+    
 
     mors = morAnnotations.iterator();
     String[] wordLabels = {
@@ -657,6 +701,7 @@ public class TestMorTagger {
       "walk -", 
       "about", 
       "my", 
+      "blogging-morting",
       "blogging-morting",
       "lazily"
     };
@@ -670,7 +715,7 @@ public class TestMorTagger {
     morAnnotations = Arrays.stream(g.all("stem"))
       .collect(Collectors.toList());
     assertEquals("Correct number of stems "+morAnnotations,
-                 8, morAnnotations.size());
+                 9, morAnnotations.size());
     mors = morAnnotations.iterator();
     assertEquals("I'll", "ill", mors.next().getLabel());
     assertEquals("sing", "sing", mors.next().getLabel());
@@ -678,8 +723,25 @@ public class TestMorTagger {
     assertEquals("walk", "walk", mors.next().getLabel());
     assertEquals("about", "about", mors.next().getLabel());
     assertEquals("my", "my", mors.next().getLabel());
-    assertEquals("blogging-morting", "bloggingmorting", mors.next().getLabel());
+    Annotation firstHalfStem = mors.next();
+    assertEquals("twenty", "twenty", firstHalfStem.getLabel());
+    Annotation secondHalfStem = mors.next();
+    assertEquals("three", "three", secondHalfStem.getLabel());
     assertEquals("lazily", "laze", mors.next().getLabel());
+
+    // ensure first/second half POS and Stem share anchors
+    assertEquals("twenty POS and Stem share starts "
+                 + firstHalfPOS.getStart() + " " +firstHalfStem.getStart(),
+                 firstHalfPOS.getStartId(), firstHalfStem.getStartId());
+    assertEquals("twenty POS and Stem share ends "
+                 + firstHalfPOS.getEnd() + " " +firstHalfStem.getEnd(),
+                 firstHalfPOS.getEndId(), firstHalfStem.getEndId());
+    assertEquals("three POS and Stem share starts "
+                 + secondHalfPOS.getStart() + " " +secondHalfStem.getStart(),
+                 secondHalfPOS.getStartId(), secondHalfStem.getStartId());
+    assertEquals("three POS and Stem share ends "
+                 + secondHalfPOS.getEnd() + " " +secondHalfStem.getEnd(),
+                 secondHalfPOS.getEndId(), secondHalfStem.getEndId());
 
     // ensure all word children are inside the word bounds
     for (Annotation word : g.all("word")) {

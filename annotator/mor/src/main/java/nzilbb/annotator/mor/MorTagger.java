@@ -54,6 +54,7 @@ import nzilbb.ag.util.Normalizer;
 import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.*;
 import nzilbb.encoding.ValidLabelsDefinitions;
+import nzilbb.encoding.comparator.Orthography2OrthographyComparator;
 import nzilbb.formatter.clan.ChatSerialization;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
@@ -121,7 +122,7 @@ public class MorTagger extends Annotator {
    * <a href="https://dali.talkbank.org/clan/unix-clan.zip">
    * https://dali.talkbank.org/clan/unix-clan.zip</a> and then <i> mor </i> is compiled. 
    * <p> If there are no other directories, then a default English grammar is downloaded from:
-   * <a href="https://talkbank.org/morgrams/eng.zip">https://talkbank.org/morgrams/eng.zip</a>
+   * <a href="https://talkbank.org/0info/mor/eng.zip">https://talkbank.org/0info/mor/eng.zip</a>
    * and unzipped.
    * @throws InvalidConfigurationException
    * @see #getConfig()
@@ -224,7 +225,7 @@ public class MorTagger extends Annotator {
       if (grammars.size() <= 0) {
         // if not, download one
         File zip = new File(getWorkingDirectory(), "eng.zip");
-        String url = "https://talkbank.org/morgrams/eng.zip";
+        String url = "https://talkbank.org/0info/mor/eng.zip";
         setStatus("Downloading " + url);
         IO.SaveUrlToFile​(
           new URL(url), zip,
@@ -1580,16 +1581,54 @@ public class MorTagger extends Annotator {
               // merge the changes into our graph by matching up the tokens
               // use MinimumEditPath because sometimes mor adds or removes  tokens
               MinimumEditPath<Annotation> mp = new MinimumEditPath<Annotation>(
-                new DefaultEditComparator<Annotation>(new EqualsComparator<Annotation>() {
-                    public int compare(Annotation o1, Annotation o2) {
-                      return o1.getLabel().compareTo(o2.getLabel());
-                    }
-                  }));
+                new Orthography2OrthographyComparator<Annotation>());
               List<Annotation> originalWords = Arrays.asList(
                 utterance.all(tokenLayerId)); // output was token layer, so compare against that
               List<Annotation> chaWords = Arrays.asList(
                 tagged.all(schema.getWordLayerId())); // tokens come in on word layer
-              for (EditStep<Annotation> step : mp.minimumEditPath(chaWords, originalWords)) {
+              // map cha tokens to original tokens
+              List<EditStep<Annotation>> editPath
+                = mp.minimumEditPath(chaWords, originalWords);
+              // make insert+delete into just change, where reasonable
+              mp.collapse(editPath);
+              
+              // first pass through edit path to collate annotations:
+              // there might be multiple chaWords per originalWord, if the original
+              // tokens included spaces (e.g. original underscores have been transformed
+              // like "American_Samoa" -> "American Samoa")
+              // we collapse these into one chaWord, so they're processed like clitics are 
+              EditStep<Annotation> lastStep = null;
+              for (EditStep<Annotation> step : editPath) {
+                Annotation chaWord = step.getFrom();
+                Annotation originalToken = step.getTo();
+                if (chaWord != null && originalToken != null) {
+                  // keep track of last fully-matched step, we might add to it
+                  lastStep = step;
+                } else if (originalToken == null) { // DELETE
+                  if (lastStep != null // there is a last step
+                      // is the chaWord part of that originalToken?
+                      && lastStep.getOperation() == EditStep.StepOperation.CHANGE
+                      && lastStep.getTo().getLabel().toLowerCase()
+                      .indexOf(chaWord.getLabel().toLowerCase()) >= 0) {
+                    // this is a sub-word of the token
+                    // so add all cha annotations to the previous chaWord
+                    Annotation lastChaWord = lastStep.getFrom();
+                    lastChaWord.setEndId(chaWord.getEndId());
+                    moveAnnotations(morLayerId, chaWord, lastChaWord);
+                    moveAnnotations(prefixLayerId, chaWord, lastChaWord);
+                    moveAnnotations(partOfSpeechLayerId, chaWord, lastChaWord);
+                    moveAnnotations(
+                      partOfSpeechSubcategoryLayerId, chaWord, lastChaWord);
+                    moveAnnotations(stemLayerId, chaWord, lastChaWord);
+                    moveAnnotations(fusionalSuffixLayerId, chaWord, lastChaWord);
+                    moveAnnotations(suffixLayerId, chaWord, lastChaWord);
+                    moveAnnotations(glossLayerId, chaWord, lastChaWord);
+                  }
+                }
+              } // next edit step (first pass)
+
+              // second pass - actually annotate original tokens
+              for (EditStep<Annotation> step : editPath) {
                 if (step.getFrom() != null && step.getTo() != null) {
                   copyAnnotations(morLayerId, step.getFrom(), step.getTo(), graph);
                   copyAnnotations(prefixLayerId, step.getFrom(), step.getTo(), graph);
@@ -1597,11 +1636,12 @@ public class MorTagger extends Annotator {
                   copyAnnotations(
                     partOfSpeechSubcategoryLayerId, step.getFrom(), step.getTo(), graph);
                   copyAnnotations(stemLayerId, step.getFrom(), step.getTo(), graph);
-                  copyAnnotations(fusionalSuffixLayerId, step.getFrom(), step.getTo(), graph);
+                  copyAnnotations(
+                    fusionalSuffixLayerId, step.getFrom(), step.getTo(), graph);
                   copyAnnotations(suffixLayerId, step.getFrom(), step.getTo(), graph);
                   copyAnnotations(glossLayerId, step.getFrom(), step.getTo(), graph);
                 }
-              } // next token
+              } // next edit step
             
             } catch(SerializationException parseException) { // error parsing the tagged .cha file
               setStatus(fragment.getId() + " not tagged: " + parseException.getMessage());
@@ -1710,4 +1750,23 @@ public class MorTagger extends Annotator {
      } // layerId != null
    } // end of copyAnnotations()
 
+   /**
+    * Move the annotations of the given cha token on the given layer to the given new parent.
+    * @param layerId
+    * @param oldChaWord
+    * @param newChaWord
+    */
+   private void moveAnnotations(
+     String layerId, Annotation oldChaWord, Annotation newChaWord) {     
+     if (layerId != null) {
+       for (Annotation chaTag : oldChaWord.getAnnotations(layerId)) {
+         Annotation newParent = newChaWord;
+         if (chaTag.getParentId().equals(oldChaWord.getParentId())) {
+           // tag is peer of oldChaWord, so use parent
+           newParent = newChaWord.getParent();
+         }
+         chaTag.setParent(newParent);
+       } // next tag
+     }
+   }
 }
