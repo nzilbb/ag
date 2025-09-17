@@ -42,8 +42,6 @@ import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
-import nzilbb.annotator.cmudict.CMUDictionaryTagger;
-import nzilbb.annotator.cmudict.CMUDictionary;
 import nzilbb.sql.derby.DerbyConnectionFactory;
 
 public class TestCMUDictionaryTagger {

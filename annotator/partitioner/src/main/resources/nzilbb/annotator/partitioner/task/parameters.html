@@ -1,0 +1,59 @@
+<h3>Partitioner</h3>
+
+<p> This annotator partitions annotation into blocks of either a given
+  number of tokens, or a given number of seconds. The annotation label
+  of each block is the number of tokens (or seconds) in that block. </p> 
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>boundaryLayerId=transcript&amp;alignment=middle&amp;tokenLayerId=word&amp;partitionSize=50&amp;maxPartitions=1&amp;destinationLayerId=middle-50</samp></p>
+
+<p> Parameters are: </p>
+<dl>
+  <dt> boundaryLayerId </dt> <dd> The Partition Boundary Layer defines which
+    annotations will act as the outer bounds of the partitions. This layer
+    already contains tokens on the <em>tokenLayerId</em> layer which will be
+    counted for partitioning. </dd>
+  <dt> alignment </dt> <dd> Partitions will be created within each annotation
+    on the <em>boundaryLayerId</em> (above), starting from the start, middle,
+    or end of each annotation, depending on the value of this parameter.
+    If <q>start</q> is specified, the first token in each <em>boundaryLayerId</em>
+    annotation will also be the first token of a partition.
+    If <q>end</q> is specified, the last token in each <em>boundaryLayerId</em>
+    annotation will also be the last token of a partition.
+    If <q>middle</q> is selected, partitions are generated from the middle of each
+    <em>boundaryLayerId</em> annotation outward. </dd> 
+  <dt> tokenLayerId </dt> <dd> Annotations on this layer will be counted in order to
+    group them into partitions. You can also create time-based annotations
+    (e.g. an interval every 5 seconds) by omitting this parameter or passing an
+    empty value. </dd> 
+  <dt> partitionSize </dt> <dd> This is the number of annotations on the
+    <em>tokenLayerId</em> layer which will make up each partition, or if 
+    <em>tokenLayerId</em> is not set, then this is the number of seconds length
+    for each partition. </dd> 
+  <dt> maxPartitions </dt> <dd> This optional setting specifies the maximum number of
+    partitions for each <em>boundaryLayerId</em> annotation (including left-overs -
+    see below). For example, if you want only the middle <var>n</var> tokens, you
+    would set this 1 (and set <em>alignment</em> to <q>middle</q>). If blank or
+    unspecified, the maximum possible number of full partitions will be created for
+    each <em>boundaryLayerId</em> annotation. </dd> 
+  <dt> leftOvers </dt> <dd> Once all the required partitions containing
+    <em>partitionSize</em> tokens have been created, there are likely to be some
+    remaining tokens left over, which have not been included in a partition.
+    If this parameter is specifes (as <q>on</q> or <q>true</q>), then these remaining
+    tokens will also be annotated, making the configuration consistent with the
+    set-theoretic definition of a partition (i.e. including all elements of the superset)
+    and introducing the possibility of partitions that contain fewer than
+    <em>partitionSize</em> tokens (which can be differentiated by the partition label). </dd> 
+  <dt> excludeOnAttribute </dt> <dd> In order to skip annotation of certain transcripts,
+    e.g. you may wish to not particition word-list or reading-passage transcripts,
+    specify the ID of a transcript attribute layer that can be used to exclude or include
+    transcripts for partitioning. e.g. to exclude transcripts on the basis of the
+    <tt>transcript_type</tt> attribute, pass <q>transcript_type</q> as the valid of this
+    parameter. </dd>
+  <dt> excludeOnAttributeValues </dt> <dd> If <em>excludeOnAttribute</em> has been
+    specified, this is a comma-separated list of values for the spcified attribute that
+    should be used to <em>exclude</em> a transcript from partitioning. e.g. to partition
+    all transcripts except those with <tt>transcript_type</tt> set to <tt>word-list</tt>
+    or <tt>reading-passing</tt>, pass <q>word-list,reading-passage</q> as the value of
+    this parameter.</dd>
+</dl>
