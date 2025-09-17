@@ -3,7 +3,70 @@
 <p> This annotator partitions tokens into blocks of a given size. </p>
 
 <p> For example, it can be used to mark blocks of 100 words long, from
-  the beginning of each turn, or mark the middle 300 words of each
-  topic tag. Leftover tokens can optionally be annotated or not.  The
+  the beginning of each turn, or mark/copy the middle 300 words of each
+  topic tag, or mark blocks of one-minute intervals, etc.
+  Leftover tokens can optionally be annotated or not.  The
   label of each block is the number of tokens in it, so leftover
   blocks can be distinguished from full blocks. </p>
+
+
+<style type="text/css">
+<!--
+.example .span {
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+.example th {
+    text-align: left;
+}
+.example td {
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.example .partition {
+    color: #96A339;
+}
+.example .partition .span {
+    border-color: #96A339;
+}
+.example caption {
+    white-space: nowrap;
+}
+-->
+</style>
+
+<table class="example"><tbody>
+    <caption>Example: partititon size = 2, with left-over tagging</caption>
+    <tr>
+      <th><em>Partition Boundary Layer</em></th>
+      <th>utterance</th>
+      <td colspan="4" class="span">&nbsp;</td>
+      <td colspan="5" class="span">&nbsp;</td>
+    </tr>
+    <tr class="partition">
+      <th><em>Partition Layer</em></th>
+      <th>partition</th>
+      <td colspan="2" class="span">2</td>
+      <td colspan="2" class="span">2</td>
+      <td colspan="2" class="span">2</td>
+      <td colspan="2" class="span">2</td>
+      <td colspan="2" class="span">1</td>
+    </tr>
+    <tr>
+      <th><em>Count (token layer)</em></th>
+      <th>word</th>
+      <td>The</td>
+      <td>quick</td>
+      <td>brown</td>
+      <td>fox</td>
+      <td>jumps</td>
+      <td>over</td>
+      <td>the</td>
+      <td>lazy</td>
+      <td>dog.</td>
+    </tr>
+</tbody></table>

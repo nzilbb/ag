@@ -8,12 +8,12 @@ getVersion(version => {
 const taskId = window.location.search.substring(1);
 
 // first, get the layer schema
-var schema = null;
+let schema = null;
 getSchema(s => {
   schema = s;
   
   // populate layer input select options...
-  var boundaryLayerId = document.getElementById("boundaryLayerId");
+  const boundaryLayerId = document.getElementById("boundaryLayerId");
   addLayerOptions(
     boundaryLayerId, schema,
     // aligned layers from turn children up
@@ -23,12 +23,16 @@ getSchema(s => {
   // default value:
   boundaryLayerId.value = schema.turnLayerId;
   
-  var tokenLayerId = document.getElementById("tokenLayerId");
+  const tokenLayerId = document.getElementById("tokenLayerId");
   addLayerOptions(
     tokenLayerId, schema,
     // word layers
-    layer => layer.id == schema.wordLayerId
-      || (layer.parentId == schema.wordLayerId));
+    layer => (layer.alignment != 0 // (not attribute layers)
+              // span/phrase layers
+              && (layer.parentId == schema.root.id
+                  || layer.parentId == schema.turnLayerId
+                  || layer.id == schema.turnLayerId))
+      || layer.parentId == schema.wordLayerId); // or word layers
   // default value:
   if (schema.layers["orthography"]) {
     tokenLayerId.value = "orthography";
@@ -38,7 +42,7 @@ getSchema(s => {
   
   // populate the transcript attribute layers...
   
-  var excludeOnAttribute = document.getElementById("excludeOnAttribute");
+  const excludeOnAttribute = document.getElementById("excludeOnAttribute");
   addLayerOptions(
     excludeOnAttribute, schema,
     layer => layer.parentId == schema.root.id && layer.alignment == 0
@@ -49,7 +53,7 @@ getSchema(s => {
   }
     
   // populate layer output select options...          
-  var destinationLayerId = document.getElementById("destinationLayerId");
+  const destinationLayerId = document.getElementById("destinationLayerId");
   addLayerOptions(
     destinationLayerId, schema,
     // no system layers
@@ -71,7 +75,7 @@ getSchema(s => {
   getText("getTaskParameters", text => {
     try {
       if (text) {
-        var parameters = new URLSearchParams(text);
+        const parameters = new URLSearchParams(text);
         
         // set initial values of properties in the form above
         // (this assumes bean property names match input id's in the form above)
@@ -85,7 +89,7 @@ getSchema(s => {
       if (destinationLayerId.selectedIndex <= 1) {
         if (!schema.layers[taskId]) { // there's  layer named after the task
           // so create one
-          var layerOption = document.createElement("option");
+          const layerOption = document.createElement("option");
           layerOption.appendChild(document.createTextNode(taskId));
           destinationLayerId.appendChild(layerOption);
         }
@@ -93,6 +97,8 @@ getSchema(s => {
         destinationLayerId.value = taskId;
       }
       changeExclusionAttribute(excludeOnAttribute);
+      setNumTokensUnits(tokenLayerId);
+      describePartitionLabels();
     } finally {
       finishedLoading();
     }
@@ -101,11 +107,11 @@ getSchema(s => {
 // this function detects when the user selects [add new layer]:
 function changedLayer(select) {
   if (select.value == "[add new layer]") {
-    var newLayer = prompt("Please enter the new layer ID", taskId);
+    const newLayer = prompt("Please enter the new layer ID", taskId);
     if (newLayer) { // they didn't cancel
       // check there's not already a layer with that name
-      for (var l in schema.layers) {
-        var layer = schema.layers[l];
+      for (let l in schema.layers) {
+        const layer = schema.layers[l];
         if (layer.id == newLayer) {
           alert("A layer called "+newLayer+" already exists");
           select.selectedIndex = 0;
@@ -113,17 +119,20 @@ function changedLayer(select) {
         }
       } // next layer
       // add the layer to the list
-      var layerOption = document.createElement("option");
+      const layerOption = document.createElement("option");
       layerOption.appendChild(document.createTextNode(newLayer));
       select.appendChild(layerOption);
       // select it
       select.selectedIndex = select.children.length - 1;
+      describePartitionLabels();
     }
+  } else {
+    describePartitionLabels();
   }
 }
 
 function setNumTokensUnits(tokenLayerId) {
-  var numTokensUnits = document.getElementById("numTokensUnits");
+  const numTokensUnits = document.getElementById("numTokensUnits");
   if (tokenLayerId.selectedIndex == 0) {
     numTokensUnits.innerHTML = "seconds";
   } else {
@@ -160,28 +169,26 @@ function setIncludeValues() {
 function changeExclusionAttribute(excludeOnAttribute) {
   // create checkbox options to *include* values from validLabels
   const excludeOnAttributeLayer = schema.layers[excludeOnAttribute.value];
+  // remove old options
+  includeOnAttributeValues.innerHTML = "";
   if (excludeOnAttributeLayer) {
     const validLabels = excludeOnAttributeLayer.validLabels;
     if (validLabels && Object.keys(validLabels).length > 0) { // there are valid labels
       const includeOnAttributeValues = document.getElementById("includeOnAttributeValues");
-      // remove old options
-      includeOnAttributeValues.innerHTML = "";
       // add new options
-      for (let label of Object.keys(validLabels)) {
-        const description = validLabels[label];
-        var valueLabel = document.createElement("label");
-        valueLabel.appendChild(document.createTextNode(description));
-        valueLabel.for = `chk-${label}`;        
+      for (let label of Object.keys(validLabels).sort()) {
+        let description = validLabels[label] != label?label:`${label} (validLabels[label])`;
         const valueInput = document.createElement("input");
         valueInput.type = "checkbox";
         valueInput.id = `chk-${label}`;        
         valueInput.value = label;
         valueInput.className = "include-exclude field";
-        const valueDiv = document.createElement("div");
-        valueDiv.className = "field";
-        valueDiv.appendChild(valueLabel);
-        valueDiv.appendChild(valueInput);
-        includeOnAttributeValues.appendChild(valueDiv);
+        const valueLabel = document.createElement("label");
+        valueLabel.className = "option";
+        valueLabel.title = `Include '${description}' transcripts`;
+        valueLabel.appendChild(valueInput);
+        valueLabel.appendChild(document.createTextNode(label));
+        includeOnAttributeValues.appendChild(valueLabel);
       } // next valid label
       setIncludeValues();
     } // there are valid labels
@@ -190,17 +197,35 @@ function changeExclusionAttribute(excludeOnAttribute) {
 
 function validate(e) {
   if (boundaryLayerId.value == destinationLayerId.value) {
-    alert(`Partition Bondary Layer and Partition Layer can't be the same: ${destinationLayerId.value}`);
+    alert(`Partition Boundary Layer and Partition Layer can't be the same: ${destinationLayerId.value}`);
     destinationLayerId.focus();
     return false;
   }
   return true;
 }
 
+function describePartitionLabels() {
+  const partitionLabels = document.getElementById("partitionLabels");
+  if (!tokenLayerId.value) {
+    partitionLabels.innerHTML = "duration in seconds";
+  } else {
+    const partitionLayer = schema.layers[destinationLayerId.value];
+    if (partitionLayer
+        && (partitionLayer.id == schema.wordLayerId
+            || partitionLayer.parentId == schema.wordLayerId)) {
+      partitionLabels.innerHTML = `copied from ${tokenLayerId.value}`;
+    } else {
+      partitionLabels.innerHTML = `number of ${tokenLayerId.value} tokens`;
+    }
+  }
+}
+
 document.getElementById("destinationLayerId").onchange = function(e) {
   changedLayer(this); };
 document.getElementById("tokenLayerId").onchange = function(e) {
-  setNumTokensUnits(this); };
+  describePartitionLabels();
+  setNumTokensUnits(this);
+};
 document.getElementById("excludeOnAttribute").onchange = function(e) {
   changeExclusionAttribute(this); };
 document.getElementById("form").onsubmit = validate;

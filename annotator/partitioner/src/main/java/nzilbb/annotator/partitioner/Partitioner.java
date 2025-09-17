@@ -278,7 +278,7 @@ public class Partitioner extends Annotator {
     transcriptTypeLayer.getValidLabels().put("reading", "Reading Passage");
     transcriptTypeLayer.getValidLabels().put("interview", "Interview");
     schema = new Schema(
-      "who", "turn", "utterance", "word",
+      "participant", "turn", "utterance", "word",
       transcriptTypeLayer,
       new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),

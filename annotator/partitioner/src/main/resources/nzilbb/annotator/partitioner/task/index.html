@@ -14,6 +14,64 @@
         seconds. The annotation label of each block is the number of
         tokens (or seconds) in that block. </summary> 
       
+      <style type="text/css">
+        <!--
+        .example .span {
+            border-top: 1px solid black;
+            border-left: 1px solid black;
+            border-right: 1px solid black;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .example th {
+            text-align: left;
+        }
+        .example td {
+            text-align: center;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        .example .partition {
+            color: #96A339;
+        }
+        .example .partition .span {
+            border-color: #96A339;
+        }
+        -->
+      </style>
+
+      <table class="example"><tbody>
+          <caption>Example: Partititon Size = 2, Partition Alignment = start, with left-over tagging</caption>
+          <tr>
+            <th><em>Partition Boundary Layer:</em></th>
+            <th>utterance</th>
+            <td colspan="4" class="span">&nbsp;</td>
+            <td colspan="5" class="span">&nbsp;</td>
+          </tr>
+          <tr class="partition">
+            <th><em>Partition Layer:</em></th>
+            <th>partition</th>
+            <td colspan="2" class="span">2</td>
+            <td colspan="2" class="span">2</td>
+            <td colspan="2" class="span">2</td>
+            <td colspan="2" class="span">2</td>
+            <td colspan="2" class="span" title="Left-over annotation">1</td>
+          </tr>
+          <tr>
+            <th><em>Count (token layer):</em></th>
+            <th>word</th>
+            <td>The</td>
+            <td>quick</td>
+            <td>brown</td>
+            <td>fox</td>
+            <td>jumps</td>
+            <td>over</td>
+            <td>the</td>
+            <td>lazy</td>
+            <td>dog.</td>
+          </tr>
+      </tbody></table>
+
       <p> For example, it can be used to mark blocks of 100 words long, from
         the beginning of each turn, or mark the middle 300 words of each
         topic tag. Leftover tokens can optionally be annotated or not.  The
@@ -69,9 +127,9 @@
           the possibility of partitions that contain fewer
           than <em>Partition-Size</em> tokens (which can be
           differentiated by the partition label).</dd> 
-        <dt> Include Transcripts By </dt> <dd> In order to skip
+        <dt> Include ... </dt> <dd> In order to skip
           annotation of certain transcripts, e.g. you may wish to not
-          partitition word-list or reading-passage transcripts,
+          partitition 'word-list' or 'reading-passage' transcripts,
           specify the ID of a transcript attribute layer that can be
           used to exclude or include transcripts for
           partitioning. e.g. to exclude transcripts on the basis of
@@ -80,10 +138,20 @@
           This will result in a list of transcript types appearing below, and
           you can then un-tick the types you want to exclude from partitioning.
         </dd>
+        <dt>Partition Layer</dt>
+        <dd>This is the layer that partition annotations will be added to.
+          <br> If this is a 'phrase' or 'span' layer, then there will be
+          one annotation created per partition, and the label will be
+          the number of tokens (or seconds) in the partition;
+          i.e. the value of the <em>Partition Size</em> setting,
+          except for 'left-over' annotations.
+          <br> If this is a 'word' layer, then there will be one
+          annotation created per token on the <em>Count</em> layer,
+          and the label is the label of the token. </dd> 
       </dl>
 
       <h3> Examples </h3>
-      
+
       <p> For example, if you want to mark blocks of 100 words long,
         from the beginning of each turn, you would use the following
         configuration: </p>
@@ -138,9 +206,11 @@
       <div class="field"
            title="Tokens within this layer will be counted to determine where the partitions are, or select 'seconds' for time-based partitioning">
         <label for="tokenLayerId"> Count </label>
-        <span><select id="tokenLayerId" name="tokenLayerId">
+        <span>
+          <select id="tokenLayerId" name="tokenLayerId">
 	    <option value="">[seconds]</option>
-        </select></span>
+          </select>
+        </span>
       </div>
       <div class="field"
            title="Number of tokens (or seconds) for each partition">
@@ -163,16 +233,18 @@
                      id="leftOvers" name="leftOvers"></span>
       </div>
       <div class="field" title="Transcript attribute for including/excluding transcripts">
-        <label for="excludeOnAttribute"> Include Transcripts by </label>
-        <span>
-          <select id="excludeOnAttribute" name="excludeOnAttribute">
-            <option value="">[none]</option>
-          </select>
-        </span>
+        <div>
+          <label for="excludeOnAttribute"> Include </label>
+          <span>
+            <select id="excludeOnAttribute" name="excludeOnAttribute">
+              <option value="">[none]</option>
+            </select>
+          </span>
+        </div>
         <input type="hidden" name="excludeOnAttributeValues" id="excludeOnAttributeValues">
-      </div>
-      <div id="includeOnAttributeValues"
-           title="Which transcript types to include">
+        <div id="includeOnAttributeValues"
+             title="Which transcript types to include">
+        </div>
       </div>
       <div class="field" title="Output layer to which partitions are added">
         <label for="destinationLayerId"> Partition Layer </label>
@@ -182,6 +254,11 @@
             <option>[add new layer]</option>         <!-- allow adding a new layer -->
           </select>
         </span>
+      </div>
+      <div class="field"
+           title="What the labels are for partition annotations depend on the 'Count' setting above">
+        <label>Partition Labels</label>
+        <span id="partitionLabels"></span>
       </div>
       <div class="controls"><input type="submit" value="Set Parameters"></div>
     </form>

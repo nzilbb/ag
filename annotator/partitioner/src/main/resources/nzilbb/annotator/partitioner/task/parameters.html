@@ -56,4 +56,14 @@
     all transcripts except those with <tt>transcript_type</tt> set to <tt>word-list</tt>
     or <tt>reading-passing</tt>, pass <q>word-list,reading-passage</q> as the value of
     this parameter.</dd>
+  <dt> destinationLayerId</dt>
+  <dd>This is the layer that partition annotations will be added to.
+    <br> If this is a 'phrase' or 'span' layer, then there will be
+    one annotation created per partition, and the label will be
+    the number of tokens (or seconds) in the partition;
+    i.e. the value of the <em>partitionSize</em> setting,
+    except for 'left-over' annotations.
+    <br> If this is a 'word' layer, then there will be one
+    annotation created per token on the <em>tokenLayerId</em> layer,
+    and the label is the label of the token. </dd> 
 </dl>

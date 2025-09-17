@@ -28,23 +28,26 @@ h6 { font-size: 12pt; color: #859044; }
 label {
     font-weight: bold;
 }
-label:after {
+.field > label:after {
     content: ':';
 }
 .field {
     display: flex;
     flex-direction: row;
 }
-.field label {
+.field > * {
     width: 50%;
     display: block;
-}
-.field span {
-    width: 50%;
 }
 .field input[type="number"] {
     width: 75px;
     text-align: right;
+}
+
+.option {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 footer {
