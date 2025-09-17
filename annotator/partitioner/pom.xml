@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.partitioner</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 
   <name>nzilbb.annotator.partitioner</name>
   <description>Partitions transcripts by a number of tokens or a number of seconds.</description>
@@ -56,6 +56,38 @@
           </archive>
           <outputDirectory>../../bin</outputDirectory>
         </configuration>
+      </plugin>
+      <!-- copy info.html as the 'site' index (wrapping it in html/body tags) -->
+      <plugin>
+        <groupId>com.github.mike10004</groupId>
+        <artifactId>concatenate-maven-plugin</artifactId>
+        <version>0.4</version>
+        <executions>
+          <execution>
+            <id>assemble-xhtml-index</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>cat</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <fileset>
+                  <directory>${project.basedir}/src/site/resources/xhtml/</directory>
+                  <includes><include>prefix.xhtml</include></includes>
+                </fileset>
+                <fileset>
+                  <directory>${project.basedir}/src/main/resources/${package.path}</directory>
+                  <includes><include>info.html</include></includes>
+                </fileset>
+                <fileset>
+                  <directory>${project.basedir}/src/site/resources/xhtml/</directory>
+                  <includes><include>suffix.xhtml</include></includes>
+                </fileset>
+              </sources>
+              <outputFile>${project.basedir}/src/site/xhtml/index.xhtml</outputFile>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       
       <plugin>

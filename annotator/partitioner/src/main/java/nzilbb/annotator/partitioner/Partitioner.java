@@ -21,15 +21,18 @@
 //
 package nzilbb.annotator.partitioner;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Vector;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import nzilbb.ag.*;
-import nzilbb.ag.util.AnnotationsByAnchor;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.util.AnnotationsByAnchor;
 
 /**
  * Divides the given tokens up into blocks of the given size.
@@ -549,7 +552,6 @@ public class Partitioner extends Annotator {
       setRunning(false);
     }
   }
-
   
   /**
    * Partition bounded by normal temporal layers
@@ -714,6 +716,11 @@ public class Partitioner extends Annotator {
     return transcript;
   } // partition
   
+  /** Static format so we don't keep creating and destroying one */
+  private static DecimalFormat offsetFormat = new DecimalFormat(
+    // force the locale to something with . as the decimal separator
+    "0.000", new DecimalFormatSymbols(Locale.UK));
+  
   /**
    * Partition the excludeOnAttribute. 
    * @param transcript The annotation graph to transform.
@@ -763,7 +770,7 @@ public class Partitioner extends Annotator {
             && leftOvers && (maxPartitions == null || partitionCount < maxPartitions)) {
           transcript.createAnnotation(
             start, bound.getEnd(), destinationLayerId,
-            ""+(bound.getEnd().getOffset() - start.getOffset()), parent);
+            offsetFormat.format(bound.getEnd().getOffset() - start.getOffset()), parent);
         }
       } else if (alignment.equals("end")) {
         // we'll add them out of order, but need ordinals to be in order
@@ -796,7 +803,7 @@ public class Partitioner extends Annotator {
         {
           transcript.createAnnotation(
             bound.getStart(), end, destinationLayerId,
-            ""+(end.getOffset() - bound.getStart().getOffset()), parent);
+            offsetFormat.format(end.getOffset() - bound.getStart().getOffset()), parent);
         }
         // ensure ordinals are in offset order
         int ordinal = 1;
@@ -827,9 +834,10 @@ public class Partitioner extends Annotator {
               continue; // next bounding annotation
             } else {
               // no starting leftover if we are excluding any full-length partitions
-              if (maxPartitions != null && annotationCount < maxPartitions) { 
+              if (maxPartitions == null || annotationCount < maxPartitions) { 
                 transcript.createAnnotation(
-                  start, multipleStart, destinationLayerId, ""+(leftoverSeconds/2), parent);
+                  start, multipleStart, destinationLayerId,
+                  offsetFormat.format(leftoverSeconds/2), parent);
                 partitionCount++;
               }
             }
@@ -877,7 +885,7 @@ public class Partitioner extends Annotator {
             && leftOvers && (maxPartitions == null || partitionCount < maxPartitions)) {
           transcript.createAnnotation(
             start, bound.getEnd(), destinationLayerId,
-            ""+(bound.getEnd().getOffset() - start.getOffset()), parent);
+            offsetFormat.format(bound.getEnd().getOffset() - start.getOffset()), parent);
         }
       } // alignment = middle
       doneCount++;

@@ -68,7 +68,7 @@ getSchema(s => {
     // no participant attributes
       && !(layer.parentId == schema.participantLayerId && layer.alignment == 0));
   if (schema.layers[taskId]) {
-    tokenLayerId.value = taskId;
+    destinationLayerId.value = taskId;
   }
   
   // GET request to getTaskParameters retrieves the current task parameters, if any

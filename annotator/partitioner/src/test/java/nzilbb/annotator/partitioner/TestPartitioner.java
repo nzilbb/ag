@@ -939,8 +939,8 @@ public class TestPartitioner {
       78.0, 87.5, 97.0, 100.0
     };
     String[] labels = {
-      "3.0", "9.5", "9.5", "3.0",
-      "3.0", "9.5", "9.5", "3.0"
+      "3.000", "9.5", "9.5", "3.000",
+      "3.000", "9.5", "9.5", "3.000"
     };
     for (int p = 0; p < partitions.length; p++) {
       assertEquals("partition "+p+" start",

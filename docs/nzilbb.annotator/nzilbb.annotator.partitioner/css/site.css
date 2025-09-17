@@ -1,0 +1,40 @@
+h1, h2, h3, h4, h5 {
+    color:#859044;
+}
+a:link, a:visited {
+    color:#859044;
+}
+.table.table-striped {
+    width: fit-content;
+}
+
+/* copied from info.html, as embedded CSS declarations are stipped out */
+.example {
+    border-collapse: unset;
+}
+.example .span {
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+.example th {
+    text-align: left;
+    white-space: nowrap;
+}
+.example td {
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 10%;
+}
+.example .partition {
+    color: #96A339;
+}
+.example .partition .span {
+    border-color: #96A339;
+}
+.example caption {
+    white-space: nowrap;
+}
