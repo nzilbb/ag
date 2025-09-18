@@ -991,7 +991,8 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
     BufferedReader reader = new BufferedReader(new InputStreamReader(txt.getStream(), "UTF-8"));
     String sLine = reader.readLine();
     int iLine = 0;
-    MessageFormat fmtSpeakerFormat = new MessageFormat(participantFormat);
+    MessageFormat fmtSpeakerFormat = participantFormat == null?null
+      :new MessageFormat(participantFormat);
     SimpleDateFormat fmtTimestampFormat = null;
     if (timestampFormat != null && timestampFormat.length() > 0) {
       // prefix with {5} and {6} to include the possibility that the timestamp
@@ -1014,23 +1015,26 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       // it contains speakers (after that, we assume it's a coincidence)
       if (iLine <= 150 && !getHasSpeakers()) {
         // is this line a speaker utterance line?
-        try {
-          Object[] oSpeaker = fmtSpeakerFormat.parse(sLine);
-          String id = (String)oSpeaker[0];
-          if (getMaxParticipantLength() == null
-              || id.length() <= getMaxParticipantLength()) {
-            setHasSpeakers(true);
-            if (iLine > 1) {
-              // this is the first speaker we've seen, so everything before this is header
-              setHeaderLines(getLines());
-              // and the transcript content starts here
-              setLines(new Vector<String>());
+        if (fmtSpeakerFormat != null) {
+          try {
+            Object[] oSpeaker = fmtSpeakerFormat.parse(sLine);
+            String id = (String)oSpeaker[0];
+            if (getMaxParticipantLength() == null
+                || id.length() <= getMaxParticipantLength()) {
+              setHasSpeakers(true);
+              if (iLine > 1) {
+                // this is the first speaker we've seen, so everything before this is header
+                setHeaderLines(getLines());
+                // and the transcript content starts here
+                setLines(new Vector<String>());
+              }
+              leftover = leftover.substring(
+                fmtSpeakerFormat.format(oSpeaker).length()).trim();
             }
-            leftover = leftover.substring(fmtSpeakerFormat.format(oSpeaker).length()).trim();
           }
+          catch(ParseException exception) {} // not parseable
+          catch(NullPointerException exception) {} // null ID
         }
-        catch(ParseException exception) {} // not parseable
-        catch(NullPointerException exception) {} // null ID
       } // early enough and we don't know whether has speakers or not yet
 
       if (!getHasTimestamps() && fmtTimestampFormat != null) {
@@ -1296,7 +1300,8 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       .setConfidence(Constants.CONFIDENCE_MANUAL);;
     int iLastPosition = 0;	 
 
-    MessageFormat fmtSpeakerFormat = new MessageFormat(participantFormat);
+    MessageFormat fmtSpeakerFormat = participantFormat == null?null
+      :new MessageFormat(participantFormat);
     SimpleDateFormat fmtTimestampFormat = null;
     if (timestampFormat != null && timestampFormat.length() > 0) {
       fmtTimestampFormat = new SimpleDateFormat(timestampFormat);
@@ -1339,7 +1344,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
         if (timers != null) timers.end("add line annotation");
       }
 	 
-      if (getHasSpeakers()) {
+      if (getHasSpeakers() && fmtSpeakerFormat != null) {
         // does the line start with a speaker ID?
         try {
           if (timers != null) timers.start("check for speaker change");
@@ -1773,7 +1778,8 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
 
       // for each utterance...
       Annotation currentParticipant = null;
-      MessageFormat fmtParticipant = new MessageFormat(participantFormat);
+      MessageFormat fmtParticipant = participantFormat == null?null
+        :new MessageFormat(participantFormat);
          
       // order utterances by anchor so that simultaneous speech comes out in utterance order
       TreeSet<Annotation> utterancesByAnchor
@@ -1788,7 +1794,9 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
           currentParticipant = participant;
           Object[] participantLabel = { currentParticipant.getLabel() }; 
           writer.println();
-          writer.print(fmtParticipant.format(participantLabel));
+          if (fmtParticipant != null) {
+            writer.print(fmtParticipant.format(participantLabel));
+          }
         } // participant change
 
         for (Annotation token : utterance.all(getWordLayer().getId())) {

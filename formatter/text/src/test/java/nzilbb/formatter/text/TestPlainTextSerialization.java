@@ -203,6 +203,130 @@ public class TestPlainTextSerialization
 
   }
 
+  /** Ensure that if the participantFormat is set to null (or empty),
+      serialization still works. */
+  @Test public void nullParticipantFormat()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("scribe", "Transcriber", 0, true, true, true),
+      new Layer("subreddit", "Subreddit name", 0, false, false, true),
+      new Layer("transcript_version_date", "Version Date", 0, false, false, true),
+      new Layer("air_date", "Publication Date", 0, false, false, true),
+      new Layer("transcript_program", "Program", 0, false, false, true),
+      new Layer("url", "URL", 0, false, false, true),
+      new Layer("who", "Participants", 0, true, true, true),
+      new Layer("topic", "Topic", 2, true, false, false),
+      new Layer("comment", "Comment", 2, true, false, true),
+      new Layer("noise", "Noise", 2, true, false, true),
+      new Layer("participant_gender", "Gender", 0, false, false, true, "who", true),
+      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+      new Layer("word", "Words", 2, true, false, false, "turn", true),
+      new Layer("pronounce", "Pronounce", 0, true, false, false, "word", true),
+      new Layer("lexical", "Lexical", 0, true, false, false, "word", true));
+    
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "comment.txt")) };
+    
+    // create deserializer
+    PlainTextSerialization deserializer = new PlainTextSerialization();
+    
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+
+    // no participant format - i.e. no speaker labels
+    configuration.get("participantFormat").setValue(null);
+    
+    assertEquals("Configuration parameters" + configuration, 11,
+                 deserializer.configure(configuration, schema).size());      
+    assertEquals("comment", "comment", 
+                 ((Layer)configuration.get("commentLayer").getValue()).getId());
+    assertEquals("noise", "noise", 
+                 ((Layer)configuration.get("noiseLayer").getValue()).getId());
+    assertEquals("lexical", "lexical", 
+                 ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+    assertEquals("pronounce", "pronounce", 
+                 ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+    assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
+    assertEquals("maxParticipantLength",
+                 Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
+    assertEquals("maxHeaderLines",
+                 Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
+    assertNull("participantFormat", 
+               configuration.get("participantFormat").getValue());
+    assertEquals("metaDataFormat", "{0}={1}",
+                 configuration.get("metaDataFormat").getValue());
+    assertEquals("timestampFormat",
+                 "HH:mm:ss.SSS",
+                 configuration.get("timestampFormat").getValue());
+
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals(0, defaultParameters.size());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+      
+    assertEquals("comment.txt", g.getId());
+    assertEquals("text units", Constants.UNIT_CHARACTERS, g.getOffsetUnits());
+    assertNotNull("schema set", g.getSchema());
+
+    // no meta data
+    assertNull("no graph meta data", g.first("subreddit"));
+    assertNull("no graph meta data", g.first("url"));
+    assertNull("no graph meta data", g.first("air_date"));
+    assertNull("no graph meta data", g.first("transcript_version_date"));
+
+    // participants     
+    Annotation[] authors = g.all("who"); 
+    assertEquals(1, authors.length);
+    assertEquals("author", authors[0].getLabel());
+
+    // turns
+    Annotation[] turns = g.all("turn");
+    assertEquals(1, turns.length);
+    assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
+    //assertEquals(Double.valueOf(23.563), turns[0].getEnd().getOffset()); // TODO
+    assertEquals("author", turns[0].getLabel());
+    assertEquals(g.first("who"), turns[0].getParent());
+
+    // utterances
+    Annotation[] utterances = g.all("utterance");
+    assertEquals("'transcript' includes all lines including header", 6, utterances.length);
+    assertEquals(Double.valueOf(0.0), utterances[0].getStart().getOffset());
+    assertEquals("author", utterances[0].getParent().getLabel());
+    assertEquals(turns[0], utterances[0].getParent());
+      
+    Annotation[] words = g.all("word");
+    assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
+    // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
+    assertEquals("Header lines as text", "subreddit=exmormon", words[0].getLabel());
+
+    assertEquals(0, g.all("entities").length);
+    assertEquals(0, g.all("language").length);
+    assertEquals(0, g.all("lexical").length);
+
+    // serialize with no errors
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> outStreams = new Vector<NamedStream>();
+    String[] layers = {"word"}; 
+    deserializer.serialize(Arrays.spliterator(graphs), layers,
+                           stream -> outStreams.add(stream),
+                           warning -> System.out.println(warning),
+                           exception -> exceptions.add(exception));
+    if (exceptions.size() > 0) fail(""+exceptions);
+
+  }
+
   @Test public void comment2()  throws Exception {
     Schema schema = new Schema("who", "turn", "utterance", "word",
                                new Layer("scribe", "Transcriber", 0, true, true, true),

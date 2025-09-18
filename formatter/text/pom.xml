@@ -11,7 +11,7 @@
   <artifactId>nzilbb.formatter.text</artifactId>
   <name>nzilbb.formatter.text</name>
   <description>Serializer/Deserializer for transcripts in plain text format.</description>
-  <version>1.5.1</version>
+  <version>1.5.2</version>
 
   <properties>
     <package.path>nzilbb/formatter/text/</package.path>
@@ -61,7 +61,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <!--trimStackTrace>false</trimStackTrace-->
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>
