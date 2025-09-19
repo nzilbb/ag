@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -192,7 +192,7 @@ public class StanfordPosTagger extends Annotator {
   }
   
   /**
-   * Takes a file to be used instead of the built-in copy of cmudict.txt
+   * Takes a file to be used instead of the built-in copy of stanford-tagger-n.n.n.zip
    * @param file The lexicon file.
    * @return null if upload was successful, an error message otherwise.
    */
@@ -210,7 +210,7 @@ public class StanfordPosTagger extends Annotator {
       }
     }
     return null;
-  } // end of uploadLexicon()
+  } // end of uploadZip()
   
   /**
    * Lists the model files that are available for use.
@@ -418,49 +418,53 @@ public class StanfordPosTagger extends Annotator {
       } else {
         tokenLayerId = schema.getWordLayerId();
       }
-         
+      
       chunkLayerId = schema.getTurnLayerId();
       
-      try {
-        // default transcript language layer
-        Layer[] candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.root.id && layer.alignment == 0" // transcript attribute
-          +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
-        if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
-        
-        // default phrase language layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.turnLayerId" // child of turn
-          +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
-        if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
-        
-        // default output layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId && layer.alignment == 0" // word tag
-          +" && (/.*pos.*/.test(layer.id) || /.*part.*of.*speech.*/.test(layer.id))");
-        if (candidates.length > 0) {
-          posLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          posLayerId = "pos";
-        }
-
-        // default model
-        model = "english-caseless-left3words-distsim.tagger";
-
-        // no exclusion pattern
-        tokenExclusionPattern = "";
-        
-      } catch(ScriptException impossible) {}
+      // default transcript language layer
+      Layer[] candidates = schema.getMatchingLayers(
+        layer -> schema.getRoot().getId().equals(layer.getParentId())
+        && layer.getAlignment() == 0 // transcript attribute
+        && layer.getId().matches(".*lang.*")); // with 'lang' in the name
+      if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
+      
+      // default phrase language layer
+      candidates = schema.getMatchingLayers(
+        layer -> schema.getTurnLayerId() != null
+        && schema.getTurnLayerId().equals(layer.getParentId()) // child of turn
+        && layer.getId().matches(".*lang.*")); // with 'lang' in the name
+      if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
+      
+      // default output layer
+      candidates = schema.getMatchingLayers(
+        layer -> schema.getWordLayerId() != null
+        && schema.getWordLayerId().equals(layer.getParentId())
+        && layer.getAlignment() == 0 // word tag
+        && layer.getId().matches(".*(pos|part.*of.*speech).*"));
+      if (candidates.length > 0) {
+        posLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        posLayerId = "pos";
+      }
+      
+      // default model
+      model = "english-caseless-left3words-distsim.tagger";
+      
+      // no exclusion pattern
+      tokenExclusionPattern = "";
       
     } else {
       beanPropertiesFromQueryString(parameters);
     }
     
     if (schema.getLayer(tokenLayerId) == null)
-      throw new InvalidConfigurationException(this, "Token layer not found: " + tokenLayerId);
+      throw new InvalidConfigurationException(
+        this, "Token layer not found: " + tokenLayerId);
     if (schema.getLayer(chunkLayerId) == null)
-      throw new InvalidConfigurationException(this, "Chunk layer not found: " + chunkLayerId);
-    if (transcriptLanguageLayerId != null && schema.getLayer(transcriptLanguageLayerId) == null) 
+      throw new InvalidConfigurationException(
+        this, "Chunk layer not found: " + chunkLayerId);
+    if (transcriptLanguageLayerId != null
+        && schema.getLayer(transcriptLanguageLayerId) == null) 
       throw new InvalidConfigurationException(
         this, "Transcript language layer not found: " + transcriptLanguageLayerId);
     if (phraseLanguageLayerId != null && schema.getLayer(phraseLanguageLayerId) == null) 
