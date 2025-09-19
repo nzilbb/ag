@@ -989,7 +989,8 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                   Parameter p = mappings.get(parameterName);
                   Vector<Layer> vPossibleLayers = new Vector<Layer>();
                   vPossibleLayers.add(ignore);
-                  if (codePattern == codePatterns[0]) { // the phrase pattern
+                  if (codePattern == codePatterns[0] // the phrase pattern
+                      || code.equals("CS")) { // or a code-switch code
                     vPossibleLayers.addAll(vIntervalLayers);
                   }
                   vPossibleLayers.addAll(vWordTagLayers);
