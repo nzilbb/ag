@@ -2,21 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>nz.ilbb.ag</groupId>
     <artifactId>nzilbb.annotator</artifactId>
-    <version>[1.0.0,)</version>
+    <groupId>nz.ilbb.ag</groupId>
+    <version>1.0.0</version>
   </parent>
 
-  <groupId>nz.ilbb.ag</groupId>
-  <artifactId>nzilbb.annotator.porterstemmer</artifactId>
-  <name>nzilbb.annotator.porterstemmer</name>
-  <version>2.0.3</version>
-  <description>The Porter Stemmer annotator uses the Porter Algorithm to compute the stems of
-  English words from their orthography.</description>
+  <groupId>nzilbb</groupId>
+  <artifactId>nzilbb.annotator.stanfordner</artifactId>
+  <version>0.1.0</version>  
+  <name>nzilbb.annotator.stanfordner</name>
+  <description>Integration with the Stanford Named Entity Recognizer (NER)</description>
 
   <properties>
-    <package.path>nzilbb/annotator/porterstemmer/</package.path>
-    <annotator.class>nzilbb.annotator.porterstemmer.PorterStemmer</annotator.class>
+    <package.path>nzilbb/annotator/stanfordner/</package.path>
+    <annotator.class>nzilbb.annotator.stanfordner.StanfordNERecognizer</annotator.class>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -26,13 +25,13 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4</version>
+      <version>[1.2.4,)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -57,36 +56,63 @@
           <outputDirectory>../../bin</outputDirectory>
         </configuration>
       </plugin>
-    <!-- copy info.html as the 'site' index (wrapping it in html/body tags) -->
+      
       <plugin>
-        <groupId>com.github.mike10004</groupId>
-        <artifactId>concatenate-maven-plugin</artifactId>
-        <version>0.4</version>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <trimStackTrace>true</trimStackTrace>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>com.googlecode.maven-download-plugin</groupId>
+        <artifactId>download-maven-plugin</artifactId>
+        <version>1.3.0</version>
         <executions>
           <execution>
-            <id>assemble-xhtml-index</id>
-            <phase>pre-site</phase>
+            <!-- the wget goal actually binds itself to this phase by default -->
+            <phase>process-resources</phase>
             <goals>
-              <goal>cat</goal>
+              <goal>wget</goal>
             </goals>
             <configuration>
-              <sources>
-                <fileset>
-                  <directory>${project.basedir}/src/site/resources/xhtml/</directory>
-                  <includes><include>prefix.xhtml</include></includes>
-                </fileset>
-                <fileset>
-                  <directory>${project.basedir}/src/main/resources/${package.path}</directory>
-                  <includes><include>info.html</include></includes>
-                </fileset>
-                <fileset>
-                  <directory>${project.basedir}/src/site/resources/xhtml/</directory>
-                  <includes><include>suffix.xhtml</include></includes>
-                </fileset>
-              </sources>
-              <outputFile>${project.basedir}/src/site/xhtml/index.xhtml</outputFile>
+              <url>https://nlp.stanford.edu/software/stanford-ner-4.2.0.zip</url>
+              <outputFileName>stanford-ner-4.2.0.zip</outputFileName>
+              <!-- default target location, just to demonstrate the parameter -->
+              <outputDirectory>${project.build.directory}</outputDirectory>
             </configuration>
           </execution>
+        </executions>
+      </plugin>
+      <!-- ...and unzip the implementation to include in our build -->
+      <!-- (but we don't include the models because they're 150MB (75MB zipped) and we don't
+           want our .jar file to be that big because it will be distributed with LaBB-CAT 
+           and not everyone will actually use it) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>prepare</id>
+            <phase>process-resources</phase>
+            <configuration>
+              <tasks>
+                <echo message="unzip stanford-tagger" />
+                <unzip src="${project.build.directory}/stanford-ner-4.2.0.zip"
+                       dest="${project.build.directory}">
+                  <patternset>
+                    <include name="stanford-ner-2020-11-17/stanford-ner.jar"/>
+                  </patternset>
+                </unzip>
+                <unzip src="${project.build.directory}/stanford-ner-2020-11-17/stanford-ner.jar"
+                       dest="${project.build.directory}/classes" />
+              </tasks>
+            </configuration>
+            <goals>
+                <goal>run</goal>
+            </goals>
+        </execution>
         </executions>
       </plugin>
     </plugins>

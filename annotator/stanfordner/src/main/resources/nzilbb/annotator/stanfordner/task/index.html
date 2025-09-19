@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> Stanford Named Entity Recognizer (NER) </title>    
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <p> This annotator tags words that are recognized as being names according to the
+      <a href="https://nlp.stanford.edu/software/CRF-NER.html" target="stanford">Stanford Named Entity Recognizer (NER)</a>
+      developed by the
+      <a href="https://nlp.stanford.edu/" target="stanford">Stanford Natural Language Processing Group</a>,
+      licensed under the
+      <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="stanford">
+        GNU General Public License</a> (v2 or later). </p>
+    
+    <form method="POST" action="setTaskParameters" onsubmit="return testPatterns(true);">
+      <div class="field" title="Input layer from which words come">
+        <label for="tokenLayerId"> Token Layer </label>
+        <span><select id="tokenLayerId" name="tokenLayerId" required></select></span>
+      </div>
+      <div class="field" title="Pattern to match tokens that should be excluded from tagging - e.g. um|ah|mm|.*~">
+        <label for="tokenExclusionPattern"> Token Exclusion Pattern </label>
+        <span><input id="tokenExclusionPattern" name="tokenExclusionPattern" type="text"
+                     onKeyUp="testPatterns();"
+                     placeholder="Regular Expression"></span>
+      </div>
+      <div class="field"
+           title="Input layer that partitions the tokens into chunks for feeding to the tagger">
+        <label for="chunkLayerId"> Chunk Layer </label>
+        <span><select id="chunkLayerId" name="chunkLayerId" required></select></span>
+      </div>
+      <div class="field" title="Transcript attribute for overall language">
+        <label for="transcriptLanguageLayerId"> Transcript Language Attribute </label>
+        <span>
+          <select id="transcriptLanguageLayerId" name="transcriptLanguageLayerId">
+            <option value="">[none]</option>
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Layer for annotating phrases in a different language">
+        <label for="phraseLanguageLayerId"> Phrase Language Layer </label>
+        <span>
+          <select id="phraseLanguageLayerId" name="phraseLanguageLayerId">
+            <option value="">[none]</option>
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Output layer on which named-entity annotations are added">
+        <label for="entityLayerId"> Entity Layer </label>
+        <span>
+          <select id="entityLayerId" name="entityLayerId" required
+                  onChange="changedLayer(this);">
+            <option disabled>[select layer]</option> <!-- force choice the first time -->
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field"
+           title="Regular expression for the ISO language codes of the languages to target, or blank for all">
+        <label for="targetLanguagePattern">Target Language Pattern</label>
+        <span><input id="targetLanguagePattern" name="targetLanguagePattern"
+                     onKeyUp="testPatterns();"
+                     type="text" placeholder="Regular Expression"></span>
+      </div>
+      <div class="field">
+        <label>Classifier to use</label>
+        <span>
+          <select id="classifier" name="classifier">
+          </select>
+        </span>
+      </div>
+      <div class="controls"><input type="submit" value="Set Parameters"></div>
+    </form>
+    
+    <footer><div> Stanford Named Entity Recognizer (NER) <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>

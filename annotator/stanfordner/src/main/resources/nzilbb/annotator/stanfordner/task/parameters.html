@@ -1,0 +1,28 @@
+<h3>Stanford Named Entity Recognizer (NER)</h3>
+
+<p> This annotator tags words that are recognized as being names according to the
+  <a href="https://nlp.stanford.edu/software/CRF-NER.html">Stanford Named Entity Recognizer (NER)</a>
+  developed by the
+  <a href="https://nlp.stanford.edu/">Stanford Natural Language Processing Group</a>,
+  licensed under the
+  <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">
+    GNU General Public License</a> (v2 or later). </p>
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>tokenLayerId=orthography&chunkLayerId=turn&entityLayerId=namedEntity&classifier=english.all.3class.distsim.crf.ser.gz</samp> </p>
+
+<p> Parameters are: </p>
+<dl>
+  <dt> tokenLayerId </dt> <dd> Input layer from which words come. </dd>
+  <dt> transcriptLanguageLayerId </dt> <dd> Transcript attribute for overall language. </dd>
+  <dt> phraseLanguageLayerId </dt> <dd> Layer for annotating phrases in a different
+    language. </dd> 
+  <dt> targetLanguagePattern </dt> <dd> Regular expression for the ISO language codes
+    of the languages to target, or blank for all. </dd> 
+  <dt> entityLayerId </dt> <dd> Output layer on which named-entity annotations are added. </dd>
+  <dt> classifier </dt> <dd> Which NER classifier to use.
+    Invoke StanfordNERecognizer's <tt>availableClassifiers</tt> endpoint for a
+    JSON-encoded list of valid classifiers.</dd> 
+  <dt> tokenExclusionPattern </dt> <dd> Pattern to match tokens that should be excluded
+    from tagging - e.g. um|ah|mm|.*~ </dd> 
+</dl>
