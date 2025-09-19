@@ -29,7 +29,7 @@ Modules that perform automatic annotation tasks on annotation graphs.
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.1.2,)</version>
+      <version>[1.2.4,)</version>
       <scope>compile</scope>
     </dependency>
    ```

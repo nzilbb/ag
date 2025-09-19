@@ -37,5 +37,6 @@
     <!--module>htk</module-->
     <!--module>mfa</module-->
     <module>partitioner</module>
+    <module>stanfordner</module>
   </modules>
 </project>
