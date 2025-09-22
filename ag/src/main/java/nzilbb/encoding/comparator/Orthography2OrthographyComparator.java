@@ -65,10 +65,10 @@ public class Orthography2OrthographyComparator<E> implements EditComparator<E> {
     } else if (!from.equals(to)) {
       String fromOrth = from.toString();
       String fromOrthLower = fromOrth.toLowerCase();
-      String fromOrthLettersOnly = fromOrthLower.replaceAll("\\P{IsLetter}","");
+      String fromOrthLettersOnly = fromOrthLower.replaceAll("\\P{Alnum}","");
       String toOrth = to.toString();
       String toOrthLower = toOrth.toLowerCase();
-      String toOrthLettersOnly = toOrthLower.replaceAll("\\P{IsLetter}","");
+      String toOrthLettersOnly = toOrthLower.replaceAll("\\P{Alnum}","");
       double distance = 99;
       if (fromOrth.equals(toOrth)) {
         // the same string

@@ -727,16 +727,18 @@ public class TestComparators {
   @Test public void Orthography2OrthographyMapping() {
     Orthography2OrthographyComparator comparator = new Orthography2OrthographyComparator();
     MinimumEditPath<String> mp = new MinimumEditPath<String>(comparator);
-    String[] from = {"the", "THE", "quick", "quick!", "!", "?", "brown", "fox" };
-    String[] to = {"THE", "the", "quick?", "quick", ".", ".", "BROWN", "Fox" };
+    String[] from = {"the", "THE", "20", "quick", "quick!", "!", "?", "brown", "fox" };
+    String[] to = {"THE", "the", "20!", "quick?", "quick", ".", ".", "BROWN", "Fox" };
     List<EditStep<String>> path = mp.minimumEditPath(Arrays.asList(from), Arrays.asList(to));
     // System.out.println(pathToString(path));
-    assertEquals(pathToString(path), 10, path.size());
+    assertEquals(pathToString(path), 11, path.size());
     int i = 0;
     assertEquals(pathToString(path), "the", path.get(i).getFrom());
     assertEquals(pathToString(path), "THE", path.get(i++).getTo());
     assertEquals(pathToString(path), "THE", path.get(i).getFrom());
     assertEquals(pathToString(path), "the", path.get(i++).getTo());
+    assertEquals(pathToString(path), "20", path.get(i).getFrom());
+    assertEquals(pathToString(path), "20!", path.get(i++).getTo());
     assertEquals(pathToString(path), "quick", path.get(i).getFrom());
     assertEquals(pathToString(path), "quick?", path.get(i++).getTo());
     assertEquals(pathToString(path), "quick!", path.get(i).getFrom());
