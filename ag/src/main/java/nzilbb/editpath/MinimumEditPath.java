@@ -21,9 +21,12 @@
 //
 package nzilbb.editpath;
 
-import java.util.List;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
+import java.util.function.BiFunction;
 
 /**
  * Implementation of the
@@ -277,7 +280,96 @@ public class MinimumEditPath<T> {
       lastStep = thisStep;
     }
     return path;
-  } // end of Collapse()
+  } // end of collapse()
+  
+  /**
+   * Maps 'from' elements to 'to' elements, allowing there to be zero
+   * or more 'to' elements per 'from' element. This essentially
+   * eliminates 'insert' operations by joining them to prior or
+   * subsequent edit steps where possible.
+   * <p> This allows e.g. edit paths from orthographic/phonological
+   * words ("I'm") to be mapped to syntactic words ("I"+"'m").
+   * <p> This convenience method that calls {@link #mapOneToMany(List,BiFunction)}
+   * with <tt>(from,to) -&gt; from.toString().contains(to.toString()))</tt>
+   * for <var>fromContainsTo</var>.
+   * @param path An edit path produced by this MinimumEditPath generator.
+   * @param fromContainsTo Function that determines whether, a given
+   * 'from' element contains the given 'to' element. The function must
+   * return true if 'to' could be part of 'from', and false otherwise.
+   * @return An ordered map of 'from' elements to zero or more 'to' elements.
+   */
+  public Map<T,List<T>> mapOneToMany(List<EditStep<T>> path) {
+    return mapOneToMany(path, null);
+  }
+  
+  /**
+   * Maps 'from' elements to 'to' elements, allowing there to be zero
+   * or more 'to' elements per 'from' element. This essentially
+   * eliminates 'insert' operations by joining them to prior or
+   * subsequent edit steps where possible.
+   * <p> This allows e.g. edit paths from orthographic/phonological
+   * words ("I'm") to be mapped to syntactic words ("I"+"'m"). 
+   * @param path An edit path produced by this MinimumEditPath generator.
+   * @param fromContainsTo Function that determines whether, a given
+   * 'from' element contains the given 'to' element. The function must
+   * return true if 'to' could be part of 'from', and false otherwise.
+   * <p> e.g. to use the string value of <var>T</var> ignoring case:
+   * <tt>(from,to) -&gt;
+   * from.toString().toLowerCase().contains(to.toString().toLowerCase())</tt>
+   * <p> If null, the method uses:
+   * <tt>(from,to) -&gt; from.toString().contains(to.toString())</tt>
+   * @return An ordered map of 'from' elements to zero or more 'to' elements.
+   */
+  public Map<T,List<T>> mapOneToMany(
+    List<EditStep<T>> path, BiFunction<T,T,Boolean> fromContainsTo) {
+    if (fromContainsTo == null) {
+      fromContainsTo = (from,to) -> from.toString().contains(to.toString());
+    }
+    Map<T,List<T>> toToFroms = new LinkedHashMap<T,List<T>>();
+    EditStep<T> lastFrom = null;
+    Vector<EditStep<T>> unmappedInserts = new Vector<EditStep<T>>();
+    for (EditStep<T> step : path) {
+      if (step.getFrom() != null) {
+        Vector<T> to = new Vector<T>();
+        toToFroms.put(step.getFrom(), to);
+        
+        // before adding 'to', check whether any previously unmapped
+        // inserts can be prepended 
+        int i = 0;
+        int forgetBefore = 0; // (we might have to forget some)
+        for (EditStep<T> priorInsert : unmappedInserts) {
+          i++;
+          // does 'from' contain 'to'?
+          if (fromContainsTo.apply(step.getFrom(), priorInsert.getTo())) {
+            to.add(priorInsert.getTo());
+            forgetBefore = i;
+          }
+        } // next prior unmap INSERT
+        // remove the prior INSERTs that were mapped (or skipped)
+        for (i = 0; i < forgetBefore; i++) unmappedInserts.remove(0);
+        // (but there still may be some inserts in the list)
+
+        // add 'to' (if any)
+        if (step.getTo() != null) to.add(step.getTo());
+        
+        lastFrom = step;
+      } else if (step.getOperation() == EditStep.StepOperation.INSERT) {
+        T to = step.getTo();
+        // can the 'to' be added to the last 'from'?
+        if (lastFrom != null) {
+          // could it be a suffix?
+          if (fromContainsTo.apply(lastFrom.getFrom(), to)) {
+            toToFroms.get(lastFrom.getFrom()).add(to);
+            to = null; // don't add it to unmappedInserts for later handling
+            // any prior unmapped inserts can't leap over this one, so forget them
+            unmappedInserts.clear();
+          }
+        }
+        if (to != null) unmappedInserts.add(step);
+      }
+    } // next step
+    return toToFroms;
+  } // end of mapOneToMany()
   
   /**
    * Return the error rate for the given path.

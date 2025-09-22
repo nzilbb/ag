@@ -1,5 +1,5 @@
 //
-// Copyright 2016-2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2016-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -24,9 +24,13 @@ package nzilbb.editpath;
 import org.junit.*;
 import static org.junit.Assert.*;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.stream.Collectors;
+import nzilbb.encoding.comparator.Orthography2OrthographyComparator;
 
 /**
  * Tests for non-character edit path computations.
@@ -135,6 +139,112 @@ public class TestMinimumEditPath {
 
     // edit distance
     assertEquals(4, mp.minimumEditDistance(vFrom, vTo), 0.0);
+  }
+
+  /** Test mapping of 1 'from' to &ge; 'to' elements. */
+  @Test public void mapOneToMany() {
+    MinimumEditPath<String> mp = new MinimumEditPath<String>(
+      new Orthography2OrthographyComparator());
+
+    Vector<String> vFrom = new Vector<String>();
+    Vector<String> vTo = new Vector<String>();
+
+    vFrom.add("I'm"); // apostrophes are in the 'to' elements
+    vFrom.add("your");
+    vFrom.add("ah"); // nothing in the 'to' elements
+    vFrom.add("father-in-law"); // hyphens aren't in the 'to' elements
+    vFrom.add("WITH");
+    vFrom.add("the");
+    vFrom.add("Fo'c'sle.");
+
+    vTo.add("<s>"); // not in 'from'
+    vTo.add("I");
+    vTo.add("'m");
+    vTo.add("your");
+    vTo.add("father");
+    vTo.add("in");
+    vTo.add("law");
+    vTo.add("with");
+    vTo.add("the");
+    vTo.add("fo");
+    vTo.add("'"); // separate apostophe
+    vTo.add("c");
+    vTo.add("'"); // separate apostophe
+    vTo.add("sle");
+    vTo.add("</s>"); // not in 'from'
+
+    List<EditStep<String>> path = mp.minimumEditPath(vFrom, vTo);
+    assertNotNull(path);
+
+    // System.out.println("Path:");
+    // for (EditStep<String> step: path) System.out.println(step.toString());
+
+    // try with default fromContainsTo function (which is case-sensitive)
+    Map<String,List<String>> map = mp.mapOneToMany(path);
+
+    // right number of steps
+    assertEquals("Right number of steps " + map.keySet(), vFrom.size(), map.size());
+
+    // key order is correct
+    Iterator<String> froms = vFrom.iterator();
+    Iterator<String> keys = map.keySet().iterator();
+    while (froms.hasNext()) {
+      assertEquals("keys in correct order " + map.keySet(), froms.next(), keys.next());
+    }
+
+    // mappings
+    Map<String,String[]> expected = new LinkedHashMap<String,String[]>() {{
+        put("I'm",           new String[] { "I", "'m" });
+        put("your",          new String[] { "your" });
+        put("ah",            new String[0]);
+        put("father-in-law", new String[] { "father", "in", "law" });
+        put("WITH",          new String[] { "with" });
+        put("the",           new String[] { "the" });
+        put("Fo'c'sle.",     new String[] {
+            /* case-mismatch so no "fo" */"'","c", "'", "sle" });
+      }};
+    for (String key : expected.keySet()) {
+      String[] values = expected.get(key);
+      assertEquals("number of values - "+key+": " + map.get(key),
+                   values.length, map.get(key).size());
+      for (int i = 0; i < values.length; i++) {
+        assertEquals("value - "+key, values[i], map.get(key).get(i));
+      } // next value
+    } // next key
+
+    // now map with case-insensitive comparison
+    map = mp.mapOneToMany(
+      path, (from,to) -> from.toLowerCase().indexOf(to.toLowerCase()) >= 0);
+
+    // right number of steps
+    assertEquals("Right number of steps " + map.keySet(), vFrom.size(), map.size());
+
+    // key order is correct
+    froms = vFrom.iterator();
+    keys = map.keySet().iterator();
+    while (froms.hasNext()) {
+      assertEquals("keys in correct order " + map.keySet(), froms.next(), keys.next());
+    }
+
+    // mappings
+    expected = new LinkedHashMap<String,String[]>() {{
+        put("I'm",           new String[] { "I", "'m" });
+        put("your",          new String[] { "your" });
+        put("ah",            new String[0]);
+        put("father-in-law", new String[] { "father", "in", "law" });
+        put("WITH",          new String[] { "with" });
+        put("the",           new String[] { "the" });
+        // case-insensitive so "Fo"->"fo"
+        put("Fo'c'sle.",     new String[] { "fo", "'", "c", "'", "sle" });
+      }};
+    for (String key : expected.keySet()) {
+      String[] values = expected.get(key);
+      assertEquals("number of values - "+key+": " + map.get(key),
+                   values.length, map.get(key).size());
+      for (int i = 0; i < values.length; i++) {
+        assertEquals("value - "+key, values[i], map.get(key).get(i));
+      } // next value
+    } // next key
   }
 
   public static void main(String args[]) {

@@ -29,7 +29,7 @@ import nzilbb.editpath.*;
 
 /**
  * These tests ensure that basic string paths can easily be worked with, 
- * but also test the general beahviour of MinimumEditPath
+ * but also test the general behaviour of MinimumEditPath
  */
 public class TestMinimumEditPathString {
    @Test public void stringEqual() {
