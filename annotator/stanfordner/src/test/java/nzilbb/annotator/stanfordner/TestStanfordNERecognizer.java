@@ -177,86 +177,23 @@ public class TestStanfordNERecognizer {
                  "namedEntity", outputLayers[0]);
     
     // run the annotator
+    // annotator.getStatusObservers().add(status -> System.out.println(status));
     annotator.transform(g);
-    // List<Annotation> posAnnotations = Arrays.stream(g.all("pos"))
-    //   .collect(Collectors.toList());
-    // assertEquals("Correct number of tokens "+posAnnotations,
-    //              13, posAnnotations.size());
-    // Iterator<Annotation> poses = posAnnotations.iterator();
-    // assertEquals("I'll", "PRP", poses.next().getLabel());
-    // assertEquals("I'll", "MD", poses.next().getLabel());
-    // assertEquals("sing", "VB", poses.next().getLabel());
-    // assertEquals("and", "CC", poses.next().getLabel());
-    // assertEquals("w~:w (fragment)", "IN", poses.next().getLabel());
-    // assertEquals("w~:SYMBOL (fragment)", "SYM", poses.next().getLabel());
-    // assertEquals("walk", "VB", poses.next().getLabel());
-    // assertEquals("about (different from default model)",
-    //              "IN", poses.next().getLabel());
-    // assertEquals("my", "PRP$", poses.next().getLabel());
-    // assertEquals("blogging-posting:blogging (OOD - different from default model)",
-    //              "NN", poses.next().getLabel());
-    // assertEquals("blogging-posting Hyphen",
-    //              "HYPH", poses.next().getLabel());
-    // assertEquals("blogging-posting:posting",
-    //              "VBG", poses.next().getLabel());
-    // assertEquals("lazily", "RB", poses.next().getLabel());
+    List<Annotation> entityAnnotations = Arrays.stream(g.all("namedEntity"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+entityAnnotations,
+                 3, entityAnnotations.size());
+    Iterator<Annotation> entities = entityAnnotations.iterator();
+    assertEquals("Barack", "PERSON", entities.next().getLabel());
+    assertEquals("Obama", "PERSON", entities.next().getLabel());
+    assertEquals("Hawaii", "LOCATION", entities.next().getLabel());
 
-    // poses = posAnnotations.iterator();
-    // String[] wordLabels = {
-    //   "I'll", "I'll", // I + 'll
-    //   "sing", "and",
-    //   "w~", "w~", // w + ~
-    //   "walk", "about", "my",
-    //   "blogging-posting", "blogging-posting", "blogging-posting", // blogging + - + posting
-    //   "lazily"
-    // };
-    // for (int i = 0; i < wordLabels.length; i++) {
-    //   assertEquals("Tag " + i + " should tag " + wordLabels[i],
-    //                wordLabels[i], poses.next().first("word").getLabel());
-    // }
-    // Annotation[] children = firstWord.all("pos");
-    // assertEquals("I'll has two tags", 2, children.length);
-
-    // // check child anchors are chained
-    // assertEquals("anchor chaining - I'll/PRP", firstWord.getStartId(), children[0].getStartId());
-    // assertEquals("anchor chaining - PRP/MD",   children[0].getEndId(), children[1].getStartId());
-    // assertEquals("anchor chaining - MD/I'll",  children[1].getEndId(), firstWord.getEndId());
-    
-    // // add a word
-    // g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
-    //                 .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
-    //                 .setParent(g.first("turn")));
-    
-    // // change a word
-    // firstWord.setLabel("John");
-    
-    // // run the annotator again
-    // annotator.transform(g);
-    // g.commit(); // have to commit to remove old tags
-    // List<String> posLabels = Arrays.stream(g.all("pos"))
-    //   .map(annotation->annotation.getLabel()).collect(Collectors.toList());
-    // assertEquals("- 1 + 1 = same number of pos as before: "+posLabels,
-    //              13, posLabels.size());
-    // Iterator<String> posLs = posLabels.iterator();
-    // assertEquals("John (updated POS)", "NNP", posLs.next());
-    // assertEquals("sing", "NNP", posLs.next());
-    // assertEquals("and", "CC", posLs.next());
-    // assertEquals("w~:w", "NNP", posLs.next());
-    // assertEquals("w~:~", "SYM", posLs.next());
-    // assertEquals("walk", "NNP", posLs.next());
-    // assertEquals("about", "IN", posLs.next());
-    // assertEquals("my", "PRP$", posLs.next());
-    // assertEquals("blogging-posting:blogging (OOD)", "NN", posLs.next());
-    // assertEquals("blogging-posting:- (OOD)", "HYPH", posLs.next());
-    // assertEquals("blogging-posting:posting (OOD)", "VBG", posLs.next());
-    // assertEquals("lazily", "RB", posLs.next());
-    // assertEquals("new", "JJ", posLs.next());
-
-    // children = firstWord.all("pos");
-    // assertEquals("John has one tag", 1, children.length);
-    // assertEquals("John's tag shares start anchors", firstWord.getStart(), children[0].getStart());
-    // assertEquals("John's tag shares end anchors", firstWord.getEnd(), children[0].getEnd());
-
+    entities = entityAnnotations.iterator();
+    String[] wordLabels = { "Barack", "Obama", "Hawaii." };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], entities.next().first("word").getLabel());
+    }
   }   
 
   /** Ensure explicit parameters work, as well as taking tokens from a layer other than
@@ -284,7 +221,6 @@ public class TestStanfordNERecognizer {
     } // next token
     
     annotator.setSchema(schema);
-    g.setId("setTaskParameters");
 
     // use specified configuration
     annotator.setTaskParameters(
@@ -344,42 +280,22 @@ public class TestStanfordNERecognizer {
     
     // run the annotator
     annotator.transform(g);
-    // List<Annotation> posAnnotations = Arrays.stream(g.all("stanfordpos"))
-    //   .collect(Collectors.toList());
-    // // for (Annotation pos : posAnnotations) System.out.println(""+pos + " - " + pos.getParent());
-    // assertEquals("Correct number of tokens "+posAnnotations,
-    //              11, posAnnotations.size());
-    // Iterator<Annotation> poses = posAnnotations.iterator();
-    // assertEquals("I'll", "PRP", poses.next().getLabel());
-    // assertEquals("I'll", "MD", poses.next().getLabel());
-    // assertEquals("sing", "VB", poses.next().getLabel());
-    // assertEquals("and", "CC", poses.next().getLabel());
-    // assertEquals("walk", "VB", poses.next().getLabel());
-    // assertEquals("about (different from default model)",
-    //              "IN", poses.next().getLabel());
-    // assertEquals("my", "PRP$", poses.next().getLabel());
-    // assertEquals("blogging-posting:blogging (OOD - different from default model)",
-    //              "NN", poses.next().getLabel());
-    // assertEquals("blogging-posting Hyphen",
-    //              "HYPH", poses.next().getLabel());
-    // assertEquals("blogging-posting:posting",
-    //              "VBG", poses.next().getLabel());
-    // assertEquals("lazily", "RB", poses.next().getLabel());
+    List<Annotation> entityAnnotations = Arrays.stream(g.all("stanfordentity"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+entityAnnotations,
+                 4, entityAnnotations.size());
+    Iterator<Annotation> entities = entityAnnotations.iterator();
+    assertEquals("Barack", "PERSON", entities.next().getLabel());
+    assertEquals("Obama", "PERSON", entities.next().getLabel());
+    assertEquals("Hawaii", "LOCATION", entities.next().getLabel());
+    assertEquals("2008", "DATE", entities.next().getLabel());
 
-    // poses = posAnnotations.iterator();
-    // String[] wordLabels = {
-    //   "I'll", "I'll", // I + 'll
-    //   "sing", "and",
-    //   "walk", "about", "my",
-    //   "blogging-posting", "blogging-posting", "blogging-posting", // blogging + - + posting
-    //   "lazily"
-    // };
-    // for (int i = 0; i < wordLabels.length; i++) {
-    //   assertEquals("Tag " + i + " should tag " + wordLabels[i],
-    //                wordLabels[i], poses.next().first("word").getLabel());
-    // }
-    
-    // assertEquals("I'll has two tags", 2, firstWord.all("stanfordpos").length);
+    entities = entityAnnotations.iterator();
+    String[] wordLabels = { "Barack", "Obama", "Hawaii.", "2008." };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], entities.next().first("word").getLabel());
+    }
   }   
 
   /** Ensure tokens can be excluded by regular expression. */
@@ -393,7 +309,7 @@ public class TestStanfordNERecognizer {
     // use specified configuration
     annotator.setTaskParameters(
       "tokenLayerId=word"
-      +"&tokenExclusionPattern=.*~"
+      +"&tokenExclusionPattern=.*ii.*" // exclude Hawaii
       +"&chunkLayerId=utterance"
       +"&transcriptLanguageLayerId=transcript_language"
       +"&phraseLanguageLayerId=lang"
@@ -403,7 +319,7 @@ public class TestStanfordNERecognizer {
     assertEquals("token layer",
                  "word", annotator.getTokenLayerId());
     assertEquals("token exclusion pattern",
-                 ".*~", annotator.getTokenExclusionPattern());
+                 ".*ii.*", annotator.getTokenExclusionPattern());
     assertEquals("chunk layer",
                  "utterance", annotator.getChunkLayerId());
     assertEquals("transcript language layer",
@@ -453,49 +369,23 @@ public class TestStanfordNERecognizer {
                  "entity", outputLayers[0]);
     
     // run the annotator
+    // annotator.getStatusObservers().add(status -> System.out.println(status));
     annotator.transform(g);
-    // List<Annotation> posAnnotations = Arrays.stream(g.all("pos"))
-    //   .collect(Collectors.toList());
-    // assertEquals("Correct number of tokens "+posAnnotations,
-    //              11, posAnnotations.size());
-    // Iterator<Annotation> poses = posAnnotations.iterator();
-    // assertEquals("I'll", "PRP", poses.next().getLabel());
-    // assertEquals("I'll", "MD", poses.next().getLabel());
-    // assertEquals("sing", "VB", poses.next().getLabel());
-    // assertEquals("and", "CC", poses.next().getLabel());
-    // // w~ skipped
-    // assertEquals("walk", "VB", poses.next().getLabel());
-    // assertEquals("about (different from default model)",
-    //              "IN", poses.next().getLabel());
-    // assertEquals("my", "PRP$", poses.next().getLabel());
-    // assertEquals("blogging-posting:blogging (OOD - different from default model)",
-    //              "NN", poses.next().getLabel());
-    // assertEquals("blogging-posting Hyphen",
-    //              "HYPH", poses.next().getLabel());
-    // assertEquals("blogging-posting:posting",
-    //              "VBG", poses.next().getLabel());
-    // assertEquals("lazily", "RB", poses.next().getLabel());
+    List<Annotation> entityAnnotations = Arrays.stream(g.all("entity"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+entityAnnotations,
+                 3, entityAnnotations.size());
+    Iterator<Annotation> entities = entityAnnotations.iterator();
+    assertEquals("Barack", "PERSON", entities.next().getLabel());
+    assertEquals("Obama", "PERSON", entities.next().getLabel());
+    assertEquals("2008.", "DATE", entities.next().getLabel());
 
-    // poses = posAnnotations.iterator();
-    // String[] wordLabels = {
-    //   "I'll", "I'll", // I + 'll
-    //   "sing", "and",
-    //   // w~ skipped
-    //   "walk", "about", "my",
-    //   "blogging-posting", "blogging-posting", "blogging-posting", // blogging + - + posting
-    //   "lazily"
-    // };
-    // for (int i = 0; i < wordLabels.length; i++) {
-    //   assertEquals("Tag " + i + " should tag " + wordLabels[i],
-    //                wordLabels[i], poses.next().first("word").getLabel());
-    // }
-    // assertEquals("I'll has two tags", 2, firstWord.all("pos").length);
-    
-    // // add a word
-    // g.addAnnotation(new Annotation().setLayerId("word").setLabel("new")
-    //                 .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(100))
-    //                 .setParent(g.first("turn")));
-    
+    entities = entityAnnotations.iterator();
+    String[] wordLabels = { "Barack", "Obama", "2008." };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], entities.next().first("word").getLabel());
+    }
   }   
 
   /** Target specific language - transcript is other language. */
@@ -526,7 +416,7 @@ public class TestStanfordNERecognizer {
                  "en.*", annotator.getTargetLanguagePattern());
       
     assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
-                 9, g.all("word").length);
+                 13, g.all("word").length);
     assertEquals("double check there are no entityes: "+Arrays.asList(g.all("entity")),
                  0, g.all("entity").length);
     // run the annotator
@@ -578,15 +468,15 @@ public class TestStanfordNERecognizer {
     // tag the graph as being in Te Reo Māori
     g.createTag(g, "transcript_language", "mi");
 
-    // tag some words as some other language - "I'll sing"
-    Annotation es = g.createAnnotation(g.getOrCreateAnchorAt(10), g.getOrCreateAnchorAt(30),
+    // tag some words as some other language - "President Barack Obama"
+    Annotation es = g.createAnnotation(g.getOrCreateAnchorAt(10), g.getOrCreateAnchorAt(40),
                                          "lang", "es-AR",
-                                         g.first("turn"));
+                                       g.first("turn"));
     Annotation[] esWords = es.all("word");
     assertEquals("words tagged as Spanish - " + Arrays.asList(esWords),
-                 2, esWords.length);
+                 3, esWords.length);
     
-    // tag some words as English - "[w~] walk about my blogging-posting"
+    // tag some words as English - "[w~] was born in Hawaii"
     Annotation lang = g.createAnnotation(g.getOrCreateAnchorAt(40), g.getOrCreateAnchorAt(80),
                                          "lang", "en-NZ",
                                          g.first("turn"));
@@ -613,26 +503,25 @@ public class TestStanfordNERecognizer {
                  "en.*", annotator.getTargetLanguagePattern());
       
     // run the annotator
+    // annotator.getStatusObservers().add(status -> System.out.println(status));
     annotator.transform(g);
-    // List<Annotation> posAnnotations = Arrays.stream(g.all("pos"))
-    //   .collect(Collectors.toList());
-    // assertEquals("Six tags "+posAnnotations, 6, posAnnotations.size());
-    // Iterator<Annotation> poses = posAnnotations.iterator();
-    // // w~ skipped
-    // assertEquals("walk", "VB", poses.next().getLabel());
-    // assertEquals("about (different from default model)",
-    //              "IN", poses.next().getLabel());
-    // assertEquals("my", "PRP$", poses.next().getLabel());
-    // assertEquals("blogging-posting:blogging (OOD - different from default model)",
-    //              "NN", poses.next().getLabel());
-    // assertEquals("blogging-posting Hyphen",
-    //              "HYPH", poses.next().getLabel());
-    // assertEquals("blogging-posting:posting",
-    //              "NN", poses.next().getLabel());
+    List<Annotation> entityAnnotations = Arrays.stream(g.all("entity"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+entityAnnotations,
+                 1, entityAnnotations.size());
+    Iterator<Annotation> entities = entityAnnotations.iterator();
+    assertEquals("Hawaii", "LOCATION", entities.next().getLabel());
+
+    entities = entityAnnotations.iterator();
+    String[] wordLabels = { "Hawaii." };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], entities.next().first("word").getLabel());
+    }
   }   
 
   /** Target specific language - transcript is right language, 
-   * but there are mistamatching phrase tags. */
+   * but there are mismatching phrase tags. */
   @Test public void targetLanguageTranscriptMatchWithMismatchingPhrases() throws Exception {
     
     Graph g = graph();
@@ -643,15 +532,15 @@ public class TestStanfordNERecognizer {
     // tag the graph as being in Te Reo Māori
     g.createTag(g, "transcript_language", "en-US");
 
-    // tag some words as some other language - "I'll sing"
-    Annotation es = g.createAnnotation(g.getOrCreateAnchorAt(10), g.getOrCreateAnchorAt(30),
+    // tag some words as some other language - "President Barck Obama"
+    Annotation es = g.createAnnotation(g.getOrCreateAnchorAt(10), g.getOrCreateAnchorAt(40),
                                          "lang", "es-AR",
                                          g.first("turn"));
     Annotation[] esWords = es.all("word");
     assertEquals("words tagged as Spanish - " + Arrays.asList(esWords),
-                 2, esWords.length);
+                 3, esWords.length);
     
-    // tag some words as Te Reo Māori - "[w~] walk about my blogging-posting"
+    // tag some words as Te Reo Māori - "[w~] was born in Hawaii"
     Annotation lang = g.createAnnotation(g.getOrCreateAnchorAt(40), g.getOrCreateAnchorAt(80),
                                          "lang", "mi",
                                          g.first("turn"));
@@ -678,14 +567,21 @@ public class TestStanfordNERecognizer {
                  "en.*", annotator.getTargetLanguagePattern());
       
     // run the annotator
-    // will tag: "and lazily"
+    // annotator.getStatusObservers().add(status -> System.out.println(status));
     annotator.transform(g);
-    // List<Annotation> posAnnotations = Arrays.stream(g.all("pos"))
-    //   .collect(Collectors.toList());
-    // assertEquals("Two tags "+posAnnotations, 2, posAnnotations.size());
-    // Iterator<Annotation> poses = posAnnotations.iterator();
-    // assertEquals("and", "CC", poses.next().getLabel());
-    // assertEquals("lazily", "RB", poses.next().getLabel());
+    List<Annotation> entityAnnotations = Arrays.stream(g.all("entity"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+entityAnnotations,
+                 1, entityAnnotations.size());
+    Iterator<Annotation> entities = entityAnnotations.iterator();
+    assertEquals("2008", "DATE", entities.next().getLabel());
+
+    entities = entityAnnotations.iterator();
+    String[] wordLabels = { "2008." };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], entities.next().first("word").getLabel());
+    }
   }   
 
   /** There are phrases tagged in a particular language, but no targetLanguagePattern. */
@@ -699,15 +595,15 @@ public class TestStanfordNERecognizer {
     // tag the graph as being in US English
     g.createTag(g, "transcript_language", "en-US");
 
-    // tag some words as some other language - "I'll sing"
-    Annotation es = g.createAnnotation(g.getOrCreateAnchorAt(10), g.getOrCreateAnchorAt(30),
-                                         "lang", "es-AR",
-                                         g.first("turn"));
+    // tag some words as some other language - "President Barakc Obama"
+    Annotation es = g.createAnnotation(g.getOrCreateAnchorAt(10), g.getOrCreateAnchorAt(40),
+                                       "lang", "es-AR",
+                                       g.first("turn"));
     Annotation[] esWords = es.all("word");
     assertEquals("words tagged as Spanish - " + Arrays.asList(esWords),
-                 2, esWords.length);
+                 3, esWords.length);
     
-    // tag some words as Te Reo Māori - "[w~] walk about my blogging-posting"
+    // tag some words as Te Reo Māori - "[w~] was born in Hawaii"
     Annotation lang = g.createAnnotation(g.getOrCreateAnchorAt(40), g.getOrCreateAnchorAt(80),
                                          "lang", "mi",
                                          g.first("turn"));
@@ -716,7 +612,7 @@ public class TestStanfordNERecognizer {
                  5, miWords.length);
     assertEquals("Te Reo Māori word has lang tag " + Arrays.asList(miWords[0].all("lang")),
                  lang, miWords[0].first("lang"));
-
+    
     // use specified configuration
     annotator.setTaskParameters(
       "tokenLayerId=word"
@@ -734,28 +630,23 @@ public class TestStanfordNERecognizer {
                annotator.getTargetLanguagePattern());
       
     // run the annotator
-    // will tag: "and lazily"
     annotator.transform(g);
-    // List<Annotation> posAnnotations = Arrays.stream(g.all("pos"))
-    //   .collect(Collectors.toList());
-    // assertEquals("Eleven tags "+posAnnotations, 11, posAnnotations.size());
-    // Iterator<Annotation> poses = posAnnotations.iterator();
-    // assertEquals("I'll", "PRP", poses.next().getLabel());
-    // assertEquals("I'll", "MD", poses.next().getLabel());
-    // assertEquals("sing", "VB", poses.next().getLabel());
-    // assertEquals("and", "CC", poses.next().getLabel());
-    // // w~ skipped
-    // assertEquals("walk", "VB", poses.next().getLabel());
-    // assertEquals("about (different from default model)",
-    //              "IN", poses.next().getLabel());
-    // assertEquals("my", "PRP$", poses.next().getLabel());
-    // assertEquals("blogging-posting:blogging (OOD - different from default model)",
-    //              "NN", poses.next().getLabel());
-    // assertEquals("blogging-posting Hyphen",
-    //              "HYPH", poses.next().getLabel());
-    // assertEquals("blogging-posting:posting",
-    //              "VBG", poses.next().getLabel());
-    // assertEquals("lazily", "RB", poses.next().getLabel());
+    List<Annotation> entityAnnotations = Arrays.stream(g.all("entity"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+entityAnnotations,
+                 4, entityAnnotations.size());
+    Iterator<Annotation> entities = entityAnnotations.iterator();
+    assertEquals("Barack", "PERSON", entities.next().getLabel());
+    assertEquals("Obama", "PERSON", entities.next().getLabel());
+    assertEquals("Hawaii", "LOCATION", entities.next().getLabel());
+    assertEquals("2008", "DATE", entities.next().getLabel());
+
+    entities = entityAnnotations.iterator();
+    String[] wordLabels = { "Barack", "Obama", "Hawaii.", "2008." };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], entities.next().first("word").getLabel());
+    }
   }   
 
   /** Ensure raw ONZE-style transcription can be used as input - i.e. including pause
@@ -778,10 +669,10 @@ public class TestStanfordNERecognizer {
       .setStart(start).setEnd(end)
       .setParent(turn));
 
-    g.createSubdivision(turn, schema.getWordLayerId(), "\"The -");
-    g.createSubdivision(turn, schema.getWordLayerId(), "quick");
-    g.createSubdivision(turn, schema.getWordLayerId(), "brown");
-    g.createSubdivision(turn, schema.getWordLayerId(), "fox,\"");
+    g.createSubdivision(turn, schema.getWordLayerId(), "\"President -");
+    g.createSubdivision(turn, schema.getWordLayerId(), "Barack");
+    g.createSubdivision(turn, schema.getWordLayerId(), "Obama");
+    g.createSubdivision(turn, schema.getWordLayerId(), "w~\"");
     g.createSubdivision(turn, schema.getWordLayerId(), "he");
     g.createSubdivision(turn, schema.getWordLayerId(), "said,");
     g.createSubdivision(turn, schema.getWordLayerId(), "\"wouldn't");
@@ -849,49 +740,20 @@ public class TestStanfordNERecognizer {
     
     // run the annotator
     annotator.transform(g);
-    // List<Annotation> posAnnotations = Arrays.stream(g.all("pos"))
-    //   .collect(Collectors.toList());
-    // assertEquals("Correct number of tokens "+posAnnotations,
-    //              20, posAnnotations.size());
-    // Iterator<Annotation> poses = posAnnotations.iterator();
-    // assertEquals("\"", "``", poses.next().getLabel());
-    // assertEquals("the", "DT", poses.next().getLabel());
-    // assertEquals("-", "HYPH", poses.next().getLabel());
-    // assertEquals("quick", "JJ", poses.next().getLabel());
-    // assertEquals("brown", "JJ", poses.next().getLabel());
-    // assertEquals("fox", "NN", poses.next().getLabel());
-    // assertEquals(",", ",", poses.next().getLabel());
-    // assertEquals("\"", "''", poses.next().getLabel());
-    // assertEquals("he", "PRP", poses.next().getLabel());
-    // assertEquals("said", "VBD", poses.next().getLabel());
-    // assertEquals(",", ",", poses.next().getLabel());
-    // assertEquals("\"", "''", poses.next().getLabel());
-    // assertEquals("would", "MD", poses.next().getLabel());
-    // assertEquals("n't", "RB", poses.next().getLabel());
-    // assertEquals("jump", "VB", poses.next().getLabel());
-    // assertEquals(".", ".", poses.next().getLabel());
-    // assertEquals("over", "IN", poses.next().getLabel());
-    // assertEquals("anything", "NN", poses.next().getLabel());
-    // assertEquals("!", ".", poses.next().getLabel());
-    // assertEquals("\"", "''", poses.next().getLabel());
+    List<Annotation> entityAnnotations = Arrays.stream(g.all("namedEntity"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+entityAnnotations,
+                 2, entityAnnotations.size());
+    Iterator<Annotation> entities = entityAnnotations.iterator();
+    assertEquals("Barack", "PERSON", entities.next().getLabel());
+    assertEquals("Obama", "PERSON", entities.next().getLabel());
 
-    // poses = posAnnotations.iterator();
-    // String[] wordLabels = {
-    //   "\"The -", "\"The -", "\"The -",
-    //   "quick",
-    //   "brown",
-    //   "fox,\"", "fox,\"", "fox,\"",
-    //   "he",
-    //   "said,", "said,",
-    //   "\"wouldn't", "\"wouldn't", "\"wouldn't",
-    //   "jump .", "jump .",
-    //   "over",
-    //   "anything!\"", "anything!\"", "anything!\""
-    // };
-    // for (int i = 0; i < wordLabels.length; i++) {
-    //   assertEquals("Tag " + i + " should tag " + wordLabels[i],
-    //                wordLabels[i], poses.next().first("word").getLabel());
-    // }
+    entities = entityAnnotations.iterator();
+    String[] wordLabels = { "Barack", "Obama" };
+    for (int i = 0; i < wordLabels.length; i++) {
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], entities.next().first("word").getLabel());
+    }
   }   
 
   /** Ensure task parameters are validated. */
@@ -1030,6 +892,7 @@ public class TestStanfordNERecognizer {
     // annotate a graph
     Graph g = new Graph()
       .setSchema(schema);
+    g.setId("TestStanfordNERecognizer");
     Anchor start = g.getOrCreateAnchorAt(1);
     Anchor end = g.getOrCreateAnchorAt(100);
     g.addAnnotation(
@@ -1044,32 +907,44 @@ public class TestStanfordNERecognizer {
       .setStart(start).setEnd(end)
       .setParent(turn));
     
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("I'll")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("President")
                     .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
                     .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("sing")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("Barack")
                     .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
                     .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("and")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("Obama")
                     .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(40))
                     .setParent(turn));
     g.addAnnotation(new Annotation().setLayerId("word").setLabel("w~")
                     .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(45))
                     .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("walk")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("was")
                     .setStart(g.getOrCreateAnchorAt(45)).setEnd(g.getOrCreateAnchorAt(50))
                     .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("about")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("born")
                     .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(60))
                     .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("my")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("in")
                     .setStart(g.getOrCreateAnchorAt(60)).setEnd(g.getOrCreateAnchorAt(70))
                     .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("blogging-posting")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("Hawaii.")
                     .setStart(g.getOrCreateAnchorAt(70)).setEnd(g.getOrCreateAnchorAt(80))
                     .setParent(turn));
-    g.addAnnotation(new Annotation().setLayerId("word").setLabel("lazily")
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("He")
                     .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("was")
+                    .setStart(g.getOrCreateAnchorAt(80)).setEnd(g.getOrCreateAnchorAt(90))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("elected")
+                    .setStart(g.getOrCreateAnchorAt(90)).setEnd(g.getOrCreateAnchorAt(92))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("in")
+                    .setStart(g.getOrCreateAnchorAt(92)).setEnd(g.getOrCreateAnchorAt(94))
+                    .setParent(turn));
+    g.addAnnotation(new Annotation().setLayerId("word").setLabel("2008.")
+                    .setStart(g.getOrCreateAnchorAt(94)).setEnd(g.getOrCreateAnchorAt(96))
                     .setParent(turn));
     return g;
   } // end of graph()

@@ -21,49 +21,28 @@
 //
 package nzilbb.annotator.stanfordner;
 
-import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
-import java.io.BufferedReader;
+import edu.stanford.nlp.ie.AbstractSequenceClassifier;
+import edu.stanford.nlp.ie.crf.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringReader;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.TimeZone;
-import java.util.TreeMap;
 import java.util.Vector;
 import java.util.function.IntConsumer;
 import java.util.regex.*;
 import java.util.stream.Collectors;
-import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
-import nzilbb.ag.automation.Dictionary;
-import nzilbb.ag.automation.DictionaryException;
-import nzilbb.ag.automation.ImplementsDictionaries;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
-import nzilbb.ag.automation.UsesRelationalDatabase;
-import nzilbb.encoding.ValidLabelsDefinitions;
-import nzilbb.sql.ConnectionFactory;
+import nzilbb.editpath.*;
+import nzilbb.encoding.comparator.Orthography2OrthographyComparator;
 import nzilbb.util.IO;
 
 /**
@@ -74,7 +53,7 @@ import nzilbb.util.IO;
 @UsesFileSystem
 public class StanfordNERecognizer extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.2.4"; }
+  public String getMinimumApiVersion() { return "1.2.5"; }
   
   /**
    * Runs any processing required to uninstall the annotator.
@@ -606,102 +585,116 @@ public class StanfordNERecognizer extends Annotator {
       if (!transcriptIsMainlyTargetLang && !thereArePhraseTags) {
         setStatus("There are no tokens in the target language ("+targetLanguagePattern+")");
       } else {
-        // handle language selection...
-        
-        // MaxentTagger tagger = new MaxentTagger(
-        //   new File(new File(getWorkingDirectory(), "models"), model).getPath());
-        
-        // for (Annotation chunk : graph.all(chunkLayerId)) {
-        //   if (isCancelling()) break;
-        
-        //   Annotation[] tokens = chunk.all(tokenLayerId);
-          
-        //   // delete all existing tags before filtering out by pattern
-        //   for (Annotation t : tokens) {            
-        //     for (Annotation p: t.all(posLayerId)) {
-        //       p.destroy();
-        //     } // next pos tag
-        //   } // next token
-          
-        //   if (tokenExclusionPattern.length() > 0) {
-        //     final Pattern exclude = Pattern.compile(tokenExclusionPattern);
-        //     tokens = Arrays.stream(tokens).filter(t->!exclude.matcher(t.getLabel()).matches())
-        //       .toArray(Annotation[]::new);
-        //   }
 
-        //   if (!transcriptIsMainlyTargetLang) { // transcript is wrong language
-        //     // filter out tokens that aren't phrase-tagged in the target language
-        //     final Pattern targetLanguage = Pattern.compile(targetLanguagePattern);
-        //     tokens = Arrays.stream(tokens).filter((token) -> {
-        //         Annotation phraseLanguage = token.first(phraseLanguageLayerId);
-        //         if (phraseLanguage == null) return false; // not tagged with a language
-        //         return targetLanguage.matcher(phraseLanguage.getLabel()).matches();
-        //       }).toArray(Annotation[]::new);
-        //   } else if (thereArePhraseTags // there are phrase-based language tags
-        //              && targetLanguagePattern != null) { // and we care about language
-        //     // filter out tokens that aren't phrase-tagged in another language
-        //     final Pattern targetLanguage = Pattern.compile(targetLanguagePattern);
-        //     tokens = Arrays.stream(tokens).filter((token) -> {
-        //         Annotation phraseLanguage = token.first(phraseLanguageLayerId);
-        //         if (phraseLanguage == null) return true; // not tagged with a language
-        //         return targetLanguage.matcher(phraseLanguage.getLabel()).matches();
-        //       }).toArray(Annotation[]::new);
-        //   }
-        
-        //   setStatus("Tagging chunk "+chunk.getStart() + "-" + chunk.getEnd());
-        //   if (tokens.length > 0) {
+        try {
+          AbstractSequenceClassifier<CoreLabel> nerClassifier = CRFClassifier.getClassifier(
+            new File(new File(getWorkingDirectory(), "classifiers"), classifier));
+          DocumentReaderAndWriter<CoreLabel> readerAndWriter =
+            nerClassifier.makePlainTextReaderAndWriter(); 
+          
+          // handle language selection...
+          
+          for (Annotation chunk : graph.all(chunkLayerId)) {
+            if (isCancelling()) break;
             
-        //     // if tokens contain spaces, these are eliminated by the parser
-        //     // so create a space-stripped version of the label
-        //     for (Annotation t : tokens) {
-        //       t.put("@untagged", t.getLabel().replaceAll("\\s",""));
-        //     } // next token
+            List<Annotation> tokens = Arrays.asList(chunk.all(tokenLayerId));
             
-        //     String text = Arrays.stream(tokens)
-        //       .map(token -> token.getLabel())
-        //       .collect(Collectors.joining(" "));
-        //     List<List<HasWord>> sentences = MaxentTagger.tokenizeText(new StringReader(text));
-        //     int t = 0;
-        //     for (List<HasWord> sentence : sentences) {
-        //       List<TaggedWord> taggedSentence = tagger.tagSentence(sentence);
-        //       for (TaggedWord w : taggedSentence) {
-        //         if (t >= tokens.length) {
-        //           throw new TransformationException(
-        //             this, "Too many tags for tokens. Last token: "
-        //             + tokens[t-1]
-        //             + ", next POS tag: " + w.tag() + " for word " + w.word());
-        //         }
-        //         Annotation token = tokens[t];
-        //         // skip any tokens with blank labels
-        //         while (token.getLabel().trim().length() == 0) {
-        //           token = tokens[++t];
-        //         }
-                
-        //         graph.createSubdivision(token, posLayerId, w.tag())
-        //           .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-        //         // there can be more than one tag per token
-        //         // e.g. "I'll" could be tagged "PRP" and "MD"
-        //         // so we keep a track of how much of the current token has been tagged
-        //         String untagged = (String)token.get("@untagged");              
-        //         if (untagged.equals(w.word())) { // finished with this token
-        //           token.remove("@untagged");
-        //           t++;
-        //         } else if (untagged.startsWith(w.word())) { // partial tag
-        //           token.put("@untagged", untagged.substring(w.word().length()));
-        //         } else { // something's gone wrong!
-        //           throw new TransformationException(
-        //             this, "Chunk "+chunk.getStart() + "-" + chunk.getEnd()
-        //             + ": Unexpected word in result: \"" + w.word() + "\""
-        //             +" - was expecting something like: \"" + untagged + "\"."
-        //             +" - token: \"" + token.getLabel() + "\" - " + token.getId()
-        //             +" Tagged: " + taggedSentence.stream()
-        //             .map(tok->tok.word()+"->"+tok.tag())
-        //             .collect(Collectors.joining(" ")));
-        //         }
-        //       } // next token
-        //     } // next sentence
-        //   } // there are tokens
-        // } // next chunk
+            // delete all existing tags before filtering out by pattern
+            for (Annotation t : tokens) {            
+              for (Annotation p: t.all(entityLayerId)) {
+                p.destroy();
+              } // next entity tag
+            } // next token
+            
+            if (tokenExclusionPattern.length() > 0) {
+              final Pattern exclude = Pattern.compile(tokenExclusionPattern);
+              tokens = tokens.stream()
+                .filter(t->!exclude.matcher(t.getLabel()).matches())
+                .collect(Collectors.toList());
+            }
+            
+            if (!transcriptIsMainlyTargetLang) { // transcript is wrong language
+              // filter out tokens that aren't phrase-tagged in the target language
+              final Pattern targetLanguage = Pattern.compile(targetLanguagePattern);
+              tokens = tokens.stream().
+                filter((token) -> {
+                    Annotation phraseLanguage = token.first(phraseLanguageLayerId);
+                    if (phraseLanguage == null) return false; // not tagged with a language
+                    return targetLanguage.matcher(phraseLanguage.getLabel()).matches();
+                  })
+                .collect(Collectors.toList());
+              
+            } else if (thereArePhraseTags // there are phrase-based language tags
+                       && targetLanguagePattern != null) { // and we care about language
+              // filter out tokens that aren't phrase-tagged in another language
+              final Pattern targetLanguage = Pattern.compile(targetLanguagePattern);
+              tokens = tokens.stream()
+                .filter((token) -> {
+                    Annotation phraseLanguage = token.first(phraseLanguageLayerId);
+                    if (phraseLanguage == null) return true; // not tagged with a language
+                    return targetLanguage.matcher(phraseLanguage.getLabel()).matches();
+                  })
+                .collect(Collectors.toList());
+            }
+            
+            setStatus("Tagging chunk "+chunk.getStart() + "-" + chunk.getEnd());
+            if (tokens.size() > 0) {
+              
+              // if tokens contain spaces, these are eliminated by the parser
+              // so create a space-stripped version of the label
+              for (Annotation t : tokens) {
+                t.put("@untagged", t.getLabel().replaceAll("\\s",""));
+              } // next token
+              
+              String text = tokens.stream()
+                .map(token -> token.getLabel())
+                .collect(Collectors.joining(" "));
+              // setStatus("text: " + text);
+              
+              List<List<CoreLabel>> sentences =
+                nerClassifier.classifyRaw(text, readerAndWriter);
+              // convert to annotations
+              Vector<Annotation> classifiedTokens = new Vector<Annotation>();
+              for (List<CoreLabel> sentence : sentences) {
+                for (CoreLabel coreLabel : sentence) {
+                  Annotation classified = new Annotation().setLabel(coreLabel.word());
+                  classified.put("@coreLabel", coreLabel);
+                  classifiedTokens.add(classified);
+                } // next token
+              } // next sentence
+
+              // map original tokens to classified tokens
+              MinimumEditPath<Annotation> mp = new MinimumEditPath<Annotation>(
+                new Orthography2OrthographyComparator<Annotation>());
+              List<EditStep<Annotation>> editPath
+                = mp.minimumEditPath(tokens, classifiedTokens);
+              // map one-original-to-many-classifier-tokens
+              // because it may have tokensized the input into smaller parts
+              Map<Annotation,List<Annotation>> map = mp.mapOneToMany(editPath);
+
+              // now tag originals
+              for (Annotation originalToken : map.keySet()) {
+                for (Annotation classifierToken : map.get(originalToken)) {
+                  CoreLabel label = (CoreLabel)classifierToken.get("@coreLabel");
+                  String entityLabel = label.get(CoreAnnotations.AnswerAnnotation.class);
+                  if (entityLabel != null && !entityLabel.equals("O")) {
+                  setStatus(originalToken + " → " + entityLabel);
+                    // there shouldn't be more than one
+                    graph.createTag(originalToken, entityLayerId, entityLabel);
+                  }
+                } // next classifier Token
+              } // next originalToken
+            } // there are tokens
+          } // next chunk
+        } catch (ClassNotFoundException x) {
+          setStatus("Could not instantiate classifier " + classifier);
+          throw new TransformationException(
+            this, "Could not instantiate classifier " + classifier);
+        } catch (IOException x) {
+          setStatus("Could not load classifier " + classifier);
+          throw new TransformationException(
+            this, "Could not load classifier " + classifier);
+        }
       } // there are possibly tokens in the right language
       
       return graph;
