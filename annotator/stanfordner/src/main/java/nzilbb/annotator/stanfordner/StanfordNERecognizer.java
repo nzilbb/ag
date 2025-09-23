@@ -99,7 +99,6 @@ public class StanfordNERecognizer extends Annotator {
     try {
       // is there a zip file that's newer than the "classifiers" subdirectory?
       boolean downloadZip = true;
-      File classifiers = new File(getWorkingDirectory(), "classifiers");   
       File[] zips = getWorkingDirectory().listFiles(new FilenameFilter() {
           public boolean accept(File dir, String name) {
             return name.endsWith(".zip");
@@ -134,9 +133,11 @@ public class StanfordNERecognizer extends Annotator {
           "There is no .zip file containing the Stanford NER implementation. Please try again.");
       }
       setStatus("Most recent .zip file: " + newestZip.getName());
-      // should we unzip the recognizer implementation?
+
+      // should we extract the classifiers?
+      File classifiers = new File(getWorkingDirectory(), "classifiers");   
       if (!classifiers.exists() || newestZip.lastModified() > classifiers.lastModified()) {
-        String error = installClassifiers(newestZip);
+        String error = installClassifiers(newestZip, false);
         if (error != null) throw new InvalidConfigurationException(this, error);
       }
       
@@ -183,51 +184,64 @@ public class StanfordNERecognizer extends Annotator {
    * @return null if upload was successful, an error message otherwise.
    */
   public String installClassifiers(File file) {
-    if (!file.getName().endsWith(".jar") && !file.getName().endsWith(".zip")
-        && !file.getName().endsWith(".crf.ser.gz")) {
-      return file.getName() + " is not a .jar, .zip, or .crf.ser.gz file.";
-    }
-
-    Vector<NamedStream> classifierStreams = new Vector<NamedStream>();
-    if (file.getName().endsWith(".crf.ser.gz")) { // a single unzipped classifier
-      try { classifierStreams.add(new NamedStream(file)); } catch(Exception exception) {}
-    } else { // zip/jar file
-      // look for .crf.ser.gz files in the file
-      try {
-        ZipFile zip = new ZipFile(file);
-        Enumeration<? extends ZipEntry> entries = zip.entries();
-        while (entries.hasMoreElements()) {
-          ZipEntry entry = entries.nextElement();
-          if (entry.getName().endsWith(".crf.ser.gz")) {
-            String[] path = entry.getName().split("/");
-            classifierStreams.add(new NamedStream(
-                                    zip.getInputStream(entry), path[path.length-1]));
-          } // classifier
-        } // next entry
-      } catch(Exception exception) {
-        return "Could not parse " + file.getName();
+    return installClassifiers(file, true);
+  }
+  /**
+   * Takes a file (.zip, .jar, or .crf.ser.gz) that contains alternative classifiers,
+   * and unpacks/installs them.
+   * @param file The file containing classifiers.
+   * @param deleteFile Whether to delete the file once processed.
+   * @return null if upload was successful, an error message otherwise.
+   */
+  public String installClassifiers(File file, boolean deleteFile) {
+    try {
+      if (!file.getName().endsWith(".jar") && !file.getName().endsWith(".zip")
+          && !file.getName().endsWith(".crf.ser.gz")) {
+        return file.getName() + " is not a .jar, .zip, or .crf.ser.gz file.";
       }
-    } // zip/jar file
-    if (classifierStreams.size() == 0) {
-      return "There were no classifiers in " + file.getName();
-    }
-    
-    // install them
-    File classifiers = new File(getWorkingDirectory(), "classifiers");
-    if (!classifiers.exists()) classifiers.mkdir();
-    for (NamedStream stream : classifierStreams) {
-      try {
-        IO.SaveInputStreamToFile​(stream.getStream(), new File(classifiers, stream.getName()));
-      } catch(IOException exception) {
-        // ensure all streams are closed
-        for (NamedStream s : classifierStreams) {
-          try { s.getStream().close(); } catch (Exception x) {}
+      
+      Vector<NamedStream> classifierStreams = new Vector<NamedStream>();
+      if (file.getName().endsWith(".crf.ser.gz")) { // a single unzipped classifier
+        try { classifierStreams.add(new NamedStream(file)); } catch(Exception exception) {}
+      } else { // zip/jar file
+        // look for .crf.ser.gz files in the file
+        try {
+          ZipFile zip = new ZipFile(file);
+          Enumeration<? extends ZipEntry> entries = zip.entries();
+          while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            if (entry.getName().endsWith(".crf.ser.gz")) {
+              String[] path = entry.getName().split("/");
+              classifierStreams.add(new NamedStream(
+                                      zip.getInputStream(entry), path[path.length-1]));
+            } // classifier
+          } // next entry
+        } catch(Exception exception) {
+          return "Could not parse " + file.getName();
         }
-        return "Could not copy " + stream.getName() + " from " + file.getName();
+      } // zip/jar file
+      if (classifierStreams.size() == 0) {
+        return "There were no classifiers in " + file.getName();
       }
+      
+      // install them
+      File classifiers = new File(getWorkingDirectory(), "classifiers");
+      if (!classifiers.exists()) classifiers.mkdir();
+      for (NamedStream stream : classifierStreams) {
+        try {
+          IO.SaveInputStreamToFile​(stream.getStream(), new File(classifiers, stream.getName()));
+        } catch(IOException exception) {
+          // ensure all streams are closed
+          for (NamedStream s : classifierStreams) {
+            try { s.getStream().close(); } catch (Exception x) {}
+          }
+          return "Could not copy " + stream.getName() + " from " + file.getName();
+        }
+      }
+      return null;
+    } finally {
+      if (deleteFile) file.delete();
     }
-    file.delete();
-    return null;
   } // end of uploadClassifiers
   
   /**
