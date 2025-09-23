@@ -257,10 +257,11 @@ function selectFile() {
     }
   }, function(e) {
     console.log("uploadFailed " + this.responseText);
+    const message = this.responseText||"Upload error";
     uploadProgress.max = uploadProgress.max || 100;
     uploadProgress.value = uploadProgress.value || 1;
     document.getElementById("uploadResult").innerHTML
-      = `<p class='error'>${this.responseText}</p>`;
+      = `<p class='error'>${message}</p>`;
   });
 }
 
