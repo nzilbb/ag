@@ -31,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -266,11 +267,12 @@ public class ParseGloss extends CommandLineProgram {
           +" ON first_word.turn_annotation_id = last_word.turn_annotation_id"
           +" INNER JOIN annotation_layer_0 word"
           +" ON word.turn_annotation_id = first_word.turn_annotation_id"
-          +" AND word.ordinal_in_turn >= first_word.ordinal_in_turn"
-          +" AND word.ordinal_in_turn <= last_word.ordinal_in_turn"
+          +" INNER JOIN anchor word_start"
+          +" ON word.start_anchor_id = word_start.anchor_id"
           +" WHERE first_word.annotation_id = ? AND last_word.annotation_id = ?"
+          +" AND word_start.offset >= ? AND word_start.offset < ?"
           // exclude pause-only 'words':
-          +" AND word.label REGEXP '.*[a-zA-Z<>].*'"
+          // +" AND word.label REGEXP '.*[a-zA-Z<>].*'"
           +" ORDER BY word.ordinal_in_turn");
 
         // update for creating tags:
@@ -378,7 +380,8 @@ public class ParseGloss extends CommandLineProgram {
           Double end = (idParts[2] instanceof Long)?((Long)idParts[2]).doubleValue():
             (Double)idParts[2];
           Annotation[] words = retrieveWords(
-            transcriptId, start, end, (String)matchIdParts[6], (String)matchIdParts[7]);
+            transcriptId, participantId, start, end,
+            (String)matchIdParts[6], (String)matchIdParts[7]);
           if (words.length == 0) {
             rejectCount = rejectFragment(
               rejectCount, fragment, err, "No words retrieved from " + url);
@@ -401,11 +404,22 @@ public class ParseGloss extends CommandLineProgram {
 
           String tokens[] = fragmentText.split(" ");
           if (tokens.length != words.length) {
-            rejectCount = rejectFragment(
-              rejectCount, fragment, err,
-              "There are "+words.length+" LaBB-CAT words but "+tokens.length
-              +" fragment tokens");
-            continue;
+            // special case: the first/last word has no real orthography (e.g. pause)
+            if (words.length - 1 == tokens.length
+                && !words[words.length-1].getLabel().matches(".*[a-zA-Z<>].*")) {
+              // strip off the last token
+              words = Arrays.copyOf(words, words.length - 1);
+            } else if (words.length - 1 == tokens.length
+                && !words[0].getLabel().matches(".*[a-zA-Z<>].*")) {
+              // strip off the first token
+              words = Arrays.copyOfRange(words, 1, words.length - 1);
+            } else {
+              rejectCount = rejectFragment(
+                rejectCount, fragment, err,
+                "There are "+words.length+" LaBB-CAT words but "+tokens.length
+                +" fragment tokens");
+              continue;
+            }
           }
 
           String pos[] = gloss.split("/");
@@ -489,7 +503,8 @@ public class ParseGloss extends CommandLineProgram {
    * @throws Exception
    */
   public Annotation[] retrieveWords(
-    String transcriptId, Double start, Double end, String firstWordId, String lastWordId)
+    String transcriptId, String participantId, Double start, Double end,
+    String firstWordId, String lastWordId)
     throws Exception {
     if (labbcat != null) {
       Graph graph = labbcat.getFragment(transcriptId, start, end, new String[] {"word"});
@@ -497,6 +512,8 @@ public class ParseGloss extends CommandLineProgram {
     } else { // use SQL
       sql.setLong(1, Long.parseLong(firstWordId.replace("ew_0_","")));
       sql.setLong(2, Long.parseLong(lastWordId.replace("ew_0_","")));
+      sql.setDouble(3, start);
+      sql.setDouble(4, end);
       try (ResultSet rs = sql.executeQuery()) {      
         Vector<Annotation> words = new Vector<Annotation>();
         while (rs.next()) {
