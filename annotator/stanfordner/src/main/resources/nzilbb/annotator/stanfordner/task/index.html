@@ -15,6 +15,11 @@
       licensed under the
       <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="stanford">
         GNU General Public License</a> (v2 or later). </p>
+
+    <p> The Stanford NER includes a number of classifiers for English. You can download
+      alternative classifiers from the <a href="https://stanfordnlp.github.io/CoreNLP/index.html#download" target="stanford">Stanford CoreNLP site</a>,
+      and install them by selecting the <em>[other classifier]</em> option for the
+      <em>Classifier to use</em> setting below.</p>
     
     <form method="POST" action="setTaskParameters" onsubmit="return testPatterns(true);">
       <div class="field" title="Input layer from which words come">
@@ -24,7 +29,6 @@
       <div class="field" title="Pattern to match tokens that should be excluded from tagging - e.g. um|ah|mm|.*~">
         <label for="tokenExclusionPattern"> Token Exclusion Pattern </label>
         <span><input id="tokenExclusionPattern" name="tokenExclusionPattern" type="text"
-                     onKeyUp="testPatterns();"
                      placeholder="Regular Expression"></span>
       </div>
       <div class="field"
@@ -48,29 +52,38 @@
           </select>
         </span>
       </div>
+      <div class="field"
+           title="Regular expression for the ISO language codes of the languages to target, or blank for all">
+        <label for="targetLanguagePattern">Target Language Pattern</label>
+        <span><input id="targetLanguagePattern" name="targetLanguagePattern"
+                     type="text" placeholder="Regular Expression"></span>
+      </div>
       <div class="field" title="Output layer on which named-entity annotations are added">
         <label for="entityLayerId"> Entity Layer </label>
         <span>
-          <select id="entityLayerId" name="entityLayerId" required
-                  onChange="changedLayer(this);">
+          <select id="entityLayerId" name="entityLayerId" required>
             <option disabled>[select layer]</option> <!-- force choice the first time -->
             <option>[add new layer]</option>         <!-- allow adding a new layer -->
           </select>
         </span>
       </div>
-      <div class="field"
-           title="Regular expression for the ISO language codes of the languages to target, or blank for all">
-        <label for="targetLanguagePattern">Target Language Pattern</label>
-        <span><input id="targetLanguagePattern" name="targetLanguagePattern"
-                     onKeyUp="testPatterns();"
-                     type="text" placeholder="Regular Expression"></span>
-      </div>
       <div class="field">
         <label>Classifier to use</label>
         <span>
-          <select id="classifier" name="classifier">
+          <select id="classifier" name="classifier" required>
           </select>
         </span>
+      </div>
+      <div id="uploadClassifier" style="display: none;">
+        <div class="field file-chooser" 
+             title="You can select a new classifier file to upload, which can be a single .crf.ser.gz classifier file, or a .jar files containing one or more classifiers.">
+          <label for="file">Classifier file <small>(e.g. <q>stanford-corenlp-4.2.0-models-german.jar</q>)</small></label>
+          <input id="file" type="file">
+        </div>
+        <div id="uploadProgress" style="display: none;">
+          <progress id="progress"></progress>
+          <div id="uploadResult"></div>
+        </div>
       </div>
       <div class="controls"><input type="submit" value="Set Parameters"></div>
     </form>
