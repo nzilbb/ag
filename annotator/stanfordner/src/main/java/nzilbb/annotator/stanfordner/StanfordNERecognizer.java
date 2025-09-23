@@ -33,11 +33,13 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Vector;
 import java.util.function.IntConsumer;
 import java.util.regex.*;
 import java.util.stream.Collectors;
 import nzilbb.ag.*;
+import nzilbb.ag.automation.AllowsManualAnnotations;
 import nzilbb.ag.automation.Annotator;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
@@ -50,7 +52,7 @@ import nzilbb.util.IO;
  * <a href="https://nlp.stanford.edu/software/CRF-NER.html">
  *  Stanford Named Entity Recognizer (NER)</a>.
  */
-@UsesFileSystem
+@UsesFileSystem @AllowsManualAnnotations
 public class StanfordNERecognizer extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
   public String getMinimumApiVersion() { return "1.2.5"; }
@@ -601,8 +603,13 @@ public class StanfordNERecognizer extends Annotator {
             
             // delete all existing tags before filtering out by pattern
             for (Annotation t : tokens) {            
-              for (Annotation p: t.all(entityLayerId)) {
-                p.destroy();
+              for (Annotation e: t.all(entityLayerId)) {
+                // don't delete manual annotations
+                if (Optional.ofNullable(e.getConfidence())
+                    .orElse(Constants.CONFIDENCE_AUTOMATIC)
+                    <= Constants.CONFIDENCE_AUTOMATIC) {
+                  e.destroy();
+                }
               } // next entity tag
             } // next token
             
@@ -677,10 +684,14 @@ public class StanfordNERecognizer extends Annotator {
                 for (Annotation classifierToken : map.get(originalToken)) {
                   CoreLabel label = (CoreLabel)classifierToken.get("@coreLabel");
                   String entityLabel = label.get(CoreAnnotations.AnswerAnnotation.class);
-                  if (entityLabel != null && !entityLabel.equals("O")) {
-                  setStatus(originalToken + " → " + entityLabel);
+                  if (entityLabel != null && !entityLabel.equals("O") // is tagged an entity
+                      // ... and is not already manually tagged
+                      && originalToken.first(entityLayerId) == null) {
+                    setStatus(originalToken + " → " + entityLabel);
                     // there shouldn't be more than one
-                    graph.createTag(originalToken, entityLayerId, entityLabel);
+                    graph.createTag(
+                      originalToken, entityLayerId, entityLabel)
+                      .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
                   }
                 } // next classifier Token
               } // next originalToken

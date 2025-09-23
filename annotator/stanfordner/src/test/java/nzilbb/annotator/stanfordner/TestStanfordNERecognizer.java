@@ -75,40 +75,37 @@ public class TestStanfordNERecognizer {
     return fThisClass.getParentFile();
   }
 
-  // /** Ensures that if there's an existing POS layer with an incorrect configuration, 
-  //  * it's corrected. */
-  // @Test public void existingLayerCorrected() throws Exception {
+  /** Ensures that if there's an existing Entity layer with an incorrect configuration, 
+   * it's corrected. */
+  @Test public void existingLayerCorrected() throws Exception {
     
-  //   Graph g = graph();
-  //   Schema schema = g.getSchema();    
-  //   // add POS layer with incorrect configuration (the one maybe created by LaBB-CAT)
-  //   schema.addLayer(
-  //     new Layer("pos", "Incorrectly configured POS layer")
-  //     .setType(Constants.TYPE_NUMBER)
-  //     .setAlignment(Constants.ALIGNMENT_NONE)
-  //     .setPeers(false)
-  //     .setPeersOverlap(true)
-  //     .setSaturated(false)
-  //     .setParentId("word"));
-  //   annotator.setSchema(schema);
-  //   annotator.setTaskParameters(null);
-  //   assertEquals("pos layer",
-  //                "pos", annotator.getPosLayerId());
-  //   assertEquals("pos layer aligned",
-  //                Constants.ALIGNMENT_INTERVAL,
-  //                schema.getLayer(annotator.getPosLayerId()).getAlignment());
-  //   assertEquals("pos layer type correct",
-  //                Constants.TYPE_STRING,
-  //                schema.getLayer(annotator.getPosLayerId()).getType());
-  //   assertTrue("pos layer peers",
-  //              schema.getLayer(annotator.getPosLayerId()).getPeers());
-  //   assertTrue("pos layer included",
-  //              schema.getLayer(annotator.getPosLayerId()).getParentIncludes());
-  //   assertFalse("pos layer peers don't overlap",
-  //              schema.getLayer(annotator.getPosLayerId()).getPeersOverlap());
-  //   assertTrue("pos layer saturated",
-  //              schema.getLayer(annotator.getPosLayerId()).getSaturated());
-  // }
+    Graph g = graph();
+    Schema schema = g.getSchema();    
+    // add POS layer with incorrect configuration (the one maybe created by LaBB-CAT)
+    schema.addLayer(
+      new Layer("entity", "Incorrectly configured NER layer")
+      .setType(Constants.TYPE_NUMBER)
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true)
+      .setPeersOverlap(true)
+      .setSaturated(false)
+      .setParentId("word"));
+    annotator.setSchema(schema);
+    annotator.setTaskParameters(null);
+    assertEquals("entity layer",
+                 "entity", annotator.getEntityLayerId());
+    assertEquals("entity layer type correct",
+                 Constants.TYPE_STRING,
+                 schema.getLayer(annotator.getEntityLayerId()).getType());
+    assertFalse("entity layer peers",
+               schema.getLayer(annotator.getEntityLayerId()).getPeers());
+    assertTrue("entity layer included",
+               schema.getLayer(annotator.getEntityLayerId()).getParentIncludes());
+    assertFalse("entity layer peers don't overlap",
+                schema.getLayer(annotator.getEntityLayerId()).getPeersOverlap());
+    assertTrue("entity layer saturated",
+               schema.getLayer(annotator.getEntityLayerId()).getSaturated());
+  }
 
   /** Annotation with default settings works as expected. */
   @Test public void defaultParameters() throws Exception {
@@ -295,6 +292,106 @@ public class TestStanfordNERecognizer {
     for (int i = 0; i < wordLabels.length; i++) {
       assertEquals("Tag " + i + " should tag " + wordLabels[i],
                    wordLabels[i], entities.next().first("word").getLabel());
+    }
+  }   
+
+  /** Ensures that pre-existing manula annotations are handled correctly. */
+  @Test public void manualAnnotations() throws Exception {
+    
+    Graph g = graph();
+    g.trackChanges();
+    Schema schema = g.getSchema();
+    // add a pre-existing layer
+    schema.addLayer(
+      new Layer("name", "Named Entities")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false)
+      .setParentId("word"));
+    annotator.setSchema(schema);
+
+    // create some manual tags
+    Annotation president = g.first("word");
+    g.createTag(president, "name", "Title") // should not be deleted
+      .setConfidence(Constants.CONFIDENCE_MANUAL);
+    Annotation barack = president.getNext(); 
+    g.createTag(barack, "name", "First Name") // should not be replaced
+      .setConfidence(Constants.CONFIDENCE_MANUAL);
+    
+    // use default configuration
+    annotator.setTaskParameters(null);
+    
+    assertEquals("token layer",
+                 "word", annotator.getTokenLayerId());
+    assertEquals("token exclusion pattern",
+                 "", annotator.getTokenExclusionPattern());
+    assertEquals("chunk layer",
+                 "turn", annotator.getChunkLayerId());
+    assertEquals("transcript language layer",
+                 "transcript_language", annotator.getTranscriptLanguageLayerId());
+    assertEquals("phrase language layer",
+                 "lang", annotator.getPhraseLanguageLayerId());
+    assertEquals("'name' defaulted to entity layer",
+                 "name", annotator.getEntityLayerId());
+    Layer entityLayer = schema.getLayer(annotator.getEntityLayerId());
+    assertEquals("entity layer child of word",
+                 "word", entityLayer.getParentId());
+    assertEquals("entity layer not aligned",
+                 Constants.ALIGNMENT_NONE,
+                 entityLayer.getAlignment());
+    assertEquals("entity layer type correct",
+                 Constants.TYPE_STRING,
+                 entityLayer.getType());
+    assertFalse("entity layer peers",
+                entityLayer.getPeers());
+    assertTrue("entity layer included",
+               entityLayer.getParentIncludes());
+    assertFalse("entity layer peers don't overlap",
+               entityLayer.getPeersOverlap());
+    assertTrue("entity layer saturated",
+               entityLayer.getSaturated());
+    assertEquals("classifier: english.all.3class.distsim.crf.ser.gz",
+                 "english.all.3class.distsim.crf.ser.gz", annotator.getClassifier());
+    assertFalse("entity layer disallows peers",
+                entityLayer.getPeers());
+    assertTrue("entity layer has no valid labels defined",
+               entityLayer.getValidLabels().size() == 0);
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("4 required layer: "+requiredLayers,
+                 4, requiredLayers.size());
+    assertTrue("turn required "+requiredLayers,
+               requiredLayers.contains("turn"));
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    assertTrue("transcript_language required "+requiredLayers,
+               requiredLayers.contains("transcript_language"));
+    assertTrue("lang required "+requiredLayers,
+               requiredLayers.contains("lang"));
+    String outputLayers[] = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                 1, outputLayers.length);
+    assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                 "name", outputLayers[0]);
+    
+    // run the annotator
+    // annotator.getStatusObservers().add(status -> System.out.println(status));
+    annotator.transform(g);
+    List<Annotation> entityAnnotations = Arrays.stream(g.all("name"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+entityAnnotations,
+                 4, entityAnnotations.size());
+    Iterator<Annotation> entities = entityAnnotations.iterator();
+    String[] entityLabels = { "Title", "First Name", "PERSON", "LOCATION" };
+    String[] wordLabels = { "President", "Barack", "Obama", "Hawaii." };
+    Integer[] confidences = { 100, 100, 50, 50 };
+    for (int i = 0; i < wordLabels.length; i++) {
+      Annotation entity = entities.next();
+      assertEquals("Tag " + i + " should tag " + wordLabels[i],
+                   wordLabels[i], entity.first("word").getLabel());
+      assertEquals("Label " + i + " should be " + entityLabels[i],
+                   entityLabels[i], entity.getLabel());
+      assertEquals("Confidence " + i + " should be " + confidences[i],
+                   confidences[i], entity.getConfidence());
     }
   }   
 
