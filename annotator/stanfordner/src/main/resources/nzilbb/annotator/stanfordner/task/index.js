@@ -11,100 +11,100 @@ const taskId = window.location.search.substring(1);
 // first, get the layer schema
 let schema = null;
 getSchema(s => {
-    schema = s;
+  schema = s;
+  
+  // populate layer input select options...          
+  const tokenLayerId = document.getElementById("tokenLayerId");
+  addLayerOptions(
+    tokenLayerId, schema,
+    // this is a function that takes a layer and returns true for the ones we want
+    layer => layer.id == schema.wordLayerId
+      || (layer.parentId == schema.wordLayerId && layer.alignment == 0));
+  tokenLayerId.value = schema.wordLayerId;
+  
+  const chunkLayerId = document.getElementById("chunkLayerId");
+  addLayerOptions(
+    chunkLayerId, schema,
+    // this is a function that takes a layer and returns true for the ones we want
+    layer => (layer.id == schema.turnLayerId || (layer.parentId == schema.turnLayerId))
+      && layer.id != schema.wordLayerId);
+  chunkLayerId.value = schema.turnLayerId;
+  
+  // populate the language layers...
+  
+  const transcriptLanguageLayerId = document.getElementById("transcriptLanguageLayerId");
+  addLayerOptions(
+    transcriptLanguageLayerId, schema,
+    layer => layer.parentId == schema.root.id && layer.alignment == 0
+      && /.*lang.*/.test(layer.id));
+  // select the first one by default
+  transcriptLanguageLayerId.selectedIndex = 1;
+  
+  const phraseLanguageLayerId = document.getElementById("phraseLanguageLayerId");
+  addLayerOptions(
+    phraseLanguageLayerId, schema,
+    layer => layer.parentId == schema.turnLayerId && layer.alignment == 2
+      && /.*lang.*/.test(layer.id));
+  // select the first one by default
+  phraseLanguageLayerId.selectedIndex = 1;
+  
+  // populate layer output select options...          
+  const entityLayerId = document.getElementById("entityLayerId");
+  addLayerOptions(
+    entityLayerId, schema,
+    layer => layer.parentId == schema.wordLayerId
+      && (layer.alignment == 0 // entity layers are aligned
+          || layer.id == taskId)); // ...but they might have set up the alignment wrong
+  entityLayerId.selectedIndex = 0;
+  
+  // what classifiers are available
+  loadClassifiers().then(()=>{
     
-    // populate layer input select options...          
-    const tokenLayerId = document.getElementById("tokenLayerId");
-    addLayerOptions(
-        tokenLayerId, schema,
-        // this is a function that takes a layer and returns true for the ones we want
-        layer => layer.id == schema.wordLayerId
-            || (layer.parentId == schema.wordLayerId && layer.alignment == 0));
-    tokenLayerId.value = schema.wordLayerId;
-    
-    const chunkLayerId = document.getElementById("chunkLayerId");
-    addLayerOptions(
-        chunkLayerId, schema,
-        // this is a function that takes a layer and returns true for the ones we want
-        layer => (layer.id == schema.turnLayerId || (layer.parentId == schema.turnLayerId))
-            && layer.id != schema.wordLayerId);
-    chunkLayerId.value = schema.turnLayerId;
-    
-    // populate the language layers...
-    
-    const transcriptLanguageLayerId = document.getElementById("transcriptLanguageLayerId");
-    addLayerOptions(
-        transcriptLanguageLayerId, schema,
-        layer => layer.parentId == schema.root.id && layer.alignment == 0
-            && /.*lang.*/.test(layer.id));
-    // select the first one by default
-    transcriptLanguageLayerId.selectedIndex = 1;
-    
-    const phraseLanguageLayerId = document.getElementById("phraseLanguageLayerId");
-    addLayerOptions(
-        phraseLanguageLayerId, schema,
-        layer => layer.parentId == schema.turnLayerId && layer.alignment == 2
-            && /.*lang.*/.test(layer.id));
-    // select the first one by default
-    phraseLanguageLayerId.selectedIndex = 1;
-    
-    // populate layer output select options...          
-    const entityLayerId = document.getElementById("entityLayerId");
-    addLayerOptions(
-        entityLayerId, schema,
-      layer => layer.parentId == schema.wordLayerId
-        && (layer.alignment == 0 // entity layers are aligned
-            || layer.id == taskId)); // ...but they might have set up the alignment wrong
-    entityLayerId.selectedIndex = 0;
-
-    // what classifiers are available
-    loadClassifiers().then(()=>{
-
-        // GET request to getTaskParameters retrieves the current task parameters, if any
-        getText("getTaskParameters", text => {
-            try {
-                const parameters = new URLSearchParams("?"+text);
-                
-                // set initial values of properties in the form above
-                // (this assumes bean property names match input id's in the form above)
-                for (const [key, value] of parameters) {
-                    document.getElementById(key).value = value;
-                    
-                    if (key == "entityLayerId") {
-                        // if there's a entity layer defined
-                        if (value
-                            // but it's not in the schema
-                            && !schema.layers[value]) {
-                            
-                            // add it to the list
-                            const select = document.getElementById("entityLayerId");
-                            const layerOption = document.createElement("option");
-                            layerOption.appendChild(document.createTextNode(value));
-                            select.appendChild(layerOption);
-                            // select it
-                            select.selectedIndex = select.children.length - 1;
-                        }
-                    } // entityLayerId
-                } // next parameter
-                
-                // if there's no entity layer defined
-                if (entityLayerId.selectedIndex == 0 && taskId) {
-                  // but there's a layer named after the task
-                  if (!schema.layers[taskId]) {
-                    // add an option for a layer named after the taskId
-                    const layerOption = document.createElement("option");
-                    layerOption.appendChild(document.createTextNode(taskId));
-                    entityLayerId.appendChild(layerOption);
-                  }
-                  
-                  // select that layer by default
-                  entityLayerId.value = taskId;
-                }
-            } finally {
-                finishedLoading();
+    // GET request to getTaskParameters retrieves the current task parameters, if any
+    getText("getTaskParameters", text => {
+      try {
+        const parameters = new URLSearchParams("?"+text);
+        
+        // set initial values of properties in the form above
+        // (this assumes bean property names match input id's in the form above)
+        for (const [key, value] of parameters) {
+          document.getElementById(key).value = value;
+          
+          if (key == "entityLayerId") {
+            // if there's a entity layer defined
+            if (value
+                // but it's not in the schema
+                && !schema.layers[value]) {
+              
+              // add it to the list
+              const select = document.getElementById("entityLayerId");
+              const layerOption = document.createElement("option");
+              layerOption.appendChild(document.createTextNode(value));
+              select.appendChild(layerOption);
+              // select it
+              select.selectedIndex = select.children.length - 1;
             }
-        });        
-    });    
+          } // entityLayerId
+        } // next parameter
+        
+        // if there's no entity layer defined
+        if (entityLayerId.selectedIndex == 0 && taskId) {
+                  // but there's a layer named after the task
+          if (!schema.layers[taskId]) {
+            // add an option for a layer named after the taskId
+            const layerOption = document.createElement("option");
+            layerOption.appendChild(document.createTextNode(taskId));
+            entityLayerId.appendChild(layerOption);
+          }
+          
+          // select that layer by default
+          entityLayerId.value = taskId;
+        }
+      } finally {
+        finishedLoading();
+      }
+    });        
+  });    
 });
 
 function loadClassifiers() {
