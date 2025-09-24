@@ -78,7 +78,7 @@ public class TestPlainTextSerialization
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 11,
+    assertEquals("Configuration parameters" + configuration, 13,
                  deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
@@ -237,7 +237,7 @@ public class TestPlainTextSerialization
     // no participant format - i.e. no speaker labels
     configuration.get("participantFormat").setValue(null);
     
-    assertEquals("Configuration parameters" + configuration, 11,
+    assertEquals("Configuration parameters" + configuration, 13,
                  deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
@@ -354,7 +354,7 @@ public class TestPlainTextSerialization
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 11, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("noise", "noise", 
@@ -550,7 +550,7 @@ public class TestPlainTextSerialization
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 11, deserializer.configure(configuration, schema).size());      
+                 13, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -707,7 +707,7 @@ public class TestPlainTextSerialization
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 11, deserializer.configure(configuration, schema).size());      
+                 13, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -870,7 +870,7 @@ public class TestPlainTextSerialization
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 11, deserializer.configure(configuration, schema).size());      
+                 13, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("noise", "noise", 
@@ -1007,7 +1007,7 @@ public class TestPlainTextSerialization
     configuration.get("useConventions").setValue(Boolean.FALSE);
 	 
     assertEquals("Configuration parameters" + configuration,
-                 11, deserializer.configure(configuration, schema).size());      
+                 13, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("noise", "noise", 
@@ -1127,7 +1127,7 @@ public class TestPlainTextSerialization
     configuration.get("useConventions").setValue(Boolean.FALSE);
 	 
     assertEquals("Configuration parameters" + configuration,
-                 11, deserializer.configure(configuration, schema).size());      
+                 13, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("noise", "noise", 
@@ -1253,7 +1253,7 @@ public class TestPlainTextSerialization
     configuration.get("useConventions").setValue(Boolean.FALSE);
 	 
     assertEquals("Configuration parameters" + configuration,
-                 11, deserializer.configure(configuration, schema).size());      
+                 13, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -1501,7 +1501,7 @@ public class TestPlainTextSerialization
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, serializer.configure(configuration, schema).size());
+    assertEquals(13, serializer.configure(configuration, schema).size());
 
     LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
       Arrays.asList(serializer.getRequiredLayers()));
@@ -1670,7 +1670,7 @@ public class TestPlainTextSerialization
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, serializer.configure(configuration, schema).size());
+    assertEquals(13, serializer.configure(configuration, schema).size());
 
     LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
       Arrays.asList(serializer.getRequiredLayers()));
@@ -1765,8 +1765,12 @@ public class TestPlainTextSerialization
                                        "a0",
                                        graph.addAnchor(new Anchor("a1", 1.0)).getId(),
                                        "t1"));
-    graph.addAnnotation(new Annotation("quick", "'quick", "word", 
+    graph.addAnnotation(new Annotation("false-start", "qu~", "word", 
                                        "a1",
+                                       graph.addAnchor(new Anchor("a1.5", 1.5)).getId(),
+                                       "t1"));
+    graph.addAnnotation(new Annotation("quick", "'quick", "word", 
+                                       "a1.5",
                                        graph.addAnchor(new Anchor("a2", 2.0)).getId(),
                                        "t1"));
     graph.addAnnotation(new Annotation("brown", "brown'", "word", 
@@ -1821,7 +1825,6 @@ public class TestPlainTextSerialization
     graph.createTag(graph.getAnnotation("the2"), "pos", "DET");
     graph.createTag(graph.getAnnotation("lazy"), "pos", "ADJ");
     graph.createTag(graph.getAnnotation("dog"), "pos", "N");
-    graph.createTag(graph.getAnnotation("."), "pos", "PUNC");
 
     // add some comments, noises, lexical and pronounce tags
     graph.addAnnotation(new Annotation("comment1", "some preamble", "comment", "a0", "a1"));
@@ -1839,10 +1842,16 @@ public class TestPlainTextSerialization
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     // don't use conventions
     configuration.get("useConventions").setValue(Boolean.FALSE);
-    assertEquals(11, serializer.configure(configuration, schema).size());
+    configuration.get("includeMissingTags").setValue(Boolean.TRUE);
+    assertEquals(13, serializer.configure(configuration, schema).size());
     assertEquals("orthography", "orthography", 
                  ((Layer)configuration.get("orthographyLayer").getValue()).getId());
-    assertEquals("use conventions", Boolean.FALSE, configuration.get("useConventions").getValue());
+    assertEquals("use conventions",
+                 Boolean.FALSE, configuration.get("useConventions").getValue());
+    assertEquals("default tag format",
+                 "{0}_{1}", configuration.get("tagFormat").getValue());
+    assertEquals("include missing tags",
+                 Boolean.TRUE, configuration.get("includeMissingTags").getValue());
     LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
       Arrays.asList(serializer.getRequiredLayers()));
     assertEquals("Needed layers doesn't include convention layers: " + needLayers,
@@ -1868,6 +1877,30 @@ public class TestPlainTextSerialization
     // test using diff
     File result = new File(dir, graph.getId() + ".txt");
     String differences = diff(new File(dir, "expected_" + graph.getId() + ".txt"), result);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      result.delete();
+    }
+
+    // different settings...
+    graph.setId("xml_"+graph.getId());
+    configuration.get("tagFormat").setValue("<{1}>{0}</{1}>"); // XML style
+    configuration.get("includeMissingTags").setValue(Boolean.FALSE);
+    serializer.configure(configuration, schema);
+    assertEquals("new tag format",
+                 "<{1}>{0}</{1}>", serializer.getTagFormat());
+    assertEquals("don't include missing tags",
+                 Boolean.FALSE, serializer.getIncludeMissingTags());
+    serializer.serialize(Utility.OneGraphSpliterator(graph), layers,
+                         stream -> streams.add(stream),
+                         warning -> System.out.println(warning),
+                         exception -> exceptions.add(exception));
+    if (exceptions.size() > 0) fail(""+exceptions);
+
+    streams.elementAt(1).save(dir);
+    result = new File(dir, graph.getId() + ".txt");
+    differences = diff(new File(dir, "expected_" + graph.getId() + ".txt"), result);
     if (differences != null) {
       fail(differences);
     } else {
@@ -1909,7 +1942,7 @@ public class TestPlainTextSerialization
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 11, deserializer.configure(configuration, schema).size());      
+                 13, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertNull("noise", configuration.get("noiseLayer").getValue());

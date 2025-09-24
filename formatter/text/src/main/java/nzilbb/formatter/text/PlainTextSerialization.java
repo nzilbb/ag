@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -507,6 +508,55 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
    * @param newTimestampFormat Format for time synchronizations within the transcript body. e.g. "HH:mm:ss.SSS"
    */
   public PlainTextSerialization setTimestampFormat(String newTimestampFormat) { timestampFormat = newTimestampFormat; return this; }
+  
+  /**
+   * Format for tags when converting to text. The default pattern is "{0}_{1}".
+   * <tt>{0}</tt> is a place-holder for the word token, and <tt>{1}</tt> is a
+   * place-holder for the tag label. 
+   * @see #getTagFormat()
+   * @see #setTagFormat(String)
+   */
+  protected String tagFormat = "{0}_{1}";
+  /**
+   * Getter for {@link #tagFormat}: Format for tags when converting to text.
+   * The default pattern is "{0}_{1}".
+   * <tt>{0}</tt> is a place-holder for the word token, and <tt>{1}</tt> is a
+   * place-holder for the tag label. 
+   * @return Format for tags when converting to text.
+   */
+  public String getTagFormat() { return tagFormat; }
+  /**
+   * Setter for {@link #tagFormat}: Format for tags when converting to text.
+   * The default pattern is "{0}_{1}".
+   * <tt>{0}</tt> is a place-holder for the word token, and <tt>{1}</tt> is a
+   * place-holder for the tag label. 
+   * @param newTagFormat Format for tags when converting to text.
+   */
+  public PlainTextSerialization setTagFormat(String newTagFormat) { tagFormat = newTagFormat; return this; }
+  
+  /**
+   * Whether to apply {@link #tagFormat} to output words even when there is no tag.
+   * The default is false.
+   * @see #getIncludeMissingTags()
+   * @see #setIncludeMissingTags(Boolean)
+   */
+  protected Boolean includeMissingTags = Boolean.FALSE;
+  /**
+   * Getter for {@link #includeMissingTags}: Whether to apply {@link #tagFormat}
+   * to output words even when there is no tag.
+   * @return Whether to apply #tagFormat to output words even when there is no tag.
+   */
+  public Boolean getIncludeMissingTags() { return includeMissingTags; }
+  /**
+   * Setter for {@link #includeMissingTags}: Whether to apply {@link #tagFormat} to
+   * output words even when there is no tag.
+   * <p> For example, if the word is <q>the</q> and there's no named-entity tag, then
+   * setting this to true will result in token being output as <q>the_</q>, but setting
+   * it to false will result in the token being output as <q>the</q>.
+   * @param newIncludeMissingTags Whether to apply {@link #tagFormat} to output words
+   * even when there is no tag.
+   */
+  public PlainTextSerialization setIncludeMissingTags(Boolean newIncludeMissingTags) { includeMissingTags = newIncludeMissingTags; return this; }
 
   /**
    * Duration of the media file in seconds, if known.
@@ -914,6 +964,26 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       configuration.get("metaDataFormat").setValue(metaDataFormat);
     }
 
+    if (!configuration.containsKey("tagFormat")) {
+      configuration.addParameter(
+        new Parameter("tagFormat", String.class, 
+                      "Tag Format",
+                      "Output format for tags - e.g. {0}_{1} for output like 'the_DET', where {0} is a place-holder for the word, and {1} is a place-holder for annotation label", true));
+    }
+    if (configuration.get("tagFormat").getValue() == null) {
+      configuration.get("tagFormat").setValue(tagFormat);
+    }
+
+    if (!configuration.containsKey("includeMissingTags")) {
+      configuration.addParameter(
+        new Parameter("includeMissingTags", Boolean.class, 
+                      "Include Missing Tags",
+                      "Whether to output missing tags with Tag Format, e.g. if the word 'the' has no tag, setting this to true will output 'the_', and false will output 'the'.", true));
+    }
+    if (configuration.get("includeMissingTags").getValue() == null) {
+      configuration.get("includeMissingTags").setValue(Boolean.FALSE);
+    }
+    
     if (!configuration.containsKey("timestampFormat")) {
       configuration.addParameter(
         new Parameter("timestampFormat", String.class, 
@@ -991,7 +1061,8 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
     BufferedReader reader = new BufferedReader(new InputStreamReader(txt.getStream(), "UTF-8"));
     String sLine = reader.readLine();
     int iLine = 0;
-    MessageFormat fmtSpeakerFormat = participantFormat == null?null
+    MessageFormat fmtSpeakerFormat
+      = participantFormat == null || participantFormat.length() == 0?null
       :new MessageFormat(participantFormat);
     SimpleDateFormat fmtTimestampFormat = null;
     if (timestampFormat != null && timestampFormat.length() > 0) {
@@ -1300,7 +1371,8 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       .setConfidence(Constants.CONFIDENCE_MANUAL);;
     int iLastPosition = 0;	 
 
-    MessageFormat fmtSpeakerFormat = participantFormat == null?null
+    MessageFormat fmtSpeakerFormat
+      = participantFormat == null || participantFormat.length() == 0?null
       :new MessageFormat(participantFormat);
     SimpleDateFormat fmtTimestampFormat = null;
     if (timestampFormat != null && timestampFormat.length() > 0) {
@@ -1737,24 +1809,26 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), "utf-8"));
 
       Schema schema = graph.getSchema();
-         
+
       // meta-data first
-      MessageFormat fmtMetaDataFormat = new MessageFormat(metaDataFormat);
-      boolean thereWereAttributes = false;
-      for (String id : selectedLayers) {
-        Layer layer = schema.getLayer(id);
-        // is it a graph tag layer
-        if (layer.getParent() != null
-            && layer.getParent().equals(schema.getRoot())
-            && layer.getAlignment() == Constants.ALIGNMENT_NONE
-            && !layer.equals(getParticipantLayer())) { // it's a graph tag
-          for (Annotation a : graph.all(id)) {
-            thereWereAttributes = true;
-            Object[] metadata = { id, a.getLabel() }; 
-            writer.println(fmtMetaDataFormat.format(metadata));
-          } // next attribute               
-        } // it's a graph tag
-      } // next selected layer
+      if (metaDataFormat != null || metaDataFormat.length() > 0) {
+        MessageFormat fmtMetaDataFormat = new MessageFormat(metaDataFormat);
+        boolean thereWereAttributes = false;
+        for (String id : selectedLayers) {
+          Layer layer = schema.getLayer(id);
+          // is it a graph tag layer
+          if (layer.getParent() != null
+              && layer.getParent().equals(schema.getRoot())
+              && layer.getAlignment() == Constants.ALIGNMENT_NONE
+              && !layer.equals(getParticipantLayer())) { // it's a graph tag
+            for (Annotation a : graph.all(id)) {
+              thereWereAttributes = true;
+              Object[] metadata = { id, a.getLabel() }; 
+              writer.println(fmtMetaDataFormat.format(metadata));
+            } // next attribute               
+          } // it's a graph tag
+        } // next selected layer
+      }
 
       // get noises if needed
       TreeSet<Annotation> noisesByAnchor
@@ -1775,10 +1849,14 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       }
       Iterator<Annotation> comments = commentsByAnchor.iterator();
       Annotation nextComment = comments.hasNext()?comments.next():null;
+      
+      MessageFormat fmtTagFormat = Optional.ofNullable(tagFormat).orElse("").length() == 0?
+        null:new MessageFormat(tagFormat);
 
       // for each utterance...
       Annotation currentParticipant = null;
-      MessageFormat fmtParticipant = participantFormat == null?null
+      MessageFormat fmtParticipant
+        = Optional.ofNullable(participantFormat).orElse("").length() == 0?null
         :new MessageFormat(participantFormat);
          
       // order utterances by anchor so that simultaneous speech comes out in utterance order
@@ -1825,24 +1903,29 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
           Annotation orthography = token;
           if (orthographyLayer != null
               && selectedLayers.contains(orthographyLayer.getId())) {
-            orthography = token.first(orthographyLayer.getId());
-            if (orthography == null) orthography = token;
+            orthography = Optional.ofNullable(token.first(orthographyLayer.getId()))
+              .orElse(token);
           }
-          writer.print(orthography.getLabel()); // TODO transcript convention support
-          // add tags
-          for (String layerId : tagLayers) {
-            if (!layerId.equals(token.getLayerId())
-                && (orthographyLayer == null || !layerId.equals(orthographyLayer.getId()))) {
-              writer.print("_");
-              Annotation tag = token.first(layerId);
-              if (tag != null) {
-                writer.print(tag.getLabel());
+          String wordToken = orthography.getLabel();
+          if (fmtTagFormat != null) {
+            // add tags
+            for (String layerId : tagLayers) {
+              if (!layerId.equals(token.getLayerId())
+                  && (orthographyLayer == null
+                      || !layerId.equals(orthographyLayer.getId()))) {
+                String tagLabel = "";
+                Annotation tag = token.first(layerId);
+                if (tag != null) tagLabel = tag.getLabel();
+                if (tagLabel.length() > 0 || includeMissingTags) {
+                  Object[] labels = { wordToken, tagLabel };
+                  wordToken = fmtTagFormat.format(labels);
+                }
               }
-            }
+            } // an actual annotation tag, not just orthography
           } // next selected layer 
+          writer.print(wordToken); // TODO transcript convention support
 
-          if (getUseConventions())
-          {
+          if (getUseConventions()) {
             if (lexicalLayer != null) {
               Annotation tag = token.first(lexicalLayer.getId());
               if (tag != null) {

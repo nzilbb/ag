@@ -1,3 +1,3 @@
 
-author:  the_DET quick_ADJ brown_ADJ fox_N jumps_V
- over_PREP the_DET lazy_ADJ dog_N ._PUNC
+author:  the_DET qu~_ quick_ADJ brown_ADJ fox_N jumps_V
+ over_PREP the_DET lazy_ADJ dog_N ._

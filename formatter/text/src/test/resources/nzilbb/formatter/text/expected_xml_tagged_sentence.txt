@@ -1,0 +1,3 @@
+
+author:  <DET>the</DET> qu~ <ADJ>quick</ADJ> <ADJ>brown</ADJ> <N>fox</N> <V>jumps</V>
+ <PREP>over</PREP> <DET>the</DET> <ADJ>lazy</ADJ> <N>dog</N> .

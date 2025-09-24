@@ -115,6 +115,20 @@ metaDataFormat
   is a place-holder for the attribute name or key, and `{1}` is a
   place-holder for the attribute value
 
+tagFormat
+: Format for outputting word tokens with tags - a string where `{0}`
+  is a place-holder for the word toekn, and `{1}` is a place-holder for the
+  annotation tag's label. The default pattern of `{0}_{1}` results in
+  output like `the_DET quick_ADJ brown_ADJ fox_N`.
+  For xml-style output, setting the pattern to `<{1}>{0}</{1}>` result in output like
+  `<DET>the</DET> <ADJ>quick</ADJ> <ADJ>brown</ADJ> <N>fox</N>`.
+
+includeMissingTags
+: Whether to apply **tagFormat** to output words even when there is no tag.
+  For example, if the word is "the' and there's no named-entity tag, then
+  setting this to true will result in token being output as `the_`, but setting
+  it to false will result in the token being output as `the`.
+
 timestampFormat
 : Format for a time stamp - e.g. `HH:mm:ss.SSS`
 
