@@ -57,6 +57,32 @@ progress {
     width: 100%;
 }
 
+.example {
+    max-width: 1000px;
+    border: 1px solid #96A339;
+    & th {
+        text-align: left;
+        white-space: nowrap;
+    }
+    & td {
+        text-align: center;
+        width: 10%;
+    }
+    & .chunk td {
+        border-top: 1px solid black;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+    & .entity {
+        color: #96A339;
+    }
+    & caption {
+        font-style: italic;
+    }
+}
+
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
     .field { flex-direction: column; }

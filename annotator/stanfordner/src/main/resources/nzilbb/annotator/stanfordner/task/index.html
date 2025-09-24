@@ -15,12 +15,45 @@
       licensed under the
       <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="stanford">
         GNU General Public License</a> (v2 or later). </p>
-
-    <p> The Stanford NER includes a number of classifiers for English. You can download
-      alternative classifiers from the <a href="https://stanfordnlp.github.io/CoreNLP/index.html#quickstart" target="stanford">Stanford CoreNLP site</a>,
-      and install them by selecting the <em>[other classifier]</em> option for the
-      <em>Classifier to use</em> setting below.</p>
     
+    <table class="example"><caption>Example of named-entity tags</caption>
+      <tr class="chunk">
+        <th><em>Chunk layer:</em></th>
+        <td colspan="7">John</td>
+        <td colspan="5">Jane</td>
+      </tr>
+      <tr class="entity">
+        <th><em>Entity Layer:</em></th>
+        <td></td>
+        <td>PERSON</td>
+        <td>PERSON</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>LOCATION</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>DATE</td>
+      </tr>
+      <tr class="token">
+        <th><em>Token layer:</em></th>
+        <td>President</td>
+        <td>Barack</td>
+        <td>Obama</td>
+        <td>was</td>
+        <td>born</td>
+        <td>in</td>
+        <td>Hawaii.</td>
+        <td>He</td>
+        <td>was</td>
+        <td>elected</td>
+        <td>in</td>
+        <td>2008.</td>
+      </tr>
+    </table>
+
     <form method="POST" action="setTaskParameters" onsubmit="return testPatterns(true);">
       <div class="field" title="Input layer from which words come">
         <label for="tokenLayerId"> Token Layer </label>
@@ -53,7 +86,7 @@
         </span>
       </div>
       <div class="field"
-           title="Regular expression for the ISO language codes of the languages to target, or blank for all">
+           title="Regular expression for the ISO language codes of the languages to target, or blank for all. If set, only tokens in the targeted language will be processed.">
         <label for="targetLanguagePattern">Target Language Pattern</label>
         <span><input id="targetLanguagePattern" name="targetLanguagePattern"
                      type="text" placeholder="Regular Expression"></span>
@@ -77,7 +110,7 @@
       <div id="uploadClassifier" style="display: none;">
         <div class="field file-chooser" 
              title="You can select a new classifier file to upload, which can be a single .crf.ser.gz classifier file, or a .jar files containing one or more classifiers.">
-          <label for="file">Classifier file <small>(e.g. <q>stanford-corenlp-4.2.0-models-german.jar</q>)</small></label>
+          <label for="file">Classifier file</label>
           <input id="file" type="file">
         </div>
         <div id="uploadProgress" style="display: none;">
@@ -85,6 +118,28 @@
           <div id="uploadResult"></div>
         </div>
       </div>
+      <details><summary>The classifier selected determines what entity labels are used,
+          and what language is expected.</summary>
+        
+        <p> Different classifiers include different possible entity labels: </p>
+        <ul>
+          <li><em>3 class:</em> LOCATION, PERSON, ORGANIZATION</li>
+          <li><em>4 class:</em> LOCATION, PERSON, ORGANIZATION, MISC</li>
+          <li><em>7 class:</em> LOCATION, PERSON, ORGANIZATION, MONEY, PERCENT, DATE, TIME</li>
+        </ul>      
+        
+        <p> The Stanford NER includes a number of classifiers for English. You can download
+          alternative classifiers from the <a href="https://stanfordnlp.github.io/CoreNLP/index.html#quickstart" target="stanford">Stanford CoreNLP site</a>,
+          and install them by selecting the <em>[other classifier]</em> option for the
+          <em>Classifier to use</em> setting.</p>
+        
+        <p> The models download page allows you to download .jar files which contain not
+          only Stanford NER classifiers, but also models for many other CoreNLP tasks.
+          You can upload the whole .jar file here, or unzip the file and upload only the
+          classifier you're interested in; the NER classifiers files have names ending in
+          <em>.distsim.crf.ser.gz</em></p>
+        
+      </details>
       <div class="controls"><input type="submit" value="Set Parameters"></div>
     </form>
     

@@ -692,7 +692,7 @@ public class TestStanfordNERecognizer {
     // tag the graph as being in US English
     g.createTag(g, "transcript_language", "en-US");
 
-    // tag some words as some other language - "President Barakc Obama"
+    // tag some words as some other language - "President Barack Obama"
     Annotation es = g.createAnnotation(g.getOrCreateAnchorAt(10), g.getOrCreateAnchorAt(40),
                                        "lang", "es-AR",
                                        g.first("turn"));

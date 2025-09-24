@@ -1,14 +1,78 @@
 <h2> Stanford Named Entity Recognizer</h2>
 
 <p> Annotator that tags words that are recognized as being names according to the
-  <a href="https://nlp.stanford.edu/software/CRF-NER.html">
+  <a href="https://nlp.stanford.edu/software/CRF-NER.html" target="stanford">
     Stanford Named Entity Recognizer (NER)</a> developed by the
   <a href="https://nlp.stanford.edu/">Stanford Natural Language Processing Group</a>. </p>
 
+<style type="text/css">
+.example {
+    max-width: 1000px;
+    border: 1px solid #96A339;
+}
+.example th {
+  text-align: left;
+  white-space: nowrap;
+}
+.example td {
+    text-align: center;
+    width: 10%;
+}
+.example .entity {
+    color: #96A339;
+}
+.example caption {
+    font-style: italic;
+}
+</style>
+
+<table class="example"><caption>Example of named-entity tags</caption>
+  <tr class="entity">
+    <th><em>Named Entity tags:</em></th>
+    <td></td>
+    <td>PERSON</td>
+    <td>PERSON</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>LOCATION</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>DATE</td>
+  </tr>
+  <tr class="token">
+    <th><em>Words:</em></th>
+    <td>President</td>
+    <td>Barack</td>
+    <td>Obama</td>
+    <td>was</td>
+    <td>born</td>
+    <td>in</td>
+    <td>Hawaii.</td>
+    <td>He</td>
+    <td>was</td>
+    <td>elected</td>
+    <td>in</td>
+    <td>2008.</td>
+  </tr>
+</table>
+
 <p> When this annotator is installed, it downloads models of version 4.2.0 of the
-  Stanford Named Entity Recognizer (NER) from <a href="https://nlp.stanford.edu/software/stanford-ner-4.2.0.zip">
+  Stanford Named Entity Recognizer (NER) from
+  <a href="https://nlp.stanford.edu/software/stanford-ner-4.2.0.zip" target="stanford">
     https://nlp.stanford.edu/software/stanford-ner-4.2.0.zip</a>, which requires
   access to the internet. </p>
 
-<p> Alternatively, it's possible to specify your own tagger models after installation.</p>
+<p> Several classifiers for English are included in the default installation.
+  You can download classifiers for other languages from the
+  <a href="https://stanfordnlp.github.io/CoreNLP/index.html#quickstart" target="stanford">
+    Stanford CoreNLP site</a>.</p>
 
+<p> Different classifiers include different possible entity labels: </p>
+<ul>
+  <li><em>3 class:</em> LOCATION, PERSON, ORGANIZATION</li>
+  <li><em>4 class:</em> LOCATION, PERSON, ORGANIZATION, MISC</li>
+  <li><em>7 class:</em> LOCATION, PERSON, ORGANIZATION, MONEY, PERCENT, DATE, TIME</li>
+</ul>
