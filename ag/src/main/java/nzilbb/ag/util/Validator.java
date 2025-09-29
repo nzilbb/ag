@@ -43,13 +43,8 @@ import nzilbb.util.Switch;
 
 /**
  * Validates Graph structure.
- * <p> TODO Validating the entire structure takes way too long for long transcripts 
- * (e.g. an hour-long interview with several layers can take five minutes to validate)
- * so validation needs to be smarter.  This could involve checking the changes that have been made
- * to the graph and trying to localize validation accordingly. e.g. if the only change is that 
- * word tags have been added, then only the tag layer (and its children if any) need be validated -
- * no default anchor computation, etc. is necessary.
  * <p> TODO validate Layer.validLabels
+ * <p> TODO check for simultaneous turns/utterances by the same participant
  * @author Robert Fromont robert@fromont.net.nz
  */
 @ProgramDescription(value="Validates JSON-encoded annotation graphs from stdin")
@@ -220,7 +215,27 @@ public class Validator extends Transform implements GraphTransformer {
    */
   @Switch("The maximum length of a label")
   public Validator setMaxLabelLength(Integer newMaxLabelLength) { maxLabelLength = newMaxLabelLength; return this; }
-   
+  
+  /**
+   * Maximum allowed transcript ID length, or null (the default) for no limit.
+   * @see #getMaxGraphIdLength()
+   * @see #setMaxGraphIdLength(Integer)
+   */
+  protected Integer maxGraphIdLength;
+  /**
+   * Getter for {@link #maxGraphIdLength}: Maximum allowed transcript
+   * ID length, or null (the default) for no limit. 
+   * @return Maximum allowed transcript ID length, or null (the default) for no limit.
+   */
+  public Integer getMaxGraphIdLength() { return maxGraphIdLength; }
+  /**
+   * Setter for {@link #maxGraphIdLength}: Maximum allowed transcript
+   * ID length, or null (the default) for no limit. 
+   * @param newMaxGraphIdLength Maximum allowed transcript ID length,
+   * or null (the default) for no limit. 
+   */
+  public Validator setMaxGraphIdLength(Integer newMaxGraphIdLength) { maxGraphIdLength = newMaxGraphIdLength; return this; }
+
   // Methods:
    
   /**
@@ -278,6 +293,14 @@ public class Validator extends Transform implements GraphTransformer {
           } // changed anchor
           if (needMoreValidation) break; // already found something interesting
         } // next anchor
+      }
+    }
+    
+    if (maxGraphIdLength != null) {
+      if (graph.getId().length() > maxGraphIdLength) {
+        errors.add(
+          "Transcript ID too long ("+graph.getId().length()+">" + maxGraphIdLength + "): "
+          + graph.getId());
       }
     }
 
@@ -473,7 +496,14 @@ public class Validator extends Transform implements GraphTransformer {
                   || layer.getParentId().equals(schema.getParticipantLayerId()))) {
             continue;
           }
-          if (annotation.getLabel() != null && annotation.getLabel().length() > maxLabelLength) {
+          if (annotation.getLabel() == null || annotation.getLabel().length() == 0) {
+            errors.add("Label blank for " + annotation.getLayerId()
+                       + ": " + logAnnotation(annotation));
+            // set the label so it's valid
+            annotation.setLabel(annotation.getLayerId());
+          }
+          if (annotation.getLabel() != null
+              && annotation.getLabel().length() > maxLabelLength) {
             errors.add("Label too long (>" + maxLabelLength + ") for "
                        + annotation.getLayerId()
                        + ": " + logAnnotation(annotation));
