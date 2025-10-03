@@ -83,9 +83,14 @@ public class TestIO {
   
   /** Ensure file-name/URL sanitization works. */
   @Test public void SafeFileNameUrl() {
-    assertEquals("Removals", "", IO.SafeFileNameUrl("\\?*+$"));
-    assertEquals("Underscores", "_____", IO.SafeFileNameUrl("|:!=^"));
-    assertEquals("Text alternative", "-at--amp--gt--ge--lt--le-", IO.SafeFileNameUrl("@&>>=<<="));
+    assertEquals("Removals",
+                 "", IO.SafeFileNameUrl("\\?*+$"));
+    assertEquals("Underscores",
+                 "_____", IO.SafeFileNameUrl("|:!=^"));
+    assertEquals("Text alternative",
+                 "-at--amp--gt--ge--lt--le-", IO.SafeFileNameUrl("@&>>=<<="));
+    assertEquals("External dots but not internal dots",
+                 "_.a.b.c._", IO.SafeFileNameUrl(".a.b.c."));
   }
    
   public static void main(String args[]) {
