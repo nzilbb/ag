@@ -667,7 +667,9 @@ public class IO
       .replaceAll(">","-gt-")
       .replaceAll("[\\|\\:\\!\\=\\^]", "_")	
       .replaceAll("@","-at-")
-      .replaceAll("&","-amp-");
+      .replaceAll("&","-amp-")
+      .replaceAll("^\\.","_.") // a leading dot hides the file on unix-like systems
+      .replaceAll("\\.$","._"); // Windows disallows folder names with a trailing dot
   } // end of SafeFileNameUrl()
   
   /**
