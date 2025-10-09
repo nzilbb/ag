@@ -33,6 +33,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -129,7 +130,9 @@ public class CsvSerializer implements GraphSerializer {
    * Setter for {@link #minimumAnchorConfidence}: Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
    * @param newMinimumAnchorConfidence Minimum confidence for anchor offsets. Offsets with lower confidence will not be serialized.
    */
-  public CsvSerializer setMinimumAnchorConfidence(Integer newMinimumAnchorConfidence) { minimumAnchorConfidence = newMinimumAnchorConfidence; return this; }
+  public CsvSerializer setMinimumAnchorConfidence(Integer newMinimumAnchorConfidence) {
+    minimumAnchorConfidence = newMinimumAnchorConfidence; return this;
+  }
 
   private long graphCount = 0;
   private long consumedGraphCount = 0;
@@ -205,13 +208,14 @@ public class CsvSerializer implements GraphSerializer {
 
     if (!configuration.containsKey("minimumAnchorConfidence")) {
       configuration.addParameter(
-        new Parameter("minimumAnchorConfidence", Integer.class, 
-                      "Min. Anchor Confidence",
-                      "Minimum confidence for an annotation's offset before it's included"
-                      +" in the CSV file. Generally, if set to 100, only manually set offsets "
-                      +" will be output, if set to 50, manually set and automatically aligned"
-                      +" offsets with be output, and specifying 0 ensures all offsets are output"
-                      +" regardless of reliability.", true));
+        new Parameter(
+          "minimumAnchorConfidence", Integer.class, 
+          "Min. Anchor Confidence",
+          "Minimum confidence for an annotation's offset before it's included"
+          +" in the CSV file. Generally, if set to 100, only manually set offsets "
+          +" will be output, if set to 50, manually set and automatically aligned"
+          +" offsets with be output. Specify 0 for all offsets regardless of reliability,"
+          +" and nothing/null for no offsets.", true));
     }
     if (configuration.get("minimumAnchorConfidence").getValue() == null) {
       configuration.get("minimumAnchorConfidence").setValue(getMinimumAnchorConfidence());
@@ -294,20 +298,21 @@ public class CsvSerializer implements GraphSerializer {
       // there will be one temporal layer/value per CSV row
       for (Layer layer : temporalLayers) {
         csv.print(layer.getId());
-        switch (layer.getAlignment()) {
-          case Constants.ALIGNMENT_INSTANT:
-            csv.print(layer.getId() + " offset");
-            break;
-          default: // INTERVAL and NONE
-            csv.print(layer.getId() + " start");
-            csv.print(layer.getId() + " end");
-            break;
+        if (minimumAnchorConfidence != null) {
+          switch (layer.getAlignment()) {
+            case Constants.ALIGNMENT_INSTANT:
+              csv.print(layer.getId() + " offset");
+              break;
+            default: // INTERVAL and NONE
+              csv.print(layer.getId() + " start");
+              csv.print(layer.getId() + " end");
+              break;
+          }
         }
       } // next temporal layer
       csv.println();
       graphs.forEachRemaining(graph -> {
           if (getCancelling()) return;
-          System.out.println("graph: " + graph.getId() + " " + graphCount + " " + fileName);
           if (fileName.length() == 0) {
             fileName.append(IO.WithoutExtension(graph.getId()));
             if (graphCount != 1) { // only one graph, so we know the final name of the stream
@@ -320,70 +325,63 @@ public class CsvSerializer implements GraphSerializer {
           }
 
           try {
-            // target one temporal layer at a time
-            for (Layer targetLayer : temporalLayers) {
-              // there's one CSV row per annotation
-              for (Annotation annotation : graph.all(targetLayer.getId())) {
-                if (annotation.containsKey("@serialized")) continue; // already output
+            // for each anchor in offset/structure order
+            for (Anchor anchor : graph.getAnchorsOrderedByStructure()) {
+              // are there any interesting annotations starting here?
+              Optional<LinkedHashSet<Annotation>> annotationsStartingHere
+                = temporalLayers.stream()
+                .map(layer->anchor.startOf​(layer.getId()))
+                .filter(annotations->annotations.size() > 0)
+                .findAny();
+              if (annotationsStartingHere.isPresent()) {
+                Annotation annotationStartingHere = annotationsStartingHere.get()
+                  .iterator().next();
+                // start the row with graph ID and any attributes
                 
                 // graph ID
                 csv.print(graph.getId());
-                        
+                
                 // all the attribute layers
                 for (Layer attributeLayer : attributeLayers) {
                   try {
                     csv.print(
                       // multiple values are represented with multiple lines in the cell
-                      String.join("\n",
-                                  // stream all annotations on the attribute layer
-                                  Arrays.stream(annotation.all(attributeLayer.getId()))
-                                  // convert to a stream of labels
-                                  .map(a -> a.getLabel())
-                                  // and convert the stream to an array
-                                  .collect(Collectors.toList()).toArray(new String[0])));
+                      annotationStartingHere.every(attributeLayer.getId())
+                      // convert to a stream of labels
+                      .map(a -> a.getLabel())
+                      // and concatenate them all together into a multi-line string
+                      .collect(Collectors.joining("\n")));
                   } catch(NullPointerException exception) {
                     csv.print("");
                   }
                 } // next attribute layer
-                        
-                // now iterate through the temporal layers, inserting the label in the
-                // right column, and adding blanks in the other columns
+                
+                // now output annotations that start here, or blank columns
                 for (Layer columnLayer : temporalLayers) {
-                  if (columnLayer == targetLayer) { // put values in these columns
-                    csv.print(annotation.getLabel());
-                    switch (columnLayer.getAlignment()) {
-                      case Constants.ALIGNMENT_INSTANT:
-                        csv.print(offset(annotation.getStart()));
-                        break;
-                      default: // INTERVAL and NONE
-                        csv.print(offset(annotation.getStart()));
-                        csv.print(offset(annotation.getEnd()));
-                        break;
-                    }
-                  } else { // other layer columns
-                    // these will be blank EXCEPT in the case where there's an annotation
-                    // on this other layer that shares anchors with the current layer's annotation
-                    Optional<Annotation> parallellAnnotation = annotation.getStart()
-                      .startAnnotations(columnLayer.getId())
-                      .filter(a -> a.getEndId().equals(annotation.getEndId()))
-                      .filter(a -> !a.containsKey("@serialized"))
-                      .findAny();
-                    if (parallellAnnotation.isPresent()) { // there is a parallel annotation here
-                      // include its details too
-                      Annotation otherAnnotation = parallellAnnotation.get();
-                      csv.print(otherAnnotation.getLabel());
+                  LinkedHashSet<Annotation> startsHere = anchor.startOf​(
+                    columnLayer.getId());
+                  if (startsHere.size() > 0) {
+                    // if there's more than one, concatenate their labels
+                    String label = startsHere.stream()
+                      .map(annotation->annotation.getLabel())
+                      .collect(Collectors.joining("\n"));
+                    csv.print(label);
+                    if (minimumAnchorConfidence != null) {
+                      // use offsets of the first one
+                      Annotation annotation = startsHere.iterator().next();
                       switch (columnLayer.getAlignment()) {
                         case Constants.ALIGNMENT_INSTANT:
-                          csv.print(offset(otherAnnotation.getStart()));
+                          csv.print(offset(annotation.getStart()));
                           break;
                         default: // INTERVAL and NONE
-                          csv.print(offset(otherAnnotation.getStart()));
-                          csv.print(offset(otherAnnotation.getEnd()));
+                          csv.print(offset(annotation.getStart()));
+                          csv.print(offset(annotation.getEnd()));
                           break;
                       }
-                      otherAnnotation.put("@serialized", Boolean.TRUE);
-                    } else {
-                      csv.print("");
+                    }
+                  } else { // no annotation, output empty cells
+                    csv.print("");
+                    if (minimumAnchorConfidence != null) {
                       switch (columnLayer.getAlignment()) {
                         case Constants.ALIGNMENT_INSTANT:
                           csv.print("");
@@ -394,11 +392,11 @@ public class CsvSerializer implements GraphSerializer {
                           break;
                       }
                     }
-                  } // blank columns
+                  }
                 } // next temporal layer
                 csv.println();
-              } // next annotation
-            } // next layer
+              } // annotations start here
+            } // next anchor
             consumedGraphCount++;
           } catch(Exception exception) {
             errors.accept(new SerializationException(exception));

@@ -1,5 +1,5 @@
 //
-// Copyright 2019 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -171,7 +171,9 @@ public class TestCsvSerializer {
     }
   }
 
-  /** Ensure if there is more than one layer selected, serialization works correcty. */
+  /** Ensure if there is more than one layer selected, serialization works correctly.
+   * Specifically, all start anchors should be in strict chronological order, and
+   * annotations that start with the same anchor appear on the same row. */
   @Test public void multipleLayers()  throws Exception {
     Graph g = createGraph("multipleLayers.trs");
       
@@ -191,7 +193,7 @@ public class TestCsvSerializer {
     // serialize
     Graph[] graphs = { g };
     File dir = getDir();
-    String[] layerIds = {"who", "word", "orthography"};
+    String[] layerIds = {"who", "utterance", "word", "orthography"};
     final Vector<SerializationException> exceptions = new Vector<SerializationException>();
     final Vector<NamedStream> streams = new Vector<NamedStream>();
     serializer.serialize(Arrays.spliterator(graphs), layerIds,
@@ -211,6 +213,50 @@ public class TestCsvSerializer {
       actual.delete();
     }
   }
+
+  /** Ensure if the offset threshold is set higher than 100,
+   * no offset columns are included. */
+  @Test public void noOffsets()  throws Exception {
+    Graph g = createGraph("noOffsets.trs");
+      
+    // create deserializer
+    CsvSerializer serializer = new CsvSerializer();
+      
+    ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
+    configuration.get("minimumAnchorConfidence").setValue(null);
+    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    assertEquals(1, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals("minimumAnchorConfidence", null, 
+                 (Integer)configuration.get("minimumAnchorConfidence").getValue());
+    
+    // no layers required
+    String[] requiredLayers = serializer.getRequiredLayers();
+    assertEquals(0, requiredLayers.length);
+    
+    // serialize
+    Graph[] graphs = { g };
+    File dir = getDir();
+    String[] layerIds = {"who", "utterance", "word", "orthography"};
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(Arrays.spliterator(graphs), layerIds,
+                         stream -> streams.add(stream),
+                         warning -> System.out.println(warning),
+                         exception -> exceptions.add(exception));
+    assertEquals(1, streams.size());
+    streams.elementAt(0).save(dir);
+
+    File actual = new File(dir, streams.elementAt(0).getName());
+    String differences = diff(
+      new File(dir, "expected_" + g.getId().replace(".trs",".csv")),
+      actual);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      actual.delete();
+    }
+  }
+  
   /**
    * Creates a test graph.
    * @return The graph for testing.
