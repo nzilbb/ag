@@ -1811,9 +1811,9 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       Schema schema = graph.getSchema();
 
       // meta-data first
+      boolean thereWereAttributes = false;
       if (metaDataFormat != null || metaDataFormat.length() > 0) {
         MessageFormat fmtMetaDataFormat = new MessageFormat(metaDataFormat);
-        boolean thereWereAttributes = false;
         for (String id : selectedLayers) {
           Layer layer = schema.getLayer(id);
           // is it a graph tag layer
@@ -1864,14 +1864,16 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
         = new TreeSet<Annotation>(new AnnotationComparatorByAnchor());
       for (Annotation u : graph.all(getUtteranceLayer().getId())) utterancesByAnchor.add(u);
 
+      boolean previousOutput = thereWereAttributes;
       for (Annotation utterance : utterancesByAnchor) {
         if (cancelling) break;
         // is the participant changing?
         Annotation participant = utterance.first(getParticipantLayer().getId());
         if (participant != currentParticipant) { // participant change
           currentParticipant = participant;
-          Object[] participantLabel = { currentParticipant.getLabel() }; 
-          writer.println();
+          Object[] participantLabel = { currentParticipant.getLabel() };
+          if (previousOutput) writer.println();
+          previousOutput = true;
           if (fmtParticipant != null) {
             writer.print(fmtParticipant.format(participantLabel));
           }
