@@ -787,6 +787,7 @@ public class HTKAligner extends Annotator {
               htkSourceDirectory.mkdir();
               
               // wget --user=... --password=... http://htk.eng.cam.ac.uk/ftp/software/HTK-3.4.1.tar.gz
+              // TODO fall back to https://github.com/open-speech/HTK/archive/refs/heads/r3.4.1_fix.zip
               URL url = new URL("https://htk.eng.cam.ac.uk/ftp/software/HTK-3.4.1.tar.gz");
               setStatus("Attempting to download HTK source code from " + url);
               HttpURLConnection connection = (HttpURLConnection)url.openConnection();
@@ -2738,10 +2739,10 @@ public class HTKAligner extends Annotator {
         // look for something like "Cannot find hmm [???-]PD[+???]"
         Pattern pCannotFindHmm = Pattern.compile(
           "Cannot find hmm \\[\\?\\?\\?-\\](.+)\\[\\+\\?\\?\\?\\]");
-        Matcher mCannotFileHmm = pCannotFindHmm.matcher(sError);
-        if (mCannotFileHmm.find()) {
+        Matcher mCannotFindHmm = pCannotFindHmm.matcher(sError);
+        if (mCannotFindHmm.find()) {
           throw new TransformationException(
-            this, "ERROR: HVite found a phone with no model: " + mCannotFileHmm.group(1));
+            this, "ERROR: HVite found a phone with no model: " + mCannotFindHmm.group(1));
         } else {
           throw new TransformationException(
             this, "ERROR: HVite returned: " + r + " - " + htk.getLastError());
@@ -3166,10 +3167,10 @@ public class HTKAligner extends Annotator {
         // look for something like "Cannot find hmm [???-]PD[+???]"
         Pattern pCannotFindHmm = Pattern.compile(
           "Cannot find hmm \\[\\?\\?\\?-\\](.+)\\[\\+\\?\\?\\?\\]");
-        Matcher mCannotFileHmm = pCannotFindHmm.matcher(sError);
-        if (mCannotFileHmm.find()) {
+        Matcher mCannotFindHmm = pCannotFindHmm.matcher(sError);
+        if (mCannotFindHmm.find()) {
           throw new TransformationException(
-            this, "ERROR: HVite found a phone with no model: " + mCannotFileHmm.group(1));
+            this, "ERROR: HVite found a phone with no model: " + mCannotFindHmm.group(1));
         } else {
           throw new TransformationException(
             this, "HVite returned: " + r + " - " + htk.getLastError());
@@ -3214,10 +3215,10 @@ public class HTKAligner extends Annotator {
         // look for something like "Cannot find hmm [???-]PD[+???]"
         Pattern pCannotFindHmm
           = Pattern.compile("Cannot find hmm \\[\\?\\?\\?-\\](.+)\\[\\+\\?\\?\\?\\]");
-        Matcher mCannotFileHmm = pCannotFindHmm.matcher(sError);
-        if (mCannotFileHmm.find()) {
+        Matcher mCannotFindHmm = pCannotFindHmm.matcher(sError);
+        if (mCannotFindHmm.find()) {
           throw new TransformationException(
-            this, "ERROR: HVite found a phone with no model: " + mCannotFileHmm.group(1));
+            this, "ERROR: HVite found a phone with no model: " + mCannotFindHmm.group(1));
         } else {
           throw new TransformationException(
             this, "HVite returned: " + r + " - " + htk.getLastError());
