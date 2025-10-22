@@ -2262,10 +2262,10 @@ public class TestValidator {
     }
   }
 
-  /** Test that labels that are too long are truncated. */
+  /** Test that labels that are too long, or blank, generate errors. */
   @Test public void labels() {
     Graph g = new Graph();
-    g.setId("my graph");
+    g.setId("my graph has a long ID");
     g.setCorpus("cc");
       
     g.addLayer(new Layer("transcript_attribute", "Transcript Attribute")
@@ -2357,7 +2357,7 @@ public class TestValidator {
     g.addAnnotation(new Annotation("word6", "over", "word", "a?2", "a5", "turn1"));
       
     g.addAnnotation(new Annotation("pos1", "DT", "pos", "a1", "a2", "word1"));
-    g.addAnnotation(new Annotation("pos2", "A", "pos", "a2", "a3", "word2"));
+    g.addAnnotation(new Annotation("posblank", "", "pos", "a2", "a3", "word2"));
     g.addAnnotation(new Annotation("pos3", "N", "pos", "a4", "a?1", "word4"));
       
     g.addAnnotation(new Annotation("phone1", "D", "phone", "a1", "a1.5", "word1"));
@@ -2369,6 +2369,7 @@ public class TestValidator {
       
     // this shouldn't be necessary: g.trackChanges();
     Validator v = new Validator();
+    v.setMaxGraphIdLength(10);
     v.setMaxLabelLength(20);
     v.setFullValidation(true);
       
@@ -2379,14 +2380,20 @@ public class TestValidator {
       v.transform(g);
       Set<Change> changes = g.getTracker().getChanges();
       if (v.getLog() != null) for (String m : v.getLog()) System.out.println(m);
-      assertEquals("one error: " + v.getErrors(),
-                   1, v.getErrors().size());
-      assertEquals("Label too long (>20) for word: [word2]2#very-very-very-very-very-very(2.0-3.0)",
+      assertEquals("three errors: " + v.getErrors(),
+                   3, v.getErrors().size());
+      assertEquals("Transcript ID too long ("+g.getId().length() +">10): "+g.getId(),
                    v.getErrors().elementAt(0));
+      assertEquals("Label too long (>20) for word: [word2]2#very-very-very-very-very-very(2.0-3.0)",
+                   v.getErrors().elementAt(1));
+      assertEquals("Label blank for pos: [posblank]1#(2.0-3.0)",
+                   v.getErrors().elementAt(2));
       assertEquals("changes applied",
-                   1, changes.size());
+                   2, changes.size());
       assertEquals("label truncated",
                    "very-very-very-very-", g.getAnnotation("word2").getLabel());
+      assertEquals("missing label set to layer ID",
+                   "pos", g.getAnnotation("posblank").getLabel());
     } catch(TransformationException exception) {
       fail(exception.toString());
     }
