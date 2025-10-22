@@ -245,13 +245,16 @@ public class Coalescer implements GraphTransformer {
           // but only our own children
           if (endingPrecedingChild.getParentId().equals(preceding.getId())) {
             endingPrecedingChild.setEnd(following.getStart());
+            
             // and any annotations on other layers that are also linked
-            originalPrecedingEnd.endingAnnotations()
+            // (create a new collection to avoid ConcurrentModificationException)
+            new Vector<Annotation>(
+              originalPrecedingEnd.getEndingAnnotations()).stream()            
               .filter(ending -> !ending.getLayerId().equals(layerId))
               .filter(ending -> !ending.getLayerId().equals(childLayerId))
               .forEach(endingOtherLayer -> {
                   endingOtherLayer.setEnd(following.getStart());
-                });
+              });
           } // own child
         } // next child ending here
       } // saturated child layer
