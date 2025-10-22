@@ -739,7 +739,9 @@ public class StanfordNERecognizer extends Annotator {
                   String entityLabel = label.get(CoreAnnotations.AnswerAnnotation.class);
                   if (entityLabel != null && !entityLabel.equals("O") // is tagged an entity
                       // ... and is not already manually tagged
-                      && originalToken.first(entityLayerId) == null) {
+                      && !originalToken.every(entityLayerId)
+                      .filter(Annotation::NotDestroyed)
+                      .findAny().isPresent()) {
                     setStatus(originalToken + " → " + entityLabel);
                     // there shouldn't be more than one
                     graph.createTag(

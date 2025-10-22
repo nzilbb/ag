@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.stanfordner</artifactId>
-  <version>0.1.1</version>  
+  <version>0.1.2</version>  
   <name>nzilbb.annotator.stanfordner</name>
   <description>Integration with the Stanford Named Entity Recognizer (NER)</description>
 

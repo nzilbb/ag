@@ -68,6 +68,7 @@ import nzilbb.util.IO;
 
 // TODO add option to tease apart POS labels
 // TODO e.g. VBD = VB + past, VBG = VB + continuous, etc.
+// TODO ensure that utterance partitioning is respected when chunking by turn
 
 /**
  * Annotator that tags words with their part of speech (POS) according to the 
