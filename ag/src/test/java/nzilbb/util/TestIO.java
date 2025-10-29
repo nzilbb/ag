@@ -91,6 +91,13 @@ public class TestIO {
                  "-at--amp--gt--ge--lt--le-", IO.SafeFileNameUrl("@&>>=<<="));
     assertEquals("External dots but not internal dots",
                  "_.a.b.c._", IO.SafeFileNameUrl(".a.b.c."));
+    assertEquals("No double-dot before a filename extension",
+                 "results._.zip", IO.SafeFileNameUrl("results..zip"));
+    assertEquals("No double-dot before a long extension",
+                 "results._.TextGrid", IO.SafeFileNameUrl("results..TextGrid"));
+    assertEquals("No double-dot removal doesn't affect fragment names",
+                 "something__123.456-789.101.TextGrid",
+                 IO.SafeFileNameUrl("something__123.456-789.101.TextGrid"));
   }
    
   public static void main(String args[]) {
