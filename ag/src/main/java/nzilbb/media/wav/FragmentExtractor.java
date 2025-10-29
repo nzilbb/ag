@@ -118,7 +118,7 @@ public class FragmentExtractor implements MediaConverter {
         "sampleRate", Integer.class, "Sample rate", "Sample rate in Hz", false);
       configuration.addParameter(sampleRate);
     }
-    if (getSampleRate() != null) {
+    if (getSampleRate() != null && sampleRate.getValue() == null) {
       sampleRate.setValue(getSampleRate());
     }
     
@@ -128,12 +128,12 @@ public class FragmentExtractor implements MediaConverter {
         "start", Double.class, "Start", "Start time in seconds", true);
       configuration.addParameter(start);
     }
-    if (getStart() != null) {
+    if (getStart() != null && start.getValue() == null) {
       start.setValue(getStart());
     }
     
     Parameter end = configuration.get("end");
-    if (end == null) {
+    if (end == null && end.getValue() == null) {
       end = new Parameter("end", Double.class, "End", "End time in seconds", true);
       configuration.addParameter(end);
     }
