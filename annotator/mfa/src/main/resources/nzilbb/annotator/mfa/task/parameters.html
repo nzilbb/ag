@@ -17,6 +17,18 @@
   <dt> overlapThreshold </dt> <dd> Percentage of overlap with other speech, above which the
     utterance is ignored. 0 means no utterances are ignored, no matter how much they
     overlap with other speech. If not specified, default is 5%.</dd>
+  <dt> leftChannelParticipantLayerId </dt> <dd> Optional input layer for specifiying a
+    transcript attribute that may name the participant on the left channel of a stereo
+    recording. If the participant of a given utterance is named in this attribute,
+    then only the left channel (channel 0) will be used for forced alignment.
+    If an utterance's participant is not identified by this or
+    rightChannelParticipantLayerId, then all channels are used. </dd>
+  <dt> rightChannelParticipantLayerId </dt> <dd> Optional input layer for specifiying a
+    transcript attribute that may name the participant on the right channel of a stereo
+    recording. If the participant of a given utterance is named in this attribute,
+    then only the right channel (channel 1) will be used for forced alignment.
+    If an utterance's participant is not identified by this or
+    leftChannelParticipantLayerId, then all channels are used. </dd>
   <dt> multilingualIPA </dt> <dd> Set any non-empty value for this parameter to use
     the <tt>--multilingual_ipa</tt> switch, omit the parameter otherwise</dd> 
   <dt> dictionaryName </dt> <dd> If you wish to use one of the available language
@@ -51,5 +63,5 @@
     the specified layer doesn't exist, a phrase layer will be created. </dd>
   <dt> utteranceTagLayerId </dt> <dd> Optional output layer for a time stamp tagging
     each aligned utterance. If the specified layer doesn't exist, a phrase layer will
-    be created. </dd>      
+    be created. </dd>
 </dl>
