@@ -67,6 +67,14 @@
     <tt>/opt/conda/bin/conda create -n aligner -c conda-forge montreal-forced-aligner=3.2.1</tt></li>
 </ol>
 
+<p> If you see errors, one or other of the following commands may resolve them:</p>
+
+<ul>
+  <li><tt>/opt/conda/envs/aligner/bin/pip install joblib==1.3.2</tt></li>
+  <li><tt>/opt/conda/envs/aligner/bin/pip uninstall setuptools<br>
+      /opt/conda/envs/aligner/bin/pip install setuptools==66.1.1</tt></li>
+</ul>
+
 <h3> Windows </h3>
 
 <p> To install the Montreal Forced Aligner on Windows systems for all users, so that
