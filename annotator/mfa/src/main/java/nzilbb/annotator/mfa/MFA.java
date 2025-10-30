@@ -503,9 +503,70 @@ public class MFA extends Annotator {
   /**
    * Setter for {@link #discOutput}: Whether to try to output DISC symbols on the phone
    * alignment layer. 
-   * @param newDiscOutput Whether to try to output DISC symbols on the phone alignment layer.
+   * @param newDiscOutput Whether to try to output DISC symbols on the
+   * phone alignment layer. 
    */
   public MFA setDiscOutput(boolean newDiscOutput) { discOutput = newDiscOutput; return this; }
+  
+  /**
+   * Layer ID of a transcript attribute that may contain the
+   * participant ID of the speaker in the left channel of a stereo
+   * recording, if participants are on different channels. 
+   * @see #getLeftChannelParticipantLayerId()
+   * @see #setLeftChannelParticipantLayerId(String)
+   */
+  protected String leftChannelParticipantLayerId;
+  /**
+   * Getter for {@link #leftChannelParticipantLayerId}: Layer ID of a
+   * transcript attribute that may contain the participant ID of the
+   * speaker in the left channel of a stereo recording, if
+   * participants are on different channels. 
+   * @return Layer ID of a transcript attribute that may contain the
+   * participant ID of the speaker in the left channel of a stereo
+   * recording, if participants are on different channels. 
+   */
+  public String getLeftChannelParticipantLayerId() { return leftChannelParticipantLayerId; }
+  /**
+   * Setter for {@link #leftChannelParticipantLayerId}: Layer ID of a
+   * transcript attribute that may contain the participant ID of the
+   * speaker in the left channel of a stereo recording, if
+   * participants are on different channels. 
+   * @param newLeftChannelParticipantLayerId Layer ID of a transcript
+   * attribute that may contain the participant ID of the speaker in
+   * the left channel of a stereo recording, if participants are on
+   * different channels. 
+   */
+  public MFA setLeftChannelParticipantLayerId(String newLeftChannelParticipantLayerId) { leftChannelParticipantLayerId = newLeftChannelParticipantLayerId; return this; }
+
+  /**
+   * Layer ID of a transcript attribute that may contain the
+   * participant ID of the speaker in the right channel of a stereo
+   * recording, if participants are on different channels. 
+   * @see #getRightChannelParticipantLayerId()
+   * @see #setRightChannelParticipantLayerId(String)
+   */
+  protected String rightChannelParticipantLayerId;
+  /**
+   * Getter for {@link #rightChannelParticipantLayerId}: Layer ID of a
+   * transcript attribute that may contain the participant ID of the
+   * speaker in the right channel of a stereo recording, if
+   * participants are on different channels. 
+   * @return Layer ID of a transcript attribute that may contain the
+   * participant ID of the speaker in the right channel of a stereo
+   * recording, if participants are on different channels. 
+   */
+   public String getRightChannelParticipantLayerId() { return rightChannelParticipantLayerId; }
+  /**
+   * Setter for {@link #rightChannelParticipantLayerId}: Layer ID of a
+   * transcript attribute that may contain the participant ID of the
+   * speaker in the right channel of a stereo recording, if
+   * participants are on different channels. 
+   * @param newRightChannelParticipantLayerId Layer ID of a transcript
+   * attribute that may contain the participant ID of the speaker in
+   * the right channel of a stereo recording, if participants are on
+   * different channels. 
+   */
+   public MFA setRightChannelParticipantLayerId(String newRightChannelParticipantLayerId) { rightChannelParticipantLayerId = newRightChannelParticipantLayerId; return this; }
 
   /**
    * Default constructor.
@@ -515,6 +576,12 @@ public class MFA extends Annotator {
       new Schema(
         "who", "turn", "utterance", "word",
         new Layer("transcript_language", "Overall Language")
+        .setAlignment(Constants.ALIGNMENT_NONE)
+        .setPeers(false).setPeersOverlap(false).setSaturated(true),
+        new Layer("transcript_leftChannel", "Left Channel Speaker")
+        .setAlignment(Constants.ALIGNMENT_NONE)
+        .setPeers(false).setPeersOverlap(false).setSaturated(true),
+        new Layer("transcript_rightChannel", "Right Channel Speaker")
         .setAlignment(Constants.ALIGNMENT_NONE)
         .setPeers(false).setPeersOverlap(false).setSaturated(true),
         new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
@@ -1141,6 +1208,12 @@ public class MFA extends Annotator {
     if (pronunciationLayerId != null) {
       requiredLayers.add(pronunciationLayerId);
     }
+    if (leftChannelParticipantLayerId != null) {
+      requiredLayers.add(leftChannelParticipantLayerId);
+    }
+    if (rightChannelParticipantLayerId != null) {
+      requiredLayers.add(rightChannelParticipantLayerId);
+    }
     
     return requiredLayers.toArray(new String[0]);
   }
@@ -1576,6 +1649,7 @@ public class MFA extends Annotator {
             }
 
             // simultaneous speech?
+            // TODO ignore this for utterances using left/right channel
             if (overlapThreshold != null) {
               if (getStore() == null) {
                 setStatus("No access to graph store, so simultaneous speech cannot be detected.");
@@ -2125,6 +2199,8 @@ public class MFA extends Annotator {
               // merge changes
               merger.transform(fragment);
               if (merger.getLog() != null) merger.getLog().forEach(l -> setStatus(l));
+
+              // TODO fix up mismatches, e.g. hyphenated in original but multiple words from MFA
               
               if (utteranceTagLayerId != null) { // add timestamp tag?
                 Annotation[] timestamps = fragment.tagsOn​(utteranceTagLayerId);

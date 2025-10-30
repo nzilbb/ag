@@ -59,7 +59,20 @@ getSchema(s => {
             }
         } // next layer
     }
-    
+
+    const leftChannelParticipantLayerId = document.getElementById("leftChannelParticipantLayerId");
+    addLayerOptions(
+        leftChannelParticipantLayerId, schema,
+        // the word layer, or word tag layers
+        layer => layer.parentId == schema.root.id && layer.alignment == 0
+        && layer.id != schema.participantLayerId && layer.id != "corpus" && layer.id != "episode");
+    const rightChannelParticipantLayerId = document.getElementById("rightChannelParticipantLayerId");
+    addLayerOptions(
+        rightChannelParticipantLayerId, schema,
+        // the word layer, or word tag layers
+        layer => layer.parentId == schema.root.id && layer.alignment == 0
+        && layer.id != schema.participantLayerId && layer.id != "corpus" && layer.id != "episode");
+
     // populate output layer select options
 
     const wordAlignmentLayerId = document.getElementById("wordAlignmentLayerId");
