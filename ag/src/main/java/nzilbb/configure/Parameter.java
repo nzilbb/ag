@@ -139,15 +139,15 @@ public class Parameter implements CloneableBean {
       String string = (String)newValue;
       if (type.equals(Integer.class) || type.equals(int.class)) {
         try {
-          value = new Integer(string);
+          value = Integer.valueOf(string);
         } catch(Exception exception) {}
       } else if (type.equals(Double.class) || type.equals(double.class)) {
         try {
-          value = new Double(string);
+          value = Double.valueOf(string);
         } catch(Exception exception) {}
       } else if (type.equals(Long.class) || type.equals(long.class)) {
         try {
-          value = new Long(string);
+          value = Long.valueOf(string);
         } catch(Exception exception) {}
       } else if (type.equals(Boolean.class) || type.equals(boolean.class)) {
         if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase("t")
