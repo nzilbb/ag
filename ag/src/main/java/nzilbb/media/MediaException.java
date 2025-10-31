@@ -26,33 +26,24 @@ package nzilbb.media;
  * @author Robert Fromont robert@fromont.net.nz
  */
 @SuppressWarnings("serial")
-public class MediaException
-  extends java.lang.Exception
-{
-   // Attributes:
-   
-   // Methods:
-   
+public class MediaException extends java.lang.Exception {
    /**
     * Default constructor.
     */
-   public MediaException()
-   {
+   public MediaException() {
    } // end of constructor
    /**
     * Constructor with message.
     * @param message The error message.
     */
-   public MediaException(String message)
-   {
+   public MediaException(String message) {
       super(message);
    } // end of constructor
    /**
     * Constructor with cause.
     * @param cause The root cause of the error.
     */
-   public MediaException(Throwable cause)
-   {
+   public MediaException(Throwable cause) {
       super(cause);
    } // end of constructor
    /**
@@ -60,8 +51,7 @@ public class MediaException
     * @param message The error message.
     * @param cause The root cause of the error.
     */
-   public MediaException(String message, Throwable cause)
-   {
+   public MediaException(String message, Throwable cause) {
       super(message, cause);
    } // end of constructor
 } // end of class MediaException
