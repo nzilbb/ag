@@ -94,7 +94,7 @@ import nzilbb.util.IO;
 @UsesFileSystem @UsesGraphStore
 public class MFA extends Annotator { 
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.2.3"; }
+  public String getMinimumApiVersion() { return "1.2.5"; }
 
   /**
    * The version of the montreal-forced-aligner package that the aligner will attempt to
@@ -1029,6 +1029,10 @@ public class MFA extends Annotator {
       wordAlignmentLayerId = null;
     if (phoneAlignmentLayerId != null && phoneAlignmentLayerId.length() == 0)
       phoneAlignmentLayerId = null;
+    if (leftChannelParticipantLayerId != null && leftChannelParticipantLayerId.length() == 0)
+      leftChannelParticipantLayerId = null;
+    if (rightChannelParticipantLayerId != null && rightChannelParticipantLayerId.length() == 0)
+      rightChannelParticipantLayerId = null;
 
     // validation...
       
@@ -1649,8 +1653,10 @@ public class MFA extends Annotator {
             }
 
             // simultaneous speech?
-            // TODO ignore this for utterances using left/right channel
-            if (overlapThreshold != null) {
+            // (don't ignore simultaneous speech for fragments from a specific channel,
+            //  that's why you split speakers into separate channels!)
+            if (overlapThreshold != null // an overlap threshold is set
+                && channelForUtterance(fragment) < 0) { // no specific channel
               if (getStore() == null) {
                 setStatus("No access to graph store, so simultaneous speech cannot be detected.");
               } else {
@@ -1773,7 +1779,10 @@ public class MFA extends Annotator {
             transcript.close();
             
             // extract audio...
-            String fileUrl = fragment.getMediaProvider().getMedia("", "audio/wav");
+            int channel = channelForUtterance(fragment);
+            if (channel >= 0) setStatus(fragment.getId() + " : "+(channel==0?"left":"right")+" channel only...");
+            String fileUrl = fragment.getMediaProvider()
+              .getMedia("", "audio/wav"+(channel < 0?"":"; channel="+channel));
             File fTemp = new File(new URI(fileUrl));
             File fWav = new File(speakerDir, fragment.getId() + ".wav");
             if (fragment.isFragment()) { // fragment media is generated on the fly, so can be moved
@@ -1827,6 +1836,37 @@ public class MFA extends Annotator {
       throw new TransformationException(this, x);
     }
   } // end of createInputFiles()
+
+  /**
+   * Determines whether the speech for the given utterance is on a
+   * specific audio channel. 
+   * @param fragment The fragment with the speech.
+   * @return 0 if the speech is on the left channel, 1 if it's on the
+   * right channel, and -1 if all channels should be used. 
+   */
+  public int channelForUtterance(Graph fragment) {
+    if (leftChannelParticipantLayerId == null && rightChannelParticipantLayerId == null) {
+      return -1;
+    }
+    Annotation fragmentParticipant = fragment.first(
+      fragment.getSchema().getParticipantLayerId());
+    if (fragmentParticipant == null) return -1;
+    if (leftChannelParticipantLayerId != null) {
+      Annotation leftChannelParticipant = fragment.first(leftChannelParticipantLayerId);
+      if (leftChannelParticipant != null
+          && leftChannelParticipant.getLabel().equals(fragmentParticipant.getLabel())) {
+        return 0;
+      }
+    }
+    if (rightChannelParticipantLayerId != null) {
+      Annotation rightChannelParticipant = fragment.first(rightChannelParticipantLayerId);
+      if (rightChannelParticipant != null
+          && rightChannelParticipant.getLabel().equals(fragmentParticipant.getLabel())) {
+        return 1;
+      }
+    }
+    return -1;
+  } // end of channelForUtterance()
   
   /**
    * Changes the name of the current session, updating all relevant file members.

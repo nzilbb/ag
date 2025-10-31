@@ -30,6 +30,7 @@ import java.net.URL;
 import nzilbb.media.*;
 import nzilbb.configure.*;
 
+/** Tester for ChannelExtractor */
 public class TestChannelExtractor {
 
   /** Ensure default left channel extraction works. */
@@ -47,11 +48,12 @@ public class TestChannelExtractor {
 
     File stereo = new File(getDir(), "stereo.wav");
     assertTrue("stereo file exists", stereo.exists());
+    assertEquals("stereo file has two channels", 2, WAV.Channels(stereo));
     File mono = new File(getDir(), "left.wav");
     MediaThread thread = converter.start("audio/wav", stereo, "audio/wav", mono);
     thread.join();
     assertTrue("mono file now exists", mono.exists());
-
+    assertEquals("mono file has only one channel", 1, WAV.Channels(mono));
   }
    
   /** Ensure selected right channel extraction works. */
@@ -71,11 +73,12 @@ public class TestChannelExtractor {
 
     File stereo = new File(getDir(), "stereo.wav");
     assertTrue("stereo file exists", stereo.exists());
+    assertEquals("stereo file has two channels", 2, WAV.Channels(stereo));
     File mono = new File(getDir(), "right.wav");
     MediaThread thread = converter.start("audio/wav", stereo, "audio/wav", mono);
     thread.join();
     assertTrue("mono file now exists", mono.exists());
-
+    assertEquals("mono file has only one channel", 1, WAV.Channels(mono));
   }
    
   /**

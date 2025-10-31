@@ -43,8 +43,21 @@ public class WAV {
    * be determined.
    * @throw UnsupportedAudioFileException If the given file is not of a supported format.
    * @throw IOException If the given file is not accessible.
+   * @deprecated Use {@link #Duration(File)} instead.
    */
-  public static Double duration(File wav) throws UnsupportedAudioFileException, IOException {
+  public static @Deprecated Double duration(File wav)
+    throws UnsupportedAudioFileException, IOException {
+    return Duration(wav);
+  }
+  /**
+   * Determine the duration in seconds of the given WAV file.
+   * @param wav
+   * @return The duration in seconds of the given file, or null if the duration couldn't
+   * be determined.
+   * @throw UnsupportedAudioFileException If the given file is not of a supported format.
+   * @throw IOException If the given file is not accessible.
+   */
+  public static Double Duration(File wav) throws UnsupportedAudioFileException, IOException {
     // determine the duration of the media file
     AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(wav);
     AudioFormat format = audioInputStream.getFormat();
@@ -54,5 +67,19 @@ public class WAV {
     }
     return null;
   } // end of duration()
-
+  
+  /**
+   * Determine the number of channels in a given WAV file.
+   * @param wav
+   * @return The number of channel in the given recording.
+   * @throw UnsupportedAudioFileException If the given file is not of a supported format.
+   * @throw IOException If the given file is not accessible.
+   */
+  public static int Channels(File wav) throws UnsupportedAudioFileException, IOException {
+    // determine the duration of the media file
+    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(wav);
+    AudioFormat format = audioInputStream.getFormat();
+    return format.getChannels();
+  } // end of duration()
+  
 } // end of class WAV

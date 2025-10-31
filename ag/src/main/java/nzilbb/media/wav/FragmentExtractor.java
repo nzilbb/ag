@@ -36,7 +36,6 @@ import javax.sound.sampled.*;
  * @author Robert Fromont robert@fromont.net.nz
  */
 public class FragmentExtractor implements MediaConverter {
-  // Attributes:   
   
   /**
    * Sample rate.
@@ -55,6 +54,27 @@ public class FragmentExtractor implements MediaConverter {
    * @return this
    */
   public FragmentExtractor setSampleRate(Integer newSampleRate) { sampleRate = newSampleRate; return this; }
+  
+  /**
+   * Which channel to extract, e.g. 0 for left, 1 for right,
+   * or null for no channel extraction.
+   * @see #getChannel()
+   * @see #setChannel(int)
+   */
+  protected Integer channel = null;
+  /**
+   * Getter for {@link #channel}: Which channel to extract.
+   * @return Which channel to extract, e.g. 0 for left, 1 for right,
+   * or null for no channel extraction.
+   */
+  public Integer getChannel() { return channel; }
+  /**
+   * Setter for {@link #channel}: Which channel to extract.
+   * @param newChannel Which channel to extract, e.g. 0 for left, 1 for right,
+   * or null for no channel extraction.
+   */
+  public FragmentExtractor setChannel(Integer newChannel) {
+    channel = newChannel; return this; }
   
   /**
    * Start time of fragment.
@@ -133,16 +153,25 @@ public class FragmentExtractor implements MediaConverter {
     }
     
     Parameter end = configuration.get("end");
-    if (end == null && end.getValue() == null) {
+    if (end == null) {
       end = new Parameter("end", Double.class, "End", "End time in seconds", true);
       configuration.addParameter(end);
     }
-    if (getEnd() != null) {
+    if (getEnd() != null && end.getValue() == null) {
       end.setValue(getEnd());
     }
 
+    Parameter channel = configuration.get("channel");
+    if (channel == null) {
+      channel = new Parameter(
+        "channel", Integer.class, "Channel", "Channel to extract, 0=left, 1=right", false);
+      configuration.addParameter(channel);
+    }
+    if (getChannel() != null && channel.getValue() == null) {
+      channel.setValue(Integer.valueOf(getChannel()));
+    }
+    
     configuration.apply(this);
-      
     return configuration;
   }
    
@@ -196,8 +225,13 @@ public class FragmentExtractor implements MediaConverter {
         }
       }
       
-      final AudioInputStream stream
-        = new TruncatingAudioInputStream(audioInputStream, getStart(), getEnd());
+      final AudioInputStream stream = channel == null?
+        // truncate only
+        new TruncatingAudioInputStream(audioInputStream, getStart(), getEnd())
+        // extract channel and then truncate
+        :new TruncatingAudioInputStream(
+          new SingleChannelAudioInputStream(audioInputStream, getChannel()),
+          getStart(), getEnd());
       
       MediaThread thread = new MediaThread(new Runnable() {
           public void run() {

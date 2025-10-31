@@ -36,7 +36,9 @@ import javax.sound.sampled.*;
  */
 public class ChannelExtractor implements MediaConverter {
 
+  /** Left channel number - 0 */
   public static final Integer LEFT = Integer.valueOf(0);
+  /** Right channel number - 1 */
   public static final Integer RIGHT = Integer.valueOf(1);
   
   /**

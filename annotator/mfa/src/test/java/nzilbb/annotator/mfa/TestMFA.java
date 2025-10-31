@@ -379,11 +379,17 @@ public class TestMFA {
         assertEquals("Phone start shared with previous end " + p,
                      phones[p-1].getEnd(), phones[p].getStart());
       }
-    } // next phone    
+    } // next phone
+    
+    // aligner should not have asked for any particular channel
+    assertEquals("Requested no specific channel", "audio/wav", lastMimeType);
   }   
   
-  /** Test alignment of fragment with pre-trained IPA models/dictionary
-   * (english_ipa/english_uk_ipa), updating word token alignments and creating children. */
+  /**
+   * Test alignment of fragment with pre-trained IPA models/dictionary
+   * (english_ipa/english_uk_ipa), updating word token alignments and creating children.
+   * Also test that channel selection by partcipant and transcript attribute works.
+   */
   @Test public void pretrainedIPAModels() throws Exception {
     annotator.setSessionName("pretrainedIPAModels");
     // if (annotator.getStatusObservers().size() == 0) {
@@ -401,6 +407,8 @@ public class TestMFA {
       +"&modelsName=english_mfa"
       +"&utteranceTagLayerId=utterance_mfa" // nonexistent
       +"&participantTagLayerId=participant_mfa" // nonexistent
+      +"&leftChannelParticipantLayerId=leftChannel"
+      +"&rightChannelParticipantLayerId=rightChannel"
       +"&wordAlignmentLayerId=word"
       +"&phoneAlignmentLayerId=segment");
     Layer layer = annotator.getSchema().getLayer("utterance_mfa");
@@ -440,7 +448,10 @@ public class TestMFA {
         assertEquals("Phone start shared with previous end " + p,
                      phones[p-1].getEnd(), phones[p].getStart());
       }
-    } // next phone    
+    } // next phone
+
+    // aligner should have asked for the right channel
+    assertEquals("Requested right channel only", "audio/wav; channel=1", lastMimeType);
   }   
   
   /** Test alignment of full graph works. */
@@ -741,6 +752,8 @@ public class TestMFA {
       10.0, 14.0, (String[])schema.getLayers().keySet().toArray(new String[0]));
     return f;
   }
+
+  public static String lastMimeType = null;
   
   /**
    * Returns a graph for annotating.
@@ -749,6 +762,12 @@ public class TestMFA {
   public static Graph graph() throws Exception {
     Schema schema = new Schema(
       "participant", "turn", "utterance", "word",
+      new Layer("leftChannel", "Participant in Left Channel")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("rightChannel", "Participant in Right Channel")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
       new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -778,6 +797,9 @@ public class TestMFA {
     Anchor end = g.getOrCreateAnchorAt(14, Constants.CONFIDENCE_MANUAL);
     g.addAnnotation(
       new Annotation().setLayerId("participant").setLabel("someone")
+      .setStart(start).setEnd(end));
+    g.addAnnotation(
+      new Annotation().setLayerId("rightChannel").setLabel("someone")
       .setStart(start).setEnd(end));
     Annotation turn = g.addAnnotation(
       new Annotation().setLayerId("turn").setLabel("someone")
@@ -809,6 +831,7 @@ public class TestMFA {
         }
         public String getMedia(String trackSuffix, String mimeType) 
           throws StoreException, PermissionException {
+          lastMimeType = mimeType;
           try {
             return getAvailableMedia()[0].getFile().toURL().toString();
           } catch (Exception x) {

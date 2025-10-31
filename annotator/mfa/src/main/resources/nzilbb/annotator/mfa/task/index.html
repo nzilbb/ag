@@ -64,7 +64,7 @@
         </select></span>
       </div>
       <details class="section"
-               title="Setting for when different speakers are on different audio channels">
+               title="Settings for when different speakers are on different audio channels">
         <summary>Participants on different stereo channels</summary>
         <div class="explanation">
           If there are stereo recordings with participants on different channels,
@@ -90,24 +90,28 @@
           </select></span>
         </div>
       </details>
-      <div class="field" title="Whether to use PostGreSQL as the relational database engine. If not, uses SQLLite instead.">
-        <label for="usePostgres"> Use PostGres </label>
-        <span><input id="usePostgres"
-                     name="usePostgres" type="checkbox"></span>
-      </div>
-      <div class="field" title="This is the value for the --beam mfa parameter.">
-        <label for="beam"> Beam </label>
-        <span><input id="beam" name="beam" type="number" min="0" step="10" value="10" ></span>
-      </div>
-      <div class="field" title="This is the value for the --retry-beam mfa parameter.">
-        <label for="retryBeam"> Retry Beam </label>
-        <span><input id="retryBeam" name="retryBeam" type="number" min="0" step="10" value="40"></span>
-      </div>
-      <div class="field" title="Whether trained acoustic models are adapted for each speaker before alignment (unticked) or not (ticked).">
-        <label for="noSpeakerAdaptation"> No Speaker Adaptation </label>
-        <span><input id="noSpeakerAdaptation"
-                     name="noSpeakerAdaptation" type="checkbox"></span>
-      </div>
+      <details class="section"
+               title="Settings for mfa command line options">
+        <summary>Command Line Options</summary>
+        <div class="field" title="Whether to use PostGreSQL as the relational database engine. If not, uses SQLLite instead.">
+          <label for="usePostgres"> Use PostGres </label>
+          <span><input id="usePostgres"
+                       name="usePostgres" type="checkbox"></span>
+        </div>
+        <div class="field" title="This is the value for the --beam mfa parameter.">
+          <label for="beam"> Beam </label>
+          <span><input id="beam" name="beam" type="number" min="0" step="10" value="10" ></span>
+        </div>
+        <div class="field" title="This is the value for the --retry-beam mfa parameter.">
+          <label for="retryBeam"> Retry Beam </label>
+          <span><input id="retryBeam" name="retryBeam" type="number" min="0" step="10" value="40"></span>
+        </div>
+        <div class="field" title="Whether trained acoustic models are adapted for each speaker before alignment (unticked) or not (ticked).">
+          <label for="noSpeakerAdaptation"> No Speaker Adaptation </label>
+          <span><input id="noSpeakerAdaptation"
+                       name="noSpeakerAdaptation" type="checkbox"></span>
+        </div>
+      </details>
       <div class="field" title="Whether manual alignments should be overwritten or not.">
         <label for="ignoreAlignmentStatuses"> Replace Manual Alignments </label>
         <span><input id="ignoreAlignmentStatuses"
