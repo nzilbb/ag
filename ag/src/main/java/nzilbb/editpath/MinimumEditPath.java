@@ -293,9 +293,6 @@ public class MinimumEditPath<T> {
    * with <tt>(from,to) -&gt; from.toString().contains(to.toString()))</tt>
    * for <var>fromContainsTo</var>.
    * @param path An edit path produced by this MinimumEditPath generator.
-   * @param fromContainsTo Function that determines whether, a given
-   * 'from' element contains the given 'to' element. The function must
-   * return true if 'to' could be part of 'from', and false otherwise.
    * @return An ordered map of 'from' elements to zero or more 'to' elements.
    */
   public Map<T,List<T>> mapOneToMany(List<EditStep<T>> path) {

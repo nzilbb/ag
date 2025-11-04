@@ -88,7 +88,7 @@ public class TestChannelExtractor {
    */
   protected File dir;
   /**
-   * Getter for {@link #fDir}: Directory for text files.
+   * Getter for {@link #dir}: Directory for text files.
    * @return Directory for text files.
    */
   public File getDir() { 
