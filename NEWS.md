@@ -1,3 +1,11 @@
+# nzilbb.ag 1.3.0
+
+- Graph Validator ensures there are no blank labels, and can validate graph ID length.
+- Avoid leading/trailing dots when sanitizing file names.
+- Add support for extracting an audio channel.
+
+For LaBB-CAT version 20251105.1200
+
 # nzilbb.ag 1.2.4
 
 - Improvements to processing and ordering of graph change reporting.

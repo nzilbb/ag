@@ -9,5 +9,6 @@ nzilbb.configure
 nzilbb.editpath
 nzilbb.encoding
 nzilbb.encoding.comparator
+nzilbb.media.wav
 nzilbb.sql.mysql
 nzilbb.util

@@ -59,7 +59,7 @@ public class FragmentExtractor implements MediaConverter {
    * Which channel to extract, e.g. 0 for left, 1 for right,
    * or null for no channel extraction.
    * @see #getChannel()
-   * @see #setChannel(int)
+   * @see #setChannel(Integer)
    */
   protected Integer channel = null;
   /**

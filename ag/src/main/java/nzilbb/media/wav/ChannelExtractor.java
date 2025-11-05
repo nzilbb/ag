@@ -44,7 +44,7 @@ public class ChannelExtractor implements MediaConverter {
   /**
    * Which channel to extract, e.g. 0 for left, 1 for right.
    * @see #getChannel()
-   * @see #setChannel(int)
+   * @see #setChannel(Integer)
    */
   protected Integer channel = Integer.valueOf(0);
   /**
