@@ -1515,7 +1515,6 @@ public class Validator extends Transform implements GraphTransformer {
                     > Constants.CONFIDENCE_AUTOMATIC) {
                   // widen parent
                   String sOriginal = logAnnotation(parent);
-                  // widen parent
                   Anchor newAnchor = child.getStart();
                   if (!childLayer.getSaturated()) {
                     // sparse children - don't share anchors with them
@@ -1580,20 +1579,31 @@ public class Validator extends Transform implements GraphTransformer {
                 } else {
                   // narrow child
                   String sOriginal = logAnnotation(child);
-                  
-                  Anchor newAnchor = parent.getEnd();
-                  if (!childLayer.getSaturated()) {
-                    // sparse children - don't share anchors with them
-                    newAnchor = new Anchor(parent.getEnd());
-                    graph.addAnchor(newAnchor);
+
+                  if (child == parent.last(childLayer.getId()) // last child
+                      // or the child end seems unmovable
+                      || Utility.getConfidence(child.getEnd(), defaultAnchorConfidence)
+                      > Constants.CONFIDENCE_AUTOMATIC) {
+                    // change anchor to end of parent
+                    Anchor newAnchor = parent.getEnd();
+                    if (!childLayer.getSaturated()) {
+                      // sparse children - don't share anchors with them
+                      newAnchor = new Anchor(parent.getEnd());
+                      graph.addAnchor(newAnchor);
+                    }
+                    changeEndWithRelatedAnnotations(
+                      child, newAnchor, 
+                      // don't change other children if it's a sequential layer
+                      !childLayer.getPeersOverlap()?child.getLayerId():null);
+                    
+                    log("Narrowed ", sOriginal, " -> ", parent,
+                        " to ", parent.getEnd().getOffset(), " to be included in parent ", parent);
+                  } else { // middle child with movable end anchor
+                    child.getEnd().setOffset(parent.getEnd().getOffset());
+                    // just change the anchor offset
+                    log("Moved end of ", sOriginal, " -> ", parent,
+                        " to ", parent.getEnd().getOffset(), " to be included in parent ", parent);
                   }
-                  changeEndWithRelatedAnnotations(
-                    child, newAnchor, 
-                    // don't change other children if it's a sequential layer
-                    !childLayer.getPeersOverlap()?child.getLayerId():null);
-                  
-                  log("Narrowed ", sOriginal, " -> ", parent,
-                      " to ", parent.getEnd().getOffset(), " to be included in parent ", parent);
                 }
               } // end anchor
             } // end anchors have offsets
