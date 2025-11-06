@@ -2289,11 +2289,23 @@ public class Merger extends Transform implements GraphTransformer {
               if (relinkUnrelatedAnnotations != null) relinkUnrelatedAnnotations.run();
             } else { // there is a delta to apply
               if (differentOffset) {
-                relinkUnrelatedAnnotations.run();
-                SetConfidence(anOriginal.getStart(), GetConfidence(delta));
-                anOriginal.getStart().setOffset(delta.getOffset());
-                log(layerId, ": Different start anchor for ", anOriginal,
-                    ": changing offset to ", delta.getOffset());
+                // if the offsets are different, but they're both candidates for
+                // default-offset setting, don't changed the original offset to match
+                // the edited one; changing it may make child annotations that the
+                // edited graph doesn't know about be backwards, which can cause
+                // unnecessary unlinking/deletion during validation
+                if (GetConfidence(anEdited.getStart()) <= Constants.CONFIDENCE_DEFAULT
+                    && GetConfidence(anOriginal.getStart()) <= Constants.CONFIDENCE_DEFAULT) {
+                  log(layerId, ": Different start anchor for ", anOriginal,
+                      ": not changing offset to ", delta.getOffset(),
+                      " because both are default confidence");
+                } else { // they're not both default offsets
+                  relinkUnrelatedAnnotations.run();
+                  SetConfidence(anOriginal.getStart(), GetConfidence(delta));
+                  anOriginal.getStart().setOffset(delta.getOffset());
+                  log(layerId, ": Different start anchor for ", anOriginal,
+                      ": changing offset to ", delta.getOffset());
+                }
               } else {
                 final Runnable finalRelinkUnrelatedAnnotations = relinkUnrelatedAnnotations;
                 final Anchor finalDelta = delta;
@@ -2656,10 +2668,22 @@ public class Merger extends Transform implements GraphTransformer {
             if (delta != null) {
               if (delta.getChange() != Change.Operation.Create) {
                 if (differentOffset) {
-                  SetConfidence(anOriginal.getEnd(), GetConfidence(delta));
-                  anOriginal.getEnd().setOffset(delta.getOffset());
-                  log(layerId, ": Different end anchor for ", anOriginal,
-                      ": changing offset to  ", delta.getOffset());
+                  // if the offsets are different, but they're both candidates for
+                  // default-offset setting, don't changed the original offset to match
+                  // the edited one; changing it may make child annotations that the
+                  // edited graph doesn't know about be backwards, which can cause
+                  // unnecessary unlinking/deletion during validation
+                  if (GetConfidence(anEdited.getEnd()) <= Constants.CONFIDENCE_DEFAULT
+                      && GetConfidence(anOriginal.getEnd()) <= Constants.CONFIDENCE_DEFAULT) {
+                    log(layerId, ": Different end anchor for ", anOriginal,
+                        ": not changing offset to  ", delta.getOffset(),
+                        " because both are default confidence");
+                  } else { // they're not both default offsets
+                    SetConfidence(anOriginal.getEnd(), GetConfidence(delta));
+                    anOriginal.getEnd().setOffset(delta.getOffset());
+                    log(layerId, ": Different end anchor for ", anOriginal,
+                        ": changing offset to  ", delta.getOffset());
+                  }
                 } else {
                   final Anchor finalDelta = delta;
                   deferredConfidenceOnlyAnchorChanges.add(() -> {

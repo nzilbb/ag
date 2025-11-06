@@ -59,11 +59,15 @@
             "confidence": 10
         },
         "n_101": {
-            "offset": 20.0,
+            "offset": 17.5,
+            "confidence": 10
+        },
+        "n_200": {
+            "offset": 25.0,
             "confidence": 10
         },
         "n_300": {
-            "offset": 30.0,
+            "offset": 32.5,
             "confidence": 10
         },
         "n_399": {
@@ -120,7 +124,7 @@
                             "id": "ew_0_1",
                             "label": "86-1-1/2",
                             "startId": "n_101",
-                            "endId": "n_300",
+                            "endId": "n_200",
                             "confidence": 100,
                             "comment": "SWAP WITH NEXT (START OF TURN)"
                         },

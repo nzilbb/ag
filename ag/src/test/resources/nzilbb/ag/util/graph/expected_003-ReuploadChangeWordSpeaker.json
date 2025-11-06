@@ -328,12 +328,16 @@
             "offset": 31.666666666666668,
             "confidence": 10
         },
+        "n_1325": {
+            "offset": 32.5,
+            "confidence": 10
+        },
         "4": {
             "offset": 33.333333333333336,
             "confidence": 10
         },
-        "n_1325": {
-            "offset": 33.333333333333336,
+        "n_1350": {
+            "offset": 35.0,
             "confidence": 10
         },
         "n_1340": {
@@ -345,7 +349,7 @@
             "confidence": 10
         },
         "n_1375": {
-            "offset": 36.666666666666664,
+            "offset": 37.5,
             "confidence": 10
         },
         "n_1380": {
@@ -972,7 +976,7 @@
                         {
                             "id": "ew_0_3206",
                             "label": "86-2-three",
-                            "startId": "n_1325",
+                            "startId": "n_1350",
                             "endId": "n_1375",
                             "confidence": 100,
                             "comment": "86 - SIMULTANEOUS SPEECH"
