@@ -321,12 +321,15 @@ public class TestPartitioner {
       +"&partitionSize=5"
       +"&maxPartitions="
       +"&alignment=invalid"
+      +"&label=invalid"
       +"&excludeOnAttribute=transcript_type"
       +"&excludeOnAttributeValues=wordlist,test%20graph"
       +"&destinationLayerId=partition"
       +"&leftOvers=on");
     assertEquals("Invalid alignment defaults to 'start'",
                  "start", annotator.getAlignment());
+    assertEquals("Invalid label defaults to 'size'",
+                 "size", annotator.getLabel());
     
   }   
    
@@ -465,8 +468,8 @@ public class TestPartitioner {
                  0, partitions.length);
   }
   
-  /** Ensure maxPartitions and alignment settings are respected. */
-  @Test public void maxPartitionsAndAlignment() throws Exception {
+  /** Ensure maxPartitions, alignment, and label settings are respected. */
+  @Test public void maxPartitionsAlignmentAndLabel() throws Exception {
       
     Graph g = graph();
     Schema schema = g.getSchema();
@@ -479,6 +482,7 @@ public class TestPartitioner {
       +"&partitionSize=10"
       +"&maxPartitions=3"
       +"&alignment=start"
+      +"&label=serial"
       +"&destinationLayerId=partition");
       
     assertEquals("partition size", Double.valueOf(10), annotator.getPartitionSize());
@@ -529,7 +533,8 @@ public class TestPartitioner {
     // each partition has the right label and number of tokens
     partitions = g.all("partition");
     for (int p = 0; p < partitions.length; p++) {
-      assertEquals("align=start: Partition "+p+" label", "10", partitions[p].getLabel());
+      assertEquals("align=start: Partition "+p+" label is serial",
+                   ""+(p+1), partitions[p].getLabel());
       assertEquals("align=start: Partition "+p+" tokens",
                    10, partitions[p].all("word").length);
     }

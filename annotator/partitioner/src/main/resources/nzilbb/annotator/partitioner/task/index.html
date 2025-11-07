@@ -127,6 +127,12 @@
           the possibility of partitions that contain fewer
           than <em>Partition-Size</em> tokens (which can be
           differentiated by the partition label).</dd> 
+        <dt>Label</dt>
+        <dd>What the annotation labels should be, possibilities are:
+          <ul>
+            <li><b>size</b> - the size of the partition</li>
+            <li><b>serial</b> - a number unique within the transcript</li>
+        </ul></dd> 
         <dt> Include ... </dt> <dd> In order to skip
           annotation of certain transcripts, e.g. you may wish to not
           partitition 'word-list' or 'reading-passage' transcripts,
@@ -231,6 +237,14 @@
         <label for="leftOvers"> Annotate Left-overs </label>
         <span><input type="checkbox"
                      id="leftOvers" name="leftOvers"></span>
+      </div>
+      <div class="field"
+           title="Whether annotations should be labelled with the size of the partition, or a serial number.">
+        <label for="label"> Label </label>
+        <span><select id="label" name="label">
+            <option>size</option>
+            <option>serial</option>
+        </select></span>
       </div>
       <div class="field" title="Transcript attribute for including/excluding transcripts">
         <div>

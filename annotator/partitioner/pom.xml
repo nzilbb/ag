@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.partitioner</artifactId>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
 
   <name>nzilbb.annotator.partitioner</name>
   <description>Partitions transcripts by a number of tokens or a number of seconds.</description>

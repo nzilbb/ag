@@ -212,6 +212,32 @@ public class Partitioner extends Annotator {
   }
   
   /**
+   * What the annotation labels should be; one of "size" (the size of
+   * the partition) or "serial" (a number unique within the transcript). 
+   * @see #getLabel()
+   * @see #setLabel(String)
+   */
+  protected String label = "size";
+  /**
+   * Getter for {@link #label}: What the annotation labels
+   * should be; one of "size" (the size of the partition) or "serial"
+   * (a number unique within the transcript). 
+   * @return What the annotation labels should be; one of "size" (the
+   * size of the partition) or "serial" (a number unique within the
+   * transcript). 
+   */
+  public String getLabel() { return label; }
+  /**
+   * Setter for {@link #label}: What the annotation labels
+   * should be; one of "size" (the size of the partition) or "serial"
+   * (a number unique within the transcript). 
+   * @param newLabel What the annotation labels should be;
+   * one of "size" (the size of the partition) or "serial" (a number
+   * unique within the transcript).c 
+   */
+  public Partitioner setLabel(String newLabel) { label = newLabel; return this; }
+  
+  /**
    * Comma-separated list of values of {@link #excludeOnAttribute}
    * layer annotations to exclude from partitioning,
    * e.g. "wordlist,reading". 
@@ -323,11 +349,14 @@ public class Partitioner extends Annotator {
     excludeOnAttribute = null;
     excludeOnAttributeValues = null;
     destinationLayerId = null;
+    label = null;
     
     // parse parameters...
     beanPropertiesFromQueryString(parameters);
       
     // validate parameters...
+
+    if (!"size".equals(label) && !"serial".equals(label)) label = "size";
     
     if (boundaryLayerId == null)
       throw new InvalidConfigurationException(this, "No boundary layer set.");
@@ -708,11 +737,19 @@ public class Partitioner extends Annotator {
 
       // ensure ordinals are in offset order
       int ordinal = 1;
-      for (Annotation partitition : partititions) partitition.setOrdinal(ordinal++);
+      for (Annotation partition : partititions) partition.setOrdinal(ordinal++);
       
       doneCount++;
       setPercentComplete(10 + ((doneCount * 65) / boundingAnnotations.length));      
     } // next bounding annotation to partition
+    if ("serial".equals(label)) {
+      int serial = 0;
+      for (Annotation partition : transcript.all(destinationLayerId)) {
+        if (partition.getChange() != Change.Operation.Destroy) {
+          partition.setLabel(""+(++serial));
+        }
+      }
+    }
     return transcript;
   } // partition
   
