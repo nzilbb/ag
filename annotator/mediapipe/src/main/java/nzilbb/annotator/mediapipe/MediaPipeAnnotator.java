@@ -92,12 +92,21 @@ import org.apache.commons.csv.CSVRecord;
  * annotations, and also saves instantaneous
  * <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker">blendshape</a>
  * score annotations, i.e. facial features that can be used to determine facial expression.
+ * <p> Although the annotator will create frame/blendshape annotations in the annotation
+ * graph by default, if {@link Annotator#setStore(GraphStore)} has been called, then
+ * the instantaneous annotations for blendshape data and frame images will instead be
+ * created using the
+ * {@link GraphStore#createAnnotation(String,String,String,String,String,Integer,String)}
+ * instead. This is to make the annotator's memory footprint smaller, as frame annotations
+ * can be extremely numerous, and creating an Annotation object for each can be memory
+ * hungry. The {@link #frameCountLayerId} annotation is still added directly to the
+ * annotation graph.
  * @author Robert Fromont robert@fromont.net.nz
  */
 @UsesFileSystem @UsesGraphStore
 public class MediaPipeAnnotator extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.2.3"; }
+  public String getMinimumApiVersion() { return "1.4.0"; }
 
   // In LaBB-CAT the Tomcat user may have a read-only home directory,
   // so cache files etc. need to be stored somewhere else,
@@ -111,6 +120,9 @@ public class MediaPipeAnnotator extends Annotator {
   
   // flag accessible to unit test for keeping generted PNG/MP4
   boolean keepGeneratedMedia = false;
+  
+  // flag accessible to unit test for skipping store-based anchor/annotation creation
+  boolean createWithStore = true;
   
   /**
    * Python environment name.
@@ -962,19 +974,20 @@ public class MediaPipeAnnotator extends Annotator {
         setStatus("There is no video on track \""+inputTrackSuffix+"\" for " + transcript.getId());
       } else { // found video
         setStatus("Deleting existing annotations...");
+        GraphStore store = getStore();
         boolean thereWereAnnotationsDeleted = false;
         for (String layerId : getOutputLayers()) {
           boolean thereWereAnnotationsDeletedOnThisLayer
             = transcript.destroyAll(layerId);
-          if (getStore() != null && thereWereAnnotationsDeletedOnThisLayer) {
+          if (store != null && thereWereAnnotationsDeletedOnThisLayer) {
             // much quicker to use store.deleteMatchingAnnotations...
-            getStore().deleteMatchingAnnotations(
+            store.deleteMatchingAnnotations(
               "layer.id == '"+QL.Esc(layerId)+"' && graph.id == '"+QL.Esc(transcript.getId())+"'");
           }
           thereWereAnnotationsDeleted = thereWereAnnotationsDeleted
             || thereWereAnnotationsDeletedOnThisLayer;
         } // next output layer
-        if (thereWereAnnotationsDeleted && getStore() != null) {
+        if (thereWereAnnotationsDeleted && store != null) {
           // we deleted annotations in the store so we can get rid of them locally too
           transcript.commit();
         }
@@ -1043,6 +1056,9 @@ public class MediaPipeAnnotator extends Annotator {
               annotatedImageFilePattern = new MessageFormat(pngPattern);
             }
             String transcriptPrefix = IO.WithoutExtension(transcript.getId());
+
+            // use the anchor offset to show progress
+            double endOffset = transcript.getEnd().getOffset();
             
             // read scores
             setStatus("Parsing blendshape data...");
@@ -1052,15 +1068,37 @@ public class MediaPipeAnnotator extends Annotator {
             for (CSVRecord record : parser) {
               if (isCancelling()) break;
               thereWereFaces = true;
-              String offset = record.get("offset");
-              Anchor anchor = transcript.getOrCreateAnchorAt​(Double.parseDouble(offset));
-              anchor.setConfidence(Constants.CONFIDENCE_MANUAL); // not unsure about the time
+              String offset = record.get("offset");              
+              Anchor anchor = new Anchor().setOffset(Double.parseDouble(offset));
+              if (store != null  // can communicate directly with the graph store
+                  && createWithStore) { // (unit test flag)
+                // create the anchor directly
+                anchor.setId(
+                  store.createAnchor(
+                    transcript.getId(), anchor.getOffset(),
+                    // not unsure about the time
+                    Constants.CONFIDENCE_MANUAL, true));
+              } else { // no graph store 
+                // edit our local version of the graph
+                anchor = transcript.getOrCreateAnchorAt​(anchor.getOffset());
+                // not unsure about the time
+                anchor.setConfidence(Constants.CONFIDENCE_MANUAL);
+              }
+              
               for (String category : categoryLayers.keySet()) {
                 String layerId = blendshapeLayerIds.get(category);
                 String label = record.get(category);
-                transcript.createAnnotation​(
-                  anchor, anchor, layerId, label, transcript)
-                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                if (store != null  // can communicate directly with the graph store
+                    && createWithStore) { // (unit test flag)
+                  store.createAnnotation(
+                    transcript.getId(), anchor.getId(), anchor.getId(),
+                    layerId, label, Constants.CONFIDENCE_AUTOMATIC, transcript.getId());
+                } else { // no graph store 
+                  // edit our local version of the graph
+                  transcript.createAnnotation​(
+                    anchor, anchor, layerId, label, transcript)
+                    .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                }
               } // next possible category
               
               if (jsonResultFilePattern != null) {
@@ -1071,12 +1109,25 @@ public class MediaPipeAnnotator extends Annotator {
                 if (!json.exists()) {
                   setStatus("Frame result missing: " + json.getName());
                 } else {
-                  Annotation blobAnnotation = transcript.createAnnotation​(
-                    anchor, anchor, resultLayerId,
-                    record.get("frame"), transcript);
-                  blobAnnotation.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                  if (!keepGeneratedMedia) json.deleteOnExit();
-                  blobAnnotation.put("dataUrl", json.toURI().toString());
+                  if (store != null  // can communicate directly with the graph store
+                      && createWithStore) { // (unit test flag)
+                    // For saving non-label data, LaBB-CAT will take a 2-line 'label',
+                    // where the first line is the label, and the second is the dataUrl
+                    String labelDataUrl = record.get("frame")
+                      +"\n"+json.toURI().toString();
+                    store.createAnnotation(
+                      transcript.getId(), anchor.getId(), anchor.getId(),
+                      resultLayerId, labelDataUrl,
+                      Constants.CONFIDENCE_AUTOMATIC, transcript.getId());
+                  } else { // no graph store 
+                    // edit our local version of the graph
+                    Annotation blobAnnotation = transcript.createAnnotation​(
+                      anchor, anchor, resultLayerId,
+                      record.get("frame"), transcript);
+                    blobAnnotation.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                    if (!keepGeneratedMedia) json.deleteOnExit();
+                    blobAnnotation.put("dataUrl", json.toURI().toString());
+                  }
                 }
               }
               
@@ -1088,16 +1139,32 @@ public class MediaPipeAnnotator extends Annotator {
                 if (!png.exists()) {
                   setStatus("Frame image missing: " + png.getName());
                 } else {
-                  Annotation blobAnnotation = transcript.createAnnotation​(
-                    anchor, anchor, annotatedImageLayerId,
-                    record.get("frame"), transcript);
-                  blobAnnotation.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                  if (!keepGeneratedMedia) png.deleteOnExit();
-                  blobAnnotation.put("dataUrl", png.toURI().toString());
+                  if (store != null  // can communicate directly with the graph store
+                      && createWithStore) { // (unit test flag)
+                    // For saving non-label data, LaBB-CAT will take a 2-line 'label',
+                    // where the first line is the label, and the second is the dataUrl
+                    String labelDataUrl = record.get("frame")
+                      +"\n"+png.toURI().toString();
+                    store.createAnnotation(
+                      transcript.getId(), anchor.getId(), anchor.getId(),
+                      annotatedImageLayerId, labelDataUrl,
+                      Constants.CONFIDENCE_AUTOMATIC, transcript.getId());
+                  } else { // no graph store 
+                    // edit our local version of the graph
+                    Annotation blobAnnotation = transcript.createAnnotation​(
+                      anchor, anchor, annotatedImageLayerId,
+                      record.get("frame"), transcript);
+                    blobAnnotation.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                    if (!keepGeneratedMedia) png.deleteOnExit();
+                    blobAnnotation.put("dataUrl", png.toURI().toString());
+                  }
                 }
               }
               r++;
+              setPercentComplete(
+                50 + (int)(((anchor.getOffset()) * 50)/endOffset));
             } // next record
+            
             if (frameCountLayerId.length() > 0) {
               transcript.createTag​(
                 transcript, frameCountLayerId, ""+r)
@@ -1116,12 +1183,12 @@ public class MediaPipeAnnotator extends Annotator {
                     "No annotated video generated by "+scriptName+" - there were no faces found.");
                 }
               } else { // webm exists
-                if (getStore() == null) {
+                if (store == null) {
                   setStatus(
                     "Annotated video generated by "+scriptName+" but no graph store to store it in.");
                 } else {
                   setStatus("Saving annotated video...");
-                  getStore().saveMedia(transcript.getId(), webm.toURI().toString(), outputTrackSuffix);
+                  store.saveMedia(transcript.getId(), webm.toURI().toString(), outputTrackSuffix);
                 }
               }
             } // webmName set

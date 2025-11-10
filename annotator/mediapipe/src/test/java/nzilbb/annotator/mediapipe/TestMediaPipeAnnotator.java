@@ -88,6 +88,9 @@ public class TestMediaPipeAnnotator {
     // }
     // set the annotator configuration
     annotator.setConfig("");
+
+    // to create annotations within the graph instead of using graph store
+    annotator.createWithStore = false;
     
     System.out.println("OK.");
   }
