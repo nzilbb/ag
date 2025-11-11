@@ -1,4 +1,4 @@
-graph,transcript_transcriber,who,word,word start,word end
+transcript,transcript_transcriber,who,word,word start,word end
 withAttributes.trs,Robert Fromont,john smith,The,0.0,1.0
 withAttributes.trs,Robert Fromont,john smith,quick,1.0,3.0
 withAttributes.trs,Robert Fromont,john smith,BROWN,,

@@ -1,5 +1,5 @@
 //
-// Copyright 2019-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2019-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -32,6 +32,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -133,6 +134,36 @@ public class CsvSerializer implements GraphSerializer {
   public CsvSerializer setMinimumAnchorConfidence(Integer newMinimumAnchorConfidence) {
     minimumAnchorConfidence = newMinimumAnchorConfidence; return this;
   }
+  
+  /**
+   * Whether to include the label in the column for the whole duration
+   * of the annotation. If false (the default) the label will be
+   * included only on the row where the annotation starts. 
+   * @see #getLabelDuration()
+   * @see #setLabelDuration(Boolean)
+   */
+  protected Boolean labelDuration = Boolean.FALSE;
+  /**
+   * Getter for {@link #labelDuration}: Whether to include the label
+   * in the column for the whole duration of the annotation. If false
+   * (the default) the label will be included only on the row where
+   * the annotation starts. 
+   * @return Whether to include the label in the column for the whole
+   * duration of the annotation. If false (the default) the label
+   * will be included only on the row where the annotation starts. 
+   */
+  public Boolean getLabelDuration() { return labelDuration; }
+  /**
+   * Setter for {@link #labelDuration}: Whether to include the label
+   * in the column for the whole duration of the annotation. If false
+   * (the default) the label will be included only on the row where
+   * the annotation starts. 
+   * @param newLabelDuration Whether to include the label in the
+   * column for the whole duration of the annotation. If false (the
+   * default) the label will be included only on the row where the
+   * annotation starts. 
+   */
+  public CsvSerializer setLabelDuration(Boolean newLabelDuration) { labelDuration = newLabelDuration; return this; }
 
   private long graphCount = 0;
   private long consumedGraphCount = 0;
@@ -221,6 +252,19 @@ public class CsvSerializer implements GraphSerializer {
       configuration.get("minimumAnchorConfidence").setValue(getMinimumAnchorConfidence());
     }
 
+    if (!configuration.containsKey("labelDuration")) {
+      configuration.addParameter(
+        new Parameter(
+          "labelDuration", Boolean.class, 
+          "Label Entire Duration",
+          "Whether to include the label in the column for the whole duration of"
+          +" the annotation. If false (the default) the label will be included"
+          + " only on the row where the annotation starts. ", false));
+    }
+    if (configuration.get("labelDuration").getValue() == null) {
+      configuration.get("labelDuration").setValue(getLabelDuration());
+    }
+
     return configuration;
   }   
 
@@ -274,12 +318,13 @@ public class CsvSerializer implements GraphSerializer {
       final CSVPrinter csv = new CSVPrinter(
         new OutputStreamWriter(out, "UTF-8"), CSVFormat.EXCEL);
       
-      csv.print("graph");
+      csv.print(schema.getRoot().getId());
       Vector<Layer> attributeLayers = new Vector<Layer>();
       Vector<Layer> temporalLayers = new Vector<Layer>();
       for (String layerId : layerIds) {
         Layer layer = schema.getLayer(layerId);
-        if (layer != null) {
+        if (layer != null  // ignore nonexistent layers ...
+            && layer.getParentId() != null) { // ... and the 'root' of the layer tree
           if ((layer.getParentId().equals(schema.getRoot().getId())
                || layer.getParentId().equals(schema.getParticipantLayerId()))
               && layer.getAlignment() == Constants.ALIGNMENT_NONE) {
@@ -325,6 +370,8 @@ public class CsvSerializer implements GraphSerializer {
           }
 
           try {
+            HashMap<String,LinkedHashSet<Annotation>> currentAnnotations
+              = new HashMap<String,LinkedHashSet<Annotation>>();
             // for each anchor in offset/structure order
             for (Anchor anchor : graph.getAnchorsOrderedByStructure()) {
               // are there any interesting annotations starting here?
@@ -358,11 +405,26 @@ public class CsvSerializer implements GraphSerializer {
                 
                 // now output annotations that start here, or blank columns
                 for (Layer columnLayer : temporalLayers) {
-                  LinkedHashSet<Annotation> startsHere = anchor.startOf​(
-                    columnLayer.getId());
-                  if (startsHere.size() > 0) {
+                  if (!currentAnnotations.containsKey(columnLayer.getId())) {
+                    currentAnnotations.put(
+                      columnLayer.getId(), new LinkedHashSet<Annotation>());
+                  }
+                  LinkedHashSet<Annotation> current
+                    = currentAnnotations.get(columnLayer.getId());
+                  // filter out annotations that are not current
+                  Iterator<Annotation> c = current.iterator();
+                  while (c.hasNext()) {
+                    Annotation a = c.next();
+                    if (!a.includesOffset(anchor.getOffset())) c.remove();
+                  }
+                  // add annotations that start here
+                  LinkedHashSet<Annotation> startsHere
+                    = anchor.startOf​(columnLayer.getId());
+                  current.addAll(startsHere);
+                  
+                  if (current.size() > 0) {
                     // if there's more than one, concatenate their labels
-                    String label = startsHere.stream()
+                    String label = current.stream()
                       .map(annotation->annotation.getLabel())
                       .collect(Collectors.joining("\n"));
                     csv.print(label);
@@ -392,6 +454,9 @@ public class CsvSerializer implements GraphSerializer {
                           break;
                       }
                     }
+                  }
+                  if (!Optional.ofNullable(labelDuration).orElse(Boolean.FALSE)) {
+                    current.clear();
                   }
                 } // next temporal layer
                 csv.println();

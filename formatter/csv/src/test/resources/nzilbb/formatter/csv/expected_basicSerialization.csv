@@ -1,4 +1,4 @@
-graph,who,word,word start,word end
+transcript,who,word,word start,word end
 basicSerialization.trs,john smith,The,0.0,1.0
 basicSerialization.trs,john smith,quick,1.0,3.0
 basicSerialization.trs,john smith,BROWN,,

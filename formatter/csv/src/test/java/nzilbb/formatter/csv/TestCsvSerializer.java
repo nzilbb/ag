@@ -52,9 +52,11 @@ public class TestCsvSerializer {
       
     ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(1, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals(2, serializer.configure(configuration, g.getSchema()).size());
     assertEquals("minimumAnchorConfidence", Integer.valueOf(50), 
                  (Integer)configuration.get("minimumAnchorConfidence").getValue());
+    assertEquals("Default labelDuration", Boolean.FALSE, 
+                 (Boolean)configuration.get("labelDuration").getValue());
       
     // no layers required
     String[] requiredLayers = serializer.getRequiredLayers();
@@ -92,15 +94,19 @@ public class TestCsvSerializer {
     CsvSerializer serializer = new CsvSerializer();
       
     ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
-    assertEquals(1, configuration.size());
+    assertEquals(2, configuration.size());
     assertEquals("minimumAnchorConfidence", Integer.valueOf(50), 
                  (Integer)configuration.get("minimumAnchorConfidence").getValue());
     configuration.get("minimumAnchorConfidence").setValue(Integer.valueOf(0));
+    assertEquals("Default labelDuration", Boolean.FALSE, 
+                 (Boolean)configuration.get("labelDuration").getValue());
       
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(1, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals(2, serializer.configure(configuration, g.getSchema()).size());
     assertEquals("minimumAnchorConfidence", Integer.valueOf(0), 
                  (Integer)configuration.get("minimumAnchorConfidence").getValue());
+    assertEquals("Default labelDuration", Boolean.FALSE, 
+                 (Boolean)configuration.get("labelDuration").getValue());
       
     // no layers required
     String[] requiredLayers = serializer.getRequiredLayers();
@@ -130,7 +136,8 @@ public class TestCsvSerializer {
     }
   }
 
-  /** Ensure that attribute columns are present if attribute layers are selected. */
+  /** Ensure that attribute columns are present if attribute layers are selected.
+   * Also ensure the schema root layer can be specified without problems. */
   @Test public void withAttributes()  throws Exception {
     Graph g = createGraph("withAttributes.trs");
       
@@ -139,9 +146,11 @@ public class TestCsvSerializer {
       
     ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(1, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals(2, serializer.configure(configuration, g.getSchema()).size());
     assertEquals("minimumAnchorConfidence", Integer.valueOf(50), 
                  (Integer)configuration.get("minimumAnchorConfidence").getValue());
+    assertEquals("Default labelDuration", Boolean.FALSE, 
+                 (Boolean)configuration.get("labelDuration").getValue());
       
     // no layers required
     String[] requiredLayers = serializer.getRequiredLayers();
@@ -150,7 +159,8 @@ public class TestCsvSerializer {
     // serialize
     Graph[] graphs = { g };
     File dir = getDir();
-    String[] layerIds = {"transcript_transcriber", "who", "word"};
+    String[] layerIds = {"transcript", // include root layer as well
+      "transcript_transcriber", "who", "word"};
     final Vector<SerializationException> exceptions = new Vector<SerializationException>();
     final Vector<NamedStream> streams = new Vector<NamedStream>();
     serializer.serialize(Arrays.spliterator(graphs), layerIds,
@@ -182,9 +192,11 @@ public class TestCsvSerializer {
       
     ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(1, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals(2, serializer.configure(configuration, g.getSchema()).size());
     assertEquals("minimumAnchorConfidence", Integer.valueOf(50), 
                  (Integer)configuration.get("minimumAnchorConfidence").getValue());
+    assertEquals("Default labelDuration", Boolean.FALSE, 
+                 (Boolean)configuration.get("labelDuration").getValue());
       
     // no layers required
     String[] requiredLayers = serializer.getRequiredLayers();
@@ -225,9 +237,56 @@ public class TestCsvSerializer {
     ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
     configuration.get("minimumAnchorConfidence").setValue(null);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(1, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals(2, serializer.configure(configuration, g.getSchema()).size());
     assertEquals("minimumAnchorConfidence", null, 
                  (Integer)configuration.get("minimumAnchorConfidence").getValue());
+    assertEquals("Default labelDuration", Boolean.FALSE, 
+                 (Boolean)configuration.get("labelDuration").getValue());
+    
+    // no layers required
+    String[] requiredLayers = serializer.getRequiredLayers();
+    assertEquals(0, requiredLayers.length);
+    
+    // serialize
+    Graph[] graphs = { g };
+    File dir = getDir();
+    String[] layerIds = {"who", "utterance", "word", "orthography"};
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(Arrays.spliterator(graphs), layerIds,
+                         stream -> streams.add(stream),
+                         warning -> System.out.println(warning),
+                         exception -> exceptions.add(exception));
+    assertEquals(1, streams.size());
+    streams.elementAt(0).save(dir);
+
+    File actual = new File(dir, streams.elementAt(0).getName());
+    String differences = diff(
+      new File(dir, "expected_" + g.getId().replace(".trs",".csv")),
+      actual);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      actual.delete();
+    }
+  }
+  
+  /** Ensure labelling of entire duration (as opposed to just the start) works. */
+  @Test public void labelEntireDuration()  throws Exception {
+    Graph g = createGraph("labelEntireDuration.trs");
+    
+    // create deserializer
+    CsvSerializer serializer = new CsvSerializer();
+    
+    ParameterSet configuration = serializer.configure(new ParameterSet(), g.getSchema());
+    configuration.get("minimumAnchorConfidence").setValue(null);
+    configuration.get("labelDuration").setValue(Boolean.TRUE);
+    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    assertEquals(2, serializer.configure(configuration, g.getSchema()).size());
+    assertEquals("minimumAnchorConfidence", null, 
+                 (Integer)configuration.get("minimumAnchorConfidence").getValue());
+    assertEquals("minimumAnchorConfidence", Boolean.TRUE, 
+                 (Boolean)configuration.get("labelDuration").getValue());
     
     // no layers required
     String[] requiredLayers = serializer.getRequiredLayers();

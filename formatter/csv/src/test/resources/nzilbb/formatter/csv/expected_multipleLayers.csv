@@ -1,4 +1,4 @@
-graph,who,utterance,utterance start,utterance end,word,word start,word end,orthography,orthography start,orthography end
+transcript,who,utterance,utterance start,utterance end,word,word start,word end,orthography,orthography start,orthography end
 multipleLayers.trs,john smith,john smith,0.0,3.0,,,,,,
 multipleLayers.trs,john smith,,,,The,0.0,1.0,the,0.0,1.0
 multipleLayers.trs,john smith,,,,quick,1.0,3.0,quick,1.0,3.0

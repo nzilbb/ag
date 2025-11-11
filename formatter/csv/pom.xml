@@ -10,8 +10,8 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.csv</artifactId>
   <name>nzilbb.formatter.csv</name>
-  <description>Serializer and deserializer for CSV files.</description>
-  <version>1.4.0</version>
+  <description>Serializer for converting to CSV files.</description>
+  <version>1.4.1</version>
 
   <properties>
     <package.path>nzilbb/formatter/csv/</package.path>

@@ -2,3 +2,40 @@
 
 ${project.description}
 
+This formatter converts transcripts to Comma Separated Values (CSV) files.
+
+Each row in the csv file represents a time-slot during the transcript,
+and each selected layer has a column for its label, start time and end time.
+
+For each time-slot, all annotations in the selected layers that start at that time
+have their label appear in the corresponding column. If multiple annotations start
+at the same time, their labels are concatenated in the same column delimited by a
+newline (i.e. a multi-line cell).
+
+e.g.
+
+| transcript | word | word start | word end | pos | pos start | pos end |
+|------------|------|------------|----------|-----|-----------|---------|
+| mop03.trs  | Time | 1.0        | 1.5      | ADJ | 1.0       | 1.5     |
+| mop03.trs  | flies| 1.5        | 1.75     | N   | 1.5       | 1.75    |
+| mop03.trs  | don't| 2.0        | 2.5      | AUX | 2.0       | 2.25    |
+| mop03.trs  |      |            |          | NOT | 2.25      | 2.5     |
+| mop03.trs  | like | 3.0        | 3.25     | V   | 3.0       | 3.25    |
+
+<h2>Configuration</h2>
+
+The following parameters can be specified for the formatter:
+
+minimumAnchorConfidence (Min. Anchor Confidence)
+: Minimum confidence for an annotation's offset before it's included
+in the CSV file. Generally, if set to 100, only manually set offsets 
+will be output, if set to 50, manually set and automatically aligned
+offsets with be output. Specify 0 for all offsets regardless of reliability.
+If nothing is specified for this setting, then no start/end time columns
+are included in the CSV file.
+
+labelDuration (Label Entire Duration)
+: Whether to include the label in the column for the whole duration of
+the annotation. If false (the default) the label will be included
+only on the row where the annotation starts. If true, the label will be
+included on every row between its start time and end time.

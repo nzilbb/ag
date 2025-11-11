@@ -1,4 +1,4 @@
-graph,who,utterance,word,orthography
+transcript,who,utterance,word,orthography
 noOffsets.trs,john smith,john smith,,
 noOffsets.trs,john smith,,The,the
 noOffsets.trs,john smith,,quick,quick
