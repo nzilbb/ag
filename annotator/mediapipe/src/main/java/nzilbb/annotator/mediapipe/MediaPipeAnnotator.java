@@ -405,6 +405,23 @@ public class MediaPipeAnnotator extends Annotator {
   public MediaPipeAnnotator setAnnotatedImageLayerId(String newAnnotatedImageLayerId) { annotatedImageLayerId = newAnnotatedImageLayerId; return this; }
   
   /**
+   * Image format to use; "png" or "jpg".
+   * @see #getImageFormat()
+   * @see #setImageFormat(String)
+   */
+  protected String imageFormat = "png";
+  /**
+   * Getter for {@link #imageFormat}: Image format to use; "png" or "jpg".
+   * @return Image format to use; "png" or "jpg".
+   */
+  public String getImageFormat() { return imageFormat; }
+  /**
+   * Setter for {@link #imageFormat}: Image format to use; "png" or "jpg".
+   * @param newImageFormat Image format to use; "png" or "jpg".
+   */
+  public MediaPipeAnnotator setImageFormat(String newImageFormat) { imageFormat = newImageFormat; return this; }
+  
+  /**
    * Whether to include the face landmarks tesselation on the annotated images/video.
    * @see #getPaintTesselation()
    * @see #setPaintTesselation(Boolean)
@@ -715,6 +732,7 @@ public class MediaPipeAnnotator extends Annotator {
     outputTrackSuffix = "";
     resultLayerId = "";
     annotatedImageLayerId = "";
+    imageFormat = "png";
     frameCountLayerId = "";
     paintTesselation = null;
     paintContours = null;
@@ -731,6 +749,10 @@ public class MediaPipeAnnotator extends Annotator {
 
     if (resultLayerId == null) resultLayerId = "";
     if (annotatedImageLayerId == null) annotatedImageLayerId = "";
+    if (imageFormat == null) imageFormat = "png";
+    imageFormat = imageFormat.toLowerCase();
+    if (imageFormat.equals("jpeg")) imageFormat = "jpg";
+    if (!imageFormat.equals("png") && !imageFormat.equals("jpg")) imageFormat = "png";
     if (resultLayerId.length() > 0 && resultLayerId.equals(annotatedImageLayerId)) {
       throw new InvalidConfigurationException(
         this, "resultLayer ("+resultLayerId+") cannot be the same as annotatedImageLayerId");
@@ -779,7 +801,7 @@ public class MediaPipeAnnotator extends Annotator {
           .setAlignment(Constants.ALIGNMENT_INSTANT)
           .setPeers(true).setPeersOverlap(false).setSaturated(false)
           .setParentId(schema.getRoot().getId())
-          .setType("image/png")
+          .setType("image/"+imageFormat)
           .setDescription("Frame images annotated with facial landmarks by mediapipe"));        
         if (resultLayer != null
             && Optional.ofNullable(resultLayer.getCategory()).orElse("").length()>0) {
@@ -802,8 +824,8 @@ public class MediaPipeAnnotator extends Annotator {
         if (annotatedImageLayer.getAlignment() != Constants.ALIGNMENT_INSTANT) {
           annotatedImageLayer.setAlignment(Constants.ALIGNMENT_INSTANT);
         }
-        if (!annotatedImageLayer.getType().equals("image/png")) {
-          annotatedImageLayer.setType("image/png");
+        if (!annotatedImageLayer.getType().equals("image/"+imageFormat)) {
+          annotatedImageLayer.setType("image/"+imageFormat);
         }
       }
     }
@@ -1009,7 +1031,7 @@ public class MediaPipeAnnotator extends Annotator {
         File mp4 = new File(getWorkingDirectory(), id + outputTrackSuffix + ".mp4");
         File ffmpeg = Execution.Which("ffmpeg"); // is ffmpeg available for webm->mp4
         if (!keepGeneratedMedia) webm.deleteOnExit();
-        String pngPattern = annotatedImageLayerId.length()==0?"NA":id + "__{0}.png";
+        String pngPattern = annotatedImageLayerId.length()==0?"NA":id + "__{0}."+imageFormat;
         setPercentComplete(1);
         boolean finishedOk = false;
         try {
@@ -1226,7 +1248,8 @@ public class MediaPipeAnnotator extends Annotator {
               // in which case, delete the pngs
               File[] frames = getWorkingDirectory().listFiles(
                 f->f.getName().startsWith(id + "__")
-                && (f.getName().endsWith(".png") || f.getName().endsWith(".json")));
+                && (f.getName().endsWith("."+imageFormat)
+                    || f.getName().endsWith(".json")));
               if (frames != null) {
                 for (File file : frames) file.delete();
               }

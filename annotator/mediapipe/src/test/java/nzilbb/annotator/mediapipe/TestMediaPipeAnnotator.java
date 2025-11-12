@@ -365,14 +365,16 @@ public class TestMediaPipeAnnotator {
     
     annotator.setTaskParameters(
       "annotatedImageLayerId=frame" // doesn't already exist
+      +"&imageFormat=jpeg"
       +"&frameCountLayerId=frameCount" // will be prefixed with "transcript_"
       +"&paintContours=true");
     assertEquals("annotatedImageLayerId set", "frame", annotator.getAnnotatedImageLayerId());
+    assertEquals("imageFormat standardized", "jpg", annotator.getImageFormat());
     
     Layer layer = annotator.getSchema().getLayer("frame");
     assertNotNull("frame layer created", layer);
     assertEquals("frame alignment", Constants.ALIGNMENT_INSTANT, layer.getAlignment());
-    assertEquals("frame type", "image/png", layer.getType());
+    assertEquals("frame type", "image/jpg", layer.getType());
     assertTrue("frame peers", layer.getPeers());
     assertEquals("frame parent", schema.getRoot().getId(), layer.getParentId());
     assertNull("frame category unset", layer.getCategory());

@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.mediapipe</artifactId>
-  <version>0.1.9</version>
+  <version>0.2.0</version>
 
   <name>nzilbb.annotator.mediapipe</name>
   <description>Annotator that integrated with mediapipe for face video analysis, etc.</description>
