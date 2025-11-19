@@ -1752,14 +1752,14 @@ public class MorTagger extends Annotator {
 
    /**
     * Move the annotations of the given cha token on the given layer to the given new parent.
-    * @param layerId
-    * @param oldChaWord
-    * @param newChaWord
+    * @param layerId The layer of children to move.
+    * @param oldChaWord The current parent for the children.
+    * @param newChaWord The new parent for the children.
     */
    private void moveAnnotations(
      String layerId, Annotation oldChaWord, Annotation newChaWord) {     
      if (layerId != null) {
-       for (Annotation chaTag : oldChaWord.getAnnotations(layerId)) {
+       for (Annotation chaTag : new Vector<Annotation>(oldChaWord.getAnnotations(layerId))) {
          Annotation newParent = newChaWord;
          if (chaTag.getParentId().equals(oldChaWord.getParentId())) {
            // tag is peer of oldChaWord, so use parent
