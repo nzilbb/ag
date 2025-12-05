@@ -283,6 +283,37 @@ public class Evaluate extends CommandLineProgram {
   }
 
   /**
+   * Regular expression to identify non-word characters
+   * (e.g. punctuation) that should be joined to a neighboring word.
+   * Set to null or empty string to disable such joining.
+   * @see #getNonWordPattern()
+   * @see #setNonWordPattern(String)
+   * @see OrthographyClumper#getNonOrthoCharacterPattern()
+   */
+  protected String nonWordPattern = null;
+  /**
+   * Getter for {@link #nonWordPattern}: Regular expression to
+   * identify non-word characters (e.g. punctuation) that should be
+   * joined to a neighboring word. 
+   * @return Regular expression to identify non-word characters
+   * (e.g. punctuation) that should be joined to a neighboring word. 
+   * @see OrthographyClumper#getNonOrthoCharacterPattern()
+   */
+  public String getNonWordPattern() { return nonWordPattern; }
+  /**
+   * Setter for {@link #nonWordPattern}: Regular expression to
+   * identify non-word characters (e.g. punctuation) that should be
+   * joined to a neighboring word.
+   * @param newNonWordPattern Regular expression to identify non-word
+   * characters (e.g. punctuation) that should be joined to a
+   * neighboring word. 
+   * Set to null or empty string to disable such joining.
+   * @see OrthographyClumper#getNonOrthoCharacterPattern()
+   */
+  @Switch("Pattern to identify non-word characters for joining to a neighboring words. Set this blank to simply tokenize on spaces. Default value is: [\\p{Punct}&&[^_]]")
+  public Evaluate setNonWordPattern(String newNonWordPattern) { nonWordPattern = newNonWordPattern; return this; }
+
+  /**
    * Path to ffmpeg, for silencing non-transcribed portions of recordings.
    * @see #getFfmpeg()
    * @see #setFfmpeg(String)
@@ -626,11 +657,15 @@ public class Evaluate extends CommandLineProgram {
     setDeserializer(new PlainTextSerialization());
     ParameterSet configuration = serializer.configure(
       new ParameterSet(), transcriber.getSchema());
+    if (nonWordPattern != null) {
+      configuration.get("nonWordPattern").setValue(nonWordPattern);
+    }
+    // confirm configuration
+    serializer.configure(configuration, transcriber.getSchema());
     if (transcriber instanceof Pretranscribed) {
       // use the same deserializer
       ((Pretranscribed)transcriber).setDeserializer(getDeserializer());
     }
-
 
     CSVPrinter out = null; // stdout will be tab-separated values
     // csv for word edit paths

@@ -15,8 +15,7 @@
   <description>Command line utility for evaluating transcriber modules</description>
 
   <properties>
-    <nzilbb.formatter.text.version>1.6.1</nzilbb.formatter.text.version>
-    <nzilbb.formatter.webvtt.version>0.7.2</nzilbb.formatter.webvtt.version>
+    <nzilbb.formatter.text.version>1.7.0</nzilbb.formatter.text.version>
     <nzilbb.annotator.orthography.version>0.2.3</nzilbb.annotator.orthography.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>

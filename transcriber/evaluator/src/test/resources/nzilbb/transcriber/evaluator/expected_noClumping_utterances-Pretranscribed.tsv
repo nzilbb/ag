@@ -1,0 +1,4 @@
+utt	txt	version	start	end	wordCount
+1	transcript1.txt	ref	0.0	34.0	4
+2	transcript1.txt	ref	34.0	73.0	5
+1	transcript1.txt	wav	0.0	50.0	9
