@@ -272,12 +272,19 @@ public class Evaluate extends CommandLineProgram {
    * OrthographyStandardizer. 
    * @param newOrthographyParameters Parameter string for configuring OrthographyStandardizer.
    */
-  @Switch("Configuration for standardization, e.g. removalPattern=[\\p{Punct}&&[^~\\-:']]")
+  @Switch("JSON configuration for standardization, e.g. {\"replacements\":{\"[\\p{Punct}&&[^~\\-:']]\":\"\"}} to ignore most punctuation, or {\"lowerCase\":false,\"replacements\":{}} to disable standardization")
   public Evaluate setOrthographyParameters(String newOrthographyParameters) {
     orthographyParameters = newOrthographyParameters;
     if (orthographyParameters != null && orthographyParameters.trim().length() > 0) {
       // ensure layers are configured correctly
-      orthographyParameters += "&tokenLayerId=word&orthographyLayerId=orthography";
+      if (orthographyParameters.indexOf("tokenLayerId") < 0) {
+        orthographyParameters = orthographyParameters.replaceAll(
+          "}$",",\"tokenLayerId\":\"word\"}");
+      }
+      if (orthographyParameters.indexOf("orthographyLayerId") < 0) {
+        orthographyParameters = orthographyParameters.replaceAll(
+          "}$",",\"orthographyLayerId\":\"orthography\"}");
+      }
     }
     return this;
   }

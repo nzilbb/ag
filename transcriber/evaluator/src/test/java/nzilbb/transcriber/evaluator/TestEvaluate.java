@@ -133,6 +133,62 @@ public class TestEvaluate {
     }
   }   
 
+  /** Disable orthography standardization and punctuation clumping.
+   * i.e. command line parameters:
+   * <ul>
+   *  <li>--nonWordPattern=</li>
+   *  <li>--orthographyParameters={"lowerCase":false,"replacements":{}}</li>
+   * </ul>
+   */
+  @Test public void raw() throws Exception {
+
+    // files
+    File dir = dir();
+    File audio = new File(dir, "transcript1.wav");
+    File transcript = new File(dir, "transcript1.txt");
+    // pre-transcribed files to compare to 
+    File pretranscribedDir = new File(dir, "pretranscribed");
+    // outputs
+    File[] outputs = {
+      new File(dir, "stdout.tsv"),
+      new File(dir, "utterances-Pretranscribed.tsv"),
+      new File(dir, "paths-Pretranscribed.tsv")
+    };
+
+    Evaluate evaluate = new Evaluate();
+    // capture main output
+    evaluate.stdout = new FileOutputStream(outputs[0]);
+    // set command-line arguments    
+    evaluate.processArguments(new String[]{
+        // no clumping:
+        "--nonWordPattern=",
+        // no standardization:
+        "--orthographyParameters={\"lowerCase\":false,\"replacements\":{}}",
+        pretranscribedDir.getPath(),
+        dir().getPath() });
+    assertEquals("nonWordPattern is blank", "", evaluate.getNonWordPattern());
+    assertEquals(
+      "orthographyParameters is correct",
+      "{\"lowerCase\":false,\"replacements\":{}"
+      +",\"tokenLayerId\":\"word\",\"orthographyLayerId\":\"orthography\"}",
+      evaluate.getOrthographyParameters());
+    //evaluate.setVerbose(true);
+    evaluate.start();
+
+    evaluate.stdout.close();
+    // ensure outputs are as expected
+    for (File output : outputs) {
+      assertTrue("Output exists: " + output.getName(), output.exists());
+      String differences = diff(
+        new File(dir, "expected_raw_" + output.getName()), output);
+      if (differences != null) {
+        fail(differences);
+      } else {
+        output.delete();
+      }
+    }
+  }   
+
   public static File dir() throws Exception { 
     URL urlThisClass = TestEvaluate.class.getResource(
       TestEvaluate.class.getSimpleName() + ".class");
