@@ -78,7 +78,7 @@ public class TestPlainTextSerialization
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 13,
+    assertEquals("Configuration parameters" + configuration, 14,
                  deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
@@ -100,6 +100,9 @@ public class TestPlainTextSerialization
     assertEquals("timestampFormat",
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -237,7 +240,7 @@ public class TestPlainTextSerialization
     // no participant format - i.e. no speaker labels
     configuration.get("participantFormat").setValue(null);
     
-    assertEquals("Configuration parameters" + configuration, 13,
+    assertEquals("Configuration parameters" + configuration, 14,
                  deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
@@ -259,6 +262,9 @@ public class TestPlainTextSerialization
     assertEquals("timestampFormat",
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -354,7 +360,8 @@ public class TestPlainTextSerialization
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 13, deserializer.configure(configuration, schema).size());      
+    assertEquals("Configuration parameters" + configuration,
+                 14, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("noise", "noise", 
@@ -377,6 +384,9 @@ public class TestPlainTextSerialization
     assertEquals("timestampFormat",
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -506,6 +516,10 @@ public class TestPlainTextSerialization
     assertEquals("line boundary",
                  Double.valueOf(284), words[50].getEnd().getOffset());
 
+    // clumping
+    assertEquals("Symbols are clumped", "< In -", words[50].getLabel());
+    assertEquals("Punctuation is clumped", "Free -", words[51].getLabel());
+
     assertEquals(0, g.all("entities").length);
     assertEquals(0, g.all("language").length);
     assertEquals(0, g.all("lexical").length);
@@ -524,6 +538,70 @@ public class TestPlainTextSerialization
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
 
+  }
+
+  /** Ensure that unsetting nonWordPattern disables clummping. */
+  @Test public void disableClumping()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("scribe", "Transcriber", 0, true, true, true),
+      new Layer("subreddit", "Subreddit name", 0, false, false, true),
+      new Layer("parent_id", "Parent", 0, false, false, true),
+      new Layer("publication_time", "Publication Date", 0, false, false, true),
+      new Layer("transcript_program", "Program", 0, false, false, true),
+      new Layer("url", "URL", 0, false, false, true),
+      new Layer("who", "Participants", 0, true, true, true),
+      new Layer("topic", "Topic", 2, true, false, false),
+      new Layer("comment", "Comment", 2, true, false, true),
+      new Layer("noise", "Noise", 2, true, false, true),
+      new Layer("main_participant", "Main", 0, false, false, true, "who", true),
+      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+      new Layer("word", "Words", 2, true, false, false, "turn", true),
+      new Layer("pronounce", "Pronounce", 0, true, false, false, "word", true),
+      new Layer("lexical", "Lexical", 0, true, false, false, "word", true));
+    
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "comment2.txt")) };
+      
+    // create deserializer
+    PlainTextSerialization deserializer = new PlainTextSerialization();
+
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
+    configuration.get("nonWordPattern").setValue("");
+    assertEquals("Configuration parameters" + configuration,
+                 14, deserializer.configure(configuration, schema).size());      
+    assertEquals("blank nonWordPattern parameter",
+                 "", configuration.get("nonWordPattern").getValue());
+    assertEquals("blank nonWordPattern",
+                 "", deserializer.getNonWordPattern());
+
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+
+    Annotation[] words = g.all("word");
+    assertEquals(Double.valueOf(0), words[0].getStart().getOffset());
+    // System.out.println("" + Arrays.asList(Arrays.copyOfRange(words, 0, 10)));
+    // clumping
+    assertEquals("Symbols aren't clumped", "<", words[50].getLabel());
+    assertEquals("Words stand alone", "In", words[51].getLabel());
+    assertEquals("Symbols isn't clumped", "-", words[52].getLabel());
+    assertEquals("Words stand alone", "Free", words[53].getLabel());
   }
 
   @Test public void elicited()  throws Exception {
@@ -550,7 +628,7 @@ public class TestPlainTextSerialization
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 13, deserializer.configure(configuration, schema).size());      
+                 14, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -568,6 +646,9 @@ public class TestPlainTextSerialization
     assertEquals("timestampFormat",
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -707,7 +788,7 @@ public class TestPlainTextSerialization
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 13, deserializer.configure(configuration, schema).size());      
+                 14, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -725,6 +806,9 @@ public class TestPlainTextSerialization
     assertEquals("timestampFormat",
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -870,7 +954,7 @@ public class TestPlainTextSerialization
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 13, deserializer.configure(configuration, schema).size());      
+                 14, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("noise", "noise", 
@@ -891,6 +975,9 @@ public class TestPlainTextSerialization
     assertEquals("timestampFormat",
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -1007,7 +1094,7 @@ public class TestPlainTextSerialization
     configuration.get("useConventions").setValue(Boolean.FALSE);
 	 
     assertEquals("Configuration parameters" + configuration,
-                 13, deserializer.configure(configuration, schema).size());      
+                 14, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("noise", "noise", 
@@ -1027,6 +1114,9 @@ public class TestPlainTextSerialization
                  configuration.get("metaDataFormat").getValue());
     assertEquals("timestampFormat", "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -1127,7 +1217,7 @@ public class TestPlainTextSerialization
     configuration.get("useConventions").setValue(Boolean.FALSE);
 	 
     assertEquals("Configuration parameters" + configuration,
-                 13, deserializer.configure(configuration, schema).size());      
+                 14, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("noise", "noise", 
@@ -1147,6 +1237,9 @@ public class TestPlainTextSerialization
                  configuration.get("metaDataFormat").getValue());
     assertEquals("timestampFormat", "'['HH:mm:ss']'",
                  configuration.get("timestampFormat").getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -1253,7 +1346,7 @@ public class TestPlainTextSerialization
     configuration.get("useConventions").setValue(Boolean.FALSE);
 	 
     assertEquals("Configuration parameters" + configuration,
-                 13, deserializer.configure(configuration, schema).size());      
+                 14, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertNull("noise", configuration.get("noiseLayer").getValue());
@@ -1271,6 +1364,9 @@ public class TestPlainTextSerialization
     assertEquals("timestampFormat",
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -1501,7 +1597,7 @@ public class TestPlainTextSerialization
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(13, serializer.configure(configuration, schema).size());
+    assertEquals(14, serializer.configure(configuration, schema).size());
 
     LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
       Arrays.asList(serializer.getRequiredLayers()));
@@ -1670,7 +1766,7 @@ public class TestPlainTextSerialization
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(13, serializer.configure(configuration, schema).size());
+    assertEquals(14, serializer.configure(configuration, schema).size());
 
     LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
       Arrays.asList(serializer.getRequiredLayers()));
@@ -1843,7 +1939,7 @@ public class TestPlainTextSerialization
     // don't use conventions
     configuration.get("useConventions").setValue(Boolean.FALSE);
     configuration.get("includeMissingTags").setValue(Boolean.TRUE);
-    assertEquals(13, serializer.configure(configuration, schema).size());
+    assertEquals(14, serializer.configure(configuration, schema).size());
     assertEquals("orthography", "orthography", 
                  ((Layer)configuration.get("orthographyLayer").getValue()).getId());
     assertEquals("use conventions",
@@ -1942,7 +2038,7 @@ public class TestPlainTextSerialization
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
-                 13, deserializer.configure(configuration, schema).size());      
+                 14, deserializer.configure(configuration, schema).size());      
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertNull("noise", configuration.get("noiseLayer").getValue());

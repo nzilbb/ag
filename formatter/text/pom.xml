@@ -11,7 +11,7 @@
   <artifactId>nzilbb.formatter.text</artifactId>
   <name>nzilbb.formatter.text</name>
   <description>Serializer/Deserializer for transcripts in plain text format.</description>
-  <version>1.6.1</version>
+  <version>1.7.0</version>
 
   <properties>
     <package.path>nzilbb/formatter/text/</package.path>

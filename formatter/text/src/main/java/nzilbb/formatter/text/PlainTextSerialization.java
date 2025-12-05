@@ -345,6 +345,36 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
    * @param newOrthographyLayer Layer for orthography.
    */
   public PlainTextSerialization setOrthographyLayer(Layer newOrthographyLayer) { orthographyLayer = newOrthographyLayer; return this; }
+  
+  /**
+   * Regular expression to identify non-word characters
+   * (e.g. punctuation) that should be joined to a neighboring word.
+   * Set to null or empty string to disable such joining.
+   * @see #getNonWordPattern()
+   * @see #setNonWordPattern(String)
+   * @see OrthographyClumper#getNonOrthoCharacterPattern()
+   */
+  protected String nonWordPattern = new OrthographyClumper().getNonOrthoCharacterPattern();
+  /**
+   * Getter for {@link #nonWordPattern}: Regular expression to
+   * identify non-word characters (e.g. punctuation) that should be
+   * joined to a neighboring word. 
+   * @return Regular expression to identify non-word characters
+   * (e.g. punctuation) that should be joined to a neighboring word. 
+   * @see OrthographyClumper#getNonOrthoCharacterPattern()
+   */
+  public String getNonWordPattern() { return nonWordPattern; }
+  /**
+   * Setter for {@link #nonWordPattern}: Regular expression to
+   * identify non-word characters (e.g. punctuation) that should be
+   * joined to a neighboring word.
+   * @param newNonWordPattern Regular expression to identify non-word
+   * characters (e.g. punctuation) that should be joined to a
+   * neighboring word. 
+   * Set to null or empty string to disable such joining.
+   * @see OrthographyClumper#getNonOrthoCharacterPattern()
+   */
+  public PlainTextSerialization setNonWordPattern(String newNonWordPattern) { nonWordPattern = newNonWordPattern; return this; }
 
   /**
    * Parameters and mappings for the next deserialization.
@@ -994,6 +1024,20 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       configuration.get("timestampFormat").setValue(timestampFormat);
     }
 
+    if (!configuration.containsKey("nonWordPattern")) {
+      configuration.addParameter(
+        new Parameter(
+          "nonWordPattern", String.class, 
+          "Non-word Pattern",
+          "Regular expression to identify non-word characters for joining to a neighboring words e.g. "
+          + new OrthographyClumper().getNonOrthoCharacterPattern()
+          + " - set this blank to simply tokenize on spaces.", true));
+    }
+    if (configuration.get("nonWordPattern").getValue() == null) {
+      configuration.get("nonWordPattern").setValue(
+        new OrthographyClumper().getNonOrthoCharacterPattern());
+    }
+
     return configuration;
   }
 
@@ -1624,18 +1668,23 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       if (timers != null) timers.end("apply conventions");
     } // apply transcription conventions
 
-    OrthographyClumper clumper = new OrthographyClumper(wordLayer.getId(), utteranceLayer.getId());
-    try {
-      // clump non-orthographic 'words' with real words
-      if (timers != null) timers.start("orthography clumping");
-      clumper.transform(graph);
-      graph.commit();
-      if (timers != null) timers.end("orthography clumping");
-    } catch(TransformationException exception) {
-      if (errors == null) errors = new SerializationException();
-      if (errors.getCause() == null) errors.initCause(exception);
-      errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
-    }
+    if (nonWordPattern != null && nonWordPattern.length() > 0) {
+      OrthographyClumper clumper = new OrthographyClumper(
+        wordLayer.getId(), utteranceLayer.getId())
+        .setNonOrthoCharacterPattern(nonWordPattern);
+      try {
+        // clump non-orthographic 'words' with real words
+        if (timers != null) timers.start("orthography clumping");
+        clumper.transform(graph);
+        graph.commit();
+        if (timers != null) timers.end("orthography clumping");
+      } catch(TransformationException exception) {
+        if (errors == null) errors = new SerializationException();
+        if (errors.getCause() == null) errors.initCause(exception);
+        errors.addError(
+          SerializationException.ErrorType.Tokenization, exception.getMessage());
+      }
+    } // there is a non-word pattern for clumping
 
     if (timers != null) timers.start("finalization");
 
