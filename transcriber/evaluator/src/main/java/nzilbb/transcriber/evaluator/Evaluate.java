@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2022-2025 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -79,7 +80,7 @@ import org.apache.commons.csv.CSVPrinter;
  * <br> <tt> java -jar nzilbb.transcriber.evaluate.jar  nzilbb.transcriber.whisper.jar
  * --Labbcat=https://labbcat.canterbury.ac.nz/demo/
  * --transcripts=first('corpus').label == 'UC'</tt> 
- * <p> Either way, the utility produces two tab-separated outputs:
+ * <p> Either way, the utility produces three tab-separated outputs:
  * <ul>
  *  <li> To std out, a list of recordings with a word count and Word Error Rate (WER)</li>
  *  <li> To a `path....tsv` file, minimum edit paths for all words, including:
@@ -94,11 +95,12 @@ import org.apache.commons.csv.CSVPrinter;
  *   <li> the start/end time of the utterance </li>
  *   <li> how many words it contains </li>
  *   <li> whether it's a reference or transcribed utterance ("ref" or "wav" respectively) </li>
- *  </ul></li>    
+ *  </ul></li>
  * </ul>
  */
-@ProgramDescription(value="Utility for automated evaluation of automatic Transcriber modules.\nOutputs:\n\tpaths-...tsv file with word edit paths\n\tutterances-...tsv file with utterance partitioning info.",
-                    arguments="nzilbb.transcriber.mytranscriber.jar [/path/to/wav/and/txt/files]")
+@ProgramDescription(
+  value="Utility for automated evaluation of automatic Transcriber modules.\nOutputs:\n\tpaths-...tsv file with word edit paths\n\tutterances-...tsv file with utterance partitioning info.",
+  arguments="nzilbb.transcriber.mytranscriber.jar [/path/to/wav/and/txt/files]")
 public class Evaluate extends CommandLineProgram {
    
   public static void main(String argv[]) {
@@ -479,6 +481,9 @@ public class Evaluate extends CommandLineProgram {
    */
   public Evaluate setUtteranceCsv(CSVPrinter newUtteranceCsv) { utteranceCsv = newUtteranceCsv; return this; }
 
+  /** Main results stream, which can be redirected for testing. */
+  OutputStream stdout = System.out;
+
   /** Constructor */
   public Evaluate() {
   }
@@ -493,25 +498,38 @@ public class Evaluate extends CommandLineProgram {
       return;
     }
     setTranscriberJar(arguments.elementAt(0));
+    File path = new File(transcriberJar);
 
-    // is the name a jar file name or a class name
-    try { // try as a jar file
-      descriptor = new AnnotatorDescriptor(new File(transcriberJar));
-    } catch (Throwable notAJarName) { // try as a class name      
-      System.err.println("Not the name of a transcriber .jar file: " + transcriberJar);
-      System.err.println(notAJarName.toString());
+    if (!path.exists()) {
+      System.err.println("Given path does not exist: " + transcriberJar);
       return;
     }
-    Annotator annotator = descriptor.getInstance();
-    if (!(annotator instanceof Transcriber)) {
-      System.err.println("Annotator: " + transcriberJar + " is not a transcriber");
-      return;
-    }
-    setTranscriber((Transcriber)annotator);
-    if (verbose) {
-      System.err.println(transcriberJar + " implements "
-                         + transcriber.getAnnotatorId()
-                         + " (" + transcriber.getVersion() + ")");
+
+    if (path.isFile()) { // transcriber implementation
+      // is the name a jar file name or a class name
+      try { // try as a jar file
+        descriptor = new AnnotatorDescriptor(path);
+      } catch (Throwable notAJarName) { // try as a class name      
+        System.err.println("Not the name of a transcriber .jar file: " + transcriberJar);
+        System.err.println(notAJarName.toString());
+        return;
+      }
+      Annotator annotator = descriptor.getInstance();
+      if (!(annotator instanceof Transcriber)) {
+        System.err.println("Annotator: " + transcriberJar + " is not a transcriber");
+        return;
+      }
+      setTranscriber((Transcriber)annotator);
+      if (verbose) {
+        System.err.println(transcriberJar + " implements "
+                           + transcriber.getAnnotatorId()
+                           + " (" + transcriber.getVersion() + ")");
+      }
+    } else { // given path is a directory
+      // ...that presumably contains pretranscribed transcript files
+      setTranscriber(
+        new Pretranscribed()
+        .setTranscriptDirectory(path));
     }
       
     // give the transcriber the resources it needs...      
@@ -608,6 +626,11 @@ public class Evaluate extends CommandLineProgram {
     setDeserializer(new PlainTextSerialization());
     ParameterSet configuration = serializer.configure(
       new ParameterSet(), transcriber.getSchema());
+    if (transcriber instanceof Pretranscribed) {
+      // use the same deserializer
+      ((Pretranscribed)transcriber).setDeserializer(getDeserializer());
+    }
+
 
     CSVPrinter out = null; // stdout will be tab-separated values
     // csv for word edit paths
@@ -617,7 +640,7 @@ public class Evaluate extends CommandLineProgram {
                new OutputStreamWriter(new FileOutputStream(csvFile), "UTF-8"),
                CSVFormat.EXCEL.withDelimiter('\t')));
       out = new CSVPrinter(
-        new OutputStreamWriter(System.out, "UTF-8"),
+        new OutputStreamWriter(stdout, "UTF-8"),
         CSVFormat.EXCEL.withDelimiter('\t'));
     } catch (Exception x) {
       System.err.println("Could not write to \""+csvFile.getPath()+"\": " + x);
@@ -766,7 +789,7 @@ public class Evaluate extends CommandLineProgram {
                new OutputStreamWriter(new FileOutputStream(csvFile), "UTF-8"),
                CSVFormat.EXCEL.withDelimiter('\t')));
       out = new CSVPrinter(
-        new OutputStreamWriter(System.out, "UTF-8"),
+        new OutputStreamWriter(stdout, "UTF-8"),
         CSVFormat.EXCEL.withDelimiter('\t'));
     } catch (Exception x) {
       System.err.println("Could not write to \""+csvFile.getPath()+"\": " + x);
