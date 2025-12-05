@@ -1,1 +1,1 @@
-Speaker1: the quick brown fox jumps over some lazy dogs!
+A: the quick brown fox jumps over some lazy dogs!

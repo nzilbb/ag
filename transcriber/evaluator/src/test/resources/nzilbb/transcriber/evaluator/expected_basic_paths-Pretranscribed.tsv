@@ -1,10 +1,10 @@
-step	txt	rawReference	reference	operation	word	rawWord	wav	distance
-1	transcript1.txt	The	the		the	the	transcript1.wav	0.0
-2	transcript1.txt	quick	quick		quick	quick	transcript1.wav	0.0
-3	transcript1.txt	brown	brown		brown	brown	transcript1.wav	0.0
-4	transcript1.txt	fox ...	fox		fox	fox	transcript1.wav	0.0
-5	transcript1.txt	... jumps	jumps		jumps	jumps	transcript1.wav	0.0
-6	transcript1.txt	over	over		over	over	transcript1.wav	0.0
-7	transcript1.txt	the	the	~	some	some	transcript1.wav	1.0
-8	transcript1.txt	lazy	lazy		lazy	lazy	transcript1.wav	0.0
-9	transcript1.txt	dog!	dog	~	dogs	dogs!	transcript1.wav	0.3333333333333333
+step	txt	speakerReference	rawReference	reference	operation	word	rawWord	speakerWord	wav	distance
+1	transcript1.txt	Speaker1	The	the		the	the	A	transcript1.wav	0.0
+2	transcript1.txt	Speaker1	quick	quick		quick	quick	A	transcript1.wav	0.0
+3	transcript1.txt	Speaker1	brown	brown		brown	brown	A	transcript1.wav	0.0
+4	transcript1.txt	Speaker1	fox ...	fox		fox	fox	A	transcript1.wav	0.0
+5	transcript1.txt	Speaker2	... jumps	jumps		jumps	jumps	A	transcript1.wav	0.0
+6	transcript1.txt	Speaker2	over	over		over	over	A	transcript1.wav	0.0
+7	transcript1.txt	Speaker2	the	the	~	some	some	A	transcript1.wav	1.0
+8	transcript1.txt	Speaker2	lazy	lazy		lazy	lazy	A	transcript1.wav	0.0
+9	transcript1.txt	Speaker2	dog!	dog	~	dogs	dogs!	A	transcript1.wav	0.3333333333333333

@@ -666,11 +666,13 @@ public class Evaluate extends CommandLineProgram {
         csv.print("txt");
         // (tag is not valid if evaluating from filesystem)
         tag = null;
+        csv.print("speakerReference");
         csv.print("rawReference");
         csv.print("reference");
         csv.print("operation");
         csv.print("word");
         csv.print("rawWord");
+        csv.print("speakerWord");
         csv.print("wav");
         csv.print("distance");
         csv.println();
@@ -817,11 +819,13 @@ public class Evaluate extends CommandLineProgram {
         csv.print("step");
         csv.print("txt");
         if (getTag() != null) csv.print("tag");
+        csv.print("speakerReference");
         csv.print("rawReference");
         csv.print("reference");
         csv.print("operation");
         csv.print("word");
         csv.print("rawWord");
+        csv.print("speakerWord");
         csv.print("wav");
         csv.print("distance");
         csv.println();
@@ -1132,11 +1136,13 @@ public class Evaluate extends CommandLineProgram {
         if (getTag() != null) csv.print("");
         csv.print("");
         csv.print("");
+        csv.print("");
       } else {
         if (getTag() != null) {
           Annotation tag = step.getFrom().first(getTag());
           csv.print(tag == null?"":tag.getLabel());
         }
+        csv.print(step.getFrom().getParent().getParent().getLabel());
         csv.print(step.getFrom().getParent().getLabel());
         csv.print(step.getFrom().getLabel());
       }
@@ -1144,9 +1150,11 @@ public class Evaluate extends CommandLineProgram {
       if (step.getTo() == null) {
         csv.print("");
         csv.print("");
+        csv.print("");
       } else {
         csv.print(step.getTo().getLabel());
         csv.print(step.getTo().getParent().getLabel());
+        csv.print(step.getTo().getParent().getParent().getLabel());
       }
       csv.print(wav.getName());
       csv.print(step.getStepDistance());
