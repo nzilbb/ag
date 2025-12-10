@@ -687,6 +687,18 @@ public class Evaluate extends CommandLineProgram {
           } // next possible extension
           return false; // if we got this far, we didn't find a transcript
         }});
+    if (wavs.length == 0 // no wavs with transcripts
+        && transcriber instanceof Pretranscribed) { // but we don't need wavs
+      // look for transcripts only
+      wavs = dir.listFiles(new FileFilter() {
+          public boolean accept(File f) {
+            // is it a transcript?
+            for (String ext : transcriptExtensions) {              
+              if (f.getPath().endsWith(ext)) return true;
+            } // next possible extension
+            return false; // if we got this far, it's not a transcript
+          }});
+    }
     if (wavs.length == 0) { // no wavs with transcripts
       System.err.println(
         "No .wav files with transcripts ("+transcriptExtensions+") found: " + files);
@@ -787,7 +799,11 @@ public class Evaluate extends CommandLineProgram {
               if (deserializer != null) break;
             } // next possible deserializer
             finalOut.print(wav.getName());
-            finalOut.print(duration(wav));
+            if (wav.getName().endsWith(".wav")) {
+              finalOut.print(duration(wav));
+            } else {
+              finalOut.print("");
+            }
             finalOut.flush();
 
             // load reference transcript
