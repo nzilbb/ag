@@ -93,23 +93,23 @@ public class Pretranscribed extends Transcriber {
   public Pretranscribed setTranscriptDirectory(File newTranscriptDirectory) { transcriptDirectory = newTranscriptDirectory; return this; }
   
   /**
-   * The {@link #GraphDeserializer} to use for reading transcripts.
-   * @see #getDeserializer()
-   * @see #setDeserializer(GraphDeserializer)
+   * The {@link #GraphDeserializer}s to use for reading transcripts.
+   * @see #getDeserializers()
+   * @see #setDeserializers(GraphDeserializer)
    */
-  protected GraphDeserializer deserializer;
+  protected List<GraphDeserializer> deserializers;
   /**
-   * Getter for {@link #deserializer}: The {@link #GraphDeserializer}
+   * Getter for {@link #deserializers}: The {@link #GraphDeserializer}s
    * to use for reading transcripts. 
-   * @return The #GraphDeserializer to use for reading transcripts.
+   * @return The {@link #GraphDeserializer}s to use for reading transcripts.
    */
-  public GraphDeserializer getDeserializer() { return deserializer; }
+  public List<GraphDeserializer> getDeserializers() { return deserializers; }
   /**
-   * Setter for {@link #deserializer}: The {@link #GraphDeserializer}
+   * Setter for {@link #deserializers}: The {@link #GraphDeserializer}s
    * to use for reading transcripts. 
-   * @param newDeserializer The #GraphDeserializer to use for reading transcripts.
+   * @param newDeserializer The {@link #GraphDeserializer}s to use for reading transcripts.
    */
-  public Pretranscribed setDeserializer(GraphDeserializer newDeserializer) { deserializer = newDeserializer; return this; }
+  public Pretranscribed setDeserializers(List<GraphDeserializer> newDeserializers) { deserializers = newDeserializers; return this; }
   
   /**
    * The orthography standardizer.
@@ -216,13 +216,18 @@ public class Pretranscribed extends Transcriber {
       // look for a a transcript matching the .wav file, in the same directory
       String baseName = IO.WithoutExtension(speech);
       File pretranscription = null;
-      for (String ext : deserializer.getDescriptor().getFileSuffixes()) {
-        File t = new File(transcriptDirectory, baseName + ext);
-        if (t.exists()) {
-          pretranscription = t;
-          break; // found the file
-        }
-      }
+      GraphDeserializer deserializer = null;
+      for (GraphDeserializer d : deserializers) {
+        for (String ext : d.getDescriptor().getFileSuffixes()) {
+          File t = new File(transcriptDirectory, baseName + ext);
+          if (t.exists()) {
+            pretranscription = t;
+            deserializer = d;
+            break; // found the file
+          }
+        } // next possible extension
+        if (deserializer != null) break;
+      } // next possible deserializer
       setPercentComplete(10);
       if (pretranscription == null) {
         throw new FileNotFoundException("No transcript for " + speech.getName());

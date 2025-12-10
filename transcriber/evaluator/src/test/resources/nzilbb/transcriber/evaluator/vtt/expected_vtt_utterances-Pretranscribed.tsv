@@ -1,0 +1,8 @@
+utt	txt	version	start	end	wordCount
+1	transcript1.vtt	ref	0.0	5.0	3
+2	transcript1.vtt	ref	5.0	10.0	3
+3	transcript1.vtt	ref	5.0	10.0	2
+4	transcript1.vtt	ref	10.0	15.0	3
+1	transcript1.vtt	wav	0.0	10.0	6
+2	transcript1.vtt	wav	5.0	10.0	2
+3	transcript1.vtt	wav	10.0	15.0	3

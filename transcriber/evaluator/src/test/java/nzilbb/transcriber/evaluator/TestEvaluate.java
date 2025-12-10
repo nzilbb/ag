@@ -73,7 +73,7 @@ public class TestEvaluate {
     // capture main output
     evaluate.stdout = new FileOutputStream(outputs[0]);
     // set command-line arguments    
-    evaluate.processArguments(new String[]{ pretranscribedDir.getPath(), dir().getPath() });
+    evaluate.processArguments(new String[]{ pretranscribedDir.getPath(), dir.getPath() });
     //evaluate.setVerbose(true);
     evaluate.start();
 
@@ -83,6 +83,44 @@ public class TestEvaluate {
       assertTrue("Output exists: " + output.getName(), output.exists());
       String differences = diff(
         new File(dir, "expected_basic_" + output.getName()), output);
+      if (differences != null) {
+        fail(differences);
+      } else {
+        output.delete();
+      }
+    }
+  }   
+
+  /** Ensure the evaluator can compare WebVTT transcripts. */
+  @Test public void webvtt() throws Exception {
+
+    // files
+    File dir = new File(dir(), "vtt");
+    File audio = new File(dir, "transcript1.wav");
+    File transcript = new File(dir, "transcript1.txt");
+    // pre-transcribed files to compare to 
+    File pretranscribedDir = new File(dir, "pretranscribed");
+    // outputs
+    File[] outputs = {
+      new File(dir, "stdout.tsv"),
+      new File(dir, "utterances-Pretranscribed.tsv"),
+      new File(dir, "paths-Pretranscribed.tsv")
+    };
+
+    Evaluate evaluate = new Evaluate();
+    // capture main output
+    evaluate.stdout = new FileOutputStream(outputs[0]);
+    // set command-line arguments    
+    evaluate.processArguments(new String[]{ pretranscribedDir.getPath(), dir.getPath() });
+    //evaluate.setVerbose(true);
+    evaluate.start();
+
+    evaluate.stdout.close();
+    // ensure outputs are as expected
+    for (File output : outputs) {
+      assertTrue("Output exists: " + output.getName(), output.exists());
+      String differences = diff(
+        new File(dir, "expected_vtt_" + output.getName()), output);
       if (differences != null) {
         fail(differences);
       } else {

@@ -16,6 +16,7 @@
 
   <properties>
     <nzilbb.formatter.text.version>1.7.0</nzilbb.formatter.text.version>
+    <nzilbb.formatter.webvtt.version>1.0.0</nzilbb.formatter.webvtt.version>
     <nzilbb.annotator.orthography.version>0.2.3</nzilbb.annotator.orthography.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -27,6 +28,11 @@
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.formatter.text</artifactId>
       <version>${nzilbb.formatter.text.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>nz.ilbb.ag</groupId>
+      <artifactId>nzilbb.formatter.webvtt</artifactId>
+      <version>${nzilbb.formatter.webvtt.version}</version>
     </dependency>
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
@@ -125,6 +131,12 @@
                   <groupId>nz.ilbb.ag</groupId>
                   <artifactId>nzilbb.formatter.text</artifactId>
                   <version>${nzilbb.formatter.text.version}</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>nz.ilbb.ag</groupId>
+                  <artifactId>nzilbb.formatter.webvtt</artifactId>
+                  <version>${nzilbb.formatter.webvtt.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

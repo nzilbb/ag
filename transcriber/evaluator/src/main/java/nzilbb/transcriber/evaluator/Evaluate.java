@@ -57,6 +57,7 @@ import nzilbb.configure.ParameterSet;
 import nzilbb.editpath.*;
 import nzilbb.editpath.MinimumEditPathString;
 import nzilbb.formatter.text.PlainTextSerialization;
+import nzilbb.formatter.webvtt.VttSerialization;
 import nzilbb.labbcat.LabbcatView;
 import nzilbb.media.MediaCensor;
 import nzilbb.media.MediaThread;
@@ -469,21 +470,21 @@ public class Evaluate extends CommandLineProgram {
   public Evaluate setStandardizer(OrthographyStandardizer newStandardizer) { standardizer = newStandardizer; return this; }
 
   /**
-   * Deserializer for parsing reference transcripts.
-   * @see #getDeserializer()
-   * @see #setDeserializer(GraphDeserializer)
+   * Deserializers for parsing reference transcripts.
+   * @see #getDeserializers()
+   * @see #setDeserializers(GraphDeserializer)
    */
-  protected GraphDeserializer serializer;
+  protected List<GraphDeserializer> deserializers;
   /**
-   * Getter for {@link #serializer}: Deserializer for parsing reference transcripts.
-   * @return Deserializer for parsing reference transcripts.
+   * Getter for {@link #serializers}: Deserializers for parsing reference transcripts.
+   * @return Deserializers for parsing reference transcripts.
    */
-  public GraphDeserializer getDeserializer() { return serializer; }
+  public List<GraphDeserializer> getDeserializers() { return deserializers; }
   /**
-   * Setter for {@link #serializer}: Deserializer for parsing reference transcripts.
-   * @param newDeserializer Deserializer for parsing reference transcripts.
+   * Setter for {@link #serializers}: Deserializers for parsing reference transcripts.
+   * @param newDeserializers Deserializers for parsing reference transcripts.
    */
-  public Evaluate setDeserializer(GraphDeserializer newDeserializer) { serializer = newDeserializer; return this; }
+  public Evaluate setDeserializers(List<GraphDeserializer> newDeserializers) { deserializers = newDeserializers; return this; }
   
   /**
    * Printer for edit path data.
@@ -649,32 +650,54 @@ public class Evaluate extends CommandLineProgram {
       return;
     }
 
-    File[] wavs = dir.listFiles(new FileFilter() {
-        public boolean accept(File f) {
-          if (!f.getName().toLowerCase().endsWith(".wav")) return false;
-          File txt = new File(f.getParentFile(), IO.WithoutExtension(f) + ".txt");
-          return txt.exists();
-        }});
-    if (wavs.length == 0) {
-      System.err.println("No .wav files with .txt transcripts found: " + files);
-      return;
-    }
+    deserializers = new Vector<GraphDeserializer>();
+    final Vector<String> transcriptExtensions = new Vector<String>();
 
-    // serializer for parsing reference transcripts
-    setDeserializer(new PlainTextSerialization());
-    ParameterSet configuration = serializer.configure(
+    // prefer webvtt
+    GraphDeserializer parser = new VttSerialization();
+    ParameterSet configuration = parser.configure(
       new ParameterSet(), transcriber.getSchema());
+    if (nonWordPattern != null) {
+      configuration.get("nonWordPattern").setValue(nonWordPattern);
+    }
+    parser.configure(configuration, transcriber.getSchema());
+    deserializers.add(parser);
+    transcriptExtensions.addAll(parser.getDescriptor().getFileSuffixes());
+
+    // accept plain text too
+    parser = new PlainTextSerialization();
+    configuration = parser.configure(new ParameterSet(), transcriber.getSchema());
+    // don't use conventions for noise/comment/pronunciation/lexical tags
     configuration.get("useConventions").setValue(Boolean.FALSE);
     if (nonWordPattern != null) {
       configuration.get("nonWordPattern").setValue(nonWordPattern);
     }
-    // confirm configuration
-    serializer.configure(configuration, transcriber.getSchema());
-    if (transcriber instanceof Pretranscribed) {
-      // use the same deserializer
-      ((Pretranscribed)transcriber).setDeserializer(getDeserializer());
+    parser.configure(configuration, transcriber.getSchema());
+    deserializers.add(parser);
+    transcriptExtensions.addAll(parser.getDescriptor().getFileSuffixes());
+    
+    File[] wavs = dir.listFiles(new FileFilter() {
+        public boolean accept(File f) {
+          if (!f.getName().toLowerCase().endsWith(".wav")) return false;
+          String baseName = IO.WithoutExtension(f);
+          // find a transcript
+          for (String ext : transcriptExtensions) {
+            File txt = new File(f.getParentFile(), baseName + ext);
+            if (txt.exists()) return true;
+          } // next possible extension
+          return false; // if we got this far, we didn't find a transcript
+        }});
+    if (wavs.length == 0) { // no wavs with transcripts
+      System.err.println(
+        "No .wav files with transcripts ("+transcriptExtensions+") found: " + files);
+      return;
     }
 
+    if (transcriber instanceof Pretranscribed) {
+      // use the same deserializer
+      ((Pretranscribed)transcriber).setDeserializers(getDeserializers());
+    }
+    
     CSVPrinter out = null; // stdout will be tab-separated values
     // csv for word edit paths
     File csvFile = new File(dir, "paths-"+transcriber.getAnnotatorId()+".tsv");
@@ -749,7 +772,20 @@ public class Evaluate extends CommandLineProgram {
             // standarize orthography
             standardizer.transform(transcribed);
             File wav = new File(dir, IO.WithoutExtension(transcribed.getId()) + ".wav");
-            File txt = new File(wav.getParentFile(), IO.WithoutExtension(wav) + ".txt");
+            String baseName = IO.WithoutExtension(wav);
+            File txt = null;
+            GraphDeserializer deserializer = null;
+            for (GraphDeserializer d : deserializers) {
+              for (String ext : d.getDescriptor().getFileSuffixes()) {
+                File t = new File(wav.getParentFile(), baseName + ext);
+                if (t.exists()) {
+                  txt = t;
+                  deserializer = d;
+                  break; // found the file
+                }
+              } // next possible extension
+              if (deserializer != null) break;
+            } // next possible deserializer
             finalOut.print(wav.getName());
             finalOut.print(duration(wav));
             finalOut.flush();
@@ -757,10 +793,10 @@ public class Evaluate extends CommandLineProgram {
             // load reference transcript
             NamedStream[] streams = { new NamedStream(txt) };
             // use default parameters for loading this file
-            serializer.setParameters(
-              serializer.load(streams, transcriber.getSchema()));
+            deserializer.setParameters(
+              deserializer.load(streams, transcriber.getSchema()));
             // deserialize
-            Graph[] graphs = serializer.deserialize();
+            Graph[] graphs = deserializer.deserialize();
             Graph reference = graphs[0];
             finalOut.print(reference.all("word").length);
             
