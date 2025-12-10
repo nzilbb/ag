@@ -213,6 +213,36 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
   public void setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; }
 
   /**
+   * Regular expression to identify non-word characters
+   * (e.g. punctuation) that should be joined to a neighboring word.
+   * Set to null or empty string to disable such joining.
+   * @see #getNonWordPattern()
+   * @see #setNonWordPattern(String)
+   * @see OrthographyClumper#getNonOrthoCharacterPattern()
+   */
+  protected String nonWordPattern = new OrthographyClumper().getNonOrthoCharacterPattern();
+  /**
+   * Getter for {@link #nonWordPattern}: Regular expression to
+   * identify non-word characters (e.g. punctuation) that should be
+   * joined to a neighboring word. 
+   * @return Regular expression to identify non-word characters
+   * (e.g. punctuation) that should be joined to a neighboring word. 
+   * @see OrthographyClumper#getNonOrthoCharacterPattern()
+   */
+  public String getNonWordPattern() { return nonWordPattern; }
+  /**
+   * Setter for {@link #nonWordPattern}: Regular expression to
+   * identify non-word characters (e.g. punctuation) that should be
+   * joined to a neighboring word.
+   * @param newNonWordPattern Regular expression to identify non-word
+   * characters (e.g. punctuation) that should be joined to a
+   * neighboring word. 
+   * Set to null or empty string to disable such joining.
+   * @see OrthographyClumper#getNonOrthoCharacterPattern()
+   */
+  public VttSerialization setNonWordPattern(String newNonWordPattern) { nonWordPattern = newNonWordPattern; return this; }
+
+  /**
    * Timers for debugging and optimization.
    * @see #getTimers()
    * @see #setTimers(Timers)
@@ -458,6 +488,20 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
         p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
       }
       p.setPossibleValues(candidateLayers.values());
+    }
+
+    if (!configuration.containsKey("nonWordPattern")) {
+      configuration.addParameter(
+        new Parameter(
+          "nonWordPattern", String.class, 
+          "Non-word Pattern",
+          "Regular expression to identify non-word characters for joining to a neighboring words e.g. "
+          + new OrthographyClumper().getNonOrthoCharacterPattern()
+          + " - set this blank to simply tokenize on spaces.", true));
+    }
+    if (configuration.get("nonWordPattern").getValue() == null) {
+      configuration.get("nonWordPattern").setValue(
+        new OrthographyClumper().getNonOrthoCharacterPattern());
     }
 
     return configuration;
@@ -816,18 +860,21 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
           errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
         }
 	    
-        OrthographyClumper clumper
-          = new OrthographyClumper(wordLayer.getId(), utteranceLayer.getId());
-        try {
-          // clump non-orthographic 'words' with real words
-          if (timers != null) timers.start("orthography clumping");
-          clumper.transform(graph);
-          if (timers != null) timers.end("orthography clumping");
-        } catch(TransformationException exception) {
-          if (errors == null) errors = new SerializationException();
-          if (errors.getCause() == null) errors.initCause(exception);
-          errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
-        }
+        if (nonWordPattern != null && nonWordPattern.length() > 0) {
+          OrthographyClumper clumper
+            = new OrthographyClumper(wordLayer.getId(), utteranceLayer.getId())
+            .setNonOrthoCharacterPattern(nonWordPattern);
+          try {
+            // clump non-orthographic 'words' with real words
+            if (timers != null) timers.start("orthography clumping");
+            clumper.transform(graph);
+            if (timers != null) timers.end("orthography clumping");
+          } catch(TransformationException exception) {
+            if (errors == null) errors = new SerializationException();
+            if (errors.getCause() == null) errors.initCause(exception);
+            errors.addError(SerializationException.ErrorType.Tokenization, exception.getMessage());
+          }
+        } // there is a non-word pattern for clumping
 
       } // there is a word layer
       graph.commit();

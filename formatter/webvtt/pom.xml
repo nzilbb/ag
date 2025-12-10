@@ -11,7 +11,7 @@
   <artifactId>nzilbb.formatter.webvtt</artifactId>
   <name>nzilbb.formatter.webvtt</name>
   <description>Serializer/Deserializer for WebVTT subtitle files.</description>
-  <version>0.7.2</version>
+  <version>1.0.0</version>
 
   <properties>
     <package.path>nzilbb/formatter/webvtt/</package.path>

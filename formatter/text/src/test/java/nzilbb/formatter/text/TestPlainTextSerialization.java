@@ -540,7 +540,7 @@ public class TestPlainTextSerialization
 
   }
 
-  /** Ensure that unsetting nonWordPattern disables clummping. */
+  /** Ensure that unsetting nonWordPattern disables clumping. */
   @Test public void disableClumping()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",

@@ -68,8 +68,11 @@ public class TestVttSerialization {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 0,
+    assertEquals("Configuration parameters" + configuration, 1,
                  deserializer.configure(configuration, schema).size());      
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -172,7 +175,7 @@ public class TestVttSerialization {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 0,
+    assertEquals("Configuration parameters" + configuration, 1,
                  deserializer.configure(configuration, schema).size());
 
     // load the stream
@@ -262,7 +265,7 @@ public class TestVttSerialization {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 1,
+    assertEquals("Configuration parameters" + configuration, 2,
                  deserializer.configure(configuration, schema).size());      
 
     // load the stream
@@ -349,7 +352,7 @@ public class TestVttSerialization {
     
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 0,
+    assertEquals("Configuration parameters" + configuration, 1,
                  deserializer.configure(configuration, schema).size());
     
     // load the stream
@@ -396,7 +399,7 @@ public class TestVttSerialization {
     Annotation[] words = g.all("word");
     assertEquals(13, words.length);
     String[] checkWords = {
-      "Well", "I", "have", "a", "fairly", "vivid", "recollection", "of",
+      "Well .", "I", "have", "a", "fairly", "vivid", "recollection -", "of",
       "all", "of", "the", "major", "quakes."};
     for (int w = 0; w < checkWords.length; w++) {
       assertEquals("check word " + w + ": " + checkWords[w], checkWords[w], words[w].getLabel());
@@ -409,6 +412,64 @@ public class TestVttSerialization {
       assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
     }
+  }
+
+  /** Ensure that unsetting nonWordPattern disables clumping. */
+  @Test public void disableClumping()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("who", "Participants", 0, true, true, true),
+      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+      new Layer("word", "Words", 2, true, false, false, "turn", true));
+    
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "abbreviated.vtt")) };
+    
+    // create deserializer
+    VttSerialization deserializer = new VttSerialization();
+    
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
+    configuration.get("nonWordPattern").setValue("");
+    assertEquals("Configuration parameters" + configuration, 1,
+                 deserializer.configure(configuration, schema).size());
+    assertEquals("blank nonWordPattern parameter",
+                 "", configuration.get("nonWordPattern").getValue());
+    assertEquals("blank nonWordPattern",
+                 "", deserializer.getNonWordPattern());
+    
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals(0, defaultParameters.size());
+    
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+    
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+    
+    assertEquals("abbreviated.vtt", g.getId());
+
+    // utterances
+    Annotation[] words = g.all("word");
+    assertEquals(15, words.length);
+    String[] checkWords = { // words includ standalone "." and "-"
+      "Well", ".", "I", "have", "a", "fairly", "vivid", "recollection", "-", "of",
+      "all", "of", "the", "major", "quakes."};
+    for (int w = 0; w < checkWords.length; w++) {
+      assertEquals("check word " + w + ": " + checkWords[w], checkWords[w], words[w].getLabel());
+    } // next word
+    
   }
 
   /** Serialization of similtaneous speech. */
@@ -518,7 +579,7 @@ public class TestVttSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(0, serializer.configure(configuration, schema).size());
+    assertEquals(1, serializer.configure(configuration, schema).size());
 
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(4, needLayers.length);
@@ -570,7 +631,7 @@ public class TestVttSerialization {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 0,
+    assertEquals("Configuration parameters" + configuration, 1,
                  deserializer.configure(configuration, schema).size());      
 
     // load the stream
@@ -668,7 +729,7 @@ public class TestVttSerialization {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 0,
+    assertEquals("Configuration parameters" + configuration, 1,
                  deserializer.configure(configuration, schema).size());      
 
     // load the stream
