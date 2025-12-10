@@ -507,6 +507,7 @@ public class TestVttSerialization {
       .setSchema(schema);
     graph.addAnchor(new Anchor("a0", 0.0));
     graph.addAnchor(new Anchor("a15", 15.0));
+    graph.addAnchor(new Anchor("a20", 20.0)); // anchor for empty utterance
     graph.addAnnotation(new Annotation("en", "en", "language", "a0", "a15"));
     // participants
     graph.addAnnotation(new Annotation("p1", "Participant 1", "who", "a0", "a15"));
@@ -522,6 +523,7 @@ public class TestVttSerialization {
     graph.addAnnotation(new Annotation("u1-2", "Participant 1", "utterance", "a5", "a10", "t1"));
     graph.addAnnotation(new Annotation("u2-1", "Participant 2", "utterance", "a5", "a10", "t2"));
     graph.addAnnotation(new Annotation("u1-3", "Participant 1", "utterance", "a10", "a15", "t1"));
+    graph.addAnnotation(new Annotation("empty", "Participant 1", "utterance", "a15", "a20", "t1"));
 
     // words
     graph.addAnnotation(new Annotation("w1-1", "w1-1", "word", 

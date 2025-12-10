@@ -746,15 +746,14 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
 
           if (startMinutes != null) { // this is an interval line...
             // finish last utterance
-            if (currentUtterance.getLabel().trim().length() > 0)
-            { // the utterance actually contains something
-              
-              currentUtterance.setLabel(
-                currentUtterance.getLabel()
-                // remove <...> tags
-                .replaceAll("<[^>]+>","")
-                // strip out newlines and multiple spaces
-                .replaceAll("[\r\n ]+", " ").replaceAll(" +", " ").trim());
+            currentUtterance.setLabel(
+              currentUtterance.getLabel()
+              // remove <...> tags
+              .replaceAll("<[^>]+>","")
+              // strip out newlines and multiple spaces
+              .replaceAll("[\r\n ]+", " ").replaceAll(" +", " ").trim());
+            if (currentUtterance.getLabel().trim().length() > 0) {
+              // the utterance actually contains something
               lastUtterance = graph.addAnnotation(currentUtterance);
             }
             
@@ -794,6 +793,8 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
             line = matchVoiceSpan.group("utterance")
               // strip of closing tag if any
               .trim().replaceAll("</v>$","");
+            // if there's nothgin left after removing the tag, ignore this line
+            if (line.trim().length() == 0) continue;
 
             // if the current participant isn't named
             if (currentTurn.getLabel().length() == 0) { // no name
@@ -828,7 +829,7 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
                 graph.addAnnotation(currentTurn);
                 currentTurn.setConfidence(Constants.CONFIDENCE_MANUAL);
                 // utterance's parent is this turn
-                currentUtterance.setParent(currentTurn);
+                currentUtterance.setParentId(currentTurn.getId());
               } // change of voice
             } // current participant has a name
           } // voice span
@@ -1049,6 +1050,10 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
       int iSubtitle = 0;
       for (Annotation utterance : utterancesByAnchor) {
         if (cancelling) break;
+        
+        Annotation[] tokens = utterance.all(getWordLayer().getId());
+        if (tokens.length == 0) continue; // don't include empty utterances
+        
         writer.println("" + (++iSubtitle));
         writer.println(VttTime(utterance.getStart().getOffset())
                        + " --> "
@@ -1063,7 +1068,7 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
           +">");
 
         boolean firstWord = true;
-        for (Annotation token : utterance.all(getWordLayer().getId())) {
+        for (Annotation token : tokens) {
           if (firstWord) {
             firstWord = false;
           } else {
