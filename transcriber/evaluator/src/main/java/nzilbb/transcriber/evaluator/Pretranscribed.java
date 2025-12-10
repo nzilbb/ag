@@ -244,7 +244,24 @@ public class Pretranscribed extends Transcriber {
       Graph pretranscribed = graphs[0];
 
       // standardize orthography?
-      if (standardizer != null) standardizer.transform(pretranscribed);      
+      if (standardizer != null) standardizer.transform(pretranscribed);
+
+      // sometimes utterance boundaries overlap
+      for (Annotation turn : pretranscribed.all(schema.getTurnLayerId())) {
+        Annotation lastUtterance = null;
+        for (Annotation utterance : turn.all(schema.getUtteranceLayerId())) {
+          if (lastUtterance != null) {
+            // does the last one finish after this one starts?
+            if (lastUtterance.getEnd().getOffset() > utterance.getStart().getOffset()) {
+              // change the end of the last one
+              lastUtterance.getEnd().setOffset(
+                utterance.getStart().getOffset());
+            }
+          }
+          
+          lastUtterance = utterance;
+        } // next utterance
+      } // next turn
       
       // merge into given transcript
       Merger merger = new Merger(pretranscribed);
