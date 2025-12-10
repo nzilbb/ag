@@ -664,6 +664,7 @@ public class Evaluate extends CommandLineProgram {
     setDeserializer(new PlainTextSerialization());
     ParameterSet configuration = serializer.configure(
       new ParameterSet(), transcriber.getSchema());
+    configuration.get("useConventions").setValue(Boolean.FALSE);
     if (nonWordPattern != null) {
       configuration.get("nonWordPattern").setValue(nonWordPattern);
     }
