@@ -23,6 +23,10 @@ package nzilbb.transcriber.evaluator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nzilbb.ag.*;
 import nzilbb.ag.util.Merger;
 import nzilbb.ag.automation.InvalidConfigurationException;
@@ -247,4 +251,38 @@ public class Pretranscribed extends Transcriber {
     
     return transcript;
   }
+  
+  /**
+   * Transcribes all audio files in the given stream.
+   * <p> This implementation skips files that don't have a corresponsing transcript.
+   * @param speech A stream of speech files to transcribe.
+   * @param consumer A consumer for receiving the graphs once they're transcribed.
+   * @throws Exception
+   */
+  public void transcribeFragments(Stream<File> speech, Consumer<Graph> consumer)
+    throws Exception {
+    setRunning(true);
+    try {
+      List<File> wavs = speech.collect(Collectors.toList());
+      setPercentComplete(0);
+      int soFar = 0;
+      for (File wav : wavs) {
+        if (isCancelling()) break;
+        Graph transcript = new Graph();
+        transcript.setId(IO.WithoutExtension(wav));
+        transcript.setSchema((Schema)getSchema().clone());
+        // transcribe the audio
+        try {
+          consumer.accept(transcribe(wav, transcript));
+        } catch(Exception exception) {
+          System.err.println(exception.getMessage());
+        }
+        if (isCancelling()) break;
+        setPercentComplete((++soFar * 100) / wavs.size());
+      } // next transcript
+      setPercentComplete(100);
+    } finally {
+      setRunning(false);
+    }
+  } // end of transcribeFragments()
 }
