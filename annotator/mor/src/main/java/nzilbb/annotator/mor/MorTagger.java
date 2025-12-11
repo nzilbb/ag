@@ -1581,7 +1581,14 @@ public class MorTagger extends Annotator {
               // merge the changes into our graph by matching up the tokens
               // use MinimumEditPath because sometimes mor adds or removes  tokens
               MinimumEditPath<Annotation> mp = new MinimumEditPath<Annotation>(
-                new Orthography2OrthographyComparator<Annotation>());
+                new Orthography2OrthographyComparator<Annotation>() {
+                  public EditStep<Annotation> delete(Annotation from) {
+                    // make deletion expensive, so that partial matches will be CHANGE
+                    // this helps match compounds like "Iron Man" match their parts
+                    return new EditStep<Annotation>(
+                      from, null, 20, EditStep.StepOperation.DELETE);
+                  }
+                });
               List<Annotation> originalWords = Arrays.asList(
                 utterance.all(tokenLayerId)); // output was token layer, so compare against that
               List<Annotation> chaWords = Arrays.asList(

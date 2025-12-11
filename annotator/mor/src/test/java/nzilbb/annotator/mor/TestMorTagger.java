@@ -657,7 +657,6 @@ public class TestMorTagger {
                  0, g.all("part-of-speech").length);
     // run the annotator
     annotator.transform(g);
-    System.out.println(""+Arrays.asList(g.all("stem")));
     List<Annotation> morAnnotations = Arrays.asList(g.all("part-of-speech"));
     assertEquals("Correct number of tokens"+morAnnotations,
                  9, morAnnotations.size());
@@ -885,6 +884,108 @@ public class TestMorTagger {
     } // next word
   }
 
+  /**
+   * Merging back changes for repeated compounds from a different input layer works.
+   */
+  @Test public void repeatedCompounds() throws Exception {
+    
+    Graph g = graph();
+    g.trackChanges();
+    Schema schema = g.getSchema();
+    schema.addLayer(new Layer("token", "Word tokens")
+                    .setAlignment(Constants.ALIGNMENT_NONE)
+                    .setPeers(false).setPeersOverlap(false).setSaturated(true)
+                    .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+
+    // chnage transcription, add input tokens
+    Annotation[] words = g.all("word");
+    words[0].setLabel("Iron_Man,");
+    words[1].setLabel("Iron_Man");
+    words[2].setLabel("two,");
+    words[3].setLabel("Thor");
+    words[4].setLabel("and");
+    words[5].setLabel("Captain_America");
+    words[6].setLabel("are");
+    words[7].setLabel("my");
+    words[8].setLabel("favourites.");
+    for (Annotation word : words) {
+      g.createTag(word, "token", word.getLabel().replaceAll("_"," "));
+    }
+    
+    annotator.setSchema(schema);
+    
+    annotator.setTaskParameters(
+      "tokenLayerId=token"
+      +"&languagesLayerId=transcript_language"
+      +"&utteranceLayerId=utterance"
+      +"&morLayerId="
+      +"&prefixLayerId="
+      +"&partOfSpeechLayerId="
+      +"&partOfSpeechSubcategoryLayerId="
+      +"&stemLayerId=stem"
+      +"&fusionalSuffixLayerId="
+      +"&suffixLayerId="
+      +"&glossLayerId=");
+    
+    assertEquals("token layer",
+                 "token", annotator.getTokenLayerId());
+    assertEquals("stem layer",
+                 "stem", annotator.getStemLayerId());
+    assertNotNull("stem layer was created",
+                  schema.getLayer(annotator.getStemLayerId()));
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("Required layers: "+requiredLayers,
+                 6, requiredLayers.size());
+    assertTrue("participants required "+requiredLayers,
+               requiredLayers.contains("participant"));
+    assertTrue("turns required "+requiredLayers,
+               requiredLayers.contains("turn"));
+    assertTrue("Utterance required "+requiredLayers,
+               requiredLayers.contains("utterance"));
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    assertTrue("token required "+requiredLayers,
+               requiredLayers.contains("token"));
+    assertTrue("transcript_language required "+requiredLayers,
+               requiredLayers.contains("transcript_language"));
+    Set<String> outputLayers = Arrays.stream(annotator.getOutputLayers())
+      .collect(Collectors.toSet());;
+    assertEquals("Stem only output layer: "+outputLayers,
+                 1, outputLayers.size());
+    assertTrue("output layers include stem", outputLayers.contains("stem"));
+    
+    Annotation firstWord = g.first("word");
+    assertEquals("double check the first word is what we think it is: "+firstWord,
+                 "Iron_Man,", firstWord.getLabel());
+      
+    // run the annotator
+    annotator.transform(g);
+    Annotation[] stems = g.all("stem");
+    List<Annotation> morAnnotations = Arrays.asList(stems);
+    assertEquals("Correct number of tokens"+morAnnotations,
+                 12, morAnnotations.size());
+    Iterator<Annotation> mors = morAnnotations.iterator();
+    assertEquals("Iron", mors.next().getLabel());
+    assertEquals("Man", mors.next().getLabel());
+    assertEquals("Iron", mors.next().getLabel());
+    assertEquals("Man", mors.next().getLabel());
+    assertEquals("two", mors.next().getLabel());
+    assertEquals("Thor", mors.next().getLabel());
+    assertEquals("and", mors.next().getLabel());
+    assertEquals("Captain", mors.next().getLabel());
+    assertEquals("America", mors.next().getLabel());
+    assertEquals("be", mors.next().getLabel());
+    assertEquals("my", mors.next().getLabel());
+    assertEquals("favourites", mors.next().getLabel());
+
+    // parents are correct
+    assertEquals("Correct parent", words[0], stems[0].getParent());
+    assertEquals("Correct parent", words[0], stems[1].getParent());
+    assertEquals("Correct parent", words[1], stems[2].getParent());
+    assertEquals("Correct parent", words[1], stems[3].getParent());
+  }
+  
   @Test public void setInvalidTaskParameters() throws Exception {
     
     try {
