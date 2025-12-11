@@ -206,8 +206,8 @@ public class TestOrthographyClumper {
     }
   }
 
-  /** CHAT-format pause - <tt>(.)</tt>, <tt>(..)</tt>, and <tt>(..)</tt> -
-      are clumped correctly (but timed pauses like <tt>(0.15)</tt> aren't). */
+  /** CHAT-format pause - <tt>(.)</tt>, <tt>(..)</tt>, <tt>(..)</tt>, and <tt>(0.15)</tt> -
+      are clumped correctly. */
   @Test public void chatPauses() {
     Graph g = new Graph();
     g.setId("my graph");
@@ -277,10 +277,9 @@ public class TestOrthographyClumper {
       assertEquals("quick '", words[1].getLabel());
       assertEquals("brown", words[2].getLabel());
       assertEquals("fox (...)", words[3].getLabel());
-      assertEquals("jumps", words[4].getLabel());
-      assertEquals("(0.15)", words[5].getLabel());
-      assertEquals("over (.) \"", words[6].getLabel());
-      assertEquals(7, words.length);
+      assertEquals("jumps (0.15)", words[4].getLabel());
+      assertEquals("over (.) \"", words[5].getLabel());
+      assertEquals(6, words.length);
 
       for (int o = 0; o < words.length; o++) {
         assertEquals("orthography corrected", o+1, words[o].getOrdinal());
