@@ -261,8 +261,8 @@ public class TestOrthographyClumper {
     g.addAnnotation(new Annotation("brown", "brown", "word", "a7", "a8", "turn1"));
     g.addAnnotation(new Annotation("fox", "fox", "word", "a8", "a9", "turn1"));
     g.addAnnotation(new Annotation("longpause", "(...)", "word", "a9", "a10", "turn1"));
-    g.addAnnotation(new Annotation("timedpause", "(0.15)", "word", "a10", "a11", "turn1"));
-    g.addAnnotation(new Annotation("underscore", "_", "word", "a11", "a12", "turn1"));
+    g.addAnnotation(new Annotation("jumps", "jumps", "word", "a10", "a11", "turn1"));
+    g.addAnnotation(new Annotation("timedpause", "(0.15)", "word", "a11", "a12", "turn1"));
     g.addAnnotation(new Annotation("over", "over", "word", "a12", "a13", "turn1"));
     g.addAnnotation(new Annotation("shortpause", "(.)", "word", "a13", "a14", "turn1"));
     g.addAnnotation(new Annotation("closequote", "\"", "word", "a14", "a15", "turn1"));
@@ -277,8 +277,8 @@ public class TestOrthographyClumper {
       assertEquals("quick '", words[1].getLabel());
       assertEquals("brown", words[2].getLabel());
       assertEquals("fox (...)", words[3].getLabel());
-      assertEquals("(0.15)", words[4].getLabel());
-      assertEquals("_", words[5].getLabel());
+      assertEquals("jumps", words[4].getLabel());
+      assertEquals("(0.15)", words[5].getLabel());
       assertEquals("over (.) \"", words[6].getLabel());
       assertEquals(7, words.length);
 
