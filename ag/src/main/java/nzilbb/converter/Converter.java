@@ -280,7 +280,41 @@ public abstract class Converter extends GuiProgram {
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true));
   } // end of getSchema()
-
+  
+  /**
+   * Normalizer to use, if any. Default is a {@link Normalizer} object.
+   * @see #getNormalizer()
+   * @see #setNormalizer(GraphTransformer)
+   */
+  protected GraphTransformer normalizer = new Normalizer();
+  /**
+   * Getter for {@link #normalizer}: Normalizer to use, if any.
+   * @return Normalizer to use, if any.
+   */
+  public GraphTransformer getNormalizer() { return normalizer; }
+  /**
+   * Setter for {@link #normalizer}: Normalizer to use, if any.
+   * @param newNormalizer Normalizer to use, if any.
+   */
+  public Converter setNormalizer(GraphTransformer newNormalizer) { normalizer = newNormalizer; return this; }
+  
+  /**
+   * Anchor offset generator to use, if any. Default is null.
+   * @see #getDefaultOffsetGenerator()
+   * @see #setDefaultOffsetGenerator(GraphTransformer)
+   */
+  protected GraphTransformer defaultOffsetGenerator;
+  /**
+   * Getter for {@link #defaultOffsetGenerator}: Anchor offset generator to use, if any.
+   * @return Anchor offset generator to use, if any.
+   */
+  public GraphTransformer getDefaultOffsetGenerator() { return defaultOffsetGenerator; }
+  /**
+   * Setter for {@link #defaultOffsetGenerator}: Anchor offset generator to use, if any.
+   * @param newDefaultOffsetGenerator Anchor offset generator to use, if any.
+   */
+  public Converter setDefaultOffsetGenerator(GraphTransformer newDefaultOffsetGenerator) { defaultOffsetGenerator = newDefaultOffsetGenerator; return this; }
+  
   /**
    * Converts a file. The default implementation uses a default schema, default settings
    * for serializations, and serializes the "utterance" layer only. 
@@ -569,10 +603,16 @@ public abstract class Converter extends GuiProgram {
       g.setId(IO.WithoutExtension(g.getId()));
     }
 
+    // need default anchor offsets?
+    if (defaultOffsetGenerator != null) {
+      for (Graph g : graphs) {
+        defaultOffsetGenerator.transform(g);
+      }    
+    }
     if (schema.getParticipantLayer() != null
         && schema.getTurnLayer() != null
-        && schema.getUtteranceLayer() != null) {
-      Normalizer normalizer = new Normalizer();
+        && schema.getUtteranceLayer() != null
+        && normalizer != null) {
       for (Graph g : graphs) {
         normalizer.transform(g);
         g.commit();
