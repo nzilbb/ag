@@ -21,7 +21,11 @@
 //
 package nzilbb.converter;
 
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Vector;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import nzilbb.ag.Anchor;
 import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
@@ -44,21 +48,21 @@ import nzilbb.util.ProgramDescription;
 public class TextToEaf extends Converter {
   
   /**
-   * Formatn for makring a chnage of turn within the transcript body, e.g. "{0}: "
+   * Format for marking a change of turn within the transcript body, e.g. "{0}: "
    * @see #getParticipantFormat()
    * @see #setParticipantFormat(String)
    */
   protected String participantFormat = "{0}: ";
   /**
-   * Getter for {@link #participantFormat}: Formatn for makring a chnage of turn within
+   * Getter for {@link #participantFormat}: Format for marking a change of turn within
    * the transcript body, e.g. "{0}: " 
-   * @return Formatn for makring a chnage of turn within the transcript body, e.g. "{0}: "
+   * @return Format for marking a change of turn within the transcript body, e.g. "{0}: "
    */
   public String getParticipantFormat() { return participantFormat; }
   /**
-   * Setter for {@link #participantFormat}: Formatn for makring a chnage of turn within
+   * Setter for {@link #participantFormat}: Format for marking a change of turn within
    * the transcript body, e.g. "{0}: " 
-   * @param newParticipantFormat Formatn for makring a chnage of turn within the
+   * @param newParticipantFormat Format for marking a change of turn within the
    * transcript body, e.g. "{0}: " 
    */
   public TextToEaf setParticipantFormat(String newParticipantFormat) { participantFormat = newParticipantFormat; return this; }
@@ -91,9 +95,14 @@ public class TextToEaf extends Converter {
       +"\n- i.e. time codes - and must end in a timecode, indicating the end time"
       +"\nof the last utterance."
       +"\n"
+      +"\nConsecutive lines without intervening time codes will be merged into one"
+      +"\nELAN annotation."
+      +"\n"
       +"\nCheck the --timestampFormat setting matches your time codes."
       +"\nThis setting uses Java SimpleDateFormat format:"
       +"\nhttps://docs.oracle.com/javase/8/docs/api/index.html?java/text/SimpleDateFormat.html";
+    // need to default utterance/word offsets before normalization
+    setDefaultOffsetGenerator(new DefaultOffsetGenerator());
   } // end of constructor
   
   public static void main(String argv[]) {
@@ -132,7 +141,8 @@ public class TextToEaf extends Converter {
    * @return The serializer to use.
    */
   public GraphSerializer getSerializer() {
-    return new EAFSerialization();
+    return new EAFSerialization()
+      .setIgnoreBlankAnnotations(true);
   }
   
   /**
@@ -143,14 +153,93 @@ public class TextToEaf extends Converter {
    */
   public void processTranscripts(Graph[] transcripts) {
     for (Graph transcript : transcripts) {
-      // need default word offsets for ELAN to not ignore them
-      try {
-        new DefaultOffsetGenerator().transform(transcript);
-      } catch(TransformationException exception) {
-        System.err.println(exception.getMessage());
-      }
+
+      // texts can have consecutive lines with no intervening offset
+      // ELAN files can't, so join these together
+      transcript.trackChanges(); // in case we delete utterances
+      for (Annotation utterance : transcript.all(getSchema().getUtteranceLayerId())) {
+        if (utterance.getStart().getOffset() == null // not sure of the end
+            || utterance.getStart().getConfidence() == null
+            || utterance.getStart().getConfidence() < Constants.CONFIDENCE_MANUAL) {
+          final Annotation participant = utterance.first(getSchema().getParticipantLayerId());
+          
+          Optional<Annotation> previousUtterance = utterance.getStart()
+            // immediately preceding utterance...
+            .endingAnnotations(getSchema().getUtteranceLayerId())
+            // ...with the same speaker
+            .filter(u -> u.first(getSchema().getParticipantLayerId()) == participant)
+            .findAny();
+          if (previousUtterance.isPresent()) {
+            mergeAnnotations(previousUtterance.get(), utterance);
+          }
+        }
+      } // next utterance
+      transcript.commit();
     }
   } // end of processTranscripts()
+  
+  /**
+   * Moves all of the children of the following peer into the preceding peer, sets the
+   * end of the preceding to the end of the following, and marks the following for
+   * deletion. 
+   * @param preceding The preceding, surviving annotation.
+   * @param following The following annotation, which will be deleted.
+   */
+  public void mergeAnnotations(Annotation preceding, Annotation following) {
+
+    Anchor originalPrecedingEnd = preceding.getEnd();
+    // set anchor
+    if (preceding.getEnd().getOffset() == null
+        || following.getEnd().getOffset() == null
+        || preceding.getEnd().getOffset() < following.getEnd().getOffset()) {
+      preceding.setEnd(following.getEnd());
+    }
+    
+    // for each child layer
+    for (String childLayerId : following.getAnnotations().keySet()) {
+      
+      // move everything from following to preceding
+      int ordinal = 1;
+      if (preceding.getAnnotations().containsKey(childLayerId)) {
+        ordinal = preceding.getAnnotations().get(childLayerId).size() + 1;
+      }
+      for (Annotation child : following.annotations(childLayerId)) {
+        // in order to prevent the annotation from checking/correcting all peer ordinals
+        // which is time-consuming and unnecessary, we first unset the parent
+        child.setParent(null);
+        // then we set the ordinal
+        child.setOrdinal(ordinal++);
+        // and finally, we set the new parent, without appending (to skip the peer-checking step)
+        child.setParent(preceding, false);
+      } // next child annotation
+
+      // saturated child layers can't have gaps
+      if (preceding.getGraph().getLayer().getSaturated()) {
+        // children linked to the original preceding end need re-linking to the following start
+        Vector<Annotation> endingPrecedingChildren = // avoid ConcurrentModificationException
+          new Vector<Annotation>(originalPrecedingEnd.endOf(childLayerId));
+        for (Annotation endingPrecedingChild : endingPrecedingChildren) {
+          // but only our own children
+          if (endingPrecedingChild.getParentId().equals(preceding.getId())) {
+            endingPrecedingChild.setEnd(following.getStart());
+            
+            // and any annotations on other layers that are also linked
+            // (create a new collection to avoid ConcurrentModificationException)
+            new Vector<Annotation>(
+              originalPrecedingEnd.getEndingAnnotations()).stream()            
+              .filter(ending -> !ending.getLayerId().equals(preceding.getLayerId()))
+              .filter(ending -> !ending.getLayerId().equals(childLayerId))
+              .forEach(endingOtherLayer -> {
+                  endingOtherLayer.setEnd(following.getStart());
+              });
+          } // own child
+        } // next child ending here
+      } // saturated child layer
+    } // next child layer
+
+
+    following.destroy();
+  } // end of mergeAnnotations()
   
   /**
    * Specify the schema to used by  {@link #convert(File)}.

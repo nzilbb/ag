@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>txt-to-eaf</artifactId>
-  <version>0.1.1</version>
+  <version>0.2.0</version>
 
   <name>nzilbb.converter.txttoeaf</name>
   <description>Aligned plain text to ELAN file converter</description>
@@ -21,11 +21,11 @@
     
     <input.package>nzilbb.formatter.text</input.package>
     <input.path>nzilbb/formatter/text/</input.path>
-    <input.version>1.5.1</input.version>
+    <input.version>1.7.1</input.version>
     
     <output.package>nzilbb.formatter.elan</output.package>
     <output.path>nzilbb/formatter/elan/</output.path>
-    <output.version>1.8.2</output.version>    
+    <output.version>1.8.6</output.version>    
   </properties>
 
   <dependencies>
@@ -126,7 +126,7 @@
                 <artifactItem>
                   <groupId>nz.ilbb.ag</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4-SNAPSHOT</version>
+                  <version>1.4.0-SNAPSHOT</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
