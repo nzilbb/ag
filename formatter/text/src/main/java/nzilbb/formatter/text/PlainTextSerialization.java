@@ -50,6 +50,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import nzilbb.ag.*;
+import nzilbb.ag.cli.Deserialize;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
@@ -69,7 +70,9 @@ import nzilbb.util.Timers;
  * <p>These can be written documents, or transcripts of speech. Interlocutors, if any, may be identified with a configurable line-start pattern.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class PlainTextSerialization implements GraphDeserializer, GraphSerializer {
+public class PlainTextSerialization
+  extends Deserialize
+  implements GraphDeserializer, GraphSerializer {
    
   // Attributes:
   protected Vector<String> warnings;
@@ -1115,6 +1118,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       fmtTimestampFormat = new SimpleDateFormat(timestampFormat);
       fmtTimestampFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
+    boolean headerFinished = false;
     while (sLine != null) {
       if (iLine == 0) { // first line
         // strip of the UTF-8 BOM if there is one.
@@ -1136,10 +1140,12 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
             String id = (String)oSpeaker[0];
             if (getMaxParticipantLength() == null
                 || id.length() <= getMaxParticipantLength()) {
+              log("speaker", leftover);
               setHasSpeakers(true);
-              if (iLine > 1) {
+              if (iLine > 1 && !headerFinished) {
                 // this is the first speaker we've seen, so everything before this is header
                 setHeaderLines(getLines());
+                headerFinished = true;
                 // and the transcript content starts here
                 setLines(new Vector<String>());
               }
@@ -1156,10 +1162,12 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
         // is this line a speaker utterance line?
         try {
           fmtTimestampFormat.parse(leftover); 
+          log("timestamp", leftover);
           // parsed, so there are timestamps
           setHasTimestamps(true);
 
-          if (!getHasSpeakers()) { // there's been no speakers so far
+          if (!getHasSpeakers() && !headerFinished) { // there's been no speakers so far
+            headerFinished = true;
             // so everything up to here was a header
             setHeaderLines(getLines());
             // and the transcript content starts here
@@ -1359,6 +1367,7 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
     Vector<Annotation> participantTags = new Vector<Annotation>();
     MessageFormat fmtMetaDataFormat = new MessageFormat(metaDataFormat);
     for (String header : getHeaderLines()) {
+      log("header", header);
       if (header.trim().length() == 0) continue;
       try { // parse meta data header
         Object[] oMetaData = fmtMetaDataFormat.parse(header);
@@ -1450,15 +1459,24 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       log("line", sLine);
 
       line.setStart(lastAnchor);
-      if (lastLine != null && lastLine.getLabel().trim().length() > 0) {
-        if (lastAnchor.getId() == null) {
-          graph.addAnchor(lastAnchor);
+      if (lastLine != null) {
+        if (lastLine.getLabel().trim().length() > 0) {
+          if (lastAnchor.getId() == null) {
+            graph.addAnchor(lastAnchor);
+          }
+          lastLine.setEndId(lastAnchor.getId());
+          if (timers != null) timers.start("add line annotation");
+          graph.addAnnotation(lastLine);
+          if (timers != null) timers.end("add line annotation");
+        } else { // last line was blank
+          // inherit their start anchor
+          if (lastLine.getStartId() != null) {
+            lastAnchor = graph.getAnchor(lastLine.getStartId());
+            log("Last line was blank, so we use their start anchor", lastAnchor);
+            line.setStart(lastAnchor);
+          }
         }
-        lastLine.setEndId(lastAnchor.getId());
-        if (timers != null) timers.start("add line annotation");
-        graph.addAnnotation(lastLine);
-        if (timers != null) timers.end("add line annotation");
-      }
+      } // there was a last line
 	 
       if (getHasSpeakers() && fmtSpeakerFormat != null) {
         // does the line start with a speaker ID?
@@ -1534,9 +1552,19 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
           try {
             double dSeconds = 0.0;
             Date timestamp = fmtTimestampFormat.parse(sLine);
-            lastAnchor.setOffset(((double)(timestamp.getTime()))/1000);
-            lastAnchor.setConfidence(Constants.CONFIDENCE_MANUAL);
-            log("timestamp", lastAnchor.getOffset());
+            if (lastAnchor.getConfidence() != null // offset already set
+                && lastAnchor.getConfidence() >= Constants.CONFIDENCE_MANUAL) { 
+              // create a new anchor
+              lastAnchor = graph.getOrCreateAnchorAt(
+                ((double)(timestamp.getTime()))/1000,
+                Constants.CONFIDENCE_MANUAL);
+              line.setStart(lastAnchor);
+              log("new anchor", lastAnchor);
+            } else { // set offset of current anchor
+              lastAnchor.setOffset(((double)(timestamp.getTime()))/1000);
+              lastAnchor.setConfidence(Constants.CONFIDENCE_MANUAL);
+              log("timestamp", lastAnchor.getOffset());
+            }
 		  
             // consume the timestamp
             sLine = sLine.substring(fmtTimestampFormat.format(timestamp).length()).trim();
@@ -1545,25 +1573,23 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
           if (timers != null) timers.end("check for timestamp");
         } // HasTimestamps
       }
-      log("line after timestamp", sLine);
+      log("line after timestamp \"", sLine, "\"");
 
       // process text
-      if (sLine.length() > 0) {
-        if (participant != null) { // speech or text
-
-          // temporary set label to transcription
-          line.setLabel(sLine
-                        // ensure ellipsis (sometimes appearing in MS Word transcripts)
-                        // ends up as a token boundary
-                        .replaceAll("…", "… "));
-          lastLine = line;
-        } else { // no speaker, so taken as comments
-          Annotation anComment = new Annotation(null, sLine, getCommentLayer().getId());
-          anComment.setStart(lastAnchor)
-            .setConfidence(Constants.CONFIDENCE_MANUAL);	       
-          lastLine = anComment;
-        } // comments
-      } // there is text on this line
+      if (participant != null) { // speech or text
+        
+        // temporary set label to transcription
+        line.setLabel(sLine
+                      // ensure ellipsis (sometimes appearing in MS Word transcripts)
+                      // ends up as a token boundary
+                      .replaceAll("…", "… "));
+        lastLine = line;
+      } else { // no speaker, so taken as comments
+        Annotation anComment = new Annotation(null, sLine, getCommentLayer().getId());
+        anComment.setStart(lastAnchor)
+          .setConfidence(Constants.CONFIDENCE_MANUAL);	       
+        lastLine = anComment;
+      } // comments
       log("line finally", line, ":",
           graph.getAnchor(line.getStartId()), "-", graph.getAnchor(line.getEndId()));
 	 
@@ -2032,6 +2058,54 @@ public class PlainTextSerialization implements GraphDeserializer, GraphSerialize
       errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
       throw errors;
     }      
+  }
+  
+  /** Command line interface, which takes transcript file names, and outputs JSON-encoded
+   * annotation graphs. */
+  public static void main(String argv[]) {
+    PlainTextSerialization application = new PlainTextSerialization()
+      .setDebug(true);
+    if (application.processArguments(argv)) {
+      application.start();
+    }
+  }
+  /**
+   * Specify the schema to used by  {@link Deserialize}.
+   * @return The schema.
+   */
+  @Override protected Schema getDefaultSchema() {
+    Schema schema = super.getDefaultSchema();
+    schema.addLayer(
+      new Layer("transcript_author", "Transcript Author")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("transcript_date", "Date of recording")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("transcript_language", "Transcript Language")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true));
+    schema.addLayer(
+      new Layer("language", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false).setParentId("turn"));
+    schema.addLayer(
+      new Layer("noise", "Noises")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false));
+    schema.addLayer(
+      new Layer("comment", "Comments").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(true).setSaturated(false));
+    schema.addLayer(
+      new Layer("pronounce", "Pronunciation tags").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    schema.addLayer(
+      new Layer("lexical", "Lexical tags").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId(schema.getWordLayerId()).setParentIncludes(true));
+    return schema;
   }
 
 } // end of class PlainTextSerialization

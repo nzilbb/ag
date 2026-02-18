@@ -11,7 +11,7 @@
   <artifactId>nzilbb.formatter.text</artifactId>
   <name>nzilbb.formatter.text</name>
   <description>Serializer/Deserializer for transcripts in plain text format.</description>
-  <version>1.7.0</version>
+  <version>1.7.1</version>
 
   <properties>
     <package.path>nzilbb/formatter/text/</package.path>
@@ -25,7 +25,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4</version>
+      <version>1.3.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -44,7 +44,10 @@
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
-            <manifest addDefaultImplementationEntries="true" />
+            <manifest addDefaultImplementationEntries="true">
+              <addClasspath>true</addClasspath>
+              <mainClass>${formatter.class}</mainClass>
+            </manifest>
             <manifestEntries>
               <nzilbb-ag-serialize-GraphSerializer>${formatter.class}</nzilbb-ag-serialize-GraphSerializer>
               <nzilbb-ag-serialize-GraphDeserializer>${formatter.class}</nzilbb-ag-serialize-GraphDeserializer>

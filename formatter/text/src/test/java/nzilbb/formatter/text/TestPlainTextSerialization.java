@@ -1319,6 +1319,137 @@ public class TestPlainTextSerialization
 	    
   }
 
+  /** Ensure that timestamps sprinkled on their own lines is correctly parsed. */
+  @Test public void freeTimestamps()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("scribe", "Transcriber", 0, true, true, true),
+      new Layer("who", "Participants", 0, true, true, true),
+      new Layer("comment", "Comment", 2, true, false, true),
+      new Layer("noise", "Noise", 2, true, false, true),
+      new Layer("participant_gender", "Gender", 0, false, false, true, "who", true),
+      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+      new Layer("word", "Words", 2, true, false, false, "turn", true),
+      new Layer("pronounce", "Pronounce", 0, true, false, false, "word", true),
+      new Layer("lexical", "Lexical", 0, true, false, false, "word", true));
+    
+    // access file
+    NamedStream[] streams = {
+      new NamedStream(new File(getDir(), "free-timestamps.txt")) }; // transcript
+    
+    // create deserializer
+    PlainTextSerialization deserializer = new PlainTextSerialization();
+    
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+      
+    assertEquals("Configuration parameters" + configuration,
+                 14, deserializer.configure(configuration, schema).size());      
+    assertEquals("comment", "comment", 
+                 ((Layer)configuration.get("commentLayer").getValue()).getId());
+    assertEquals("noise", "noise", 
+                 ((Layer)configuration.get("noiseLayer").getValue()).getId());
+    assertEquals("lexical", "lexical", 
+                 ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+    assertEquals("pronounce", "pronounce", 
+                 ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+    assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
+    assertEquals("maxParticipantLength",
+                 Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
+    assertEquals("maxHeaderLines",
+                 Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
+    assertEquals("participantFormat", "{0}: ",
+                 configuration.get("participantFormat").getValue());
+    assertEquals("metaDataFormat", "{0}={1}",
+                 configuration.get("metaDataFormat").getValue());
+    assertEquals("timestampFormat", "HH:mm:ss.SSS",
+                 configuration.get("timestampFormat").getValue());
+    assertEquals("nonWordPattern",
+                 "[\\p{Punct}&&[^_]]",
+                 configuration.get("nonWordPattern").getValue());
+
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    //for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals(0, defaultParameters.size());
+    
+    deserializer.setParameters(defaultParameters);
+
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+      
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+      
+    assertEquals("free-timestamps.txt", g.getId());
+    assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
+
+    // participants     
+    Annotation[] participants = g.all("who"); 
+    assertEquals(1, participants.length);
+    assertEquals("free-timestamps", participants[0].getLabel());
+
+    // turns
+    Annotation[] turns = g.all("turn");
+    assertEquals(1, turns.length);
+    assertEquals("free-timestamps", turns[0].getLabel());
+    assertEquals(participants[0], turns[0].getParent());
+      
+    // utterances
+    Annotation[] utterances = g.all("utterance");
+    assertEquals("Five utterances: " + Arrays.asList(utterances),
+                 5, utterances.length);
+    assertEquals(turns[0], utterances[0].getParent());
+    assertEquals(turns[0], utterances[1].getParent());
+    assertEquals(turns[0], utterances[2].getParent());
+    assertEquals(turns[0], utterances[3].getParent());
+    assertEquals(turns[0], utterances[4].getParent());
+	    
+    Annotation[] words = g.all("word");
+    // System.out.println("" + Arrays.asList(words));
+    String[] expectedTokens = {
+      "The", "quick", "brown", "fox", 
+      "jumps", "over", "the", "lazy",
+      "dog.",
+      "Aquel", "biógrafo", "se", "zampó", "un", "extraño", "sándwich",
+      "de", "vodka", "y", "ajo."
+    };
+    assertEquals("Right number of words: " + Arrays.asList(words),
+                 expectedTokens.length, words.length);
+    for (int w = 0; w < expectedTokens.length; w++) {
+      assertEquals("word label " + w, expectedTokens[w], words[w].getLabel());
+    }
+    
+    // alignment
+    assertEquals(Double.valueOf(1.000), utterances[0].getStart().getOffset());
+    assertEquals(Double.valueOf(2.000), utterances[1].getStart().getOffset());
+    assertEquals(Double.valueOf(4.000), utterances[2].getStart().getOffset());
+    assertEquals(Double.valueOf(5.000), utterances[3].getStart().getOffset());
+    assertNull(utterances[4].getStart().getOffset());
+
+    assertEquals(Double.valueOf(2.000), utterances[0].getEnd().getOffset());
+    assertEquals(Double.valueOf(3.000), utterances[1].getEnd().getOffset());
+    assertEquals(Double.valueOf(5.000), utterances[2].getEnd().getOffset());
+    assertNull(utterances[3].getEnd().getOffset());
+    assertEquals(Double.valueOf(7.000), utterances[4].getEnd().getOffset());
+
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      if (a.getLayerId().equals("who")) {
+        // except participant, which is automatically generated from file name
+        assertEquals("Participant label has 'automatic' confidence: " + a.getLayer() + ": " + a,
+                     Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), a.getConfidence());
+      } else {
+        assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                     Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+      }
+    }
+	    
+  }
+
   @Test public void cmsw()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -1402,8 +1533,8 @@ public class TestPlainTextSerialization
     Annotation[] turns = g.all("turn");
     assertEquals(1, turns.length);
     assertEquals(Double.valueOf(0.0), turns[0].getStart().getOffset());
-    assertEquals("turn ends at end of recording",
-                 Double.valueOf(190946.0), turns[0].getEnd().getOffset());
+    assertEquals("turn ends at end of text",
+                 Double.valueOf(190898.0), turns[0].getEnd().getOffset());
     assertEquals("Collin, Zacharias", turns[0].getLabel());
     assertEquals(authors[0], turns[0].getParent());
       
