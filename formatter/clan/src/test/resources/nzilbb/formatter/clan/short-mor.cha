@@ -2,7 +2,7 @@
 @Languages:	eng
 @Participants:	INT someone Investigator
 @ID:	||INT|||||Investigator|||
-*INT:	I'll sing . 10000_30000
-%mor:	pro:sub|I~mod|will v|sing .
-%pos:	pro:sub|I~mod|will v|sing .
+*INT:	gonna sing . 10000_30000
+%mor:	part|go-PRESP inf|to v|sing .
+%pos:	part|go-PRESP inf|to v|sing .
 @End

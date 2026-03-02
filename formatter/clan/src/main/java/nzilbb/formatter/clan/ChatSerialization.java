@@ -31,8 +31,10 @@ import java.io.PrintWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -1861,6 +1863,20 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         SimpleTokenizer linkageSplitter 
           = new SimpleTokenizer(schema.getWordLayerId(), getLinkageLayer().getId(), "_", true);
         linkageSplitter.transform(graph);
+        for (Annotation linkage : graph.all(getLinkageLayer().getId())) {
+          // if they linkage would be skipped by MOR
+          if (linkage.getLabel().startsWith("&")) {// &- (filler) &+ (fragment) &~ (nonword)
+            // ensure that all the parts of it are tagged 
+            new AnnotationChain(
+              linkage.getStart(), linkage.getEnd(),
+              Collections.singleton(getLinkageLayer().getId()))
+              .stream()
+              .filter(annotation -> annotation.getLayerId().equals(schema.getWordLayerId()))
+              .forEach(word -> {
+                  word.put("@skippedByMor", Boolean.TRUE);
+              });
+          } // linkage skipped by mor
+        } // next linkage 
         graph.commit();
       }
 
@@ -1887,13 +1903,13 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       // whether they've been skipped by mor
       boolean allSkippeByMor = true;
       for (Annotation word : graph.all(schema.getWordLayerId())) {
-        if (word.getLabel().startsWith("&+")) {
+        if (word.getLabel().startsWith("&")) { // &- (filler) &+ (fragment) &~ (nonword)
           word.put("@skippedByMor", Boolean.TRUE);
         } else if (word.getLabel().matches("^\\W+$")
-                   && !word.getLabel().matches("[,.;?!\\[\\]<>]")) {
+                   && !word.getLabel().matches("[\\[\\]<>]")) {
           // mor also skips words containing only punctuation, except specific cases
           word.put("@skippedByMor", Boolean.TRUE);
-        } else if (!word.getLabel().matches("[,.;?!\\[\\]<>]")) {
+        } else if (!word.getLabel().matches("[\\[\\]<>]")) {
           allSkippeByMor = false;
         }
       } // next token
@@ -1940,13 +1956,22 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         repetitionsLayerId, "/", "", true, true);	  
       spanningTransformer.transform(graph);	
       if (repetitionsLayerId != null) {
-        // if they coincide with the ends of spans, then they annotate the span
         for (Annotation repetition : graph.all(repetitionsLayerId)) {
+          // if they coincide with the ends of spans, then they annotate the span
           LinkedHashSet<Annotation> endingSpans = repetition.getEnd().endOf("@span");
           if (endingSpans.size() > 0) {
             Annotation span = endingSpans.iterator().next();
             repetition.setStart(span.getStart());
           }
+          // mark words as skipped by mor
+          new AnnotationChain(
+            repetition.getStart(), repetition.getEnd(),
+            new LinkedHashSet<String>() {{ add(repetitionsLayerId); add("@span"); }})
+            .stream()
+            .filter(annotation -> annotation.getLayerId().equals(schema.getWordLayerId()))
+            .forEach(word -> {
+                word.put("@skippedByMor", Boolean.TRUE);
+            });
         } // next error
       } // repetitionsLayerId set
       graph.commit();
@@ -1958,13 +1983,22 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         retracingLayerId, "//", "", true, true);	  
       spanningTransformer.transform(graph);	
       if (retracingLayerId != null) {
-        // if they coincide with the ends of spans, then they annotate the span
         for (Annotation retrace : graph.all(retracingLayerId)) {
+          // if they coincide with the ends of spans, then they annotate the span
           LinkedHashSet<Annotation> endingSpans = retrace.getEnd().endOf("@span");
           if (endingSpans.size() > 0) {
             Annotation span = endingSpans.iterator().next();
             retrace.setStart(span.getStart());
           }
+          // mark words as skipped by mor
+          new AnnotationChain(
+            retrace.getStart(), retrace.getEnd(),
+            new LinkedHashSet<String>() {{ add(retracingLayerId); add("@span"); }})
+            .stream()
+            .filter(annotation -> annotation.getLayerId().equals(schema.getWordLayerId()))
+            .forEach(word -> {
+                word.put("@skippedByMor", Boolean.TRUE);
+            });
         } // next error
       } // retracingLayerId set
       graph.commit();
@@ -2007,6 +2041,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         if (parsingMor && !allSkippeByMor) {
           List<String> morTags = Arrays.stream(morLine.getLabel().split("\\s+"))
             // filter out punctuation tags
+            .filter(tag->!tag.matches("^[.?!,;]$")) // utterance terminator
+            .filter(tag->!tag.startsWith("+"))   // +//. or +...
             .filter(tag->!tag.equals("cm|cm"))   // comma
             .filter(tag->!tag.equals("end|end")) // postposed forms
             .filter(tag->!tag.equals("beg|beg")) // preposed forms
@@ -2015,11 +2051,33 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             .filter(tag->!tag.equals("bq2|bq2")) // begin single quote
             .filter(tag->!tag.equals("eq2|eq2")) // end single quote
             .collect(Collectors.toList());
-          List<Annotation> tokens = Arrays.stream(
+          List<Annotation> t = Arrays.stream(
             morLine.getParent().all(schema.getWordLayerId()))
             // filter out tokens that are skipped by mor
             .filter(token->!token.containsKey("@skippedByMor"))
             .collect(Collectors.toList());
+          Vector<Annotation> tokens = new Vector<Annotation>();
+          HashSet<String> cliticizations = new HashSet<String>() {{
+              add("coulda"); add("gotta"); add("wanna"); add("mighta");
+              add("hadta"); add("needa"); add("musta"); add("hafta");
+              add("gonna"); add("shoulda"); add("hasta"); add("sposta");
+              add("woulda"); add("oughta"); add("useta"); add("dunno");
+              add("kinda"); add("dyou"); add("sorta"); add("gimme");
+              add("lemme"); add("wassup"); add("lotsa"); add("kinda");
+            }};
+          for (Annotation token : t) {
+            tokens.add(token);
+            // contractions that are expanded by MOR are doubled up
+            if (cliticizations.contains(token.getLabel())) {
+              // two mor tags
+              tokens.add(token);
+            } else if (token.getLabel().equals("whyntcha")
+                       || token.getLabel().equals("whaddya")) {
+              // three more tags
+              tokens.add(token);
+              tokens.add(token);
+            }
+          }
 
           if (morTags.size() > tokens.size()) {
             String message = "There are more "+morphosyntaxLine.replace(":","")
@@ -2209,6 +2267,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
     // remove temporary "@mor" layer
     graph.getSchema().getLayers().remove("@mor");
+    graph.commit(); // ensure @mor annotations are removed
       
     // reset all change tracking
     graph.getTracker().reset();
