@@ -22,3 +22,44 @@ ${project.description}
 - Pauses - untimed, (e.g. `(.)`, `(...)`), 
       or timed (e.g. `(0.15)`, `(2.)`, `(1:05.15)`)  
 - `%mor` line annotations (or %pos line annotations, if present) 
+
+<h2>Layers to add to fully capture supported tags</h2>
+
+<h3>Word layers</h3>
+
+(All Type=Text, Alignment=None)
+
+- completion: Incomplete word completion - e.g. `dinner doin(g) all`
+- disfluency: Disfluency marking with `&+` - e.g. `so &+sund Sunday`
+- expansion: Non-standard form expansion - e.g. `gonna [: going to]`
+
+If there's a `%mor` layer in the transcripts:
+
+(All Type=Text, Alignment=Intervals)
+
+- mor: Complete `%mor` tag(s) for the word token - there can be multiple tags,
+       e.g. contractions and cliticizations.\
+       These tags are then spit into the following parts:
+- morFusionalSuffix
+- morGloss
+- morPOS
+- morPOSSubcategory
+- morPrefix
+- morStem
+- morSuffix
+
+<h3>Phrase layers</h3>
+
+(All Type=Text, Alignment=Intervals)
+
+- cunit: the grammatical unit for each utterance, labelled with utterance terminator
+- error: Errors - e.g. `they've <work up a hunger> [* s:r]` or `they got [* m] to`
+- linkage: multiple words in a name joined by `_` e.g. `Winnie_the_Pooh`
+- pause: Pauses - untimed, (e.g. `(.)`, `(...)`), or timed (e.g. `(0.15)`, `(2.)`, `(1:05.15)`) 
+- repetition: Repetition/stuttered false starts - e.g. `the <picnic> [/] picnic`
+   or `the Saturday [/] in the morning`
+- retrace: Retracing - e.g. `<some friends and I> [//] uh` or `and sit [//] sets him`
+
+<h3>Span layers</h3>
+
+- gem (Type=Text, Alignment=Intervals): Parts of the transcript marked for separate analysis.
