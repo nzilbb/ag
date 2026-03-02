@@ -292,7 +292,8 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
             AnchorChain wordChain = AnchorChain.ChainBackwardUntil(
               word.getStart(), preferredChainLayers,
               annotation -> // only follow annotations...
-              !annotation.getLayer().isAncestor(turnLayerId) // ... that have no turn
+              (annotation.getLayer() != null // ... that have no turn
+               && !annotation.getLayer().isAncestor(turnLayerId))
               || annotation.first(turnLayerId) == turn, //  or are in the same turn as utterance
               anchor ->        // stop when we get beyond the bounds of the word or utterance
               (anchor.getOffset() != null
@@ -320,7 +321,8 @@ public class DefaultOffsetGenerator extends Transform implements GraphTransforme
           AnchorChain wordChain = AnchorChain.ChainForwardUntil(
             word.getStart(), preferredChainLayers,
             annotation -> // only follow annotations...
-            !annotation.getLayer().isAncestor(turnLayerId) // ... that have no turn
+            (annotation.getLayer() != null // ... that have no turn
+             && !annotation.getLayer().isAncestor(turnLayerId))
             || annotation.first(turnLayerId) == turn, // ... or are in the same turn as utterance
             anchor ->
             // stop when we get to the end of the word

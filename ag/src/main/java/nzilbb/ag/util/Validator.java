@@ -489,7 +489,8 @@ public class Validator extends Transform implements GraphTransformer {
       for (Annotation annotation : graph.getAnnotationsById().values()) {
         if (annotation.getChange() != Change.Operation.Destroy) {
           // don't check graph/participant attributes
-          Layer layer = annotation.getLayer(); 
+          Layer layer = annotation.getLayer();
+          assert layer != null : "layer != null - " + annotation.getLayerId();
           if (layer.getAlignment() == Constants.ALIGNMENT_NONE
               && (layer.getParentId() == null
                   || layer.getParentId().equals(schema.getRoot().getId())

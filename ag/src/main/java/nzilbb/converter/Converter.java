@@ -606,7 +606,12 @@ public abstract class Converter extends GuiProgram {
     // need default anchor offsets?
     if (defaultOffsetGenerator != null) {
       for (Graph g : graphs) {
-        defaultOffsetGenerator.transform(g);
+        try {
+          defaultOffsetGenerator.transform(g);
+        } catch(Exception exception) {
+          System.err.println(g.getId() + ": " + exception);
+        }
+        g.commit();
       }    
     }
     if (schema.getParticipantLayer() != null
