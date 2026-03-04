@@ -11,7 +11,7 @@
   <artifactId>nzilbb.formatter.clan</artifactId>
   <name>nzilbb.formatter.clan</name>
   <description>Serialization for CHAT files produced by CLAN.</description>
-  <version>1.4.0</version>
+  <version>1.4.1</version>
 
   <properties>
     <package.path>nzilbb/formatter/clan/</package.path>
@@ -60,7 +60,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <!--trimStackTrace>false</trimStackTrace-->
+          <trimStackTrace>false</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>    

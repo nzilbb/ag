@@ -96,7 +96,7 @@ public class TestChatSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals(40, deserializer.configure(configuration, schema).size());
+    assertEquals(41, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -563,7 +563,7 @@ public class TestChatSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals(40, deserializer.configure(configuration, schema).size());
+    assertEquals(41, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -812,7 +812,7 @@ public class TestChatSerialization {
     assertEquals("Split MOR word groups by default", Boolean.TRUE,
                  configuration.get("splitMorWordGroups").getValue());
     configuration.get("splitMorTagGroups").setValue(Boolean.FALSE);
-    assertEquals(40, deserializer.configure(configuration, schema).size());
+    assertEquals(41, deserializer.configure(configuration, schema).size());
     assertEquals("Don't split MOR tag groups",
                  Boolean.FALSE, deserializer.getSplitMorTagGroups());
       
@@ -967,8 +967,12 @@ public class TestChatSerialization {
       new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
       new Layer("word", "Words", 2, true, false, false, "turn", true),
       new Layer("mor", "%mor tags")
-      .setAlignment(Constants.ALIGNMENT_NONE)
-      .setPeers(false).setPeersOverlap(true).setSaturated(true)
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("gra", "%gra tags")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
       .setParentId("word").setParentIncludes(true),
       new Layer("gem", "Gems", 2, true, false, true));
     // access file
@@ -982,7 +986,7 @@ public class TestChatSerialization {
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("MOR layer", "mor",
                  ((Layer)configuration.get("morLayer").getValue()).getId());
-    assertEquals(40, deserializer.configure(configuration, schema).size());
+    assertEquals(41, deserializer.configure(configuration, schema).size());
     
     // Ensure the deserializer doesn't confuse "CUnit" as being the cUnitLayer which normally
     // holds the unit terminator as the label, but here is just used for partitioning lines
@@ -1028,9 +1032,8 @@ public class TestChatSerialization {
     Annotation[] utterances = g.all("c-unit");
     //assertEquals("Number of utterances correct", 1, utterances.length);
     Annotation[] words = g.all("word");
-    System.out.println(""+Arrays.asList(words));
     String[] wordLabels = {
-      "gonna", "sing", "." };
+      "I'm", "gonna", "sing", "birthday", "." };
     for (int i = 0; i < wordLabels.length; i++) {
       assertEquals("word labels " + i, wordLabels[i], words[i].getLabel());
     }
@@ -1042,12 +1045,22 @@ public class TestChatSerialization {
     // morphosyntactic tags
     Annotation[] mor = g.all("turn")[0].all("mor");
     String[] morLabels = {
-      "part|go-PRESP", "inf|to", "v|sing", "." };
+      "pro:sub|I", "cop|be&1S", "part|go-PRESP", "inf|to", "v|sing", "n|", "n|birth", "n|day", "." };
     String[] taggedWordLabels = {
-      "gonna", "gonna", "sing", "." };
+      "I'm", "I'm", "gonna", "gonna", "sing", "birthday", "birthday", "birthday", "." };
+    String[] graLabels = {
+      "1|3|SUBJ", "2|3|AUX", "3|0|ROOT", "4|3|INF", "5|3|COMP", "6|5|POBJ", null, null, "7|3|PUNCT" };
     for (int i = 0; i < mor.length; i++) {
       assertEquals("mor labels " + i, morLabels[i], mor[i].getLabel());
       assertEquals("mor words " + i, taggedWordLabels[i], mor[i].getParent().getLabel());
+      if (graLabels[i] == null) {
+        assertEquals("gra tag " + i + " - " + Arrays.asList(mor[i].tagsOn​("gra")),
+                     0, mor[i].tagsOn​("gra").length);
+      } else { // we're expecting a %gra label
+        assertEquals("gra tag " + i + " - " + Arrays.asList(mor[i].tagsOn​("gra")),
+                     1, mor[i].tagsOn​("gra").length);
+        assertEquals("gra tags " + i, graLabels[i], mor[i].tagsOn​("gra")[0].getLabel());
+      }
     }
     
     // check all annotations have 'manual' confidence
@@ -1108,7 +1121,7 @@ public class TestChatSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals(40, deserializer.configure(configuration, schema).size());
+    assertEquals(41, deserializer.configure(configuration, schema).size());
     assertNull("No MOR layer", 
                configuration.get("morLayer").getValue());
     assertNull("No pause layer", 
@@ -1273,7 +1286,7 @@ public class TestChatSerialization {
     assertEquals("Split MOR word groups by default", Boolean.TRUE,
                  configuration.get("splitMorWordGroups").getValue());
     configuration.get("splitMorWordGroups").setValue(Boolean.FALSE);
-    assertEquals(40, deserializer.configure(configuration, schema).size());
+    assertEquals(41, deserializer.configure(configuration, schema).size());
     assertEquals("Don't split MOR word groups",
                  Boolean.FALSE, deserializer.getSplitMorWordGroups());
       
@@ -1522,7 +1535,7 @@ public class TestChatSerialization {
                  ((Layer)configuration.get("morSuffixLayer").getValue()).getId());
     assertEquals("Gloss layer", "gloss",
                  ((Layer)configuration.get("morGlossLayer").getValue()).getId());
-    assertEquals(40, deserializer.configure(configuration, schema).size());
+    assertEquals(41, deserializer.configure(configuration, schema).size());
     assertNotNull("Suffix layer set", deserializer.getMorSuffixLayer());
       
     // load the stream
@@ -1824,7 +1837,7 @@ public class TestChatSerialization {
                  ((Layer)configuration.get("morSuffixLayer").getValue()).getId());
     assertEquals("Gloss layer", "gloss",
                  ((Layer)configuration.get("morGlossLayer").getValue()).getId());
-    assertEquals(40, deserializer.configure(configuration, schema).size());
+    assertEquals(41, deserializer.configure(configuration, schema).size());
     assertNotNull("Suffix layer set", deserializer.getMorSuffixLayer());
       
     // load the stream
@@ -2097,7 +2110,7 @@ public class TestChatSerialization {
                  ((Layer)configuration.get("morSuffixLayer").getValue()).getId());
     assertEquals("Gloss layer", "gloss",
                  ((Layer)configuration.get("morGlossLayer").getValue()).getId());
-    assertEquals(40, deserializer.configure(configuration, schema).size());
+    assertEquals(41, deserializer.configure(configuration, schema).size());
     assertNotNull("Suffix layer set", deserializer.getMorSuffixLayer());
     
     // load the stream
@@ -2423,7 +2436,7 @@ public class TestChatSerialization {
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     configuration = serializer.configure(configuration, schema);
-    assertEquals(40, configuration.size());
+    assertEquals(41, configuration.size());
     assertEquals("scribe attribute", "scribe", 
                  ((Layer)configuration.get("transcriberLayer").getValue()).getId());
     assertEquals("languages attribute", "transcript_language", 
@@ -2658,7 +2671,7 @@ public class TestChatSerialization {
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     configuration = serializer.configure(configuration, schema);
-    assertEquals(40, configuration.size());
+    assertEquals(41, configuration.size());
     assertEquals("scribe attribute", "scribe", 
                  ((Layer)configuration.get("transcriberLayer").getValue()).getId());
     assertEquals("languages attribute", "transcript_language", 
@@ -2900,7 +2913,7 @@ public class TestChatSerialization {
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     configuration.get("includeTimeCodes").setValue(Boolean.FALSE);
     configuration = serializer.configure(configuration, schema);
-    assertEquals(40, configuration.size());
+    assertEquals(41, configuration.size());
     assertEquals("scribe attribute", "scribe", 
                  ((Layer)configuration.get("transcriberLayer").getValue()).getId());
     assertEquals("languages attribute", "transcript_language", 
@@ -3034,7 +3047,7 @@ public class TestChatSerialization {
     assertEquals("Split MOR tag groups by default", Boolean.TRUE,
                  configuration.get("splitMorTagGroups").getValue());
     configuration.get("splitMorWordGroups").setValue(Boolean.FALSE);
-    assertEquals(40, deserializer.configure(configuration, schema).size());
+    assertEquals(41, deserializer.configure(configuration, schema).size());
     assertFalse("Don't MOR word groups", deserializer.getSplitMorWordGroups());
     assertEquals("Word layer is token layer", "word", 
                  ((Layer)configuration.get("tokenLayer").getValue()).getId());
@@ -3062,7 +3075,7 @@ public class TestChatSerialization {
     configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     configuration = serializer.configure(configuration, schema);
-    assertEquals(40, configuration.size());
+    assertEquals(41, configuration.size());
     assertEquals("MOR layer", "mor",
                  ((Layer)configuration.get("morLayer").getValue()).getId());
     assertEquals("Word layer is token layer", "word", 
@@ -3124,6 +3137,131 @@ public class TestChatSerialization {
     }
   }
 
+  /** A temporary for on the fly parse testing;
+   * Save a file called .../src/test/resources/nzilbb/formatter/clan/temp.cha
+   * for parsing of it to be performed in the test harness.
+   */
+  @Test public void tempTest()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("transcript_date", "Recording date")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("transcript_location", "Location")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("transcript_recording_quality", "Recording quality")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("transcript_room_layout", "Room layout")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("transcript_tape_location", "Tape location")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("transcriber", "Transcribers", 0, true, true, true),
+      new Layer("languages", "Graph language", 0, true, true, true),
+      new Layer("who", "Participants", 0, true, true, true),
+      new Layer("language", "Speaker language", 0, false, false, true, "who", true),
+      new Layer("corpus", "Speaker corpus", 0, false, false, true, "who", true),
+      new Layer("role", "Speaker role", 0, false, false, true, "who", true),
+      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+      new Layer("c-unit", "C-Units", 2, true, false, false, "turn", true),
+      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+      new Layer("linkage", "Linkages", 2, true, false, false, "turn", true),
+      new Layer("error", "Errors", 2, true, false, false, "turn", true),
+      new Layer("retracing", "Retracing", 2, true, false, false, "turn", true),
+      new Layer("repetition", "Repetitions", 2, true, false, false, "turn", true),
+      new Layer("word", "Words", 2, true, false, false, "turn", true),
+      new Layer("completion", "Completion", 0, true, false, false, "word", true),
+      new Layer("expansion", "Expansion", 0, false, false, true, "word", true),
+      new Layer("disfluency", "Disfluency", 0, false, false, true, "word", true),
+      new Layer("mor", "%mor tags")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL) // because sub-words are sequential
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("gra", "%gra tags")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true),
+      new Layer("gem", "Gems", 2, true, false, true));
+    
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "temp.cha")) };
+
+    // create deserializer
+    ChatSerialization deserializer = new ChatSerialization();
+
+    // general configuration
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals(41, deserializer.configure(configuration, schema).size());
+
+    // load the stream
+    ParameterSet defaultParamaters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParamaters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParamaters);
+
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    for (String warning : deserializer.getWarnings()) System.out.println(warning);
+    Graph g = graphs[0];
+
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+
+    // meta data
+    assertEquals("temp.cha", g.getId());
+      
+    String[] languages = g.labels("languages"); 
+    assertEquals(1, languages.length);
+    assertEquals("en", languages[0]);
+      
+    // participants     
+    assertEquals(2, g.all("who").length);
+    assertEquals("Participant", g.getAnnotation("PAR").getLabel());
+    assertEquals("who", g.getAnnotation("PAR").getLayerId());
+    assertEquals("Investigator", g.getAnnotation("INT").getLabel());
+    assertEquals("who", g.getAnnotation("INT").getLayerId());
+
+    // participant meta data
+    assertEquals("en", g.getAnnotation("PAR").first("language").getLabel());
+    assertEquals("en", g.getAnnotation("INT").first("language").getLabel());
+    assertEquals("change_corpus_later", g.getAnnotation("PAR").first("corpus").getLabel());
+    assertEquals("change_corpus_later", g.getAnnotation("INT").first("corpus").getLabel());
+    assertEquals("Participant", g.getAnnotation("PAR").first("role").getLabel());
+    assertEquals("Investigator", g.getAnnotation("INT").first("role").getLabel());
+
+    // turns
+    Annotation[] turns = g.all("turn");
+    
+    // add tests...
+      
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+    }
+
+    // there should be no changes
+    assertEquals("There are no changes on a deserialized graph " + g.getChanges(),
+                 0, g.getChanges().size());
+
+    // there's no "@mor" temporary layer
+    assertNull("The temporary @mor layer has been removed ",
+               g.getLayer("@mor"));
+
+    // all annotations have an ID
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertNotNull("ID is set " + a.getLabel() + " - " + a.getLayerId(),
+                    a.getId());
+    }
+
+  }
+  
   /**
    * Diffs two files.
    * @param expected

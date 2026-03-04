@@ -48,6 +48,12 @@ If there's a `%mor` layer in the transcripts:
 - morStem
 - morSuffix
 
+If there's also a `%gra` layer in the transcripts:
+
+- gra (Type=Text, Alignment=Intervals): Complete `%gra` tag, one for each `%mor` annotation.
+  (These tags mark grammatical relations, between a dependent and a head; the dependent
+  is tagged, but currently is not formally linked to its head.)
+
 <h3>Phrase layers</h3>
 
 (All Type=Text, Alignment=Intervals)

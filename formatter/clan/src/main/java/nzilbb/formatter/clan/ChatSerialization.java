@@ -40,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -829,6 +830,23 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
   public ChatSerialization setMorphosyntaxLine(String newMorphosyntaxLine) { morphosyntaxLine = newMorphosyntaxLine; return this; }
   
   /**
+   * Layer for %gra grammatical dependency tier annotations.
+   * @see #getGraLayer()
+   * @see #setGraLayer(Layer)
+   */
+  protected Layer graLayer;
+  /**
+   * Getter for {@link #graLayer}: Layer for %gra grammatical dependency tier annotations.
+   * @return Layer for %gra grammatical dependency tier annotations.
+   */
+  public Layer getGraLayer() { return graLayer; }
+  /**
+   * Setter for {@link #graLayer}: Layer for %gra grammatical dependency tier annotations.
+   * @param newGraLayer Layer for %gra grammatical dependency tier annotations.
+   */
+  public ChatSerialization setGraLayer(Layer newGraLayer) { graLayer = newGraLayer; return this; }
+  
+  /**
    * Utterance tokenizer.  The default is {@link SimpleTokenizer}.
    * @see #getTokenizer()
    * @see #setTokenizer(GraphTransformer)
@@ -963,6 +981,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     morFusionalSuffixLayer = null;
     morSuffixLayer = null;
     morGlossLayer = null;
+    graLayer = null;
 
     pauseLayer = null;
 
@@ -1179,6 +1198,14 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
       Utility.FindLayerById(wordChildLayers, Arrays.asList(possibilities_mor_gloss)));
     p.setPossibleValues(wordChildLayers.values());
 
+    p = configuration.containsKey("graLayer")?configuration.get("graLayer")
+      :configuration.addParameter(
+        new Parameter("graLayer", Layer.class, "GRA layer", "Layer for grammatical dependency tags"));
+    String[] possibilities_gra = {"gra","dependency","dependencies"};
+    if (p.getValue() == null) p.setValue(
+      Utility.FindLayerById(wordChildLayers, Arrays.asList(possibilities_gra)));
+    p.setPossibleValues(wordChildLayers.values());
+    
     LinkedHashMap<String,Layer> possibleLayers = new LinkedHashMap<String,Layer>();
     for (Layer top : schema.getRoot().getChildren().values()) {
       if (top.getAlignment() == Constants.ALIGNMENT_INTERVAL) { // aligned children of graph
@@ -1469,6 +1496,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     if (morFusionalSuffixLayer != null) graph.addLayer((Layer)morFusionalSuffixLayer.clone());
     if (morSuffixLayer != null) graph.addLayer((Layer)morSuffixLayer.clone());
     if (morGlossLayer != null) graph.addLayer((Layer)morGlossLayer.clone());
+    if (graLayer != null) graph.addLayer((Layer)graLayer.clone());
     if (gemLayer != null) graph.addLayer((Layer)gemLayer.clone());
     if (linkageLayer != null) graph.addLayer((Layer)linkageLayer.clone());
     if (cUnitLayer != null) graph.addLayer((Layer)cUnitLayer.clone());
@@ -1681,6 +1709,10 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                    .setAlignment(Constants.ALIGNMENT_NONE)
                    .setPeers(false).setPeersOverlap(false).setSaturated(true)
                    .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
+    graph.addLayer(new Layer("@gra", "GRA Spans")
+                   .setAlignment(Constants.ALIGNMENT_NONE)
+                   .setPeers(false).setPeersOverlap(false).setSaturated(true)
+                   .setParentId(schema.getTurnLayerId()).setParentIncludes(true));
     for (String line : syncLines) {
       if (line.startsWith(morphosyntaxLine)) {
         // morphosyntactic tags
@@ -1694,7 +1726,16 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         }
         
       } else if (line.startsWith("%")) { // dependent tier
-        if (!line.startsWith("%mor") // (if there are %pos lines, this might be %mor)
+        if (line.startsWith("%gra")) { // grammatical dependencies
+          // remember this line for after the previous turn has been tokenized into words
+          String graLine = line.substring(5).trim();
+          Annotation gra = currentTurn.first("@gra");
+          if (gra != null) { // append to the previous tags
+            gra.setLabel(gra.getLabel() + " " + graLine);
+          } else {
+            gra = graph.createTag(lastUtterance, "@gra", graLine);
+          }
+        } else if (!line.startsWith("%mor") // (if there are %pos lines, this might be %mor)
             && !tierUnsupportedWarning) {
           warnings.add(
             "Dependent tiers other than %mor are not currently parsed; ignoring lines like \""
@@ -2038,6 +2079,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
       // match %mor annotations with their tokens
       for (Annotation morLine : graph.all("@mor")) {
+        Optional<Annotation> graLine = morLine.getStart().startingAnnotations​("@gra")
+          .findAny();
         if (parsingMor && !allSkippeByMor) {
           List<String> morTags = Arrays.stream(morLine.getLabel().split("\\s+"))
             // filter out punctuation tags
@@ -2079,6 +2122,12 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
             }
           }
 
+          List<String> graTags = null;
+          if (graLine.isPresent()) {
+            graTags = Arrays.stream(graLine.get().getLabel().split("\\s+"))
+              .filter(tag->!tag.endsWith("PUNCT")) // utterance terminator            
+              .collect(Collectors.toList());
+          }          
           if (morTags.size() > tokens.size()) {
             String message = "There are more "+morphosyntaxLine.replace(":","")
               +" tags ("+morTags+") than real tokens ("+tokens+")"; 
@@ -2096,6 +2145,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
           // tag each token
           Iterator<String> iMorTags = morTags.iterator();
           Iterator<Annotation> iTokens = tokens.iterator();
+          Annotation lastToken = null;
           while (iMorTags.hasNext()) {            
             Annotation token = iTokens.next();            
             String morTag = iMorTags.next();
@@ -2126,8 +2176,18 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                 for (String wordGroup : morTagGroup) {
                   // tag groups are temporally sequential, so each one is chained
                   // across the duration of the word
-                  String[] words = wordGroup.split("[$+~]");
+                  String[] words = wordGroup
+                    // we need to know if the subpart starts with "+"
+                    // so keep it in the string using lookahead (?=X)
+                    .split("(?=\\+)|[$~]");
                   Annotation lastTag = null;
+                  if (lastToken == token && morLayer != null) {
+                    // continuation of the same token
+                    Optional<Annotation> last = lastToken.getEnd()
+                      .endingAnnotations(morLayer.getId())
+                      .findAny();
+                    if (last.isPresent()) lastTag = last.get();
+                  }
                   Vector<Annotation> tags = new Vector<Annotation>();
                   
                   // first, tease out the words and sort out their anchors
@@ -2135,6 +2195,12 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                     Annotation tag = new Annotation()
                       .setLabel(subword)
                       .setParentId(token.getId());
+                    if (subword.startsWith("+")) { // it's a sub-component of a compound
+                      // strip off the leading +
+                      tag.setLabel(subword.substring(1)); 
+                      // tag it so we can identify it later
+                      tag.put("@skippedByGra", "+");
+                    }
                     if (lastTag == null) {
                       tag.setStartId(token.getStartId());
                     } else { // chain the end of the last subword the start of this subword
@@ -2241,14 +2307,36 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                     addUniqueAnnotation(
                       graph, morStemLayer, label,
                       token.getId(), tag.getStartId(), tag.getEndId());
-                    
                   } // next tag
                 } // next word group
               } // splitMorWordGroups
             } // splitMorTagGroups
+            lastToken = token;
           } // next token/tag
+
+          // now that all %mor tags are created, add any %gra tags
+          if (morLayer != null && graLayer != null
+              && graTags != null && graTags.size() > 0) {
+            List<Annotation> morAnnotations = Arrays.stream(
+              morLine.getParent().all(morLayer.getId()))
+              .filter(mor->!mor.containsKey("@skippedByGra")) // not a sub-part of compound
+              .collect(Collectors.toList());
+            if (morAnnotations.size() != graTags.size()) {
+              String message = "There are "+graTags.size()+" %gra tags ("+graTags+")"
+                +" but "+morAnnotations.size()+" %mor annotations"+" ("+morAnnotations+")";
+              if (errors == null) errors = new SerializationException(message);
+              errors.addError(SerializationException.ErrorType.Tokenization, message);
+              continue;
+            }
+            Iterator<String> iGraTags = graTags.iterator();
+            for (Annotation mor : morAnnotations) {
+              Annotation gra = graph.createTag(mor, graLayer.getId(), iGraTags.next());
+            }
+          }
+
         } // %mor
         morLine.destroy();
+        if (graLine.isPresent()) graLine.get().destroy();
       } // next mor 
         
       // set all annotations to manual confidence
@@ -2256,6 +2344,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
         a.setConfidence(Constants.CONFIDENCE_MANUAL);
         // also remove mor-related tags
         if (a.containsKey("@skippedByMor")) a.remove("@skippedByMor");
+        if (a.containsKey("@skippedByGra")) a.remove("@skippedByGra");
       }
 
     } catch(TransformationException exception) {
@@ -2267,7 +2356,8 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
 
     // remove temporary "@mor" layer
     graph.getSchema().getLayers().remove("@mor");
-    graph.commit(); // ensure @mor annotations are removed
+    graph.getSchema().getLayers().remove("@gra");
+    graph.commit(); // ensure @mor/@gra annotations are removed
       
     // reset all change tracking
     graph.getTracker().reset();
@@ -2449,6 +2539,7 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
     if (transcriberLayer != null) requiredLayers.add(transcriberLayer.getId());
     if (languagesLayer != null) requiredLayers.add(languagesLayer.getId());
     if (morLayer != null) requiredLayers.add(morLayer.getId());
+    if (graLayer != null) requiredLayers.add(graLayer.getId());
     for (String key : participantLayers.keySet()) {
       Layer layer = participantLayers.get(key);
       if (layer != null) {
