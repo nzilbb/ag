@@ -1544,11 +1544,16 @@ public class ChatSerialization implements GraphDeserializer, GraphSerializer {
                 }
                 if (participantTokens.hasMoreTokens()) {
                   String name = participantTokens.nextToken();
-                  participants.get(id).put("name", name);
-                  if (participantTokens.hasMoreTokens()) {
-                    String role = participantTokens.nextToken();
-                    participants.get(id).put("role", role);
+                  String role = name; // the second token might be the role
+                  if (participantTokens.hasMoreTokens()) { // third token
+                    // ... is the role
+                    role = participantTokens.nextToken();
+                  } else { // only two tokens, ID and role
+                    // participant name is the file name combined with the rol
+                    name = IO.WithoutExtension(getName()) + " " + role;
                   }
+                  participants.get(id).put("name", name);
+                  participants.get(id).put("role", role);
                 }
               }
             }

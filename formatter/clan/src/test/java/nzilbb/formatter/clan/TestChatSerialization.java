@@ -962,6 +962,7 @@ public class TestChatSerialization {
       "who", "turn", "CUnit", "word", // CUnit is the name of the utterance partition layer
       new Layer("languages", "Graph language", 0, true, true, true),
       new Layer("who", "Participants", 0, true, true, true),
+      new Layer("participant_role", "Role", 0, false, false, false, "who", true),
       new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
       new Layer("CUnit", "C-Units", 2, true, false, false, "turn", true),
       new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
@@ -987,6 +988,9 @@ public class TestChatSerialization {
     assertEquals("MOR layer", "mor",
                  ((Layer)configuration.get("morLayer").getValue()).getId());
     assertEquals(41, deserializer.configure(configuration, schema).size());
+    assertEquals("Role attribute mapped",
+                 "participant_role",
+                 ((Layer)configuration.get("roleLayer").getValue()).getId());
     
     // Ensure the deserializer doesn't confuse "CUnit" as being the cUnitLayer which normally
     // holds the unit terminator as the label, but here is just used for partitioning lines
@@ -1021,8 +1025,12 @@ public class TestChatSerialization {
       
     // participants     
     assertEquals(1, g.all("who").length);
-    assertEquals("someone", g.getAnnotation("INT").getLabel());
-    assertEquals("who", g.getAnnotation("INT").getLayerId());
+    Annotation INT = g.getAnnotation("INT");
+    assertEquals("short-mor Investigator", INT.getLabel());
+    assertEquals("who", INT.getLayerId());
+    Annotation role = INT.first("participant_role");
+    assertNotNull("Role assigned", role);
+    assertEquals("Role correct", "Investigator", role.getLabel());
 
     // turns
     Annotation[] turns = g.all("turn");
@@ -3187,7 +3195,9 @@ public class TestChatSerialization {
       new Layer("gem", "Gems", 2, true, false, true));
     
     // access file
-    NamedStream[] streams = { new NamedStream(new File(getDir(), "temp.cha")) };
+    File file = new File(getDir(), "temp.cha");
+    if (!file.exists()) return; // no temporary parse test
+    NamedStream[] streams = { new NamedStream(file) };
 
     // create deserializer
     ChatSerialization deserializer = new ChatSerialization();
@@ -3222,9 +3232,9 @@ public class TestChatSerialization {
       
     // participants     
     assertEquals(2, g.all("who").length);
-    assertEquals("Participant", g.getAnnotation("PAR").getLabel());
+    assertEquals("temp Participant", g.getAnnotation("PAR").getLabel());
     assertEquals("who", g.getAnnotation("PAR").getLayerId());
-    assertEquals("Investigator", g.getAnnotation("INT").getLabel());
+    assertEquals("temp Investigator", g.getAnnotation("INT").getLabel());
     assertEquals("who", g.getAnnotation("INT").getLayerId());
 
     // participant meta data

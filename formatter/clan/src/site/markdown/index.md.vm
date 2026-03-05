@@ -58,9 +58,9 @@ If there's also a `%gra` layer in the transcripts:
 
 (All Type=Text, Alignment=Intervals)
 
-- cunit: the grammatical unit for each utterance, labelled with utterance terminator
+- cunit: The grammatical unit for each utterance, labelled with utterance terminator
 - error: Errors - e.g. `they've <work up a hunger> [* s:r]` or `they got [* m] to`
-- linkage: multiple words in a name joined by `_` e.g. `Winnie_the_Pooh`
+- linkage: Multiple words in a name joined by `_` e.g. `Winnie_ther_Pooh`
 - pause: Pauses - untimed, (e.g. `(.)`, `(...)`), or timed (e.g. `(0.15)`, `(2.)`, `(1:05.15)`) 
 - repetition: Repetition/stuttered false starts - e.g. `the <picnic> [/] picnic`
    or `the Saturday [/] in the morning`
@@ -69,3 +69,27 @@ If there's also a `%gra` layer in the transcripts:
 <h3>Span layers</h3>
 
 - gem (Type=Text, Alignment=Intervals): Parts of the transcript marked for separate analysis.
+
+<h3>Participant Attributes</h3>
+
+- language: The language the participant speaks.
+- corpus: A one-word label for the corpus in lowercase.
+- age: The age of the speaker, using the form *years;months.days*
+  as in `2;11.17` for 2 years, 11 months, and 17 days.
+- sex: `gender` can be used as the attribute name.
+- group: Any single word label.
+- SES: Socio-economic status\
+  e.g. `WC` for working class, `UC` for upper class, `MC` for middle class, `LI` for limited income)
+- role: The speaker's (standardized) role e.g. `Target_Child`, `Target_Adult`, `Child`,
+  `Mother`, `Father`, `Participant`, `Investigator`, `Adult`, `Friend`, `Unidentified`, etc.
+- education: Educational level of the speaker e.g. `Elem`, `HS`, `UG`, `Grad`, `Doc`
+- custom: Any additional information needed for a given project.
+
+<h3>Participant Attributes</h3>
+
+- scribe: The person who transcribed the transcript.
+- language: The language(s) of the speech in the recording.
+- recordingdate: The date of the recording.
+- location: Location of the recording.
+- recordingquality: Recorging quality.
+- roomlayout: Room layout.
