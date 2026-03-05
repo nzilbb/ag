@@ -85,7 +85,7 @@ If there's also a `%gra` layer in the transcripts:
 - education: Educational level of the speaker e.g. `Elem`, `HS`, `UG`, `Grad`, `Doc`
 - custom: Any additional information needed for a given project.
 
-<h3>Participant Attributes</h3>
+<h3>Transcript Attributes</h3>
 
 - scribe: The person who transcribed the transcript.
 - language: The language(s) of the speech in the recording.
