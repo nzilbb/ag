@@ -50,7 +50,7 @@
         </ANNOTATION>
     </TIER>
     <TIER ANNOTATOR="Robert" LINGUISTIC_TYPE_REF="token-lt"
-        PARENT_REF="mop03-2b" PARTICIPANT="mop03-2b" TIER_ID="the-word-label">
+        PARENT_REF="mop03-2b" PARTICIPANT="mop03-2b" TIER_ID="the-token-label">
         <ANNOTATION>
             <REF_ANNOTATION ANNOTATION_ID="a12" ANNOTATION_REF="a1">
                 <ANNOTATION_VALUE>"and</ANNOTATION_VALUE>

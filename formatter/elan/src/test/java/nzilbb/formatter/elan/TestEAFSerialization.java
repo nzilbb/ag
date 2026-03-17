@@ -100,7 +100,7 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, configuration.size());
+    assertEquals(12, configuration.size());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("pronounce", "pronounce", 
@@ -123,9 +123,11 @@ public class TestEAFSerialization {
                  (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
     assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", ".*word.*", 
+                 (String)configuration.get("wordTierPattern").getValue());
       
     configuration.get("minimumTurnPauseLength").setValue(Double.valueOf(0.5));
-    assertEquals(11, deserializer.configure(configuration, schema).size());
+    assertEquals(12, deserializer.configure(configuration, schema).size());
     assertEquals("customize minimumTurnPauseLength", Double.valueOf(0.5), 
                  deserializer.getMinimumTurnPauseLength());
 
@@ -425,7 +427,7 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, configuration.size());
+    assertEquals(12, configuration.size());
     assertEquals("comment", "comment", 
                  ((Layer)configuration.get("commentLayer").getValue()).getId());
     assertEquals("pronounce", "pronounce", 
@@ -448,11 +450,13 @@ public class TestEAFSerialization {
                  (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
     assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", ".*word.*", 
+                 (String)configuration.get("wordTierPattern").getValue());
       
     configuration.get("useConventions").setValue(Boolean.FALSE);
     
     configuration.get("minimumTurnPauseLength").setValue(Double.valueOf(0.5));
-    assertEquals(11, deserializer.configure(configuration, schema).size());
+    assertEquals(12, deserializer.configure(configuration, schema).size());
     assertEquals("customize minimumTurnPauseLength", Double.valueOf(0.5), 
                  deserializer.getMinimumTurnPauseLength());
     assertEquals("disable useConventions", Boolean.FALSE, 
@@ -697,7 +701,7 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, deserializer.configure(configuration, schema).size());
+    assertEquals(12, deserializer.configure(configuration, schema).size());
     assertNull("phrase language",
                configuration.get("phraseLanguageLayer").getValue());
     assertEquals("comment", "comment", 
@@ -720,6 +724,8 @@ public class TestEAFSerialization {
                  (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
     assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", ".*word.*", 
+                 (String)configuration.get("wordTierPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -944,7 +950,7 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, deserializer.configure(configuration, schema).size());
+    assertEquals(12, deserializer.configure(configuration, schema).size());
     assertNull("phrase language",
                configuration.get("phraseLanguageLayer").getValue());
     assertEquals("comment", "comment", 
@@ -967,6 +973,8 @@ public class TestEAFSerialization {
                  (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
     assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", ".*word.*", 
+                 (String)configuration.get("wordTierPattern").getValue());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -1180,7 +1188,7 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, configuration.size());
+    assertEquals(12, configuration.size());
     assertNull("phrase language",
                configuration.get("phraseLanguageLayer").getValue());
     assertNull("comment", 
@@ -1203,10 +1211,12 @@ public class TestEAFSerialization {
                  (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
     assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", ".*word.*", 
+                 (String)configuration.get("wordTierPattern").getValue());
       
     configuration.get("useConventions").setValue(Boolean.FALSE);
     configuration.get("ignoreBlankAnnotations").setValue(Boolean.FALSE);
-    assertEquals(11, deserializer.configure(configuration, schema).size());
+    assertEquals(12, deserializer.configure(configuration, schema).size());
     assertNull("phrase language",
                configuration.get("phraseLanguageLayer").getValue());
     assertEquals("customize useConventions", Boolean.FALSE, 
@@ -1315,7 +1325,7 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, configuration.size());
+    assertEquals(12, configuration.size());
     assertNull("phrase language",
                configuration.get("phraseLanguageLayer").getValue());
     assertNull("comment", 
@@ -1338,9 +1348,11 @@ public class TestEAFSerialization {
                  (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
     assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", ".*word.*", 
+                 (String)configuration.get("wordTierPattern").getValue());
       
     configuration.get("useConventions").setValue(Boolean.FALSE);
-    assertEquals(11, deserializer.configure(configuration, schema).size());
+    assertEquals(12, deserializer.configure(configuration, schema).size());
     assertEquals("customize useConventions", Boolean.FALSE, 
                  deserializer.getUseConventions());
 
@@ -1444,7 +1456,8 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, deserializer.configure(configuration, schema).size());
+    configuration.get("wordTierPattern").setValue("the-token-label");
+    assertEquals(12, deserializer.configure(configuration, schema).size());
     assertNull("phrase language",
                configuration.get("phraseLanguageLayer").getValue());
     assertNull("comment",
@@ -1467,6 +1480,10 @@ public class TestEAFSerialization {
                  (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
     assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", "the-token-label", 
+                 (String)configuration.get("wordTierPattern").getValue());
+    assertEquals("wordTierPattern", "the-token-label", 
+                 (String)configuration.get("wordTierPattern").getValue());
     
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -1722,7 +1739,7 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, serializer.configure(configuration, schema).size());
+    assertEquals(12, serializer.configure(configuration, schema).size());
     assertEquals("phrase language", "language",
                  ((Layer)configuration.get("phraseLanguageLayer").getValue()).getId());
     assertEquals("comment", "comment", 
@@ -1745,6 +1762,8 @@ public class TestEAFSerialization {
                  (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
     assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", ".*word.*", 
+                 (String)configuration.get("wordTierPattern").getValue());
 
     LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
       Arrays.asList(serializer.getRequiredLayers()));
@@ -1828,7 +1847,7 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, serializer.configure(configuration, schema).size());
+    assertEquals(12, serializer.configure(configuration, schema).size());
     assertNull("phrase language",
                configuration.get("phraseLanguageLayer").getValue());
     assertEquals("comment", "comment", 
@@ -1851,6 +1870,8 @@ public class TestEAFSerialization {
                  (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
     assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", ".*word.*", 
+                 (String)configuration.get("wordTierPattern").getValue());
       
     LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
       Arrays.asList(serializer.getRequiredLayers()));
@@ -1946,7 +1967,7 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, serializer.configure(configuration, schema).size());
+    assertEquals(12, serializer.configure(configuration, schema).size());
     assertEquals("phrase language", "language",
                  ((Layer)configuration.get("phraseLanguageLayer").getValue()).getId());
     assertEquals("comment", "comment", 
@@ -1969,6 +1990,8 @@ public class TestEAFSerialization {
                  (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
     assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", ".*word.*", 
+                 (String)configuration.get("wordTierPattern").getValue());
       
     LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
       Arrays.asList(serializer.getRequiredLayers()));
@@ -2060,7 +2083,7 @@ public class TestEAFSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(11, serializer.configure(configuration, schema).size());
+    assertEquals(12, serializer.configure(configuration, schema).size());
     assertNull("phrase language",
                configuration.get("phraseLanguageLayer").getValue());
     assertEquals("comment", "comment", 
@@ -2083,6 +2106,8 @@ public class TestEAFSerialization {
                  (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
     assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
                  (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", ".*word.*", 
+                 (String)configuration.get("wordTierPattern").getValue());
       
     LinkedHashSet<String> needLayers = new LinkedHashSet<String>(
       Arrays.asList(serializer.getRequiredLayers()));

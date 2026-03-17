@@ -159,3 +159,12 @@ minimumTurnPauseLength
   speaker, with no intervening speaker, for which the inter-turn
   pausecounts as a turn change boundary. If the pause is shorter than
   this, the turns are merged into one. 
+
+wordTierPattern
+: A regular expression that matches the tier that contains word tokens.
+  This is used to map a tier to the *word* token layer by default, if
+  no layers match the name of the tier. By default this is `.*word.*`
+  which will match any tier with "word" anyway in the name (case-sensitive).
+  For example, if your transcripts have word tokens in tiers whose names
+  always start with "ORT-" you can set this setting to `ORT-.*` to ensure
+  they're mapped to the word layer by default.

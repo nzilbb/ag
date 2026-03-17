@@ -450,6 +450,25 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
    */
   public EAFSerialization setMinimumTurnPauseLength(Double newMinimumTurnPauseLength) { minimumTurnPauseLength = newMinimumTurnPauseLength; return this; }
 
+  /**
+   * A regular expression that matches the tier that contains word tokens.
+   * @see #getWordTierPattern()
+   * @see #setWordTierPattern(String)
+   */
+  protected String wordTierPattern = ".*word.*";
+  /**
+   * Getter for {@link #wordTierPattern}: A regular expression that
+   * matches the tier that contains word tokens. 
+   * @return A regular expression that matches the tier that contains word tokens.
+   */
+  public String getWordTierPattern() { return wordTierPattern; }
+  /**
+   * Setter for {@link #wordTierPattern}: A regular expression that
+   * matches the tier that contains word tokens. 
+   * @param newWordTierPattern A regular expression that matches the
+   * tier that contains word tokens. 
+   */
+  public EAFSerialization setWordTierPattern(String newWordTierPattern) { wordTierPattern = newWordTierPattern; return this; }
    
   // IStreamDeserializer methods:
    
@@ -782,6 +801,17 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       configuration.get("minimumTurnPauseLength").setValue(getMinimumTurnPauseLength());
     }
 
+    if (!configuration.containsKey("wordTierPattern")) {
+      configuration.addParameter(
+        new Parameter("wordTierPattern", String.class, 
+                      "Word Tier Pattern",
+                      "A regular expression that matches the tier that contains"
+                      +" word tokens, e.g. .*word.*", true));
+    }
+    if (configuration.get("wordTierPattern").getValue() == null) {
+      configuration.get("wordTierPattern").setValue(getWordTierPattern());
+    }
+
     return configuration;
   }   
 
@@ -933,7 +963,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
             }
             if (layer == null // no match on name
                 && getWordLayer() != null // and there's a word layer
-                && tierName.toLowerCase().indexOf("word") >= 0) { // tier has "word" in it
+                && tierName.matches(wordTierPattern)) { // tier has "word" in it
               layer = getSchema().getLayer(getWordLayer().getId());
             }            
             if (layer != null) { // there is a matching layer
