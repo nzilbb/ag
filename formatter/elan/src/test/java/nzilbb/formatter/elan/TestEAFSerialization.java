@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1409,7 +1409,7 @@ public class TestEAFSerialization {
 
   }
 
-  /** Deserializaion of file symbolic subdivisions and symbolic associations as well as
+  /** Deserialization of file symbolic subdivisions and symbolic associations as well as
    * utterance divisions.  */
   @Test public void symbolic_tiers()  throws Exception {
     Schema schema = new Schema(
@@ -1431,13 +1431,13 @@ public class TestEAFSerialization {
       new Layer("word", "Word tokens").setAlignment(Constants.ALIGNMENT_INTERVAL)
       .setPeers(true).setPeersOverlap(false).setSaturated(false)
       .setParentId("turn").setParentIncludes(true),
-      new Layer("orthography", "Orthography")
+      new Layer("word-orthography", "Orthography")
       .setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(false).setPeersOverlap(false).setSaturated(true)
       .setParentId("word").setParentIncludes(true));
     // access file
     NamedStream[] streams = { new NamedStream(new File(getDir(), "test_symbolic_tiers.eaf")) };
-      
+    
     // create deserializer
     EAFSerialization deserializer = new EAFSerialization();
       
@@ -1474,7 +1474,7 @@ public class TestEAFSerialization {
     assertEquals(3, defaultParameters.size());
     assertEquals("utterance mapping", "utterance", 
                  ((Layer)defaultParameters.get("tier0").getValue()).getId());    
-    assertEquals("orthography mapping", "orthography", 
+    assertEquals("orthography mapping", "word-orthography", 
                  ((Layer)defaultParameters.get("tier1").getValue()).getId());
     assertEquals("word mapping", "word", 
                  ((Layer)defaultParameters.get("tier2").getValue()).getId());
@@ -1533,7 +1533,7 @@ public class TestEAFSerialization {
         assertEquals(turns[0].getId(), words[i].getParentId());
         assertEquals("annotator " + i, "Robert", words[i].getAnnotator());
         
-        Annotation orthography = words[i].first("orthography");
+        Annotation orthography = words[i].first("word-orthography");
         assertNotNull("has orthography " + i, orthography);
         assertEquals("orthography label " + i, orthLabels[i], orthography.getLabel());
         assertEquals("orthography start " + i, words[i].getStart(), orthography.getStart());

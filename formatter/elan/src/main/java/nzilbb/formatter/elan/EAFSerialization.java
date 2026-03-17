@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2025 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -894,8 +894,6 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                        || tierName.equalsIgnoreCase("turns")
                        || tierName.equalsIgnoreCase("turn")) {
               tierName = getTurnLayer().getId();
-            } else if (tierName.toLowerCase().indexOf("word") >= 0) {
-              tierName = getWordLayer().getId();
             }
             Layer layer = getSchema().getLayer(tierName);
             if (layer == null) { // no exact match
@@ -910,6 +908,11 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                 }
               } // next layer
             }
+            if (layer == null // no match on name
+                && getWordLayer() != null // and there's a word layer
+                && tierName.toLowerCase().indexOf("word") >= 0) { // tier has "word" in it
+              layer = getSchema().getLayer(getWordLayer().getId());
+            }            
             // TODO Noises->noise and COMMENTS->comment
             if (layer == null) { // no exact match
               // try a prefix-match - i.e. "word - John Smith" should map to the "word" layer
