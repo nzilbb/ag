@@ -908,11 +908,6 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                 }
               } // next layer
             }
-            if (layer == null // no match on name
-                && getWordLayer() != null // and there's a word layer
-                && tierName.toLowerCase().indexOf("word") >= 0) { // tier has "word" in it
-              layer = getSchema().getLayer(getWordLayer().getId());
-            }            
             // TODO Noises->noise and COMMENTS->comment
             if (layer == null) { // no exact match
               // try a prefix-match - i.e. "word - John Smith" should map to the "word" layer
@@ -936,6 +931,11 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
                 }
               } // next layer
             }
+            if (layer == null // no match on name
+                && getWordLayer() != null // and there's a word layer
+                && tierName.toLowerCase().indexOf("word") >= 0) { // tier has "word" in it
+              layer = getSchema().getLayer(getWordLayer().getId());
+            }            
             if (layer != null) { // there is a matching layer
               if (layer.getAlignment() != 1) p.setValue(layer);
             } else if (parent == null) {
