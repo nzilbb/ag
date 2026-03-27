@@ -1,5 +1,5 @@
 //
-// Copyright 2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2022-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1017,6 +1017,8 @@ public class TestFlatLexiconTagger {
         +"&exactMatch=on"
         +"&strip=");
       
+      assertNull("Ensure lexiconLink isn't set", annotator.getLexiconLink());
+      
       // call tagMatchingAnnotations
       annotator.transformTranscripts(store, null);
     } catch(Exception exception) {
@@ -1172,7 +1174,10 @@ public class TestFlatLexiconTagger {
         +"&dictionary=a-z.csv:Word->Pronunciation"
         +"&firstVariantOnly=false"
         +"&exactMatch=on"
+        +"&lexiconLink="
         +"&strip=");
+
+      assertNull("Ensure lexiconLink isn't set", annotator.getLexiconLink());
       
       // call tagMatchingAnnotations
       annotator.transformTranscripts(store, null);
@@ -1198,6 +1203,87 @@ public class TestFlatLexiconTagger {
     assertEquals(
       "tagMatchingAnnotations layerId brown",
       "b r aʊ n", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && label === 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
+                 2, store.tagMatchingAnnotationsLayerIds.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && label === 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
+        "layer.id == 'word'"
+        +" && label === 'brown'"));
+    
+    assertEquals("tagMatchingAnnotations num confidences: "
+                 + store.tagMatchingAnnotationsConfidences,
+                 2, store.tagMatchingAnnotationsConfidences.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && label === 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
+        "layer.id == 'word'"
+        +" && label === 'brown'"));
+  }
+
+  /** Test generation of annotations that link to the lexicon entry. */
+  @Test public void lexiconLink() {
+    GraphStoreHarness store = new GraphStoreHarness();
+    Graph g = graph();
+    Schema schema = g.getSchema();
+    annotator.setSchema(schema);
+    try {
+      annotator.setTaskParameters(
+        "tokenLayerId=word"
+        +"&transcriptLanguageLayerId=transcript_language"
+        +"&phraseLanguageLayerId=lang"
+        +"&targetLanguagePattern="
+        +"&tagLayerId=phonemes"
+        +"&dictionary=a-z.csv:Word->Pronunciation"
+        +"&firstVariantOnly=false"
+        +"&exactMatch=on"
+        +"&lexiconLink=http://example.com/edit/annotator/ext/FlatLexiconTagger/entry.html?l={0}%26f={1}%26e={2}"
+        +"&strip=");
+      
+      assertEquals("Ensure lexiconLink is set",
+                   "http://example.com/edit/annotator/ext/FlatLexiconTagger/entry.html?l={0}&f={1}&e={2}",
+                   annotator.getLexiconLink());
+      assertEquals("tag layer type correct",
+                   "text/url", // TODO Constants.TYPE_URL
+                   schema.getLayer(annotator.getTagLayerId()).getType());
+      
+      // call tagMatchingAnnotations
+      annotator.transformTranscripts(store, null);
+    } catch(Exception exception) {
+      fail(""+exception);
+    }
+
+    // check the right calls were made to the graph store
+    assertEquals("aggregateMatchingAnnotations operation",
+                 "DISTINCT BINARY", store.aggregateMatchingAnnotationsOperation);
+    assertEquals(
+      "aggregateMatchingAnnotations expression",
+      "layer.id == 'word'",
+      store.aggregateMatchingAnnotationsExpression);
+    
+    assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
+                 2, store.tagMatchingAnnotationsLabels.size());
+    assertEquals(
+      "tagMatchingAnnotations layerId quick",
+      "k w ɪ k\nhttp://example.com/edit/annotator/ext/FlatLexiconTagger/entry.html?l=a-z.csv&f=Word&e=quick", store.tagMatchingAnnotationsLabels.get(
+        "layer.id == 'word'"
+        +" && label === 'quick'"));
+    assertEquals(
+      "tagMatchingAnnotations layerId brown",
+      "b r aʊ n\nhttp://example.com/edit/annotator/ext/FlatLexiconTagger/entry.html?l=a-z.csv&f=Word&e=brown", store.tagMatchingAnnotationsLabels.get(
         "layer.id == 'word'"
         +" && label === 'brown'"));
     

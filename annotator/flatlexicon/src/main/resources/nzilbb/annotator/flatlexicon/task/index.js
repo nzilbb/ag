@@ -354,6 +354,21 @@ function trackLexiconLoad() {
   });
 }
 
+/** Automatically set the lexiconLink setting to work for editing the entry in LaBB-CAT */
+function inferLink() {
+  // turn something like:
+  // http://example.com/labbcat/admin/annotator/task/FlatLexiconTagger/?dict
+  // ...into something like:
+  // http://example.com/labbcat/edit/annotator/ext/FlatLexiconTagger/entry.html?l={0}&f={1}&e={2}
+  document.getElementById("lexiconLink").value
+    = window.location.toString()
+    .replace("/admin/","/edit/")
+    .replace("/task/","/ext/")
+    .replace(/\?.*$/,"")
+    +"entry.html?l={0}&f={1}&e={2}";
+  return false;
+}
+
 document.getElementById("tagLayerId").onchange = function(e) {
   changedLayer(this); };
 document.getElementById("file").onchange = selectFile;
@@ -362,3 +377,4 @@ document.getElementById("fieldDelimiter").onchange = showSample;
 document.getElementById("quote").onchange = showSample;
 document.getElementById("comment").onchange = showSample;
 document.getElementById("skipFirstLine").onclick = showSample;
+document.getElementById("btnInferLink").onclick = inferLink;
