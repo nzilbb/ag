@@ -45,7 +45,8 @@ public class VanillaSQLTranslator extends MySQLTranslator {
       if (translated.startsWith("REPLACE INTO")) {
          translated = translated
             .replaceFirst("REPLACE INTO","INSERT INTO"); // this isn't strictly valid!
-      } else if (translated.startsWith("CREATE TABLE")) {
+      } else if (translated.startsWith("CREATE TABLE")
+        || translated.startsWith("ALTER TABLE")) {
          translated = translated
             .replace(" ENGINE=MyISAM","")
             .replaceAll(" CHARACTER SET \\w+","")

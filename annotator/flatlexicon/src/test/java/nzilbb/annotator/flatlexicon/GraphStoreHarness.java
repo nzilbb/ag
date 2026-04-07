@@ -803,6 +803,22 @@ public class GraphStoreHarness implements GraphStore {
     throws StoreException, PermissionException {
     throw new StoreException("Not implemented");
   }
+  
+  /**
+   * Creates an annotation starting at <var>from</var> and ending at <var>to</var>.
+   * @param id The ID of the transcript.
+   * @param offset The anchor's offset (e.g. seconds since the start of the recording).
+   * @param confidence The confidence rating.
+   * @param existingOk true if the ID of an existing annotation at the same offset
+   * can be accepted (like {@link Graph#getOrCreateAnchorAt(double)}), false if the
+   * anchor must be a new one with no other linked annotations. 
+   * @return The ID of the new anchor.
+   */
+  public String createAnchor(
+    String id, Double offset, Integer confidence, boolean existingOk)
+    throws StoreException, PermissionException, GraphNotFoundException {
+    throw new StoreException("Not implemented");
+  }
 
   /**
    * Saves the given source file for the given transcript.

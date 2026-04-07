@@ -30,6 +30,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nzilbb.ag.Anchor;
@@ -909,6 +910,49 @@ public class TestFlatLexiconTagger {
     assertEquals("Polish entry returned",
                  1, entries.size());
     assertEquals("Polish entry correct", "'ʐɨ-ʨa", entries.get(0));
+
+    // can list fields
+    List<Map<String,String>> fields = annotator.readFields("dict");
+    assertEquals("Correct number of fields in lexicon: " + fields,
+                 2, fields.size());
+    Map<String,String> field = fields.get(0);
+    assertEquals("Correct field name", "type", field.get("field"));
+    assertEquals("Correct field type", "string", field.get("type"));
+    assertEquals("Correct field validation", "", field.get("validation"));
+
+    // field CRUD
+    assertFalse("Cannot create field in nonexistent lexicon",
+                annotator.createField("nonexistent", "xxx", "string", "").length() == 0);
+    assertFalse("Cannot create field that already exists",
+                annotator.createField("dict", "type", "string", "").length() == 0);
+    assertEquals("Can create new field",
+                 "", annotator.createField("dict", "test", "boolean", "true|false"));
+    fields = annotator.readFields("dict");
+    assertEquals("Field created: " + fields,
+                 3, fields.size());
+    field = fields.get(2);
+    assertEquals("Correct new field name", "test", field.get("field"));
+    assertEquals("Correct new field type", "boolean", field.get("type"));
+    assertEquals("Correct new field validation", "true|false", field.get("validation"));
+    
+    assertEquals("Can update new field",
+                 "", annotator.updateField("dict", "test", "integer", ""));
+    fields = annotator.readFields("dict");
+    assertEquals("New field still there: " + fields,
+                 3, fields.size());
+    field = fields.get(2);
+    assertEquals("Correct new field name", "test", field.get("field"));
+    assertEquals("Correct new field new type", "integer", field.get("type"));
+    assertEquals("Correct new field new validation", "", field.get("validation"));
+
+    assertEquals("Can delete new field",
+                 "", annotator.deleteField("dict", "test"));
+    fields = annotator.readFields("dict");
+    assertEquals("New field no longer there: " + fields,
+                 2, fields.size());
+
+    assertFalse("Can't delete new field again",
+                annotator.deleteField("dict", "test").length() == 0);
     
     // can remove lexicons
     assertEquals("Can delete lexicon", "", annotator.deleteLexicon("dict"));

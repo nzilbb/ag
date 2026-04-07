@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.flatlexicon</artifactId>
-  <version>4.0.0</version>
+  <version>4.0.1</version>
 
   <name>nzilbb.annotator.flatlexicon</name>
   <description>Looks up lexicons derived from a flat file (e.g. in CSV format)</description>
@@ -26,7 +26,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4</version>
+      <version>1.4.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -106,7 +106,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <trimStackTrace>true</trimStackTrace>
+          <trimStackTrace>false</trimStackTrace>
         </configuration>
       </plugin>
       <!-- copy info.html as the 'site' index (wrapping it in html/body tags) -->

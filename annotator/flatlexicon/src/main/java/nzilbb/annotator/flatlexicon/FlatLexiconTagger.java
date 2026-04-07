@@ -105,42 +105,114 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
   public void setRdbConnectionFactory(ConnectionFactory db)
     throws SQLException {
     super.setRdbConnectionFactory(db);
-
+    
     // get DB connection
     Connection rdb = newConnection();
 
     try {
-
-      // check the schema has been created
-      try { // either of prepareStatement or executeQuery may fail if the table doesn't exist
-        PreparedStatement sql = rdb.prepareStatement(
-          sqlx.apply("SELECT lexicon_id, name FROM "+getAnnotatorId()+"_lexicon ORDER BY name"));
-        try {
-          ResultSet rsCheck = sql.executeQuery();
-          rsCheck.close();
-        } finally {
-          sql.close();
-        }
+      
+      try {        
+        // check the schema has been created
+        // either of prepareStatement or executeQuery may fail if the table doesn't exist
+        try (PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply("SELECT lexicon_id, name FROM "+getAnnotatorId()
+                          +"_lexicon ORDER BY name"))) {
+          try (ResultSet rsCheck = sql.executeQuery()) {
+          } // rsCheck.close()
+        } // sql.close()
       } catch(SQLException exception) {
         
-        PreparedStatement sql = rdb.prepareStatement(
-          sqlx.apply(
-            "CREATE TABLE "+getAnnotatorId()+"_lexicon ("
-            +" lexicon_id INTEGER NOT NULL AUTO_INCREMENT"
-            +" COMMENT 'ID which is appended to "
-            +getAnnotatorId()+" to compute the lexicon table name',"
-            +" name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
-            +" COMMENT 'Identifying name for the lexicon',"
-            +" PRIMARY KEY (lexicon_id)"
-            +") ENGINE=MyISAM;"));
-        sql.executeUpdate();
-        sql.close();
+        try(PreparedStatement sql = rdb.prepareStatement(
+              sqlx.apply(
+                "CREATE TABLE "+getAnnotatorId()+"_lexicon ("
+                +" lexicon_id INTEGER NOT NULL AUTO_INCREMENT"
+                +" COMMENT 'ID which is appended to "
+                +getAnnotatorId()+" to compute the lexicon table name',"
+                +" name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
+                +" COMMENT 'Identifying name for the lexicon',"
+                +" PRIMARY KEY (lexicon_id)"
+                +") ENGINE=MyISAM;"))) {
+          sql.executeUpdate();
+        } // sql.close();
       }
       
-      // TODO create/populate field definitions table if it doesn't exist
+      // create field definitions table if it doesn't exist
+      // either of prepareStatement or executeQuery may fail if the table doesn't exist
+      try {
+        try (PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply("SELECT lexicon_id FROM "+getAnnotatorId()+"_field"))) {
+          try (ResultSet rsCheck = sql.executeQuery()) {
+          } // rsCheck.close();
+        } // sql.close();
+      } catch(SQLException exception) { // no _field table
+        
+        try (PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply(
+                 "CREATE TABLE "+getAnnotatorId()+"_field ("
+                 +" lexicon_id INTEGER NOT NULL"
+                 +" COMMENT 'Lexicon ID',"
+                 +" field varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+                 +" COMMENT 'Name of the field',"
+                 +" type varchar(30) NOT NULL DEFAULT 'string'"
+                 +" COMMENT 'Type of the field, e.g. string, text, richtext, number, etc.',"
+                 +" validation varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''"
+                 +" COMMENT 'Constraints on values',"
+                 +" ordinal INTEGER NOT NULL DEFAULT 0"
+                 +" COMMENT 'Determins order between fields',"
+                 +" PRIMARY KEY (lexicon_id, field)"
+                 +") ENGINE=MyISAM;"))) {
+          sql.executeUpdate();
+        } // sql.close();
+      }
+      
+      // populate field definitions table where necessary
+      try (PreparedStatement sqlLexiconFields = rdb.prepareStatement(
+             sqlx.apply("SELECT * FROM "+getAnnotatorId()+"_field WHERE lexicon_id = ?"));
+           PreparedStatement sqlInsertField = rdb.prepareStatement(
+             sqlx.apply(
+               "INSERT INTO "+getAnnotatorId()+"_field"
+               +" (lexicon_id, field, type, validation, ordinal)"
+               +" VALUES (?,?,'string','',?)"))) {
+        try (PreparedStatement sqlLexicons = rdb.prepareStatement(
+               sqlx.apply(
+                 "SELECT lexicon_id, name FROM "+getAnnotatorId()+"_lexicon ORDER BY name"))) {
+          try (ResultSet rsLexicons = sqlLexicons.executeQuery()) {
+            while (rsLexicons.next()) {
+              int lexiconId = rsLexicons.getInt("lexicon_id");
+              sqlLexiconFields.setInt(1, lexiconId);
+              sqlInsertField.setInt(1, lexiconId);
+              try (ResultSet rsFields = sqlLexiconFields.executeQuery()) {
+                if (!rsFields.next()) { // no fields defined, so define them
+                  setStatus(
+                    "Default field definitions for " + rsLexicons.getString("name"));
+                  String sLexiconTable = getAnnotatorId()+"_lexicon_"+rsLexicons.getInt("lexicon_id");
+                  try (PreparedStatement selectEntry = rdb.prepareStatement(
+                         sqlx.apply("SELECT * FROM "+sLexiconTable+" LIMIT 1"))) {
+                    try (ResultSet row = selectEntry.executeQuery()) {
+                      if (row.next()) { // only the first entry
+                        ResultSetMetaData meta = row.getMetaData();
+                        for (int c = 1; c <= meta.getColumnCount(); c++) {
+                          String f = meta.getColumnName(c);
+                          if (!f.equalsIgnoreCase("serial")
+                              && !f.equalsIgnoreCase("supplemental")) {
+                            sqlInsertField.setString(2, meta.getColumnName(c));
+                            sqlInsertField.setInt(3, c);
+                            sqlInsertField.executeUpdate();
+                          } // real field
+                        } // next column
+                      } // there is a row
+                    } // row.close()
+                  } // selectEntry.close()
+                } // no fields defined
+              } // rsFields.close()
+            } // next lexicon
+          } // rsLexicons.close()
+        } // sqlLexicons.close()
+      } // sqlLexiconFields.close()
+      
     } finally {
       try { rdb.close(); } catch(SQLException x) {}
-    }      
+    }
   }
    
   /**
@@ -153,25 +225,32 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       Connection rdb = newConnection();      
       try {
 
-        PreparedStatement sql = rdb.prepareStatement(
-          sqlx.apply("SELECT lexicon_id, name FROM "+getAnnotatorId()+"_lexicon ORDER BY name"));
-        ResultSet rs = sql.executeQuery();
-        while (rs.next()) {
-          String sName = rs.getString("name");
-          String sLexiconTable = getAnnotatorId()+"_lexicon_"+rs.getInt("lexicon_id");
-          PreparedStatement deleteLexicon = rdb.prepareStatement(
-	    sqlx.apply("DROP TABLE " + sLexiconTable));
-          deleteLexicon.executeUpdate();
-          deleteLexicon.close();
-        } // next lexicon
-        rs.close();
-        sql.close();
+        try (PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply("SELECT lexicon_id, name FROM "
+                          +getAnnotatorId()+"_lexicon ORDER BY name"))) {
+          try (ResultSet rs = sql.executeQuery()) {
+            while (rs.next()) {
+              String sName = rs.getString("name");
+              String sLexiconTable = getAnnotatorId()+"_lexicon_"+rs.getInt("lexicon_id");
+              try (PreparedStatement deleteLexicon = rdb.prepareStatement(
+                     sqlx.apply("DROP TABLE " + sLexiconTable))) {
+                deleteLexicon.executeUpdate();
+              } // deleteLexicon.close();
+            } // next lexicon
+          } // rs.close();
+        } // sql.close();
         
-        // check the schema has been created
-        sql = rdb.prepareStatement(
-          sqlx.apply("DROP TABLE "+getAnnotatorId()+"_wordform"));
-        sql.executeUpdate();
-        sql.close();
+        // drop fields table
+        try (PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply("DROP TABLE "+getAnnotatorId()+"_field"))) {
+          sql.executeUpdate();
+        } // sql.close();
+        
+        // drop lexicon table
+        try (PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply("DROP TABLE "+getAnnotatorId()+"_lexicon"))) {
+          sql.executeUpdate();
+        } // sql.close();
         
       } finally {
         try { rdb.close(); } catch(SQLException x) {}
@@ -262,6 +341,14 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           setStatus("Adding new lexicon: " + lexicon);
         }
 
+        // delete the field records if any
+        try (PreparedStatement deleteLexicon = rdb.prepareStatement(
+               sqlx.apply(
+                 "DELETE FROM "+getAnnotatorId()+"_field WHERE lexicon_id = ?"))) {
+          deleteLexicon.setInt(1, lexiconId);
+          deleteLexicon.executeUpdate();
+        } // deleteLexicon.close();
+        
         // create lexicon table
         String sqlQuote = rdb.getMetaData().getIdentifierQuoteString();
         StringBuilder columnList = new StringBuilder();
@@ -271,19 +358,31 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
         int columnCount = 0;
         String splitPattern = fieldDelimiter;
         if (splitPattern.equals("\\")) splitPattern = "\\\\";
-        for (String column : fieldNames.split(splitPattern)) {
-          if (column.length() == 0) column = "Field" + columnCount;
-          columnList.append(", ").append(sqlQuote).append(column).append(sqlQuote);
-          argumentList.append(",?");
-          columnDefinitions.append(", ").append(sqlQuote).append(column).append(sqlQuote)
-            .append(" varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL");
-          columnIndexDefinitions.add(
-            "CREATE INDEX IDX_"+getAnnotatorId()+"_"+lexiconId+"_"+(++columnCount)+" ON "
-            +getAnnotatorId()+"_lexicon_"+lexiconId+" ("+sqlQuote+column+sqlQuote+")");
-
-          // TODO create/update field definition
+        
+        try(PreparedStatement sqlInsertField = rdb.prepareStatement(
+             sqlx.apply(
+               "INSERT INTO "+getAnnotatorId()+"_field"
+               +" (lexicon_id, field, type, validation, ordinal)"
+               +" VALUES (?,?,'string','',?)"))) {
+          sqlInsertField.setInt(1, lexiconId);
+          int c = 1;
+          for (String column : fieldNames.split(splitPattern)) {
+            if (column.length() == 0) column = "Field" + columnCount;
+            columnList.append(", ").append(sqlQuote).append(column).append(sqlQuote);
+            argumentList.append(",?");
+            columnDefinitions.append(", ").append(sqlQuote).append(column).append(sqlQuote)
+              .append(" varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL");
+            columnIndexDefinitions.add(
+              "CREATE INDEX IDX_"+getAnnotatorId()+"_"+lexiconId+"_"+(++columnCount)+" ON "
+              +getAnnotatorId()+"_lexicon_"+lexiconId+" ("+sqlQuote+column+sqlQuote+")");
+            
+            // create/update field definition
+            sqlInsertField.setString(2, column);
+            sqlInsertField.setInt(3, c++);
+            sqlInsertField.executeUpdate();
           
-        } // next column
+          } // next column
+        } // sqlInsertField.close()
         
         // drop the table first (just in case it's already there)
         String sSql = "DROP TABLE "+getAnnotatorId()+"_lexicon_"+lexiconId;
@@ -450,60 +549,298 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
   } // end of listLexicons()
   
   /**
+   * Determines the lexicon ID given the name.
+   * @param rdb Database connection to use.
+   * @param lexicon The name of the lexicon.
+   * @return The lexicon ID, or -1 if there's no such lexicon.
+   * @throws SQLException x
+   */
+  protected int lexiconId(Connection rdb, String lexicon) throws SQLException {
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply(
+             "SELECT lexicon_id FROM "+getAnnotatorId()+"_lexicon WHERE name = ?"))) {
+      sql.setString(1, lexicon);
+      try (ResultSet rs = sql.executeQuery()) {
+        if (rs.next()) {
+          return rs.getInt("lexicon_id");
+        }
+      } // rs.close()
+    } // sql.close()
+    return -1;
+  } // end of lexiconId()
+  
+  /**
    * Deletes the given lexicon.
    * @param lexicon
    * @return An error message, if any, or an empty string if not.
    */
   public String deleteLexicon(String lexicon) throws SQLException {
-    Connection rdb = newConnection();      
-    try {
+    try (Connection rdb = newConnection()) {
       // find the lexicon
-      PreparedStatement sql = rdb.prepareStatement(
-        sqlx.apply("SELECT lexicon_id FROM "+getAnnotatorId()+"_lexicon WHERE name = ?"));
-      sql.setString(1, lexicon);
-      ResultSet rs = sql.executeQuery();
-      try {
-        if (rs.next()) {
-
-          // drop the lexicon table
-          String sLexiconTable = getAnnotatorId()+"_lexicon_"+rs.getInt("lexicon_id");
-          String dropError = "";
-          try {
-            PreparedStatement deleteLexicon = rdb.prepareStatement(
-              sqlx.apply("DROP TABLE " + sLexiconTable));
-            try {
-              deleteLexicon.executeUpdate();
-            } finally {
-              deleteLexicon.close();
-            }
-          } catch(SQLException exception) {
-            dropError = exception.getMessage();
-          }
-
-          // delete the lexicon record
-          try {
-            PreparedStatement deleteLexicon = rdb.prepareStatement(
-              sqlx.apply("DELETE FROM "+getAnnotatorId()+"_lexicon WHERE name = ?"));
-            deleteLexicon.setString(1, lexicon);
-            try {
-              deleteLexicon.executeUpdate();
-            } finally {
-              deleteLexicon.close();
-            }
-          } catch(SQLException exception) {}
-          return dropError;          
-        } else {
-          return "Nonexistent lexicon: " + lexicon;
-        }
-      } finally {
-        rs.close();
-        sql.close();
+      int lexiconId = lexiconId(rdb, lexicon);
+      if (lexiconId >= 0) {            
+        // drop the lexicon table
+        String sLexiconTable = getAnnotatorId()+"_lexicon_"+lexiconId;
+        String dropError = "";
+        try (PreparedStatement deleteLexicon = rdb.prepareStatement(
+               sqlx.apply("DROP TABLE " + sLexiconTable))) {
+          deleteLexicon.executeUpdate();
+        } catch(SQLException exception) {
+          dropError = exception.getMessage();
+        } // deleteLexicon.close();
+        
+        // delete the field records
+        try (PreparedStatement deleteLexicon = rdb.prepareStatement(
+               sqlx.apply(
+                 "DELETE FROM "+getAnnotatorId()+"_field WHERE lexicon_id = ?"))) {
+          deleteLexicon.setInt(1, lexiconId);
+          deleteLexicon.executeUpdate();
+        } // deleteLexicon.close();
+        
+        // delete the lexicon record
+        try (PreparedStatement deleteLexicon = rdb.prepareStatement(
+               sqlx.apply(
+                 "DELETE FROM "+getAnnotatorId()+"_lexicon WHERE lexicon_id = ?"))) {
+          deleteLexicon.setInt(1, lexiconId);
+          deleteLexicon.executeUpdate();
+        } // deleteLexicon.close();
+        return dropError;
+      } else {
+        return "Nonexistent lexicon: " + lexicon;
       }
-    } finally {
-      rdb.close();
     }
   } // end of deleteLexicon()
   
+  /**
+   * Create a new field in the given lexicon, of type 'string'.
+   * @param lexicon The lexicon ID.
+   * @param field The name of the field.
+   * @return An error message if creation failed. Otherwise, an empty string.
+   */
+  public String createField(String lexicon, String field) throws SQLException {
+    return createField(lexicon, field, "string", "");
+  }
+  
+  /**
+   * Create a new field in the given lexicon.
+   * @param lexicon The lexicon ID.
+   * @param field The name of the field.
+   * @param type The field type.
+   * @param validation The constraints on the field values.
+   * @return An error message if creation failed. Otherwise, an empty string.
+   */
+  public String createField(
+    String lexicon, String field, String type, String validation)
+    throws SQLException {
+    try (Connection rdb = newConnection()) {
+      // find the lexicon
+      int lexiconId = lexiconId(rdb, lexicon);
+      if (lexiconId >= 0) {
+        if (field == null || field.trim().length() == 0) {
+          return "No field name specified.";
+        }
+        try (PreparedStatement sqlUnique = rdb.prepareStatement(
+               sqlx.apply(
+                 "SELECT * FROM "+getAnnotatorId()+"_field"
+                 +" WHERE lexicon_id = ? AND field = ?"))) {
+          sqlUnique.setInt(1, lexiconId);
+          sqlUnique.setString(2, field);
+          try (ResultSet rsUnique = sqlUnique.executeQuery()) {
+            if (rsUnique.next()) {
+              return "There is already a field called " + field;
+            }
+          }
+        }
+        int ordinal = 1;
+        try (PreparedStatement sqlOrdinal = rdb.prepareStatement(
+               sqlx.apply(
+                 "SELECT MAX(ordinal) FROM "+getAnnotatorId()+"_field WHERE lexicon_id = ?"))) {
+          sqlOrdinal.setInt(1, lexiconId);
+          try (ResultSet rsOrdinal = sqlOrdinal.executeQuery()) {
+            if (rsOrdinal.next()) {
+              ordinal = rsOrdinal.getInt(1) + 1;
+            }
+          }
+        }
+        try (PreparedStatement sqlInsertFieldRow = rdb.prepareStatement(
+               sqlx.apply(
+                 "INSERT INTO "+getAnnotatorId()+"_field" // TODO ordinal
+                 +" (lexicon_id, field, type, validation, ordinal) VALUES (?,?,?,?,?)"))) {
+          sqlInsertFieldRow.setInt(1, lexiconId);
+          sqlInsertFieldRow.setString(2, field);
+          sqlInsertFieldRow.setString(3, type);
+          sqlInsertFieldRow.setString(4, validation);
+          sqlInsertFieldRow.setInt(5, ordinal);
+          sqlInsertFieldRow.executeUpdate();
+
+          // insert field row succeeded, so add the field to the table
+          try (PreparedStatement sqlAlterTable = rdb.prepareStatement(
+                 sqlx.apply(
+                   "ALTER TABLE "+getAnnotatorId() +"_lexicon_"+lexiconId
+                   +" ADD COLUMN `"+field+"` varchar(200)"
+                   +" CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL"))) {
+            sqlAlterTable.executeUpdate();
+          } catch (SQLException alterX) { // ALTER TABLE failed
+            // delete the field from the table
+            try (PreparedStatement sqlDeleteFieldRow = rdb.prepareStatement(
+                   sqlx.apply(
+                     "DELETE FROM "+getAnnotatorId()+"_field"
+                     +" WHERE lexicon_id = ? AND field = ?"))) {
+              sqlDeleteFieldRow.setInt(1, lexiconId);
+              sqlDeleteFieldRow.setString(2, field);
+              sqlDeleteFieldRow.executeUpdate();
+            } // sqlDeleteFieldRow.close();            
+            return alterX.toString();
+          } // sqlAlterTable.close()          
+        } catch (SQLException x) { // field is already there
+          return x.toString();
+        } // sqlInsertFieldRow.close()
+      } else {
+        return "Nonexistent lexicon: " + lexicon;
+      }
+    } catch (Exception x) {
+      System.err.println("FlatLexiconTagger.createField("+lexicon+", "+field+"): " + x);
+      return x.toString();
+    } // rdb.close()
+    return "";
+  } // end of createField()
+
+  /**
+   * Get all field definitions for the given lexicon.
+   * @param lexicon The lexicon ID.
+   * @return A list of field definitions for the lexicon.
+   */
+  public List<Map<String,String>> readFields(String lexicon)
+   throws SQLException {
+    List<Map<String,String>> fields = new Vector<Map<String,String>>();
+    try (Connection rdb = newConnection()) {
+      // find the lexicon
+      int lexiconId = lexiconId(rdb, lexicon);
+      if (lexiconId >= 0) {            
+        // list the lexicon fields
+        try (PreparedStatement sqlFields = rdb.prepareStatement(
+               sqlx.apply(
+                 "SELECT * FROM "+getAnnotatorId()+"_field"
+                 +" WHERE lexicon_id = ? ORDER BY ordinal"))) {
+          sqlFields.setInt(1, lexiconId);
+          try (ResultSet rsFields = sqlFields.executeQuery()) {
+            while (rsFields.next()) {
+              LinkedHashMap<String,String> field = new LinkedHashMap<String,String>();
+              field.put("field", rsFields.getString("field"));
+              field.put("type", rsFields.getString("type"));
+              field.put("validation", rsFields.getString("validation"));
+              fields.add(field);
+            } // next field
+          } // rsFields.close()
+        } // sqlFields.close()
+      } else {
+        System.err.println(
+          "FlatLexiconTagger.readFields("+lexicon+"): Nonexistent lexicon.");
+        fields.add(new LinkedHashMap<String,String>(){{
+          put("FlatLexiconTagger_error", "Nonexistent lexicon: " + lexicon);
+        }});
+      }
+    } catch (Exception x) {
+      System.err.println("FlatLexiconTagger.readFields("+lexicon+"): " + x);
+      fields.add(new LinkedHashMap<String,String>(){{
+        put("FlatLexiconTagger_error", x.toString());
+      }});      
+    } // rdb.close()
+    return fields;
+  } // end of readFields()
+
+  /**
+   * Update an existing field in the given lexicon.
+   * @param lexicon The lexicon ID.
+   * @param field The name of the field.
+   * @param type The field type.
+   * @return An error message if update failed. Otherwise, an empty string.
+   */
+  public String updateField(String lexicon, String field, String type) throws SQLException {
+    return updateField(lexicon, field, type, "");
+  }
+  /**
+   * Update an existing field in the given lexicon.
+   * @param lexicon The lexicon ID.
+   * @param field The name of the field.
+   * @param type The field type.
+   * @param validation The constraints on the field values.
+   * @return An error message if update failed. Otherwise, an empty string.
+   */
+  public String updateField(
+    String lexicon, String field, String type, String validation)
+    throws SQLException {
+    try (Connection rdb = newConnection()) {
+      // find the lexicon
+      int lexiconId = lexiconId(rdb, lexicon);
+      if (lexiconId >= 0) {
+        try (PreparedStatement sqlUpdateFieldRow = rdb.prepareStatement(
+               sqlx.apply(
+                 "UPDATE "+getAnnotatorId()+"_field" // TODO ordinal
+                 +" SET type = ?, validation = ? WHERE lexicon_id = ? AND field = ?"))) {
+          sqlUpdateFieldRow.setString(1, type);
+          sqlUpdateFieldRow.setString(2, validation);
+          sqlUpdateFieldRow.setInt(3, lexiconId);
+          sqlUpdateFieldRow.setString(4, field);
+          if (sqlUpdateFieldRow.executeUpdate() == 0) {
+            return "No such field \""+field+"\" in " + lexicon;
+          }
+        } catch (SQLException x) { // field is already there
+          return x.toString();
+        } // sqlInsertFieldRow.close()
+      } else {
+        return "Nonexistent lexicon: " + lexicon;
+      }
+    } catch (Exception x) {
+      System.err.println("FlatLexiconTagger.createField("+lexicon+", "+field+"): " + x);
+      return x.toString();
+    } // rdb.close()
+    return "";
+  } // end of updateField()
+
+  /**
+   * Delete an existing field in the given lexicon.
+   * @param lexicon The lexicon ID.
+   * @param field The name of the field.
+   * @return An error message if deletion failed. Otherwise, an empty string.
+   */
+  public String deleteField(String lexicon, String field) throws SQLException {
+    try (Connection rdb = newConnection()) {
+      // find the lexicon
+      int lexiconId = lexiconId(rdb, lexicon);
+      if (lexiconId >= 0) {
+        try (PreparedStatement sqlDeleteFieldRow = rdb.prepareStatement(
+               sqlx.apply(
+                 "DELETE FROM "+getAnnotatorId()+"_field"
+                 +" WHERE lexicon_id = ? AND field = ?"))) {
+          sqlDeleteFieldRow.setInt(1, lexiconId);
+          sqlDeleteFieldRow.setString(2, field);
+          if (sqlDeleteFieldRow.executeUpdate() == 0) {
+            return "No such field \""+field+"\" in " + lexicon;
+          } else {
+            // delete field row succeeded, so drop the field from the table
+            try (PreparedStatement sqlAlterTable = rdb.prepareStatement(
+                   sqlx.apply(
+                     "ALTER TABLE "+getAnnotatorId() +"_lexicon_"+lexiconId
+                     +" DROP COLUMN `"+field+"`"))) {
+              sqlAlterTable.executeUpdate();
+            } catch (SQLException alterX) { // ALTER TABLE failed
+              return alterX.toString();
+            } // sqlAlterTable.close()
+          } // field existed
+        } catch (SQLException x) { // field is already there
+          return x.toString();
+        } // sqlInsertFieldRow.close()
+      } else {
+        return "Nonexistent lexicon: " + lexicon;
+      }
+    } catch (Exception x) {
+      System.err.println("FlatLexiconTagger.createField("+lexicon+", "+field+"): " + x);
+      return x.toString();
+    } // rdb.close()
+    return "";
+  } // end of deleteField()
+
   /**
    * Get all values for the given entry.
    * @param lexicon The lexicon ID.
@@ -516,58 +853,51 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    throws SQLException {
     try (Connection rdb = newConnection()) {
       // find the lexicon
-      try (PreparedStatement sql = rdb.prepareStatement(
-             sqlx.apply(
-               "SELECT lexicon_id FROM "+getAnnotatorId()+"_lexicon WHERE name = ?"))) {
-        sql.setString(1, lexicon);
-        try (ResultSet rs = sql.executeQuery()) {
-          if (rs.next()) {
-            // drop the lexicon table
-            String sLexiconTable = getAnnotatorId()+"_lexicon_"+rs.getInt("lexicon_id");
-            try {
-              LinkedHashMap<String,String> values = new LinkedHashMap<String,String>();
-              String s = sqlx.apply(
-                "SELECT * FROM "+sLexiconTable+" WHERE `"+field.replace(';',' ')+"` = ?");
-              try (PreparedStatement selectEntry = rdb.prepareStatement(s)) {
-                selectEntry.setString(1, entry);
-                try (ResultSet fields = selectEntry.executeQuery()) {
-                  if (fields.next()) { // only the first entry, sorry
-                    ResultSetMetaData meta = fields.getMetaData();
-                    for (int c = 1; c <= meta.getColumnCount(); c++) {
-                      String f = meta.getColumnName(c);
-                      if (!f.equalsIgnoreCase("serial")
-                          && !f.equalsIgnoreCase("supplemental")) {
-                        values.put(f, fields.getString(f));
-                      }
-                    } // next column
-                  } else {
-                    return new LinkedHashMap<String,String>(){{
-                      put("FlatLexiconTagger_error", "No entry: " + entry);
-                    }};
+      int lexiconId = lexiconId(rdb, lexicon);
+      if (lexiconId >= 0) {            
+        String sLexiconTable = getAnnotatorId()+"_lexicon_"+lexiconId;
+        try {
+          LinkedHashMap<String,String> values = new LinkedHashMap<String,String>();
+          String s = sqlx.apply(
+            "SELECT * FROM "+sLexiconTable+" WHERE `"+field.replace(';',' ')+"` = ?");
+          try (PreparedStatement selectEntry = rdb.prepareStatement(s)) {
+            selectEntry.setString(1, entry);
+            try (ResultSet fields = selectEntry.executeQuery()) {
+              if (fields.next()) { // only the first entry, sorry
+                ResultSetMetaData meta = fields.getMetaData();
+                for (int c = 1; c <= meta.getColumnCount(); c++) {
+                  String f = meta.getColumnName(c);
+                  if (!f.equalsIgnoreCase("serial")
+                      && !f.equalsIgnoreCase("supplemental")) {
+                    values.put(f, fields.getString(f));
                   }
-                } // fields.close()
-              } // selectEntry.close()
-              return values;
-            } catch(SQLException exception) {
-              System.err.println(
-                "FlatLexiconTagger.getEntry("+lexicon+", "+field+", "+entry+"): "+exception);
-              return new LinkedHashMap<String,String>(){{
-                put("FlatLexiconTagger_error", exception.getMessage());
-              }};
-            }
-          } else {
-            System.err.println(
-              "FlatLexiconTagger.getEntry("+lexicon+", "+field+", "+entry
-              +"): Nonexistent lexicon.");
-            return new LinkedHashMap<String,String>(){{
-              put("FlatLexiconTagger_error", "Nonexistent lexicon: " + lexicon);
-            }};
-          }
-        } // rs.close()
-      } // sql.close()
+                } // next column
+              } else {
+                return new LinkedHashMap<String,String>(){{
+                  put("FlatLexiconTagger_error", "No entry: " + entry);
+                }};
+              }
+            } // fields.close()
+          } // selectEntry.close()
+          return values;
+        } catch(SQLException exception) {
+          System.err.println(
+            "FlatLexiconTagger.getEntry("+lexicon+", "+field+", "+entry+"): "+exception);
+          return new LinkedHashMap<String,String>(){{
+            put("FlatLexiconTagger_error", exception.getMessage());
+          }};
+        }
+      } else {
+        System.err.println(
+          "FlatLexiconTagger.getEntry("+lexicon+", "+field+", "+entry
+          +"): Nonexistent lexicon.");
+        return new LinkedHashMap<String,String>(){{
+          put("FlatLexiconTagger_error", "Nonexistent lexicon: " + lexicon);
+        }};
+      }
     } // rdb.close()
   } // end of getEntry()
-
+  
   /**
    * Get all values for the given entry.
    * @param lexicon The lexicon ID.
@@ -582,85 +912,78 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
     JsonObject json = Json.createReader(new StringReader(data)).readObject();
     try (Connection rdb = newConnection()) {
       // find the lexicon
-      try (PreparedStatement sql = rdb.prepareStatement(
-             sqlx.apply(
-               "SELECT lexicon_id FROM "+getAnnotatorId()+"_lexicon WHERE name = ?"))) {
-        sql.setString(1, lexicon);
-        try (ResultSet rs = sql.executeQuery()) {
-          sql.setString(1, lexicon);
-          if (rs.next()) {
-            // drop the lexicon table
-            String sLexiconTable = getAnnotatorId()+"_lexicon_"+rs.getInt("lexicon_id");
-            try {
-              LinkedHashMap<String,String> values = new LinkedHashMap<String,String>();
-              String s = sqlx.apply(
-                "SELECT * FROM "+sLexiconTable+" WHERE `"+field.replace(';',' ')+"` = ?");
-              try (PreparedStatement selectEntry = rdb.prepareStatement(s)) {
-                selectEntry.setString(1, entry);
-                String update = "";
-                try (ResultSet fields = selectEntry.executeQuery()) {
-                  boolean changed = false;
-                  Vector<String> parameters = new Vector<String>();
-                  if (fields.next()) { // only the first entry, sorry
-                    ResultSetMetaData meta = fields.getMetaData();
-                    for (int c = 1; c <= meta.getColumnCount(); c++) {
-                      String f = meta.getColumnName(c);
-                      if (!f.equalsIgnoreCase("serial")
-                          && !f.equalsIgnoreCase("supplemental")) {
-                        // can we update this field?
-                        if (!f.equals(field) && json.containsKey(f)
-                            // the value has actually changed
-                            && !json.getString(f).equals(fields.getString(f))) {
-                          if (update.length() == 0) {
-                            update = "UPDATE "+sLexiconTable+" SET `"+f+"` = ?";
-                          } else {
-                            update += ", `"+f+"` = ?";
-                          }
-                          parameters.add(json.getString(f));
-                          values.put(f, json.getString(f));
-                          changed = true;
-                        } else {
-                          values.put(f, fields.getString(f));
-                        }
+      int lexiconId = lexiconId(rdb, lexicon);
+      if (lexiconId >= 0) {            
+        // drop the lexicon table
+        String sLexiconTable = getAnnotatorId()+"_lexicon_"+lexiconId;
+        try {
+          LinkedHashMap<String,String> values = new LinkedHashMap<String,String>();
+          String s = sqlx.apply(
+            "SELECT * FROM "+sLexiconTable+" WHERE `"+field.replace(';',' ')+"` = ?");
+          try (PreparedStatement selectEntry = rdb.prepareStatement(s)) {
+            selectEntry.setString(1, entry);
+            String update = "";
+            try (ResultSet fields = selectEntry.executeQuery()) {
+              boolean changed = false;
+              Vector<String> parameters = new Vector<String>();
+              if (fields.next()) { // only the first entry, sorry
+                ResultSetMetaData meta = fields.getMetaData();
+                for (int c = 1; c <= meta.getColumnCount(); c++) {
+                  String f = meta.getColumnName(c);
+                  if (!f.equalsIgnoreCase("serial")
+                      && !f.equalsIgnoreCase("supplemental")) {
+                    // can we update this field?
+                    if (!f.equals(field) && json.containsKey(f)
+                        // the value has actually changed
+                        && !json.getString(f).equals(fields.getString(f))) {
+                      if (update.length() == 0) {
+                        update = "UPDATE "+sLexiconTable+" SET `"+f+"` = ?";
+                      } else {
+                        update += ", `"+f+"` = ?";
                       }
-                    } // next column
-                    if (changed) { // some fields have new values
-                      // save changes
-                      update += " WHERE `"+field.replace(';',' ')+"` = ?";
-                      parameters.add(entry);
-                      try (PreparedStatement updateEntry = rdb.prepareStatement(
-                             sqlx.apply(update))) {
-                        for (int p = 0; p < parameters.size(); p++) {
-                          updateEntry.setString(p+1, parameters.get(p));
-                        } // next parameter
-                        updateEntry.executeUpdate();
-                      } // updateEntry                    
-                    } // changed
-                  } else {
-                    return new LinkedHashMap<String,String>(){{
-                      put("FlatLexiconTagger_error", "No entry: " + entry);
-                    }};
+                      parameters.add(json.getString(f));
+                      values.put(f, json.getString(f));
+                      changed = true;
+                    } else {
+                      values.put(f, fields.getString(f));
+                    }
                   }
-                } // fields.close()
-              } // selectEntry.close()
-              return values;
-            } catch(SQLException exception) {
-              System.err.println(
-                "FlatLexiconTagger.getEntry("+lexicon+", "+field+", "+entry+"): "+exception);
-              return new LinkedHashMap<String,String>(){{
-                put("FlatLexiconTagger_error", exception.getMessage());
-              }};
-            }
-          } else {
-            System.err.println(
-              "FlatLexiconTagger.getEntry("+lexicon+", "+field+", "+entry
-              +"): Nonexistent lexicon.");
-            return new LinkedHashMap<String,String>(){{
-              put("FlatLexiconTagger_error", "Nonexistent lexicon: " + lexicon);
-            }};
-          }
-        } // rs.close()
-      } // sql.close()
+                } // next column
+                if (changed) { // some fields have new values
+                  // save changes
+                  update += " WHERE `"+field.replace(';',' ')+"` = ?";
+                  parameters.add(entry);
+                  try (PreparedStatement updateEntry = rdb.prepareStatement(
+                         sqlx.apply(update))) {
+                    for (int p = 0; p < parameters.size(); p++) {
+                      updateEntry.setString(p+1, parameters.get(p));
+                    } // next parameter
+                    updateEntry.executeUpdate();
+                  } // updateEntry                    
+                } // changed
+              } else {
+                return new LinkedHashMap<String,String>(){{
+                  put("FlatLexiconTagger_error", "No entry: " + entry);
+                }};
+              }
+            } // fields.close()
+          } // selectEntry.close()
+          return values;
+        } catch(SQLException exception) {
+          System.err.println(
+            "FlatLexiconTagger.getEntry("+lexicon+", "+field+", "+entry+"): "+exception);
+          return new LinkedHashMap<String,String>(){{
+            put("FlatLexiconTagger_error", exception.getMessage());
+          }};
+        }
+      } else {
+        System.err.println(
+          "FlatLexiconTagger.getEntry("+lexicon+", "+field+", "+entry
+          +"): Nonexistent lexicon.");
+        return new LinkedHashMap<String,String>(){{
+          put("FlatLexiconTagger_error", "Nonexistent lexicon: " + lexicon);
+        }};
+      }
     } // rdb.close()
   }
   
