@@ -32,7 +32,7 @@ function getText(path, gotText) {
 
 // encode a function parameter
 function encode(parameter) {
-    return encodeURI(parameter).replace(",","%2C");
+  return encodeURIComponent(parameter);
 }
 
 // encode a function parameter
