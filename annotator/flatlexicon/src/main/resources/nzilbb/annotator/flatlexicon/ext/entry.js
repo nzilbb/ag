@@ -14,7 +14,7 @@ console.log(`lexicon "${lexicon}" field "${field}" entry "${entry}"`);
 
 document.getElementById("entry").innerText = entry;
 
-let fields = [];
+let fields = {}; // definitions for fields (type/validation etc.)
 
 function showForm(data) {
   if (data.FlatLexiconTagger_error) {
@@ -23,8 +23,7 @@ function showForm(data) {
   }
   const attributes = document.getElementById("attributes");
   attributes.innerHTML = ""; // clear any existing list
-  fields = Object.keys(data);
-  for (let name of fields) {
+  for (let name in fields) {
     const row = document.createElement("div");
     row.className = "field";
     row.title = name;
@@ -35,10 +34,26 @@ function showForm(data) {
     let value = document.createElement("span");
     value.className = "value";
     let span = document.createElement("span");
-    span.className = "read-only";
+    span.className = fields[name].type;
     span.id = `attribute-${name}`;
     if (data[name]) {
-      span.appendChild(document.createTextNode(data[name]));
+      if (fields[name].type == "url") {
+        const a = document.createElement("a");
+        a.href = data[name];
+        a.target = name;
+        a.appendChild(document.createTextNode(data[name]));
+        span.appendChild(a);
+      } else if (fields[name].type == "email") {
+        const a = document.createElement("a");
+        a.href = "mailto:" + data[name];
+        a.target = name;
+        a.appendChild(document.createTextNode(data[name]));
+        span.appendChild(a);
+      } else if (fields[name].type == "richtext") {
+        span.innerHTML = data[name];
+      } else {
+        span.appendChild(document.createTextNode(data[name]));
+      }
     }
     value.appendChild(span);
     row.appendChild(value);
@@ -57,11 +72,22 @@ function enableEditLink() {
   });
 }
 
-// get all fields for entry
-getJSON(resourceForFunction("readEntry", lexicon, field, entry), data => {
-  startLoading();
-  showForm(data);
-  finishedLoading();
-  enableEditLink();
+// get field definitions
+getJSON(resourceForFunction("readFields", lexicon), definitions => {
+  
+  // build a dictionary of definitions
+  for (let definition of definitions) {
+    if (definition.field) {
+      fields[definition.field] = definition;
+    }
+  } // next field definition
+  
+  // get all fields for entry
+  getJSON(resourceForFunction("readEntry", lexicon, field, entry), data => {
+    startLoading();
+    showForm(data);
+    finishedLoading();
+    enableEditLink();
+  });
 });
 

@@ -22,10 +22,13 @@ label {
 label:after {
     content: ':';
 }
+
 .field {
     display: flex;
     flex-direction: row;
 }
+.field:nth-child(odd)  { background: #EEEEEE; }
+.field:nth-child(even) { background: #FFFFFF; }
 .field label {
     width: 30%;
     display: block;
@@ -33,8 +36,8 @@ label:after {
 .field span {
     width: 70%;
 }
-.field input {
-    width: 99%;
+.field span.text {
+    white-space: pre-wrap;
 }
 .field input[type="number"] {
     width: 75px;

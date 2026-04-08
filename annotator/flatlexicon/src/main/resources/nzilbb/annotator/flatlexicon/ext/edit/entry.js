@@ -14,7 +14,7 @@ console.log(`lexicon "${lexicon}" field "${field}" entry "${entry}"`);
 
 document.getElementById("entry").innerText = entry;
 
-let fields = [];
+const fields = {}; // definitions for fields (type/validation etc.)
 
 function showForm(data) {
   if (data.FlatLexiconTagger_error) {
@@ -23,8 +23,7 @@ function showForm(data) {
   }
   const attributes = document.getElementById("attributes");
   attributes.innerHTML = ""; // clear any existing list
-  fields = Object.keys(data);
-  for (let name of fields) {
+  for (let name in fields) {
     const row = document.createElement("div");
     row.className = "field";
     row.title = name;
@@ -42,15 +41,73 @@ function showForm(data) {
       value.appendChild(span);
     } else {
       let input = document.createElement("input");
-      input.type = "text"
+
+      // default text input
+      input.type = "text";
+      // refine type constraints
+      if (fields[name].type == "integer") {
+        input.type = "number";
+        input.step = 1;
+      } else if (fields[name].type == "number") {
+        input.type = "number";
+        input.step = 0.1;
+      } else if (fields[name].type == "url") {
+        input.type = "url";
+        let a = document.createElement("a");
+        a.title = `Open ${name}`;
+        a.target = name;
+        a.href = "#";
+        a.onclick = function(e) {
+          if (input.value) {
+            this.href = input.value;
+            return true;
+          } else {
+            e.preventDefault();
+            return false;
+          }
+        }
+        a.appendChild(document.createTextNode("🡽"));
+        value.appendChild(a);
+      } else if (fields[name].type == "email") {
+        input.type = "email";
+      } else if (fields[name].type == "date") {
+        input.type = "date";
+      } else if (fields[name].type == "datetime") {
+        input.type = "datetime-local";
+      } else if (fields[name].type == "boolean" && !fields[name].validation) {
+        fields[name].validation = "|false|true";
+      } else if (fields[name].type == "text") {
+        input = document.createElement("textarea");
+      } else if (fields[name].type == "richtext") { // TODO
+        input = document.createElement("textarea");
+      }
+      if (fields[name].validation) {
+        // if it's just a list of alternative, e.g. "option1|option2|option3"
+        if (/^\|?(\w+\|)+\w+/.test(fields[name].validation)) { // implement as a select instead
+          input = document.createElement("select");
+          for (let opt of fields[name].validation.split("|")) {
+            const option = document.createElement("option");
+            option.appendChild(document.createTextNode(opt));
+            input.appendChild(option);
+          } // next option
+        } else if (fields[name].validation.split("<").length == 2) { // min<max
+          const interval = fields[name].validation.split("<");
+          if (interval[0]) input.min = interval[0];
+          if (interval[1]) input.max = interval[1];
+        } else {
+          input.pattern = fields[name].validation;
+        }
+      }
+
       input.name = name;
       input.id = `attribute-${name}`;
       input.placeholder = name;
-      input.value = data[name];
+      input.value = data[name] || "";
       input.onkeyup = input.onchange = function(e) {
         // show save button
         document.getElementById("btnSave").style.display = null;
       }
+      
       value.appendChild(input);
     }
     row.appendChild(value);
@@ -60,11 +117,23 @@ function showForm(data) {
   document.getElementById("btnSave").style.display = "none";
 }
 
-// get all fields for entry
-getJSON(resourceForFunction("readEntry", lexicon, field, entry), data => {
-  startLoading();
-  showForm(data);
-  finishedLoading();
+// get field definitions
+getJSON(resourceForFunction("readFields", lexicon), definitions => {
+
+  // build a dictionary of definitions
+  for (let definition of definitions) {
+    if (definition.field) {
+      fields[definition.field] = definition;
+    }
+  } // next field definition
+
+  // get all field values for entry
+  getJSON(resourceForFunction("readEntry", lexicon, field, entry), data => {
+    startLoading();
+    showForm(data);
+    finishedLoading();
+  });
+
 });
 
 document.getElementById("btnSave").onclick = function (e) {
@@ -74,9 +143,14 @@ document.getElementById("btnSave").onclick = function (e) {
   fd.append("f", field);
   fd.append("e", entry);
   const data = {};
-  for (let name of fields) {
-    const input = document.getElementById(`attribute-${name}`);
+  for (let name in fields) {
+    const input = document.getElementById(`attribute-${name}`);    
     if (input && input.value) {
+      if (name != field // not read only
+          && !input.checkValidity()) { // not valid    
+        input.reportValidity();
+        return;
+      }
       data[name] = input.value;
     }
   } // next field

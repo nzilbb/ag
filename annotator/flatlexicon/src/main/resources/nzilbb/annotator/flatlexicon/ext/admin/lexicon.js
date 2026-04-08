@@ -39,7 +39,8 @@ function newField(attributes, field) {
   type.className = "type";
   type.id = `type-${field.field}`;
   const types = [
-    "string", "text", "richtext", "integer", "number", "boolean", "geo-location"];
+    "string", "text", "richtext", "integer", "number", "boolean",
+    "url", "email", "date", "datetime", "geo-location"];
   for (let t of types) {
     const option = document.createElement("option");
     option.appendChild(document.createTextNode(t));
@@ -55,6 +56,10 @@ function newField(attributes, field) {
   validation.type = "text"
   validation.id = `validation-${field.field}`;
   validation.placeholder = "Validation";
+  validation.title = "Constraints, e.g."
+    +"\n - \"0<10\" for values between 0 and 100 (inclusive)"
+    +"\n - \"option1|option2|option3\" for a list of options"
+    +"\n - \"[a-zA-Z0-9]*\" for only alphanumeric values";
   validation.value = field.validation||"";
   validation.onkeyup = validation.onchange = function(e) {
     // show save button

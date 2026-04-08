@@ -26,6 +26,8 @@ label:after {
     display: flex;
     flex-direction: row;
 }
+.field:nth-child(odd)  { background: #EEEEEE; }
+.field:nth-child(even) { background: #FFFFFF; }
 .field label {
     width: 30%;
     display: block;
@@ -33,12 +35,24 @@ label:after {
 .field span {
     width: 70%;
 }
-.field input {
+.field input, .field textarea {
     width: 99%;
 }
 .field input[type="number"] {
     width: 75px;
     text-align: right;
+}
+.field a {
+    position: absolute;
+    padding: 5px;
+    text-decoration: none;
+}
+.field input[type="url"] {
+    padding-left: 15px;
+}
+
+.field input:invalid, .field textarea:invalid {
+  outline: red solid 3px;
 }
 
 button img {
