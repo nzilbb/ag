@@ -32,6 +32,7 @@ import java.util.TreeMap;
 import java.util.Vector;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.ImplementsDictionaries;
@@ -340,12 +341,12 @@ public class TheWorksExample extends Annotator
     * Getter for {@link #reverse}: Reverse annotation labels setting.
     * @return Reverse annotation labels setting.
     */
-   public Boolean getReverse() { return reverse; }
+   @ApiEndpoint("view") public Boolean getReverse() { return reverse; }
    /**
     * Setter for {@link #reverse}: Reverse annotation labels setting.
     * @param newReverse Reverse annotation labels setting.
     */
-   public void setReverse(Boolean newReverse) { reverse = newReverse; }
+   @ApiEndpoint("edit") public void setReverse(Boolean newReverse) { reverse = newReverse; }
 
    /**
     * How many spaces to add on the left.
@@ -357,12 +358,12 @@ public class TheWorksExample extends Annotator
     * Getter for {@link #leftPadding}: How many spaces to add on the left.
     * @return How many spaces to add on the left.
     */
-   public int getLeftPadding() { return leftPadding; }
+   @ApiEndpoint("view") public int getLeftPadding() { return leftPadding; }
    /**
     * Setter for {@link #leftPadding}: How many spaces to add on the left.
     * @param newLeftPadding How many spaces to add on the left.
     */
-   public TheWorksExample setLeftPadding(int newLeftPadding) { leftPadding = newLeftPadding; return this; }
+   @ApiEndpoint("edit") public TheWorksExample setLeftPadding(int newLeftPadding) { leftPadding = newLeftPadding; return this; }
 
    /**
     * How many spaces to add on the right.
@@ -374,7 +375,7 @@ public class TheWorksExample extends Annotator
     * Getter for {@link #rightPadding}: How many spaces to add on the right.
     * @return How many spaces to add on the right.
     */
-   public Integer getRightPadding() { return rightPadding; }
+   @ApiEndpoint("view") public Integer getRightPadding() { return rightPadding; }
    /**
     * Setter for {@link #rightPadding}: How many spaces to add on the right.
     * @param newRightPadding How many spaces to add on the right.
@@ -386,8 +387,7 @@ public class TheWorksExample extends Annotator
     * @param leftPadding
     * @param rightPadding
     */
-   public void setPadding(int leftPadding, int rightPadding)
-   {
+   @ApiEndpoint("view") public void setPadding(int leftPadding, int rightPadding) {
       setLeftPadding(leftPadding);
       setRightPadding(rightPadding);
    } // end of setPadding()
@@ -402,12 +402,12 @@ public class TheWorksExample extends Annotator
     * Getter for {@link #prefix}: Prefix to add.
     * @return Prefix to add.
     */
-   public String getPrefix() { return prefix; }
+   @ApiEndpoint("view") public String getPrefix() { return prefix; }
    /**
     * Setter for {@link #prefix}: Prefix to add.
     * @param newPrefix Prefix to add.
     */
-   public TheWorksExample setPrefix(String newPrefix) { prefix = newPrefix; return this; }
+   @ApiEndpoint("edit") public TheWorksExample setPrefix(String newPrefix) { prefix = newPrefix; return this; }
    
    /**
     * Value for annotator confidence.
@@ -419,7 +419,7 @@ public class TheWorksExample extends Annotator
     * Getter for {@link #labelConfidence}: Value for annotator confidence.
     * @return Value for annotator confidence.
     */
-   public Double getLabelConfidence() { return labelConfidence; }
+   @ApiEndpoint("view") public Double getLabelConfidence() { return labelConfidence; }
    /**
     * Setter for {@link #labelConfidence}: Value for annotator confidence.
     * @param newLabelConfidence Value for annotator confidence.
@@ -431,7 +431,7 @@ public class TheWorksExample extends Annotator
     * @param file The file uploaded by the webapp.
     * @return null if upload was successful, an error message otherwise.
     */
-   public String uploadFile(File file) {
+   @ApiEndpoint("edit") public String uploadFile(File file) {
       // file is a temporary file that will be deleted after this method finishes,
       // so we must copy it elsewhere or process the contents now
       return null;
@@ -448,7 +448,7 @@ public class TheWorksExample extends Annotator
     * #setConfig(String) method should take to return. 
     * @return How long, in seconds, the #setConfig(String) method should take to return.
     */
-   public Integer getSimulatedInstallationDuration() { return simulatedInstallationDuration; }
+   @ApiEndpoint("view") public Integer getSimulatedInstallationDuration() { return simulatedInstallationDuration; }
    /**
     * Setter for {@link #simulatedInstallationDuration}: How long, in seconds, the
     * #setConfig(String) method should take to return. 
@@ -469,7 +469,7 @@ public class TheWorksExample extends Annotator
     * </ul>
     * @return A (possibly empty) list of IDs of dictionaries.
     */
-   public List<String> getDictionaryIds() {
+   @ApiEndpoint("view") public List<String> getDictionaryIds() {
       return new Vector<String>() {{ add("frequencies"); }};
    }
 

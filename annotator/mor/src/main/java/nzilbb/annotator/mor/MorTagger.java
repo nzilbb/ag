@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -43,6 +43,7 @@ import java.util.stream.Stream;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.serialize.SerializationException;
@@ -68,7 +69,7 @@ import nzilbb.util.ISO639;
 @UsesFileSystem
 public class MorTagger extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.2.3"; }
+  public String getMinimumApiVersion() { return "1.4.0"; }
   
   /**
    * Runs any processing required to uninstall the annotator.
@@ -257,7 +258,7 @@ public class MorTagger extends Annotator {
    * @param file The lexicon file.
    * @return null if upload was successful, an error message otherwise.
    */
-  public String uploadZip(File file) {
+  @ApiEndpoint("admin") public String uploadZip(File file) {
     if (!file.getName().endsWith(".zip")) {
       return file.getName() + " is not a .zip file.";
     }
@@ -275,7 +276,7 @@ public class MorTagger extends Annotator {
    * @param fileName The name of the grammar/lexicon file.
    * @return The given file, or null if it doesn't exist or isn't a zip file.
    */
-  public InputStream downloadZip(String fileName) {
+  @ApiEndpoint("admin") public InputStream downloadZip(String fileName) {
     if (!fileName.endsWith(".zip")) {
       System.out.println(fileName + " isn't a zip file");
       return null;
@@ -298,7 +299,7 @@ public class MorTagger extends Annotator {
    * Lists the grammars that are available for use.
    * @return A list of file names that can be selected.
    */
-  public List<String> availableGrammars() {
+  @ApiEndpoint("view") public List<String> availableGrammars() {
     return Arrays.stream(
       getWorkingDirectory().listFiles(new FileFilter() {
           public boolean accept(File f) {

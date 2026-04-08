@@ -89,11 +89,7 @@ function saveField(field) {
   const type = document.getElementById(`type-${field}`).value;
   const validation = document.getElementById(`validation-${field}`).value;
   startLoading();
-  getText("updateField?"
-          +encodeURIComponent(lexicon)
-          +","+encodeURIComponent(field)
-          +","+encodeURIComponent(type)
-          +","+encodeURIComponent(validation), error => {
+  getText(resourceForFunction("updateField", lexicon, field, type, validation), error => {
     document.getElementById("error").innerText = error;
     document.getElementById(`save-${field}`).disabled = true;
     finishedLoading();
@@ -104,7 +100,7 @@ function deleteField(field) {
   if (confirm(
     `Are you sure you want to delete "${field}" and all data associated with it?\nThis action cannot be undone.`)) {
     startLoading();
-    getText("deleteField?"+encodeURIComponent(lexicon)+","+encodeURIComponent(field), error => {
+    getText(resourceForFunction("deleteField", lexicon, field), error => {
       document.getElementById("error").innerText = error;
       if (!error) {
         document.getElementById(`field-${field}`).remove();
@@ -115,7 +111,7 @@ function deleteField(field) {
 }
 
 // get all fields for entry
-getJSON(`readFields?${lexicon}`, data => {
+getJSON(resourceForFunction("readFields", lexicon), data => {
   startLoading();
   showForm(data);
   finishedLoading();
@@ -125,8 +121,7 @@ document.getElementById("btnNewField").onclick = function(e) {
   const field = prompt("Enter a name for the new field");
   if (field) {
     startLoading();
-    getText(
-      "createField?"+encodeURIComponent(lexicon)+","+encodeURIComponent(field),
+    getText(resourceForFunction("createField", lexicon, field),
       error => {
         document.getElementById("error").innerText = error;
         if (!error) {

@@ -8,15 +8,6 @@ body {
     width: 100%;
     max-width: 800px;
 }
-details>summary {
-    cursor: pointer;
-    font-weight: bold;
-}
-body>details>summary {
-    cursor: help;
-    list-style-type: 'ⓘ';
-    font-weight: normal;
-}
 
 h1 { font-size: 17pt; color: #859044; text-align: center; }
 h2 { font-size: 16pt; color: #859044; text-align: center; }
@@ -46,12 +37,6 @@ label:after {
     width: 75px;
 }
 
-a img, button img {
-    width: 16px;
-    height: 16px;
-    vertical-align: middle;
-}
-
 footer {
     text-align: center;
     font-style: italic;
@@ -65,20 +50,17 @@ progress {
     width: 100%;
 }
 
-#uploadForm {
-    padding-bottom: 20px;
+/* annotation examples */
+td {
+    text-align: center;
 }
-#sample {
-    border-collapse: collapse;
-    display: inline-table;
-    max-width: 90vw;
-    overflow: auto;
-}
-#sample th input {
-    width: 95%;
-}
-#sample td {
-    border: 1px solid silver;
+.C { /* annotation bracket */
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    border-top-left-radius: 50%;
+    border-bottom-left-radius: 50%;
+    width: 5px;
 }
 
 /* Layout on narrower screens */

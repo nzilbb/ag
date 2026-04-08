@@ -59,6 +59,7 @@ import java.util.stream.Collectors;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.ImplementsDictionaries;
@@ -79,7 +80,7 @@ import nzilbb.util.IO;
 @UsesRelationalDatabase
 public class UnisynTagger extends Annotator implements ImplementsDictionaries {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.1.3"; }
+  public String getMinimumApiVersion() { return "1.4.0"; }
   
   /**
    * {@link UsesRelationalDatabase} method that sets the information required for
@@ -387,7 +388,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * @param file The lexicon file.
    * @return An empty string if upload was successful, an error message otherwise.
    */
-  public String loadLexicon(String lexicon, File file) {
+  @ApiEndpoint("admin") public String loadLexicon(String lexicon, File file) {
     try {
       Connection rdb = newConnection();      
       try {
@@ -785,7 +786,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * @return A list of lexicon names.
    * @throws SQLException
    */
-  public List<String> listLexicons() throws SQLException {
+  @ApiEndpoint("view") public List<String> listLexicons() throws SQLException {
     Vector<String> names = new Vector<String>();
     Connection rdb = newConnection();
     try {
@@ -808,7 +809,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * @param lexicon
    * @return An error message, if any, or an empty string if not.
    */
-  public String deleteLexicon(String lexicon) throws SQLException {
+  @ApiEndpoint("admin") public String deleteLexicon(String lexicon) throws SQLException {
     Connection rdb = newConnection();      
     try {
       // find the lexicon
@@ -879,7 +880,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * @param note The new note for the label.
    * @return An error if any, or null if not.
    */
-  public String createDiscMapping(String lexicon, String phoneme_orig, String phoneme_disc, String note) {
+  @ApiEndpoint("admin") public String createDiscMapping(String lexicon, String phoneme_orig, String phoneme_disc, String note) {
     Vector<LinkedHashMap> mappings = new Vector<LinkedHashMap>();
     try {
       Connection rdb = newConnection();      
@@ -912,7 +913,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    *   <dt>note</dt> <dd> A descriptive note about the phoneme label(s). </dd>
    *  </dl>
    */
-  public Collection<Map<String,String>> readDiscMappings(String lexicon) {
+  @ApiEndpoint("admin") public Collection<Map<String,String>> readDiscMappings(String lexicon) {
     Vector<Map<String,String>> mappings = new Vector<Map<String,String>>();
     try {
       Connection rdb = newConnection();      
@@ -953,7 +954,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * @param note The new note for the label.
    * @return An error if any, or null if not.
    */
-  public String updateDiscMapping(String lexicon, String phoneme_orig, String phoneme_disc, String note) {
+  @ApiEndpoint("admin") public String updateDiscMapping(String lexicon, String phoneme_orig, String phoneme_disc, String note) {
     Vector<LinkedHashMap> mappings = new Vector<LinkedHashMap>();
     try {
       Connection rdb = newConnection();      
@@ -987,7 +988,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * @param phoneme_orig The phoneme label to update.
    * @return An error if any, or null if not.
    */
-  public String deleteDiscMapping(String lexicon, String phoneme_orig) {
+  @ApiEndpoint("admin") public String deleteDiscMapping(String lexicon, String phoneme_orig) {
     Vector<LinkedHashMap> mappings = new Vector<LinkedHashMap>();
     try {
       Connection rdb = newConnection();      

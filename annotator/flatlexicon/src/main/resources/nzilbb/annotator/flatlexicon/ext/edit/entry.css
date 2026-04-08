@@ -16,6 +16,37 @@ h4 { font-size: 14pt; color: #859044; }
 h5 { font-size: 13pt; color: #859044; }
 h6 { font-size: 12pt; color: #859044; }
 
+label {
+    font-weight: bold;
+}
+label:after {
+    content: ':';
+}
+.field {
+    display: flex;
+    flex-direction: row;
+}
+.field label {
+    width: 30%;
+    display: block;
+}
+.field span {
+    width: 70%;
+}
+.field input {
+    width: 99%;
+}
+.field input[type="number"] {
+    width: 75px;
+    text-align: right;
+}
+
+button img {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+
 footer {
     text-align: center;
     font-style: italic;
@@ -23,4 +54,14 @@ footer {
 
 .error {
     color: red;
+}
+
+progress {
+    width: 100%;
+}
+
+/* Layout on narrower screens */
+@media all and (max-width: 640px) {
+    .field { flex-direction: column; }
+    .field span, .field label { width: 95vw; }
 }

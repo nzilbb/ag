@@ -139,6 +139,14 @@ public class TestRequestRouter {
          assertEquals("Nonexistent failure status",
                       400, exception.getHttpStatus());
       }
+
+      try {
+         router.request("GET", "http://foo/bar/setRightPadding?1", null, null);
+         fail("Non-published method method");
+      } catch(RequestException exception) {
+         assertEquals("Not found failure status",
+                      404, exception.getHttpStatus());
+      }
    }
 
    public static void main(String args[]) {

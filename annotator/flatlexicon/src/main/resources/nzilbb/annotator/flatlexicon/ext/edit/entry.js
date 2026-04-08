@@ -34,27 +34,30 @@ function showForm(data) {
     
     let value = document.createElement("span");
     value.className = "value";
-    let span = document.createElement("span");
-    span.className = "read-only";
-    span.id = `attribute-${name}`;
-    if (data[name]) {
+    if (name == field) { // the ID is read-only
+      let span = document.createElement("span");
+      span.className = "read-only";
+      span.id = `attribute-${name}`;
       span.appendChild(document.createTextNode(data[name]));
+      value.appendChild(span);
+    } else {
+      let input = document.createElement("input");
+      input.type = "text"
+      input.name = name;
+      input.id = `attribute-${name}`;
+      input.placeholder = name;
+      input.value = data[name];
+      input.onkeyup = input.onchange = function(e) {
+        // show save button
+        document.getElementById("btnSave").style.display = null;
+      }
+      value.appendChild(input);
     }
-    value.appendChild(span);
     row.appendChild(value);
     attributes.appendChild(row);
   }
-}
-
-function enableEditLink() {
-  const editUrl = "edit/entry.html"+window.location.search;
-  getText(editUrl, (data) => {
-    if (data) { // they can access the URL
-      const editLink = document.getElementById("edit-link");
-      editLink.href = editUrl;
-      editLink.style.display = null;
-    }
-  });
+  // hide save button
+  document.getElementById("btnSave").style.display = "none";
 }
 
 // get all fields for entry
@@ -62,6 +65,25 @@ getJSON(resourceForFunction("readEntry", lexicon, field, entry), data => {
   startLoading();
   showForm(data);
   finishedLoading();
-  enableEditLink();
 });
 
+document.getElementById("btnSave").onclick = function (e) {
+  document.getElementById("error").innerText = "";
+  var fd = new FormData();
+  fd.append("l", lexicon);
+  fd.append("f", field);
+  fd.append("e", entry);
+  const data = {};
+  for (let name of fields) {
+    const input = document.getElementById(`attribute-${name}`);
+    if (input && input.value) {
+      data[name] = input.value;
+    }
+  } // next field
+  fd.append("data", JSON.stringify(data));
+  startLoading();
+  postForm("updateEntry", fd, function(e) {
+    showForm(JSON.parse(this.responseText));
+    finishedLoading();
+  });
+}

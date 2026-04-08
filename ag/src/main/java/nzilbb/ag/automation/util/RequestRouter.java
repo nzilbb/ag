@@ -38,12 +38,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.util.CloneableBean;
 import nzilbb.util.IO;
 import org.apache.commons.fileupload.MultipartStream;
@@ -78,10 +80,18 @@ public class RequestRouter {
     // index method names as routes
     routes = new HashMap<String,List<Method>>();
     for (Method method : annotator.getClass().getDeclaredMethods()) {
-      registerMethod(method);
+      ApiEndpoint annotation = method.getAnnotation(ApiEndpoint.class);
+      if (annotation != null) {      
+        registerMethod(method);
+      }
     } // next method
 
-      // allow version to be retrieved
+    // allow annotator ID to be retrieved
+    try {
+      registerMethod(annotator.getClass().getMethod("getAnnotatorId"));
+    } catch(NoSuchMethodException impossible) {}
+      
+    // allow version to be retrieved
     try {
       registerMethod(annotator.getClass().getMethod("getVersion"));
     } catch(NoSuchMethodException impossible) {}
@@ -103,6 +113,30 @@ public class RequestRouter {
       
     return this;
   }
+  
+  /**
+   * A function for checking user role, which returns true if a user
+   * has a role, and false otherwise. 
+   * @see #getUserHasRole()
+   * @see #setUserHasRole(Function)
+   */
+  protected Function<String,Boolean> userHasRole = role->true;
+  /**
+   * Getter for {@link #userHasRole}: A function for checking user
+   * role, which returns true if a user has a role, and false
+   * otherwise. 
+   * @return A function for checking user role, which returns true if
+   * a user has a role, and false otherwise. 
+   */
+  public Function<String,Boolean> getUserHasRole() { return userHasRole; }
+  /**
+   * Setter for {@link #userHasRole}: A function for checking user
+   * role, which returns true if a user has a role, and false
+   * otherwise. 
+   * @param newUserHasRole A function for checking user role, which
+   * returns true if a user has a role, and false otherwise. 
+   */
+  public RequestRouter setUserHasRole(Function<String,Boolean> newUserHasRole) { userHasRole = newUserHasRole; return this; }
    
   // Methods:
    
@@ -110,6 +144,14 @@ public class RequestRouter {
    * Default constructor.
    */
   public RequestRouter() {
+  } // end of constructor
+   
+  /**
+   * Constructor.
+   * @param annotator The annotator to route requests to.
+   */
+  public RequestRouter(Annotator annotator) {
+    setAnnotator(annotator);
   } // end of constructor
    
   /**
@@ -124,14 +166,6 @@ public class RequestRouter {
     // add this method to the route
     routes.get(method.getName()).add(method);
   } // end of registerMethod()
-   
-  /**
-   * Constructor.
-   * @param annotator The annotator to route requests to.
-   */
-  public RequestRouter(Annotator annotator) {
-    setAnnotator(annotator);
-  } // end of constructor
    
   /**
    * Make a request of the annotator.
@@ -259,6 +293,14 @@ public class RequestRouter {
           annotator.getClass().getSimpleName() + "_", "_" + classMethod.getName());
         // save the body content into it
         IO.SaveInputStreamToFile(body, file);
+
+        // check role?
+        ApiEndpoint annotation = classMethod.getAnnotation(ApiEndpoint.class);
+        if (annotation != null) { // method annotated with role required
+          if (!userHasRole.apply(annotation.value())) {
+            throw new RequestException(403, "Forbidden", method, uri); // forbidden
+          }
+        }
         // invoke the method
         result = classMethod.invoke(annotator, file);
         // delete file
@@ -368,8 +410,10 @@ public class RequestRouter {
               object.add(k.toString(), (Boolean)map.get(k));
             } else if (map.get(k) instanceof CloneableBean) {
               object.add(k.toString(), ((CloneableBean)map.get(k)).toJson());
-            } else {             
-              object.add(k.toString(), map.get(k) == null?null:map.get(k).toString());
+            } else if (map.get(k) != null) {
+              object.add(k.toString(), map.get(k).toString());
+            } else {
+              object.addNull(k.toString());
             }
           }
           list.add(object);
@@ -390,8 +434,10 @@ public class RequestRouter {
           object.add(k.toString(), (Integer)map.get(k));
         } else if (map.get(k) instanceof Boolean) {
           object.add(k.toString(), (Boolean)map.get(k));
-        } else {             
-          object.add(k.toString(), map.get(k) == null?null:map.get(k).toString());
+        } else if (map.get(k) != null) {
+          object.add(k.toString(), map.get(k).toString());
+        } else {
+          object.addNull(k.toString());
         }
       }
       return new ByteArrayInputStream(object.build().toString().getBytes());
@@ -412,6 +458,12 @@ public class RequestRouter {
   protected Object invokeMethod(
     Method classMethod, Object[] parameterValues, String method, URI uri)
     throws RequestException {
+    ApiEndpoint annotation = classMethod.getAnnotation(ApiEndpoint.class);
+    if (annotation != null) { // method annotated with role required
+      if (!userHasRole.apply(annotation.value())) {
+        throw new RequestException(403, "Forbidden", method, uri); // forbidden
+      }
+    }
     try {
       if (parameterValues.length == 0) {
         return classMethod.invoke(annotator);

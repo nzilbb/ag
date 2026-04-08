@@ -10,7 +10,7 @@
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.annotator.mor</artifactId>
   <name>nzilbb.annotator.mor</name>
-  <version>1.0.3</version>
+  <version>1.1.0</version>
   <description>Annotator that annotates words tags from the the Talk Bank MOR morphosyntactic tagger.</description>
 
   <properties>
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4-SNAPSHOT</version>
+      <version>1.4.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

@@ -1297,6 +1297,11 @@ public class TestLabelMapper {
           throws StoreException, PermissionException, GraphNotFoundException    {
           throw new StoreException();
         }
+        public String createAnchor(
+          String id, Double offset, Integer confidence, boolean existingOk)
+          throws StoreException, PermissionException, GraphNotFoundException {
+          throw new StoreException();
+        }
         public void destroyAnnotation(String id, String annotationId)
           throws StoreException, PermissionException, GraphNotFoundException    {
           throw new StoreException();

@@ -62,6 +62,7 @@ import java.util.stream.Stream;
 import javax.script.*;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesGraphStore;
@@ -87,7 +88,7 @@ import nzilbb.util.IO;
 @UsesFileSystem @UsesGraphStore
 public class HTKAligner extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.2.3"; }
+  public String getMinimumApiVersion() { return "1.4.0"; }
   
   /**
    * Path to HTK tools.
@@ -3536,7 +3537,7 @@ public class HTKAligner extends Annotator {
    * Lists log files from previous alignments.
    * @return A list of log file names, newest first.
    */
-  public Collection<String> listLogs() {
+  @ApiEndpoint("edit") public Collection<String> listLogs() {
     try {
       File[] logs = getWorkingDirectory().listFiles(new FilenameFilter() {
           public boolean accept(File dir, String name) {
@@ -3559,7 +3560,7 @@ public class HTKAligner extends Annotator {
    * @param log
    * @return True if the log file was deleted, false otherwise.
    */
-  public boolean deleteLog(String log) {
+  @ApiEndpoint("edit") public boolean deleteLog(String log) {
     if (log.endsWith(".log")) {
       return new File(getWorkingDirectory(), log).delete();
     }
@@ -3571,7 +3572,7 @@ public class HTKAligner extends Annotator {
    * @param log
    * @return The given log file, or null if it doesn't exist or isn't a log file.
    */
-  public InputStream downloadLog(String log) {
+  @ApiEndpoint("edit") public InputStream downloadLog(String log) {
     if (log.endsWith(".log")) {
       File logFile = new File(getWorkingDirectory(), log);
       if (logFile.exists()) {

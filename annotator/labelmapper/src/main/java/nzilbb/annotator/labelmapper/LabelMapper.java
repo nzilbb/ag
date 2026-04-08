@@ -48,6 +48,7 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesGraphStore;
 import nzilbb.ag.automation.UsesRelationalDatabase;
@@ -71,7 +72,7 @@ import org.apache.commons.csv.CSVPrinter;
 public class LabelMapper extends Annotator {
 
   /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-  public String getMinimumApiVersion() { return "1.2.3"; }
+  public String getMinimumApiVersion() { return "1.4.0"; }
   
   /** Layer ID for the layer to chunk labels and tokens. */
   protected String scopeLayerId;
@@ -1273,7 +1274,7 @@ public class LabelMapper extends Annotator {
    * @throws SQLException
    * @see #mappingToCsv(String)
    */
-  public List<String> listMappings() throws SQLException {
+  @ApiEndpoint("edit") public List<String> listMappings() throws SQLException {
     Vector<String> mappings = new Vector<String>();
     Connection rdb = newConnection();
     PreparedStatement sql = rdb.prepareStatement(
@@ -1302,7 +1303,7 @@ public class LabelMapper extends Annotator {
    * @see #listMappings()
    * @see #mappingToCsv(String,String)
    */
-  public InputStream mappingToCsv(String mappingId)
+  @ApiEndpoint("edit") public InputStream mappingToCsv(String mappingId)
     throws IOException, SQLException {
     int arrowPos = mappingId.indexOf("→");
     if (arrowPos < 0) throw new SQLException("Invalid mapping ID: " + mappingId);
@@ -1315,7 +1316,7 @@ public class LabelMapper extends Annotator {
    * @param targetLayerId The target layer ID.
    * @return A stream of CSV records.
    */
-  public InputStream mappingToCsv(String sourceLayerId, String targetLayerId)
+  @ApiEndpoint("edit") public InputStream mappingToCsv(String sourceLayerId, String targetLayerId)
     throws IOException, SQLException {
     
     File csv = File.createTempFile("LabelMapper_", "_mapping.csv");
@@ -1407,7 +1408,7 @@ public class LabelMapper extends Annotator {
    * tracked mapping between layers.
    * @return A stream of CSV records.
    */
-  public InputStream utteranceSummaryToCsv(String mappingId)
+  @ApiEndpoint("edit") public InputStream utteranceSummaryToCsv(String mappingId)
     throws IOException, SQLException {
     int arrowPos = mappingId.indexOf("→");
     if (arrowPos < 0) throw new SQLException("Invalid mapping ID: " + mappingId);
@@ -1422,7 +1423,7 @@ public class LabelMapper extends Annotator {
    * @param targetLayerId The target layer ID.
    * @return A stream of CSV records.
    */
-  public InputStream utteranceSummaryToCsv(String sourceLayerId, String targetLayerId)
+  @ApiEndpoint("edit") public InputStream utteranceSummaryToCsv(String sourceLayerId, String targetLayerId)
     throws IOException, SQLException {
     
     File csv = File.createTempFile("LabelMapper_", "_utterances.csv");
@@ -1493,7 +1494,7 @@ public class LabelMapper extends Annotator {
    * @return A map containing summary statistics.
    * @throws SQLException
    */
-  public Map<String,Double> summarizeMapping(String mappingId) throws SQLException {
+  @ApiEndpoint("edit") public Map<String,Double> summarizeMapping(String mappingId) throws SQLException {
     int arrowPos = mappingId.indexOf("→");
     if (arrowPos < 0) throw new SQLException("Invalid mapping ID: " + mappingId);
     return summarizeMapping(mappingId.substring(0, arrowPos), mappingId.substring(arrowPos + 1));
@@ -1506,7 +1507,7 @@ public class LabelMapper extends Annotator {
    * @return A map containing summary statistics.
    * @throws SQLException
    */
-  public Map<String,Double> summarizeMapping(String sourceLayerId, String targetLayerId)
+  @ApiEndpoint("edit") public Map<String,Double> summarizeMapping(String sourceLayerId, String targetLayerId)
     throws SQLException {
     TreeMap<String,Double> summary = new TreeMap<String,Double>();
     
@@ -1575,7 +1576,7 @@ public class LabelMapper extends Annotator {
    * tracked mapping between layers.
    * @throws SQLException
    */
-  public void deleteMapping(String mappingId) throws SQLException {
+  @ApiEndpoint("edit") public void deleteMapping(String mappingId) throws SQLException {
     int arrowPos = mappingId.indexOf("→");
     if (arrowPos < 0) throw new SQLException("Invalid mapping ID: " + mappingId);
     deleteMapping(mappingId.substring(0, arrowPos), mappingId.substring(arrowPos + 1));
@@ -1588,7 +1589,7 @@ public class LabelMapper extends Annotator {
    * @param targetLayerId The target layer ID.
    * @throws SQLException
    */
-  public void deleteMapping(String sourceLayerId, String targetLayerId)
+  @ApiEndpoint("edit") public void deleteMapping(String sourceLayerId, String targetLayerId)
     throws SQLException {
     Connection rdb = newConnection();
     PreparedStatement sql = rdb.prepareStatement(

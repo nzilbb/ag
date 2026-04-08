@@ -359,10 +359,10 @@ function inferLink() {
   // turn something like:
   // http://example.com/labbcat/admin/annotator/task/FlatLexiconTagger/?dict
   // ...into something like:
-  // http://example.com/labbcat/edit/annotator/ext/FlatLexiconTagger/entry.html?l={0}&f={1}&e={2}
+  // http://example.com/labbcat/annotator/ext/FlatLexiconTagger/entry.html?l={0}&f={1}&e={2}
   document.getElementById("lexiconLink").value
     = window.location.toString()
-    .replace("/admin/","/edit/")
+    .replace("/admin/","/")
     .replace("/task/","/ext/")
     .replace(/\?.*$/,"")
     +"entry.html?l={0}&f={1}&e={2}";

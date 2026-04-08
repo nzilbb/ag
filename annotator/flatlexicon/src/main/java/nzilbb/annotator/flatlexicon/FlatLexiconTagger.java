@@ -63,6 +63,7 @@ import javax.json.stream.JsonParser;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.ImplementsDictionaries;
@@ -83,7 +84,7 @@ import org.apache.commons.csv.CSVRecord;
 @UsesRelationalDatabase
 public class FlatLexiconTagger extends Annotator implements ImplementsDictionaries {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.2.2"; }
+  public String getMinimumApiVersion() { return "1.4.0"; }
      
   /**
    * Setter for {@link #status}: The current status of the task.
@@ -277,7 +278,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param file The lexicon file.
    * @return null if upload was successful, an error message otherwise.
    */
-  public String loadLexicon(
+  @ApiEndpoint("admin") public String loadLexicon(
     String lexicon, String fieldDelimiter, String quote, String comment, String fieldNames,
     String skipFirstLine, File file) {
     return loadLexicon(
@@ -303,7 +304,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param file The lexicon file.
    * @return An empty string if upload was successful, an error message otherwise.
    */
-  public String loadLexicon(
+  @ApiEndpoint("admin") public String loadLexicon(
     String lexicon, String fieldDelimiter, String quote, String comment, String fieldNames,
     boolean skipFirstLine, File file) {
     try {
@@ -530,7 +531,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @return A list of lexicon names.
    * @throws SQLException
    */
-  public List<String> listLexicons() throws SQLException {
+  @ApiEndpoint("view") public List<String> listLexicons() throws SQLException {
     Vector<String> names = new Vector<String>();
     Connection rdb = newConnection();
     try {
@@ -574,7 +575,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param lexicon
    * @return An error message, if any, or an empty string if not.
    */
-  public String deleteLexicon(String lexicon) throws SQLException {
+  @ApiEndpoint("admin") public String deleteLexicon(String lexicon) throws SQLException {
     try (Connection rdb = newConnection()) {
       // find the lexicon
       int lexiconId = lexiconId(rdb, lexicon);
@@ -617,7 +618,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param field The name of the field.
    * @return An error message if creation failed. Otherwise, an empty string.
    */
-  public String createField(String lexicon, String field) throws SQLException {
+  @ApiEndpoint("admin") public String createField(String lexicon, String field) throws SQLException {
     return createField(lexicon, field, "string", "");
   }
   
@@ -629,7 +630,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param validation The constraints on the field values.
    * @return An error message if creation failed. Otherwise, an empty string.
    */
-  public String createField(
+  @ApiEndpoint("admin") public String createField(
     String lexicon, String field, String type, String validation)
     throws SQLException {
     try (Connection rdb = newConnection()) {
@@ -710,7 +711,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param lexicon The lexicon ID.
    * @return A list of field definitions for the lexicon.
    */
-  public List<Map<String,String>> readFields(String lexicon)
+  @ApiEndpoint("view") public List<Map<String,String>> readFields(String lexicon)
    throws SQLException {
     List<Map<String,String>> fields = new Vector<Map<String,String>>();
     try (Connection rdb = newConnection()) {
@@ -756,7 +757,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param type The field type.
    * @return An error message if update failed. Otherwise, an empty string.
    */
-  public String updateField(String lexicon, String field, String type) throws SQLException {
+  @ApiEndpoint("admin") public String updateField(String lexicon, String field, String type) throws SQLException {
     return updateField(lexicon, field, type, "");
   }
   /**
@@ -767,7 +768,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param validation The constraints on the field values.
    * @return An error message if update failed. Otherwise, an empty string.
    */
-  public String updateField(
+  @ApiEndpoint("admin") public String updateField(
     String lexicon, String field, String type, String validation)
     throws SQLException {
     try (Connection rdb = newConnection()) {
@@ -804,7 +805,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param field The name of the field.
    * @return An error message if deletion failed. Otherwise, an empty string.
    */
-  public String deleteField(String lexicon, String field) throws SQLException {
+  @ApiEndpoint("admin") public String deleteField(String lexicon, String field) throws SQLException {
     try (Connection rdb = newConnection()) {
       // find the lexicon
       int lexiconId = lexiconId(rdb, lexicon);
@@ -849,7 +850,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * entry to return.
    * @return The keys/values for the entry.
    */
-  public Map<String,String> readEntry(String lexicon, String field, String entry)
+  @ApiEndpoint("view") public Map<String,String> readEntry(String lexicon, String field, String entry)
    throws SQLException {
     try (Connection rdb = newConnection()) {
       // find the lexicon
@@ -895,6 +896,12 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           put("FlatLexiconTagger_error", "Nonexistent lexicon: " + lexicon);
         }};
       }
+    } catch (Exception x) {
+      System.err.println(
+        "FlatLexiconTagger.getEntry("+lexicon+", "+field+", "+entry+"): "+x);
+      return new LinkedHashMap<String,String>(){{
+        put("FlatLexiconTagger_error", x.getMessage());
+      }};
     } // rdb.close()
   } // end of getEntry()
   
@@ -907,7 +914,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param data JSON representation of the entry's new attribute values.
    * @return The keys/values for the entry.
    */
-  public Map<String,String> updateEntry(
+  @ApiEndpoint("edit") public Map<String,String> updateEntry(
     String lexicon, String field, String entry, String data) throws SQLException {
     JsonObject json = Json.createReader(new StringReader(data)).readObject();
     try (Connection rdb = newConnection()) {
@@ -1823,7 +1830,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * </ul>
    * @return A (possibly empty) list of IDs of dictionaries.
    */
-  public List<String> getDictionaryIds() {
+  @ApiEndpoint("view") public List<String> getDictionaryIds() {
     List<String> ids = new Vector<String>();
     try {
       Connection rdb = newConnection();      

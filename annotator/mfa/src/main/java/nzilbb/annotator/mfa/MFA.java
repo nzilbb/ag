@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2025 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -66,6 +66,7 @@ import java.util.stream.Stream;
 import javax.script.*;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesGraphStore;
@@ -94,7 +95,7 @@ import nzilbb.util.IO;
 @UsesFileSystem @UsesGraphStore
 public class MFA extends Annotator { 
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.2.5"; }
+  public String getMinimumApiVersion() { return "1.4.0"; }
 
   /**
    * The version of the montreal-forced-aligner package that the aligner will attempt to
@@ -110,7 +111,7 @@ public class MFA extends Annotator {
    * attempt to install if it's not already installed. (This only works inside Docker
    * containers.) 
    */
-  public String getBuiltForMfaVersion() { return builtForMfaVersion; }
+  @ApiEndpoint("view") public String getBuiltForMfaVersion() { return builtForMfaVersion; }
   
   /**
    * Path to the mfa executable. 
@@ -122,12 +123,12 @@ public class MFA extends Annotator {
    * Getter for {@link #mfaPath}: Path to the mfa executable.
    * @return Path to the mfa executable.
    */
-  public String getMfaPath() { return mfaPath; }
+  @ApiEndpoint("admin") public String getMfaPath() { return mfaPath; }
   /**
    * Setter for {@link #mfaPath}: Path to the mfa executable.
    * @param newMfaPath Path to the mfa executable.
     */
-  public MFA setMfaPath(String newMfaPath) { mfaPath = newMfaPath; return this; }
+  @ApiEndpoint("admin") public MFA setMfaPath(String newMfaPath) { mfaPath = newMfaPath; return this; }
     
   /**
    * Whether manual alignments should be overwritten (true) or not (false).
@@ -626,7 +627,7 @@ public class MFA extends Annotator {
    * MFA, e.g. "aligner".
    * @return A valid path to MFA, or an empty string if it could not be inferred.
    */
-  public String inferMfaPath(String condaPath, String mfaEnvironment) {
+  @ApiEndpoint("admin") public String inferMfaPath(String condaPath, String mfaEnvironment) {
     try {
       File conda = new File(condaPath);
       File envs = null;
@@ -671,7 +672,7 @@ public class MFA extends Annotator {
    * <p> This is the list returned by <tt>mfa model download dictionary</tt>
    * @return A list of valid values for {@link #dictionaryName}.
    */
-  public Collection<String> validDictionaryNames() throws TransformationException {
+  @ApiEndpoint("admin") public Collection<String> validDictionaryNames() throws TransformationException {
     String dictionariesRaw = mfa(true, getWorkingDirectory(), "model", "download", "dictionary");
     String[] dictionaryLines = dictionariesRaw.split("\n");
     List<String> dictionaries = Arrays.stream(dictionaryLines)
@@ -695,7 +696,7 @@ public class MFA extends Annotator {
    * <p> This is the list returned by <tt>mfa model download acoustic</tt>
    * @return A list of valid values for {@link #modelsName}.
    */
-  public Collection<String> validAcousticModels() throws TransformationException {
+  @ApiEndpoint("admin") public Collection<String> validAcousticModels() throws TransformationException {
     String acousticModelsRaw = mfa(true, getWorkingDirectory(), "model", "download", "acoustic");
     String[] acousticModelLines = acousticModelsRaw.split("\n");
     List<String> acousticModels = Arrays.stream(acousticModelLines)
@@ -718,7 +719,7 @@ public class MFA extends Annotator {
    * Lists log files from previous alignments.
    * @return A list of log file names, newest first.
    */
-  public Collection<String> listLogs() {
+  @ApiEndpoint("edit") public Collection<String> listLogs() {
     try {
       File[] logs = getWorkingDirectory().listFiles(new FilenameFilter() {
           public boolean accept(File dir, String name) {
@@ -741,7 +742,7 @@ public class MFA extends Annotator {
    * @param log
    * @return True if the log file was deleted, false otherwise.
    */
-  public boolean deleteLog(String log) {
+  @ApiEndpoint("edit") public boolean deleteLog(String log) {
     if (log.endsWith(".log")) {
       return new File(getWorkingDirectory(), log).delete();
     }
@@ -753,7 +754,7 @@ public class MFA extends Annotator {
    * @param log
    * @return The given log file, or null if it doesn't exist or isn't a log file.
    */
-  public InputStream downloadLog(String log) {
+  @ApiEndpoint("edit") public InputStream downloadLog(String log) {
     if (log.endsWith(".log")) {
       File logFile = new File(getWorkingDirectory(), log);
       if (logFile.exists()) {
@@ -920,7 +921,7 @@ public class MFA extends Annotator {
    * @return The currently-installed MFA version.
    * @throws InvalidConfigurationException If "mfa version" could not be executed.
    */
-  public String mfaVersion() throws InvalidConfigurationException {
+  @ApiEndpoint("view") public String mfaVersion() throws InvalidConfigurationException {
     if (mfaPath == null || mfaPath.length() == 0) {
       File whichMfa = Execution.Which("mfa");
       if (whichMfa != null) {

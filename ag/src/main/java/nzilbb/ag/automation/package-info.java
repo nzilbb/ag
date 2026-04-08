@@ -77,6 +77,8 @@
   
   <p> Web-apps can also communicate with the Annotator object by making HTTP
     requests to its host, where the URL path is the name of the class method to call.
+    The method must be annotated with the <code>@ApiEndpoint</code> annotation to
+    ensure methods are only accessed by users with the correct level of permission.
     For GET requests, the query string contains the method parameter values, in order,
     seperated by commas. Whatever the given method returns is passed back as the response. </p>
 
@@ -99,7 +101,7 @@
   </p>
 
   <p> For example if the Annotation class has the method: <br>
-    <code>public String uploadLexicon(File lexicon)</code><br>
+    <code>@ApiEndpoint("admin") public String uploadLexicon(File lexicon)</code><br>
     &hellip; then the web-app can make the PUT or POST request to <br>
     <tt>/uploadLexicon</tt> <br>
     &hellip; which will get as a response whatever calling
@@ -107,7 +109,7 @@
 
   <p> To provide for downloading of files from a web-app, the Annotation class's method
     should return an InputStream object, e.g. if there's a method declared <br>
-    <code>public InputStream downloadLexicon()</code><br>
+    <code>@ApiEndpoint("view") public InputStream downloadLexicon()</code><br>
     &hellip; then the web-app can make a GET request to <br>
     <tt>/downloadLexicon</tt> <br>
     &hellip; which will download the contents of whatever  calling
@@ -216,7 +218,7 @@
         parameter's value contains a comma, it's not interpreted as two parameters
         instead. </p>
       <p> e.g. if your annotator implements a Java method like <br>
-        <code> String testLookup(String word, String encoding) </code> <br>
+        <code> @ApiEndpoint("view") String testLookup(String word, String encoding) </code> <br>
         ... then in the web-app, you can invoke this function using Javascript code
         something like: <br>
         <code> getText(resourceForFunction("testLookup", word, encoding), function(e) {
@@ -490,6 +492,15 @@ getText("getTaskParameters", text =&gt; {
   
   <p> Otherwise, the <i> ext </i> web-app can access the Annotator object using GET
     requests, in a similar fashion to the other web-apps. </p>
+    
+  <p> <em>NB</em> in LaBB-CAT the 'ext' webapp is published to all users, including
+  read-only users. The for functions that should be exposed only to users with
+  'read/write' permissions, Annotator methods should be annotated as
+  <code>@ApiEndpoint("edit")</code>, and resources files should be places in a
+  subdirectory of <tt>ext</tt> called <tt>edit</tt>.
+  Similarly, for functions that should be exposed only to superusers, annotate
+  methods as <code>@ApiEndpoint("admin")</code> and place resource files in
+  <tt></tt>ext/admin/ </p>
     
 </details>
 
