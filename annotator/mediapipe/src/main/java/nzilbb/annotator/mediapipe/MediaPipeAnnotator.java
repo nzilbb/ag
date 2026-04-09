@@ -71,6 +71,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesGraphStore;
@@ -174,7 +175,7 @@ public class MediaPipeAnnotator extends Annotator {
    * @return The num_faces configuration option: The maximum number of faces that can be 
    * detected by the the FaceLandmarker. Smoothing is only applied when num_faces is set to 1. 
    */
-  public Integer getNumFaces() { return numFaces; }
+  @ApiEndpoint("admin") public Integer getNumFaces() { return numFaces; }
   /**
    * Setter for {@link #numFaces}: The num_faces configuration option: The maximum number 
    * of faces that can be detected by the the FaceLandmarker. Smoothing is only applied 
@@ -199,7 +200,7 @@ public class MediaPipeAnnotator extends Annotator {
    * @return The min_face_detection_confidence configuration option: The minimum
    * confidence score for the face detection to be considered successful. 
    */
-  public Double getMinFaceDetectionConfidence() { return minFaceDetectionConfidence; }
+  @ApiEndpoint("admin") public Double getMinFaceDetectionConfidence() { return minFaceDetectionConfidence; }
   /**
    * Setter for {@link #minFaceDetectionConfidence}: The min_face_detection_confidence
    * configuration option: The minimum confidence score for the face detection to be
@@ -224,7 +225,7 @@ public class MediaPipeAnnotator extends Annotator {
    * @return The min_face_presence_confidence configuration option: The minimum confidence
    * score of face presence score in the face landmark detection. 
    */
-  public Double getMinFacePresenceConfidence() { return minFacePresenceConfidence; }
+  @ApiEndpoint("admin") public Double getMinFacePresenceConfidence() { return minFacePresenceConfidence; }
   /**
    * Setter for {@link #minFacePresenceConfidence}: The min_face_presence_confidence
    * configuration option: The minimum confidence score of face presence score in the face
@@ -249,7 +250,7 @@ public class MediaPipeAnnotator extends Annotator {
    * @return The min_tracking_confidence configuration option: The minimum confidence
    * score for the face tracking to be considered successful. 
    */
-  public Double getMinTrackingConfidence() { return minTrackingConfidence; }
+  @ApiEndpoint("admin") public Double getMinTrackingConfidence() { return minTrackingConfidence; }
   /**
    * Setter for {@link #minTrackingConfidence}: The min_tracking_confidence configuration
    * option: The minimum confidence score for the face tracking to be considered
@@ -281,7 +282,7 @@ public class MediaPipeAnnotator extends Annotator {
    * Returns a list of possible categories.
    * @return A list of possible categories.
    */
-  public List<String> getBlendshapeCategories() {
+  @ApiEndpoint("admin") public List<String> getBlendshapeCategories() {
     return Arrays.asList(blendshapeCategories);
   } // end of getBlendshapeCategories()
   
@@ -289,7 +290,7 @@ public class MediaPipeAnnotator extends Annotator {
    * Returns a list of possible categories.
    * @return A list of possible categories.
    */
-  public List<MediaTrackDefinition> getMediaTracks() {
+  @ApiEndpoint("admin") public List<MediaTrackDefinition> getMediaTracks() {
     if (getStore() != null) {
       try {
         return Arrays.asList(getStore().getMediaTracks());

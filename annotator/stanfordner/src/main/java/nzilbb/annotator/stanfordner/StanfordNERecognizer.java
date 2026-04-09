@@ -44,6 +44,7 @@ import java.util.zip.ZipFile;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.AllowsManualAnnotations;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -59,7 +60,7 @@ import nzilbb.util.IO;
 @UsesFileSystem @AllowsManualAnnotations
 public class StanfordNERecognizer extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.2.5"; }
+  public String getMinimumApiVersion() { return "1.4.0"; }
   
   /**
    * Runs any processing required to uninstall the annotator.
@@ -161,7 +162,7 @@ public class StanfordNERecognizer extends Annotator {
    * @param file The Stanford NER implementation file.
    * @return null if upload was successful, an error message otherwise.
    */
-  public String uploadZip(File file) {
+  @ApiEndpoint("admin") public String uploadZip(File file) {
     if (!file.getName().endsWith(".zip")) {
       return file.getName() + " is not a .zip file.";
     }
@@ -183,7 +184,7 @@ public class StanfordNERecognizer extends Annotator {
    * @param file The file containing classifiers.
    * @return null if upload was successful, an error message otherwise.
    */
-  public String installClassifiers(File file) {
+  @ApiEndpoint("admin") public String installClassifiers(File file) {
     return installClassifiers(file, true);
   }
   /**
@@ -193,7 +194,7 @@ public class StanfordNERecognizer extends Annotator {
    * @param deleteFile Whether to delete the file once processed.
    * @return null if upload was successful, an error message otherwise.
    */
-  public String installClassifiers(File file, boolean deleteFile) {
+  @ApiEndpoint("admin") public String installClassifiers(File file, boolean deleteFile) {
     try {
       if (!file.getName().endsWith(".jar") && !file.getName().endsWith(".zip")
           && !file.getName().endsWith(".crf.ser.gz")) {
@@ -248,7 +249,7 @@ public class StanfordNERecognizer extends Annotator {
    * Lists the classifier files that are available for use.
    * @return A list of file names that can be selected.
    */
-  public List<String> availableClassifiers() {
+  @ApiEndpoint("admin") public List<String> availableClassifiers() {
     File classifiers = new File(getWorkingDirectory(), "classifiers");
     if (!classifiers.exists()) return new Vector<String>();
     return Arrays.asList(
