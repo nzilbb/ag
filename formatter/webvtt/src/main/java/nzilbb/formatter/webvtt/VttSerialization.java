@@ -775,6 +775,29 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
             currentUtterance.setConfidence(Constants.CONFIDENCE_MANUAL);
             currentTurn.setEndId(end.getId());
             
+            // last utterance a long time ago?
+            if (lastUtterance != null
+                && graph.getAnchor(currentUtterance.getStartId()).getOffset()
+                - lastUtterance.getEnd().getOffset() > 0.5) {
+              // start a new turn here...
+              
+              // the last turn ends at the start of this utterance
+              if (lastUtterance != null) {
+                currentTurn.setEndId(lastUtterance.getEndId());
+              }
+              
+              // new turn
+              currentTurn = new Annotation(
+                null, currentTurn.getLabel(),
+                schema.getTurnLayerId(),
+                currentUtterance.getStartId(), currentUtterance.getEndId(),
+                currentTurn.getParentId());
+              graph.addAnnotation(currentTurn);
+              currentTurn.setConfidence(Constants.CONFIDENCE_MANUAL);
+              // utterance's parent is this turn
+              currentUtterance.setParentId(currentTurn.getId());
+            }
+            
             line = vtt.readLine();
             continue;
           } // this is an interval line
@@ -803,9 +826,12 @@ public class VttSerialization implements GraphDeserializer, GraphSerializer {
               currentTurn.getParent().setLabel(voice); // ...and participant
               participantsByName.put(voice, currentTurn.getParent());
             } else { // current participant has a name
-              if (!currentTurn.getLabel().equals(voice)) { // different speaker?
+              if (!currentTurn.getLabel().equals(voice) // different speaker?
+                   // or last utterance a long time ago ?
+                  || graph.getAnchor(currentUtterance.getStartId()).getOffset()
+                  - currentTurn.getEnd().getOffset() > 0.5) {
                 // start a new turn here...
-
+                
                 // is there an existing participant with this name?
                 Annotation participant = participantsByName.get(voice);
                 if (participant == null) { // haven't encounterd this voice before
