@@ -2196,13 +2196,18 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       
     Element header = document.createElement("HEADER");
     annotationDocument.appendChild(header);
-    header.setAttribute("MEDIA_FILE","");
     header.setAttribute("TIME_UNITS","milliseconds");
     long lLastUnusedAnnotationId = 0;
-    if (graph.getMediaProvider() != null) {
+    if (graph.getMediaProvider() == null) { // no media provider
+      // default assumption is that the media is a wav file with the same name
+      header.setAttribute("MEDIA_FILE",IO.WithoutExtension(graph.getId())+".wav");
+    } else { // there is a media provider
       try {
         MediaFile[] files = graph.getMediaProvider().getAvailableMedia();
-        if (files.length > 0) {
+        if (files.length == 0) {
+          // default assumption is that the media is a wav file with the same name
+          header.setAttribute("MEDIA_FILE",IO.WithoutExtension(graph.getId())+".wav");
+        } else { // there are files
           Element mediaDescriptor = document.createElement("MEDIA_DESCRIPTOR");
           header.appendChild(mediaDescriptor);
           mediaDescriptor.setAttribute("MEDIA_URL", "");
