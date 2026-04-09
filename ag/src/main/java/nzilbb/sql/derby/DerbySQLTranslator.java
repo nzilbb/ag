@@ -80,6 +80,10 @@ public class DerbySQLTranslator extends VanillaSQLTranslator {
       // .replaceAll("\\s+(\\w+)\\s+=\\s+BINARY\\s+(\\S+)", 
       //             " CAST($1 AS BLOB) = CAST($2 AS BLOB)")
       .replaceAll("\\s+BINARY\\s+"," ")
+      // ALTER TABLE tbl CHANGE COLUMN colName colName ...
+      // -> ALTER TABLE tbl ALTER COLUMN colName SET DATA TYPE ...
+      .replaceAll("\\s+CHANGE\\s+COLUMN\\s+(\"[^\"]+\")\\s+(\"[^\"]+\")\\s+",
+                  " ALTER COLUMN $1 SET DATA TYPE ")
       .replace("LAST_INSERT_ID()", "IDENTITY_VAL_LOCAL()");
     if (trace) System.out.println("SQL after: " + translated);
     return translated;

@@ -129,7 +129,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
                 +" lexicon_id INTEGER NOT NULL AUTO_INCREMENT"
                 +" COMMENT 'ID which is appended to "
                 +getAnnotatorId()+" to compute the lexicon table name',"
-                +" name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
+                +" name VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
                 +" COMMENT 'Identifying name for the lexicon',"
                 +" PRIMARY KEY (lexicon_id)"
                 +") ENGINE=MyISAM;"))) {
@@ -152,11 +152,11 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
                  "CREATE TABLE "+getAnnotatorId()+"_field ("
                  +" lexicon_id INTEGER NOT NULL"
                  +" COMMENT 'Lexicon ID',"
-                 +" field varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+                 +" field VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
                  +" COMMENT 'Name of the field',"
-                 +" type varchar(30) NOT NULL DEFAULT 'string'"
+                 +" type VARCHAR(30) NOT NULL DEFAULT 'string'"
                  +" COMMENT 'Type of the field, e.g. string, text, richtext, number, etc.',"
-                 +" validation varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''"
+                 +" validation VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''"
                  +" COMMENT 'Constraints on values',"
                  +" ordinal INTEGER NOT NULL DEFAULT 0"
                  +" COMMENT 'Determins order between fields',"
@@ -372,7 +372,7 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
             columnList.append(", ").append(sqlQuote).append(column).append(sqlQuote);
             argumentList.append(",?");
             columnDefinitions.append(", ").append(sqlQuote).append(column).append(sqlQuote)
-              .append(" varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL");
+              .append(" VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL");
             columnIndexDefinitions.add(
               "CREATE INDEX IDX_"+getAnnotatorId()+"_"+lexiconId+"_"+(++columnCount)+" ON "
               +getAnnotatorId()+"_lexicon_"+lexiconId+" ("+sqlQuote+column+sqlQuote+")");
@@ -675,11 +675,15 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           sqlInsertFieldRow.executeUpdate();
 
           // insert field row succeeded, so add the field to the table
+          String columnType
+            = "VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL";
+          if ("text".equals(type) || "richtext".equals(type)) {
+            columnType = "TEXT";
+          } // type is TEXT
           try (PreparedStatement sqlAlterTable = rdb.prepareStatement(
                  sqlx.apply(
                    "ALTER TABLE "+getAnnotatorId() +"_lexicon_"+lexiconId
-                   +" ADD COLUMN `"+field+"` varchar(200)"
-                   +" CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL"))) {
+                   +" ADD COLUMN `"+field+"` " + columnType))) {
             sqlAlterTable.executeUpdate();
           } catch (SQLException alterX) { // ALTER TABLE failed
             // delete the field from the table
@@ -785,6 +789,20 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
           sqlUpdateFieldRow.setString(4, field);
           if (sqlUpdateFieldRow.executeUpdate() == 0) {
             return "No such field \""+field+"\" in " + lexicon;
+          }
+
+          String columnType
+            = "VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL";
+          if ("text".equals(type) || "richtext".equals(type)) {
+            columnType = "TEXT";
+          } // type is TEXT
+          try (PreparedStatement sqlAlterTable = rdb.prepareStatement(
+                 sqlx.apply(
+                   "ALTER TABLE "+getAnnotatorId() +"_lexicon_"+lexiconId
+                   +" CHANGE COLUMN `"+field+"` `"+field+"` " + columnType))) {
+            sqlAlterTable.executeUpdate();
+          } catch (SQLException alterX) { // ALTER TABLE failed
+            return "Could not update column type: " + alterX.getMessage();
           }
         } catch (SQLException x) { // field is already there
           return x.toString();
