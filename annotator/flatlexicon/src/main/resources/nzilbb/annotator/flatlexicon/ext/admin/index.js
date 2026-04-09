@@ -23,7 +23,7 @@ function listLexicons() {
             var link = document.createElement("a");
             td.appendChild(link);
             link.title = `${lexiconId} definition`;
-            link.href = `lexicon.html?l=${lexiconId}`
+            link.href = `fields.html?l=${lexiconId}`
             var img = document.createElement("img");
             img.src = "../edit.svg"
             img.alt = "✎";

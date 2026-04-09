@@ -1,3 +1,9 @@
+import {
+  ClassicEditor, Essentials,
+  Paragraph, Heading, Bold, Italic, Underline, BlockQuote, Font, Link, AutoLink,
+  HorizontalLine, List, Table, TableToolbar, Indent, IndentBlock 
+} from 'ckeditor5';
+
 startLoading();
 
 // show annotator version
@@ -54,6 +60,7 @@ function showForm(data) {
       } else if (fields[name].type == "url") {
         input.type = "url";
         let a = document.createElement("a");
+        a.className = "url-link";
         a.title = `Open ${name}`;
         a.target = name;
         a.href = "#";
@@ -78,8 +85,8 @@ function showForm(data) {
         fields[name].validation = "|false|true";
       } else if (fields[name].type == "text") {
         input = document.createElement("textarea");
-      } else if (fields[name].type == "richtext") { // TODO
-        input = document.createElement("textarea");
+      } else if (fields[name].type == "richtext") { 
+        input = document.createElement("textarea"); // attach the editor later...
       }
       if (fields[name].validation) {
         // if it's just a list of alternative, e.g. "option1|option2|option3"
@@ -109,6 +116,43 @@ function showForm(data) {
       }
       
       value.appendChild(input);
+
+      if (fields[name].type == "richtext") {
+        ClassicEditor
+          .create( {
+	    attachTo: input,
+            licenseKey: 'GPL',
+            plugins: [
+              Essentials,
+              Paragraph, Heading, Bold, Italic, Underline, BlockQuote, Font, Link, AutoLink,
+              HorizontalLine, List, Table, TableToolbar, Indent, IndentBlock  ],
+            toolbar: [
+	      // 'undo', 'redo', '|',
+              'bold', 'italic', 'underline', '|',
+              'outdent', 'indent', 'bulletedList', 'numberedList', 'blockquote',
+	      // 'fontSize', 'fontFamily', 'fontColor', '|',
+              'link', 'insertTable', 'horizontalLine'
+	    ],
+            table: {
+	      contentToolbar: [
+	        'tableColumn',
+	        'tableRow',
+	        'mergeTableCells'
+	      ]
+            },
+	    licenseKey: 'GPL'
+	  } )
+	  .then( editor => {
+	    input.editor = editor;
+            editor.model.document.on( 'change:data', () => {
+              // show save button
+              document.getElementById("btnSave").style.display = null;
+            } );
+	  } )
+	  .catch( error => {
+	    console.error( error );
+	  } );        
+      }
     }
     row.appendChild(value);
     attributes.appendChild(row);
@@ -151,7 +195,11 @@ document.getElementById("btnSave").onclick = function (e) {
         input.reportValidity();
         return;
       }
-      data[name] = input.value;
+      if (input.editor) {
+        data[name] = input.editor.getData();
+      } else {
+        data[name] = input.value;
+      }
     }
   } // next field
   fd.append("data", JSON.stringify(data));

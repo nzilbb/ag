@@ -42,7 +42,7 @@ label:after {
     width: 75px;
     text-align: right;
 }
-.field a {
+.field a.url-link {
     position: absolute;
     padding: 5px;
     text-decoration: none;
