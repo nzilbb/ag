@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -226,7 +227,183 @@ public class WhisperDeserializer implements GraphDeserializer {
    * @param newWordLayer Word token layer.
    */
   public void setWordLayer(Layer newWordLayer) { wordLayer = newWordLayer; }
+  
+  /**
+   * The minimum inter-word pause length, in seconds, before a pause
+   * counts as a 'short pause'. The default value is 0.2.
+   * @see #minMediumPauseLength
+   * @see #minLongPauseLength
+   * @see #shortPauseLabel
+   * @see #getMinShortPauseLength()
+   * @see #setMinShortPauseLength(Double)
+   */
+  protected Double minShortPauseLength = 0.2;
+  /**
+   * Getter for {@link #minShortPauseLength}: The minimum inter-word
+   * pause length, in seconds, before a pause counts as a 'short
+   * pause'. The default values is 0.2.
+   * @return The minimum inter-word pause length, in seconds, before a
+   * pause counts as a 'short pause'. 
+   * @see #getShortPauseLabel()
+   */
+  public Double getMinShortPauseLength() { return minShortPauseLength; }
+  /**
+   * Setter for {@link #minShortPauseLength}: The minimum inter-word
+   * pause length, in seconds, before a pause counts as a 'short
+   * pause'.
+   * @param newMinShortPauseLength The minimum inter-word pause
+   * length, in seconds, before a pause counts as a 'short pause'. 
+   */
+  public WhisperDeserializer setMinShortPauseLength(Double newMinShortPauseLength) { minShortPauseLength = newMinShortPauseLength; return this; }
+  
+  /**
+   * The minimum inter-word pause length, in seconds, before a pause
+   * counts as a 'medium pause'. The default value is 0.7.
+   * @see #minShortPauseLength
+   * @see #minLongPauseLength
+   * @see #mediumPauseLabel
+   * @see #getMinMediumPauseLength()
+   * @see #setMinMediumPauseLength(Double)
+   */
+  protected Double minMediumPauseLength = 0.7;
+  /**
+   * Getter for {@link #minMediumPauseLength}: The minimum inter-word
+   * pause length, in seconds, before a pause counts as a 'medium pause'.
+   * The default value is 0.7. 
+   * @return The minimum inter-word pause length, in seconds, before
+   * a pause counts as a 'medium pause'. 
+   * @see #getMediumPauseLabel()
+   */
+  public Double getMinMediumPauseLength() { return minMediumPauseLength; }
+  /**
+   * Setter for {@link #minMediumPauseLength}: The minimum inter-word
+   * pause length, in seconds, before a pause counts as a 'medium pause'. 
+   * @param newMinMediumPauseLength The minimum inter-word pause
+   * length, in seconds, before a pause counts as a 'medium pause'. 
+   */
+  public WhisperDeserializer setMinMediumPauseLength(Double newMinMediumPauseLength) { minMediumPauseLength = newMinMediumPauseLength; return this; }
+  
+  /**
+   * The minimum inter-word pause length, in seconds, before a pause
+   * counts as a 'long pause'. The default value is 1.4.
+   * @see #minShortPauseLength
+   * @see #minMediumPauseLength
+   * @see #longPauseLabel
+   * @see #getMinLongPauseLength()
+   * @see #setMinLongPauseLength(Double)
+   */
+  protected Double minLongPauseLength = 1.4;
+  /**
+   * Getter for {@link #minLongPauseLength}: The minimum inter-word
+   * pause length, in seconds, before a pause counts as a 'long pause'.
+   * The default value is 1.4. 
+   * @return The minimum inter-word pause length, in seconds, before a
+   * pause counts as a 'long pause'. 
+   * @see #getLongPauseLabel()
+   */
+  public Double getMinLongPauseLength() { return minLongPauseLength; }
+  /**
+   * Setter for {@link #minLongPauseLength}: The minimum inter-word
+   * pause length, in seconds, before a pause counts as a 'long pause'. 
+   * @param newMinLongPauseLength The minimum inter-word pause length,
+   * in seconds, before a pause counts as a 'long pause'. 
+   */
+  public WhisperDeserializer setMinLongPauseLength(Double newMinLongPauseLength) { minLongPauseLength = newMinLongPauseLength; return this; }
 
+  /**
+   * The string to append to the word before a short pause.
+   * If an inter-word pause has a duration between
+   * {@link #getMinShortPauseLength()} and {@link #getMinMediumPauseLength()}, then
+   * the word before the pause will have this string appended to its
+   * label (after a space).
+   * @see #getShortPauseLabel()
+   * @see #setShortPauseLabel(String)
+   */
+  protected String shortPauseLabel = "(.)";
+  /**
+   * Getter for {@link #shortPauseLabel}: The string to append to the
+   * word before a short pause.  
+   * If an inter-word pause has a duration between
+   * {@link #getMinShortPauseLength()} and {@link #getMinMediumPauseLength()}, then
+   * the word before the pause will have this string appended to its
+   * label (after a space).
+   * If null or empty, no short pauses are labelled.
+   * @return The string to append to the word before a short pause.
+   */
+  public String getShortPauseLabel() { return shortPauseLabel; }
+  /**
+   * Setter for {@link #shortPauseLabel}: The string to append to the
+   * word before a short pause. 
+   * If an inter-word pause has a duration between
+   * {@link #getMinShortPauseLength()} and {@link #getMinMediumPauseLength()}, then
+   * the word before the pause will have this string appended to its
+   * label (after a space).
+   * @param newShortPauseLabel The string to append to the word before a short pause.
+   */
+  public WhisperDeserializer setShortPauseLabel(String newShortPauseLabel) { shortPauseLabel = newShortPauseLabel; return this; }
+
+  /**
+   * The string to append to the word before a medium pause.
+   * If an inter-word pause has a duration between
+   * {@link #getMinMediumPauseLength()} and {@link #getMinLongPauseLength()}, then
+   * the word before the pause will have this string appended to its
+   * label (after a space).
+   * @see #getMediumPauseLabel()
+   * @see #setMediumPauseLabel(String)
+   */
+  protected String mediumPauseLabel = "(..)";
+  /**
+   * Getter for {@link #mediumPauseLabel}: The string to append to the
+   * word before a medium pause. 
+   * If an inter-word pause has a duration between
+   * {@link #getMinMediumPauseLength()} and {@link #getMinLongPauseLength()}, then
+   * the word before the pause will have this string appended to its
+   * label (after a space).
+   * If null or empty, no medium pauses are labelled.
+   * @return The string to append to the word before a medium pause.
+   */
+  public String getMediumPauseLabel() { return mediumPauseLabel; }
+  /**
+   * Setter for {@link #mediumPauseLabel}: The string to append to the
+   * word before a medium pause. 
+   * If an inter-word pause has a duration between
+   * {@link #getMinMediumPauseLength()} and {@link #getMinLongPauseLength()}, then
+   * the word before the pause will have this string appended to its
+   * label (after a space).
+   * @param newMediumPauseLabel The string to append to the word before a medium pause.
+   */
+  public WhisperDeserializer setMediumPauseLabel(String newMediumPauseLabel) { mediumPauseLabel = newMediumPauseLabel; return this; }
+  
+  /**
+   * The string to append to the word before a long pause.
+   * If an inter-word pause has a duration longer than
+   * {@link #getMinLongPauseLength()}, then the word before the pause
+   * will have this string appended to its 
+   * label (after a space).
+   * @see #getLongPauseLabel()
+   * @see #setLongPauseLabel(String)
+   */
+  protected String longPauseLabel = "(...)";
+  /**
+   * Getter for {@link #longPauseLabel}: The string to append to the
+   * word before a long pause. 
+   * If an inter-word pause has a duration longer than
+   * {@link #getMinLongPauseLength()}, then the word before the pause
+   * will have this string appended to its 
+   * If null or empty, no long pauses are labelled.
+   * @return The string to append to the word before a long pause.
+   */
+  public String getLongPauseLabel() { return longPauseLabel; }
+  /**
+   * Setter for {@link #longPauseLabel}: The string to append to the
+   * word before a long pause. 
+   * If an inter-word pause has a duration longer than
+   * {@link #getMinLongPauseLength()}, then the word before the pause
+   * will have this string appended to its 
+   * @param newLongPauseLabel The string to append to the word before a long pause.
+   */
+  public WhisperDeserializer setLongPauseLabel(String newLongPauseLabel) { longPauseLabel = newLongPauseLabel; return this; }
+  
   /**
    * Timers for debugging and optimization.
    * @see #getTimers()
@@ -304,8 +481,7 @@ public class WhisperDeserializer implements GraphDeserializer {
   } // end of constructor
 
   // GraphDeserializer methods
-
-
+  
   /**
    * Sets parameters for deserializer as a whole.  This might include database connection
    * parameters, locations of supporting files, etc. 
@@ -414,7 +590,7 @@ public class WhisperDeserializer implements GraphDeserializer {
       layerToCandidates.put("wordLayer", possibleTurnChildLayers);
     }
     
-    // add parameters that aren't in the configuration yet, and set possibile/default values
+    // add parameters that aren't in the configuration yet, and set possible/default values
     for (Parameter p : layerToPossibilities.keySet()) {
       List<String> possibleNames = layerToPossibilities.get(p);
       LinkedHashMap<String,Layer> candidateLayers = layerToCandidates.get(p.getName());
@@ -427,6 +603,79 @@ public class WhisperDeserializer implements GraphDeserializer {
         p.setValue(Utility.FindLayerById(candidateLayers, possibleNames));
       }
       p.setPossibleValues(candidateLayers.values());
+    }
+
+    if (!configuration.containsKey("minShortPauseLength")) {
+      configuration.addParameter(
+        new Parameter(
+          "minShortPauseLength", Double.class, 
+          "Minimum Short Pause Length",
+          "The minimum inter-word pause length, in seconds,"
+          +" before a pause counts as a 'short pause'.", true));
+    }
+    if (configuration.get("minShortPauseLength").getValue() == null) {
+      configuration.get("minShortPauseLength").setValue(getMinShortPauseLength());
+    }
+    if (!configuration.containsKey("shortPauseLabel")) {
+      configuration.addParameter(
+        new Parameter(
+          "shortPauseLabel", String.class, 
+          "Short Pause Label",
+          "If an inter-word pause has a duration between minShortPauseLength"
+          +" and minMediumPauseLength, then the word before the pause"
+          +" will have this string appended to its"
+          +" label (after a space).", false));
+    }
+    if (configuration.get("shortPauseLabel").getValue() == null) {
+      configuration.get("shortPauseLabel").setValue(getShortPauseLabel());
+    }
+    if (!configuration.containsKey("minMediumPauseLength")) {
+      configuration.addParameter(
+        new Parameter(
+          "minMediumPauseLength", Double.class, 
+          "Minimum Medium Pause Length",
+          "The minimum inter-word pause length, in seconds,"
+          +" before a pause counts as a 'medium pause' e.g. (.)", true));
+    }
+    if (configuration.get("minMediumPauseLength").getValue() == null) {
+      configuration.get("minMediumPauseLength").setValue(getMinMediumPauseLength());
+    }
+    if (!configuration.containsKey("mediumPauseLabel")) {
+      configuration.addParameter(
+        new Parameter(
+          "mediumPauseLabel", String.class, 
+          "Medium Pause Label",
+          "If an inter-word pause has a duration between minMediumPauseLength"
+          +" and minLongPauseLength, then the word before the pause"
+          +" will have this string appended to its"
+          +" label (after a space) e.g (..)", false));
+    }
+    if (configuration.get("mediumPauseLabel").getValue() == null) {
+      configuration.get("mediumPauseLabel").setValue(getMediumPauseLabel());
+    }
+    if (!configuration.containsKey("minLongPauseLength")) {
+      configuration.addParameter(
+        new Parameter(
+          "minLongPauseLength", Double.class, 
+          "Minimum Long Pause Length",
+          "The minimum inter-word pause length, in seconds,"
+          +" before a pause counts as a 'long pause'.", true));
+    }
+    if (configuration.get("minLongPauseLength").getValue() == null) {
+      configuration.get("minLongPauseLength").setValue(getMinLongPauseLength());
+    }
+    if (!configuration.containsKey("longPauseLabel")) {
+      configuration.addParameter(
+        new Parameter(
+          "longPauseLabel", String.class, 
+          "Long Pause Label",
+          "If an inter-word pause has a duration more than minLongPauseLength,"
+          +" then the word before the pause will have this string appended to its"
+          +" label (after a space) e.g. for the the lengh of the pause in parentheses,"
+          +" use: ({0.000})", false));
+    }
+    if (configuration.get("longPauseLabel").getValue() == null) {
+      configuration.get("longPauseLabel").setValue(getLongPauseLabel());
     }
 
     return configuration;
@@ -535,6 +784,28 @@ public class WhisperDeserializer implements GraphDeserializer {
     if (timers != null) timers.start("deserialize");
     if (schema == null) throw new SerializerNotConfiguredException("Layer schema not set");
     
+    if (shortPauseLabel == null) shortPauseLabel = ""; 
+    if (mediumPauseLabel == null) mediumPauseLabel = "";
+    if (longPauseLabel == null) longPauseLabel = "";
+    if ((shortPauseLabel+mediumPauseLabel+longPauseLabel).length() > 0) { // pause labels
+      if (minShortPauseLength == null) {
+        throw new SerializerNotConfiguredException("minShortPauseLength not set");
+      }
+      if (minMediumPauseLength == null) {
+        throw new SerializerNotConfiguredException("minMediumPauseLength not set");
+      }
+      if (minLongPauseLength == null) {
+        throw new SerializerNotConfiguredException("minLongPauseLength not set");
+      }
+    }
+    // create pause formatters if the label definitions include {...}
+    DecimalFormat shortPauseFormat = !shortPauseLabel.matches("(.*)\\{(.+)\\}(.*)")?null
+      :new DecimalFormat(shortPauseLabel.replaceAll("(.*)\\{(.+)\\}(.*)", "$2"));
+    DecimalFormat mediumPauseFormat = !mediumPauseLabel.matches("(.*)\\{(.+)\\}(.*)")?null
+      :new DecimalFormat(mediumPauseLabel.replaceAll("(.*)\\{(.+)\\}(.*)", "$2"));
+    DecimalFormat longPauseFormat = !longPauseLabel.matches("(.*)\\{(.+)\\}(.*)")?null
+      :new DecimalFormat(longPauseLabel.replaceAll("(.*)\\{(.+)\\}(.*)", "$2"));
+
     // if there are errors, accumlate as many as we can before throwing SerializationException
     SerializationException errors = null;
 
@@ -563,91 +834,103 @@ public class WhisperDeserializer implements GraphDeserializer {
     graph.setOffsetUnits(Constants.UNIT_SECONDS);
     graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
 
-    // all lines should be like the following 
-    // [00:00.000 --> 00:05.600]  Well I have a fairly vivid recollection.
-    MessageFormat utteranceFormat = new MessageFormat(
-      "[{0,number,integer}:{1,number,integer}.{2,number,integer}"
-      +" --> "
-      +"{3,number,integer}:{4,number,integer}.{5,number,integer}]{6}");
-
     // use a default speaker named after the file
     Annotation currentTurn = null;
+    Annotation lastWord = null;
     HashMap<String,Annotation> participants = new HashMap<String,Annotation>();
-    // try {
-
+    
     JsonArray jsonSegments = json.getJsonArray("segments");
-
-    int wordCount = 0;
-      // each segment is an utterance
-      for (JsonObject segment : jsonSegments.getValuesAs(JsonObject.class)) {
-        Anchor start = graph.getOrCreateAnchorAt(
-          segment.getJsonNumber("start").doubleValue(), Constants.CONFIDENCE_MANUAL);                  
-        Anchor end = graph.getOrCreateAnchorAt(
-          segment.getJsonNumber("end").doubleValue(), Constants.CONFIDENCE_MANUAL);
-        String speaker = graph.getId();
-        if (segment.containsKey("speaker")) { // explicit speaker
-          speaker = segment.getString("speaker");
-        } else if (currentTurn != null) { // no explicit speaker but we're in a turn
-          // just continue with the last speaker
-          speaker = currentTurn.getLabel();
-        }
-        if (!participants.containsKey(speaker)) {
-          participants.put(
-            speaker, graph.addAnnotation(
-              new Annotation(null, speaker, schema.getParticipantLayerId())));
-          participants.get(speaker).setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-        }
-        
-        if (currentTurn == null || !currentTurn.getLabel().equals(speaker)) {
-          currentTurn = new Annotation(
-            null, speaker, schema.getTurnLayerId(),
-            start.getId(), end.getId(), participants.get(speaker).getId());
-          currentTurn.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-          graph.addAnnotation(currentTurn);
-        }
-        Annotation utterance = new Annotation(
-          null, speaker, schema.getUtteranceLayerId(),
-          start.getId(), end.getId(), currentTurn.getId());
-        currentTurn.setEndId(end.getId());
-        utterance.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-        graph.addAnnotation(utterance);
-
-        if (!segment.containsKey("words")) { // no individual word tokens
-          utterance.setLabel(segment.getString("text"));
-        } else { // there are individual word tokens
-          JsonArray words = segment.getJsonArray("words");
-          Anchor lastEnd = start;
-          Annotation lastWord = null;
-          // each word...
-          for (JsonObject word : words.getValuesAs(JsonObject.class)) {
-            Anchor wordStart = word.containsKey("start")?
-              graph.createAnchorAt(
-                word.getJsonNumber("start").doubleValue(), Constants.CONFIDENCE_AUTOMATIC)
-              : lastEnd;
-            Anchor wordEnd = word.containsKey("end")?
-              graph.createAnchorAt(
-                word.getJsonNumber("end").doubleValue(), Constants.CONFIDENCE_AUTOMATIC)
-              : graph.addAnchor(new Anchor());
-            lastWord = new Annotation(
-              null, word.getString("word"), schema.getWordLayerId(),
-              wordStart.getId(), wordEnd.getId(), currentTurn.getId());
-            lastWord.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-            graph.addAnnotation(lastWord);
-          } // next word
-          if (lastWord.getEnd().getOffset() == null) { // last word had no "end"
-            // set the end of the last word to be the end of the utterance
-            lastWord.setEndId(end.getId());
-          }
-        } // there are individual word tokens
-        
-      } // next segment
+    // each segment is an utterance
+    for (JsonObject segment : jsonSegments.getValuesAs(JsonObject.class)) {
+      Anchor start = graph.getOrCreateAnchorAt(
+        segment.getJsonNumber("start").doubleValue(), Constants.CONFIDENCE_MANUAL);                  
+      Anchor end = graph.getOrCreateAnchorAt(
+        segment.getJsonNumber("end").doubleValue(), Constants.CONFIDENCE_MANUAL);
+      String speaker = graph.getId();
+      if (segment.containsKey("speaker")) { // explicit speaker
+        speaker = segment.getString("speaker");
+      } else if (currentTurn != null) { // no explicit speaker but we're in a turn
+        // just continue with the last speaker
+        speaker = currentTurn.getLabel();
+      }
+      if (!participants.containsKey(speaker)) {
+        participants.put(
+          speaker, graph.addAnnotation(
+            new Annotation(null, speaker, schema.getParticipantLayerId())));
+        participants.get(speaker).setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      }
       
-      graph.commit();
-    // } catch(IOException exception) {
-    //   if (errors == null) errors = new SerializationException();
-    //   if (errors.getCause() == null) errors.initCause(exception);
-    //   errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
-    // }
+      if (currentTurn == null || !currentTurn.getLabel().equals(speaker)) {
+        currentTurn = new Annotation(
+          null, speaker, schema.getTurnLayerId(),
+          start.getId(), end.getId(), participants.get(speaker).getId());
+        currentTurn.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+        graph.addAnnotation(currentTurn);
+
+        // don't add inter-word pause labels across turns
+        lastWord = null;
+      }
+      Annotation utterance = new Annotation(
+        null, speaker, schema.getUtteranceLayerId(),
+        start.getId(), end.getId(), currentTurn.getId());
+      currentTurn.setEndId(end.getId());
+      utterance.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      graph.addAnnotation(utterance);
+      
+      if (!segment.containsKey("words")) { // no individual word tokens
+        utterance.setLabel(segment.getString("text"));
+      } else { // there are individual word tokens
+        JsonArray words = segment.getJsonArray("words");
+        Anchor lastEnd = start;
+        // each word...
+        for (JsonObject word : words.getValuesAs(JsonObject.class)) {
+          Anchor wordStart = word.containsKey("start")?
+            graph.createAnchorAt(
+              word.getJsonNumber("start").doubleValue(), Constants.CONFIDENCE_AUTOMATIC)
+            : lastEnd;
+          Anchor wordEnd = word.containsKey("end")?
+            graph.createAnchorAt(
+              word.getJsonNumber("end").doubleValue(), Constants.CONFIDENCE_AUTOMATIC)
+            : graph.addAnchor(new Anchor());
+          Annotation thisWord = new Annotation(
+            null, word.getString("word"), schema.getWordLayerId(),
+            wordStart.getId(), wordEnd.getId(), currentTurn.getId());
+          thisWord.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+          graph.addAnnotation(thisWord);
+
+          if (lastWord != null
+              && lastWord.getEnd().getOffset() != null
+              && wordStart.getOffset() != null) {
+            double interWordPause
+              = wordStart.getOffset() - lastWord.getEnd().getOffset();
+            if (interWordPause > minShortPauseLength) { // inter-word pause
+              if (interWordPause <= minMediumPauseLength) { // short pause
+                if (shortPauseLabel.length() > 0) {
+                  lastWord.setLabel(lastWord.getLabel() + " " + shortPauseLabel);
+                }
+              } else if (interWordPause <= minLongPauseLength) { // medium pause
+                if (mediumPauseLabel.length() > 0) {
+                  lastWord.setLabel(lastWord.getLabel() + " " + mediumPauseLabel);
+                }
+              } else { // long pause
+                lastWord.setLabel(
+                  pauseLabel(
+                    lastWord.getLabel(), interWordPause, longPauseLabel, longPauseFormat));
+              }
+            } // inter-word pause
+          }
+          
+          lastWord = thisWord;
+        } // next word
+        if (lastWord.getEnd().getOffset() == null) { // last word had no "end"
+          // set the end of the last word to be the end of the utterance
+          lastWord.setEndId(end.getId());
+        }
+      } // there are individual word tokens
+        
+    } // next segment
+      
+    graph.commit();
     
     if (errors != null) throw errors;
     
@@ -661,6 +944,28 @@ public class WhisperDeserializer implements GraphDeserializer {
     if (timers != null) timers.end("deserialize");
     return graphs;
   } // deserializeJSON
+  
+  /**
+   * Determines the pause label, given the inter-word pause, and the
+   * format definitions for its label 
+   * @param priorWordLabel The label of the word prior to the pause.
+   * @param interWordPause The magnitude of the inter-word pause.
+   * @param pauseLabel The pause label definition, which can be null.
+   * @param pauseLabelFormat The format for rendering the pause
+   * length, which may be null.
+   * @return The new label for the prior word.
+   */
+  public String pauseLabel(String priorWordLabel, double interWordPause, String pauseLabel, DecimalFormat pauseLabelFormat) {
+    if (pauseLabel == null || pauseLabel.length() == 0) return priorWordLabel;
+    if (pauseLabelFormat == null) {
+      return priorWordLabel + " " + pauseLabel;
+    }
+    return priorWordLabel + " " +
+      pauseLabel.replaceAll(
+        "(.*)\\{(.+)\\}(.*)",
+        "$1"+pauseLabelFormat.format(interWordPause)+"$3");
+  } // end of pauseLabel()
+  
    
   /**
    * Deserializes the transcript from the output of the "whisper" command.

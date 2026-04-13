@@ -2,3 +2,51 @@
 
 Parser for transcriptions output by the [Whisper](https://github.com/openai/whisper) ASR system.
 
+The parser can parse either the *stdout* output of the `whisper` command,
+or the .json formatted file that `whisper` produces.
+
+If the .json file is specified, the formatter can include inter-word
+pause markers. i.e. if the pause between one word and the next is
+longer than one of three thresholds, the space between the words is
+labelled as either a short, medium, or long pause.
+
+<h2 id="configuration">Configuration</h2>
+
+The following parameters can be specified for the formatter:
+
+minShortPauseLength
+: The minimum inter-word pause length, in seconds, before a pause
+counts as a 'short pause'. 
+
+minMediumPauseLength
+: The minimum inter-word pause length, in seconds, before a pause
+counts as a 'medium pause'. 
+
+minLongPauseLength
+: The minimum inter-word pause length, in seconds, before a pause
+counts as a 'long pause'. 
+
+shortPauseLabel
+: If an inter-word pause has a duration between minShortPauseLength
+and minMediumPauseLength, then the word before the pause will have
+this string appended to its label (after a space). e.g. `(.)` to use
+the CA/CHAT convention for short pauses.
+
+mediumPauseLabel
+: If an inter-word pause has a duration between minMediumPauseLength
+and minMediumPauseLength, then the word before the pause will have
+this string appended to its label (after a space). e.g. `(..)` to use
+the CA/CHAT convention for medium pauses.
+
+longPauseLabel
+: If an inter-word pause has a duration between minLongPauseLength
+and minMediumPauseLength, then the word before the pause will have
+this string appended to its label (after a space). e.g. `(...)` to use
+the CA/CHAT convention for short pauses. 
+
+The pause label definitions (*shortPauseLabel*, *mediumPauseLabel* and
+*longPauseLabel*) may specify that the duration of the pause is
+included in the label, by including a decimal format definition
+enclosed in curly braces. For example, if you want long pauses to use
+the CA/CHAT conventions of a duration within parentheses, you can
+specify `({0.0##})` as the value for *longPauseLabel*.
