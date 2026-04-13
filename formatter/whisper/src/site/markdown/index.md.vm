@@ -49,4 +49,4 @@ The pause label definitions (*shortPauseLabel*, *mediumPauseLabel* and
 included in the label, by including a decimal format definition
 enclosed in curly braces. For example, if you want long pauses to use
 the CA/CHAT conventions of a duration within parentheses, you can
-specify `({0.0##})` as the value for *longPauseLabel*.
+specify `({0.000})` as the value for *longPauseLabel*.
