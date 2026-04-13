@@ -269,6 +269,157 @@ public class TestWhisperDeserializer {
     }
   }
 
+  /** Ensure JSON files are parsed correctly */
+  @Test public void basicJSON()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("who", "Speakers")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Word tokens")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true));
+    
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "wordlist.json")) };
+    
+    // create deserializer
+    WhisperDeserializer deserializer = new WhisperDeserializer();
+
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals("Configuration parameters" + configuration, 0,
+                 deserializer.configure(configuration, schema).size());      
+    
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals(0, defaultParameters.size());
+    
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+
+    // lines with no timestamp are ignored but warned about
+    for (String warning : deserializer.getWarnings()) {
+      assertEquals("Warning for comment line", "Invalid line: \"# New turn here:\"", warning);
+    }
+    
+    assertEquals("wordlist.json", g.getId());
+    assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
+    
+    
+    // participants     
+    Annotation[] speakers = g.all("who"); 
+    assertEquals("Number of speakers: " + Arrays.asList(speakers),
+                 2, speakers.length);
+    assertEquals("SPEAKER_01", speakers[0].getLabel());
+    assertEquals("SPEAKER_00", speakers[1].getLabel());
+    
+    // turns
+    Annotation[] turns = g.all("turn");
+    // a turn break was added by having an utterance start after the previous utterance end
+    assertEquals("Two turns", 9, turns.length);
+    assertEquals("Turn 1 label is speaker name",
+                 "SPEAKER_01", turns[0].getLabel());
+    assertEquals("Turn 2 label is speaker name",
+                 "SPEAKER_00", turns[1].getLabel());
+    assertEquals(Double.valueOf(2.862), turns[0].getStart().getOffset());
+    assertEquals(Double.valueOf(3.942), turns[0].getEnd().getOffset());
+    assertEquals(Double.valueOf(5.063), turns[1].getStart().getOffset());
+    assertEquals(Double.valueOf(31.85), turns[1].getEnd().getOffset());
+    
+    // utterances
+    Annotation[] utterances = g.all("utterance");
+    assertEquals("Correct number of utterances", 70, utterances.length);
+    assertEquals("Utterance label is speaker name",
+                 "SPEAKER_01", utterances[0].getLabel());
+    assertEquals("Start time of first utterance",
+                 Double.valueOf(2.862), utterances[0].getStart().getOffset());
+    assertEquals("End time of first utterance",
+                 Double.valueOf(3.942), utterances[0].getEnd().getOffset());
+    
+    assertEquals("Start time of second utterance",
+                 Double.valueOf(5.063), utterances[1].getStart().getOffset());
+    assertEquals("End time of second utterance",
+                 Double.valueOf(7.003), utterances[1].getEnd().getOffset());
+
+    assertEquals("Start time of last utterance",
+                 Double.valueOf(280.247),
+                 utterances[utterances.length-1].getStart().getOffset());
+    assertEquals("End time of last utterance",
+                 Double.valueOf(280.507),
+                 utterances[utterances.length-1].getEnd().getOffset());
+
+    // all anchors are 'manual' confidence (even though they were automatically determined)
+    for (Annotation utterance : utterances) {
+      assertEquals("check utterance start confidence " + utterance.getStart(),
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL),
+                   utterance.getStart().getConfidence());
+      assertEquals("check utterance end confidence " + utterance.getEnd(),
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL),
+                   utterance.getEnd().getConfidence());
+    }
+    
+    // words
+    Annotation[] words = g.all("word");
+    assertEquals("Correct number of words", 228, words.length);
+    String[] checkWords = {
+      "Okay,", "go.",
+      "New", "Zealand", "English", "word", "list.",
+      "Number", "one,", "hit,", "hid,", "hint.",
+      "Number", "two,", "boot,", "booed,", "boo,", "tune,", "dune."};
+    Double[] checkStarts = {
+      2.862, 3.722,
+      5.063, 5.283, 5.803, 6.283, 6.643,
+      7.803, 8.143, 8.824, 9.384, 10.104,
+      11.384, 11.644, 12.905, 13.745, 14.885, 15.966, 17.026};
+    Double[] checkEnds = {
+      3.022, 3.942,
+      5.263, 5.743, 6.163, 6.603, 7.003,
+      8.063, 8.284, 9.044, 9.624, 10.424,
+      11.604, 11.924, 13.205, 14.245, 15.325, 16.486, 17.546};
+    String[] checkSpeakers = {
+      "SPEAKER_01", "SPEAKER_01",
+      "SPEAKER_00", "SPEAKER_00", "SPEAKER_00", "SPEAKER_00", "SPEAKER_00",
+      "SPEAKER_00", "SPEAKER_00", "SPEAKER_00", "SPEAKER_00", "SPEAKER_00",
+      "SPEAKER_00", "SPEAKER_00", "SPEAKER_00", "SPEAKER_00", "SPEAKER_00", "SPEAKER_00", "SPEAKER_00"};
+    for (int w = 0; w < checkWords.length; w++) {
+      assertEquals("check word " + w + ": " + checkWords[w],
+                   checkWords[w], words[w].getLabel());
+      assertEquals("check start " + w + ": " + checkWords[w],
+                   checkStarts[w], words[w].getStart().getOffset());
+      assertEquals("check start confidence " + w + ": " + checkWords[w],
+                   Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
+                   words[w].getStart().getConfidence());
+      assertEquals("check end " + w + ": " + checkWords[w],
+                   checkEnds[w], words[w].getEnd().getOffset());
+      assertEquals("check end confidence " + w + ": " + checkWords[w],
+                   Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC),
+                   words[w].getEnd().getConfidence());
+      assertEquals("check speaker " + w + ": " + checkWords[w],
+                   checkSpeakers[w], words[w].getParent().getLabel());
+    } // next word
+    
+    // check all annotations have 'automatic' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'automatic' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), a.getConfidence());
+    }
+  }
+  
   /**
    * Directory for text files.
    * @see #getDir()

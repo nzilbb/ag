@@ -40,6 +40,10 @@ import java.util.Spliterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonException;
+import javax.json.JsonObject;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
@@ -105,21 +109,38 @@ public class WhisperDeserializer implements GraphDeserializer {
   public void setName(String newName) { name = newName; }
 
   /**
-   * Reader for transcript stream.
+   * Reader for transcript stdout stream.
    * @see #getTranscript()
    * @see #setTranscript(BufferedReader)
    */
   protected BufferedReader transcript;
   /**
-   * Getter for {@link #transcript}: Reader for transcript stream.
-   * @return Reader for transcript stream.
+   * Getter for {@link #transcript}: Reader for transcript stdout stream.
+   * @return Reader for transcript stdout stream.
    */
   public BufferedReader getTranscript() { return transcript; }
   /**
-   * Setter for {@link #transcript}: Reader for transcript stream.
-   * @param newTranscript Reader for transcript stream.
+   * Setter for {@link #transcript}: Reader for transcript stdout stream.
+   * @param newTranscript Reader for transcript stdout stream.
    */
   public void setTranscript(BufferedReader newTranscript) { transcript = newTranscript; }
+  
+  /**
+   * JSON object representing the JSON-formatted transcript.
+   * @see #getJson()
+   * @see #setJson(JsonObject)
+   */
+  protected JsonObject json;
+  /**
+   * Getter for {@link #json}: JSON object representing the JSON-formatted transcript.
+   * @return JSON object representing the JSON-formatted transcript.
+   */
+  public JsonObject getJson() { return json; }
+  /**
+   * Setter for {@link #json}: JSON object representing the JSON-formatted transcript.
+   * @param newJson JSON object representing the JSON-formatted transcript.
+   */
+  public WhisperDeserializer setJson(JsonObject newJson) { json = newJson; return this; }  
 
   /**
    * The annotation graph schema.
@@ -432,14 +453,28 @@ public class WhisperDeserializer implements GraphDeserializer {
     if (timers != null) timers.start("load");
     setSchema(schema);
 
-    // take the first stream, ignore all others.
-    NamedStream transcriptStream = Utility.FindSingleStream(streams, ".wt", "text/whisper+plain");
-    if (transcriptStream == null)
-      throw new SerializationException("No Whisper transcript stream found");
+    // take the first stream JSON stream and ignore all others
+    NamedStream transcriptStream = Utility.FindSingleStream(streams, ".json", "application/json");
+    if (transcriptStream != null) { // JSON stream
+      setJson(
+        Json.createReader(new InputStreamReader(transcriptStream.getStream(), "UTF-8"))
+        .readObject());
+      if (!json.containsKey("segments")) {
+        throw new SerializationException(
+          "Stream " + transcriptStream.getName() + " has no \"segments\" attribute.");
+      }
+    } else { // no JSON stream
+      // look for a stdout stream (i.e. the output of the "whisper" command)
+      transcriptStream = Utility.FindSingleStream(streams, ".wt", "text/whisper+plain");
+      setTranscript(
+        new BufferedReader(new InputStreamReader(transcriptStream.getStream(), "UTF-8")));
+      if (transcriptStream == null) { // no stdout stream
+        throw new SerializationException("No Whisper transcript stream found");
+      }
+    } // no JSON stream
+    
     setName(transcriptStream.getName());
-    setTranscript(
-      new BufferedReader(new InputStreamReader(transcriptStream.getStream(), "UTF-8")));
-
+    
     return new ParameterSet();
   }
 
@@ -475,6 +510,173 @@ public class WhisperDeserializer implements GraphDeserializer {
     if (timers != null) timers.start("deserialize");
     if (schema == null) throw new SerializerNotConfiguredException("Layer schema not set");
 
+    // deserialize from the output of the command
+    if (getName().endsWith(".json")) {
+      return deserializeJSON();
+    } else {
+      return deserializeStdOut();
+    }
+  }
+  
+  /**
+   * Deserializes the transcript from the JSON file written by Whisper.
+   * <p> This format is preferable because it includes word alignments and
+   * may include speaker IDs (if it's the output from WhisperX).
+   * @return A list of valid (if incomplete) {@link Graph}s. 
+   * @throws SerializerNotConfiguredException if the object has not been configured.
+   * @throws SerializationParametersMissingException if the parameters for this particular
+   * graph have not been set. 
+   * @throws SerializationException if errors occur during deserialization.
+   */
+  protected Graph[] deserializeJSON() 
+    throws SerializerNotConfiguredException, SerializationParametersMissingException,
+    SerializationException {
+    // if there are errors, accumlate as many as we can before throwing SerializationException
+    if (timers != null) timers.start("deserialize");
+    if (schema == null) throw new SerializerNotConfiguredException("Layer schema not set");
+    
+    // if there are errors, accumlate as many as we can before throwing SerializationException
+    SerializationException errors = null;
+
+    warnings = new Vector<String>();
+
+    Graph graph = new Graph();
+    graph.setId(getName());
+    graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
+    // creat the 0 anchor to prevent graph tagging from creating one with no confidence
+    Anchor graphStart = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
+
+    // add layers to the graph
+    // we don't just copy the whole schema, because that would imply that all the extra layers
+    // contained no annotations, which is not necessarily true
+    graph.addLayer((Layer)participantLayer.clone());
+    graph.getSchema().setParticipantLayerId(participantLayer.getId());
+    graph.addLayer((Layer)turnLayer.clone());
+    graph.getSchema().setTurnLayerId(turnLayer.getId());
+    graph.addLayer((Layer)utteranceLayer.clone());
+    graph.getSchema().setUtteranceLayerId(utteranceLayer.getId());
+    if (wordLayer != null) {
+      graph.addLayer((Layer)wordLayer.clone());
+      graph.getSchema().setWordLayerId(wordLayer.getId());
+    }
+
+    graph.setOffsetUnits(Constants.UNIT_SECONDS);
+    graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
+
+    // all lines should be like the following 
+    // [00:00.000 --> 00:05.600]  Well I have a fairly vivid recollection.
+    MessageFormat utteranceFormat = new MessageFormat(
+      "[{0,number,integer}:{1,number,integer}.{2,number,integer}"
+      +" --> "
+      +"{3,number,integer}:{4,number,integer}.{5,number,integer}]{6}");
+
+    // use a default speaker named after the file
+    Annotation currentTurn = null;
+    HashMap<String,Annotation> participants = new HashMap<String,Annotation>();
+    // try {
+
+    JsonArray jsonSegments = json.getJsonArray("segments");
+
+    int wordCount = 0;
+      // each segment is an utterance
+      for (JsonObject segment : jsonSegments.getValuesAs(JsonObject.class)) {
+        Anchor start = graph.getOrCreateAnchorAt(
+          segment.getJsonNumber("start").doubleValue(), Constants.CONFIDENCE_MANUAL);                  
+        Anchor end = graph.getOrCreateAnchorAt(
+          segment.getJsonNumber("end").doubleValue(), Constants.CONFIDENCE_MANUAL);
+        String speaker = graph.getId();
+        if (segment.containsKey("speaker")) { // explicit speaker
+          speaker = segment.getString("speaker");
+        } else if (currentTurn != null) { // no explicit speaker but we're in a turn
+          // just continue with the last speaker
+          speaker = currentTurn.getLabel();
+        }
+        if (!participants.containsKey(speaker)) {
+          participants.put(
+            speaker, graph.addAnnotation(
+              new Annotation(null, speaker, schema.getParticipantLayerId())));
+          participants.get(speaker).setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+        }
+        
+        if (currentTurn == null || !currentTurn.getLabel().equals(speaker)) {
+          currentTurn = new Annotation(
+            null, speaker, schema.getTurnLayerId(),
+            start.getId(), end.getId(), participants.get(speaker).getId());
+          currentTurn.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+          graph.addAnnotation(currentTurn);
+        }
+        Annotation utterance = new Annotation(
+          null, speaker, schema.getUtteranceLayerId(),
+          start.getId(), end.getId(), currentTurn.getId());
+        currentTurn.setEndId(end.getId());
+        utterance.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+        graph.addAnnotation(utterance);
+
+        if (!segment.containsKey("words")) { // no individual word tokens
+          utterance.setLabel(segment.getString("text"));
+        } else { // there are individual word tokens
+          JsonArray words = segment.getJsonArray("words");
+          Anchor lastEnd = start;
+          Annotation lastWord = null;
+          // each word...
+          for (JsonObject word : words.getValuesAs(JsonObject.class)) {
+            Anchor wordStart = word.containsKey("start")?
+              graph.createAnchorAt(
+                word.getJsonNumber("start").doubleValue(), Constants.CONFIDENCE_AUTOMATIC)
+              : lastEnd;
+            Anchor wordEnd = word.containsKey("end")?
+              graph.createAnchorAt(
+                word.getJsonNumber("end").doubleValue(), Constants.CONFIDENCE_AUTOMATIC)
+              : graph.addAnchor(new Anchor());
+            lastWord = new Annotation(
+              null, word.getString("word"), schema.getWordLayerId(),
+              wordStart.getId(), wordEnd.getId(), currentTurn.getId());
+            lastWord.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+            graph.addAnnotation(lastWord);
+          } // next word
+          if (lastWord.getEnd().getOffset() == null) { // last word had no "end"
+            // set the end of the last word to be the end of the utterance
+            lastWord.setEndId(end.getId());
+          }
+        } // there are individual word tokens
+        
+      } // next segment
+      
+      graph.commit();
+    // } catch(IOException exception) {
+    //   if (errors == null) errors = new SerializationException();
+    //   if (errors.getCause() == null) errors.initCause(exception);
+    //   errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
+    // }
+    
+    if (errors != null) throw errors;
+    
+    // reset all change tracking
+    if (graph.getTracker() != null) {
+      graph.getTracker().reset();
+      graph.setTracker(null);
+    }
+    
+    Graph[] graphs = { graph };
+    if (timers != null) timers.end("deserialize");
+    return graphs;
+  } // deserializeJSON
+   
+  /**
+   * Deserializes the transcript from the output of the "whisper" command.
+   * @return A list of valid (if incomplete) {@link Graph}s. 
+   * @throws SerializerNotConfiguredException if the object has not been configured.
+   * @throws SerializationParametersMissingException if the parameters for this particular
+   * graph have not been set. 
+   * @throws SerializationException if errors occur during deserialization.
+   */
+  protected Graph[] deserializeStdOut() 
+    throws SerializerNotConfiguredException, SerializationParametersMissingException,
+    SerializationException {
+    // if there are errors, accumlate as many as we can before throwing SerializationException
+    if (timers != null) timers.start("deserialize");
+    if (schema == null) throw new SerializerNotConfiguredException("Layer schema not set");
+    
     // if there are errors, accumlate as many as we can before throwing SerializationException
     SerializationException errors = null;
 
@@ -617,7 +819,7 @@ public class WhisperDeserializer implements GraphDeserializer {
     Graph[] graphs = { graph };
     if (timers != null) timers.end("deserialize");
     return graphs;
-  }
+  } // deserializeStdOut
    
   private static final MessageFormat timeFormatter = new MessageFormat(
     "{0,number,00}:{1,number,00}:{2,number,00.000}", new Locale("en"));

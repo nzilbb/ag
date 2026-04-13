@@ -1,0 +1,3706 @@
+{
+  "segments": [
+    {
+      "start": 2.862,
+      "end": 3.942,
+      "text": " Okay, go.",
+      "words": [
+        {
+          "word": "Okay,",
+          "start": 2.862,
+          "end": 3.022,
+          "score": 0.302,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "go.",
+          "start": 3.722,
+          "end": 3.942,
+          "score": 0.725,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.1392161895017155,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 5.063,
+      "end": 7.003,
+      "text": "New Zealand English word list.",
+      "words": [
+        {
+          "word": "New",
+          "start": 5.063,
+          "end": 5.263,
+          "score": 0.804,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Zealand",
+          "start": 5.283,
+          "end": 5.743,
+          "score": 0.767,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "English",
+          "start": 5.803,
+          "end": 6.163,
+          "score": 0.791,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "word",
+          "start": 6.283,
+          "end": 6.603,
+          "score": 0.89,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "list.",
+          "start": 6.643,
+          "end": 7.003,
+          "score": 0.826,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.1392161895017155,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 7.803,
+      "end": 10.424,
+      "text": "Number one, hit, hid, hint.",
+      "words": [
+        {
+          "word": "Number",
+          "start": 7.803,
+          "end": 8.063,
+          "score": 0.607,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "one,",
+          "start": 8.143,
+          "end": 8.284,
+          "score": 0.854,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "hit,",
+          "start": 8.824,
+          "end": 9.044,
+          "score": 0.967,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "hid,",
+          "start": 9.384,
+          "end": 9.624,
+          "score": 0.982,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "hint.",
+          "start": 10.104,
+          "end": 10.424,
+          "score": 0.919,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.1392161895017155,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 11.384,
+      "end": 17.546,
+      "text": "Number two, boot, booed, boo, tune, dune.",
+      "words": [
+        {
+          "word": "Number",
+          "start": 11.384,
+          "end": 11.604,
+          "score": 0.605,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "two,",
+          "start": 11.644,
+          "end": 11.924,
+          "score": 0.935,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "boot,",
+          "start": 12.905,
+          "end": 13.205,
+          "score": 0.828,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "booed,",
+          "start": 13.745,
+          "end": 14.245,
+          "score": 0.637,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "boo,",
+          "start": 14.885,
+          "end": 15.325,
+          "score": 0.795,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "tune,",
+          "start": 15.966,
+          "end": 16.486,
+          "score": 0.74,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "dune.",
+          "start": 17.026,
+          "end": 17.546,
+          "score": 0.694,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.1392161895017155,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 18.506,
+      "end": 21.947,
+      "text": "Three, bird, curt, burn.",
+      "words": [
+        {
+          "word": "Three,",
+          "start": 18.506,
+          "end": 18.806,
+          "score": 0.835,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "bird,",
+          "start": 19.467,
+          "end": 19.887,
+          "score": 0.909,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "curt,",
+          "start": 20.547,
+          "end": 20.887,
+          "score": 0.807,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "burn.",
+          "start": 21.527,
+          "end": 21.947,
+          "score": 0.833,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.1392161895017155,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 22.447,
+      "end": 28.369,
+      "text": "Four, bat, bad, back, bag, ban.",
+      "words": [
+        {
+          "word": "Four,",
+          "start": 22.447,
+          "end": 22.767,
+          "score": 0.913,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "bat,",
+          "start": 23.568,
+          "end": 23.908,
+          "score": 0.841,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "bad,",
+          "start": 24.468,
+          "end": 25.068,
+          "score": 0.826,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "back,",
+          "start": 25.668,
+          "end": 26.008,
+          "score": 0.919,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "bag,",
+          "start": 26.608,
+          "end": 27.129,
+          "score": 0.902,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "ban.",
+          "start": 27.869,
+          "end": 28.369,
+          "score": 0.913,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.1392161895017155,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 29.409,
+      "end": 31.85,
+      "text": "Five, bit, bed,",
+      "words": [
+        {
+          "word": "Five,",
+          "start": 29.409,
+          "end": 29.829,
+          "score": 0.874,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "bit,",
+          "start": 30.65,
+          "end": 30.91,
+          "score": 0.955,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "bed,",
+          "start": 31.49,
+          "end": 31.85,
+          "score": 0.913,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.1392161895017155,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 32.637,
+      "end": 52.01,
+      "text": " Bic, big and bin, six, but, bud, buck, bug, bun, number seven, bark, barn, path, laugh, dance, eight,",
+      "words": [
+        {
+          "word": "Bic,",
+          "start": 32.637,
+          "end": 32.937,
+          "score": 0.83,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "big",
+          "start": 34.238,
+          "end": 34.618,
+          "score": 0.943,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "and",
+          "start": 35.099,
+          "end": 35.199,
+          "score": 0.952,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "bin,",
+          "start": 35.259,
+          "end": 35.639,
+          "score": 0.891,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "six,",
+          "start": 36.44,
+          "end": 36.76,
+          "score": 0.955,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "but,",
+          "start": 37.64,
+          "end": 37.921,
+          "score": 0.842,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "bud,",
+          "start": 38.761,
+          "end": 39.141,
+          "score": 0.923,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "buck,",
+          "start": 40.182,
+          "end": 40.502,
+          "score": 0.585,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "bug,",
+          "start": 42.063,
+          "end": 42.363,
+          "score": 0.854,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "bun,",
+          "start": 43.204,
+          "end": 43.564,
+          "score": 0.891,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "number",
+          "start": 44.445,
+          "end": 44.645,
+          "score": 0.413,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "seven,",
+          "start": 44.665,
+          "end": 44.985,
+          "score": 0.862,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "bark,",
+          "start": 45.866,
+          "end": 46.326,
+          "score": 0.87,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "barn,",
+          "start": 47.087,
+          "end": 47.607,
+          "score": 0.868,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "path,",
+          "start": 48.327,
+          "end": 48.828,
+          "score": 0.795,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "laugh,",
+          "start": 49.448,
+          "end": 49.888,
+          "score": 0.762,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "dance,",
+          "start": 50.529,
+          "end": 51.009,
+          "score": 0.889,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "eight,",
+          "start": 51.87,
+          "end": 52.01,
+          "score": 0.902,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.3111607142857143,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 52.876,
+      "end": 53.236,
+      "text": " Bought.",
+      "words": [
+        {
+          "word": "Bought.",
+          "start": 52.876,
+          "end": 53.236,
+          "score": 0.646,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 53.957,
+      "end": 54.457,
+      "text": "Bored.",
+      "words": [
+        {
+          "word": "Bored.",
+          "start": 53.957,
+          "end": 54.457,
+          "score": 0.722,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 55.218,
+      "end": 55.638,
+      "text": "Born.",
+      "words": [
+        {
+          "word": "Born.",
+          "start": 55.218,
+          "end": 55.638,
+          "score": 0.677,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 56.319,
+      "end": 56.719,
+      "text": "Bore.",
+      "words": [
+        {
+          "word": "Bore.",
+          "start": 56.319,
+          "end": 56.719,
+          "score": 0.872,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 57.54,
+      "end": 57.92,
+      "text": "Nine.",
+      "words": [
+        {
+          "word": "Nine.",
+          "start": 57.54,
+          "end": 57.92,
+          "score": 0.9,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 58.601,
+      "end": 58.861,
+      "text": "Book.",
+      "words": [
+        {
+          "word": "Book.",
+          "start": 58.601,
+          "end": 58.861,
+          "score": 0.955,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 59.702,
+      "end": 59.962,
+      "text": "Good.",
+      "words": [
+        {
+          "word": "Good.",
+          "start": 59.702,
+          "end": 59.962,
+          "score": 0.966,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 60.803,
+      "end": 61.063,
+      "text": "Put.",
+      "words": [
+        {
+          "word": "Put.",
+          "start": 60.803,
+          "end": 61.063,
+          "score": 0.912,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 62.004,
+      "end": 62.424,
+      "text": "Tin.",
+      "words": [
+        {
+          "word": "Tin.",
+          "start": 62.004,
+          "end": 62.424,
+          "score": 0.922,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 63.205,
+      "end": 63.485,
+      "text": "Beet.",
+      "words": [
+        {
+          "word": "Beet.",
+          "start": 63.205,
+          "end": 63.485,
+          "score": 0.862,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 64.526,
+      "end": 64.926,
+      "text": "Bed.",
+      "words": [
+        {
+          "word": "Bed.",
+          "start": 64.526,
+          "end": 64.926,
+          "score": 0.84,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 66.428,
+      "end": 66.648,
+      "text": "Beak.",
+      "words": [
+        {
+          "word": "Beak.",
+          "start": 66.428,
+          "end": 66.648,
+          "score": 0.936,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.1764547372686452,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 68.465,
+      "end": 90.549,
+      "text": " bean sorry that's uh can i repeat 10 beat bead beak bean number 11 loud lout howl cow town 12 tie tied tight pie pine 13 hay bay bait",
+      "words": [
+        {
+          "word": "bean",
+          "start": 68.465,
+          "end": 68.825,
+          "score": 0.87,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "sorry",
+          "start": 69.165,
+          "end": 69.445,
+          "score": 0.901,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "that's",
+          "start": 69.485,
+          "end": 69.665,
+          "score": 0.585,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "uh",
+          "start": 69.985,
+          "end": 70.225,
+          "score": 0.568,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "can",
+          "start": 70.425,
+          "end": 70.565,
+          "score": 0.902,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "i",
+          "start": 70.605,
+          "end": 70.705,
+          "score": 0.566,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "repeat",
+          "start": 70.725,
+          "end": 71.446,
+          "score": 0.594,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "10"
+        },
+        {
+          "word": "beat",
+          "start": 71.666,
+          "end": 71.946,
+          "score": 0.782,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "bead",
+          "start": 72.586,
+          "end": 73.026,
+          "score": 0.85,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "beak",
+          "start": 73.626,
+          "end": 73.926,
+          "score": 0.898,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "bean",
+          "start": 74.866,
+          "end": 75.186,
+          "score": 0.761,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "number",
+          "start": 75.866,
+          "end": 76.066,
+          "score": 0.706,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "11"
+        },
+        {
+          "word": "loud",
+          "start": 76.106,
+          "end": 77.687,
+          "score": 0.803,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "lout",
+          "start": 78.827,
+          "end": 79.187,
+          "score": 0.886,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "howl",
+          "start": 79.787,
+          "end": 80.287,
+          "score": 0.81,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "cow",
+          "start": 80.987,
+          "end": 81.508,
+          "score": 0.94,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "town",
+          "start": 81.928,
+          "end": 82.328,
+          "score": 0.958,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "12"
+        },
+        {
+          "word": "tie",
+          "start": 83.268,
+          "end": 83.688,
+          "score": 0.88,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "tied",
+          "start": 84.368,
+          "end": 84.828,
+          "score": 0.658,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "tight",
+          "start": 85.368,
+          "end": 85.928,
+          "score": 0.48,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "pie",
+          "start": 86.969,
+          "end": 87.349,
+          "score": 0.75,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "pine",
+          "start": 88.069,
+          "end": 88.469,
+          "score": 0.691,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "13"
+        },
+        {
+          "word": "hay",
+          "start": 88.929,
+          "end": 89.409,
+          "score": 0.744,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "bay",
+          "start": 89.429,
+          "end": 89.489,
+          "score": 0.0,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "bait",
+          "start": 90.229,
+          "end": 90.549,
+          "score": 0.783,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.3352272727272727,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 94.878,
+      "end": 120.231,
+      "text": " Paid, pay, pain, take, fourteen, moat, mow, mowed, moan, fifteen, beer, bear, hear, hair, ear, air, sixteen, spear, spare,",
+      "words": [
+        {
+          "word": "Paid,",
+          "start": 94.878,
+          "end": 95.378,
+          "score": 0.852,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "pay,",
+          "start": 96.079,
+          "end": 96.519,
+          "score": 0.935,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "pain,",
+          "start": 97.119,
+          "end": 97.559,
+          "score": 0.827,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "take,",
+          "start": 98.26,
+          "end": 98.6,
+          "score": 0.899,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "fourteen,",
+          "start": 99.54,
+          "end": 100.241,
+          "score": 0.787,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "moat,",
+          "start": 101.381,
+          "end": 101.701,
+          "score": 0.907,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "mow,",
+          "start": 103.042,
+          "end": 103.482,
+          "score": 0.779,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "mowed,",
+          "start": 104.423,
+          "end": 104.943,
+          "score": 0.692,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "moan,",
+          "start": 105.944,
+          "end": 106.324,
+          "score": 0.936,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "fifteen,",
+          "start": 107.304,
+          "end": 107.904,
+          "score": 0.893,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "beer,",
+          "start": 109.065,
+          "end": 109.425,
+          "score": 0.854,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "bear,",
+          "start": 110.426,
+          "end": 110.786,
+          "score": 0.841,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "hear,",
+          "start": 111.726,
+          "end": 112.107,
+          "score": 0.783,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "hair,",
+          "start": 112.847,
+          "end": 113.247,
+          "score": 0.724,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "ear,",
+          "start": 114.508,
+          "end": 114.808,
+          "score": 0.744,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "air,",
+          "start": 114.828,
+          "end": 116.009,
+          "score": 0.55,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "sixteen,",
+          "start": 116.909,
+          "end": 117.449,
+          "score": 0.904,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "spear,",
+          "start": 118.43,
+          "end": 118.83,
+          "score": 0.788,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "spare,",
+          "start": 119.81,
+          "end": 120.231,
+          "score": 0.682,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.13174715638160706,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 121.451,
+      "end": 125.655,
+      "text": " Shear, share, cheer, chair.",
+      "words": [
+        {
+          "word": "Shear,",
+          "start": 121.451,
+          "end": 121.832,
+          "score": 0.605,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "share,",
+          "start": 123.033,
+          "end": 123.413,
+          "score": 0.384,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "cheer,",
+          "start": 124.213,
+          "end": 124.594,
+          "score": 0.796,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "chair.",
+          "start": 125.294,
+          "end": 125.655,
+          "score": 0.712,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.2575061192699507,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 126.675,
+      "end": 142.547,
+      "text": "Seventeen, hid, had, hard, hoard, hood, hood, head, herd, heed, hud, and hod.",
+      "words": [
+        {
+          "word": "Seventeen,",
+          "start": 126.675,
+          "end": 127.356,
+          "score": 0.821,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "hid,",
+          "start": 128.116,
+          "end": 128.377,
+          "score": 0.748,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "had,",
+          "start": 129.057,
+          "end": 129.497,
+          "score": 0.75,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "hard,",
+          "start": 130.438,
+          "end": 130.939,
+          "score": 0.822,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "hoard,",
+          "start": 131.739,
+          "end": 132.24,
+          "score": 0.812,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "hood,",
+          "start": 132.98,
+          "end": 133.561,
+          "score": 0.838,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "hood,",
+          "start": 134.982,
+          "end": 135.242,
+          "score": 0.919,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "head,",
+          "start": 136.363,
+          "end": 136.683,
+          "score": 0.857,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "herd,",
+          "start": 137.704,
+          "end": 138.124,
+          "score": 0.835,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "heed,",
+          "start": 139.425,
+          "end": 139.845,
+          "score": 0.913,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "hud,",
+          "start": 140.846,
+          "end": 141.186,
+          "score": 0.836,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "and",
+          "start": 141.907,
+          "end": 142.027,
+          "score": 0.802,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "hod.",
+          "start": 142.127,
+          "end": 142.547,
+          "score": 0.862,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.2575061192699507,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 144.049,
+      "end": 146.25,
+      "text": "Eighteen, groan, groan, moan,",
+      "words": [
+        {
+          "word": "Eighteen,",
+          "start": 144.049,
+          "end": 144.469,
+          "score": 0.946,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "groan,",
+          "start": 144.489,
+          "end": 144.609,
+          "score": 0.099,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "groan,",
+          "start": 145.75,
+          "end": 146.15,
+          "score": 0.891,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "moan,",
+          "start": 146.17,
+          "end": 146.25,
+          "score": 0.0,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.2575061192699507,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 151.354,
+      "end": 175.955,
+      "text": " Moan Throne Throne 19 Weather Witch Weather Witch When Wine While Wine 20 Tin Shed Add Yes End Bid 21",
+      "words": [
+        {
+          "word": "Moan",
+          "start": 151.354,
+          "end": 151.895,
+          "score": 0.773,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Throne",
+          "start": 152.615,
+          "end": 153.176,
+          "score": 0.783,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Throne",
+          "start": 153.716,
+          "end": 154.217,
+          "score": 0.708,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "19"
+        },
+        {
+          "word": "Weather",
+          "start": 157.179,
+          "end": 157.599,
+          "score": 0.732,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Witch",
+          "start": 158.7,
+          "end": 159.041,
+          "score": 0.803,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Weather",
+          "start": 160.121,
+          "end": 160.542,
+          "score": 0.731,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Witch",
+          "start": 161.603,
+          "end": 161.843,
+          "score": 0.816,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "When",
+          "start": 162.924,
+          "end": 163.244,
+          "score": 0.933,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Wine",
+          "start": 164.085,
+          "end": 164.585,
+          "score": 0.69,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "While",
+          "start": 165.286,
+          "end": 166.787,
+          "score": 0.846,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Wine",
+          "start": 167.648,
+          "end": 168.048,
+          "score": 0.554,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "20"
+        },
+        {
+          "word": "Tin",
+          "start": 169.269,
+          "end": 169.629,
+          "score": 0.808,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Shed",
+          "start": 170.67,
+          "end": 171.071,
+          "score": 0.857,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Add",
+          "start": 172.071,
+          "end": 172.292,
+          "score": 0.769,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Yes",
+          "start": 173.072,
+          "end": 173.473,
+          "score": 0.86,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "End",
+          "start": 174.533,
+          "end": 174.854,
+          "score": 0.819,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "Bid",
+          "start": 175.614,
+          "end": 175.955,
+          "score": 0.959,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "21"
+        }
+      ],
+      "avg_logprob": -0.26637619504561794,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 178.463,
+      "end": 178.863,
+      "text": " Dole.",
+      "words": [
+        {
+          "word": "Dole.",
+          "start": 178.463,
+          "end": 178.863,
+          "score": 0.74,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 179.704,
+      "end": 180.204,
+      "text": "Dole.",
+      "words": [
+        {
+          "word": "Dole.",
+          "start": 179.704,
+          "end": 180.204,
+          "score": 0.762,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 180.985,
+      "end": 181.345,
+      "text": "Dull.",
+      "words": [
+        {
+          "word": "Dull.",
+          "start": 180.985,
+          "end": 181.345,
+          "score": 0.865,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 182.346,
+      "end": 182.966,
+      "text": "Twenty-two.",
+      "words": [
+        {
+          "word": "Twenty-two.",
+          "start": 182.346,
+          "end": 182.966,
+          "score": 0.776,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 183.827,
+      "end": 184.227,
+      "text": "School.",
+      "words": [
+        {
+          "word": "School.",
+          "start": 183.827,
+          "end": 184.227,
+          "score": 0.837,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 185.147,
+      "end": 185.468,
+      "text": "Full.",
+      "words": [
+        {
+          "word": "Full.",
+          "start": 185.147,
+          "end": 185.468,
+          "score": 0.676,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 186.388,
+      "end": 186.828,
+      "text": "Wool.",
+      "words": [
+        {
+          "word": "Wool.",
+          "start": 186.388,
+          "end": 186.828,
+          "score": 0.807,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 187.709,
+      "end": 188.129,
+      "text": "Will.",
+      "words": [
+        {
+          "word": "Will.",
+          "start": 187.709,
+          "end": 188.129,
+          "score": 0.661,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 188.87,
+      "end": 189.29,
+      "text": "Pool.",
+      "words": [
+        {
+          "word": "Pool.",
+          "start": 188.87,
+          "end": 189.29,
+          "score": 0.879,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 190.17,
+      "end": 190.571,
+      "text": "Well.",
+      "words": [
+        {
+          "word": "Well.",
+          "start": 190.17,
+          "end": 190.571,
+          "score": 0.937,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 191.391,
+      "end": 191.932,
+      "text": "Twenty-three.",
+      "words": [
+        {
+          "word": "Twenty-three.",
+          "start": 191.391,
+          "end": 191.932,
+          "score": 0.773,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 192.912,
+      "end": 193.292,
+      "text": "Fill.",
+      "words": [
+        {
+          "word": "Fill.",
+          "start": 192.912,
+          "end": 193.292,
+          "score": 0.87,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 194.513,
+      "end": 194.893,
+      "text": "Filling.",
+      "words": [
+        {
+          "word": "Filling.",
+          "start": 194.513,
+          "end": 194.893,
+          "score": 0.937,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 196.795,
+      "end": 197.275,
+      "text": "Fall.",
+      "words": [
+        {
+          "word": "Fall.",
+          "start": 196.795,
+          "end": 197.275,
+          "score": 0.632,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 197.995,
+      "end": 198.496,
+      "text": "Falling.",
+      "words": [
+        {
+          "word": "Falling.",
+          "start": 197.995,
+          "end": 198.496,
+          "score": 0.862,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 199.556,
+      "end": 199.937,
+      "text": "Fool.",
+      "words": [
+        {
+          "word": "Fool.",
+          "start": 199.556,
+          "end": 199.937,
+          "score": 0.784,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 200.737,
+      "end": 201.237,
+      "text": "Fooling.",
+      "words": [
+        {
+          "word": "Fooling.",
+          "start": 200.737,
+          "end": 201.237,
+          "score": 0.873,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 202.198,
+      "end": 202.618,
+      "text": "Four.",
+      "words": [
+        {
+          "word": "Four.",
+          "start": 202.198,
+          "end": 202.618,
+          "score": 0.923,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 203.419,
+      "end": 204.019,
+      "text": "Twenty-four.",
+      "words": [
+        {
+          "word": "Twenty-four.",
+          "start": 203.419,
+          "end": 204.019,
+          "score": 0.875,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 205.3,
+      "end": 205.6,
+      "text": "Milk.",
+      "words": [
+        {
+          "word": "Milk.",
+          "start": 205.3,
+          "end": 205.6,
+          "score": 0.915,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 206.461,
+      "end": 206.901,
+      "text": "Child.",
+      "words": [
+        {
+          "word": "Child.",
+          "start": 206.461,
+          "end": 206.901,
+          "score": 0.412,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.1491477288983085,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 207.761,
+      "end": 208.421,
+      "text": " Railway.",
+      "words": [
+        {
+          "word": "Railway.",
+          "start": 207.761,
+          "end": 208.421,
+          "score": 0.794,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 208.961,
+      "end": 209.461,
+      "text": "Cold.",
+      "words": [
+        {
+          "word": "Cold.",
+          "start": 208.961,
+          "end": 209.461,
+          "score": 0.91,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 210.522,
+      "end": 209.461,
+      "text": "25.",
+      "words": [
+        {
+          "word": "25."
+        }
+      ],
+      "avg_logprob": -0.20312499538773582
+    },
+    {
+      "start": 210.582,
+      "end": 212.722,
+      "text": "Fairy.",
+      "words": [
+        {
+          "word": "Fairy.",
+          "start": 210.582,
+          "end": 212.722,
+          "score": 0.681,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 213.582,
+      "end": 214.222,
+      "text": "Fairy.",
+      "words": [
+        {
+          "word": "Fairy.",
+          "start": 213.582,
+          "end": 214.222,
+          "score": 0.696,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 215.182,
+      "end": 215.623,
+      "text": "Hearing.",
+      "words": [
+        {
+          "word": "Hearing.",
+          "start": 215.182,
+          "end": 215.623,
+          "score": 0.81,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 216.403,
+      "end": 217.903,
+      "text": "Hearing.",
+      "words": [
+        {
+          "word": "Hearing.",
+          "start": 216.403,
+          "end": 217.903,
+          "score": 0.852,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 217.923,
+      "end": 217.903,
+      "text": "26.",
+      "words": [
+        {
+          "word": "26."
+        }
+      ],
+      "avg_logprob": -0.20312499538773582
+    },
+    {
+      "start": 219.303,
+      "end": 219.803,
+      "text": "City.",
+      "words": [
+        {
+          "word": "City.",
+          "start": 219.303,
+          "end": 219.803,
+          "score": 0.945,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 220.624,
+      "end": 221.144,
+      "text": "Letter.",
+      "words": [
+        {
+          "word": "Letter.",
+          "start": 220.624,
+          "end": 221.144,
+          "score": 0.928,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 222.124,
+      "end": 222.584,
+      "text": "Fatter.",
+      "words": [
+        {
+          "word": "Fatter.",
+          "start": 222.124,
+          "end": 222.584,
+          "score": 0.887,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 223.404,
+      "end": 223.844,
+      "text": "Ladder.",
+      "words": [
+        {
+          "word": "Ladder.",
+          "start": 223.404,
+          "end": 223.844,
+          "score": 0.784,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 224.784,
+      "end": 225.284,
+      "text": "Scatter.",
+      "words": [
+        {
+          "word": "Scatter.",
+          "start": 224.784,
+          "end": 225.284,
+          "score": 0.847,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 226.185,
+      "end": 226.685,
+      "text": "Better.",
+      "words": [
+        {
+          "word": "Better.",
+          "start": 226.185,
+          "end": 226.685,
+          "score": 0.916,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 227.505,
+      "end": 227.985,
+      "text": "Batter.",
+      "words": [
+        {
+          "word": "Batter.",
+          "start": 227.505,
+          "end": 227.985,
+          "score": 0.887,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 228.565,
+      "end": 229.265,
+      "text": "And Peter.",
+      "words": [
+        {
+          "word": "And",
+          "start": 228.565,
+          "end": 228.725,
+          "score": 0.871,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "Peter.",
+          "start": 228.865,
+          "end": 229.265,
+          "score": 0.962,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 229.285,
+      "end": 229.265,
+      "text": "27.",
+      "words": [
+        {
+          "word": "27."
+        }
+      ],
+      "avg_logprob": -0.20312499538773582
+    },
+    {
+      "start": 230.205,
+      "end": 230.325,
+      "text": "Tour.",
+      "words": [
+        {
+          "word": "Tour.",
+          "start": 230.205,
+          "end": 230.325,
+          "score": 0.344,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.20312499538773582,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 233.511,
+      "end": 262.43,
+      "text": " pour, sure, sewer, skewer, cure, pour, 28, street, train, tree, dream, 29, mother, father, nothing, something, 30, think, thin, with, toothbrush, breathe,",
+      "words": [
+        {
+          "word": "pour,",
+          "start": 233.511,
+          "end": 233.911,
+          "score": 0.849,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "sure,",
+          "start": 234.772,
+          "end": 235.212,
+          "score": 0.67,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "sewer,",
+          "start": 236.213,
+          "end": 236.593,
+          "score": 0.924,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "skewer,",
+          "start": 237.394,
+          "end": 238.094,
+          "score": 0.913,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "cure,",
+          "start": 239.295,
+          "end": 239.695,
+          "score": 0.679,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "pour,",
+          "start": 240.456,
+          "end": 240.816,
+          "score": 0.728,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "28,"
+        },
+        {
+          "word": "street,",
+          "start": 243.057,
+          "end": 243.498,
+          "score": 0.883,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "train,",
+          "start": 244.738,
+          "end": 245.179,
+          "score": 0.841,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "tree,",
+          "start": 246.079,
+          "end": 246.46,
+          "score": 0.914,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "dream,",
+          "start": 247.22,
+          "end": 248.941,
+          "score": 0.914,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "29,"
+        },
+        {
+          "word": "mother,",
+          "start": 250.142,
+          "end": 250.542,
+          "score": 0.931,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "father,",
+          "start": 251.243,
+          "end": 251.783,
+          "score": 0.84,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "nothing,",
+          "start": 252.563,
+          "end": 252.944,
+          "score": 0.863,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "something,",
+          "start": 253.824,
+          "end": 254.385,
+          "score": 0.875,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "30,"
+        },
+        {
+          "word": "think,",
+          "start": 256.766,
+          "end": 257.106,
+          "score": 0.908,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "thin,",
+          "start": 257.947,
+          "end": 258.307,
+          "score": 0.904,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "with,",
+          "start": 259.228,
+          "end": 259.508,
+          "score": 0.904,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "toothbrush,",
+          "start": 260.308,
+          "end": 261.009,
+          "score": 0.925,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "breathe,",
+          "start": 261.95,
+          "end": 262.43,
+          "score": 0.699,
+          "speaker": "SPEAKER_00"
+        }
+      ],
+      "avg_logprob": -0.15005095011514166,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 263.698,
+      "end": 267.64,
+      "text": " Clothe, beneath, 32.",
+      "words": [
+        {
+          "word": "Clothe,",
+          "start": 263.698,
+          "end": 264.378,
+          "score": 0.823,
+          "speaker": "SPEAKER_00"
+        },
+        {
+          "word": "beneath,",
+          "start": 265.139,
+          "end": 267.64,
+          "score": 0.768,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "32."
+        }
+      ],
+      "avg_logprob": -0.22400323070328812,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 268.501,
+      "end": 274.384,
+      "text": "Milk, silk, sulk, gold, 33.",
+      "words": [
+        {
+          "word": "Milk,",
+          "start": 268.501,
+          "end": 268.881,
+          "score": 0.869,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "silk,",
+          "start": 269.841,
+          "end": 270.241,
+          "score": 0.878,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "sulk,",
+          "start": 270.982,
+          "end": 271.402,
+          "score": 0.696,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "gold,",
+          "start": 272.102,
+          "end": 274.384,
+          "score": 0.799,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "33."
+        }
+      ],
+      "avg_logprob": -0.22400323070328812,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 274.424,
+      "end": 278.246,
+      "text": "Ellen and Alan, full stop.",
+      "words": [
+        {
+          "word": "Ellen",
+          "start": 274.424,
+          "end": 275.724,
+          "score": 0.938,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "and",
+          "start": 276.285,
+          "end": 276.405,
+          "score": 0.706,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "Alan,",
+          "start": 276.645,
+          "end": 276.945,
+          "score": 0.643,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "full",
+          "start": 277.585,
+          "end": 277.825,
+          "score": 0.91,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "stop.",
+          "start": 277.885,
+          "end": 278.246,
+          "score": 0.878,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.22400323070328812,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 280.247,
+      "end": 280.507,
+      "text": "Thank you.",
+      "words": [
+        {
+          "word": "Thank",
+          "start": 280.247,
+          "end": 280.407,
+          "score": 0.761,
+          "speaker": "SPEAKER_01"
+        },
+        {
+          "word": "you.",
+          "start": 280.447,
+          "end": 280.507,
+          "score": 0.028,
+          "speaker": "SPEAKER_01"
+        }
+      ],
+      "avg_logprob": -0.22400323070328812,
+      "speaker": "SPEAKER_01"
+    }
+  ],
+  "word_segments": [
+    {
+      "word": "Okay,",
+      "start": 2.862,
+      "end": 3.022,
+      "score": 0.302,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "go.",
+      "start": 3.722,
+      "end": 3.942,
+      "score": 0.725,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "New",
+      "start": 5.063,
+      "end": 5.263,
+      "score": 0.804,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Zealand",
+      "start": 5.283,
+      "end": 5.743,
+      "score": 0.767,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "English",
+      "start": 5.803,
+      "end": 6.163,
+      "score": 0.791,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "word",
+      "start": 6.283,
+      "end": 6.603,
+      "score": 0.89,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "list.",
+      "start": 6.643,
+      "end": 7.003,
+      "score": 0.826,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Number",
+      "start": 7.803,
+      "end": 8.063,
+      "score": 0.607,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "one,",
+      "start": 8.143,
+      "end": 8.284,
+      "score": 0.854,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "hit,",
+      "start": 8.824,
+      "end": 9.044,
+      "score": 0.967,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "hid,",
+      "start": 9.384,
+      "end": 9.624,
+      "score": 0.982,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "hint.",
+      "start": 10.104,
+      "end": 10.424,
+      "score": 0.919,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Number",
+      "start": 11.384,
+      "end": 11.604,
+      "score": 0.605,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "two,",
+      "start": 11.644,
+      "end": 11.924,
+      "score": 0.935,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "boot,",
+      "start": 12.905,
+      "end": 13.205,
+      "score": 0.828,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "booed,",
+      "start": 13.745,
+      "end": 14.245,
+      "score": 0.637,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "boo,",
+      "start": 14.885,
+      "end": 15.325,
+      "score": 0.795,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "tune,",
+      "start": 15.966,
+      "end": 16.486,
+      "score": 0.74,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "dune.",
+      "start": 17.026,
+      "end": 17.546,
+      "score": 0.694,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Three,",
+      "start": 18.506,
+      "end": 18.806,
+      "score": 0.835,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bird,",
+      "start": 19.467,
+      "end": 19.887,
+      "score": 0.909,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "curt,",
+      "start": 20.547,
+      "end": 20.887,
+      "score": 0.807,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "burn.",
+      "start": 21.527,
+      "end": 21.947,
+      "score": 0.833,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Four,",
+      "start": 22.447,
+      "end": 22.767,
+      "score": 0.913,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bat,",
+      "start": 23.568,
+      "end": 23.908,
+      "score": 0.841,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bad,",
+      "start": 24.468,
+      "end": 25.068,
+      "score": 0.826,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "back,",
+      "start": 25.668,
+      "end": 26.008,
+      "score": 0.919,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bag,",
+      "start": 26.608,
+      "end": 27.129,
+      "score": 0.902,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "ban.",
+      "start": 27.869,
+      "end": 28.369,
+      "score": 0.913,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Five,",
+      "start": 29.409,
+      "end": 29.829,
+      "score": 0.874,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bit,",
+      "start": 30.65,
+      "end": 30.91,
+      "score": 0.955,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bed,",
+      "start": 31.49,
+      "end": 31.85,
+      "score": 0.913,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Bic,",
+      "start": 32.637,
+      "end": 32.937,
+      "score": 0.83,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "big",
+      "start": 34.238,
+      "end": 34.618,
+      "score": 0.943,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "and",
+      "start": 35.099,
+      "end": 35.199,
+      "score": 0.952,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "bin,",
+      "start": 35.259,
+      "end": 35.639,
+      "score": 0.891,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "six,",
+      "start": 36.44,
+      "end": 36.76,
+      "score": 0.955,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "but,",
+      "start": 37.64,
+      "end": 37.921,
+      "score": 0.842,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "bud,",
+      "start": 38.761,
+      "end": 39.141,
+      "score": 0.923,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "buck,",
+      "start": 40.182,
+      "end": 40.502,
+      "score": 0.585,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "bug,",
+      "start": 42.063,
+      "end": 42.363,
+      "score": 0.854,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "bun,",
+      "start": 43.204,
+      "end": 43.564,
+      "score": 0.891,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "number",
+      "start": 44.445,
+      "end": 44.645,
+      "score": 0.413,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "seven,",
+      "start": 44.665,
+      "end": 44.985,
+      "score": 0.862,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "bark,",
+      "start": 45.866,
+      "end": 46.326,
+      "score": 0.87,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "barn,",
+      "start": 47.087,
+      "end": 47.607,
+      "score": 0.868,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "path,",
+      "start": 48.327,
+      "end": 48.828,
+      "score": 0.795,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "laugh,",
+      "start": 49.448,
+      "end": 49.888,
+      "score": 0.762,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "dance,",
+      "start": 50.529,
+      "end": 51.009,
+      "score": 0.889,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "eight,",
+      "start": 51.87,
+      "end": 52.01,
+      "score": 0.902,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Bought.",
+      "start": 52.876,
+      "end": 53.236,
+      "score": 0.646,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Bored.",
+      "start": 53.957,
+      "end": 54.457,
+      "score": 0.722,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Born.",
+      "start": 55.218,
+      "end": 55.638,
+      "score": 0.677,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Bore.",
+      "start": 56.319,
+      "end": 56.719,
+      "score": 0.872,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Nine.",
+      "start": 57.54,
+      "end": 57.92,
+      "score": 0.9,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Book.",
+      "start": 58.601,
+      "end": 58.861,
+      "score": 0.955,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Good.",
+      "start": 59.702,
+      "end": 59.962,
+      "score": 0.966,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Put.",
+      "start": 60.803,
+      "end": 61.063,
+      "score": 0.912,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Tin.",
+      "start": 62.004,
+      "end": 62.424,
+      "score": 0.922,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Beet.",
+      "start": 63.205,
+      "end": 63.485,
+      "score": 0.862,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Bed.",
+      "start": 64.526,
+      "end": 64.926,
+      "score": 0.84,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Beak.",
+      "start": 66.428,
+      "end": 66.648,
+      "score": 0.936,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bean",
+      "start": 68.465,
+      "end": 68.825,
+      "score": 0.87,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "sorry",
+      "start": 69.165,
+      "end": 69.445,
+      "score": 0.901,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "that's",
+      "start": 69.485,
+      "end": 69.665,
+      "score": 0.585,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "uh",
+      "start": 69.985,
+      "end": 70.225,
+      "score": 0.568,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "can",
+      "start": 70.425,
+      "end": 70.565,
+      "score": 0.902,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "i",
+      "start": 70.605,
+      "end": 70.705,
+      "score": 0.566,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "repeat",
+      "start": 70.725,
+      "end": 71.446,
+      "score": 0.594,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "10"
+    },
+    {
+      "word": "beat",
+      "start": 71.666,
+      "end": 71.946,
+      "score": 0.782,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bead",
+      "start": 72.586,
+      "end": 73.026,
+      "score": 0.85,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "beak",
+      "start": 73.626,
+      "end": 73.926,
+      "score": 0.898,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bean",
+      "start": 74.866,
+      "end": 75.186,
+      "score": 0.761,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "number",
+      "start": 75.866,
+      "end": 76.066,
+      "score": 0.706,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "11"
+    },
+    {
+      "word": "loud",
+      "start": 76.106,
+      "end": 77.687,
+      "score": 0.803,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "lout",
+      "start": 78.827,
+      "end": 79.187,
+      "score": 0.886,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "howl",
+      "start": 79.787,
+      "end": 80.287,
+      "score": 0.81,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "cow",
+      "start": 80.987,
+      "end": 81.508,
+      "score": 0.94,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "town",
+      "start": 81.928,
+      "end": 82.328,
+      "score": 0.958,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "12"
+    },
+    {
+      "word": "tie",
+      "start": 83.268,
+      "end": 83.688,
+      "score": 0.88,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "tied",
+      "start": 84.368,
+      "end": 84.828,
+      "score": 0.658,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "tight",
+      "start": 85.368,
+      "end": 85.928,
+      "score": 0.48,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "pie",
+      "start": 86.969,
+      "end": 87.349,
+      "score": 0.75,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "pine",
+      "start": 88.069,
+      "end": 88.469,
+      "score": 0.691,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "13"
+    },
+    {
+      "word": "hay",
+      "start": 88.929,
+      "end": 89.409,
+      "score": 0.744,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bay",
+      "start": 89.429,
+      "end": 89.489,
+      "score": 0.0,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bait",
+      "start": 90.229,
+      "end": 90.549,
+      "score": 0.783,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Paid,",
+      "start": 94.878,
+      "end": 95.378,
+      "score": 0.852,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "pay,",
+      "start": 96.079,
+      "end": 96.519,
+      "score": 0.935,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "pain,",
+      "start": 97.119,
+      "end": 97.559,
+      "score": 0.827,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "take,",
+      "start": 98.26,
+      "end": 98.6,
+      "score": 0.899,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "fourteen,",
+      "start": 99.54,
+      "end": 100.241,
+      "score": 0.787,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "moat,",
+      "start": 101.381,
+      "end": 101.701,
+      "score": 0.907,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "mow,",
+      "start": 103.042,
+      "end": 103.482,
+      "score": 0.779,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "mowed,",
+      "start": 104.423,
+      "end": 104.943,
+      "score": 0.692,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "moan,",
+      "start": 105.944,
+      "end": 106.324,
+      "score": 0.936,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "fifteen,",
+      "start": 107.304,
+      "end": 107.904,
+      "score": 0.893,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "beer,",
+      "start": 109.065,
+      "end": 109.425,
+      "score": 0.854,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "bear,",
+      "start": 110.426,
+      "end": 110.786,
+      "score": 0.841,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "hear,",
+      "start": 111.726,
+      "end": 112.107,
+      "score": 0.783,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "hair,",
+      "start": 112.847,
+      "end": 113.247,
+      "score": 0.724,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "ear,",
+      "start": 114.508,
+      "end": 114.808,
+      "score": 0.744,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "air,",
+      "start": 114.828,
+      "end": 116.009,
+      "score": 0.55,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "sixteen,",
+      "start": 116.909,
+      "end": 117.449,
+      "score": 0.904,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "spear,",
+      "start": 118.43,
+      "end": 118.83,
+      "score": 0.788,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "spare,",
+      "start": 119.81,
+      "end": 120.231,
+      "score": 0.682,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Shear,",
+      "start": 121.451,
+      "end": 121.832,
+      "score": 0.605,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "share,",
+      "start": 123.033,
+      "end": 123.413,
+      "score": 0.384,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "cheer,",
+      "start": 124.213,
+      "end": 124.594,
+      "score": 0.796,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "chair.",
+      "start": 125.294,
+      "end": 125.655,
+      "score": 0.712,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Seventeen,",
+      "start": 126.675,
+      "end": 127.356,
+      "score": 0.821,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "hid,",
+      "start": 128.116,
+      "end": 128.377,
+      "score": 0.748,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "had,",
+      "start": 129.057,
+      "end": 129.497,
+      "score": 0.75,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "hard,",
+      "start": 130.438,
+      "end": 130.939,
+      "score": 0.822,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "hoard,",
+      "start": 131.739,
+      "end": 132.24,
+      "score": 0.812,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "hood,",
+      "start": 132.98,
+      "end": 133.561,
+      "score": 0.838,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "hood,",
+      "start": 134.982,
+      "end": 135.242,
+      "score": 0.919,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "head,",
+      "start": 136.363,
+      "end": 136.683,
+      "score": 0.857,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "herd,",
+      "start": 137.704,
+      "end": 138.124,
+      "score": 0.835,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "heed,",
+      "start": 139.425,
+      "end": 139.845,
+      "score": 0.913,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "hud,",
+      "start": 140.846,
+      "end": 141.186,
+      "score": 0.836,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "and",
+      "start": 141.907,
+      "end": 142.027,
+      "score": 0.802,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "hod.",
+      "start": 142.127,
+      "end": 142.547,
+      "score": 0.862,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Eighteen,",
+      "start": 144.049,
+      "end": 144.469,
+      "score": 0.946,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "groan,",
+      "start": 144.489,
+      "end": 144.609,
+      "score": 0.099,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "groan,",
+      "start": 145.75,
+      "end": 146.15,
+      "score": 0.891,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "moan,",
+      "start": 146.17,
+      "end": 146.25,
+      "score": 0.0,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Moan",
+      "start": 151.354,
+      "end": 151.895,
+      "score": 0.773,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Throne",
+      "start": 152.615,
+      "end": 153.176,
+      "score": 0.783,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Throne",
+      "start": 153.716,
+      "end": 154.217,
+      "score": 0.708,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "19"
+    },
+    {
+      "word": "Weather",
+      "start": 157.179,
+      "end": 157.599,
+      "score": 0.732,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Witch",
+      "start": 158.7,
+      "end": 159.041,
+      "score": 0.803,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Weather",
+      "start": 160.121,
+      "end": 160.542,
+      "score": 0.731,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Witch",
+      "start": 161.603,
+      "end": 161.843,
+      "score": 0.816,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "When",
+      "start": 162.924,
+      "end": 163.244,
+      "score": 0.933,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Wine",
+      "start": 164.085,
+      "end": 164.585,
+      "score": 0.69,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "While",
+      "start": 165.286,
+      "end": 166.787,
+      "score": 0.846,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Wine",
+      "start": 167.648,
+      "end": 168.048,
+      "score": 0.554,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "20"
+    },
+    {
+      "word": "Tin",
+      "start": 169.269,
+      "end": 169.629,
+      "score": 0.808,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Shed",
+      "start": 170.67,
+      "end": 171.071,
+      "score": 0.857,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Add",
+      "start": 172.071,
+      "end": 172.292,
+      "score": 0.769,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Yes",
+      "start": 173.072,
+      "end": 173.473,
+      "score": 0.86,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "End",
+      "start": 174.533,
+      "end": 174.854,
+      "score": 0.819,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Bid",
+      "start": 175.614,
+      "end": 175.955,
+      "score": 0.959,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "21"
+    },
+    {
+      "word": "Dole.",
+      "start": 178.463,
+      "end": 178.863,
+      "score": 0.74,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Dole.",
+      "start": 179.704,
+      "end": 180.204,
+      "score": 0.762,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Dull.",
+      "start": 180.985,
+      "end": 181.345,
+      "score": 0.865,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Twenty-two.",
+      "start": 182.346,
+      "end": 182.966,
+      "score": 0.776,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "School.",
+      "start": 183.827,
+      "end": 184.227,
+      "score": 0.837,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Full.",
+      "start": 185.147,
+      "end": 185.468,
+      "score": 0.676,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Wool.",
+      "start": 186.388,
+      "end": 186.828,
+      "score": 0.807,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Will.",
+      "start": 187.709,
+      "end": 188.129,
+      "score": 0.661,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Pool.",
+      "start": 188.87,
+      "end": 189.29,
+      "score": 0.879,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Well.",
+      "start": 190.17,
+      "end": 190.571,
+      "score": 0.937,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Twenty-three.",
+      "start": 191.391,
+      "end": 191.932,
+      "score": 0.773,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Fill.",
+      "start": 192.912,
+      "end": 193.292,
+      "score": 0.87,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Filling.",
+      "start": 194.513,
+      "end": 194.893,
+      "score": 0.937,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Fall.",
+      "start": 196.795,
+      "end": 197.275,
+      "score": 0.632,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Falling.",
+      "start": 197.995,
+      "end": 198.496,
+      "score": 0.862,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Fool.",
+      "start": 199.556,
+      "end": 199.937,
+      "score": 0.784,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Fooling.",
+      "start": 200.737,
+      "end": 201.237,
+      "score": 0.873,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Four.",
+      "start": 202.198,
+      "end": 202.618,
+      "score": 0.923,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Twenty-four.",
+      "start": 203.419,
+      "end": 204.019,
+      "score": 0.875,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Milk.",
+      "start": 205.3,
+      "end": 205.6,
+      "score": 0.915,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Child.",
+      "start": 206.461,
+      "end": 206.901,
+      "score": 0.412,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Railway.",
+      "start": 207.761,
+      "end": 208.421,
+      "score": 0.794,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Cold.",
+      "start": 208.961,
+      "end": 209.461,
+      "score": 0.91,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "25."
+    },
+    {
+      "word": "Fairy.",
+      "start": 210.582,
+      "end": 212.722,
+      "score": 0.681,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Fairy.",
+      "start": 213.582,
+      "end": 214.222,
+      "score": 0.696,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Hearing.",
+      "start": 215.182,
+      "end": 215.623,
+      "score": 0.81,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Hearing.",
+      "start": 216.403,
+      "end": 217.903,
+      "score": 0.852,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "26."
+    },
+    {
+      "word": "City.",
+      "start": 219.303,
+      "end": 219.803,
+      "score": 0.945,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Letter.",
+      "start": 220.624,
+      "end": 221.144,
+      "score": 0.928,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Fatter.",
+      "start": 222.124,
+      "end": 222.584,
+      "score": 0.887,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Ladder.",
+      "start": 223.404,
+      "end": 223.844,
+      "score": 0.784,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Scatter.",
+      "start": 224.784,
+      "end": 225.284,
+      "score": 0.847,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Better.",
+      "start": 226.185,
+      "end": 226.685,
+      "score": 0.916,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Batter.",
+      "start": 227.505,
+      "end": 227.985,
+      "score": 0.887,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "And",
+      "start": 228.565,
+      "end": 228.725,
+      "score": 0.871,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Peter.",
+      "start": 228.865,
+      "end": 229.265,
+      "score": 0.962,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "27."
+    },
+    {
+      "word": "Tour.",
+      "start": 230.205,
+      "end": 230.325,
+      "score": 0.344,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "pour,",
+      "start": 233.511,
+      "end": 233.911,
+      "score": 0.849,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "sure,",
+      "start": 234.772,
+      "end": 235.212,
+      "score": 0.67,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "sewer,",
+      "start": 236.213,
+      "end": 236.593,
+      "score": 0.924,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "skewer,",
+      "start": 237.394,
+      "end": 238.094,
+      "score": 0.913,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "cure,",
+      "start": 239.295,
+      "end": 239.695,
+      "score": 0.679,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "pour,",
+      "start": 240.456,
+      "end": 240.816,
+      "score": 0.728,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "28,"
+    },
+    {
+      "word": "street,",
+      "start": 243.057,
+      "end": 243.498,
+      "score": 0.883,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "train,",
+      "start": 244.738,
+      "end": 245.179,
+      "score": 0.841,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "tree,",
+      "start": 246.079,
+      "end": 246.46,
+      "score": 0.914,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "dream,",
+      "start": 247.22,
+      "end": 248.941,
+      "score": 0.914,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "29,"
+    },
+    {
+      "word": "mother,",
+      "start": 250.142,
+      "end": 250.542,
+      "score": 0.931,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "father,",
+      "start": 251.243,
+      "end": 251.783,
+      "score": 0.84,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "nothing,",
+      "start": 252.563,
+      "end": 252.944,
+      "score": 0.863,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "something,",
+      "start": 253.824,
+      "end": 254.385,
+      "score": 0.875,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "30,"
+    },
+    {
+      "word": "think,",
+      "start": 256.766,
+      "end": 257.106,
+      "score": 0.908,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "thin,",
+      "start": 257.947,
+      "end": 258.307,
+      "score": 0.904,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "with,",
+      "start": 259.228,
+      "end": 259.508,
+      "score": 0.904,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "toothbrush,",
+      "start": 260.308,
+      "end": 261.009,
+      "score": 0.925,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "breathe,",
+      "start": 261.95,
+      "end": 262.43,
+      "score": 0.699,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "Clothe,",
+      "start": 263.698,
+      "end": 264.378,
+      "score": 0.823,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "word": "beneath,",
+      "start": 265.139,
+      "end": 267.64,
+      "score": 0.768,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "32."
+    },
+    {
+      "word": "Milk,",
+      "start": 268.501,
+      "end": 268.881,
+      "score": 0.869,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "silk,",
+      "start": 269.841,
+      "end": 270.241,
+      "score": 0.878,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "sulk,",
+      "start": 270.982,
+      "end": 271.402,
+      "score": 0.696,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "gold,",
+      "start": 272.102,
+      "end": 274.384,
+      "score": 0.799,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "33."
+    },
+    {
+      "word": "Ellen",
+      "start": 274.424,
+      "end": 275.724,
+      "score": 0.938,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "and",
+      "start": 276.285,
+      "end": 276.405,
+      "score": 0.706,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Alan,",
+      "start": 276.645,
+      "end": 276.945,
+      "score": 0.643,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "full",
+      "start": 277.585,
+      "end": 277.825,
+      "score": 0.91,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "stop.",
+      "start": 277.885,
+      "end": 278.246,
+      "score": 0.878,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "Thank",
+      "start": 280.247,
+      "end": 280.407,
+      "score": 0.761,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "word": "you.",
+      "start": 280.447,
+      "end": 280.507,
+      "score": 0.028,
+      "speaker": "SPEAKER_01"
+    }
+  ],
+  "language": "en"
+}
