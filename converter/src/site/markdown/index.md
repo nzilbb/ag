@@ -12,19 +12,20 @@ These are standalone programs that convert transcripts from one tool format to a
 * tex - *LaTeX* files
 * txt - *plain text* files
 * kaldi - input files for the [Kaldi](https://kaldi-asr.org/) automatic speech recognition training system
+* whisper - output .json files from the [Whisper](https://openai.com/index/whisper/) automatic speech recognition system (and its derivatives)
 
-| to↓ from→ | trs | eaf  | vtt | slt | cha | textgrid | txt |
-| --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: |
-| **trs** | | [eaf-to-trs](eaf-to-trs/index.html) | [vtt-to-trs](vtt-to-trs/index.html) | [slt-to-trs](slt-to-trs/index.html) | [cha-to-trs](cha-to-trs/index.html) | [textgrid-to-trs](textgrid-to-trs/index.html) | |
-| **eaf** | [trs-to-eaf](trs-to-eaf/index.html) | | [vtt-to-eaf](vtt-to-eaf/index.html) | [slt-to-eaf](slt-to-eaf/index.html) | [cha-to-eaf](cha-to-eaf/index.html) | [textgrid-to-eaf](textgrid-to-eaf/index.html) | [txt-to-eaf](txt-to-eaf/index.html) |
-| **vtt** | [trs-to-vtt](trs-to-vtt/index.html) | [eaf-to-vtt](eaf-to-vtt/index.html) | | [slt-to-vtt](slt-to-vtt/index.html) | [cha-to-vtt](cha-to-vtt/index.html) | [textgrid-to-vtt](textgrid-to-vtt/index.html) | |
-| **slt** | [trs-to-slt](trs-to-slt/index.html) | [eaf-to-slt](eaf-to-slt/index.html) | | | | | |
-| **cha** | [trs-to-cha](trs-to-cha/index.html) | [eaf-to-cha](eaf-to-cha/index.html) | [vtt-to-cha](vtt-to-cha/index.html) | | | | |
-| **textgrid** | [trs-to-textgrid](trs-to-textgrid/index.html) | [eaf-to-textgrid](eaf-to-textgrid/index.html) | [vtt-to-textgrid](vtt-to-textgrid/index.html) | [slt-to-textgrid](slt-to-textgrid/index.html) | [cha-to-textgrid](cha-to-textgrid/index.html) | | |
-| **txt** | [trs-to-txt](trs-to-txt/index.html) | | | | | | |
-| **pdf** | [trs-to-pdf](trs-to-pdf/index.html) | [eaf-to-pdf](eaf-to-pdf/index.html) | [vtt-to-pdf](vtt-to-pdf/index.html) | [slt-to-pdf](slt-to-pdf/index.html) | [cha-to-pdf](cha-to-pdf/index.html) | [textgrid-to-pdf](textgrid-to-pdf/index.html) | |
-| **tex** | [trs-to-tex](trs-to-tex/index.html) | [eaf-to-tex](eaf-to-tex/index.html) | [vtt-to-tex](vtt-to-tex/index.html) | [slt-to-tex](slt-to-tex/index.html) | | [textgrid-to-tex](textgrid-to-tex/index.html) | |
-| **kaldi** | [trs-to-kaldi](trs-to-kaldi/index.html) | [eaf-to-kaldi](eaf-to-kaldi/index.html) | | | | [textgrid-to-kaldi](textgrid-to-kaldi/index.html) | |
+| to↓ from→ | trs | eaf  | vtt | slt | cha | textgrid | txt | whisper |
+| --- | :---: | :---:  | :---: | :---: | :---: | :---: | :---: | :---: |
+| **trs** | | [eaf-to-trs](eaf-to-trs/index.html) | [vtt-to-trs](vtt-to-trs/index.html) | [slt-to-trs](slt-to-trs/index.html) | [cha-to-trs](cha-to-trs/index.html) | [textgrid-to-trs](textgrid-to-trs/index.html) | | |
+| **eaf** | [trs-to-eaf](trs-to-eaf/index.html) | | [vtt-to-eaf](vtt-to-eaf/index.html) | [slt-to-eaf](slt-to-eaf/index.html) | [cha-to-eaf](cha-to-eaf/index.html) | [textgrid-to-eaf](textgrid-to-eaf/index.html) | [txt-to-eaf](txt-to-eaf/index.html) | [whisper-to-eaf](whisper-to-eaf/index.html) |
+| **vtt** | [trs-to-vtt](trs-to-vtt/index.html) | [eaf-to-vtt](eaf-to-vtt/index.html) | | [slt-to-vtt](slt-to-vtt/index.html) | [cha-to-vtt](cha-to-vtt/index.html) | [textgrid-to-vtt](textgrid-to-vtt/index.html) | | |
+| **slt** | [trs-to-slt](trs-to-slt/index.html) | [eaf-to-slt](eaf-to-slt/index.html) | | | | | | |
+| **cha** | [trs-to-cha](trs-to-cha/index.html) | [eaf-to-cha](eaf-to-cha/index.html) | [vtt-to-cha](vtt-to-cha/index.html) | | | | | |
+| **textgrid** | [trs-to-textgrid](trs-to-textgrid/index.html) | [eaf-to-textgrid](eaf-to-textgrid/index.html) | [vtt-to-textgrid](vtt-to-textgrid/index.html) | [slt-to-textgrid](slt-to-textgrid/index.html) | [cha-to-textgrid](cha-to-textgrid/index.html) | | | |
+| **txt** | [trs-to-txt](trs-to-txt/index.html) | | | | | | | |
+| **pdf** | [trs-to-pdf](trs-to-pdf/index.html) | [eaf-to-pdf](eaf-to-pdf/index.html) | [vtt-to-pdf](vtt-to-pdf/index.html) | [slt-to-pdf](slt-to-pdf/index.html) | [cha-to-pdf](cha-to-pdf/index.html) | [textgrid-to-pdf](textgrid-to-pdf/index.html) | | |
+| **tex** | [trs-to-tex](trs-to-tex/index.html) | [eaf-to-tex](eaf-to-tex/index.html) | [vtt-to-tex](vtt-to-tex/index.html) | [slt-to-tex](slt-to-tex/index.html) | | [textgrid-to-tex](textgrid-to-tex/index.html) | | |
+| **kaldi** | [trs-to-kaldi](trs-to-kaldi/index.html) | [eaf-to-kaldi](eaf-to-kaldi/index.html) | | | | [textgrid-to-kaldi](textgrid-to-kaldi/index.html) | | |
 
 To use a particular converter, you need to have Java installed on your
 system. Download the file, and double-click it to run.
