@@ -83,24 +83,45 @@ switch, or use the *Help|Information* menu option of the conversion utility conc
    - add the following to *dependencies*
    ```
     <dependency>
-      <groupId>nzilbb</groupId>
-      <artifactId>converter-base</artifactId>
-      <version>[1.0.4,)</version>
-    </dependency>
-    <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>${input.package}</artifactId>
       <version>[${input.version},)</version>
     </dependency>
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>${output.package}</artifactId>
       <version>[${output.version},)</version>
+    </dependency>
+    <dependency>
+      <groupId>nz.ilbb.ag</groupId>
+      <artifactId>nzilbb.ag</artifactId>
+      <version>1.3.0</version>
     </dependency>
    ```
    - add the following to *build*
    ```
     <plugins>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.1</version>
+        <executions>
+          <execution>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>nzilbb.converter.InputFormatToOutputFormat</mainClass>
+          <arguments>
+            <argument>--helpmarkdown=${project.basedir}/src/site/markdown/index.md</argument>
+          </arguments>
+          <blockSystemExit>true</blockSystemExit>
+        </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.0.2</version>
@@ -154,27 +175,21 @@ switch, or use the *Help|Information* menu option of the conversion utility conc
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>nzilbb</groupId>
+                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>${input.package}</artifactId>
                   <version>${input.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>nzilbb</groupId>
+                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>${output.package}</artifactId>
                   <version>${output.version}</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>nzilbb</groupId>
-                  <artifactId>converter-base</artifactId>
-                  <version>1.0.4</version>
-                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>nzilbb</groupId>
+                  <groupId>nz.ilbb.ag</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>1.0.6</version>
+                  <version>1.2.4-SNAPSHOT</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>
@@ -207,4 +222,4 @@ switch, or use the *Help|Information* menu option of the conversion utility conc
    cp ../../ag/src/site/resources/images/labbcat.png \
      src/main/resources/nzilbb/converter/InformatToOutformat.png
    ```
-6. Add your implementation to *informattooutformat/src/main/java/nzilbb/converter/InformatToOutformat.java
+6. Add your implementation to\ informattooutformat/src/main/java/nzilbb/converter/InformatToOutformat.java
