@@ -407,15 +407,15 @@ public class WhisperDeserializer implements GraphDeserializer {
   
   /**
    * Maximum utterance duration to target (seconds). Longer utterances will be
-   * split on longer inter-word pauses. 
+   * split on longer inter-word pauses. 15s by default. 
    * @see #getMaxUtteranceDuration()
    * @see #setMaxUtteranceDuration(Double)
    */
-  protected Double maxUtteranceDuration = 20.0;
+  protected Double maxUtteranceDuration = 15.0;
   /**
    * Getter for {@link #maxUtteranceDuration}: Maximum utterance
    * duration to target. Longer utterances will be split on longer
-   * inter-word pauses. 20s by default.
+   * inter-word pauses. 15s by default.
    * @return Maximum utterance duration to target (seconds). Longer utterances
    * will be split on longer inter-word pauses. 
    */
@@ -423,7 +423,7 @@ public class WhisperDeserializer implements GraphDeserializer {
   /**
    * Setter for {@link #maxUtteranceDuration}: Maximum utterance
    * duration to target. Longer utterances will be split on longer
-   * inter-word pauses. 20s by default. 
+   * inter-word pauses.
    * @param newMaxUtteranceDuration Maximum utterance duration to
    * target. Longer utterances will be split on longer inter-word
    * pauses. 
@@ -931,6 +931,12 @@ public class WhisperDeserializer implements GraphDeserializer {
         segment.getJsonNumber("start").doubleValue(), initialUtteranceBoundaryConfidence);
       Anchor end = graph.getOrCreateAnchorAt(
         segment.getJsonNumber("end").doubleValue(), initialUtteranceBoundaryConfidence);
+      if (start.getOffset() > end.getOffset()) { // backwards segment
+        warnings.add("Utterance " + start + "-" + end + " backwards.");
+        Anchor originalStart = start;
+        start = end;
+        end = originalStart;
+      }
       String speaker = graph.getId();
       if (segment.containsKey("speaker")) { // explicit speaker
         speaker = segment.getString("speaker");
@@ -945,7 +951,11 @@ public class WhisperDeserializer implements GraphDeserializer {
         participants.get(speaker).setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       }
       
-      if (currentTurn == null || !currentTurn.getLabel().equals(speaker)) {
+      if (currentTurn == null || !currentTurn.getLabel().equals(speaker) // speaker change
+          // or last utterance was a while ago
+          || (utterancePadding != null && lastUtteranceEnd != null
+              && start.getOffset() - lastUtteranceEnd.getOffset()
+              > utterancePadding * 2)) {
         currentTurn = new Annotation(
           null, speaker, schema.getTurnLayerId(),
           start.getId(), end.getId(), participants.get(speaker).getId());
@@ -1013,7 +1023,8 @@ public class WhisperDeserializer implements GraphDeserializer {
           lastWord.setEndId(end.getId());
         }        
       } // there are individual word tokens
-        
+
+      lastUtteranceEnd = utterance.getEnd();
     } // next segment
 
     if (maxUtteranceDuration != null) {
@@ -1064,7 +1075,6 @@ public class WhisperDeserializer implements GraphDeserializer {
     } // maxUtteranceDuration is set
 
     if (utterancePadding != null) { // pad utterances where possible
-      System.out.println("utterancePadding " + utterancePadding);
       // utterance boundaries are often the first/last word boundaries
       // but the word boundaries may not be precise, so we pad utterances
       // where possible to ensure they entirely cover the words they contain
@@ -1083,7 +1093,7 @@ public class WhisperDeserializer implements GraphDeserializer {
         } else { // there is a previous utterance
           if (utterance.getStart().getOffset() - previousUtterance.getEnd().getOffset()
               > utterancePadding*2) { // the previous utterance was too long ago
-            Anchor newStart = graph.getOrCreateAnchorAt(
+            Anchor newStart = graph.createAnchorAt(
               utterance.getStart().getOffset() - utterancePadding,
               Constants.CONFIDENCE_MANUAL);
               if (utterance.getStartId().equals(utterance.getParent().getStartId())) {
@@ -1091,7 +1101,7 @@ public class WhisperDeserializer implements GraphDeserializer {
                 utterance.getParent().setStart(newStart);
               }
             utterance.setStart(newStart);
-            Anchor newEnd = graph.getOrCreateAnchorAt(
+            Anchor newEnd = graph.createAnchorAt(
               previousUtterance.getEnd().getOffset() + utterancePadding,
               Constants.CONFIDENCE_MANUAL);
             if (previousUtterance.getEndId().equals(
@@ -1102,7 +1112,7 @@ public class WhisperDeserializer implements GraphDeserializer {
             previousUtterance.setEnd(newEnd);
           } else { // the previous utterance could share an anchor with this one
             // set the shared offset as halfway between them
-            Anchor newShared = graph.getOrCreateAnchorAt(
+            Anchor newShared = graph.createAnchorAt(
               previousUtterance.getEnd().getOffset()
               + ((utterance.getStart().getOffset()
                   - previousUtterance.getEnd().getOffset())/2),

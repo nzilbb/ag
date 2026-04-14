@@ -47,7 +47,7 @@ of `(...)` corresponds to the CA/CHAT convention for short pauses.
 maxUtteranceDuration
 : Maximum utterance duration to target in seconds. Utterances with a
 duration longer than this will be split on longer inter-word pauses
-(the longest pause first). The default value is `20.0`s.
+(the longest pause first). The default value is `15.0`s.
 
 utterancePadding
 :Maximum number of seconds to subtract from the start time and add to

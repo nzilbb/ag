@@ -316,7 +316,7 @@ public class TestWhisperDeserializer {
     assertEquals("longPauseLabel",
                  "(...)", (String)(configuration.get("longPauseLabel").getValue()));
     assertEquals("maxUtteranceDuration",
-                 Double.valueOf(20),
+                 Double.valueOf(15),
                  (Double)(configuration.get("maxUtteranceDuration").getValue()));
     assertEquals("utterancePadding",
                  Double.valueOf(0.5),
@@ -350,10 +350,12 @@ public class TestWhisperDeserializer {
     Graph g = graphs[0];
 
     // lines with no timestamp are ignored but warned about
-    for (String warning : deserializer.getWarnings()) {
-      assertEquals("Warning for comment line", "Invalid line: \"# New turn here:\"", warning);
-    }
-    
+    String[] warnings = deserializer.getWarnings();
+    assertEquals("Number of warnings", 3, warnings.length);
+    assertEquals("warning 0", "Utterance 210.522-209.461 backwards.", warnings[0]);
+    assertEquals("warning 1", "Utterance 217.923-217.903 backwards.", warnings[1]); 
+    assertEquals("warning 2", "Utterance 229.285-229.265 backwards.", warnings[2]);
+   
     assertEquals("wordlist.json", g.getId());
     assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
     
@@ -368,7 +370,7 @@ public class TestWhisperDeserializer {
     // turns
     Annotation[] turns = g.all("turn");
     // a turn break was added by having an utterance start after the previous utterance end
-    assertEquals("Two turns", 9, turns.length);
+    assertEquals("Two turns", 23, turns.length);
     assertEquals("Turn 1 label is speaker name",
                  "SPEAKER_01", turns[0].getLabel());
     assertEquals("Turn 2 label is speaker name",
@@ -376,7 +378,8 @@ public class TestWhisperDeserializer {
     assertEquals(0, g.compareOffsets(2.362, turns[0].getStart().getOffset()));
     assertEquals(0, g.compareOffsets(4.442, turns[0].getEnd().getOffset()));
     assertEquals(0, g.compareOffsets(4.563, turns[1].getStart().getOffset()));
-    assertEquals(0, g.compareOffsets(32.2435, turns[1].getEnd().getOffset()));
+    assertEquals("second turn end " + turns[1].getEnd().getOffset(),
+                 0, g.compareOffsets(28.869, turns[1].getEnd().getOffset()));
     
     // utterances
     Annotation[] utterances = g.all("utterance");
@@ -407,6 +410,7 @@ public class TestWhisperDeserializer {
                    280.507, utterances[utterances.length-1].getEnd().getOffset()));
 
     // all anchors are 'manual' confidence (even though they were automatically determined)
+    // and none are backwards (in the test file, utterace 50 is 210.522-209.461
     for (Annotation utterance : utterances) {
       assertEquals("check utterance start confidence " + utterance.getStart(),
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL),
@@ -414,6 +418,8 @@ public class TestWhisperDeserializer {
       assertEquals("check utterance end confidence " + utterance.getEnd(),
                    Integer.valueOf(Constants.CONFIDENCE_MANUAL),
                    utterance.getEnd().getConfidence());
+      assertTrue("utterance not backwards " + utterance.getStart()+"-"+utterance.getEnd(),
+                 utterance.getDuration() >= 0);
     }
     
     // words
@@ -510,7 +516,7 @@ public class TestWhisperDeserializer {
     assertEquals("longPauseLabel",
                  "(...)", (String)(configuration.get("longPauseLabel").getValue()));
     assertEquals("maxUtteranceDuration",
-                 Double.valueOf(20),
+                 Double.valueOf(15),
                  (Double)(configuration.get("maxUtteranceDuration").getValue()));
     assertEquals("utterancePadding",
                  Double.valueOf(0.5),
@@ -547,14 +553,8 @@ public class TestWhisperDeserializer {
     Graph[] graphs = deserializer.deserialize();
     Graph g = graphs[0];
 
-    // lines with no timestamp are ignored but warned about
-    for (String warning : deserializer.getWarnings()) {
-      assertEquals("Warning for comment line", "Invalid line: \"# New turn here:\"", warning);
-    }
-    
     assertEquals("wordlist.json", g.getId());
     assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
-    
     
     // participants     
     Annotation[] speakers = g.all("who"); 
@@ -702,8 +702,8 @@ public class TestWhisperDeserializer {
                  "(..)", (String)(configuration.get("mediumPauseLabel").getValue()));
     assertEquals("longPauseLabel",
                  "(...)", (String)(configuration.get("longPauseLabel").getValue()));
-    assertEquals("maxUtteranceDuration",
-                 Double.valueOf(20),
+    assertEquals("maxUtteranceDuration default",
+                 Double.valueOf(15),
                  (Double)(configuration.get("maxUtteranceDuration").getValue()));
     assertEquals("utterancePadding",
                  Double.valueOf(0.5),
@@ -712,6 +712,7 @@ public class TestWhisperDeserializer {
     configuration.get("shortPauseLabel").setValue("");
     configuration.get("mediumPauseLabel").setValue("");
     configuration.get("longPauseLabel").setValue("");
+    configuration.get("maxUtteranceDuration").setValue(Double.valueOf(20));
 
     deserializer.configure(configuration, schema);
     assertEquals("shortPauseLabel unset",
@@ -735,11 +736,6 @@ public class TestWhisperDeserializer {
     Graph[] graphs = deserializer.deserialize();
     Graph g = graphs[0];
 
-    // lines with no timestamp are ignored but warned about
-    for (String warning : deserializer.getWarnings()) {
-      assertEquals("Warning for comment line", "Invalid line: \"# New turn here:\"", warning);
-    }
-    
     assertEquals("wordlist.json", g.getId());
     assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
     
@@ -754,7 +750,7 @@ public class TestWhisperDeserializer {
     // turns
     Annotation[] turns = g.all("turn");
     // a turn break was added by having an utterance start after the previous utterance end
-    assertEquals("Two turns", 9, turns.length);
+    assertEquals("Two turns", 23, turns.length);
     assertEquals("Turn 1 label is speaker name",
                  "SPEAKER_01", turns[0].getLabel());
     assertEquals("Turn 2 label is speaker name",
@@ -766,7 +762,7 @@ public class TestWhisperDeserializer {
     assertEquals("second turn start padded",
                  Double.valueOf(4.563), turns[1].getStart().getOffset());
     assertEquals("second turn end padded",
-                 Double.valueOf(32.2435), turns[1].getEnd().getOffset());
+                 Double.valueOf(28.869), turns[1].getEnd().getOffset());
     
     // utterances
     Annotation[] utterances = g.all("utterance");
