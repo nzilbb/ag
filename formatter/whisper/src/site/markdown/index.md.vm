@@ -50,7 +50,7 @@ duration longer than this will be split on longer inter-word pauses
 (the longest pause first). The default value is `15.0`s.
 
 utterancePadding
-:Maximum number of seconds to subtract from the start time and add to
+: Maximum number of seconds to subtract from the start time and add to
 the end time of each utterance, to allow for alignment errors of
 first/last word in each segment.
 
