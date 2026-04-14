@@ -78,7 +78,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 6,
+    assertEquals("Configuration parameters" + configuration, 7,
                  deserializer.configure(configuration, schema).size());      
     
     // load the stream
@@ -185,7 +185,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration wants missing word layer" + configuration, 7,
+    assertEquals("Configuration wants missing word layer" + configuration, 8,
                  deserializer.configure(configuration, schema).size());      
     
     // load the stream
@@ -297,7 +297,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 6,
+    assertEquals("Configuration parameters" + configuration, 7,
                  deserializer.configure(configuration, schema).size());
     // defaults
     assertEquals("minShortPauseLength",
@@ -315,10 +315,15 @@ public class TestWhisperDeserializer {
                  "(..)", (String)(configuration.get("mediumPauseLabel").getValue()));
     assertEquals("longPauseLabel",
                  "(...)", (String)(configuration.get("longPauseLabel").getValue()));
-    // disable pause labelling
+    assertEquals("maxUtteranceDuration",
+                 Double.valueOf(20),
+                 (Double)(configuration.get("maxUtteranceDuration").getValue()));
+    // disable pause labelling etc.
     configuration.get("shortPauseLabel").setValue("");
     configuration.get("mediumPauseLabel").setValue("");
     configuration.get("longPauseLabel").setValue("");
+    configuration.get("maxUtteranceDuration").setValue(null);
+
     deserializer.configure(configuration, schema);
     assertEquals("shortPauseLabel unset",
                  "", deserializer.getShortPauseLabel());
@@ -326,6 +331,8 @@ public class TestWhisperDeserializer {
                  "", deserializer.getMediumPauseLabel());
     assertEquals("longPauseLabel unset",
                  "", deserializer.getLongPauseLabel());
+    assertNull("maxUtteranceDuration unset",
+               deserializer.getMaxUtteranceDuration());
     
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -476,7 +483,7 @@ public class TestWhisperDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     // defaults
-    assertEquals("Configuration parameters" + configuration, 6,
+    assertEquals("Configuration parameters" + configuration, 7,
                  deserializer.configure(configuration, schema).size());      
     assertEquals("minShortPauseLength",
                  Double.valueOf(0.2),
@@ -493,11 +500,18 @@ public class TestWhisperDeserializer {
                  "(..)", (String)(configuration.get("mediumPauseLabel").getValue()));
     assertEquals("longPauseLabel",
                  "(...)", (String)(configuration.get("longPauseLabel").getValue()));
+    assertEquals("maxUtteranceDuration",
+                 Double.valueOf(20),
+                 (Double)(configuration.get("maxUtteranceDuration").getValue()));
+    
+    // disable maxUtteranceDuration
+    configuration.get("maxUtteranceDuration").setValue(null);
+
     // change thresholds
     configuration.get("minShortPauseLength").setValue(0.6);
     configuration.get("minMediumPauseLength").setValue(0.7);
     configuration.get("minLongPauseLength").setValue(0.9);
-    configuration.get("longPauseLabel").setValue("({0.0##})");
+    configuration.get("longPauseLabel").setValue("({0.0##})");    
     deserializer.configure(configuration, schema);
     assertEquals("minShortPauseLength changed",
                  Double.valueOf(0.6), deserializer.getMinShortPauseLength());
@@ -627,6 +641,127 @@ public class TestWhisperDeserializer {
       assertEquals("Annotation has 'automatic' confidence: " + a.getLayer() + ": " + a,
                    Integer.valueOf(Constants.CONFIDENCE_AUTOMATIC), a.getConfidence());
     }
+  }
+  
+  /** Ensure long utterances are split on longest pauses. */
+  @Test public void maxUtteranceDuration()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("who", "Speakers")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Word tokens")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true));
+    
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "wordlist.json")) };
+    
+    // create deserializer
+    WhisperDeserializer deserializer = new WhisperDeserializer();
+
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals("Configuration parameters" + configuration, 7,
+                 deserializer.configure(configuration, schema).size());
+    // defaults
+    assertEquals("minShortPauseLength",
+                 Double.valueOf(0.2),
+                 (Double)(configuration.get("minShortPauseLength").getValue()));
+    assertEquals("minMediumPauseLength",
+                 Double.valueOf(0.7),
+                 (Double)(configuration.get("minMediumPauseLength").getValue()));
+    assertEquals("minLongPauseLength",
+                 Double.valueOf(1.4),
+                 (Double)(configuration.get("minLongPauseLength").getValue()));
+    assertEquals("shortPauseLabel",
+                 "(.)", (String)(configuration.get("shortPauseLabel").getValue()));
+    assertEquals("mediumPauseLabel",
+                 "(..)", (String)(configuration.get("mediumPauseLabel").getValue()));
+    assertEquals("longPauseLabel",
+                 "(...)", (String)(configuration.get("longPauseLabel").getValue()));
+    assertEquals("maxUtteranceDuration",
+                 Double.valueOf(20),
+                 (Double)(configuration.get("maxUtteranceDuration").getValue()));
+    // disable pause labelling etc.
+    configuration.get("shortPauseLabel").setValue("");
+    configuration.get("mediumPauseLabel").setValue("");
+    configuration.get("longPauseLabel").setValue("");
+
+    deserializer.configure(configuration, schema);
+    assertEquals("shortPauseLabel unset",
+                 "", deserializer.getShortPauseLabel());
+    assertEquals("mediumPauseLabel unset",
+                 "", deserializer.getMediumPauseLabel());
+    assertEquals("longPauseLabel unset",
+                 "", deserializer.getLongPauseLabel());
+    assertEquals("maxUtteranceDuration set",
+                 Double.valueOf(20), deserializer.getMaxUtteranceDuration());
+    
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+    assertEquals(0, defaultParameters.size());
+    
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+
+    // lines with no timestamp are ignored but warned about
+    for (String warning : deserializer.getWarnings()) {
+      assertEquals("Warning for comment line", "Invalid line: \"# New turn here:\"", warning);
+    }
+    
+    assertEquals("wordlist.json", g.getId());
+    assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
+    
+    
+    // participants     
+    Annotation[] speakers = g.all("who"); 
+    assertEquals("Number of speakers: " + Arrays.asList(speakers),
+                 2, speakers.length);
+    assertEquals("SPEAKER_01", speakers[0].getLabel());
+    assertEquals("SPEAKER_00", speakers[1].getLabel());
+    
+    // turns
+    Annotation[] turns = g.all("turn");
+    // a turn break was added by having an utterance start after the previous utterance end
+    assertEquals("Two turns", 9, turns.length);
+    assertEquals("Turn 1 label is speaker name",
+                 "SPEAKER_01", turns[0].getLabel());
+    assertEquals("Turn 2 label is speaker name",
+                 "SPEAKER_00", turns[1].getLabel());
+    assertEquals(Double.valueOf(2.862), turns[0].getStart().getOffset());
+    assertEquals(Double.valueOf(3.942), turns[0].getEnd().getOffset());
+    assertEquals(Double.valueOf(5.063), turns[1].getStart().getOffset());
+    assertEquals(Double.valueOf(31.85), turns[1].getEnd().getOffset());
+    
+    // utterances
+    Annotation[] utterances = g.all("utterance");
+    
+    // first split should be utterance 68.465-90.549
+    // on "loud" (76.106-77.687) "lout" (78.827-79.187) with a pause of 1.14
+    assertEquals("Start time of utterance before first split",
+                 Double.valueOf(68.465), utterances[20].getStart().getOffset());
+    assertEquals("End time of utterance before first split",
+                 Double.valueOf(77.687), utterances[20].getEnd().getOffset());    
+    assertEquals("Start time of utterance after first split",
+                 Double.valueOf(78.827), utterances[21].getStart().getOffset());
+    assertEquals("End time of utterance after first split",
+                 Double.valueOf(90.549), utterances[21].getEnd().getOffset());
+
   }
   
   /**

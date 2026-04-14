@@ -16,33 +16,38 @@ The following parameters can be specified for the formatter:
 
 minShortPauseLength
 : The minimum inter-word pause length, in seconds, before a pause
-counts as a 'short pause'. 
+counts as a 'short pause'. The default value is `0.2`s.
 
 minMediumPauseLength
 : The minimum inter-word pause length, in seconds, before a pause
-counts as a 'medium pause'. 
+counts as a 'medium pause'. The default value is `0.7`s. 
 
 minLongPauseLength
 : The minimum inter-word pause length, in seconds, before a pause
-counts as a 'long pause'. 
+counts as a 'long pause'.  The default value is `1.4`s.
 
 shortPauseLabel
 : If an inter-word pause has a duration between minShortPauseLength
 and minMediumPauseLength, then the word before the pause will have
-this string appended to its label (after a space). e.g. `(.)` to use
-the CA/CHAT convention for short pauses.
+this string appended to its label (after a space). The default value
+of `(.)` corresponds to the CA/CHAT convention for short pauses.
 
 mediumPauseLabel
 : If an inter-word pause has a duration between minMediumPauseLength
 and minMediumPauseLength, then the word before the pause will have
-this string appended to its label (after a space). e.g. `(..)` to use
-the CA/CHAT convention for medium pauses.
+this string appended to its label (after a space). The default value
+of `(..)` corresponds to the CA/CHAT convention for medium pauses.
 
 longPauseLabel
 : If an inter-word pause has a duration between minLongPauseLength
 and minMediumPauseLength, then the word before the pause will have
-this string appended to its label (after a space). e.g. `(...)` to use
-the CA/CHAT convention for short pauses. 
+this string appended to its label (after a space). The default value
+of `(...)` corresponds to the CA/CHAT convention for short pauses.
+
+maxUtteranceDuration
+: Maximum utterance duration to target in seconds. Utterances with a
+duration longer than this will be split on longer inter-word pauses
+(the longest pause first). The default value is `20.0`s.
 
 The pause label definitions (*shortPauseLabel*, *mediumPauseLabel* and
 *longPauseLabel*) may specify that the duration of the pause is

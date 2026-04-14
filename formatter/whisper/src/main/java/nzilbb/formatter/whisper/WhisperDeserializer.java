@@ -1,5 +1,5 @@
 //
-// Copyright 2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2022-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -35,6 +35,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Spliterator;
@@ -405,6 +406,31 @@ public class WhisperDeserializer implements GraphDeserializer {
   public WhisperDeserializer setLongPauseLabel(String newLongPauseLabel) { longPauseLabel = newLongPauseLabel; return this; }
   
   /**
+   * Maximum utterance duration to target (seconds). Longer utterances will be
+   * split on longer inter-word pauses. 
+   * @see #getMaxUtteranceDuration()
+   * @see #setMaxUtteranceDuration(Double)
+   */
+  protected Double maxUtteranceDuration = 20.0;
+  /**
+   * Getter for {@link #maxUtteranceDuration}: Maximum utterance
+   * duration to target. Longer utterances will be split on longer
+   * inter-word pauses. 20s by default.
+   * @return Maximum utterance duration to target (seconds). Longer utterances
+   * will be split on longer inter-word pauses. 
+   */
+  public Double getMaxUtteranceDuration() { return maxUtteranceDuration; }
+  /**
+   * Setter for {@link #maxUtteranceDuration}: Maximum utterance
+   * duration to target. Longer utterances will be split on longer
+   * inter-word pauses. 20s by default. 
+   * @param newMaxUtteranceDuration Maximum utterance duration to
+   * target. Longer utterances will be split on longer inter-word
+   * pauses. 
+   */
+  public WhisperDeserializer setMaxUtteranceDuration(Double newMaxUtteranceDuration) { maxUtteranceDuration = newMaxUtteranceDuration; return this; }
+  
+  /**
    * Timers for debugging and optimization.
    * @see #getTimers()
    * @see #setTimers(Timers)
@@ -678,6 +704,18 @@ public class WhisperDeserializer implements GraphDeserializer {
       configuration.get("longPauseLabel").setValue(getLongPauseLabel());
     }
 
+    if (!configuration.containsKey("maxUtteranceDuration")) {
+      configuration.addParameter(
+        new Parameter(
+          "maxUtteranceDuration", Double.class, 
+          "Maximum Utterance Duration (s)",
+          "Utterances longer than this will be split on longer inter-word pauses,"
+          +" where possible.", false));
+    }
+    if (configuration.get("maxUtteranceDuration").getValue() == null) {
+      configuration.get("maxUtteranceDuration").setValue(getMaxUtteranceDuration());
+    }
+
     return configuration;
   }   
 
@@ -837,6 +875,7 @@ public class WhisperDeserializer implements GraphDeserializer {
     // use a default speaker named after the file
     Annotation currentTurn = null;
     Annotation lastWord = null;
+    int utteranceOrdinal = 0;
     HashMap<String,Annotation> participants = new HashMap<String,Annotation>();
     
     JsonArray jsonSegments = json.getJsonArray("segments");
@@ -869,12 +908,13 @@ public class WhisperDeserializer implements GraphDeserializer {
 
         // don't add inter-word pause labels across turns
         lastWord = null;
+        utteranceOrdinal = 0;
       }
       Annotation utterance = new Annotation(
         null, speaker, schema.getUtteranceLayerId(),
-        start.getId(), end.getId(), currentTurn.getId());
+        start.getId(), end.getId(), currentTurn.getId(),
+        ++utteranceOrdinal, Constants.CONFIDENCE_AUTOMATIC);
       currentTurn.setEndId(end.getId());
-      utterance.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
       graph.addAnnotation(utterance);
       
       if (!segment.containsKey("words")) { // no individual word tokens
@@ -925,11 +965,58 @@ public class WhisperDeserializer implements GraphDeserializer {
         if (lastWord.getEnd().getOffset() == null) { // last word had no "end"
           // set the end of the last word to be the end of the utterance
           lastWord.setEndId(end.getId());
-        }
+        }        
       } // there are individual word tokens
         
     } // next segment
-      
+
+    if (maxUtteranceDuration != null) {
+      // look for utterances that are too long, and split them on the longest pauses
+      LinkedList<Annotation> utteranceQueue = new LinkedList<Annotation>(
+        Arrays.asList(graph.all(schema.getUtteranceLayerId())));
+      while (!utteranceQueue.isEmpty()) {
+        Annotation utterance = utteranceQueue.remove();
+        if (utterance.getDuration() > maxUtteranceDuration) { // utterance too long
+          // split the utterance into two at the longest inter-word pause
+          Annotation splitAfter = null;
+          Annotation splitBefore = null;
+          double splitPauseDuration = 0.0;
+          Annotation previousWord = null;
+          for (Annotation word : utterance.all(schema.getWordLayerId())) {
+            if (previousWord != null && previousWord.getEnd().getOffset() != null
+                && word.getStart().getOffset() != null) {
+              double interWordPauseDuration
+                = word.getStart().getOffset() - previousWord.getEnd().getOffset();
+              if (interWordPauseDuration > splitPauseDuration) {
+                splitAfter = previousWord;
+                splitBefore = word;
+                splitPauseDuration = interWordPauseDuration;
+              }
+            }
+            previousWord = word;
+          } // next word
+          
+          if (splitBefore != null) { // found a split point
+            
+            // new utterance covers the last half
+            Annotation newUtterance = new Annotation(
+              null, utterance.getLabel(), schema.getUtteranceLayerId(),
+              splitBefore.getStartId(), utterance.getEndId(),
+              utterance.getParentId(), utterance.getOrdinal() + 1,
+              Constants.CONFIDENCE_AUTOMATIC);
+            graph.addAnnotation(newUtterance);
+            utteranceQueue.offer(newUtterance); // might still be too long
+            
+            // existing utterance covers the first half
+            utterance.setEnd(splitAfter.getEnd());
+            utteranceQueue.offer(utterance); // might still be too long
+            
+          } // split point identified
+          
+        } // utterance is too long
+      } // there are still utterances to check
+    } // maxUtteranceDuration is set
+
     graph.commit();
     
     if (errors != null) throw errors;

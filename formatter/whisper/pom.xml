@@ -9,7 +9,7 @@
 
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter.whisper</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
 
   <name>nzilbb.formatter.whisper</name>
   <description>Parser for transcriptions output by the Whisper ASR system</description>
@@ -105,7 +105,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <trimStackTrace>false</trimStackTrace>
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>    
