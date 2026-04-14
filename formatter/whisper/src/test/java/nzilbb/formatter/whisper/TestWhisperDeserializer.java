@@ -78,7 +78,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 7,
+    assertEquals("Configuration parameters" + configuration, 8,
                  deserializer.configure(configuration, schema).size());      
     
     // load the stream
@@ -185,7 +185,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration wants missing word layer" + configuration, 8,
+    assertEquals("Configuration wants missing word layer" + configuration, 9,
                  deserializer.configure(configuration, schema).size());      
     
     // load the stream
@@ -297,7 +297,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 7,
+    assertEquals("Configuration parameters" + configuration, 8,
                  deserializer.configure(configuration, schema).size());
     // defaults
     assertEquals("minShortPauseLength",
@@ -318,6 +318,9 @@ public class TestWhisperDeserializer {
     assertEquals("maxUtteranceDuration",
                  Double.valueOf(20),
                  (Double)(configuration.get("maxUtteranceDuration").getValue()));
+    assertEquals("utterancePadding",
+                 Double.valueOf(0.5),
+                 (Double)(configuration.get("utterancePadding").getValue()));
     // disable pause labelling etc.
     configuration.get("shortPauseLabel").setValue("");
     configuration.get("mediumPauseLabel").setValue("");
@@ -370,10 +373,10 @@ public class TestWhisperDeserializer {
                  "SPEAKER_01", turns[0].getLabel());
     assertEquals("Turn 2 label is speaker name",
                  "SPEAKER_00", turns[1].getLabel());
-    assertEquals(Double.valueOf(2.862), turns[0].getStart().getOffset());
-    assertEquals(Double.valueOf(3.942), turns[0].getEnd().getOffset());
-    assertEquals(Double.valueOf(5.063), turns[1].getStart().getOffset());
-    assertEquals(Double.valueOf(31.85), turns[1].getEnd().getOffset());
+    assertEquals(0, g.compareOffsets(2.362, turns[0].getStart().getOffset()));
+    assertEquals(0, g.compareOffsets(4.442, turns[0].getEnd().getOffset()));
+    assertEquals(0, g.compareOffsets(4.563, turns[1].getStart().getOffset()));
+    assertEquals(0, g.compareOffsets(32.2435, turns[1].getEnd().getOffset()));
     
     // utterances
     Annotation[] utterances = g.all("utterance");
@@ -381,21 +384,27 @@ public class TestWhisperDeserializer {
     assertEquals("Utterance label is speaker name",
                  "SPEAKER_01", utterances[0].getLabel());
     assertEquals("Start time of first utterance",
-                 Double.valueOf(2.862), utterances[0].getStart().getOffset());
+                 0, g.compareOffsets(2.362, utterances[0].getStart().getOffset()));
     assertEquals("End time of first utterance",
-                 Double.valueOf(3.942), utterances[0].getEnd().getOffset());
+                 0, g.compareOffsets(4.442, utterances[0].getEnd().getOffset()));
     
     assertEquals("Start time of second utterance",
-                 Double.valueOf(5.063), utterances[1].getStart().getOffset());
+                 0, g.compareOffsets(4.563, utterances[1].getStart().getOffset()));
     assertEquals("End time of second utterance",
-                 Double.valueOf(7.003), utterances[1].getEnd().getOffset());
+                 0, g.compareOffsets(7.403, utterances[1].getEnd().getOffset()));
 
-    assertEquals("Start time of last utterance",
-                 Double.valueOf(280.247),
-                 utterances[utterances.length-1].getStart().getOffset());
+    assertEquals("Start time of third utterance " + utterances[2].getStart().getOffset(),
+                 0, g.compareOffsets(7.403, utterances[2].getStart().getOffset()));
+    assertEquals("End time of third utterance " + utterances[2].getEnd().getOffset(),
+                 0, g.compareOffsets(10.904, utterances[2].getEnd().getOffset()));
+
+    assertEquals("Start time of last utterance "
+                 + utterances[utterances.length-1].getStart().getOffset(),
+                 0, g.compareOffsets(
+                   279.747, utterances[utterances.length-1].getStart().getOffset()));
     assertEquals("End time of last utterance",
-                 Double.valueOf(280.507),
-                 utterances[utterances.length-1].getEnd().getOffset());
+                 0, g.compareOffsets(
+                   280.507, utterances[utterances.length-1].getEnd().getOffset()));
 
     // all anchors are 'manual' confidence (even though they were automatically determined)
     for (Annotation utterance : utterances) {
@@ -483,7 +492,7 @@ public class TestWhisperDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     // defaults
-    assertEquals("Configuration parameters" + configuration, 7,
+    assertEquals("Configuration parameters" + configuration, 8,
                  deserializer.configure(configuration, schema).size());      
     assertEquals("minShortPauseLength",
                  Double.valueOf(0.2),
@@ -503,9 +512,13 @@ public class TestWhisperDeserializer {
     assertEquals("maxUtteranceDuration",
                  Double.valueOf(20),
                  (Double)(configuration.get("maxUtteranceDuration").getValue()));
+    assertEquals("utterancePadding",
+                 Double.valueOf(0.5),
+                 (Double)(configuration.get("utterancePadding").getValue()));
     
     // disable maxUtteranceDuration
     configuration.get("maxUtteranceDuration").setValue(null);
+    configuration.get("utterancePadding").setValue(null);
 
     // change thresholds
     configuration.get("minShortPauseLength").setValue(0.6);
@@ -671,7 +684,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 7,
+    assertEquals("Configuration parameters" + configuration, 8,
                  deserializer.configure(configuration, schema).size());
     // defaults
     assertEquals("minShortPauseLength",
@@ -692,6 +705,9 @@ public class TestWhisperDeserializer {
     assertEquals("maxUtteranceDuration",
                  Double.valueOf(20),
                  (Double)(configuration.get("maxUtteranceDuration").getValue()));
+    assertEquals("utterancePadding",
+                 Double.valueOf(0.5),
+                 (Double)(configuration.get("utterancePadding").getValue()));
     // disable pause labelling etc.
     configuration.get("shortPauseLabel").setValue("");
     configuration.get("mediumPauseLabel").setValue("");
@@ -743,10 +759,14 @@ public class TestWhisperDeserializer {
                  "SPEAKER_01", turns[0].getLabel());
     assertEquals("Turn 2 label is speaker name",
                  "SPEAKER_00", turns[1].getLabel());
-    assertEquals(Double.valueOf(2.862), turns[0].getStart().getOffset());
-    assertEquals(Double.valueOf(3.942), turns[0].getEnd().getOffset());
-    assertEquals(Double.valueOf(5.063), turns[1].getStart().getOffset());
-    assertEquals(Double.valueOf(31.85), turns[1].getEnd().getOffset());
+    assertEquals("first turn start padded",
+                 Double.valueOf(2.362), turns[0].getStart().getOffset());
+    assertEquals("first turn end padded",
+                 Double.valueOf(4.442), turns[0].getEnd().getOffset());
+    assertEquals("second turn start padded",
+                 Double.valueOf(4.563), turns[1].getStart().getOffset());
+    assertEquals("second turn end padded",
+                 Double.valueOf(32.2435), turns[1].getEnd().getOffset());
     
     // utterances
     Annotation[] utterances = g.all("utterance");
@@ -754,13 +774,13 @@ public class TestWhisperDeserializer {
     // first split should be utterance 68.465-90.549
     // on "loud" (76.106-77.687) "lout" (78.827-79.187) with a pause of 1.14
     assertEquals("Start time of utterance before first split",
-                 Double.valueOf(68.465), utterances[20].getStart().getOffset());
+                 Double.valueOf(68.465 - 0.5), utterances[20].getStart().getOffset());
     assertEquals("End time of utterance before first split",
-                 Double.valueOf(77.687), utterances[20].getEnd().getOffset());    
+                 Double.valueOf(77.687 + 0.5), utterances[20].getEnd().getOffset());    
     assertEquals("Start time of utterance after first split",
-                 Double.valueOf(78.827), utterances[21].getStart().getOffset());
+                 Double.valueOf(78.827 - 0.5), utterances[21].getStart().getOffset());
     assertEquals("End time of utterance after first split",
-                 Double.valueOf(90.549), utterances[21].getEnd().getOffset());
+                 Double.valueOf(90.549 + 0.5), utterances[21].getEnd().getOffset());
 
   }
   

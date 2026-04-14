@@ -49,6 +49,11 @@ maxUtteranceDuration
 duration longer than this will be split on longer inter-word pauses
 (the longest pause first). The default value is `20.0`s.
 
+utterancePadding
+:Maximum number of seconds to subtract from the start time and add to
+the end time of each utterance, to allow for alignment errors of
+first/last word in each segment.
+
 The pause label definitions (*shortPauseLabel*, *mediumPauseLabel* and
 *longPauseLabel*) may specify that the duration of the pause is
 included in the label, by including a decimal format definition

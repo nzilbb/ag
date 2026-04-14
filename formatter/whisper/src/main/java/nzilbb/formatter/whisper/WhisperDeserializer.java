@@ -50,7 +50,7 @@ import nzilbb.ag.*;
 import nzilbb.ag.serialize.*;
 import nzilbb.ag.serialize.util.NamedStream;
 import nzilbb.ag.serialize.util.Utility;
-import nzilbb.ag.util.AnnotationComparatorByAnchor;
+import nzilbb.ag.util.AnnotationsByAnchor;
 import nzilbb.ag.util.ConventionTransformer;
 import nzilbb.ag.util.OrthographyClumper;
 import nzilbb.ag.util.SimpleTokenizer;
@@ -429,6 +429,35 @@ public class WhisperDeserializer implements GraphDeserializer {
    * pauses. 
    */
   public WhisperDeserializer setMaxUtteranceDuration(Double newMaxUtteranceDuration) { maxUtteranceDuration = newMaxUtteranceDuration; return this; }
+
+  
+  /**
+   * Maximum number of seconds to subtract from the start time and add
+   * to the end time of each utterance, to allow for alignment errors of
+   * first/last word in each segment. The default is 0.5s. 
+   * @see #getUtterancePadding()
+   * @see #setUtterancePadding(Double)
+   */
+  protected Double utterancePadding = 0.5;
+  /**
+   * Getter for {@link #utterancePadding}: Maximum number of seconds to
+   * subtract from the start time and add to the end time of each utterance,
+   * to allow for alignment errors of first/last word in each segment.
+   * The default is 0.5s.
+   * @return Maximum number of seconds to subtract from the start time and
+   * add to the end time of each utterance, to allow for alignment errors
+   * of first/last word in each segment.
+   */
+  public Double getUtterancePadding() { return utterancePadding; }
+  /**
+   * Setter for {@link #utterancePadding}: Maximum number of seconds to
+   * subtract from the start time and add to the end time of each utterance,
+   * to allow for alignment errors of first/last word in each segment.
+   * @param newUtterancePadding Maximum number of seconds to subtract
+   * from the start time and add to the end time of each utterance, to
+   * allow for alignment errors of first/last word in each segment.
+   */
+  public WhisperDeserializer setUtterancePadding(Double newUtterancePadding) { utterancePadding = newUtterancePadding; return this; }
   
   /**
    * Timers for debugging and optimization.
@@ -715,6 +744,19 @@ public class WhisperDeserializer implements GraphDeserializer {
     if (configuration.get("maxUtteranceDuration").getValue() == null) {
       configuration.get("maxUtteranceDuration").setValue(getMaxUtteranceDuration());
     }
+    
+    if (!configuration.containsKey("utterancePadding")) {
+      configuration.addParameter(
+        new Parameter(
+          "utterancePadding", Double.class, 
+          "Utterance Padding (s)",
+          "Maximum number of seconds to subtract from the start time and"
+          +" add to the end time of each utterance, to allow for alignment"
+          +" errors of first/last word in each segment.", false));
+    }
+    if (configuration.get("utterancePadding").getValue() == null) {
+      configuration.get("utterancePadding").setValue(getUtterancePadding());
+    }
 
     return configuration;
   }   
@@ -876,15 +918,19 @@ public class WhisperDeserializer implements GraphDeserializer {
     Annotation currentTurn = null;
     Annotation lastWord = null;
     int utteranceOrdinal = 0;
+    Anchor lastUtteranceEnd = null;
     HashMap<String,Annotation> participants = new HashMap<String,Annotation>();
+    int initialUtteranceBoundaryConfidence
+      = utterancePadding == null?Constants.CONFIDENCE_MANUAL
+      :Constants.CONFIDENCE_AUTOMATIC;
     
     JsonArray jsonSegments = json.getJsonArray("segments");
     // each segment is an utterance
     for (JsonObject segment : jsonSegments.getValuesAs(JsonObject.class)) {
       Anchor start = graph.getOrCreateAnchorAt(
-        segment.getJsonNumber("start").doubleValue(), Constants.CONFIDENCE_MANUAL);                  
+        segment.getJsonNumber("start").doubleValue(), initialUtteranceBoundaryConfidence);
       Anchor end = graph.getOrCreateAnchorAt(
-        segment.getJsonNumber("end").doubleValue(), Constants.CONFIDENCE_MANUAL);
+        segment.getJsonNumber("end").doubleValue(), initialUtteranceBoundaryConfidence);
       String speaker = graph.getId();
       if (segment.containsKey("speaker")) { // explicit speaker
         speaker = segment.getString("speaker");
@@ -973,7 +1019,7 @@ public class WhisperDeserializer implements GraphDeserializer {
     if (maxUtteranceDuration != null) {
       // look for utterances that are too long, and split them on the longest pauses
       LinkedList<Annotation> utteranceQueue = new LinkedList<Annotation>(
-        Arrays.asList(graph.all(schema.getUtteranceLayerId())));
+        new AnnotationsByAnchor​((graph.all(schema.getUtteranceLayerId()))));
       while (!utteranceQueue.isEmpty()) {
         Annotation utterance = utteranceQueue.remove();
         if (utterance.getDuration() > maxUtteranceDuration) { // utterance too long
@@ -1016,6 +1062,72 @@ public class WhisperDeserializer implements GraphDeserializer {
         } // utterance is too long
       } // there are still utterances to check
     } // maxUtteranceDuration is set
+
+    if (utterancePadding != null) { // pad utterances where possible
+      System.out.println("utterancePadding " + utterancePadding);
+      // utterance boundaries are often the first/last word boundaries
+      // but the word boundaries may not be precise, so we pad utterances
+      // where possible to ensure they entirely cover the words they contain
+      Annotation previousUtterance = null;
+      for (Annotation utterance :new  AnnotationsByAnchor​(
+             graph.all(schema.getUtteranceLayerId()))) {
+        if (previousUtterance == null) { // first utterance
+          Anchor newStart = graph.getOrCreateAnchorAt(
+            Math.max(utterance.getStart().getOffset() - utterancePadding, 0.0),
+            Constants.CONFIDENCE_MANUAL);
+          if (utterance.getStartId().equals(utterance.getParent().getStartId())) {
+            // shares start with parent
+            utterance.getParent().setStart(newStart);
+          }
+          utterance.setStart(newStart);
+        } else { // there is a previous utterance
+          if (utterance.getStart().getOffset() - previousUtterance.getEnd().getOffset()
+              > utterancePadding*2) { // the previous utterance was too long ago
+            Anchor newStart = graph.getOrCreateAnchorAt(
+              utterance.getStart().getOffset() - utterancePadding,
+              Constants.CONFIDENCE_MANUAL);
+              if (utterance.getStartId().equals(utterance.getParent().getStartId())) {
+                // shares start with parent
+                utterance.getParent().setStart(newStart);
+              }
+            utterance.setStart(newStart);
+            Anchor newEnd = graph.getOrCreateAnchorAt(
+              previousUtterance.getEnd().getOffset() + utterancePadding,
+              Constants.CONFIDENCE_MANUAL);
+            if (previousUtterance.getEndId().equals(
+                  previousUtterance.getParent().getEndId())) {
+              // shares end with parent
+              previousUtterance.getParent().setEnd(newEnd);
+            }
+            previousUtterance.setEnd(newEnd);
+          } else { // the previous utterance could share an anchor with this one
+            // set the shared offset as halfway between them
+            Anchor newShared = graph.getOrCreateAnchorAt(
+              previousUtterance.getEnd().getOffset()
+              + ((utterance.getStart().getOffset()
+                  - previousUtterance.getEnd().getOffset())/2),
+              Constants.CONFIDENCE_MANUAL);
+              if (utterance.getStartId().equals(utterance.getParent().getStartId())) {
+                // shares start with parent
+                utterance.getParent().setStart(newShared);
+              }
+            utterance.setStart(newShared);
+            if (previousUtterance.getEndId().equals(
+                  previousUtterance.getParent().getEndId())) {
+              // shares end with parent
+              previousUtterance.getParent().setEnd(newShared);
+            }
+            previousUtterance.setEnd(utterance.getStart());
+          }
+        } // there is a previous utterance
+        previousUtterance = utterance;
+      } // next utterance
+      // we don't pad the last utterance, because we don't know if that would
+      // go beyond the end of the media
+      if (previousUtterance != null) {
+        previousUtterance.getEnd().setConfidence(Constants.CONFIDENCE_MANUAL);
+      }
+    }
 
     graph.commit();
     
