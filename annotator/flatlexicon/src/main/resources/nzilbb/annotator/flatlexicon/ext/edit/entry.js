@@ -16,7 +16,6 @@ const parameters = new URLSearchParams(window.location.search);
 const lexicon = parameters.get("l") || parameters.get("lexicon");
 const field = parameters.get("f") || parameters.get("field");
 const entry = parameters.get("e") || parameters.get("entry");
-console.log(`lexicon "${lexicon}" field "${field}" entry "${entry}"`);
 
 document.getElementById("entry").innerText = entry;
 
@@ -189,18 +188,19 @@ document.getElementById("btnSave").onclick = function (e) {
   const data = {};
   for (let name in fields) {
     const input = document.getElementById(`attribute-${name}`);    
-    if (input && input.value) {
-      if (name != field // not read only
-          && !input.checkValidity()) { // not valid    
-        input.reportValidity();
-        return;
-      }
-      if (input.editor) {
-        data[name] = input.editor.getData();
-      } else {
-        data[name] = input.value;
-      }
-    }
+    if (input) {      
+      if (name != field) { // not read only
+        if (!input.checkValidity()) { // not valid    
+          input.reportValidity();
+          return;
+        }
+        if (input.editor) {
+          data[name] = input.editor.getData();
+        } else {
+          data[name] = input.value;
+        }
+      } // not read only
+    } // input found
   } // next field
   fd.append("data", JSON.stringify(data));
   startLoading();
