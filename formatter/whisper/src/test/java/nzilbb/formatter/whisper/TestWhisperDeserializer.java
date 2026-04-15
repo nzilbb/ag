@@ -78,7 +78,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 8,
+    assertEquals("Configuration parameters" + configuration, 9,
                  deserializer.configure(configuration, schema).size());      
     
     // load the stream
@@ -185,7 +185,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration wants missing word layer" + configuration, 9,
+    assertEquals("Configuration wants missing word layer" + configuration, 10,
                  deserializer.configure(configuration, schema).size());      
     
     // load the stream
@@ -273,6 +273,9 @@ public class TestWhisperDeserializer {
   @Test public void basicJSON()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
+      new Layer("transcript_language", "Language")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("who", "Speakers")
       .setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
@@ -297,7 +300,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 8,
+    assertEquals("Configuration parameters" + configuration, 9,
                  deserializer.configure(configuration, schema).size());
     // defaults
     assertEquals("minShortPauseLength",
@@ -321,6 +324,9 @@ public class TestWhisperDeserializer {
     assertEquals("utterancePadding",
                  Double.valueOf(0.5),
                  (Double)(configuration.get("utterancePadding").getValue()));
+    assertEquals("language",
+                 "transcript_language",
+                 ((Layer)(configuration.get("languageLayer").getValue())).getId());
     // disable pause labelling etc.
     configuration.get("shortPauseLabel").setValue("");
     configuration.get("mediumPauseLabel").setValue("");
@@ -359,6 +365,11 @@ public class TestWhisperDeserializer {
     assertEquals("wordlist.json", g.getId());
     assertEquals("time units", Constants.UNIT_SECONDS, g.getOffsetUnits());
     
+    // language     
+    Annotation[] lang = g.all("transcript_language"); 
+    assertEquals("Language tag: " + Arrays.asList(lang),
+                 1, lang.length);
+    assertEquals("en", lang[0].getLabel());
     
     // participants     
     Annotation[] speakers = g.all("who"); 
@@ -498,7 +509,7 @@ public class TestWhisperDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     // defaults
-    assertEquals("Configuration parameters" + configuration, 8,
+    assertEquals("Configuration parameters" + configuration, 9,
                  deserializer.configure(configuration, schema).size());      
     assertEquals("minShortPauseLength",
                  Double.valueOf(0.35),
@@ -521,6 +532,7 @@ public class TestWhisperDeserializer {
     assertEquals("utterancePadding",
                  Double.valueOf(0.5),
                  (Double)(configuration.get("utterancePadding").getValue()));
+    assertNull("no languageLayer", configuration.get("languageLayer").getValue());
     
     // disable maxUtteranceDuration
     configuration.get("maxUtteranceDuration").setValue(null);
@@ -684,7 +696,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 8,
+    assertEquals("Configuration parameters" + configuration, 9,
                  deserializer.configure(configuration, schema).size());
     // defaults
     assertEquals("minShortPauseLength",

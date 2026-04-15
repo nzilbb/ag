@@ -459,6 +459,23 @@ public class WhisperDeserializer implements GraphDeserializer {
   public WhisperDeserializer setUtterancePadding(Double newUtterancePadding) { utterancePadding = newUtterancePadding; return this; }
   
   /**
+   * Layer for the document language.
+   * @see #getLanguageLayer()
+   * @see #setLanguageLayer(Layer)
+   */
+  protected Layer languageLayer;
+  /**
+   * Getter for {@link #languageLayer}: Layer for the document language.
+   * @return Layer for the document language.
+   */
+  public Layer getLanguageLayer() { return languageLayer; }
+  /**
+   * Setter for {@link #languageLayer}: Layer for the document language.
+   * @param newLanguageLayer Layer for the document language.
+   */
+  public WhisperDeserializer setLanguageLayer(Layer newLanguageLayer) { languageLayer = newLanguageLayer; return this; }
+
+  /**
    * Timers for debugging and optimization.
    * @see #getTimers()
    * @see #setTimers(Timers)
@@ -616,6 +633,17 @@ public class WhisperDeserializer implements GraphDeserializer {
         } // next possible word tag layer
       }
     }
+    
+    LinkedHashMap<String,Layer> graphTagLayers = new LinkedHashMap<String,Layer>();
+    for (Layer top : schema.getRoot().getChildren().values()) {
+      if (top.getAlignment() == Constants.ALIGNMENT_NONE
+          && top.getChildren().size() == 0) { // unaligned childless children of graph
+        graphTagLayers.put(top.getId(), top);
+      }
+    } // next top level layer
+    graphTagLayers.remove("corpus");
+    graphTagLayers.remove("transcript_type");
+    
     if (getParticipantLayer() == null) {
       layerToPossibilities.put(
         new Parameter("participantLayer", Layer.class, "Participant layer", 
@@ -644,6 +672,13 @@ public class WhisperDeserializer implements GraphDeserializer {
       layerToCandidates.put("wordLayer", possibleTurnChildLayers);
     }
     
+    // transcript language
+    layerToPossibilities.put(
+      new Parameter("languageLayer", Layer.class, "Transcript Language layer", 
+                    "The language of the whole transcript"), 
+      Arrays.asList("transcriptlanguage","language","transcriptlang","lang"));
+    layerToCandidates.put("languageLayer", graphTagLayers);
+
     // add parameters that aren't in the configuration yet, and set possible/default values
     for (Parameter p : layerToPossibilities.keySet()) {
       List<String> possibleNames = layerToPossibilities.get(p);
@@ -909,6 +944,7 @@ public class WhisperDeserializer implements GraphDeserializer {
       graph.addLayer((Layer)wordLayer.clone());
       graph.getSchema().setWordLayerId(wordLayer.getId());
     }
+    if (languageLayer != null) graph.addLayer((Layer)languageLayer.clone());
 
     graph.setOffsetUnits(Constants.UNIT_SECONDS);
     graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
@@ -922,6 +958,14 @@ public class WhisperDeserializer implements GraphDeserializer {
     int initialUtteranceBoundaryConfidence
       = utterancePadding == null?Constants.CONFIDENCE_MANUAL
       :Constants.CONFIDENCE_AUTOMATIC;
+
+    if (languageLayer != null && json.containsKey("language")) {
+      String lang = json.getString("language");
+      if (lang != null && lang.length() > 0) {
+        graph.createTag(graph, languageLayer.getId(), lang)
+          .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+      }
+    }
     
     JsonArray jsonSegments = json.getJsonArray("segments");
     // each segment is an utterance

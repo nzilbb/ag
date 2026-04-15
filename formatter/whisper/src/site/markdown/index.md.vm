@@ -14,6 +14,9 @@ labelled as either a short, medium, or long pause.
 
 The following parameters can be specified for the formatter:
 
+languageLayer
+: The optional ID of the annotation layer for storing the language of the transcript.
+
 minShortPauseLength
 : The minimum inter-word pause length, in seconds, before a pause
 counts as a 'short pause'. The default value is `0.35`s.
