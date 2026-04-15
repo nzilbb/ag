@@ -977,7 +977,10 @@ public abstract class Converter extends GuiProgram {
       md.println("|   |   |"); // markdown table
       md.println("|:--|:--|");
       for (Parameter p : config.values()) {
-        md.println("| `--"+p.getName()+"=`*" + p.getType().getSimpleName()+"* | "+p.getHint()+" |");
+        md.println("| `--"+p.getName()+"="
+                   + (p.getValue() != null?p.getValue()+"`"
+                      :"`*" + p.getType().getSimpleName()+"*")
+                   +" | "+p.getHint()+" |");
       }
     }
     GraphSerializer serializer = getSerializer();
@@ -993,7 +996,10 @@ public abstract class Converter extends GuiProgram {
       md.println("|   |   |"); // markdown table
       md.println("|:--|:--|");
       for (Parameter p : config.values()) {
-        md.println("| `--"+p.getName()+"=`*" + p.getType().getSimpleName()+"* | "+p.getHint()+" |");
+        md.println("| `--"+p.getName()+"="
+                   + (p.getValue() != null?p.getValue()+"`"
+                      :"`*" + p.getType().getSimpleName()+"*")
+                   +" | "+p.getHint()+" |");
       }
     }
   } // end of helpMarkdown()
