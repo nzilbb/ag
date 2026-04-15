@@ -391,9 +391,9 @@ public class TestWhisperDeserializer {
     assertEquals("End time of first utterance",
                  0, g.compareOffsets(4.442, utterances[0].getEnd().getOffset()));
     
-    assertEquals("Start time of second utterance",
+    assertEquals("Start time of second utterance " + utterances[1].getStart().getOffset(),
                  0, g.compareOffsets(4.563, utterances[1].getStart().getOffset()));
-    assertEquals("End time of second utterance",
+    assertEquals("End time of second utterance " + utterances[1].getEnd().getOffset(),
                  0, g.compareOffsets(7.403, utterances[1].getEnd().getOffset()));
 
     assertEquals("Start time of third utterance " + utterances[2].getStart().getOffset(),
