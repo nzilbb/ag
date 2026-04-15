@@ -36,7 +36,7 @@ import nzilbb.editpath.MinimumEditPath;
 
 public class TestWhisperToEaf {
   
-  @Test public void webvtt() throws Exception {
+  @Test public void eaf() throws Exception {
     File dir = getDir();
     File input = new File(dir, "wordlist.json");
     WhisperToEaf converter = new WhisperToEaf();
