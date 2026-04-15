@@ -57,7 +57,7 @@ switch, or use the *Help|Information* menu option of the conversion utility conc
 1. In this directory, run the following command (change *myannotator* to the required name):
    ```
    mvn archetype:generate \
-     -DgroupId=nzilbb \
+     -DgroupId=nz.ilbb.ag \
      -DartifactId=informattooutformat \
      -DarchetypeArtifactId=maven-archetype-quickstart \
      -DarchetypeVersion=1.4 \
@@ -100,7 +100,6 @@ switch, or use the *Help|Information* menu option of the conversion utility conc
    ```
    - add the following to *build*
    ```
-    <plugins>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -189,7 +188,7 @@ switch, or use the *Help|Information* menu option of the conversion utility conc
                 <artifactItem>
                   <groupId>nz.ilbb.ag</groupId>
                   <artifactId>nzilbb.ag</artifactId>
-                  <version>1.2.4-SNAPSHOT</version>
+                  <version>1.3.0</version>
                   <outputDirectory>${project.build.directory}/classes</outputDirectory>
                 </artifactItem>
                 <artifactItem>

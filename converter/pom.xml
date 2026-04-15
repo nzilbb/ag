@@ -57,5 +57,6 @@
     <module>eaftotextgrid</module>
     <module>textgridtoeaf</module>
     <module>whispertoeaf</module>
+    <module>whispertovtt</module>
   </modules>
 </project>
