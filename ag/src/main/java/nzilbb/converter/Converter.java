@@ -918,7 +918,9 @@ public abstract class Converter extends GuiProgram {
       helpInfo.append(" Command-line configuration parameters for deserialization:\n");
       for (Parameter p : config.values()) {
         helpInfo.append(
-          wrap("\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint()));
+          wrap("\t--" + p.getName() + "="
+               + (p.getValue() != null?p.getValue():"["+p.getType().getSimpleName()+"]")
+               + "\t" + p.getHint()));
         helpInfo.append("\n");
       }
     }
@@ -932,7 +934,9 @@ public abstract class Converter extends GuiProgram {
       helpInfo.append(" Command-line configuration parameters for serialization:\n");
       for (Parameter p : config.values()) {
         helpInfo.append(
-          wrap("\t--" + p.getName() + "=" + p.getType().getSimpleName() + "\t" + p.getHint()));
+          wrap("\t--" + p.getName() + "="
+               + (p.getValue() != null?p.getValue():"["+p.getType().getSimpleName()+"]")
+               + "\t" + p.getHint()));
         helpInfo.append("\n");
       }
     }
