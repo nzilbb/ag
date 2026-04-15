@@ -16,7 +16,7 @@ The following parameters can be specified for the formatter:
 
 minShortPauseLength
 : The minimum inter-word pause length, in seconds, before a pause
-counts as a 'short pause'. The default value is `0.2`s.
+counts as a 'short pause'. The default value is `0.35`s.
 
 minMediumPauseLength
 : The minimum inter-word pause length, in seconds, before a pause

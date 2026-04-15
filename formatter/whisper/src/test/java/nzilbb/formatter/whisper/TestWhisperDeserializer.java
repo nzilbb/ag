@@ -301,7 +301,7 @@ public class TestWhisperDeserializer {
                  deserializer.configure(configuration, schema).size());
     // defaults
     assertEquals("minShortPauseLength",
-                 Double.valueOf(0.2),
+                 Double.valueOf(0.35),
                  (Double)(configuration.get("minShortPauseLength").getValue()));
     assertEquals("minMediumPauseLength",
                  Double.valueOf(0.7),
@@ -501,7 +501,7 @@ public class TestWhisperDeserializer {
     assertEquals("Configuration parameters" + configuration, 8,
                  deserializer.configure(configuration, schema).size());      
     assertEquals("minShortPauseLength",
-                 Double.valueOf(0.2),
+                 Double.valueOf(0.35),
                  (Double)(configuration.get("minShortPauseLength").getValue()));
     assertEquals("minMediumPauseLength",
                  Double.valueOf(0.7),
@@ -688,7 +688,7 @@ public class TestWhisperDeserializer {
                  deserializer.configure(configuration, schema).size());
     // defaults
     assertEquals("minShortPauseLength",
-                 Double.valueOf(0.2),
+                 Double.valueOf(0.35),
                  (Double)(configuration.get("minShortPauseLength").getValue()));
     assertEquals("minMediumPauseLength",
                  Double.valueOf(0.7),

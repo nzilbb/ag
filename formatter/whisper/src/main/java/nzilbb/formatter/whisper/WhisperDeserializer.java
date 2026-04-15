@@ -231,18 +231,18 @@ public class WhisperDeserializer implements GraphDeserializer {
   
   /**
    * The minimum inter-word pause length, in seconds, before a pause
-   * counts as a 'short pause'. The default value is 0.2.
+   * counts as a 'short pause'. The default value is 0.35.
    * @see #minMediumPauseLength
    * @see #minLongPauseLength
    * @see #shortPauseLabel
    * @see #getMinShortPauseLength()
    * @see #setMinShortPauseLength(Double)
    */
-  protected Double minShortPauseLength = 0.2;
+  protected Double minShortPauseLength = 0.35;
   /**
    * Getter for {@link #minShortPauseLength}: The minimum inter-word
    * pause length, in seconds, before a pause counts as a 'short
-   * pause'. The default values is 0.2.
+   * pause'. The default values is 0.35.
    * @return The minimum inter-word pause length, in seconds, before a
    * pause counts as a 'short pause'. 
    * @see #getShortPauseLabel()
@@ -429,7 +429,6 @@ public class WhisperDeserializer implements GraphDeserializer {
    * pauses. 
    */
   public WhisperDeserializer setMaxUtteranceDuration(Double newMaxUtteranceDuration) { maxUtteranceDuration = newMaxUtteranceDuration; return this; }
-
   
   /**
    * Maximum number of seconds to subtract from the start time and add
@@ -690,7 +689,7 @@ public class WhisperDeserializer implements GraphDeserializer {
           "minMediumPauseLength", Double.class, 
           "Minimum Medium Pause Length",
           "The minimum inter-word pause length, in seconds,"
-          +" before a pause counts as a 'medium pause' e.g. (.)", true));
+          +" before a pause counts as a 'medium pause'", true));
     }
     if (configuration.get("minMediumPauseLength").getValue() == null) {
       configuration.get("minMediumPauseLength").setValue(getMinMediumPauseLength());
@@ -703,7 +702,7 @@ public class WhisperDeserializer implements GraphDeserializer {
           "If an inter-word pause has a duration between minMediumPauseLength"
           +" and minLongPauseLength, then the word before the pause"
           +" will have this string appended to its"
-          +" label (after a space) e.g (..)", false));
+          +" label (after a space)", false));
     }
     if (configuration.get("mediumPauseLabel").getValue() == null) {
       configuration.get("mediumPauseLabel").setValue(getMediumPauseLabel());
@@ -726,7 +725,7 @@ public class WhisperDeserializer implements GraphDeserializer {
           "Long Pause Label",
           "If an inter-word pause has a duration more than minLongPauseLength,"
           +" then the word before the pause will have this string appended to its"
-          +" label (after a space) e.g. for the the lengh of the pause in parentheses,"
+          +" label (after a space) e.g. for the the length of the pause in parentheses,"
           +" use: ({0.000})", false));
     }
     if (configuration.get("longPauseLabel").getValue() == null) {
