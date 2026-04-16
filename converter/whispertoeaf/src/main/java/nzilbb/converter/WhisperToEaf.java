@@ -68,6 +68,18 @@ public class WhisperToEaf extends Converter {
   public GraphSerializer getSerializer() {
     return new EAFSerialization();
   }
-  
+
+  /**
+   * Specify the schema to used by  {@link #convert(File)}.
+   * @return The schema.
+   */
+  @Override public Schema getSchema() {
+    Schema schema = super.getSchema();
+    // ensure that the normalizer doesn't enforce anchor-sharing between utterances
+    // because human transcript correctors will probaby want to move utterance boundaries
+    schema.getUtteranceLayer().setSaturated(false);
+    return schema;
+  } // end of getSchema()
+
   private static final long serialVersionUID = -1;
 } // end of class WhisperToEaf

@@ -8,6 +8,7 @@ Command-line configuration parameters for deserialization:
 
 |   |   |
 |:--|:--|
+| `--languageLayer=`*Layer* | The language of the whole transcript |
 | `--minShortPauseLength=0.35` | The minimum inter-word pause length, in seconds, before a pause counts as a 'short pause'. |
 | `--shortPauseLabel=(.)` | If an inter-word pause has a duration between minShortPauseLength and minMediumPauseLength, then the word before the pause will have this string appended to its label (after a space). |
 | `--minMediumPauseLength=0.7` | The minimum inter-word pause length, in seconds, before a pause counts as a 'medium pause' |

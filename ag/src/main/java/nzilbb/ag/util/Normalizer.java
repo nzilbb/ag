@@ -175,6 +175,7 @@ public class Normalizer extends Transform implements GraphTransformer {
       throw new TransformationException(this, "No turn layer specified.");
     if (schema.getUtteranceLayer() == null) 
       throw new TransformationException(this, "No utterance layer specified.");
+    Layer utteranceLayer = schema.getUtteranceLayer();
 
     if (schema.getEpisodeLayerId() != null) {
       Annotation[] episode = graph.all(schema.getEpisodeLayerId());
@@ -213,7 +214,8 @@ public class Normalizer extends Transform implements GraphTransformer {
                 utterance.setLabel(participant.getLabel());
               }
               // check utterances are chained together
-              if (lastUtterance != null 
+              if (lastUtterance != null
+                  && utteranceLayer.getSaturated() // unless they're not meant to be
                   && !utterance.getStartId().equals(lastUtterance.getEndId())) { // not chained
                 // change the last utterance end
                 Anchor newEnd = utterance.getStart();
