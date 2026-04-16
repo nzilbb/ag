@@ -929,7 +929,7 @@ public class WhisperDeserializer implements GraphDeserializer {
     graph.setId(getName());
     graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
     // creat the 0 anchor to prevent graph tagging from creating one with no confidence
-    Anchor graphStart = graph.getOrCreateAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
+    Anchor graphStart = graph.createAnchorAt(0.0, Constants.CONFIDENCE_MANUAL);
 
     // add layers to the graph
     // we don't just copy the whole schema, because that would imply that all the extra layers
@@ -970,9 +970,9 @@ public class WhisperDeserializer implements GraphDeserializer {
     JsonArray jsonSegments = json.getJsonArray("segments");
     // each segment is an utterance
     for (JsonObject segment : jsonSegments.getValuesAs(JsonObject.class)) {
-      Anchor start = graph.getOrCreateAnchorAt(
+      Anchor start = graph.createAnchorAt(
         segment.getJsonNumber("start").doubleValue(), initialUtteranceBoundaryConfidence);
-      Anchor end = graph.getOrCreateAnchorAt(
+      Anchor end = graph.createAnchorAt(
         segment.getJsonNumber("end").doubleValue(), initialUtteranceBoundaryConfidence);
       if (start.getOffset() > end.getOffset()) { // backwards segment
         warnings.add("Utterance " + start + "-" + end + " backwards.");
@@ -1125,7 +1125,7 @@ public class WhisperDeserializer implements GraphDeserializer {
       for (Annotation utterance :new  AnnotationsByAnchor​(
              graph.all(schema.getUtteranceLayerId()))) {
         if (previousUtterance == null) { // first utterance
-          Anchor newStart = graph.getOrCreateAnchorAt(
+          Anchor newStart = graph.createAnchorAt(
             Math.max(utterance.getStart().getOffset() - utterancePadding, 0.0),
             Constants.CONFIDENCE_MANUAL);
           if (utterance.getStartId().equals(utterance.getParent().getStartId())) {
@@ -1155,22 +1155,25 @@ public class WhisperDeserializer implements GraphDeserializer {
             previousUtterance.setEnd(newEnd);
           } else { // the previous utterance could share an anchor with this one
             // set the shared offset as halfway between them
-            Anchor newShared = graph.createAnchorAt(
+            Anchor newStart = graph.createAnchorAt(
               previousUtterance.getEnd().getOffset()
               + ((utterance.getStart().getOffset()
                   - previousUtterance.getEnd().getOffset())/2),
               Constants.CONFIDENCE_MANUAL);
               if (utterance.getStartId().equals(utterance.getParent().getStartId())) {
                 // shares start with parent
-                utterance.getParent().setStart(newShared);
+                utterance.getParent().setStart(newStart);
               }
-            utterance.setStart(newShared);
+            utterance.setStart(newStart);
+            Anchor newEnd = graph.createAnchorAt(
+              newStart.getOffset(),
+              Constants.CONFIDENCE_MANUAL);
             if (previousUtterance.getEndId().equals(
                   previousUtterance.getParent().getEndId())) {
               // shares end with parent
-              previousUtterance.getParent().setEnd(newShared);
+              previousUtterance.getParent().setEnd(newEnd);
             }
-            previousUtterance.setEnd(utterance.getStart());
+            previousUtterance.setEnd(newEnd);
           }
         } // there is a previous utterance
         previousUtterance = utterance;
