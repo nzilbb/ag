@@ -72,7 +72,6 @@ public class TestWhisperXTranscriber {
     transcriber.setWorkingDirectory(dir);
     
     // set the annotator configuration
-    transcriber.setLanguageLayer(getSchema().getLayer("transcript_language"));
     transcriber.getStatusObservers().add(s->System.err.println(s));
     transcriber.setConfig(transcriber.getConfig());
     
@@ -92,6 +91,9 @@ public class TestWhisperXTranscriber {
     // setup
     File audio = new File(dir(), "utterance.wav");
     transcriber.setSchema(getSchema());
+    assertNotNull("Layer layer set autmatically", transcriber.getLanguageLayer());
+    assertEquals("Layer layer correct",
+                 "transcript_language",transcriber.getLanguageLayer().getId());
     
     Graph transcript = new Graph();
     transcript.setSchema(getSchema());
@@ -126,6 +128,11 @@ public class TestWhisperXTranscriber {
         .collect(Collectors.joining(" "))
         +"\"");
     }
+
+    // language
+    Annotation lang = transcript.first("transcript_language");
+    assertNotNull("Language set", lang); 
+    assertEquals("Language correct", "en", lang.getLabel()); 
   }   
 
   /** Test transcription of a longer, multi-speaker recording. */
@@ -184,6 +191,11 @@ public class TestWhisperXTranscriber {
         .collect(Collectors.joining(" "))
         +"\"");
     }
+    
+    // language
+    Annotation lang = transcript.first("transcript_language");
+    assertNotNull("Language set", lang); 
+    assertEquals("Language correct", "en", lang.getLabel()); 
   }   
 
   /**

@@ -768,6 +768,19 @@ public class WhisperXTranscriber extends Transcriber {
     beanPropertiesFromQueryString(config);
     setPercentComplete(10);
 
+    if (languageLayer == null && schema != null) {
+      for (Layer layer : schema.getLayers().values()) {
+        if ((layer.getParentId() == null
+             || layer.getParentId().equals(schema.getRoot().getId()))
+            && layer.getAlignment() == 0
+            && layer.getId().toLowerCase().matches(".*language.*")) {
+          setLanguageLayer(layer);
+          break;
+        }
+            
+      } // next layer
+    }
+
     whisperXExe = Execution.Which("whisperx", venv);
 
     // try to install whisperx if it isn't installed...
