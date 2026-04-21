@@ -980,7 +980,7 @@ public class WhisperDeserializer implements GraphDeserializer {
         start = end;
         end = originalStart;
       }
-      String speaker = graph.getId();
+      String speaker = IO.WithoutExtension(graph.getId());
       if (segment.containsKey("speaker")) { // explicit speaker
         speaker = segment.getString("speaker");
       } else if (currentTurn != null) { // no explicit speaker but we're in a turn
@@ -1183,8 +1183,16 @@ public class WhisperDeserializer implements GraphDeserializer {
       if (previousUtterance != null) {
         previousUtterance.getEnd().setConfidence(Constants.CONFIDENCE_MANUAL);
       }
+    } // utterancePadding set
+    
+    // ensure all participant annotations are correctly anchored
+    Anchor start = graph.getStart();
+    Anchor end = graph.getEnd();
+    for (Annotation participant : participants.values()) {
+      participant.setStart(start);
+      participant.setEnd(end);
     }
-
+    
     graph.commit();
     
     if (errors != null) throw errors;
@@ -1243,6 +1251,7 @@ public class WhisperDeserializer implements GraphDeserializer {
     warnings = new Vector<String>();
 
     Graph graph = new Graph();
+    graph.trackChanges();
     graph.setId(getName());
     graph.setOffsetGranularity(Constants.GRANULARITY_MILLISECONDS);
     // creat the 0 anchor to prevent graph tagging from creating one with no confidence
@@ -1329,7 +1338,6 @@ public class WhisperDeserializer implements GraphDeserializer {
 	 
       // ensure we have an utterance tokenizer
       if (getWordLayer() != null) {
-        graph.trackChanges();
         if (getTokenizer() == null) {
           setTokenizer(new SimpleTokenizer(getUtteranceLayer().getId(), getWordLayer().getId()));
         }
@@ -1361,13 +1369,14 @@ public class WhisperDeserializer implements GraphDeserializer {
           utterance.setLabel(utterance.getParent().getLabel());
         } // next turn
       } // there is a word layer
-      graph.commit();
+
     } catch(IOException exception) {
       if (errors == null) errors = new SerializationException();
       if (errors.getCause() == null) errors.initCause(exception);
       errors.addError(SerializationException.ErrorType.Other, exception.getMessage());
     }
     
+    graph.commit();
     if (errors != null) throw errors;
     
     // reset all change tracking

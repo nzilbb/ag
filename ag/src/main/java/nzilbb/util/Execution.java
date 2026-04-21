@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2021 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -24,6 +24,7 @@ package nzilbb.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Vector;
@@ -95,6 +96,25 @@ public class Execution implements Runnable {
    * @param newEnvironmentVariables Environment variables.
    */
   public Execution setEnvironmentVariables(LinkedHashMap<String,String> newEnvironmentVariables) { environmentVariables = newEnvironmentVariables; return this; }
+  
+  /**
+   * The directory of the Python virtual environment to execute in.
+   * @see #getVenv()
+   * @see #setVenv(File)
+   */
+  protected File venv;
+  /**
+   * Getter for {@link #venv}: The directory of the Python virtual
+   * environment to execute in. 
+   * @return The directory of the Python virtual environment to execute in.
+   */
+  public File getVenv() { return venv; }
+  /**
+   * Setter for {@link #venv}: The directory of the Python virtual
+   * environment to execute in. 
+   * @param newVenv The directory of the Python virtual environment to execute in.
+   */
+  public Execution setVenv(File newVenv) { venv = newVenv; return this; }
    
   /**
    * Command line arguments.
@@ -315,6 +335,46 @@ public class Execution implements Runnable {
     if (arguments != null) vArguments.addAll(arguments);
     
     if (verbose) System.out.println("Execution: " + vArguments);
+
+    // Do we need to activate a Python virtual environment before execution?
+    File venvScript = null;
+    if (venv != null) {
+      if (verbose) System.out.println("Execution venv: " + venv.getPath());
+      
+      // put the command into a shell script
+      try {
+        venvScript = File.createTempFile(
+          "Execution-", ".sh", getWorkingDirectory()); // TODO .bat on Windows
+        if (verbose) System.out.println("venv script: " + venvScript.getPath());
+        venvScript.deleteOnExit();
+        StringBuilder command = new StringBuilder();
+        for (String arg : vArguments) {
+          if (command.length() > 0) command.append(" ");
+          if (arg.indexOf(' ') >= 0) command.append("\"");
+          command.append(arg);
+          if (arg.indexOf(' ') >= 0) command.append("\"");
+        } // next argument
+        PrintWriter scriptWriter = new PrintWriter(venvScript, "UTF-8");
+        try {
+          scriptWriter.println("set -e");
+          File activate = new File(new File(venv, "bin"), "activate");
+          scriptWriter.println("source \""+activate.getPath()+"\"");
+          scriptWriter.println(command);
+        } finally {
+          scriptWriter.close();
+        }        
+       } catch(IOException exception) {
+        error.append("Could not create script for virtual environment ");
+        error.append(venv.getPath());
+        error.append(": ");
+        error.append(exception.getMessage());
+      }      
+      // now the current execution is to run the shell script
+      vArguments.clear();
+      vArguments.add("bash"); // TODO windows interpreter
+      vArguments.add(venvScript.getPath());
+    } // venv is set
+    
     try {
 
       Vector<String> envp = new Vector<String>();
@@ -440,6 +500,9 @@ public class Execution implements Runnable {
     } catch(IOException exception) {
       System.err.println("Execution: Could not execute: " + exception);
       error.append("Could not execute: " + exception);
+    } finally {
+      // delete virtual environment script?
+      if (venvScript != null) venvScript.delete(); 
     }
     finished = true;
     if (verbose) System.out.println("Execution: finished.");
@@ -472,6 +535,31 @@ public class Execution implements Runnable {
     File path = null;
     try {
       Execution which = new Execution()
+        .setExe(new File("/usr/bin/which"))
+        .arg(command);
+      which.run();
+      if (which.getInput().toString().trim().length() > 0) {
+        path = new File(which.getInput().toString().trim());
+      }
+    } catch (Throwable t) {
+      System.err.println("Execution.Which("+command+"): " + t);
+    }
+    return path;
+  } // end of which()
+
+  /**
+   * Runs the "which" command to determine if a command is available
+   * within a Python virtual environment.
+   * @param command The command we want to location of.
+   * @param venv The Python virtual environment to activate before
+   * running "which".
+   * @return The executable file for the command, or null if it can't be identified.
+   */
+  public static File Which(String command, File venv) {
+    File path = null;
+    try {
+      Execution which = new Execution()
+        .setVenv(venv)
         .setExe(new File("/usr/bin/which"))
         .arg(command);
       which.run();

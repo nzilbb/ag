@@ -43,6 +43,7 @@ Once this is done, building with tests can be achieved with the command:
 ```
 mvn package
 ```
+
 ### Alternative credentials
 
 An alternative to use a `GoogleTranscriber-key.json` file is to use the `gcloud`

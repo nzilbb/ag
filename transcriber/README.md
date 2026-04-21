@@ -27,9 +27,9 @@ Modules that perform automatic transcription of speech recordings using ASR/STT.
    - add the following to *dependencies*
    ```
     <dependency>
-      <groupId>nzilbb</groupId>
+      <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>[1.0.8,)</version>
+      <version>1.3.0</version>
       <scope>compile</scope>
     </dependency>
    ```

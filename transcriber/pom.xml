@@ -1,6 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>  
+<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>nz.ilbb.ag</groupId>
     <artifactId>annotation-graphs</artifactId>
@@ -13,12 +12,13 @@
   <description>
     Modules that use Speech To Text to perform automated transcription of speech recordings.
   </description>
-  <packaging>pom</packaging> 
+  <packaging>pom</packaging>
   <modules>
     <module>evaluator</module>
     <module>deepspeech</module>
     <module>google</module>
     <module>whisper</module>
     <module>papareo</module>
+    <module>whisperx</module>
   </modules>
 </project>
