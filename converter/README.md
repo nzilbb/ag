@@ -207,14 +207,15 @@ switch, or use the *Help|Information* menu option of the conversion utility conc
 3. Remove the groupId-based source code structure:
    ```
    cd informattooutformat
-   rm src/main/java/nzilbb/App.java src/test/java/nzilbb/AppTest.java
+   rm -r src/main/java/nz src/test/java/nz
    ```
 4. Add directory structure for the annotator code:
    ```
-   mkdir src/main/java/nzilbb/converter src/main/resources src/main/resources/nzilbb \
-     src/main/resources/nzilbb/converter \
+   mkdir src/main/java/nzilbb src/main/java/nzilbb/converter src/main/resources \
+     src/main/resources/nzilbb src/main/resources/nzilbb/converter \
      src/test/java/nzilbb/converter src/test/resources src/test/resources/nzilbb \
-     src/test/resources/nzilbb/converter
+     src/test/resources/nzilbb/converter src/site/ \
+     src/main/resources/nzilbbconverter src/main/resources/nzilbbconverter/images
    ```
 5. Add an icon for the converter, e.g.:
    ```

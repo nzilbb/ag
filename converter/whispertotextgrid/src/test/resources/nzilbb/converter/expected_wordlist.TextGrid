@@ -1,0 +1,432 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 280.507 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "SPEAKER_00" 
+        xmin = 0 
+        xmax = 280.507 
+        intervals: size = 30 
+        intervals [1]:
+            xmin = 0 
+            xmax = 4.563 
+            text = "" 
+        intervals [2]:
+            xmin = 4.563 
+            xmax = 7.4030000000000005 
+            text = "New Zealand English word list. (..)" 
+        intervals [3]:
+            xmin = 7.4030000000000005 
+            xmax = 10.904 
+            text = "Number one, (.) hit, hid, (.) hint. (..)" 
+        intervals [4]:
+            xmin = 10.904 
+            xmax = 18.026 
+            text = "Number two, (..) boot, (.) booed, (.) boo, (.) tune, (.) dune. (..)" 
+        intervals [5]:
+            xmin = 18.026 
+            xmax = 22.197 
+            text = "Three, (.) bird, (.) curt, (.) burn. (.)" 
+        intervals [6]:
+            xmin = 22.197 
+            xmax = 28.869 
+            text = "Four, (..) bat, (.) bad, (.) back, (.) bag, (..) ban." 
+        intervals [7]:
+            xmin = 28.869 
+            xmax = 28.909 
+            text = "" 
+        intervals [8]:
+            xmin = 28.909 
+            xmax = 32.2435 
+            text = "Five, (..) bit, (.) bed," 
+        intervals [9]:
+            xmin = 32.2435 
+            xmax = 64.026 
+            text = "" 
+        intervals [10]:
+            xmin = 64.026 
+            xmax = 65.426 
+            text = "Bed." 
+        intervals [11]:
+            xmin = 65.426 
+            xmax = 65.928 
+            text = "" 
+        intervals [12]:
+            xmin = 65.928 
+            xmax = 67.148 
+            text = "Beak." 
+        intervals [13]:
+            xmin = 67.148 
+            xmax = 67.965 
+            text = "" 
+        intervals [14]:
+            xmin = 67.965 
+            xmax = 78.327 
+            text = "bean sorry that's uh can i repeat beat (.) bead (.) beak (..) bean (.) number loud (..)" 
+        intervals [15]:
+            xmin = 78.327 
+            xmax = 91.049 
+            text = "lout (.) howl (.) cow (.) town tie (.) tied (.) tight (..) pie (..) pine hay bay (..) bait" 
+        intervals [16]:
+            xmin = 91.049 
+            xmax = 94.378 
+            text = "" 
+        intervals [17]:
+            xmin = 94.378 
+            xmax = 102.542 
+            text = "Paid, (..) pay, (.) pain, (..) take, (..) fourteen, (..) moat, (..)" 
+        intervals [18]:
+            xmin = 102.542 
+            xmax = 114.008 
+            text = "mow, (..) mowed, (..) moan, (..) fifteen, (..) beer, (..) bear, (..) hear, (..) hair, (..)" 
+        intervals [19]:
+            xmin = 114.008 
+            xmax = 120.731 
+            text = "ear, air, (..) sixteen, (..) spear, (..) spare," 
+        intervals [20]:
+            xmin = 120.731 
+            xmax = 120.951 
+            text = "" 
+        intervals [21]:
+            xmin = 120.951 
+            xmax = 126.155 
+            text = "Shear, (..) share, (..) cheer, (..) chair." 
+        intervals [22]:
+            xmin = 126.155 
+            xmax = 143.549 
+            text = "" 
+        intervals [23]:
+            xmin = 143.549 
+            xmax = 146.75 
+            text = "Eighteen, groan, (..) groan, moan," 
+        intervals [24]:
+            xmin = 146.75 
+            xmax = 150.854 
+            text = "" 
+        intervals [25]:
+            xmin = 150.854 
+            xmax = 156.679 
+            text = "Moan (..) Throne (.) Throne" 
+        intervals [26]:
+            xmin = 156.679 
+            xmax = 168.769 
+            text = "Weather (..) Witch (..) Weather (..) Witch (..) When (..) Wine (..) While (..) Wine 21" 
+        intervals [27]:
+            xmin = 168.769 
+            xmax = 176.455 
+            text = "Tin (..) Shed (..) Add (..) Yes (..) End (..) Bid" 
+        intervals [28]:
+            xmin = 176.455 
+            xmax = 263.198 
+            text = "" 
+        intervals [29]:
+            xmin = 263.198 
+            xmax = 268.0705 
+            text = "Clothe, (..) beneath, 32." 
+        intervals [30]:
+            xmin = 268.0705 
+            xmax = 280.507 
+            text = "" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "SPEAKER_01" 
+        xmin = 0 
+        xmax = 280.507 
+        intervals: size = 73 
+        intervals [1]:
+            xmin = 0 
+            xmax = 2.362 
+            text = "" 
+        intervals [2]:
+            xmin = 2.362 
+            xmax = 4.442 
+            text = "Okay, (..) go." 
+        intervals [3]:
+            xmin = 4.442 
+            xmax = 32.2435 
+            text = "" 
+        intervals [4]:
+            xmin = 32.2435 
+            xmax = 41.563 
+            text = "Bic, (..) big (.) and bin, (..) six, (..) but, (..) bud, (..) buck, (...)" 
+        intervals [5]:
+            xmin = 41.563 
+            xmax = 52.443 
+            text = "bug, (..) bun, (..) number seven, (..) bark, (..) barn, (..) path, (.) laugh, (.) dance, (..) eight, (..)" 
+        intervals [6]:
+            xmin = 52.443 
+            xmax = 53.5965 
+            text = "Bought. (..)" 
+        intervals [7]:
+            xmin = 53.5965 
+            xmax = 54.837500000000006 
+            text = "Bored. (..)" 
+        intervals [8]:
+            xmin = 54.837500000000006 
+            xmax = 55.9785 
+            text = "Born. (.)" 
+        intervals [9]:
+            xmin = 55.9785 
+            xmax = 57.1295 
+            text = "Bore. (..)" 
+        intervals [10]:
+            xmin = 57.1295 
+            xmax = 58.2605 
+            text = "Nine. (.)" 
+        intervals [11]:
+            xmin = 58.2605 
+            xmax = 59.281499999999994 
+            text = "Book. (..)" 
+        intervals [12]:
+            xmin = 59.281499999999994 
+            xmax = 60.3825 
+            text = "Good. (..)" 
+        intervals [13]:
+            xmin = 60.3825 
+            xmax = 61.533500000000004 
+            text = "Put. (..)" 
+        intervals [14]:
+            xmin = 61.533500000000004 
+            xmax = 62.814499999999995 
+            text = "Tin. (..)" 
+        intervals [15]:
+            xmin = 62.814499999999995 
+            xmax = 63.985 
+            text = "Beet." 
+        intervals [16]:
+            xmin = 63.985 
+            xmax = 126.175 
+            text = "" 
+        intervals [17]:
+            xmin = 126.175 
+            xmax = 134.482 
+            text = "Seventeen, (..) hid, (.) had, (..) hard, (..) hoard, (..) hood, (...)" 
+        intervals [18]:
+            xmin = 134.482 
+            xmax = 143.047 
+            text = "hood, (..) head, (..) herd, (..) heed, (..) hud, (..) and hod." 
+        intervals [19]:
+            xmin = 143.047 
+            xmax = 177.963 
+            text = "" 
+        intervals [20]:
+            xmin = 177.963 
+            xmax = 179.2835 
+            text = "Dole. (..)" 
+        intervals [21]:
+            xmin = 179.2835 
+            xmax = 180.5945 
+            text = "Dole. (..)" 
+        intervals [22]:
+            xmin = 180.5945 
+            xmax = 181.845 
+            text = "Dull." 
+        intervals [23]:
+            xmin = 181.845 
+            xmax = 181.846 
+            text = "" 
+        intervals [24]:
+            xmin = 181.846 
+            xmax = 183.3965 
+            text = "Twenty-two. (..)" 
+        intervals [25]:
+            xmin = 183.3965 
+            xmax = 184.687 
+            text = "School. (..)" 
+        intervals [26]:
+            xmin = 184.687 
+            xmax = 185.928 
+            text = "Full. (..)" 
+        intervals [27]:
+            xmin = 185.928 
+            xmax = 187.26850000000002 
+            text = "Wool. (..)" 
+        intervals [28]:
+            xmin = 187.26850000000002 
+            xmax = 188.4995 
+            text = "Will. (..)" 
+        intervals [29]:
+            xmin = 188.4995 
+            xmax = 189.73 
+            text = "Pool. (..)" 
+        intervals [30]:
+            xmin = 189.73 
+            xmax = 190.981 
+            text = "Well. (..)" 
+        intervals [31]:
+            xmin = 190.981 
+            xmax = 192.422 
+            text = "Twenty-three. (..)" 
+        intervals [32]:
+            xmin = 192.422 
+            xmax = 193.792 
+            text = "Fill." 
+        intervals [33]:
+            xmin = 193.792 
+            xmax = 194.013 
+            text = "" 
+        intervals [34]:
+            xmin = 194.013 
+            xmax = 195.393 
+            text = "Filling." 
+        intervals [35]:
+            xmin = 195.393 
+            xmax = 196.295 
+            text = "" 
+        intervals [36]:
+            xmin = 196.295 
+            xmax = 197.635 
+            text = "Fall. (..)" 
+        intervals [37]:
+            xmin = 197.635 
+            xmax = 198.996 
+            text = "Falling." 
+        intervals [38]:
+            xmin = 198.996 
+            xmax = 199.056 
+            text = "" 
+        intervals [39]:
+            xmin = 199.056 
+            xmax = 200.337 
+            text = "Fool. (..)" 
+        intervals [40]:
+            xmin = 200.337 
+            xmax = 201.7175 
+            text = "Fooling. (..)" 
+        intervals [41]:
+            xmin = 201.7175 
+            xmax = 203.01850000000002 
+            text = "Four. (..)" 
+        intervals [42]:
+            xmin = 203.01850000000002 
+            xmax = 204.519 
+            text = "Twenty-four." 
+        intervals [43]:
+            xmin = 204.519 
+            xmax = 204.8 
+            text = "" 
+        intervals [44]:
+            xmin = 204.8 
+            xmax = 206.03050000000002 
+            text = "Milk. (..)" 
+        intervals [45]:
+            xmin = 206.03050000000002 
+            xmax = 207.33100000000002 
+            text = "Child. (..)" 
+        intervals [46]:
+            xmin = 207.33100000000002 
+            xmax = 208.691 
+            text = "Railway. (.)" 
+        intervals [47]:
+            xmin = 208.691 
+            xmax = 209.461 
+            text = "Cold." 
+        intervals [48]:
+            xmin = 209.461 
+            xmax = 210.552 
+            text = "25." 
+        intervals [49]:
+            xmin = 210.552 
+            xmax = 213.152 
+            text = "Fairy. (..)" 
+        intervals [50]:
+            xmin = 213.152 
+            xmax = 214.702 
+            text = "Fairy. (..)" 
+        intervals [51]:
+            xmin = 214.702 
+            xmax = 216.01299999999998 
+            text = "Hearing. (..)" 
+        intervals [52]:
+            xmin = 216.01299999999998 
+            xmax = 217.903 
+            text = "Hearing." 
+        intervals [53]:
+            xmin = 217.903 
+            xmax = 218.423 
+            text = "26." 
+        intervals [54]:
+            xmin = 218.423 
+            xmax = 218.803 
+            text = "" 
+        intervals [55]:
+            xmin = 218.803 
+            xmax = 220.2135 
+            text = "City. (..)" 
+        intervals [56]:
+            xmin = 220.2135 
+            xmax = 221.63400000000001 
+            text = "Letter. (..)" 
+        intervals [57]:
+            xmin = 221.63400000000001 
+            xmax = 222.994 
+            text = "Fatter. (..)" 
+        intervals [58]:
+            xmin = 222.994 
+            xmax = 224.314 
+            text = "Ladder. (..)" 
+        intervals [59]:
+            xmin = 224.314 
+            xmax = 225.7345 
+            text = "Scatter. (..)" 
+        intervals [60]:
+            xmin = 225.7345 
+            xmax = 227.095 
+            text = "Better. (..)" 
+        intervals [61]:
+            xmin = 227.095 
+            xmax = 228.275 
+            text = "Batter. (.)" 
+        intervals [62]:
+            xmin = 228.275 
+            xmax = 229.265 
+            text = "And Peter." 
+        intervals [63]:
+            xmin = 229.265 
+            xmax = 229.745 
+            text = "27. (..)" 
+        intervals [64]:
+            xmin = 229.745 
+            xmax = 230.825 
+            text = "Tour." 
+        intervals [65]:
+            xmin = 230.825 
+            xmax = 233.011 
+            text = "" 
+        intervals [66]:
+            xmin = 233.011 
+            xmax = 242.557 
+            text = "pour, (..) sure, (..) sewer, (..) skewer, (..) cure, (..) pour," 
+        intervals [67]:
+            xmin = 242.557 
+            xmax = 256.266 
+            text = "street, (..) train, (..) tree, (..) dream, mother, (..) father, (..) nothing, (..) something," 
+        intervals [68]:
+            xmin = 256.266 
+            xmax = 262.93 
+            text = "think, (..) thin, (..) with, (..) toothbrush, (..) breathe," 
+        intervals [69]:
+            xmin = 262.93 
+            xmax = 268.0705 
+            text = "" 
+        intervals [70]:
+            xmin = 268.0705 
+            xmax = 274.404 
+            text = "Milk, (..) silk, (..) sulk, (.) gold, 33." 
+        intervals [71]:
+            xmin = 274.404 
+            xmax = 278.746 
+            text = "Ellen (.) and Alan, (.) full stop." 
+        intervals [72]:
+            xmin = 278.746 
+            xmax = 279.747 
+            text = "" 
+        intervals [73]:
+            xmin = 279.747 
+            xmax = 280.507 
+            text = "Thank you." 

@@ -21,7 +21,7 @@ These are standalone programs that convert transcripts from one tool format to a
 | **vtt** | [trs-to-vtt](trs-to-vtt/index.html) | [eaf-to-vtt](eaf-to-vtt/index.html) | | [slt-to-vtt](slt-to-vtt/index.html) | [cha-to-vtt](cha-to-vtt/index.html) | [textgrid-to-vtt](textgrid-to-vtt/index.html) | | [whisper-to-vtt](whisper-to-vtt/index.html) |
 | **slt** | [trs-to-slt](trs-to-slt/index.html) | [eaf-to-slt](eaf-to-slt/index.html) | | | | | | |
 | **cha** | [trs-to-cha](trs-to-cha/index.html) | [eaf-to-cha](eaf-to-cha/index.html) | [vtt-to-cha](vtt-to-cha/index.html) | | | | | |
-| **textgrid** | [trs-to-textgrid](trs-to-textgrid/index.html) | [eaf-to-textgrid](eaf-to-textgrid/index.html) | [vtt-to-textgrid](vtt-to-textgrid/index.html) | [slt-to-textgrid](slt-to-textgrid/index.html) | [cha-to-textgrid](cha-to-textgrid/index.html) | | | |
+| **textgrid** | [trs-to-textgrid](trs-to-textgrid/index.html) | [eaf-to-textgrid](eaf-to-textgrid/index.html) | [vtt-to-textgrid](vtt-to-textgrid/index.html) | [slt-to-textgrid](slt-to-textgrid/index.html) | [cha-to-textgrid](cha-to-textgrid/index.html) | | | [whisper-to-textgrid](whisper-to-textgrid/index.html) |
 | **txt** | [trs-to-txt](trs-to-txt/index.html) | | | | | | | |
 | **pdf** | [trs-to-pdf](trs-to-pdf/index.html) | [eaf-to-pdf](eaf-to-pdf/index.html) | [vtt-to-pdf](vtt-to-pdf/index.html) | [slt-to-pdf](slt-to-pdf/index.html) | [cha-to-pdf](cha-to-pdf/index.html) | [textgrid-to-pdf](textgrid-to-pdf/index.html) | | |
 | **tex** | [trs-to-tex](trs-to-tex/index.html) | [eaf-to-tex](eaf-to-tex/index.html) | [vtt-to-tex](vtt-to-tex/index.html) | [slt-to-tex](slt-to-tex/index.html) | | [textgrid-to-tex](textgrid-to-tex/index.html) | | |
