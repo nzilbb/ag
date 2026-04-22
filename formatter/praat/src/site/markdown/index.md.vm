@@ -95,3 +95,7 @@ when no utterance layer is mapped. 0 means 'do not infer utterance boundaries'.
 ignoreLabels
 : Regular expression for annotation to ignore, e.g. `<p:>` to ignore MAUS pauses.
 
+includeMetaData
+: If `true`, exported TextGrids include transcript attributes (e.g. language) as
+one-annotation tiers. Otherwise transcript attributes are ignored (the default).
+

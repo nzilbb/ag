@@ -1,5 +1,5 @@
 //
-// Copyright 2004-2025 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2004-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -381,6 +381,27 @@ public class TextGridSerialization
   }
   
   /**
+   * Whether to include transcript attributes as one-annotation tiers or ignore them.
+   * @see #getIncludeMetaData()
+   * @see #setIncludeMetaData(Boolean)
+   */
+  protected Boolean includeMetaData = Boolean.FALSE;
+  /**
+   * Getter for {@link #includeMetaData}: Whether to include
+   * transcript attributes as one-annotation tiers or ignore them. 
+   * @return Whether to include transcript attributes as
+   * one-annotation tiers or ignore them. 
+   */
+  public Boolean getIncludeMetaData() { return includeMetaData; }
+  /**
+   * Setter for {@link #includeMetaData}: Whether to include
+   * transcript attributes as one-annotation tiers or ignore them. 
+   * @param newIncludeMetaData Whether to include transcript
+   * attributes as one-annotation tiers or ignore them. 
+   */
+  public TextGridSerialization setIncludeMetaData(Boolean newIncludeMetaData) { includeMetaData = newIncludeMetaData; return this; }
+  
+  /**
    * Graph ID.
    * @see #getId()
    * @see #setId(String)
@@ -691,6 +712,18 @@ public class TextGridSerialization
           true));
     }
     
+    if (!configuration.containsKey("includeMetaData")) {
+      configuration.addParameter(
+        new Parameter(
+          "includeMetaData", Boolean.class, 
+          "Include Meta-Data",
+          "Whether to include transcript attributes as one-annotation tiers or ignore them",
+          true));
+    }
+    if (configuration.get("includeMetaData").getValue() == null) {
+      configuration.get("includeMetaData").setValue(Boolean.FALSE);
+    }
+
     return configuration;
   }   
 
@@ -1674,6 +1707,13 @@ public class TextGridSerialization
       if (layer.equals(getTurnLayer()) && getUtteranceLayer() != null) continue;
       // skip layers that were not explicitly selected
       if (!selectedLayers.contains(layer.getId())) continue;
+      // skip meta-data?      
+      if (!layer.getId().equals(schema.getParticipantLayerId())
+          && schema.getRoot().getId().equals(layer.getParentId())
+          && layer.getAlignment() == Constants.ALIGNMENT_NONE
+          && (includeMetaData == null || !includeMetaData)) {
+        continue;
+      }
       boolean assignedToParticipant = layer.getAncestors().contains(getParticipantLayer());
       if (layer.getAlignment() == Constants.ALIGNMENT_INSTANT)
       { // layer of instants

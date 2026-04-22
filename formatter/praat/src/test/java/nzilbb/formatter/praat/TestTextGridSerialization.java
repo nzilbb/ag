@@ -1,5 +1,5 @@
 //
-// Copyright 2015-2025 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2015-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -71,7 +71,7 @@ public class TestTextGridSerialization {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("useConventions").setValue(Boolean.TRUE);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -310,7 +310,7 @@ public class TestTextGridSerialization {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("useConventions").setValue(Boolean.FALSE);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -405,7 +405,7 @@ public class TestTextGridSerialization {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("useConventions").setValue(Boolean.TRUE);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -489,7 +489,7 @@ public class TestTextGridSerialization {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     configuration.get("useConventions").setValue(Boolean.TRUE);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -580,7 +580,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -731,7 +731,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -850,7 +850,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
       
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -960,7 +960,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -1159,7 +1159,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -1400,7 +1400,7 @@ public class TestTextGridSerialization {
     // no utterance inference
     configuration.get("utteranceThreshold").setValue(Double.valueOf(0.0));
     configuration.get("ignoreLabels").setValue("<p:>");
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
     assertEquals("utteranceThreshold",
                  Double.valueOf(0.0), deserializer.getUtteranceThreshold());
     assertEquals("ignoreLabels",
@@ -1556,7 +1556,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -1699,7 +1699,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
     
     // load the stream
     ParameterSet defaultParamaters = deserializer.load(streams, schema);
@@ -1768,7 +1768,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, deserializer.configure(configuration, schema).size());
+    assertEquals(10, deserializer.configure(configuration, schema).size());
 
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
@@ -1804,6 +1804,7 @@ public class TestTextGridSerialization {
   @Test public void serialize_utterance_word()  throws Exception {
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
+      new Layer("language", "Language", 0, false, true, true),
       new Layer("who", "Participants", 0, true, true, true),
       new Layer("comment", "Comment", 2, true, false, true),
       new Layer("noise", "Noise", 2, true, false, true),
@@ -1829,7 +1830,12 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, serializer.configure(configuration, schema).size());
+    assertEquals(10, configuration.size());
+    assertEquals("Meta-data ignored by default",
+                 Boolean.FALSE, (Boolean)configuration.get("includeMetaData").getValue());
+    serializer.configure(configuration, schema).size();
+    assertEquals("Meta-data ignored",
+                 Boolean.FALSE, serializer.getIncludeMetaData());
 
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(4, needLayers.length);
@@ -1849,6 +1855,70 @@ public class TestTextGridSerialization {
 
     // test using diff
     File expected = new File(dir, "expected_serialize_utterance_word.TextGrid");
+    File actual = new File(dir, "serialize_utterance_word.TextGrid");
+    String differences = diff(expected, actual);
+    if (differences != null) {
+      fail(differences);
+    } else {
+      actual.delete();
+    }
+  }
+
+  @Test public void serialize_language_utterance_word()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("language", "Language", 0, false, true, true),
+      new Layer("who", "Participants", 0, true, true, true),
+      new Layer("comment", "Comment", 2, true, false, true),
+      new Layer("noise", "Noise", 2, true, false, true),
+      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
+      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
+      new Layer("word", "Words", 2, true, false, false, "turn", true),
+      new Layer("phone", "Phones", 2, true, true, true, "word", true),
+      new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
+      new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
+    File dir = getDir();
+    // access file
+    NamedStream[] jsonStreams = { new NamedStream(new File(dir, "serialize_utterance_word.json")) };
+      
+    // deserialize graph from JSON
+    JSONSerialization json = new JSONSerialization();
+    json.configure(json.configure(new ParameterSet(), schema), schema);
+    json.setParameters(json.load(jsonStreams, schema));
+    Graph[] graphs = json.deserialize();
+
+    // create serializer
+    TextGridSerialization serializer = new TextGridSerialization();
+      
+    // general configuration
+    ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
+    //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    assertEquals(10, configuration.size());
+    assertEquals("Meta-data ignored by default",
+                 Boolean.FALSE, (Boolean)configuration.get("includeMetaData").getValue());
+    configuration.get("includeMetaData").setValue(Boolean.TRUE);
+    serializer.configure(configuration, schema).size();
+    assertEquals("Meta-data not ignored",
+                 Boolean.TRUE, serializer.getIncludeMetaData());
+
+    String[] needLayers = serializer.getRequiredLayers();
+    assertEquals(4, needLayers.length);
+    assertEquals("who", needLayers[0]);
+    assertEquals("turn", needLayers[1]);
+    assertEquals("utterance", needLayers[2]);
+    assertEquals("word", needLayers[3]);
+	 
+    // serialize
+    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
+    final Vector<NamedStream> streams = new Vector<NamedStream>();
+    serializer.serialize(Arrays.spliterator(graphs), null,
+                         stream -> streams.add(stream),
+                         warning -> System.out.println(warning),
+                         exception -> exceptions.add(exception));
+    streams.elementAt(0).save(dir);
+
+    // test using diff
+    File expected = new File(dir, "expected_serialize_language_utterance_word.TextGrid");
     File actual = new File(dir, "serialize_utterance_word.TextGrid");
     String differences = diff(expected, actual);
     if (differences != null) {
@@ -1896,7 +1966,7 @@ public class TestTextGridSerialization {
     // general configuration
     ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, serializer.configure(configuration, schema).size());
+    assertEquals(10, serializer.configure(configuration, schema).size());
 
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(4, needLayers.length);
@@ -1918,75 +1988,6 @@ public class TestTextGridSerialization {
     // test using diff
     File expected = new File(dir, "expected_serialize_utterance_word__212.4-216.36333.TextGrid");
     File actual = new File(dir, "serialize_utterance_word__212.400-216.363.TextGrid");
-    String differences = diff(expected, actual);
-    if (differences != null) {
-      fail(differences);
-    } else {
-      actual.delete();
-    }
-  }
-
-  @Test public void serialize_selected_layer()  throws Exception {
-    Schema schema = new Schema(
-      "who", "turn", "utterance", "word",
-      new Layer("who", "Participants", 0, true, true, true),
-      new Layer("comment", "Comment", 2, true, false, true),
-      new Layer("noise", "Noise", 2, true, false, true),
-      new Layer("turn", "Speaker turns", 2, true, false, false, "who", true),
-      new Layer("utterance", "Utterances", 2, true, false, true, "turn", true),
-      new Layer("word", "Words", 2, true, false, false, "turn", true),
-      new Layer("phone", "Phones", 2, true, true, true, "word", true),
-      new Layer("f1", "First Formant", 1, true, true, false, "phone", false),
-      new Layer("lexical", "Lexical", 0, true, false, false, "word", true),
-      new Layer("pronounce", "Pronounce", 0, false, false, true, "word", true));
-    File dir = getDir();
-    // access file
-    NamedStream[] jsonStreams = { new NamedStream(new File(dir, "serialize_utterance_word.json")) };
-      
-    // deserialize graph from JSON
-    JSONSerialization json = new JSONSerialization();
-    json.configure(json.configure(new ParameterSet(), schema), schema);
-    json.setParameters(json.load(jsonStreams, schema));
-    Graph[] graphs = json.deserialize();
-
-    // extract fragment
-    double fragmentFrom = 212.4;
-    double fragmentTo = 216.36333; // exactly on the offset of the last anchor
-    String [] layerIds = { "utterance", "word", "phone" };
-    Graph fragment = graphs[0].getFragment(fragmentFrom, fragmentTo, layerIds);
-    fragment.shiftAnchors(-fragmentFrom);
-    assertEquals("serialize_utterance_word__212.400-216.363", fragment.getId());
-    Graph[] fragments = { fragment };
-
-    // create serializer
-    TextGridSerialization serializer = new TextGridSerialization();
-      
-    // general configuration
-    ParameterSet configuration = serializer.configure(new ParameterSet(), schema);
-    //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
-    assertEquals(9, serializer.configure(configuration, schema).size());
-
-    String[] needLayers = serializer.getRequiredLayers();
-    assertEquals(4, needLayers.length);
-    assertEquals("who", needLayers[0]);
-    assertEquals("turn", needLayers[1]);
-    assertEquals("utterance", needLayers[2]);
-    assertEquals("word", needLayers[3]);
-	 
-    String[] selectedLayers = { "phone" };
-    // serialize
-    final Vector<SerializationException> exceptions = new Vector<SerializationException>();
-    final Vector<NamedStream> streams = new Vector<NamedStream>();
-    serializer.serialize(Arrays.spliterator(fragments), selectedLayers,
-                         stream -> streams.add(stream),
-                         warning -> System.out.println(warning),
-                         exception -> exceptions.add(exception));
-    streams.elementAt(0).setName("selected_layers__212.400-216.363.TextGrid");
-    streams.elementAt(0).save(dir);
-
-    // test using diff
-    File expected = new File(dir, "expected_selected_layers__212.400-216.363.TextGrid");
-    File actual = new File(dir, "selected_layers__212.400-216.363.TextGrid");
     String differences = diff(expected, actual);
     if (differences != null) {
       fail(differences);
@@ -2036,7 +2037,7 @@ public class TestTextGridSerialization {
     // test invalid peer overlap allowance too
     // i.e. in "Cyril would", "would" starts on its own tier because it starts before "Cyril" ends
     configuration.get("allowPeerOverlap").setValue(Boolean.TRUE);
-    assertEquals(9, serializer.configure(configuration, schema).size());
+    assertEquals(10, serializer.configure(configuration, schema).size());
 
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(4, needLayers.length);
@@ -2106,7 +2107,7 @@ public class TestTextGridSerialization {
     //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
     assertEquals("Default utteranceThreshold",
                  Double.valueOf(0.5), configuration.get("utteranceThreshold").getValue());
-    assertEquals(9, serializer.configure(configuration, schema).size());
+    assertEquals(10, serializer.configure(configuration, schema).size());
 
     String[] needLayers = serializer.getRequiredLayers();
     assertEquals(4, needLayers.length);
