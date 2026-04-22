@@ -809,6 +809,7 @@ public class WhisperXTranscriber extends Transcriber {
         // try installing python3-all-venv (we might be running in Docker, where we're allowed)
         cmd = new Execution()
           .setExe("apt")
+          .setWorkingDirectory(getWorkingDirectory())
           .arg("install").arg("-y").arg("python3-all-venv");
         cmd.getStdoutObservers().add(m->setStatus(m));
         cmd.getStderrObservers().add(m->setStatus(m));
@@ -838,11 +839,17 @@ public class WhisperXTranscriber extends Transcriber {
       if (!cacheDir.exists() && !cacheDir.mkdir()) {
         setStatus("Could not create pip cache directory: "+cacheDir.getPath());
       }
+      File tmpDir = new File(getWorkingDirectory(), "tmp");
+      if (!tmpDir.exists() && !tmpDir.mkdir()) {
+        setStatus("Could not create pip tmp directory: "+tmpDir.getPath());
+      }
       cmd = new Execution()
         .setVenv(venv)
+        .setWorkingDirectory(getWorkingDirectory())
         .setExe("pip")
         .arg("install")
         .arg("--cache-dir="+cacheDir.getPath())
+        .env("TMPDIR", tmpDir.getPath()) // instead of /tmp which can be too small
         .arg("whisperx");
       cmd.getStdoutObservers().add(m->setStatus(m));
       cmd.getStderrObservers().add(m->setStatus(m));
@@ -943,6 +950,7 @@ public class WhisperXTranscriber extends Transcriber {
       // run whisperX recognizer
       Execution whisperX = new Execution()
         .setVenv(venv)
+        .setWorkingDirectory(getWorkingDirectory())
         .setExe(whisperXExe)
         .env("HOME", getWorkingDirectory().getPath()) // for ~/.cache/whisper/...
         .arg("--model").arg(model);
@@ -1080,6 +1088,7 @@ public class WhisperXTranscriber extends Transcriber {
       Execution whisperX = new Execution()
         .setVenv(venv)
         .setExe(whisperXExe)
+        .setWorkingDirectory(getWorkingDirectory())
         .env("HOME", getWorkingDirectory().getPath()) // for ~/.cache/whisper/...
         .arg("--model").arg(model);
 

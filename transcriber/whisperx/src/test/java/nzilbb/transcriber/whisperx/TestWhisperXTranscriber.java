@@ -103,6 +103,7 @@ public class TestWhisperXTranscriber {
 
     // transcribe the audio
     transcriber.setDiarize(false);
+    //transcriber.setModel("/home/robert/nzilbb/automated-transcription/nzilbb-training/models/quakestudies-medium-10000");
     transcriber.transcribe(audio, transcript);
 
     // check the graph
