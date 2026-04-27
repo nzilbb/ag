@@ -410,7 +410,8 @@ public abstract class Annotator implements GraphTransformer, MonitorableTask {
           || method.getName().equals("getConfig")
           || method.getName().equals("getRequiredLayers")
           || method.getName().equals("getOutputLayers")
-          || method.getName().equals("getPercentComplete")) continue;
+          || method.getName().equals("getPercentComplete")
+          || method.getName().equals("getMinimumApiVersion")) continue;
       
       try {
         if (method.getName().startsWith("get")) { // found a getter
