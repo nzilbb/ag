@@ -1,0 +1,38 @@
+<html><body>
+<h2>DB Tagger</h2>
+
+<p> This annotator tags entities with data loaded from a relational database table.
+  Initial data should be supplied by plain text file (e.g. a CSV file), but the table
+  schema can be edited to create/update/delete fields (columns), and field types can
+  include HTML (rich-text) as well as plain text, numeric, etc. data.
+  Sub-tables can also be added to represent fields with multiple values, and these
+  sub-tables can also have multiple fields. </p>  
+
+<p> The data file you supply may contain multiple fields, and multiple entries
+  per word.  It might include: </p>
+<ul>
+  <li>ID</li>
+  <li>name</li>
+  <li>description</li>
+  <li>otherNames</li>
+</ul>
+<p> ...or any other data you like. </p>
+
+<p> <em>NB</em> the text file must use ASCII or UTF-8 character encoding.  If your
+  data file uses another encoding (e.g. <q>Western</q> or ISO-8859, you will
+  need to re-save the file using UTF-8 (in many text editors, the character encoding
+  is an option available when you select <q>Save As...</q> from the <q>File</q> menu). </p> 
+
+<p> You can upload as many files as you like, each corresponding to a different
+  primary table.  Once you have at least one table, you can configure a word or
+  phrase layer to lookup the resulting entries. </p>
+<p> If the output layer is a phrase layer (i.e. annotations can span multiple tokens),
+  then multiple consecutive tokens that match the same table entry are tagged
+  with a single annotation. </p>
+
+<p> This tagger is designed primarily for use within a LaBB-CAT
+  context, where view/edit links are controlled and secured by
+  LaBB-CAT. The original purpose is to provide links to editable data
+ about named entities used in transcripts. </p>
+
+</body></html>

@@ -1,0 +1,76 @@
+body {
+    background-color: #ffffff;
+    color: #353833;
+    font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin: auto;
+    height: 100%;
+    width: 100%;
+    max-width: 800px;
+}
+
+details>summary {
+    cursor: pointer;
+    font-weight: bold;
+}
+body>details>summary {
+    cursor: help;
+    list-style-type: 'ⓘ';
+    font-weight: normal;
+}
+
+h1 { font-size: 17pt; color: #859044; text-align: center; }
+h2 { font-size: 16pt; color: #859044; text-align: center; }
+h3 { font-size: 15pt; color: #859044; font-style:italic; }
+h4 { font-size: 14pt; color: #859044; }
+h5 { font-size: 13pt; color: #859044; }
+h6 { font-size: 12pt; color: #859044; }
+
+label {
+    font-weight: bold;
+}
+label:after {
+    content: ':';
+}
+.field {
+    display: flex;
+    flex-direction: row;
+}
+.field label {
+    width: 30%;
+    display: block;
+}
+.field select {
+    width: 35%;
+}
+.field input {
+    width: 35%;
+}
+
+button img, body>details img {
+    width: 16px;
+    height: 16px;
+    vertical-align: center;
+}
+button[disabled] img {
+    opacity: 0.5;
+}
+
+footer {
+    text-align: center;
+    font-style: italic;
+}
+
+.error {
+    color: red;
+}
+
+progress {
+    width: 100%;
+}
+
+/* Layout on narrower screens */
+@media all and (max-width: 640px) {
+    .field { flex-direction: column; }
+    .field label, .field select, .field input  { width: 95vw; }
+}

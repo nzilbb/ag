@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> DB Tagger </title>
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <h1>DNB Tagger</h1>
+    
+    <p> This annotator tags annotates words with data from a relational datab table
+      loaded from a plain text file (e.g. a CSV file).
+      The initial file must have a 'flat' structure in the sense that it's a simple
+      list of entries with a fixed number of columns/fields.
+      However once installed, sub-tables can be defined to represent one-to-many
+      relationships, allowing each primary-table entry to correspond to multiple
+      secondary-table entries. </p>  
+    
+    <table>
+      <caption>Tables</caption>
+      <tbody id="tables"></tbody>
+    </table>
+        
+    <footer><div> DB Tagger <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>

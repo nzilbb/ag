@@ -38,5 +38,6 @@
     <!--module>mfa</module-->
     <module>partitioner</module>
     <module>stanfordner</module>
+    <module>db</module>
   </modules>
 </project>

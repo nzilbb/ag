@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> Fields </title>
+    <link rel="stylesheet" href="fields.css" type="text/css">
+    <script src="../util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <h1 id="table">Fields</h1>
+
+    <details><summary>You can define the fields for this table here.</summary>
+      <p> Field names are listed on the left. Each field has: </p>
+      <dl>
+        <dt>Type</dt>
+        <dd> What kind of information can be stored in this field. This can be:
+          <ul>
+            <li><b>string</b>: short, single-line text </li>
+            <li><b>text</b>: long multi-line text </li>
+            <li><b>richtext</b>: long text that includes formatting, bold/italic text, links, etc. </li>
+            <li><b>integer</b>: whole number </li>
+            <li><b>number</b>: decimal number </li>
+            <li><b>boolean</b>: true or false </li>
+            <li><b>url</b>: link to a web page </li>
+            <li><b>email</b>: email address </li>
+            <li><b>date</b>: date (excluding time) </li>
+            <li><b>datetime</b>: date including time of day </li>
+            <li><b>geo-location</b>: coordinates for a geographic location </li>
+          </ul>
+        </dd>
+
+        <dt>Validation</dt>
+        <dd> A definition for how the values for the field are constrained.
+          What you enter here may depend on the Type specified. You can enter:
+          <ul>
+            <li> A list of alternatives separated by <tt>|</tt>, which will
+              result in a dropdown list of options, e.g. <br>
+              <tt>singular|plural</tt> <br>
+              If you want to allow for there being no value specified,
+              include a <tt>|</tt> at the beginniing of the validation, e.g.<br>
+              <tt>|singular|plural</tt></li>
+            <li> For integer/number fields, you can specify the (inclusive)
+              minimum or maximum for the value, separated by <tt>&lt;</tt>, e.g.<br>
+              <tt>1&lt;7</tt><br>
+              If you want only a minimum you can omit the maximum (or vice versa) e.g.<br>
+              <tt>0&lt;</tt>
+            </li>
+            <li> For string fields, you can specify a regular expression that the value
+              must match, e.g.<br>
+              <tt>.+@gmail\.com</tt></li>
+          </ul>
+          Validation definitions can be up to 50 characters long.
+        </dd>
+      </dl>
+
+      <p> When you make a change to the definition of a field, use the field's save button
+        <img src="../save.svg" alt="💾"> to save your changes.</p>
+      
+      <p> You can delete a field using the field's save button
+        <img src="../delete.svg" alt="❌">. When you delete a field, all data
+        previously saved for the field is permanantly lost, and any automated
+        annotations that rely on that field will no longer work.</p>
+      
+      <p> You can add a new field by pressing the 'add' button
+        <img src="../add.svg" alt="➕"> at the bottom of the list. You will be
+        asked for the name of the field, which cannot be changed once entered.
+        Field names can be up to 50 characters long.</p>
+      
+    </details>
+
+    <div id="attributes"></div>
+    <button id="btnNewField" title="Add new field"><img src="../add.svg" alt="➕"></button>
+    <p id="error" class="error"></p>
+    <footer><div> DB Tagger <small id="version"></small> </div></footer>
+    
+    <script src="fields.js" type="text/javascript"></script>
+  </body>
+</html>

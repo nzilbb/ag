@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>nzilbb.annotator</artifactId>
+    <groupId>nz.ilbb.ag</groupId>
+    <version>1.0.0</version>
+  </parent>
+
+  <groupId>nzilbb</groupId>
+  <artifactId>nzilbb.annotator.db</artifactId>
+  <version>0.1.0</version>
+
+  <name>nzilbb.annotator.db</name>
+  <description>Annotator for tagging entities from an editable relational database.</description>
+
+  <properties>
+    <package.path>nzilbb/annotator/db/</package.path>
+    <annotator.class>nzilbb.annotator.db.DbTagger</annotator.class>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>nz.ilbb.ag</groupId>
+      <artifactId>nzilbb.ag</artifactId>
+      <version>1.4.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-csv</artifactId>
+      <version>1.8</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>10.15.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbyclient</artifactId>
+      <version>10.15.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbytools</artifactId>
+      <version>10.15.2.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- add manifest attributes required for identifying the annotator class -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest addDefaultImplementationEntries="true" />
+            <manifestEntries>
+              <nzilbb-ag-automation-Annotator>${annotator.class}</nzilbb-ag-automation-Annotator>
+              <Name>${package.path}</Name>
+              <Implementation-Title>${project.description}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>New Zealand Institute of Language, Brain and Behaviour</Implementation-Vendor>
+            </manifestEntries>
+          </archive>
+          <outputDirectory>../../bin</outputDirectory>
+        </configuration>
+      </plugin>
+      <!-- include commons-csv in our jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.apache.commons</groupId>
+                  <artifactId>commons-csv</artifactId>
+                  <version>1.8</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- download/unpack https://cdn.ckeditor.com/ckeditor5/48.0.0/zip/ckeditor5-48.0.0.zip -->
+      <plugin>
+        <groupId>com.googlecode.maven-download-plugin</groupId>
+        <artifactId>download-maven-plugin</artifactId>
+        <version>1.3.0</version>
+        <executions>
+          <execution>
+            <!-- the wget goal actually binds itself to this phase by default -->
+            <phase>process-resources</phase>
+            <goals>
+              <goal>wget</goal>
+            </goals>
+            <configuration>
+              <url>https://cdn.ckeditor.com/ckeditor5/48.0.0/zip/ckeditor5-48.0.0.zip</url>
+              <outputFileName>ckeditor5-48.0.0.zip</outputFileName>
+              <!-- default target location, just to demonstrate the parameter -->
+              <outputDirectory>${project.build.directory}</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- ...and unzip the implementation to include in our build -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>prepare</id>
+            <phase>process-resources</phase>
+            <configuration>
+              <tasks>
+                <echo message="unzip ckeditor" />
+                <unzip src="${project.build.directory}/ckeditor5-48.0.0.zip"
+                       dest="${project.build.directory}/classes/nzilbb/annotator/db/ext">
+                  <patternset>
+                    <include name="ckeditor5//*"/>
+                  </patternset>
+                </unzip>
+              </tasks>
+            </configuration>
+            <goals>
+                <goal>run</goal>
+            </goals>
+        </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <trimStackTrace>false</trimStackTrace>
+        </configuration>
+      </plugin>
+      <!-- copy info.html as the 'site' index (wrapping it in html/body tags) -->
+      <plugin>
+        <groupId>com.github.mike10004</groupId>
+        <artifactId>concatenate-maven-plugin</artifactId>
+        <version>0.4</version>
+        <executions>
+          <execution>
+            <id>assemble-xhtml-index</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>cat</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <fileset>
+                  <directory>${project.basedir}/src/site/resources/xhtml/</directory>
+                  <includes><include>prefix.xhtml</include></includes>
+                </fileset>
+                <fileset>
+                  <directory>${project.basedir}/src/main/resources/${package.path}</directory>
+                  <includes><include>info.html</include></includes>
+                </fileset>
+                <fileset>
+                  <directory>${project.basedir}/src/site/resources/xhtml/</directory>
+                  <includes><include>suffix.xhtml</include></includes>
+                </fileset>
+              </sources>
+              <outputFile>${project.basedir}/src/site/xhtml/index.xhtml</outputFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+        <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.7.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
