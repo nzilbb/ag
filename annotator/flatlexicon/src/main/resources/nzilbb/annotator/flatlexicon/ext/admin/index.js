@@ -20,16 +20,6 @@ function listLexicons() {
             td.appendChild(document.createTextNode(lexiconId));
             td = document.createElement("td");
             tr.appendChild(td);
-            var link = document.createElement("a");
-            td.appendChild(link);
-            link.title = `${lexiconId} definition`;
-            link.href = `fields.html?l=${lexiconId}`
-            var img = document.createElement("img");
-            img.src = "../edit.svg"
-            img.alt = "✎";
-            link.appendChild(img);
-            td = document.createElement("td");
-            tr.appendChild(td);
             var button = document.createElement("button");            
             td.appendChild(button);
             button.title = `Delete ${lexiconId}`;
@@ -80,7 +70,7 @@ function selectFile() {
         } else {
             // get headers...
             var firstLine = csvRecordsArray[0];
-            console.log("First line: " + firstLine);
+            var secondLine = csvRecordsArray.length < 2?csvRecordsArray[0]:csvRecordsArray[1];
             // split the line into fields
             let delimiter = ",";
             if (firstLine.startsWith(";;;")) { // most likely the CMU dictionary
@@ -91,7 +81,9 @@ function selectFile() {
             else if (firstLine.match(/.;.*/)) delimiter = ";";
             else if (firstLine.match(/. .*/)) delimiter = " ";
             document.getElementById("fieldDelimiter").value = delimiter;
-            if (firstLine.match(/.*".*/)) document.getElementById("quote").value = "\"";
+            if (firstLine.match(/.*".*/) || secondLine.match(/.*".*/)) {
+              document.getElementById("quote").value = "\"";
+            }
             showSample();
             document.getElementById("btnUploadLexicon").removeAttribute("disabled");
         }
@@ -123,6 +115,17 @@ function showSample() {
                     row.substring(firstDelimiter + 1)];
             }
         }
+    } else if (quote) {
+      parseFields = row => {
+        // ensure quoted delimiters don't split one field
+        row = row.replaceAll(
+          new RegExp(`(${quote}[^${quote}]*)${fieldDelimiter}([^${quote}]*${quote})`, "g"),
+          // use \n in place of delimiter
+          "$1\n$2");
+        return row.split(fieldDelimiter)
+        // change \n back into delimiter
+          .map(field => field.replaceAll("\n",fieldDelimiter));
+      }
     }
     var stripQuotes = field => field;
     if (quote) {

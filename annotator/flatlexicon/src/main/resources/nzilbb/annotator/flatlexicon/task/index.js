@@ -164,7 +164,7 @@ function selectFile() {
     } else {
       // get headers...
       var firstLine = csvRecordsArray[0];
-      console.log("First line: " + firstLine);
+      var secondLine = csvRecordsArray.length < 2?csvRecordsArray[0]:csvRecordsArray[1];
       // split the line into fields
       let delimiter = ",";
       if (firstLine.startsWith(";;;")) { // most likely the CMU dictionary
@@ -175,7 +175,9 @@ function selectFile() {
       else if (firstLine.match(/.;.*/)) delimiter = ";";
       else if (firstLine.match(/. .*/)) delimiter = " ";
       document.getElementById("fieldDelimiter").value = delimiter;
-      if (firstLine.match(/.*".*/)) document.getElementById("quote").value = "\"";
+      if (firstLine.match(/.*".*/) || secondLine.match(/.*".*/)) {
+        document.getElementById("quote").value = "\"";
+      }
       showSample();
       document.getElementById("btnUploadLexicon").removeAttribute("disabled");
     }
@@ -206,6 +208,17 @@ function showSample() {
           row.substring(0, firstDelimiter),
           row.substring(firstDelimiter + 1)];
       }
+    }
+  } else if (quote) {
+    parseFields = row => {
+      // ensure quoted delimiters don't split one field
+      row = row.replaceAll(
+        new RegExp(`(${quote}[^${quote}]*)${fieldDelimiter}([^${quote}]*${quote})`, "g"),
+        // use \n in place of delimiter
+        "$1\n$2");
+      return row.split(fieldDelimiter)
+      // change \n back into delimiter
+        .map(field => field.replaceAll("\n",fieldDelimiter));
     }
   }
   var stripQuotes = field => field;
@@ -354,21 +367,6 @@ function trackLexiconLoad() {
   });
 }
 
-/** Automatically set the lexiconLink setting to work for editing the entry in LaBB-CAT */
-function inferLink() {
-  // turn something like:
-  // http://example.com/labbcat/admin/annotator/task/FlatLexiconTagger/?dict
-  // ...into something like:
-  // http://example.com/labbcat/annotator/ext/FlatLexiconTagger/entry.html?l={0}&f={1}&e={2}
-  document.getElementById("lexiconLink").value
-    = window.location.toString()
-    .replace("/admin/","/")
-    .replace("/task/","/ext/")
-    .replace(/\?.*$/,"")
-    +"entry.html?l={0}&f={1}&e={2}";
-  return false;
-}
-
 document.getElementById("tagLayerId").onchange = function(e) {
   changedLayer(this); };
 document.getElementById("file").onchange = selectFile;
@@ -377,4 +375,3 @@ document.getElementById("fieldDelimiter").onchange = showSample;
 document.getElementById("quote").onchange = showSample;
 document.getElementById("comment").onchange = showSample;
 document.getElementById("skipFirstLine").onclick = showSample;
-document.getElementById("btnInferLink").onclick = inferLink;

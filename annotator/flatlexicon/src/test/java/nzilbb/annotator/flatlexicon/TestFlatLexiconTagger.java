@@ -1,5 +1,5 @@
 //
-// Copyright 2022-2026 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2022 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -30,7 +30,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nzilbb.ag.Anchor;
@@ -910,49 +909,6 @@ public class TestFlatLexiconTagger {
     assertEquals("Polish entry returned",
                  1, entries.size());
     assertEquals("Polish entry correct", "'ʐɨ-ʨa", entries.get(0));
-
-    // can list fields
-    List<Map<String,String>> fields = annotator.readFields("dict");
-    assertEquals("Correct number of fields in lexicon: " + fields,
-                 2, fields.size());
-    Map<String,String> field = fields.get(0);
-    assertEquals("Correct field name", "type", field.get("field"));
-    assertEquals("Correct field type", "string", field.get("type"));
-    assertEquals("Correct field validation", "", field.get("validation"));
-
-    // field CRUD
-    assertFalse("Cannot create field in nonexistent lexicon",
-                annotator.createField("nonexistent", "xxx", "string", "").length() == 0);
-    assertFalse("Cannot create field that already exists",
-                annotator.createField("dict", "type", "string", "").length() == 0);
-    assertEquals("Can create new field",
-                 "", annotator.createField("dict", "test", "boolean", "true|false"));
-    fields = annotator.readFields("dict");
-    assertEquals("Field created: " + fields,
-                 3, fields.size());
-    field = fields.get(2);
-    assertEquals("Correct new field name", "test", field.get("field"));
-    assertEquals("Correct new field type", "boolean", field.get("type"));
-    assertEquals("Correct new field validation", "true|false", field.get("validation"));
-    
-    assertEquals("Can update new field",
-                 "", annotator.updateField("dict", "test", "integer", ""));
-    fields = annotator.readFields("dict");
-    assertEquals("New field still there: " + fields,
-                 3, fields.size());
-    field = fields.get(2);
-    assertEquals("Correct new field name", "test", field.get("field"));
-    assertEquals("Correct new field new type", "integer", field.get("type"));
-    assertEquals("Correct new field new validation", "", field.get("validation"));
-
-    assertEquals("Can delete new field",
-                 "", annotator.deleteField("dict", "test"));
-    fields = annotator.readFields("dict");
-    assertEquals("New field no longer there: " + fields,
-                 2, fields.size());
-
-    assertFalse("Can't delete new field again",
-                annotator.deleteField("dict", "test").length() == 0);
     
     // can remove lexicons
     assertEquals("Can delete lexicon", "", annotator.deleteLexicon("dict"));
@@ -1060,8 +1016,6 @@ public class TestFlatLexiconTagger {
         +"&firstVariantOnly=false"
         +"&exactMatch=on"
         +"&strip=");
-      
-      assertNull("Ensure lexiconLink isn't set", annotator.getLexiconLink());
       
       // call tagMatchingAnnotations
       annotator.transformTranscripts(store, null);
@@ -1218,10 +1172,7 @@ public class TestFlatLexiconTagger {
         +"&dictionary=a-z.csv:Word->Pronunciation"
         +"&firstVariantOnly=false"
         +"&exactMatch=on"
-        +"&lexiconLink="
         +"&strip=");
-
-      assertNull("Ensure lexiconLink isn't set", annotator.getLexiconLink());
       
       // call tagMatchingAnnotations
       annotator.transformTranscripts(store, null);
@@ -1247,87 +1198,6 @@ public class TestFlatLexiconTagger {
     assertEquals(
       "tagMatchingAnnotations layerId brown",
       "b r aʊ n", store.tagMatchingAnnotationsLabels.get(
-        "layer.id == 'word'"
-        +" && label === 'brown'"));
-    
-    assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
-                 2, store.tagMatchingAnnotationsLayerIds.size());
-    assertEquals(
-      "tagMatchingAnnotations layerId quick",
-      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
-        "layer.id == 'word'"
-        +" && label === 'quick'"));
-    assertEquals(
-      "tagMatchingAnnotations layerId brown",
-      "phonemes", store.tagMatchingAnnotationsLayerIds.get(
-        "layer.id == 'word'"
-        +" && label === 'brown'"));
-    
-    assertEquals("tagMatchingAnnotations num confidences: "
-                 + store.tagMatchingAnnotationsConfidences,
-                 2, store.tagMatchingAnnotationsConfidences.size());
-    assertEquals(
-      "tagMatchingAnnotations layerId quick",
-      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
-        "layer.id == 'word'"
-        +" && label === 'quick'"));
-    assertEquals(
-      "tagMatchingAnnotations layerId brown",
-      Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
-        "layer.id == 'word'"
-        +" && label === 'brown'"));
-  }
-
-  /** Test generation of annotations that link to the lexicon entry. */
-  @Test public void lexiconLink() {
-    GraphStoreHarness store = new GraphStoreHarness();
-    Graph g = graph();
-    Schema schema = g.getSchema();
-    annotator.setSchema(schema);
-    try {
-      annotator.setTaskParameters(
-        "tokenLayerId=word"
-        +"&transcriptLanguageLayerId=transcript_language"
-        +"&phraseLanguageLayerId=lang"
-        +"&targetLanguagePattern="
-        +"&tagLayerId=phonemes"
-        +"&dictionary=a-z.csv:Word->Pronunciation"
-        +"&firstVariantOnly=false"
-        +"&exactMatch=on"
-        +"&lexiconLink=http://example.com/edit/annotator/ext/FlatLexiconTagger/entry.html?l={0}%26f={1}%26e={2}"
-        +"&strip=");
-      
-      assertEquals("Ensure lexiconLink is set",
-                   "http://example.com/edit/annotator/ext/FlatLexiconTagger/entry.html?l={0}&f={1}&e={2}",
-                   annotator.getLexiconLink());
-      assertEquals("tag layer type correct",
-                   "text/url", // TODO Constants.TYPE_URL
-                   schema.getLayer(annotator.getTagLayerId()).getType());
-      
-      // call tagMatchingAnnotations
-      annotator.transformTranscripts(store, null);
-    } catch(Exception exception) {
-      fail(""+exception);
-    }
-
-    // check the right calls were made to the graph store
-    assertEquals("aggregateMatchingAnnotations operation",
-                 "DISTINCT BINARY", store.aggregateMatchingAnnotationsOperation);
-    assertEquals(
-      "aggregateMatchingAnnotations expression",
-      "layer.id == 'word'",
-      store.aggregateMatchingAnnotationsExpression);
-    
-    assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
-                 2, store.tagMatchingAnnotationsLabels.size());
-    assertEquals(
-      "tagMatchingAnnotations layerId quick",
-      "k w ɪ k\nhttp://example.com/edit/annotator/ext/FlatLexiconTagger/entry.html?l=a-z.csv&f=Word&e=quick", store.tagMatchingAnnotationsLabels.get(
-        "layer.id == 'word'"
-        +" && label === 'quick'"));
-    assertEquals(
-      "tagMatchingAnnotations layerId brown",
-      "b r aʊ n\nhttp://example.com/edit/annotator/ext/FlatLexiconTagger/entry.html?l=a-z.csv&f=Word&e=brown", store.tagMatchingAnnotationsLabels.get(
         "layer.id == 'word'"
         +" && label === 'brown'"));
     
