@@ -42,12 +42,12 @@ label:after {
     width: 75px;
     text-align: right;
 }
-.field a.url-link {
+.field a.url-link, .field a.geo-link {
     position: absolute;
     padding: 5px;
     text-decoration: none;
 }
-.field input[type="url"] {
+.field input[type="url"], .field.geo-location input {
     padding-left: 15px;
 }
 

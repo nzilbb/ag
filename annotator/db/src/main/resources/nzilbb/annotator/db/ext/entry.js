@@ -25,7 +25,7 @@ function showForm(data) {
   attributes.innerHTML = ""; // clear any existing list
   for (let name in fields) {
     const row = document.createElement("div");
-    row.className = "field";
+    row.className = "field " + fields[name].type;
     row.title = name;
     let label = document.createElement("label");
     label.appendChild(document.createTextNode(name));
@@ -45,7 +45,30 @@ function showForm(data) {
         span.appendChild(a);
       } else if (fields[name].type == "email") {
         const a = document.createElement("a");
-        a.href = "mailto:" + data[name];
+        a.href = "mailto:" + encodeURIComponent(data[name]);
+        a.target = name;
+        a.appendChild(document.createTextNode(data[name]));
+        span.appendChild(a);
+      } else if (fields[name].type == "geo-location") {
+        const a = document.createElement("a");
+        let coords = data[name].split(",");
+        if (data[name].indexOf(":") >= 0) { // shape
+          // something like:
+          // -43.607048, 172.467246 : -43.626186, 172.552390 : -43.681332, 172.552390
+          
+          // go to the point in the middle
+          const shape = data[name].split(":")
+                .map(coord=>coord.trim().split(",")
+                     .map(s=>Number(s)));
+          const latitudes = shape.map(coord=>coord[0]);
+          const longitudes = shape.map(coord=>coord[1]);
+          coords = [
+            latitudes.reduce((a, b) => a + b) / latitudes.length,
+            longitudes.reduce((a, b) => a + b) / longitudes.length
+          ];
+        } 
+        //a.href = "https://www.google.com/maps?q=" + encodeURIComponent(data[name]);
+        a.href = `https://www.openstreetmap.org/?mlat=${coords[0]}&mlon=${coords[1]}#map=16/${coords[0]}/${coords[1]}`;
         a.target = name;
         a.appendChild(document.createTextNode(data[name]));
         span.appendChild(a);
@@ -58,6 +81,38 @@ function showForm(data) {
     value.appendChild(span);
     row.appendChild(value);
     attributes.appendChild(row);
+    if (data[name] && fields[name].type == "geo-location") {
+      // add a map showing the location
+      const mapdiv = document.createElement("div");
+      mapdiv.id = `map-${name}`;
+      mapdiv.className = "map";
+      attributes.appendChild(mapdiv);
+      const map = L.map(mapdiv);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+      if (data[name].indexOf(":") >= 0) { // shape
+        // something like:
+        // -43.607048, 172.467246 : -43.626186, 172.552390 : -43.681332, 172.552390
+        const shape = data[name].split(":")
+              .map(coord=>coord.trim().split(",")
+                   .map(s=>Number(s)));
+        const latitudes = shape.map(coord=>coord[0]);
+        const longitudes = shape.map(coord=>coord[1]);
+        const centre = [
+          latitudes.reduce((a, b) => a + b) / latitudes.length,
+          longitudes.reduce((a, b) => a + b) / longitudes.length
+        ];
+        const targetCoordinates = L.latLng(centre[0], centre[1]);
+        map.setView(targetCoordinates, 14);
+        L.polygon(shape).addTo(map);
+      } else { // point        
+        const coords = data[name].split(",").map(s=>Number(s));
+        const targetCoordinates = L.latLng(coords[0], coords[1]);
+        map.setView(targetCoordinates, 16);
+        L.marker(targetCoordinates).addTo(map);
+      }
+    }
   }
 }
 

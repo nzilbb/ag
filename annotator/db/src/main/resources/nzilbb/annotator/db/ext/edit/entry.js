@@ -30,7 +30,7 @@ function showForm(data) {
   attributes.innerHTML = ""; // clear any existing list
   for (let name in fields) {
     const row = document.createElement("div");
-    row.className = "field";
+    row.className = "field " + fields[name].type;
     row.title = name;
     let label = document.createElement("label");
     label.appendChild(document.createTextNode(name));
@@ -58,7 +58,7 @@ function showForm(data) {
         input.step = 0.1;
       } else if (fields[name].type == "url") {
         input.type = "url";
-        let a = document.createElement("a");
+        const a = document.createElement("a");
         a.className = "url-link";
         a.title = `Open ${name}`;
         a.target = name;
@@ -73,6 +73,39 @@ function showForm(data) {
           }
         }
         a.appendChild(document.createTextNode("🡽"));
+        value.appendChild(a);
+      } else if (fields[name].type == "geo-location") {
+        const a = document.createElement("a");
+        a.className = "geo-link";
+        a.title = `Open ${name}`;
+        a.target = name;
+        a.href = "#";
+        a.onclick = function(e) {
+          if (input.value) {
+            let coords = input.value.split(",");
+            if (input.value.indexOf(":") >= 0) { // shape
+              // something like:
+              // -43.607048, 172.467246 : -43.626186, 172.552390 : -43.681332, 172.552390
+              
+              // go to the point in the middle
+              const shape = input.value.split(":")
+                    .map(coord=>coord.trim().split(",")
+                         .map(s=>Number(s)));
+              const latitudes = shape.map(coord=>coord[0]);
+              const longitudes = shape.map(coord=>coord[1]);
+              coords = [
+                latitudes.reduce((a, b) => a + b) / latitudes.length,
+                longitudes.reduce((a, b) => a + b) / longitudes.length
+              ];
+            } 
+            this.href = `https://www.openstreetmap.org/?mlat=${coords[0]}&mlon=${coords[1]}#map=16/${coords[0]}/${coords[1]}`
+            return true;
+          } else {
+            e.preventDefault();
+            return false;
+          }
+        }
+        a.appendChild(document.createTextNode("🌏"));
         value.appendChild(a);
       } else if (fields[name].type == "email") {
         input.type = "email";

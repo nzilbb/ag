@@ -39,9 +39,15 @@ label:after {
 .field span.text {
     white-space: pre-wrap;
 }
-.field input[type="number"] {
-    width: 75px;
-    text-align: right;
+.field.url a:before {
+    content: "🡽 ";
+}
+.field.geo-location a:before {
+    content: "🌏 ";
+}
+div.map {
+    width: 100%;
+    height: 25vh;
 }
 
 a img, button img {
