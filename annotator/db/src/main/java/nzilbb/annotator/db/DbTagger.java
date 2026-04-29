@@ -372,39 +372,106 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
           deleteTable.setInt(1, tableId);
           deleteTable.executeUpdate();
         } // deleteTable.close();
+
         
-        // create table table
+        // create data table
         String sqlQuote = rdb.getMetaData().getIdentifierQuoteString();
         StringBuilder columnList = new StringBuilder();
         StringBuilder argumentList = new StringBuilder();
         StringBuilder columnDefinitions = new StringBuilder();
         Vector<String> columnIndexDefinitions = new Vector<String>();
-        int columnCount = 0;
         String splitPattern = fieldDelimiter;
         if (splitPattern.equals("\\")) splitPattern = "\\\\";
+
+        // the thread needs it's own copy of the file
+        final File tempFile = File.createTempFile("DbTagger-", file.getName());
+        tempFile.deleteOnExit();
+        
+        // we also count records so we can accurates track progress
+        int entryCount = 0;
+        // and maybe convert the first space to a tab
+        boolean firstSpace = fieldDelimiter.equals(" - ");
+	BufferedReader reader = new BufferedReader(
+	   new InputStreamReader(new FileInputStream(file), "UTF-8"));
+	BufferedWriter writer = new BufferedWriter(
+	   new OutputStreamWriter(new FileOutputStream(tempFile), "UTF-8"));
+        String line = reader.readLine(); 
+        while (line != null) {
+          if (line.trim().length() > 0) { // ignore blank lines
+            if (entryCount > 0) writer.newLine();
+            if (firstSpace) line = line.replaceFirst(" ", "\t");
+            writer.write(line);
+            entryCount++;
+          }
+          line = reader.readLine();
+        } // next line
+        reader.close();
+        writer.close();
+        if (skipFirstLine) entryCount--;
+
+        final int finalEntryCount = entryCount;
+        final int finalTableId = tableId;
+        final String finalFieldDelimiter = firstSpace?"\t":fieldDelimiter;
+        
+        // pass through the data once to get longest data for each field
+        CSVFormat format = CSVFormat.DEFAULT
+          .withIgnoreEmptyLines(true).withDelimiter(finalFieldDelimiter.charAt(0));
+        if (comment != null && comment.length() > 0) {
+          format = format.withCommentMarker(comment.charAt(0));
+        }
+        if (quote != null && quote.length() > 0) {
+          format = format.withQuote(quote.charAt(0)).withEscape('\\');
+        } else {
+          format = format.withQuote(null);
+        }
+        final CSVFormat finalFormat = format;
+        final Vector<Integer> maxColumnWidths = new Vector<Integer>();
+        setStatus("Checking " + entryCount + (entryCount==1?" entry...":" entries..."));
+        try (CSVParser csv = new CSVParser(
+               new InputStreamReader(new FileInputStream(tempFile), "UTF-8"), format)) {
+          Iterator<CSVRecord> records = csv.iterator();
+          if (skipFirstLine && records.hasNext()) records.next();
+          while (records.hasNext()) {
+            CSVRecord record = records.next();
+            for (int c = 0; c < record.size(); c++) {
+              if (c >= maxColumnWidths.size()) maxColumnWidths.add(0);
+              if (record.get(c) != null) {
+                if (maxColumnWidths.get(c) < record.get(c).length()) {
+                  maxColumnWidths.set(c, record.get(c).length());
+                }
+              }
+            } // next column
+          } // next record
+        } // close csv parser
+        final int finalColumnCount = maxColumnWidths.size();
+        setStatus("Checked " + entryCount + (entryCount==1?" entry.":" entries."));
         
         try(PreparedStatement sqlInsertField = rdb.prepareStatement(
              sqlx.apply(
                "INSERT INTO "+getAnnotatorId()+"_field"
                +" (table_id, field, type, validation, ordinal)"
-               +" VALUES (?,?,'string','',?)"))) {
+               +" VALUES (?,?,?,'',?)"))) {
           sqlInsertField.setInt(1, tableId);
           int c = 1;
           for (String column : fieldNames.split(splitPattern)) {
-            if (column.length() == 0) column = "Field" + columnCount;
+            if (column.length() == 0) column = "Field" + c;
             columnList.append(", ").append(sqlQuote).append(column).append(sqlQuote);
             argumentList.append(",?");
             columnDefinitions.append(", ").append(sqlQuote).append(column).append(sqlQuote)
-              .append(" VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL");
-            columnIndexDefinitions.add(
-              "CREATE INDEX IDX_"+getAnnotatorId()+"_"+tableId+"_"+(++columnCount)+" ON "
-              +getAnnotatorId()+"_table_"+tableId+" ("+sqlQuote+column+sqlQuote+")");
+              .append(maxColumnWidths.get(c-1) > 200?" TEXT":" VARCHAR(200)")
+              .append(" CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL");
+            if (maxColumnWidths.get(c-1) <= 200) { // can't index TEXT fields
+              columnIndexDefinitions.add(
+                "CREATE INDEX IDX_"+getAnnotatorId()+"_"+tableId+"_"+c+" ON "
+                +getAnnotatorId()+"_table_"+tableId+" ("+sqlQuote+column+sqlQuote+")");
+            }
             
             // create/update field definition
             sqlInsertField.setString(2, column);
-            sqlInsertField.setInt(3, c++);
+            sqlInsertField.setString(3, maxColumnWidths.get(c-1) > 200?"text":"string");
+            sqlInsertField.setInt(4, c++);
             sqlInsertField.executeUpdate();
-          
+            
           } // next column
         } // sqlInsertField.close()
         
@@ -438,37 +505,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
 
         // load the table in another thread - the caller must track isRunning...
         
-        // the thread needs it's own copy of the file
-        final File tempFile = File.createTempFile("DbTagger-", file.getName());
-        tempFile.deleteOnExit();
-        
-        // we also count records so we can accurates track progress
-        int entryCount = 0;
-        // and maybe convert the first space to a tab
-        boolean firstSpace = fieldDelimiter.equals(" - ");
-	BufferedReader reader = new BufferedReader(
-	   new InputStreamReader(new FileInputStream(file), "UTF-8"));
-	BufferedWriter writer = new BufferedWriter(
-	   new OutputStreamWriter(new FileOutputStream(tempFile), "UTF-8"));
-        String line = reader.readLine(); 
-        while (line != null) {
-          if (line.trim().length() > 0) { // ignore blank lines
-            if (entryCount > 0) writer.newLine();
-            if (firstSpace) line = line.replaceFirst(" ", "\t");
-            writer.write(line);
-            entryCount++;
-          }
-          line = reader.readLine();
-        } // next line
-        reader.close();
-        writer.close();
-        if (skipFirstLine) entryCount--;
         setStatus("Loading " + entryCount + (entryCount==1?" entry...":" entries..."));
-        
-        final int finalEntryCount = entryCount;
-        final int finalTableId = tableId;
-        final int finalColumnCount = columnCount;
-        final String finalFieldDelimiter = firstSpace?"\t":fieldDelimiter;
         setRunning(true);
         Runnable loadFile = () -> {
           try {
@@ -480,18 +517,8 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
                 sqlx.apply("INSERT INTO "+getAnnotatorId() +"_table_"+finalTableId
                            +" (supplemental"+columnList+")"
                            +" VALUES (0"+argumentList+")"));
-              CSVFormat format = CSVFormat.DEFAULT
-                .withIgnoreEmptyLines(true).withDelimiter(finalFieldDelimiter.charAt(0));
-              if (comment != null && comment.length() > 0) {
-                format = format.withCommentMarker(comment.charAt(0));
-              }
-              if (quote != null && quote.length() > 0) {
-                format = format.withQuote(quote.charAt(0)).withEscape('\\');
-              } else {
-                format = format.withQuote(null);
-              }
               CSVParser csv = new CSVParser(
-                new InputStreamReader(new FileInputStream(tempFile), "UTF-8"), format);
+                new InputStreamReader(new FileInputStream(tempFile), "UTF-8"), finalFormat);
               int e = 0;
               setPercentComplete(0);
               try {
@@ -506,7 +533,6 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
                         // strip the index
                         value = value.replaceAll("^(.*)(\\([0-9]+\\))$", "$1");
                       }
-                      // setStatus("Row " +e+ " Column " + c + ": " + value);
                       sqlLoad.setString(c + 1, value.trim());
                     } catch(Exception exception) {
                       sqlLoad.setString(c + 1, "");
@@ -545,6 +571,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
         try { rdb.close(); } catch(SQLException x) {}
       }
     } catch (Exception x) {
+      x.printStackTrace(System.out);
       return x.toString();
     }
   } // end of loadTable()

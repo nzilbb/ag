@@ -63,6 +63,7 @@ public class DerbySQLTranslator extends VanillaSQLTranslator {
       .replaceAll("`([^`]+)`", "\"$1\"")
       .replace(" = TRUE", " <> 0")
       .replace(" = FALSE", " = 0")
+      .replace(" TEXT", " LONG VARCHAR")
       .replaceAll("\\s+AUTO_INCREMENT",
                   " GENERATED ALWAYS AS IDENTITY(Start with 1, Increment by 1)")
       .replaceAll(",?\\s*INDEX\\s+\\w+\\s*\\([^)]+\\)","")
