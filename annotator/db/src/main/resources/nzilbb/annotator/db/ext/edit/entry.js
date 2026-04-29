@@ -17,7 +17,14 @@ const table = parameters.get("t") || parameters.get("table");
 const field = parameters.get("f") || parameters.get("field");
 const entry = parameters.get("e") || parameters.get("entry");
 
-document.getElementById("entry").innerText = entry;
+// replace title with link to read-only page
+document.getElementById("entry").innerText = "";
+const viewLink = document.createElement("a");
+viewLink.href = "../entry.html?t="+encodeURIComponent(table)
+  +"&f="+encodeURIComponent(field)
+  +"&e="+encodeURIComponent(entry);
+viewLink.appendChild(document.createTextNode(entry));
+document.getElementById("entry").appendChild(viewLink);
 
 const fields = {}; // definitions for fields (type/validation etc.)
 
