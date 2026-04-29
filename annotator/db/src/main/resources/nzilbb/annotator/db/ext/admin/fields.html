@@ -62,15 +62,28 @@
         previously saved for the field is permanantly lost, and any automated
         annotations that rely on that field will no longer work.</p>
       
-      <p> You can add a new field by pressing the 'add' button
-        <img src="../add.svg" alt="➕"> at the bottom of the list. You will be
+      <p> You can add a new field by selecting a fiel type from the ➕ box
+        at the bottom of the list. You will be
         asked for the name of the field, which cannot be changed once entered.
         Field names can be up to 50 characters long.</p>
       
     </details>
 
     <div id="attributes"></div>
-    <button id="btnNewField" title="Add new field"><img src="../add.svg" alt="➕"></button>
+    <select id="newFieldType" title="Add new field">
+      <option value="">➕</option>
+      <option>string</option>
+      <option>text</option>
+      <option>html</option>
+      <option>integer</option>
+      <option>number</option>
+      <option>boolean</option>
+      <option>url</option>
+      <option>email</option>
+      <option>date</option>
+      <option>datetime</option>
+      <option>geo-location</option>
+    </select>
     <p id="error" class="error"></p>
     <footer><div> DB Tagger <small id="version"></small> </div></footer>
     

@@ -122,17 +122,21 @@ getJSON(resourceForFunction("readFields", table), data => {
   finishedLoading();
 });
 
-document.getElementById("btnNewField").onclick = function(e) {
-  const field = prompt("Enter a name for the new field");
-  if (field) {
-    startLoading();
-    getText(resourceForFunction("createField", table, field),
-      error => {
-        document.getElementById("error").innerText = error;
-        if (!error) {
-          newField(attributes, {field: field});
-        }
-        finishedLoading();
-      });
-  }
+document.getElementById("newFieldType").onchange = function(e) {
+  if (this.value) { // type selected
+    const type = this.value;
+    this.value = ""; // unselect type
+    const field = prompt(`Enter a name for the new ${type} field`);
+    if (field) {
+      startLoading();
+      getText(resourceForFunction("createField", table, field, type),
+              error => {
+                document.getElementById("error").innerText = error;
+                if (!error) {
+                  newField(attributes, {field: field, type: type});
+                }
+                finishedLoading();
+              });
+    }
+  } // type selected
 }
