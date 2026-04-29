@@ -154,86 +154,32 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
                 +getAnnotatorId()+" to compute the table table name',"
                 +" name VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL"
                 +" COMMENT 'Identifying name for the table',"
+                +" parent_table_id INTEGER NULL"
+                +" COMMENT 'If a child table, this is the table_id of parent table',"
                 +" PRIMARY KEY (table_id)"
                 +") ENGINE=MyISAM;"))) {
           sql.executeUpdate();
         } // sql.close();
       }
       
-      // create field definitions table if it doesn't exist
-      // either of prepareStatement or executeQuery may fail if the table doesn't exist
-      try {
-        try (PreparedStatement sql = rdb.prepareStatement(
-               sqlx.apply("SELECT table_id FROM "+getAnnotatorId()+"_field"))) {
-          try (ResultSet rsCheck = sql.executeQuery()) {
-          } // rsCheck.close();
-        } // sql.close();
-      } catch(SQLException exception) { // no _field table
-        
-        try (PreparedStatement sql = rdb.prepareStatement(
-               sqlx.apply(
-                 "CREATE TABLE "+getAnnotatorId()+"_field ("
-                 +" table_id INTEGER NOT NULL"
-                 +" COMMENT 'Table ID',"
-                 +" field VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
-                 +" COMMENT 'Name of the field',"
-                 +" type VARCHAR(30) NOT NULL DEFAULT 'string'"
-                 +" COMMENT 'Type of the field, e.g. string, text, richtext, number, etc.',"
-                 +" validation VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''"
-                 +" COMMENT 'Constraints on values',"
-                 +" ordinal INTEGER NOT NULL DEFAULT 0"
-                 +" COMMENT 'Determins order between fields',"
-                 +" PRIMARY KEY (table_id, field)"
-                 +") ENGINE=MyISAM;"))) {
-          sql.executeUpdate();
-        } // sql.close();
-      }
-      
-      // populate field definitions table where necessary
-      try (PreparedStatement sqlTableFields = rdb.prepareStatement(
-             sqlx.apply("SELECT * FROM "+getAnnotatorId()+"_field WHERE table_id = ?"));
-           PreparedStatement sqlInsertField = rdb.prepareStatement(
+      try (PreparedStatement sql = rdb.prepareStatement(
              sqlx.apply(
-               "INSERT INTO "+getAnnotatorId()+"_field"
-               +" (table_id, field, type, validation, ordinal)"
-               +" VALUES (?,?,'string','',?)"))) {
-        try (PreparedStatement sqlTables = rdb.prepareStatement(
-               sqlx.apply(
-                 "SELECT table_id, name FROM "+getAnnotatorId()+"_table ORDER BY name"))) {
-          try (ResultSet rsTables = sqlTables.executeQuery()) {
-            while (rsTables.next()) {
-              int tableId = rsTables.getInt("table_id");
-              sqlTableFields.setInt(1, tableId);
-              sqlInsertField.setInt(1, tableId);
-              try (ResultSet rsFields = sqlTableFields.executeQuery()) {
-                if (!rsFields.next()) { // no fields defined, so define them
-                  setStatus(
-                    "Default field definitions for " + rsTables.getString("name"));
-                  String sTableTable = getAnnotatorId()+"_table_"+rsTables.getInt("table_id");
-                  try (PreparedStatement selectEntry = rdb.prepareStatement(
-                         sqlx.apply("SELECT * FROM "+sTableTable+" LIMIT 1"))) {
-                    try (ResultSet row = selectEntry.executeQuery()) {
-                      if (row.next()) { // only the first entry
-                        ResultSetMetaData meta = row.getMetaData();
-                        for (int c = 1; c <= meta.getColumnCount(); c++) {
-                          String f = meta.getColumnName(c);
-                          if (!f.equalsIgnoreCase("serial")
-                              && !f.equalsIgnoreCase("supplemental")) {
-                            sqlInsertField.setString(2, meta.getColumnName(c));
-                            sqlInsertField.setInt(3, c);
-                            sqlInsertField.executeUpdate();
-                          } // real field
-                        } // next column
-                      } // there is a row
-                    } // row.close()
-                  } // selectEntry.close()
-                } // no fields defined
-              } // rsFields.close()
-            } // next table
-          } // rsTables.close()
-        } // sqlTables.close()
-      } // sqlTableFields.close()
-      
+               "CREATE TABLE "+getAnnotatorId()+"_field ("
+               +" table_id INTEGER NOT NULL"
+               +" COMMENT 'Table ID',"
+               +" field VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+               +" COMMENT 'Name of the field',"
+               +" type VARCHAR(30) NOT NULL DEFAULT 'string'"
+               +" COMMENT 'Type of the field, e.g. string, text, richtext, number, etc.',"
+               +" validation VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''"
+               +" COMMENT 'Constraints on values',"
+               +" ordinal INTEGER NOT NULL DEFAULT 0"
+               +" COMMENT 'Determines order between fields',"
+               +" PRIMARY KEY (table_id, field)"
+               +") ENGINE=MyISAM;"))) {
+        sql.executeUpdate();
+      } // sql.close();
+            
     } finally {
       try { rdb.close(); } catch(SQLException x) {}
     }
@@ -255,9 +201,9 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
           try (ResultSet rs = sql.executeQuery()) {
             while (rs.next()) {
               String sName = rs.getString("name");
-              String sTableTable = getAnnotatorId()+"_table_"+rs.getInt("table_id");
+              String sTableName = getAnnotatorId()+"_table_"+rs.getInt("table_id");
               try (PreparedStatement deleteTable = rdb.prepareStatement(
-                     sqlx.apply("DROP TABLE " + sTableTable))) {
+                     sqlx.apply("DROP TABLE " + sTableName))) {
                 deleteTable.executeUpdate();
               } // deleteTable.close();
             } // next table
@@ -372,7 +318,6 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
           deleteTable.setInt(1, tableId);
           deleteTable.executeUpdate();
         } // deleteTable.close();
-
         
         // create data table
         String sqlQuote = rdb.getMetaData().getIdentifierQuoteString();
@@ -586,7 +531,8 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
     Connection rdb = newConnection();
     try {
       PreparedStatement sql = rdb.prepareStatement(
-        sqlx.apply("SELECT name FROM "+getAnnotatorId()+"_table ORDER BY name"));
+        sqlx.apply("SELECT name FROM "+getAnnotatorId()+"_table"
+                   +" WHERE parent_table_id IS NULL ORDER BY name"));
       ResultSet rs = sql.executeQuery();
       while (rs.next()) {
         names.add(rs.getString("name"));
@@ -629,17 +575,60 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
     try (Connection rdb = newConnection()) {
       // find the table
       int tableId = tableId(rdb, table);
-      if (tableId >= 0) {            
-        // drop the table table
-        String sTableTable = getAnnotatorId()+"_table_"+tableId;
+      if (tableId >= 0) {
         String dropError = "";
+
+        // is this a child table?
+        try (PreparedStatement sqlParentTable = rdb.prepareStatement(
+               sqlx.apply(
+                 "SELECT parent.name, parent.table_id"
+                 +" FROM "+getAnnotatorId()+"_table parent"
+                 +" INNER JOIN "+getAnnotatorId()+"_table child"
+                 +" ON parent.table_id = child.parent_table_id"
+                 +" WHERE child.table_id = ?"))) {
+          sqlParentTable.setInt(1, tableId);
+          try (ResultSet rsParentTable = sqlParentTable.executeQuery()) {
+            if (rsParentTable.next()) {
+              String parentTable = rsParentTable.getString("name");
+              int parentTableId = rsParentTable.getInt("table_id");
+              try (PreparedStatement sqlDeleteFieldRow = rdb.prepareStatement(
+                     sqlx.apply(
+                       "DELETE FROM "+getAnnotatorId()+"_field"
+                       +" WHERE table_id = ? AND field = ?"))) {
+                sqlDeleteFieldRow.setInt(1, parentTableId);
+                sqlDeleteFieldRow.setString(2, table.replace(parentTable+"_",""));
+                sqlDeleteFieldRow.executeUpdate();
+              }
+            } // rsParentTable.next()
+          } // rsParentTable.close()
+        } catch(SQLException exception) {
+          dropError = dropError += "\n" + exception.getMessage();
+        } // sqlParentTable.close();
+
+        // delete child tables
+        try (PreparedStatement sqlChildFields = rdb.prepareStatement(
+               sqlx.apply(
+                 "SELECT field FROM "+getAnnotatorId()+"_field"
+                 +" WHERE table_id = ? AND type = 'child-table' ORDER BY ordinal"))) {
+          sqlChildFields.setInt(1, tableId);
+          try (ResultSet rsChildFields = sqlChildFields.executeQuery()) {
+            while (rsChildFields.next()) {
+              deleteField(table, rsChildFields.getString("field"));
+            }
+          } // rsChildFields.close()
+        } catch(SQLException exception) {
+          dropError = dropError += "\n" + exception.getMessage();
+        } // sqlChildFields.close();
+
+        // drop the data table
+        String sTableName = getAnnotatorId()+"_table_"+tableId;
         try (PreparedStatement deleteTable = rdb.prepareStatement(
-               sqlx.apply("DROP TABLE " + sTableTable))) {
+               sqlx.apply("DROP TABLE " + sTableName))) {
           deleteTable.executeUpdate();
         } catch(SQLException exception) {
-          dropError = exception.getMessage();
+          dropError = dropError += "\n" + exception.getMessage();
         } // deleteTable.close();
-        
+
         // delete the field records
         try (PreparedStatement deleteTable = rdb.prepareStatement(
                sqlx.apply(
@@ -655,7 +644,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
           deleteTable.setInt(1, tableId);
           deleteTable.executeUpdate();
         } // deleteTable.close();
-        return dropError;
+        return dropError.trim();
       } else {
         return "Nonexistent table: " + table;
       }
@@ -670,6 +659,18 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
    */
   @ApiEndpoint("admin") public String createField(String table, String field) throws SQLException {
     return createField(table, field, "string", "");
+  }
+  
+  /**
+   * Create a new field in the given table.
+   * @param table The table ID.
+   * @param field The name of the field.
+   * @param type The field type.
+   * @return An error message if creation failed. Otherwise, an empty string.
+   */
+  @ApiEndpoint("admin") public String createField(
+    String table, String field, String type) throws SQLException {
+    return createField(table, field, type, "");
   }
   
   /**
@@ -713,6 +714,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
             }
           }
         }
+        // insert a row in the fields table for the new field
         try (PreparedStatement sqlInsertFieldRow = rdb.prepareStatement(
                sqlx.apply(
                  "INSERT INTO "+getAnnotatorId()+"_field" // TODO ordinal
@@ -724,28 +726,80 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
           sqlInsertFieldRow.setInt(5, ordinal);
           sqlInsertFieldRow.executeUpdate();
 
-          // insert field row succeeded, so add the field to the table
-          String columnType
-            = "VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL";
-          if ("text".equals(type) || "richtext".equals(type)) {
-            columnType = "TEXT";
-          } // type is TEXT
-          try (PreparedStatement sqlAlterTable = rdb.prepareStatement(
-                 sqlx.apply(
-                   "ALTER TABLE "+getAnnotatorId() +"_table_"+tableId
-                   +" ADD COLUMN `"+field+"` " + columnType))) {
-            sqlAlterTable.executeUpdate();
-          } catch (SQLException alterX) { // ALTER TABLE failed
-            // delete the field from the table
-            try (PreparedStatement sqlDeleteFieldRow = rdb.prepareStatement(
+          if ("child-table".equals(type)) { // 1-to-n child table instead of field
+            // insert a row in the tables table for the child table
+            String childTable = table+"_"+field;
+            try (PreparedStatement sqlCreateChildRow = rdb.prepareStatement(
                    sqlx.apply(
-                     "DELETE FROM "+getAnnotatorId()+"_field"
-                     +" WHERE table_id = ? AND field = ?"))) {
-              sqlDeleteFieldRow.setInt(1, tableId);
-              sqlDeleteFieldRow.setString(2, field);
-              sqlDeleteFieldRow.executeUpdate();
-            } // sqlDeleteFieldRow.close();            
-            return alterX.toString();
+                     "INSERT INTO "+getAnnotatorId() +"_table"
+                     +" (name, parent_table_id) VALUES (?,?)"))) {
+              sqlCreateChildRow.setString(1, childTable);
+              sqlCreateChildRow.setInt(2, tableId);
+              sqlCreateChildRow.executeUpdate();
+            }
+            int childTableId = -1;
+            try (PreparedStatement sqlChildTableId = rdb.prepareStatement(
+                   sqlx.apply("SELECT LAST_INSERT_ID() FROM "+getAnnotatorId()+"_table"))) {
+              try (ResultSet rs = sqlChildTableId.executeQuery()) {
+                rs.next();
+                childTableId = rs.getInt(1);
+              } // close rs
+            } // close sqlChildTableId
+            setStatus("Adding new table: " + childTable);
+
+            // create the child table (with no fields)
+            try (PreparedStatement sqlCreateChildTable = rdb.prepareStatement(
+                   sqlx.apply(
+                     "CREATE TABLE "+getAnnotatorId() +"_table_"+childTableId+" ("
+                     +" serial INTEGER NOT NULL AUTO_INCREMENT"
+                     +" COMMENT 'Primary key and variant ordering field',"
+                     +" supplemental SMALLINT NOT NULL DEFAULT 0"
+                     +" COMMENT 'Whether the word/variant has been manually added since uploading from the original file',"
+                     +" PRIMARY KEY (serial)) ENGINE=MyISAM;"))) {
+              sqlCreateChildTable.executeUpdate();
+              
+              // create a default field named after the table
+              String childFieldError = createField(childTable, field);
+              if (childFieldError != null && childFieldError.length() > 0) {
+                // back out of everything in an orderly fashion...
+                throw new Exception(childFieldError);
+              }
+              
+            } catch (Exception x) {
+              // delete the child table from the list
+              try (PreparedStatement sqlDeleteChildTableRow = rdb.prepareStatement(
+                     sqlx.apply(
+                       "DELETE FROM "+getAnnotatorId()+"_table WHERE table_id = ?"))) {
+                sqlDeleteChildTableRow.setInt(1, childTableId);
+                sqlDeleteChildTableRow.executeUpdate();
+              } // sqlDeleteChildTableRow.close();
+              throw x;
+            }
+
+          } else { // regular field
+            // insert field row succeeded, so add the field to the table
+            String columnType
+              = "VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL";
+            if ("text".equals(type) || "richtext".equals(type)) { // TEXT
+              columnType = "TEXT";
+            }
+            try (PreparedStatement sqlAlterTable = rdb.prepareStatement(
+                   sqlx.apply(
+                     "ALTER TABLE "+getAnnotatorId() +"_table_"+tableId
+                     +" ADD COLUMN `"+field+"` " + columnType))) {
+              sqlAlterTable.executeUpdate();
+            } catch (SQLException alterX) { // ALTER TABLE failed
+              // delete the field from the table
+              try (PreparedStatement sqlDeleteFieldRow = rdb.prepareStatement(
+                     sqlx.apply(
+                       "DELETE FROM "+getAnnotatorId()+"_field"
+                       +" WHERE table_id = ? AND field = ?"))) {
+                sqlDeleteFieldRow.setInt(1, tableId);
+                sqlDeleteFieldRow.setString(2, field);
+                sqlDeleteFieldRow.executeUpdate();
+              } // sqlDeleteFieldRow.close();            
+              return alterX.toString();
+            }
           } // sqlAlterTable.close()          
         } catch (SQLException x) { // field is already there
           return x.toString();
@@ -829,6 +883,11 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
       // find the table
       int tableId = tableId(rdb, table);
       if (tableId >= 0) {
+        // is it a child table field?
+        if (tableId(rdb, table+"_"+field) >= 0) {
+          return "Cannot update child table field: " + table+"_"+field;
+        }
+
         try (PreparedStatement sqlUpdateFieldRow = rdb.prepareStatement(
                sqlx.apply(
                  "UPDATE "+getAnnotatorId()+"_field" // TODO ordinal
@@ -878,6 +937,9 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
       // find the table
       int tableId = tableId(rdb, table);
       if (tableId >= 0) {
+        // is it a child table field?
+        int childTableId = tableId(rdb, table+"_"+field);
+
         try (PreparedStatement sqlDeleteFieldRow = rdb.prepareStatement(
                sqlx.apply(
                  "DELETE FROM "+getAnnotatorId()+"_field"
@@ -887,19 +949,24 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
           if (sqlDeleteFieldRow.executeUpdate() == 0) {
             return "No such field \""+field+"\" in " + table;
           } else {
-            // delete field row succeeded, so drop the field from the table
-            try (PreparedStatement sqlAlterTable = rdb.prepareStatement(
-                   sqlx.apply(
-                     "ALTER TABLE "+getAnnotatorId() +"_table_"+tableId
-                     +" DROP COLUMN `"+field+"`"))) {
-              sqlAlterTable.executeUpdate();
-            } catch (SQLException alterX) { // ALTER TABLE failed
-              return alterX.toString();
-            } // sqlAlterTable.close()
+            if (childTableId >= 0) { // child table field
+              deleteTable(table+"_"+field);
+            } else { // regular field
+              // delete field row succeeded, so drop the field from the table
+              try (PreparedStatement sqlAlterTable = rdb.prepareStatement(
+                     sqlx.apply(
+                       "ALTER TABLE "+getAnnotatorId() +"_table_"+tableId
+                       +" DROP COLUMN `"+field+"`"))) {
+                sqlAlterTable.executeUpdate();
+              } catch (SQLException alterX) { // ALTER TABLE failed
+                return alterX.toString();
+              } // sqlAlterTable.close()
+            }
+
           } // field existed
-        } catch (SQLException x) { // field is already there
+        } catch (SQLException x) {
           return x.toString();
-        } // sqlInsertFieldRow.close()
+        } // sqlDeleteFieldRow.close()
       } else {
         return "Nonexistent table: " + table;
       }
@@ -924,11 +991,11 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
       // find the table
       int tableId = tableId(rdb, table);
       if (tableId >= 0) {            
-        String sTableTable = getAnnotatorId()+"_table_"+tableId;
+        String sTableName = getAnnotatorId()+"_table_"+tableId;
         try {
           LinkedHashMap<String,String> values = new LinkedHashMap<String,String>();
           String s = sqlx.apply(
-            "SELECT * FROM "+sTableTable+" WHERE `"+field.replace(';',' ')+"` = ?");
+            "SELECT * FROM "+sTableName+" WHERE `"+field.replace(';',' ')+"` = ?");
           try (PreparedStatement selectEntry = rdb.prepareStatement(s)) {
             selectEntry.setString(1, entry);
             try (ResultSet fields = selectEntry.executeQuery()) {
@@ -990,11 +1057,11 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
       int tableId = tableId(rdb, table);
       if (tableId >= 0) {            
         // drop the table table
-        String sTableTable = getAnnotatorId()+"_table_"+tableId;
+        String sTableName = getAnnotatorId()+"_table_"+tableId;
         try {
           LinkedHashMap<String,String> values = new LinkedHashMap<String,String>();
           String s = sqlx.apply(
-            "SELECT * FROM "+sTableTable+" WHERE `"+field.replace(';',' ')+"` = ?");
+            "SELECT * FROM "+sTableName+" WHERE `"+field.replace(';',' ')+"` = ?");
           try (PreparedStatement selectEntry = rdb.prepareStatement(s)) {
             selectEntry.setString(1, entry);
             String update = "";
@@ -1012,7 +1079,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
                         // the value has actually changed
                         && !json.getString(f).equals(fields.getString(f))) {
                       if (update.length() == 0) {
-                        update = "UPDATE "+sTableTable+" SET `"+f+"` = ?";
+                        update = "UPDATE "+sTableName+" SET `"+f+"` = ?";
                       } else {
                         update += ", `"+f+"` = ?";
                       }
@@ -1906,7 +1973,8 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
 
         // for each table
         PreparedStatement sql = rdb.prepareStatement(
-          sqlx.apply("SELECT table_id, name FROM "+getAnnotatorId()+"_table ORDER BY name"));
+          sqlx.apply("SELECT table_id, name FROM "+getAnnotatorId()+"_table"
+                     +" WHERE parent_table_id IS NULL ORDER BY name"));
         ResultSet rs = sql.executeQuery();
         while (rs.next()) {
 

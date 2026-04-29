@@ -961,6 +961,144 @@ public class TestDbTagger {
                  6, ids.size());
   }   
 
+  /** Test that child tables work. */
+  @Test public void childTables() throws Exception {
+
+    // ensure there's no leftover version of the extra table
+    String error = annotator.deleteTable("parent");
+    if (error != null) System.out.println(error);
+    
+    // starting condition: one table with three fields
+    List<String> ids = annotator.getDictionaryIds();
+    assertEquals("Correct number of dictionaries: " + ids,
+                 6, ids.size());
+
+    // add a table, using first-space delimiter
+    File file = new File(dir(), "a-z.dict");
+    error = annotator.loadTable(
+      "parent", " - ", "", "", "type - phonemes", false, file);
+    assertEquals("loadTable returns no error", "", error);
+    // loading is in a separate thread
+    while (annotator.getRunning()) {
+      try {Thread.sleep(100);} catch(Exception exception) {}
+    }
+
+    // it's available as a dictionary
+    ids = annotator.getDictionaryIds();
+    assertEquals("New dictionaries present: " + ids,
+                 8, ids.size());
+    assertTrue("parent:type->phonemes " + ids,
+               ids.contains("parent:type->phonemes"));
+    assertTrue("parent:phonemes->type",
+               ids.contains("parent:phonemes->type"));
+
+    // create child table field
+    assertEquals("Can create child field",
+                 "", annotator.createField("parent", "child1", "child-table", "ignored"));
+    List<Map<String,String>> fields = annotator.readFields("parent");
+    assertEquals("Field created: " + fields,
+                 3, fields.size());
+    assertTrue("Field present: " + fields,
+               fields.stream()
+               .map(f->f.get("field"))
+               .collect(Collectors.toSet()).contains("child1"));
+    Map<String,String> field = fields.get(2);
+    assertEquals("Correct new field name", "child1", field.get("field"));
+    assertEquals("Correct new field type", "child-table", field.get("type"));
+
+    // child table exists
+    fields = annotator.readFields("parent_child1");
+    assertEquals("Default child field created: " + fields,
+                 1, fields.size());
+    field = fields.get(0);
+    assertEquals("Correct default field name", "child1", field.get("field"));
+    assertEquals("Correct default field new type", "string", field.get("type"));
+    assertEquals("Correct default field new validation", "", field.get("validation"));
+
+    ids = annotator.getDictionaryIds();
+    assertEquals("Child table not a dictionary present: " + ids,
+                 8, ids.size());
+    
+    error = annotator.updateField("parent", "child1", "integer", "");
+    assertFalse("Can't update new field", error.length() == 0);
+    fields = annotator.readFields("parent");
+    assertEquals("New field still there: " + fields,
+                 3, fields.size());
+    field = fields.get(2);
+    assertEquals("New field unchanged", "child-table", field.get("type"));
+
+    assertEquals("Can update new field",
+                 "", annotator.updateField("parent_child1", "child1", "integer", ""));
+    fields = annotator.readFields("parent_child1");
+    assertEquals("New child field still there: " + fields,
+                 1, fields.size());
+    field = fields.get(0);
+    assertEquals("Correct new field name", "child1", field.get("field"));
+    assertEquals("Correct new field new type", "integer", field.get("type"));
+
+    assertEquals("Can create new field in child table",
+                 "", annotator.createField("parent_child1", "test", "boolean", "true|false"));
+    fields = annotator.readFields("parent_child1");
+    assertEquals("Field created: " + fields,
+                 2, fields.size());
+    field = fields.get(1);
+    assertEquals("Correct created field name", "test", field.get("field"));
+    assertEquals("Correct created field type", "boolean", field.get("type"));
+    assertEquals("Correct created field validation", "true|false", field.get("validation"));
+
+    assertEquals("Can delete new field",
+                 "", annotator.deleteField("parent", "child1"));
+    fields = annotator.readFields("parent");
+    assertEquals("New field no longer there: " + fields,
+                 2, fields.size());
+    
+    // child table is gone
+    fields = annotator.readFields("parent_child1");
+    assertEquals("One value returned: " + fields,
+                 1, fields.size());
+    assertEquals("Value is error: " + fields,
+                 "Nonexistent table: parent_child1", fields.get(0).get("DbTagger_error"));
+
+    assertFalse("Can't delete new field again",
+                annotator.deleteField("parent", "child1").length() == 0);
+
+    // create another child table field
+    assertEquals("Can create child2 field",
+                 "", annotator.createField("parent", "child2", "child-table", "ignored"));
+    fields = annotator.readFields("parent");
+    assertEquals("Field created: " + fields,
+                 3, fields.size());
+    field = fields.get(2);
+    assertEquals("Correct new field name", "child2", field.get("field"));
+    assertEquals("Correct new field type", "child-table", field.get("type"));
+
+    // child table exists
+    fields = annotator.readFields("parent_child2");
+    assertEquals("Default child field created: " + fields,
+                 1, fields.size());
+    field = fields.get(0);
+    assertEquals("Correct default field name", "child2", field.get("field"));
+    assertEquals("Correct default field new type", "string", field.get("type"));
+    assertEquals("Correct default field new validation", "", field.get("validation"));
+    
+    // can remove child table
+    assertEquals("Can delete child table", "", annotator.deleteTable("parent_child2"));
+    fields = annotator.readFields("parent");
+    assertEquals("Field deleted from parent: " + fields,
+                 2, fields.size());
+    assertFalse("Field absent: " + fields,
+                fields.stream()
+                .map(f->f.get("field"))
+                .collect(Collectors.toSet()).contains("child2"));
+
+    // can remove tables
+    assertEquals("Can delete table", "", annotator.deleteTable("parent"));
+    ids = annotator.getDictionaryIds();
+    assertEquals("Table (and its dictionaries) were deleted: " + ids,
+                 6, ids.size());
+
+  }
+  
   /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly,
    * including language filtering. */
   @Test public void transformTranscriptsWithLanguageFiltering() {
