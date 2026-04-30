@@ -153,7 +153,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <trimStackTrace>false</trimStackTrace>
+          <trimStackTrace>true</trimStackTrace>
         </configuration>
       </plugin>
       <!-- copy info.html as the 'site' index (wrapping it in html/body tags) -->

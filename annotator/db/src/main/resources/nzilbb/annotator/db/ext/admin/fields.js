@@ -8,8 +8,10 @@ getVersion(version => {
 // parse parameters
 const parameters = new URLSearchParams(window.location.search);
 const table = parameters.get("t") || parameters.get("table");
-console.log(`table "${table}"`);
-
+const parentTable = parameters.get("p") || parameters.get("parent");
+if (parentTable) {
+  document.getElementById("nav-back").href = `fields.html?t=${parentTable}`;
+}
 document.getElementById("table").innerText = table;
 
 let fields = [];
@@ -34,49 +36,73 @@ function newField(attributes, field) {
   let label = document.createElement("label");
   label.appendChild(document.createTextNode(field.field));
   row.appendChild(label);
+
+  if (field.type == "child-table") {
+    
+    const type = document.createElement("span");
+    type.className = "type";
+    type.id = `type-${field.field}`;
+    type.appendChild(document.createTextNode(field.type));
+    row.appendChild(type);
+    
+    const link = document.createElement("a");
+    link.className = "edit-link";
+    link.title = `${field.field} definition`;
+    link.href = `fields.html?p=${table}&t=${table}_${field.field}`
+    const img = document.createElement("img");
+    img.src = "../edit.svg"
+    img.alt = "✎";
+    link.appendChild(img);
+    row.appendChild(link);
+
+  } else { // regular field
+    
+    let type = document.createElement("select");
+    type.className = "type";
+    type.id = `type-${field.field}`;
+    const types = [
+      "string", "text", "html", "integer", "number", "boolean",
+      "url", "email", "date", "datetime", "geo-location"];
+    for (let t of types) {
+      const option = document.createElement("option");
+      option.appendChild(document.createTextNode(t));
+      type.appendChild(option);
+    } // next possible type
+    type.onkeyup = type.onchange = function(e) {
+      // show save button
+      document.getElementById(`save-${field.field}`).disabled = false;
+    }
+    type.value = field.type||"string";
+    row.appendChild(type);
+    
+    let validation = document.createElement("input");
+    validation.type = "text"
+    validation.id = `validation-${field.field}`;
+    validation.placeholder = "Validation";
+    validation.title = "Constraints, e.g."
+      +"\n - \"0<10\" for values between 0 and 100 (inclusive)"
+      +"\n - \"option1|option2|option3\" for a list of options"
+      +"\n - \"[a-zA-Z0-9]*\" for only alphanumeric values";
+    validation.value = field.validation||"";
+    validation.onkeyup = validation.onchange = function(e) {
+      // show save button
+      document.getElementById(`save-${field.field}`).disabled = false;
+    }
+    row.appendChild(validation);
+    
+    let btnSave = document.createElement("button");
+    btnSave.id = `save-${field.field}`;
+    btnSave.disabled = true;
+    let img = document.createElement("img");
+    img.src = "../save.svg";
+    img.alt= "💾";
+    btnSave.appendChild(img);
+    btnSave.onclick = function(e) {
+      saveField(field.field);
+    }
+    row.appendChild(btnSave);
+  } // regular field (not child-table)
   
-  let type = document.createElement("select");
-  type.className = "type";
-  type.id = `type-${field.field}`;
-  const types = [
-    "string", "text", "html", "integer", "number", "boolean",
-    "url", "email", "date", "datetime", "geo-location"];
-  for (let t of types) {
-    const option = document.createElement("option");
-    option.appendChild(document.createTextNode(t));
-    type.appendChild(option);
-  } // next possible type
-  type.onkeyup = type.onchange = function(e) {
-    // show save button
-    document.getElementById(`save-${field.field}`).disabled = false;
-  }
-  type.value = field.type||"string";
-  row.appendChild(type);
-  let validation = document.createElement("input");
-  validation.type = "text"
-  validation.id = `validation-${field.field}`;
-  validation.placeholder = "Validation";
-  validation.title = "Constraints, e.g."
-    +"\n - \"0<10\" for values between 0 and 100 (inclusive)"
-    +"\n - \"option1|option2|option3\" for a list of options"
-    +"\n - \"[a-zA-Z0-9]*\" for only alphanumeric values";
-  validation.value = field.validation||"";
-  validation.onkeyup = validation.onchange = function(e) {
-    // show save button
-    document.getElementById(`save-${field.field}`).disabled = false;
-  }
-  row.appendChild(validation);
-  let btnSave = document.createElement("button");
-  btnSave.id = `save-${field.field}`;
-  btnSave.disabled = true;
-  let img = document.createElement("img");
-  img.src = "../save.svg";
-  img.alt= "💾";
-  btnSave.appendChild(img);
-  btnSave.onclick = function(e) {
-    saveField(field.field);
-  }
-  row.appendChild(btnSave);
   let btnDelete = document.createElement("button");
   btnDelete.id = `delete-${field.field}`;
   img = document.createElement("img");
@@ -126,7 +152,7 @@ document.getElementById("newFieldType").onchange = function(e) {
   if (this.value) { // type selected
     const type = this.value;
     this.value = ""; // unselect type
-    const field = prompt(`Enter a name for the new ${type} field`);
+    const field = prompt(`Enter a name for the new ${type}`);
     if (field) {
       startLoading();
       getText(resourceForFunction("createField", table, field, type),

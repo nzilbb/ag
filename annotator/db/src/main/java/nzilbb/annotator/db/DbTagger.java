@@ -139,12 +139,11 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
         // check the schema has been created
         // either of prepareStatement or executeQuery may fail if the table doesn't exist
         try (PreparedStatement sql = rdb.prepareStatement(
-               sqlx.apply("SELECT table_id, name FROM "+getAnnotatorId()
-                          +"_table ORDER BY name"))) {
+               sqlx.apply("SELECT table_id, name FROM "+getAnnotatorId()+"_table"))) {
           try (ResultSet rsCheck = sql.executeQuery()) {
           } // rsCheck.close()
         } // sql.close()
-      } catch(SQLException exception) {
+      } catch(SQLException exception) { // table table does't exist
         
         try(PreparedStatement sql = rdb.prepareStatement(
               sqlx.apply(
@@ -160,25 +159,36 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
                 +") ENGINE=MyISAM;"))) {
           sql.executeUpdate();
         } // sql.close();
-      }
+      } // table table does't exist
       
-      try (PreparedStatement sql = rdb.prepareStatement(
-             sqlx.apply(
-               "CREATE TABLE "+getAnnotatorId()+"_field ("
-               +" table_id INTEGER NOT NULL"
-               +" COMMENT 'Table ID',"
-               +" field VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
-               +" COMMENT 'Name of the field',"
-               +" type VARCHAR(30) NOT NULL DEFAULT 'string'"
-               +" COMMENT 'Type of the field, e.g. string, text, richtext, number, etc.',"
-               +" validation VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''"
-               +" COMMENT 'Constraints on values',"
-               +" ordinal INTEGER NOT NULL DEFAULT 0"
-               +" COMMENT 'Determines order between fields',"
-               +" PRIMARY KEY (table_id, field)"
-               +") ENGINE=MyISAM;"))) {
-        sql.executeUpdate();
-      } // sql.close();
+      try {        
+        // check the schema has been created
+        // either of prepareStatement or executeQuery may fail if the table doesn't exist
+        try (PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply("SELECT table_id, field FROM "+getAnnotatorId()+"_field"))) {
+          try (ResultSet rsCheck = sql.executeQuery()) {
+          } // rsCheck.close()
+        } // sql.close()
+      } catch(SQLException exception) { // field table doesn't exist
+        // create it
+        try (PreparedStatement sql = rdb.prepareStatement(
+               sqlx.apply(
+                 "CREATE TABLE "+getAnnotatorId()+"_field ("
+                 +" table_id INTEGER NOT NULL"
+                 +" COMMENT 'Table ID',"
+                 +" field VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL"
+                 +" COMMENT 'Name of the field',"
+                 +" type VARCHAR(30) NOT NULL DEFAULT 'string'"
+                 +" COMMENT 'Type of the field, e.g. string, text, richtext, number, etc.',"
+                 +" validation VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''"
+                 +" COMMENT 'Constraints on values',"
+                 +" ordinal INTEGER NOT NULL DEFAULT 0"
+                 +" COMMENT 'Determines order between fields',"
+                 +" PRIMARY KEY (table_id, field)"
+                 +") ENGINE=MyISAM;"))) {
+          sql.executeUpdate();
+        } // sql.close();
+      } // field table doesn't exist
             
     } finally {
       try { rdb.close(); } catch(SQLException x) {}
@@ -755,6 +765,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
                      +" COMMENT 'Primary key and variant ordering field',"
                      +" supplemental SMALLINT NOT NULL DEFAULT 0"
                      +" COMMENT 'Whether the word/variant has been manually added since uploading from the original file',"
+                     +" parent_serial INTEGER NOT NULL,"
                      +" PRIMARY KEY (serial)) ENGINE=MyISAM;"))) {
               sqlCreateChildTable.executeUpdate();
               
@@ -1003,8 +1014,10 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
                 ResultSetMetaData meta = fields.getMetaData();
                 for (int c = 1; c <= meta.getColumnCount(); c++) {
                   String f = meta.getColumnName(c);
-                  if (!f.equalsIgnoreCase("serial")
-                      && !f.equalsIgnoreCase("supplemental")) {
+                  if (f.equalsIgnoreCase("serial")) {
+                    // derby makes this uppercase, we don't want that
+                    values.put(f.toLowerCase(), fields.getString(f));
+                  } else if(!f.equalsIgnoreCase("supplemental")) {
                     values.put(f, fields.getString(f));
                   }
                 } // next column
@@ -1018,14 +1031,14 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
           return values;
         } catch(SQLException exception) {
           System.err.println(
-            "DbTagger.getEntry("+table+", "+field+", "+entry+"): "+exception);
+            "DbTagger.readEntry("+table+", "+field+", "+entry+"): "+exception);
           return new LinkedHashMap<String,String>(){{
             put("DbTagger_error", exception.getMessage());
           }};
         }
       } else {
         System.err.println(
-          "DbTagger.getEntry("+table+", "+field+", "+entry
+          "DbTagger.readEntry("+table+", "+field+", "+entry
           +"): Nonexistent table.");
         return new LinkedHashMap<String,String>(){{
           put("DbTagger_error", "Nonexistent table: " + table);
@@ -1033,7 +1046,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
       }
     } catch (Exception x) {
       System.err.println(
-        "DbTagger.getEntry("+table+", "+field+", "+entry+"): "+x);
+        "DbTagger.readEntry("+table+", "+field+", "+entry+"): "+x);
       return new LinkedHashMap<String,String>(){{
         put("DbTagger_error", x.getMessage());
       }};
@@ -1056,7 +1069,6 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
       // find the table
       int tableId = tableId(rdb, table);
       if (tableId >= 0) {            
-        // drop the table table
         String sTableName = getAnnotatorId()+"_table_"+tableId;
         try {
           LinkedHashMap<String,String> values = new LinkedHashMap<String,String>();
@@ -1113,14 +1125,14 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
           return values;
         } catch(SQLException exception) {
           System.err.println(
-            "DbTagger.getEntry("+table+", "+field+", "+entry+"): "+exception);
+            "DbTagger.updateEntry("+table+", "+field+", "+entry+"): "+exception);
           return new LinkedHashMap<String,String>(){{
             put("DbTagger_error", exception.getMessage());
           }};
         }
       } else {
         System.err.println(
-          "DbTagger.getEntry("+table+", "+field+", "+entry
+          "DbTagger.updateEntry("+table+", "+field+", "+entry
           +"): Nonexistent table.");
         return new LinkedHashMap<String,String>(){{
           put("DbTagger_error", "Nonexistent table: " + table);
@@ -1129,6 +1141,244 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
     } // rdb.close()
   }
   
+  /**
+   * Identifies the child table and parent serial.
+   * @param rdb Database connection to use.
+   * @param parentTable The parent table name.
+   * @param field The field used to identify the parent entry.
+   * @param entry The value for <var>field</var>, which identifies the
+   * parent entry of the child rows.
+   * @param childField The child-table field to return the entries for.
+   * @return A pair of numbers, the first is the child table ID
+   * and the second is the parent serial.
+   */
+  private long[] readChildEntries(
+    Connection rdb, String parentTable, String field, String entry, String childField) throws Exception {
+    long[] ids = new long[2];
+    Vector<Map<String,String>> entries = new Vector<Map<String,String>>();
+    // find the table
+    int parentTableId = tableId(rdb, parentTable);
+    ids[0] = tableId(rdb, parentTable+"_"+childField);
+    if (parentTableId >= 0 && ids[0] >= 0) {
+      String parentTableName = getAnnotatorId()+"_table_"+parentTableId;
+      String childTableName = getAnnotatorId()+"_table_"+ids[0];
+      // get serial of parent entry
+      String s = sqlx.apply(
+        "SELECT serial FROM "+parentTableName+" WHERE `"+field.replace(';',' ')+"` = ?");
+      try (PreparedStatement selectParentEntry = rdb.prepareStatement(s)) {
+        selectParentEntry.setString(1, entry);
+        try (ResultSet serialRow = selectParentEntry.executeQuery()) {
+          if (serialRow.next()) { // only the first entry, sorry
+            ids[1] = serialRow.getLong("serial");
+            return ids;
+          } else {
+            throw new Exception("No entry: " + entry);
+          }
+        } // serialRow.close()
+      } // selectParentEntry.close()
+    } else {
+      System.err.println(
+        "readChildEntries("
+        +parentTable+", "+field+", "+entry+", "+childField+"): Nonexistent table.");
+      throw new Exception("Nonexistent table: " + parentTable);
+    }
+  }                
+
+  /**
+   * Creates a child-table entry for the given parent entry.
+   * @param parentTable The parent table name.
+   * @param field The field used to identify the parent entry.
+   * @param entry The value for <var>field</var>, which identifies the
+   * parent entry of the child rows.
+   * @param childField The child-table field to return the entries for.
+   * @param data JSON representation of the new entry's attribute values.
+   * @return The keys/values for the entry.
+   */
+  @ApiEndpoint("edit") public Map<String,String> createChildEntry(
+    String parentTable, String field, String entry, String childField, String data) throws SQLException {
+    JsonObject json = Json.createReader(new StringReader(data)).readObject();
+    LinkedHashMap<String,String> newEntry = new LinkedHashMap<String,String>();
+    try (Connection rdb = newConnection()) {
+      long[] ids = readChildEntries(rdb, parentTable, field, entry, childField);
+      long childTableId = ids[0];
+      long parentSerial = ids[1];
+      List<Map<String,String>> fields = readFields(parentTable+"_"+childField);
+      String columnList = fields.stream()
+        .map(def->"`"+def.get("field")+"`")
+        .collect(Collectors.joining(","));
+      String argumentList = fields.stream().map(def->"?").collect(Collectors.joining(","));
+      try (PreparedStatement insertEntry = rdb.prepareStatement(
+             sqlx.apply("INSERT INTO "+getAnnotatorId() +"_table_"+childTableId
+                        +" (parent_serial, supplemental,"+columnList+")"
+                        +" VALUES (?,1,"+argumentList+")"))) {
+        int p = 1;
+        insertEntry.setLong(p++, parentSerial);
+        for (Map<String,String> f : fields) {
+          String name = f.get("field");
+          String value = json.containsKey(name)?json.getString(name):"";
+          insertEntry.setString(p++, value);
+          newEntry.put(name, value);
+        } // next field
+        insertEntry.executeUpdate();
+      } // close insertEntry
+      try (PreparedStatement sqlSerial = rdb.prepareStatement(
+             sqlx.apply("SELECT LAST_INSERT_ID() FROM "
+                        +getAnnotatorId() +"_table_"+childTableId))) {
+        try (ResultSet rs = sqlSerial.executeQuery()) {
+          if (rs.next()) newEntry.put("serial", rs.getString(1));
+        } // close rs
+      } // close sqlChildTableId
+    } catch (Exception x) {
+      System.err.println(
+        "createChildEntry("+parentTable+", "+field+", "+entry+", "+childField+"): "+x);
+      newEntry.put("DbTagger_error", x.getMessage());
+    } // rdb.close()
+    return newEntry;
+  }
+  
+  /**
+   * Get all child-table entries values for the given parent entry.
+   * @param parentTable The parent table name.
+   * @param field The field used to identify the parent entry.
+   * @param entry The value for <var>field</var>, which identifies the
+   * parent entry of the child rows.
+   * @param childField The child-table field to return the entries for.
+   * @return A list of child table entries.
+   */
+  @ApiEndpoint("view") public List<Map<String,String>> readChildEntries(
+    String parentTable, String field, String entry, String childField) throws SQLException {
+    Vector<Map<String,String>> entries = new Vector<Map<String,String>>();
+    try (Connection rdb = newConnection()) {
+      long[] ids = readChildEntries(rdb, parentTable, field, entry, childField);
+      long childTableId = ids[0];
+      long parentSerial = ids[1];
+      String childTableName = getAnnotatorId()+"_table_"+childTableId;
+      try (PreparedStatement selectEntries = rdb.prepareStatement(
+             sqlx.apply("SELECT * FROM "+childTableName+" WHERE parent_serial = ?"))) {
+        selectEntries.setLong(1, parentSerial);
+        try (ResultSet rows = selectEntries.executeQuery()) {
+          while (rows.next()) {
+            LinkedHashMap<String,String> childEntry
+              = new LinkedHashMap<String,String>();
+            ResultSetMetaData meta = rows.getMetaData();
+            for (int c = 1; c <= meta.getColumnCount(); c++) {
+              String f = meta.getColumnName(c);
+              if (f.equalsIgnoreCase("serial")) {
+                // derby makes this uppercase, we don't want that
+                childEntry.put(f.toLowerCase(), rows.getString(f));
+              } else if(!f.equalsIgnoreCase("supplemental")) {
+                childEntry.put(f, rows.getString(f));
+              }
+            } // next column
+            entries.add(childEntry);
+          } // next row
+        } // rows.close()
+      } // selectEntries.close()
+    } catch (Exception x) {
+      System.err.println(
+        "readChildEntries("+parentTable+", "+field+", "+entry+", "+childField+"): "+x);
+      entries.add(new LinkedHashMap<String,String>(){{
+        put("DbTagger_error", x.getMessage());
+      }});
+    } // rdb.close()
+    return entries;
+  } // end of readChildEntries()
+
+  /**
+   * Updates an existing child-table entry for the given parent entry.
+   * @param parentTable The parent table name.
+   * @param field The field used to identify the parent entry.
+   * @param entry The value for <var>field</var>, which identifies the
+   * parent entry of the child rows.
+   * @param childField The child-table field to return the entries for.
+   * @param data JSON representation of the new entry's attribute values,
+   * which must include the original "serial" value returned by readChildEntries().
+   * @return The keys/values for the entry.
+   */
+  @ApiEndpoint("edit") public Map<String,String> updateChildEntry(
+    String parentTable, String field, String entry, String childField, String data) throws SQLException {
+    final JsonObject json = Json.createReader(new StringReader(data)).readObject();
+    LinkedHashMap<String,String> newEntry = new LinkedHashMap<String,String>();
+    if (json.containsKey("serial")) {
+      newEntry.put("serial", json.getString("serial"));
+      try (Connection rdb = newConnection()) {
+        long[] ids = readChildEntries(rdb, parentTable, field, entry, childField);
+        long childTableId = ids[0];
+        long parentSerial = ids[1];
+        List<Map<String,String>> fields = readFields(parentTable+"_"+childField);
+        String columnList = fields.stream()
+          // only update the fields that are actually specified
+          .filter(def->json.containsKey(def.get("field")))
+          .map(def->"`"+def.get("field")+"` = ?")
+          .collect(Collectors.joining(","));
+        try (PreparedStatement updateEntry = rdb.prepareStatement(
+               sqlx.apply("UPDATE "+getAnnotatorId() +"_table_"+childTableId
+                          +" SET "+columnList
+                          +" WHERE parent_serial = ? AND serial = ?"))) {
+          int p = 1;
+          for (Map<String,String> f : fields) {
+            String name = f.get("field");
+            if (json.containsKey(name)) {
+              String value = json.containsKey(name)?json.getString(name):"";
+              updateEntry.setString(p++, value);
+              newEntry.put(name, value);
+            }
+          } // next field
+          updateEntry.setLong(p++, parentSerial);
+          updateEntry.setString(p++, json.getString("serial"));
+          updateEntry.executeUpdate();
+        } // close insertEntry
+      } catch (Exception x) {
+        System.err.println(
+          "updateChildEntry("+parentTable+", "+field+", "+entry+", "+childField+"): "+x);
+        newEntry.put("DbTagger_error", x.getMessage());
+      } // rdb.close()
+    } else { // serial no present
+      newEntry.put("DbTagger_error", "\"serial\" is required to identify the entry");
+    }
+    return newEntry;
+  }
+    
+  /**
+   * Deletes an existing child-table entry for the given parent entry.
+   * @param parentTable The parent table name.
+   * @param field The field used to identify the parent entry.
+   * @param entry The value for <var>field</var>, which identifies the
+   * parent entry of the child rows.
+   * @param childField The child-table field to return the entries for.
+   * @param data JSON representation of the new entry's attribute values,
+   * which must include the original "serial" value returned by readChildEntries()
+   * (but needn't contain any other values).
+   * @return An error if any.
+   */
+  @ApiEndpoint("edit") public String deleteChildEntry(
+    String parentTable, String field, String entry, String childField, String data) throws SQLException {
+    final JsonObject json = Json.createReader(new StringReader(data)).readObject();
+    if (json.containsKey("serial")) {
+      try (Connection rdb = newConnection()) {
+        long[] ids = readChildEntries(rdb, parentTable, field, entry, childField);
+        long childTableId = ids[0];
+        long parentSerial = ids[1];
+        try (PreparedStatement deleteEntry = rdb.prepareStatement(
+               sqlx.apply("DELETE FROM "+getAnnotatorId() +"_table_"+childTableId
+                          +" WHERE parent_serial = ? AND serial = ?"))) {
+          deleteEntry.setLong(1, parentSerial);
+          deleteEntry.setString(2, json.getString("serial"));
+          if (deleteEntry.executeUpdate() < 1) {
+            return "Nonexistent entry";
+          }
+        } // close deleteEntry
+      } catch (Exception x) {
+        System.err.println(
+          "updateChildEntry("+parentTable+", "+field+", "+entry+", "+childField+"): "+x);
+        return x.getMessage();
+      } // rdb.close()
+    } else { // serial no present
+      return "\"serial\" is required to identify the entry";
+    }
+    return "";
+  }
+    
   /**
    * ID of the input layer containing word tokens.
    * @see #getTokenLayerId()

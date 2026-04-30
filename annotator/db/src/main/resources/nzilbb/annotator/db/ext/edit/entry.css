@@ -16,10 +16,10 @@ h4 { font-size: 14pt; color: #859044; }
 h5 { font-size: 13pt; color: #859044; }
 h6 { font-size: 12pt; color: #859044; }
 
-label {
+label, legend {
     font-weight: bold;
 }
-label:after {
+label:after, legend:after {
     content: ':';
 }
 .field {
@@ -38,6 +38,9 @@ label:after {
 .field input, .field textarea {
     width: 99%;
 }
+.field td input, .field td textarea { /* child table*/
+    width: 90%;
+}
 .field input[type="number"] {
     width: 75px;
     text-align: right;
@@ -55,10 +58,14 @@ label:after {
   outline: red solid 3px;
 }
 
+fieldset table {
+    width: 100%;
+}
+
 button img {
     width: 16px;
     height: 16px;
-    vertical-align: middle;
+    vertical-align: center;
 }
 
 footer {

@@ -26,6 +26,14 @@ h4 { font-size: 14pt; color: #859044; }
 h5 { font-size: 13pt; color: #859044; }
 h6 { font-size: 12pt; color: #859044; }
 
+nav {
+    font-size: x-large;
+    position: absolute;
+}
+nav a {
+    text-decoration: none;
+}
+
 label {
     font-weight: bold;
 }
@@ -35,6 +43,7 @@ label:after {
 .field {
     display: flex;
     flex-direction: row;
+    align-items: center;
 }
 .field label {
     width: 30%;
@@ -46,8 +55,14 @@ label:after {
 .field input {
     width: 35%;
 }
-
-button img, body>details img {
+.field span.type {
+    width: 35%;
+    flex-grow: 1;
+}
+a.edit-link {
+    padding: 3px;
+}
+a.edit-link img, button img, body>details img {
     width: 16px;
     height: 16px;
     vertical-align: center;
