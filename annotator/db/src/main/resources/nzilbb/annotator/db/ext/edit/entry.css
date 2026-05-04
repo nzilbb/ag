@@ -62,6 +62,10 @@ fieldset table {
     width: 100%;
 }
 
+th.save-column {
+    width: 20px;
+}
+
 button img {
     width: 16px;
     height: 16px;

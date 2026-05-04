@@ -920,6 +920,12 @@ public class TestDbTagger {
     assertEquals("Correct field type", "string", field.get("type"));
     assertEquals("Correct field validation", "", field.get("validation"));
 
+    // get get entry
+    Map<String,String> entry = annotator.readEntry("dict", "type", "THE");
+    assertEquals("Correct type value", "THE", entry.get("type"));
+    assertEquals("Correct Pronunciation value ", "ð ə", entry.get("phonemes"));
+    assertTrue("serial is present " + entry, entry.keySet().contains("serial")); 
+
     // field CRUD
     assertFalse("Cannot create field in nonexistent table",
                 annotator.createField("nonexistent", "xxx", "string", "").length() == 0);
@@ -1046,6 +1052,77 @@ public class TestDbTagger {
     assertEquals("Correct created field type", "boolean", field.get("type"));
     assertEquals("Correct created field validation", "true|false", field.get("validation"));
 
+    List<Map<String,String>> childEntries = annotator.readChildEntries(
+      "parent", "type", "THE", "child1");
+    assertEquals("There are no child entries", 0, childEntries.size());
+
+    // add an entry
+    Map<String,String> childEntry = annotator.createChildEntry(
+      "parent", "type", "THE", "child1", "{\"child1\":\"foo\"}");
+    assertTrue("New child entry has serial set", childEntry.containsKey("serial"));
+    String childSerial = childEntry.get("serial");
+    assertEquals("New child entry child1 value " + childEntry,
+                 "foo", childEntry.get("child1"));
+    assertEquals("New child entry test value empty " + childEntry,
+                 "", childEntry.get("test"));
+
+    // the entry is present
+    childEntries = annotator.readChildEntries(
+      "parent", "type", "THE", "child1");
+    assertEquals("There is one child entry", 1, childEntries.size());
+    childEntry = childEntries.get(0);
+    assertEquals("Child entry child1 value " + childEntry,
+                 "foo", childEntry.get("child1"));
+    assertEquals("Child entry test value empty " + childEntry,
+                 "", childEntry.get("test"));
+
+    // update entry error
+    childEntry = annotator.updateChildEntry(
+      "parent", "type", "THE", "child1", "{\"test\":\"true\"}"); // no serial
+    assertFalse("Updated child entry has no serial set", childEntry.containsKey("serial"));
+    assertEquals("Update error",
+                 "\"serial\" is required to identify the entry",
+                 childEntry.get("DbTagger_error"));
+    
+    // update entry
+    childEntry = annotator.updateChildEntry(
+      "parent", "type", "THE", "child1",
+      "{\"serial\":\""+childSerial+"\",\"test\":\"true\"}"); // partial update
+    assertTrue("Updated child entry has serial set", childEntry.containsKey("serial"));
+    assertFalse("Update child entry has no child1 " + childEntry,
+                childEntry.containsKey("child1"));
+    assertEquals("Updated child entry test value set " + childEntry,
+                 "true", childEntry.get("test"));
+    
+    // the entry is updated
+    childEntries = annotator.readChildEntries(
+      "parent", "type", "THE", "child1");
+    assertEquals("There is one child entry", 1, childEntries.size());
+    childEntry = childEntries.get(0);
+    assertEquals("Updated child entry child1 value " + childEntry,
+                 "foo", childEntry.get("child1"));
+    assertEquals("Updated child entry test value set " + childEntry,
+                 "true", childEntry.get("test"));
+    
+    // no entry for other word
+    childEntries = annotator.readChildEntries(
+      "parent", "type", "BROWN", "child1");
+    assertEquals("There are no child entries for other word", 0, childEntries.size());
+
+    // delete entry
+    error = annotator.deleteChildEntry(
+      "parent", "type", "THE", "child1", "{\"serial\":\""+childSerial+"\"}");
+    assertEquals("No error on delete", "", error);
+    childEntries = annotator.readChildEntries(
+      "parent", "type", "THE", "child1");
+    assertEquals("Child entry is gone", 0, childEntries.size());
+
+    // can't delete again
+    error = annotator.deleteChildEntry(
+      "parent", "type", "THE", "child1", "{\"serial\":\""+childSerial+"\"}");
+    assertEquals("Error on delete", "Nonexistent entry", error);
+    
+    // delete field
     assertEquals("Can delete new field",
                  "", annotator.deleteField("parent", "child1"));
     fields = annotator.readFields("parent");

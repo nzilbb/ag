@@ -1254,7 +1254,9 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
       long parentSerial = ids[1];
       String childTableName = getAnnotatorId()+"_table_"+childTableId;
       try (PreparedStatement selectEntries = rdb.prepareStatement(
-             sqlx.apply("SELECT * FROM "+childTableName+" WHERE parent_serial = ?"))) {
+             sqlx.apply("SELECT * FROM "+childTableName
+                        +" WHERE parent_serial = ?"
+                        +" ORDER BY serial"))) {
         selectEntries.setLong(1, parentSerial);
         try (ResultSet rows = selectEntries.executeQuery()) {
           while (rows.next()) {
@@ -1263,7 +1265,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
             ResultSetMetaData meta = rows.getMetaData();
             for (int c = 1; c <= meta.getColumnCount(); c++) {
               String f = meta.getColumnName(c);
-              if (f.equalsIgnoreCase("serial")) {
+              if (f.equalsIgnoreCase("serial") || f.equalsIgnoreCase("parent_serial")) {
                 // derby makes this uppercase, we don't want that
                 childEntry.put(f.toLowerCase(), rows.getString(f));
               } else if(!f.equalsIgnoreCase("supplemental")) {

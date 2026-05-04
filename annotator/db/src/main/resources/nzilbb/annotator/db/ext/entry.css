@@ -50,6 +50,13 @@ div.map {
     height: 25vh;
 }
 
+fieldset table {
+    width: 100%;
+}
+fieldset table th {
+    text-align: left;
+}
+
 a img, button img {
     width: 16px;
     height: 16px;

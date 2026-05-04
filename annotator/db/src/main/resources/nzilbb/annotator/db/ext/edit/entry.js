@@ -30,8 +30,8 @@ const fields = {}; // definitions for fields (type/validation etc.)
 const childFields = {}; // definitions for child-table fields (key is child name)
 
 function showForm(data) {
-  if (data.FlatTableTagger_error) {
-    document.getElementById("error").innerText = data.FlatTableTagger_error;
+  if (data.DbTagger_error) {
+    document.getElementById("error").innerText = data.DbTagger_error;
     return;
   }
   const attributes = document.getElementById("attributes");
@@ -53,7 +53,9 @@ function showForm(data) {
         span.appendChild(document.createTextNode(data[name]));
         value.appendChild(span);
       } else {
-        createFieldInput(value, fields[name], data[name]);
+        createFieldInput(
+          value, fields[name], (e)=>document.getElementById("btnSave").style.display = null,
+          data[name]);
       }
       row.appendChild(value);
     } else { // child-table
@@ -73,14 +75,13 @@ function showForm(data) {
           }
         } // next child field definition
 
-        showChildForm(name, null);
-        
-        // // get all field values for entry
-        // getJSON(resourceForFunction("readChildEntries", childTable, field, entry), data => {
-        //   startLoading();
-        //   showChildForm(name, data);
-        //   finishedLoading();
-        // }); // readEntries
+        // get all field values for entry
+        startLoading();
+        getJSON(
+          resourceForFunction("readChildEntries", table, field, entry, name), data => {
+            finishedLoading();
+            showChildForm(name, data);
+          }); // readChildEntries
         
       }); // readFields
     }
@@ -93,21 +94,31 @@ function showForm(data) {
   document.getElementById("btnSave").style.display = "none";
 }
 
-function showChildForm(field, data) {
-  const value = document.getElementById(`row-${field}`);
+function showChildForm(childField, data) {
+  const value = document.getElementById(`row-${childField}`);
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   let tr = document.createElement("tr");
-  for (let name in childFields[field]) {
+  for (let name in childFields[childField]) {
     const th = document.createElement("th");
     th.appendChild(document.createTextNode(name));
     tr.appendChild(th);
   } // next field
+  // add columns for save/delete buttons
+  const thSave = document.createElement("th");
+  thSave.className = "save-column";
+  tr.appendChild(thSave);
+  const thDelete = document.createElement("th");
+  thDelete.className = "delete-column";
+  tr.appendChild(thDelete);
   thead.appendChild(tr);
   table.appendChild(thead);
   
   const tbody = document.createElement("tbody");
-  tbody.id = `rows-${field}`;
+  tbody.id = `rows-${childField}`;
+  for (let r in data) { // for each child row
+    addChildRow(childField, tbody, data[r])
+  } // next child row
   
   table.appendChild(tbody);
   const tfoot  = document.createElement("tfoot");
@@ -118,9 +129,10 @@ function showChildForm(field, data) {
   img.src = "../add.svg";
   img.alt= "➕";
   btnCreate.appendChild(img);
-  btnCreate.onclick = function(e) {
-    addChildRow(field, {});
-  }
+  btnCreate.addEventListener("click", function(e) {
+    const firstInput = addChildRow(childField, tbody, {});
+    if (firstInput) firstInput.focus();
+  });
   td.appendChild(btnCreate);
   tr.appendChild(td);
   tfoot.appendChild(tr);
@@ -128,20 +140,118 @@ function showChildForm(field, data) {
   value.appendChild(table);
 }
 
-function addChildRow(field, data) {
-  const rows = document.getElementById(`rows-${field}`);
-  let tr = document.createElement("tr");
-  for (let name in childFields[field]) {
+function addChildRow(childField, rows, model) {
+  let firstInput = null;
+  
+  const tr = document.createElement("tr");
+  
+  const tdSave = document.createElement("td");
+  tdSave.className = "save-column";
+  const btnSave = document.createElement("button");
+  btnSave.className = "save";
+  const img = document.createElement("img");
+  const inputs = {};
+  img.src = "../save.svg";
+  img.alt= "💾";
+  btnSave.appendChild(img);
+  btnSave.style.display = "none"; // hidden to start with
+  btnSave.addEventListener("click", function(e) {    
+    // load data from inputs into model 
+    for (let name in childFields[childField]) {
+      model[name] = inputs[name].value;
+    }
+    if (!model.serial) { // serial not set - it's a new row
+      startLoading();
+      getJSON(resourceForFunction(
+        "createChildEntry", table, field, entry, childField, JSON.stringify(model)),
+              newModel => {
+                finishedLoading();
+                console.log("createChildEntry " + JSON.stringify(newModel));
+                if (newModel.DbTagger_error) {
+                  document.getElementById("error").innerText = newModel.DbTagger_error;
+                } else {
+                  Object.assign(model, newModel); // should include serial
+                  btnSave.style.display = "none"; // hide button again
+                }
+              });
+    } else { // serial already set - it's an existing row
+      startLoading();
+      getJSON(resourceForFunction(
+        "updateChildEntry", table, field, entry, childField, JSON.stringify(model)),
+              newModel => {
+                finishedLoading();
+                console.log("updateChildEntry " + JSON.stringify(newModel));
+                if (newModel.DbTagger_error) {
+                  document.getElementById("error").innerText = newModel.DbTagger_error;
+                } else {
+                  Object.assign(model, newModel); // should include serial
+                  btnSave.style.display = "none"; // hide button again
+                }
+              });
+    }
+  });
+  tdSave.appendChild(btnSave);
+  
+  const tdDelete = document.createElement("td");
+  tdDelete.className = "delete-column";
+  const btnDelete = document.createElement("button");
+  const imgDelete = document.createElement("img");
+  imgDelete.src = "../delete.svg";
+  imgDelete.alt= "❌";
+  btnDelete.appendChild(imgDelete);
+  btnDelete.addEventListener("click", function(e) {
+    if (confirm(
+      `Are you sure you want to delete this ${childField}?\nThis cannot be undone.`)) {
+      if (model.serial) { // serial not set - it's a new row
+        startLoading();
+        getJSON(resourceForFunction(
+          "deleteChildEntry", table, field, entry, childField, JSON.stringify(model)),
+                error => {
+                  finishedLoading();
+                  console.log("deleteChildEntry " + error);
+                  if (error) {
+                    document.getElementById("error").innerText = error;
+                  } else {
+                    // remove the row from the table
+                    tr.remove();
+                    // esnure UI has time to remove the row
+                    setTimeout(()=>alert(`${childField} deleted.`), 100);
+                  }
+                });
+      } else { // a new row
+        tr.remove();
+        // esnure UI has time to remove the row
+        setTimeout(()=>alert(`${childField} deleted.`), 100);
+      }
+    } // yes I'm sure
+  });
+  tdDelete.appendChild(btnDelete);
+  
+  for (let name in childFields[childField]) {
     const td = document.createElement("td");
     td.title = name;
     td.className = name;
-    createFieldInput(td, childFields[field][name], data[name] || "");
+    
+    // create the UI component for the field value
+    const input = createFieldInput(
+      td, childFields[childField][name], (e)=>btnSave.style.display = null,
+      model[name] || "");
+    // ensure the save function can access the input
+    inputs[name] = input;
+    if (!firstInput) firstInput = input;
+    
     tr.appendChild(td);
   } // next field
+
+  // add save button at the end
+  tr.appendChild(tdSave);
+  tr.appendChild(tdDelete);
   rows.appendChild(tr);
+
+  return firstInput; // in case we wat to focus on it
 }
 
-function createFieldInput(valueElement, fieldDefinition, value) {
+function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, value) {
   let input = document.createElement("input");
   
   // default text input
@@ -160,7 +270,7 @@ function createFieldInput(valueElement, fieldDefinition, value) {
     a.title = `Open ${fieldDefinition.field}`;
     a.target = fieldDefinition.field;
     a.href = "#";
-    a.onclick = function(e) {
+    a.addEventListener("click", function(e) {
       if (input.value) {
         this.href = input.value;
         return true;
@@ -168,7 +278,7 @@ function createFieldInput(valueElement, fieldDefinition, value) {
         e.preventDefault();
         return false;
       }
-    }
+    });
     a.appendChild(document.createTextNode("🡽"));
     valueElement.appendChild(a);
   } else if (fieldDefinition.type == "geo-location") {
@@ -177,7 +287,7 @@ function createFieldInput(valueElement, fieldDefinition, value) {
     a.title = `Open ${fieldDefinition.field}`;
     a.target = fieldDefinition.field;
     a.href = "#";
-    a.onclick = function(e) {
+    a.addEventListener("click", function(e) {
       if (input.value) {
         let coords = input.value.split(",");
         if (input.value.indexOf(":") >= 0) { // shape
@@ -201,7 +311,7 @@ function createFieldInput(valueElement, fieldDefinition, value) {
         e.preventDefault();
         return false;
       }
-    }
+    });
     a.appendChild(document.createTextNode("🌏"));
     valueElement.appendChild(a);
   } else if (fieldDefinition.type == "email") {
@@ -239,10 +349,9 @@ function createFieldInput(valueElement, fieldDefinition, value) {
   input.id = `attribute-${fieldDefinition.field}`;
   input.placeholder = fieldDefinition.field;
   input.value = value || "";
-  input.onkeyup = input.onchange = function(e) {
-    // show save button
-    document.getElementById("btnSave").style.display = null;
-  }
+  // show save button:
+  input.addEventListener("keyup", saveButtonHandler);
+  input.addEventListener("change", saveButtonHandler);
 
   valueElement.appendChild(input);
   
@@ -273,10 +382,7 @@ function createFieldInput(valueElement, fieldDefinition, value) {
       } )
       .then( editor => {
 	input.editor = editor;
-        editor.model.document.on( 'change:data', () => {
-          // show save button
-          document.getElementById("btnSave").style.display = null;
-        } );
+        editor.model.document.on('change:data', saveButtonHandler);
       } )
       .catch( error => {
 	console.error( error );
@@ -304,7 +410,7 @@ getJSON(resourceForFunction("readFields", table), definitions => {
 
 });
 
-document.getElementById("btnSave").onclick = function (e) {
+document.getElementById("btnSave").addEventListener("click", function (e) {
   document.getElementById("error").innerText = "";
   var fd = new FormData();
   fd.append("t", table);
@@ -333,4 +439,15 @@ document.getElementById("btnSave").onclick = function (e) {
     showForm(JSON.parse(this.responseText));
     finishedLoading();
   });
-}
+});
+
+window.addEventListener("beforeunload", (event) => { // before they navigate away
+  // are there any save buttons visible?
+  for (let btnSave of document.getElementsByClassName("save")) {
+    if (btnSave.style.display != "none") {
+      event.preventDefault();
+      event.returnValue = true;
+      return;
+    } // button currently displayed
+  } // next save button
+});
