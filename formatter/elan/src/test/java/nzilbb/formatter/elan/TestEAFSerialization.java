@@ -49,7 +49,149 @@ import nzilbb.formatter.elan.*;
 
 public class TestEAFSerialization {
 
-  /** Basic seserialization of a transcript including utterance tiers only. */
+  // @Test public void deleteme()  throws Exception {    
+  //   Schema schema = new Schema(
+  //     "who", "turn", "utterance", "word",
+  //     new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+  //     .setPeers(true).setPeersOverlap(true).setSaturated(true),
+  //     new Layer("comment", "Comment").setAlignment(Constants.ALIGNMENT_INTERVAL)
+  //     .setPeers(true).setPeersOverlap(true).setSaturated(false),
+  //     new Layer("noise", "Noise").setAlignment(Constants.ALIGNMENT_INTERVAL)
+  //     .setPeers(true).setPeersOverlap(true).setSaturated(false),
+  //     new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+  //     .setPeers(true).setPeersOverlap(false).setSaturated(false)
+  //     .setParentId("who").setParentIncludes(true),
+  //     new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+  //     .setPeers(true).setPeersOverlap(false).setSaturated(true)
+  //     .setParentId("turn").setParentIncludes(true),
+  //     new Layer("language", "Phrase Language").setAlignment(Constants.ALIGNMENT_INTERVAL)
+  //     .setPeers(true).setPeersOverlap(false).setSaturated(false)
+  //     .setParentId("turn").setParentIncludes(true),
+  //     new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+  //     .setPeers(true).setPeersOverlap(false).setSaturated(false)
+  //     .setParentId("turn").setParentIncludes(true),
+  //     new Layer("lexical", "Lexical").setAlignment(Constants.ALIGNMENT_NONE)
+  //     .setPeers(false).setPeersOverlap(false).setSaturated(true)
+  //     .setParentId("word").setParentIncludes(true),
+  //     new Layer("pronounce", "Pronounce").setAlignment(Constants.ALIGNMENT_NONE)
+  //     .setPeers(false).setPeersOverlap(false).setSaturated(true)
+  //     .setParentId("word").setParentIncludes(true));
+  //   // access file
+  //   NamedStream[] streams = { new NamedStream(new File(getDir(), "deleteme.eaf")) };
+      
+  //   // create deserializer
+  //   EAFSerialization deserializer = new EAFSerialization();
+      
+  //   // general configuration
+  //   ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+  //   //for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+  //   assertEquals(12, configuration.size());
+  //   assertEquals("comment", "comment", 
+  //                ((Layer)configuration.get("commentLayer").getValue()).getId());
+  //   assertEquals("pronounce", "pronounce", 
+  //                ((Layer)configuration.get("pronounceLayer").getValue()).getId());
+  //   assertEquals("lexical", "lexical", 
+  //                ((Layer)configuration.get("lexicalLayer").getValue()).getId());
+  //   assertEquals("noise", "noise", 
+  //                ((Layer)configuration.get("noiseLayer").getValue()).getId());
+  //   assertEquals("phrase language", "language", 
+  //                ((Layer)configuration.get("phraseLanguageLayer").getValue()).getId());
+  //   assertEquals("useConventions", Boolean.TRUE, 
+  //                (Boolean)configuration.get("useConventions").getValue());
+  //   assertEquals("ignoreBlankAnnotations", Boolean.TRUE, 
+  //                (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
+  //   assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
+  //                (Double)configuration.get("minimumTurnPauseLength").getValue());
+  //   assertEquals("wordTierPattern", ".*word.*", 
+  //                (String)configuration.get("wordTierPattern").getValue());
+      
+  //   configuration.get("minimumTurnPauseLength").setValue(Double.valueOf(0.5));
+  //   assertEquals(12, deserializer.configure(configuration, schema).size());
+  //   assertEquals("customize minimumTurnPauseLength", Double.valueOf(0.5), 
+  //                deserializer.getMinimumTurnPauseLength());
+    
+  //   // load the stream
+  //   ParameterSet defaultParameters = deserializer.load(streams, schema);
+  //   //for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+  //   assertEquals("Number of parameters: " + defaultParameters.values(),
+  //                4, defaultParameters.size());
+  //   assertEquals("utterance mapping", "utterance", 
+  //                ((Layer)defaultParameters.get("tier0").getValue()).getId());
+  //   assertEquals("utterance mapping", "utterance", 
+  //                ((Layer)defaultParameters.get("tier1").getValue()).getId());
+  //   assertEquals("noise mapping", "noise", 
+  //                ((Layer)defaultParameters.get("tier2").getValue()).getId());
+  //   assertEquals("utterance mapping", "utterance", 
+  //                ((Layer)defaultParameters.get("tier3").getValue()).getId());
+
+  //   // configure the deserialization
+  //   deserializer.setParameters(defaultParameters);
+      
+  //   // build the graph
+  //   Graph[] graphs = deserializer.deserialize();
+  //   Graph g = graphs[0];
+
+  //   for (String warning : deserializer.getWarnings()) {
+  //     System.out.println(warning);
+  //   }
+      
+  //   assertEquals("deleteme.eaf", g.getId());
+
+  //   for (Annotation a : g.getAnnotationsById().values()) {
+  //     if (a.getLabel().startsWith("debug-")) {
+  //       System.out.println("after deserialize " + a.getId() + ": " + a.getLabel() + " ("+a.getStart()+"-"+a.getEnd()+") " + a.getParentId() + ":" + a.getParent() + "#" + a.getOrdinal());
+  //     }
+  //   }
+  //   g.trackChanges();
+  //   new nzilbb.ag.util.DefaultOffsetGenerator()
+  //     .setDebug(true)
+  //     .transform(g);
+  //   g.commit();
+  //   g.create();
+
+  //   for (Annotation a : g.getAnnotationsById().values()) {
+  //     if (a.getLabel().startsWith("debug-")) {
+  //       System.out.println("after DefaultOffsetGenerator " + a.getId() + ": " + a.getLabel() + " ("+a.getStart()+"-"+a.getEnd()+") " + a.getParentId() + ":" + a.getParent());
+  //     }
+  //   }
+    
+  //   new nzilbb.ag.util.Normalizer()
+  //     .setMinimumTurnPauseLength(0.5)
+  //     .transform(g);
+  //   new nzilbb.ag.util.Validator()
+  //     .setMaxGraphIdLength(200)
+  //     .setMaxLabelLength(247)
+  //     .setFullValidation(true)
+  //     //.setDebug(true)
+  //     .transform(g);    
+
+  //   // last minute reversed-anchor check, just in case
+  //   for (Annotation a : g.getAnnotationsById().values()) {
+  //     if (a.getChange() == Change.Operation.Destroy) continue;
+  //     Layer layer = a.getLayer();
+  //     if (layer != null && layer.getAlignment() > 0) {
+  //           if (a.getStart() != null) { // (could be in a fragment)
+  //             if (a.getStart().getOffset() == null) {
+  //               fail(a.getId() + " (" + a.getLabel() + ") - no start offset.");
+  //             }
+  //             if (a.getEnd() != null) { // (could be in a fragment)
+  //               if (a.getEnd().getOffset() == null) {
+  //                 fail(a.getId() + " (" + a.getLabel() + ") - no end offset.");
+  //               }
+  //               if (a.getStart().getOffset() > a.getEnd().getOffset()) {
+  //                 fail(
+  //                   a.getId() + " (" + a.getLabel() + ") - backwards: "
+  //                   +a.getStart()+"["+a.getStart().getId()+"]-"
+  //                   +a.getEnd()+"["+a.getEnd().getId()+"].");
+  //               }
+  //             } // end is set
+  //           } // start is set
+  //     }
+  //   } // next annotation
+    
+  // }
+
+  /** Basic deserialization of a transcript including utterance tiers only. */
   @Test public void utterance()  throws Exception {    
     Schema schema = new Schema(
       "who", "turn", "utterance", "word",
@@ -1561,6 +1703,71 @@ public class TestEAFSerialization {
       fail(x.toString());
     }
 
+  }
+  
+  /** Two utterance tiers with the same PARTICIPANT attribute are disallowed
+      (this is a frequnt mistake - forgetting to change the PARTICIPANT on a new tier).  */
+  @Test public void participant_check()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("scribe", "Author").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("version_date", "Date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("lang", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Word tokens").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word-orthography", "Orthography")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true)
+      .setParentId("word").setParentIncludes(true));
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "participant_check.eaf")) };
+    
+    // create deserializer
+    EAFSerialization deserializer = new EAFSerialization();
+      
+    // general configuration
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    configuration.get("wordTierPattern").setValue("the-token-label");
+    assertEquals(12, deserializer.configure(configuration, schema).size());
+    
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals(4, defaultParameters.size());
+    assertEquals("utterance mapping 1", "utterance", 
+                 ((Layer)defaultParameters.get("tier0").getValue()).getId());    
+    assertEquals("utterance mapping 2", "utterance", 
+                 ((Layer)defaultParameters.get("tier1").getValue()).getId());    
+    assertEquals("orthography mapping", "word-orthography", 
+                 ((Layer)defaultParameters.get("tier2").getValue()).getId());
+    assertEquals("word mapping", "word", 
+                 ((Layer)defaultParameters.get("tier3").getValue()).getId());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+    
+    // build the graph
+    try {
+      Graph[] graphs = deserializer.deserialize();
+      fail("Two utterance tiers with same PARTICIPANT should fail to deserialize");
+    } catch (SerializationException x) {      
+      System.out.println(x.getMessage());
+      assertNotNull("Correct error type",
+                    x.getErrors().get(SerializationException.ErrorType.InvalidDocument));
+    }
   }
   
   /** Basic serialization works. */

@@ -1253,7 +1253,12 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
       = new HashMap<String,HashMap<String,String>>();
 
     Vector<Annotation> symbolicAnnotations = new Vector<Annotation>();
-    
+
+    // ensure that utterance tier participants are not repeated
+    HashMap<String,String> participantToUtteranceTierId = new HashMap<String,String>();
+    // ensure that turn tier participants are not repeated
+    HashMap<String,String> participantToTurnTierId = new HashMap<String,String>();
+
     // parse the XML file a tag at a time
     try {
       InputStream in = new FileInputStream(eafFile);
@@ -1312,6 +1317,33 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
             speaker = parser.getAttributeValue(null, "PARTICIPANT");
             if (speaker == null) speaker = tierId;
             layer = (Layer)mappings.get("tier"+tierIndex).getValue();
+            if (layer.getId().equals(schema.getUtteranceLayerId())) { // utterance layer
+              // ensure that utterance tier participants are not repeated
+              if (!participantToUtteranceTierId.containsKey(speaker)) {
+                participantToUtteranceTierId.put(speaker, tierId);
+              } else {
+                // two utterance tiers have the same participant, which is almost
+                // certainly a mistake
+                String message =
+                  "Both tiers \""+participantToUtteranceTierId.get(speaker)+"\""
+                  +" and \""+tierId+"\" have the same participant \""+speaker+"\""; 
+                if (errors == null) errors = new SerializationException(message);
+                errors.addError(SerializationException.ErrorType.InvalidDocument, message);
+              }
+            } else if (layer.getId().equals(schema.getTurnLayerId())) { // turn layer
+              // ensure that turn tier participants are not repeated
+              // ensure that utterance tier participants are not repeated
+              if (!participantToUtteranceTierId.containsKey(speaker)) {
+                participantToUtteranceTierId.put(speaker, tierId);
+              } else {
+                // two turn tiers have the same participant, which is almost
+                // certainly a mistake
+                String message = "Both tiers \""+participantToTurnTierId.get(speaker)+"\""
+                  +" and \""+tierId+"\" have the same participant \""+speaker+"\""; 
+                if (errors == null) errors = new SerializationException(message);
+                errors.addError(SerializationException.ErrorType.InvalidDocument, message);
+              }
+            }
             
           } else if (parser.getLocalName().equals("ALIGNABLE_ANNOTATION")) { // annotation
 
@@ -1505,7 +1537,7 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
         Annotation utterance = new Annotation(turn);
         utterance.setLayerId(utteranceLayer.getId())
           .setParentId(turn.getId())
-          .setConfidence(Constants.CONFIDENCE_MANUAL);;
+          .setConfidence(Constants.CONFIDENCE_MANUAL);
         if (!wordLayerMapped) { // no word layer 
           // ...which means the label must be the untokenized words
           // and so the turn's @participant must be the speaker name

@@ -11,7 +11,7 @@
   <artifactId>nzilbb.formatter.elan</artifactId>
   <name>nzilbb.formatter.elan</name>
   <description>Serializer/Deserializer for ELAN files.</description>
-  <version>1.9.1</version>
+  <version>1.9.3</version>
 
   <properties>
     <package.path>nzilbb/formatter/elan/</package.path>
@@ -25,7 +25,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4</version>
+      <version>1.4.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
