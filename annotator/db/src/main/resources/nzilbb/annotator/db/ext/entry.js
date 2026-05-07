@@ -80,17 +80,19 @@ function showForm(data) {
         // something like:
         // -43.607048, 172.467246 : -43.626186, 172.552390 : -43.681332, 172.552390
         const shape = data[name].split(":")
-              .filter(coord=>coord.includes(","))
+              .filter(coord=>coord.includes(",")) // discard invalid points
               .map(coord=>coord.trim().split(",")
                    .map(s=>Number(s)));
         const latitudes = shape.map(coord=>coord[0]);
         const longitudes = shape.map(coord=>coord[1]);
-        const centre = [
-          latitudes.reduce((a, b) => a + b) / latitudes.length,
-          longitudes.reduce((a, b) => a + b) / longitudes.length
-        ];
-        const targetCoordinates = L.latLng(centre[0], centre[1]);
-        map.setView(targetCoordinates, 14);
+        const bounds = [[
+          latitudes.reduce((a, b) => Math.min(a, b)),
+          longitudes.reduce((a, b) => Math.min(a, b))
+        ],[
+          latitudes.reduce((a, b) => Math.max(a, b)),
+          longitudes.reduce((a, b) => Math.max(a, b))
+        ]];
+        map.fitBounds(bounds);
         L.polygon(shape).addTo(map);
       } else { // point        
         const coords = data[name].split(",").map(s=>Number(s));
@@ -130,7 +132,6 @@ function showChildForm(childField, data) {
 }
 
 function addChildRow(childField, rows, model) {
-  console.log("addChildRow " + JSON.stringify(model));
   const tr = document.createElement("tr");    
   for (let name in childFields[childField]) {
     const td = document.createElement("td");
@@ -145,7 +146,6 @@ function addChildRow(childField, rows, model) {
 }
 
 function createFieldValue(valueElement, fieldDefinition, value) {
-  console.log(`createFieldValue(${fieldDefinition.field}, ${value})`);
   let span = document.createElement("span");
   span.className = fieldDefinition.type;
   span.id = `attribute-${fieldDefinition.field}`;
@@ -189,6 +189,10 @@ function createFieldValue(valueElement, fieldDefinition, value) {
       span.innerHTML = value;
     } else if (fieldDefinition.type == "boolean") {
       if (value == "true") span.innerHTML = "✔";
+    } else if (fieldDefinition.type == "date") {
+      if (value) span.innerHTML = new Date(value).toLocaleDateString();
+    } else if (fieldDefinition.type == "datetime") {
+      if (value) span.innerHTML = new Date(value).toLocaleString();
     } else {
       span.appendChild(document.createTextNode(value));
     }

@@ -174,7 +174,6 @@ function addChildRow(childField, rows, model) {
         "createChildEntry", table, field, entry, childField, JSON.stringify(model)),
               newModel => {
                 finishedLoading();
-                console.log("createChildEntry " + JSON.stringify(newModel));
                 if (newModel.DbTagger_error) {
                   document.getElementById("error").innerText = newModel.DbTagger_error;
                 } else {
@@ -188,7 +187,6 @@ function addChildRow(childField, rows, model) {
         "updateChildEntry", table, field, entry, childField, JSON.stringify(model)),
               newModel => {
                 finishedLoading();
-                console.log("updateChildEntry " + JSON.stringify(newModel));
                 if (newModel.DbTagger_error) {
                   document.getElementById("error").innerText = newModel.DbTagger_error;
                 } else {
@@ -216,7 +214,6 @@ function addChildRow(childField, rows, model) {
           "deleteChildEntry", table, field, entry, childField, JSON.stringify(model)),
                 error => {
                   finishedLoading();
-                  console.log("deleteChildEntry " + error);
                   if (error) {
                     document.getElementById("error").innerText = error;
                   } else {
