@@ -99,10 +99,12 @@ function showChildForm(childField, data) {
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   let tr = document.createElement("tr");
+  let showHeader = false; // if it's just a single field named after the parent-table field
   for (let name in childFields[childField]) {
     const th = document.createElement("th");
     th.appendChild(document.createTextNode(name));
     tr.appendChild(th);
+    if (name != childField) showHeader = true;
   } // next field
   // add columns for save/delete buttons
   const thSave = document.createElement("th");
@@ -111,8 +113,10 @@ function showChildForm(childField, data) {
   const thDelete = document.createElement("th");
   thDelete.className = "delete-column";
   tr.appendChild(thDelete);
-  thead.appendChild(tr);
-  table.appendChild(thead);
+  if (showHeader) {
+    thead.appendChild(tr);
+    table.appendChild(thead);
+  }
   
   const tbody = document.createElement("tbody");
   tbody.id = `rows-${childField}`;
@@ -158,7 +162,11 @@ function addChildRow(childField, rows, model) {
   btnSave.addEventListener("click", function(e) {    
     // load data from inputs into model 
     for (let name in childFields[childField]) {
-      model[name] = inputs[name].value;
+      if (inputs[name].type == "checkbox") {
+        model[name] = inputs[name].checked?"true":"false";
+      } else {
+        model[name] = inputs[name].value;
+      }
     }
     if (!model.serial) { // serial not set - it's a new row
       startLoading();
@@ -321,7 +329,8 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
   } else if (fieldDefinition.type == "datetime") {
     input.type = "datetime-local";
   } else if (fieldDefinition.type == "boolean" && !fieldDefinition.validation) {
-    fieldDefinition.validation = "|false|true";
+    input.type = "checkbox";
+    input.value = "true";
   } else if (fieldDefinition.type == "text") {
     input = document.createElement("textarea");
   } else if (fieldDefinition.type == "html") { 
@@ -348,7 +357,11 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
   input.name = fieldDefinition.field;
   input.id = `attribute-${fieldDefinition.field}`;
   input.placeholder = fieldDefinition.field;
-  input.value = value || "";
+  if (fieldDefinition.type == "boolean") { // it's a checkbox
+    input.checked = value == "true";
+  } else {
+    input.value = value || "";
+  }
   // show save button:
   input.addEventListener("keyup", saveButtonHandler);
   input.addEventListener("change", saveButtonHandler);
@@ -427,6 +440,8 @@ document.getElementById("btnSave").addEventListener("click", function (e) {
         }
         if (input.editor) {
           data[name] = input.editor.getData();
+        } else if (input.type == "checkbox") {
+          data[name] = input.checked?"true":"false";
         } else {
           data[name] = input.value;
         }

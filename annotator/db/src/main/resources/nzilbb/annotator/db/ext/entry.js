@@ -80,6 +80,7 @@ function showForm(data) {
         // something like:
         // -43.607048, 172.467246 : -43.626186, 172.552390 : -43.681332, 172.552390
         const shape = data[name].split(":")
+              .filter(coord=>coord.includes(","))
               .map(coord=>coord.trim().split(",")
                    .map(s=>Number(s)));
         const latitudes = shape.map(coord=>coord[0]);
@@ -106,13 +107,17 @@ function showChildForm(childField, data) {
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   let tr = document.createElement("tr");
+  let showHeader = false; // if it's just a single field named after the parent-table field
   for (let name in childFields[childField]) {
     const th = document.createElement("th");
     th.appendChild(document.createTextNode(name));
     tr.appendChild(th);
+    if (name != childField) showHeader = true;
   } // next field
-  thead.appendChild(tr);
-  table.appendChild(thead);
+  if (showHeader) {
+    thead.appendChild(tr);
+    table.appendChild(thead);
+  }
   
   const tbody = document.createElement("tbody");
   tbody.id = `rows-${childField}`;
@@ -130,7 +135,7 @@ function addChildRow(childField, rows, model) {
   for (let name in childFields[childField]) {
     const td = document.createElement("td");
     td.title = name;
-    td.className = name;    
+    td.className = name + " " + childFields[childField][name].type;    
     // create the UI component for the field value
     createFieldValue(
       td, childFields[childField][name], model[name] || "");
@@ -182,6 +187,8 @@ function createFieldValue(valueElement, fieldDefinition, value) {
       span.appendChild(a);
     } else if (fieldDefinition.type == "html") {
       span.innerHTML = value;
+    } else if (fieldDefinition.type == "boolean") {
+      if (value == "true") span.innerHTML = "✔";
     } else {
       span.appendChild(document.createTextNode(value));
     }

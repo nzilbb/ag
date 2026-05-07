@@ -22,6 +22,7 @@ label, legend {
 label:after, legend:after {
     content: ':';
 }
+textarea { field-sizing: content; }
 .field {
     display: flex;
     flex-direction: row;
@@ -38,8 +39,19 @@ label:after, legend:after {
 .field input, .field textarea {
     width: 99%;
 }
-.field td input, .field td textarea { /* child table*/
+.field th {
+    text-align: left;
+    white-space: nowrap;
+}
+.field td { /* child table*/
+    vertical-align: top;
+}
+.field td input { /* child table*/
     width: 90%;
+}
+.field td textarea { /* child table*/
+    width: 90%;
+    min-width: 200px;
 }
 .field input[type="number"] {
     width: 75px;
@@ -63,13 +75,14 @@ fieldset table {
 }
 
 th.save-column {
-    width: 20px;
+    width: 34px;
 }
 
 button img {
     width: 16px;
     height: 16px;
-    vertical-align: center;
+    vertical-align: middle;
+    vertical-align: center; /* for Firefox, ignored by Chrome */
 }
 
 footer {

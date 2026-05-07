@@ -27,8 +27,8 @@ label:after {
     display: flex;
     flex-direction: row;
 }
-.field:nth-child(odd)  { background: #EEEEEE; }
-.field:nth-child(even) { background: #FFFFFF; }
+.field:nth-child(odd),  fieldset table tr:nth-child(odd)  { background: #EEEEEE; }
+.field:nth-child(even), fieldset table tr:nth-child(even) { background: #FFFFFF; }
 .field label {
     width: 30%;
     display: block;
@@ -52,11 +52,18 @@ div.map {
 
 fieldset table {
     width: 100%;
+    border-collapse: collapse;
 }
 fieldset table th {
     text-align: left;
+    white-space: nowrap;
 }
-
+fieldset table td {
+    vertical-align: top;
+}
+fieldset table td.boolean {
+    text-align: center;
+}
 a img, button img {
     width: 16px;
     height: 16px;
