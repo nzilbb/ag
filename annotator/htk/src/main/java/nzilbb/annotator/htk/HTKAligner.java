@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2021-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -151,7 +151,7 @@ public class HTKAligner extends Annotator {
    * Getter for {@link #pauseMarkers}: Characters that mark pauses in speech in the transcript.
    * @return Characters that mark pauses in speech in the transcript.
    */
-  public String getPauseMarkers() { return pauseMarkers; }
+  @ApiEndpoint("view") public String getPauseMarkers() { return pauseMarkers; }
   /**
    * Setter for {@link #pauseMarkers}: Characters that mark pauses in speech in the transcript.
    * @param newPauseMarkers Characters that mark pauses in speech in the transcript.
@@ -168,7 +168,7 @@ public class HTKAligner extends Annotator {
    * Getter for {@link #noisePatterns}: Patterns on the noise layer that HTK should model for.
    * @return Patterns on the noise layer that HTK should model for.
    */
-  public String getNoisePatterns() { return noisePatterns; }
+  @ApiEndpoint("view") public String getNoisePatterns() { return noisePatterns; }
   /**
    * Setter for {@link #noisePatterns}: Patterns on the noise layer that HTK should model for.
    * @param newNoisePatterns Patterns on the noise layer that HTK should model for.
@@ -297,50 +297,6 @@ public class HTKAligner extends Annotator {
    * @param newSampleRate Sample rate in Hz to resample to, if any.
    */
   public HTKAligner setSampleRate(Integer newSampleRate) { sampleRate = newSampleRate; return this; }
-  
-  /**
-   * Regular expression for matching the participant ID of the participant in the left
-   * audio channel. 
-   * @see #getLeftPattern()
-   * @see #setLeftPattern(String)
-   */
-  protected String leftPattern = "";
-  /**
-   * Getter for {@link #leftPattern}: Regular expression for matching the participant ID
-   * of the participant in the left audio channel. 
-   * @return Regular expression for matching the participant ID of the participant in the
-   * left audio channel. 
-   */
-  public String getLeftPattern() { return leftPattern; }
-  /**
-   * Setter for {@link #leftPattern}: Regular expression for matching the participant ID
-   * of the participant in the left audio channel. 
-   * @param newLeftPattern Regular expression for matching the participant ID of the
-   * participant in the left audio channel. 
-   */
-  public HTKAligner setLeftPattern(String newLeftPattern) { leftPattern = newLeftPattern; return this; }
-  
-  /**
-   * Regular expression for matching the participant ID of the participant in the right
-   * audio channel. 
-   * @see #getRightPattern()
-   * @see #setRightPattern(String)
-   */
-  protected String rightPattern = "";
-  /**
-   * Getter for {@link #rightPattern}: Regular expression for matching the participant ID
-   * of the participant in the right audio channel. 
-   * @return Regular expression for matching the participant ID of the participant in the
-   * right audio channel. 
-   */
-  public String getRightPattern() { return rightPattern; }
-  /**
-   * Setter for {@link #rightPattern}: Regular expression for matching the participant ID
-   * of the participant in the right audio channel. 
-   * @param newRightPattern Regular expression for matching the participant ID of the
-   * participant in the right audio channel. 
-   */
-  public HTKAligner setRightPattern(String newRightPattern) { rightPattern = newRightPattern; return this; }
   
   /**
    * Layer ID of the primary transcription token layer.
@@ -503,7 +459,7 @@ public class HTKAligner extends Annotator {
    * which the utterance is ignored. 
    * @return Percentage of overlap with other speech, above which the utterance is ignored.
    */
-  public Integer getOverlapThreshold() { return overlapThreshold; }
+  @ApiEndpoint("view") public Integer getOverlapThreshold() { return overlapThreshold; }
   /**
    * Setter for {@link #overlapThreshold}: Percentage of overlap with other speech, above
    * which the utterance is ignored. 
@@ -551,7 +507,7 @@ public class HTKAligner extends Annotator {
    * training/alignment is finished. 
    * @return What should happen with working files after training/alignment is finished.
    */
-  public Integer getCleanupOption() { return cleanupOption; }
+  @ApiEndpoint("view") public Integer getCleanupOption() { return cleanupOption; }
   /**
    * Setter for {@link #cleanupOption}: What should happen with working files after
    * training/alignment is finished. 
@@ -597,6 +553,66 @@ public class HTKAligner extends Annotator {
   public HTKAligner setDiscOutput(boolean newDiscOutput) { discOutput = newDiscOutput; return this; }
   
   /**
+   * Layer ID of a transcript attribute that may contain the
+   * participant ID of the speaker in the left channel of a stereo
+   * recording, if participants are on different channels. 
+   * @see #getLeftChannelParticipantLayerId()
+   * @see #setLeftChannelParticipantLayerId(String)
+   */
+  protected String leftChannelParticipantLayerId;
+  /**
+   * Getter for {@link #leftChannelParticipantLayerId}: Layer ID of a
+   * transcript attribute that may contain the participant ID of the
+   * speaker in the left channel of a stereo recording, if
+   * participants are on different channels. 
+   * @return Layer ID of a transcript attribute that may contain the
+   * participant ID of the speaker in the left channel of a stereo
+   * recording, if participants are on different channels. 
+   */
+  public String getLeftChannelParticipantLayerId() { return leftChannelParticipantLayerId; }
+  /**
+   * Setter for {@link #leftChannelParticipantLayerId}: Layer ID of a
+   * transcript attribute that may contain the participant ID of the
+   * speaker in the left channel of a stereo recording, if
+   * participants are on different channels. 
+   * @param newLeftChannelParticipantLayerId Layer ID of a transcript
+   * attribute that may contain the participant ID of the speaker in
+   * the left channel of a stereo recording, if participants are on
+   * different channels. 
+   */
+  public HTKAligner setLeftChannelParticipantLayerId(String newLeftChannelParticipantLayerId) { leftChannelParticipantLayerId = newLeftChannelParticipantLayerId; return this; }
+
+  /**
+   * Layer ID of a transcript attribute that may contain the
+   * participant ID of the speaker in the right channel of a stereo
+   * recording, if participants are on different channels. 
+   * @see #getRightChannelParticipantLayerId()
+   * @see #setRightChannelParticipantLayerId(String)
+   */
+  protected String rightChannelParticipantLayerId;
+  /**
+   * Getter for {@link #rightChannelParticipantLayerId}: Layer ID of a
+   * transcript attribute that may contain the participant ID of the
+   * speaker in the right channel of a stereo recording, if
+   * participants are on different channels. 
+   * @return Layer ID of a transcript attribute that may contain the
+   * participant ID of the speaker in the right channel of a stereo
+   * recording, if participants are on different channels. 
+   */
+   public String getRightChannelParticipantLayerId() { return rightChannelParticipantLayerId; }
+  /**
+   * Setter for {@link #rightChannelParticipantLayerId}: Layer ID of a
+   * transcript attribute that may contain the participant ID of the
+   * speaker in the right channel of a stereo recording, if
+   * participants are on different channels. 
+   * @param newRightChannelParticipantLayerId Layer ID of a transcript
+   * attribute that may contain the participant ID of the speaker in
+   * the right channel of a stereo recording, if participants are on
+   * different channels. 
+   */
+  public HTKAligner setRightChannelParticipantLayerId(String newRightChannelParticipantLayerId) { rightChannelParticipantLayerId = newRightChannelParticipantLayerId; return this; }
+
+  /**
    * Default constructor.
    */
   public HTKAligner() {
@@ -604,6 +620,12 @@ public class HTKAligner extends Annotator {
       new Schema(
         "who", "turn", "utterance", "word",
         new Layer("transcript_language", "Overall Language")
+        .setAlignment(Constants.ALIGNMENT_NONE)
+        .setPeers(false).setPeersOverlap(false).setSaturated(true),
+        new Layer("transcript_leftChannel", "Left Channel Speaker")
+        .setAlignment(Constants.ALIGNMENT_NONE)
+        .setPeers(false).setPeersOverlap(false).setSaturated(true),
+        new Layer("transcript_rightChannel", "Right Channel Speaker")
         .setAlignment(Constants.ALIGNMENT_NONE)
         .setPeers(false).setPeersOverlap(false).setSaturated(true),
         new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
@@ -684,7 +706,9 @@ public class HTKAligner extends Annotator {
         "scripts/mktri.ded", "scripts/mktri.led", "scripts/proto", 
         "scripts/sil.hed", "scripts/tree.hed",
         // p2fa files
-        "p2fa/model/11025/config", "p2fa/model/11025/hmmdefs", "p2fa/model/11025/macros", 
+        "p2fa/model/11025/config",
+        "p2fa/model/11025/configleft", "p2fa/model/11025/configright",
+        "p2fa/model/11025/hmmdefs", "p2fa/model/11025/macros", 
         "p2fa/model/monophones", "p2fa/readme.txt"
       };
       for (String file : aFiles) {
@@ -929,10 +953,10 @@ public class HTKAligner extends Annotator {
       phoneAlignmentLayerId = null;
     if (scoreLayerId != null && scoreLayerId.length() == 0)
       scoreLayerId = null;
-    if (leftPattern != null && leftPattern.length() == 0)
-      leftPattern = null;
-    if (rightPattern != null && rightPattern.length() == 0)
-      rightPattern = null;
+    if (leftChannelParticipantLayerId != null && leftChannelParticipantLayerId.length() == 0)
+      leftChannelParticipantLayerId = null;
+    if (rightChannelParticipantLayerId != null && rightChannelParticipantLayerId.length() == 0)
+      rightChannelParticipantLayerId = null;
     if (pauseMarkers != null && pauseMarkers.length() == 0)
       pauseMarkers = null;
     if (noisePatterns != null && noisePatterns.length() == 0)
@@ -953,6 +977,14 @@ public class HTKAligner extends Annotator {
         this, "Pronunciation layer not found: " + pronunciationLayerId);
     if (noiseLayerId != null && schema.getLayer(noiseLayerId) == null)
       throw new InvalidConfigurationException(this, "Noise layer not found: " + noiseLayerId);
+    if (leftChannelParticipantLayerId != null
+        && schema.getLayer(leftChannelParticipantLayerId) == null)
+      throw new InvalidConfigurationException(
+        this, "Left channel participant layer not found: " + leftChannelParticipantLayerId);
+    if (rightChannelParticipantLayerId != null
+        && schema.getLayer(rightChannelParticipantLayerId) == null)
+      throw new InvalidConfigurationException(
+        this, "Right channel participant layer not found: " + rightChannelParticipantLayerId);
 
     Layer utteranceTagLayer = null;
     if (utteranceTagLayerId != null) {
@@ -1200,6 +1232,12 @@ public class HTKAligner extends Annotator {
       requiredLayers.add(pronunciationLayerId);
     } else {
       throw new InvalidConfigurationException(this, "Pronunciation layer is not set.");
+    }
+    if (leftChannelParticipantLayerId != null) {
+      requiredLayers.add(leftChannelParticipantLayerId);
+    }
+    if (rightChannelParticipantLayerId != null) {
+      requiredLayers.add(rightChannelParticipantLayerId);
     }
     
     if (noiseLayerId != null)
@@ -1610,6 +1648,37 @@ public class HTKAligner extends Annotator {
     }
   } // end of transformTranscripts()
 
+  /**
+   * Determines whether the speech for the given utterance is on a
+   * specific audio channel. 
+   * @param fragment The fragment with the speech.
+   * @return 0 if the speech is on the left channel, 1 if it's on the
+   * right channel, and -1 if all channels should be used. 
+   */
+  public int channelForUtterance(Graph fragment) {
+    if (leftChannelParticipantLayerId == null && rightChannelParticipantLayerId == null) {
+      return -1;
+    }
+    Annotation fragmentParticipant = fragment.first(
+      fragment.getSchema().getParticipantLayerId());
+    if (fragmentParticipant == null) return -1;
+    if (leftChannelParticipantLayerId != null) {
+      Annotation leftChannelParticipant = fragment.first(leftChannelParticipantLayerId);
+      if (leftChannelParticipant != null
+          && leftChannelParticipant.getLabel().equals(fragmentParticipant.getLabel())) {
+        return 0;
+      }
+    }
+    if (rightChannelParticipantLayerId != null) {
+      Annotation rightChannelParticipant = fragment.first(rightChannelParticipantLayerId);
+      if (rightChannelParticipant != null
+          && rightChannelParticipant.getLabel().equals(fragmentParticipant.getLabel())) {
+        return 1;
+      }
+    }
+    return -1;
+  } // end of channelForUtterance()
+  
   // Bunch of files and resources needed by HTK:
 
   /** The working directory for this training session. */
@@ -1650,10 +1719,6 @@ public class HTKAligner extends Annotator {
   protected HashMap<String,String> htPauseMarkers;
   /** Compiled noise patterns */
   protected HashMap<String,Pattern> noisePatternsMap;
-  /** Left channel participant pattern */
-  protected Pattern leftPatternRegex;
-  /** Right channel participant pattern */
-  protected Pattern rightPatternRegex;
   /** Triphone list file */
   protected File triphoneListFile;
   /** Triphone MLF */
@@ -1684,11 +1749,10 @@ public class HTKAligner extends Annotator {
     phonemesWithSpMlf = null;
     htPauseMarkers = null;
     noisePatternsMap = null;
-    leftPatternRegex = null;
-    rightPatternRegex = null;
     triphoneListFile = null;
     triphonesMlf = null;
     statsFile = null;
+    audioConfig = null;
     // load htkPath from config file
     getConfig();
   } // end of reset()
@@ -1823,9 +1887,6 @@ public class HTKAligner extends Annotator {
         } // next pattern
       }
       
-      leftPatternRegex = leftPattern == null?null:Pattern.compile(leftPattern);
-      rightPatternRegex = rightPattern == null?null:Pattern.compile(rightPattern);
-      
       // start MLF...
       wordsMlf = new File(sessionWorkingDir, sessionName + "_words.mlf");
       final BufferedWriter mlfOut = new BufferedWriter(
@@ -1875,7 +1936,10 @@ public class HTKAligner extends Annotator {
             }            
             
             // simultaneous speech?
-            if (overlapThreshold != null) {
+            // (don't ignore simultaneous speech for fragments from a specific channel,
+            //  that's why you split speakers into separate channels!)
+            if (overlapThreshold != null // an overlap threshold is set
+                && channelForUtterance(fragment) < 0) { // no specific channel
               if (getStore() == null) {
                 setStatus("No access to graph store, so simultaneous speech cannot be detected.");
               } else {
@@ -2170,6 +2234,8 @@ public class HTKAligner extends Annotator {
     return bJustAddedNoise;
   } // end of addWordToUtterance()
   
+  File audioConfig = null; // expose to unit testing
+  
   /**
    * Extracts audio features for the given utterance.
    * @param fragment
@@ -2184,20 +2250,7 @@ public class HTKAligner extends Annotator {
       double dStartTime = fragment.getStart().getOffset();
       if (dStartTime < 0) dStartTime = 0;
       double dEndTime = fragment.getEnd().getOffset();
-      
-      String channel = "";
-      if (leftPatternRegex != null || rightPatternRegex != null) {
-        if (leftPatternRegex != null
-            && leftPatternRegex.matcher(
-              fragment.first(schema.getUtteranceLayerId()).getLabel()).matches()) {
-          channel = "left";
-        } else if (rightPatternRegex != null 
-                   && rightPatternRegex.matcher(
-                     fragment.first(schema.getUtteranceLayerId()).getLabel()).matches()) {
-          channel = "right";
-        }
-      }
-      
+            
       String fileUrl = fragment.getMediaProvider().getMedia(
         "", "audio/wav" + (sampleRate == null?"":"; samplerate="+sampleRate));
       File fTemp = new File(new URI(fileUrl));
@@ -2210,19 +2263,22 @@ public class HTKAligner extends Annotator {
       }
       
       // convert WAV to MFCC
+      audioConfig = null;
+      int channel = channelForUtterance(fragment);
+      if (channel >= 0) setStatus(fragment.getId() + " : "+(channel==0?"left":"right")+" channel only...");
       int r = 99;
-      File fConfig = null;
       setStatus(
         "Extracting features from \"" + fWav.getName() + "\" to \"" + fTarget.getName() + "\""
-        +(channel.length()==0?"":" - channel: " + channel));
+        +(channel<0?"":" - channel: " + (channel==0?"left":"right")));
+      String channelSuffix = (channel<0?"":(channel==0?"left":"right"));
       if (useP2FA) {
-        fConfig = new File(getP2FAModelDirectory(), "config");
-      } else if (channel.length() != 0) {
+        audioConfig = new File(getP2FAModelDirectory(), "config"+channelSuffix);
+      } else if (channel >= 0) {
         // need to pass a config file for specifying the channel to use
-        fConfig = new File(sessionWorkingDir, "config"+channel);
+        audioConfig = new File(sessionWorkingDir, "config"+channelSuffix);
       }
-      if (fConfig != null) {
-        r = htk.HCopy(fConfig, "WAV", fWav, fTarget);
+      if (audioConfig != null) {
+        r = htk.HCopy(audioConfig, "WAV", fWav, fTarget);
       } else {
         r = htk.HCopy("WAV", fWav, fTarget);
       }

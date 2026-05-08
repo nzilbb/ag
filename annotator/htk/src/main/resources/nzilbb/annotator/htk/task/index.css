@@ -58,6 +58,18 @@ progress {
     width: 100%;
 }
 
+.section {
+    padding: 10px;
+}
+.section[open] {
+    border: 1px solid silver;
+    border-radius: 10px;
+}
+.section summary {
+    font-weight: bold;
+    margin-left: -7px;
+}
+
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
     .field { flex-direction: column; }

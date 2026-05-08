@@ -123,8 +123,8 @@ public class TestHTKAligner {
       +"&overlapThreshold=5"
       +"&cleanupOption=75"
       +"&noisePatterns=laugh.* unclear .*noise.*"
-      +"&leftPattern="
-      +"&rightPattern="
+      +"&leftChannelParticipantLayerId="
+      +"&rightChannelParticipantLayerId="
       +"&pauseMarkers=-");
     
     // layers are created as required
@@ -140,8 +140,8 @@ public class TestHTKAligner {
       +"&overlapThreshold=5"
       +"&cleanupOption=75"
       +"&noisePatterns=laugh.* unclear .*noise.*"
-      +"&leftPattern="
-      +"&rightPattern="
+      +"&leftChannelParticipantLayerId="
+      +"&rightChannelParticipantLayerId="
       +"&pauseMarkers=-");
     Layer layer = annotator.getSchema().getLayer("utterance_htk");
     assertNotNull("utterance_htk layer created", layer);
@@ -174,8 +174,8 @@ public class TestHTKAligner {
         +"&overlapThreshold=5"
         +"&cleanupOption=75"
         +"&noisePatterns=laugh.* unclear .*noise.*"
-        +"&leftPattern="
-        +"&rightPattern="
+        +"&leftChannelParticipantLayerId="
+        +"&rightChannelParticipantLayerId="
         +"&pauseMarkers=-");
       fail("Should fail with nonexistent orthographyLayerId");
     } catch (InvalidConfigurationException x) {
@@ -193,8 +193,8 @@ public class TestHTKAligner {
         +"&overlapThreshold=5"
         +"&cleanupOption=75"
         +"&noisePatterns=laugh.* unclear .*noise.*"
-        +"&leftPattern="
-        +"&rightPattern="
+        +"&leftChannelParticipantLayerId="
+        +"&rightChannelParticipantLayerId="
         +"&pauseMarkers=-");
       fail("Should fail with nonexistent pronunciationLayerId");
     } catch (InvalidConfigurationException x) {
@@ -212,16 +212,57 @@ public class TestHTKAligner {
         +"&overlapThreshold=5"
         +"&cleanupOption=75"
         +"&noisePatterns=laugh.* unclear .*noise.*"
-        +"&leftPattern="
-        +"&rightPattern="
+        +"&leftChannelParticipantLayerId="
+        +"&rightChannelParticipantLayerId="
         +"&pauseMarkers=-");
       fail("Should fail with nonexistent noiseLayerId");
     } catch (InvalidConfigurationException x) {
+    }
+    try {
+      annotator.setTaskParameters(
+        "orthographyLayerId=word"
+        +"&pronunciationLayerId=phonemes"
+        +"&noiseLayerId="
+        +"&utteranceTagLayerId=htk"
+        +"&participantTagLayerId="
+        +"&wordAlignmentLayerId=word"
+        +"&phoneAlignmentLayerId=segment"
+        +"&scoreLayerId="
+        +"&overlapThreshold=5"
+        +"&cleanupOption=75"
+        +"&noisePatterns=laugh.* unclear .*noise.*"
+        +"&leftChannelParticipantLayerId=nonexistent" // nonexistent
+        +"&rightChannelParticipantLayerId="
+        +"&pauseMarkers=-");
+      fail("Should fail with nonexistent leftChannelParticipantLayerId");
+    } catch (InvalidConfigurationException x) {
+      System.out.println(x.toString());
+    }
+    try {
+      annotator.setTaskParameters(
+        "orthographyLayerId=word"
+        +"&pronunciationLayerId=phonemes"
+        +"&noiseLayerId="
+        +"&utteranceTagLayerId=htk"
+        +"&participantTagLayerId="
+        +"&wordAlignmentLayerId=word"
+        +"&phoneAlignmentLayerId=segment"
+        +"&scoreLayerId="
+        +"&overlapThreshold=5"
+        +"&cleanupOption=75"
+        +"&noisePatterns=laugh.* unclear .*noise.*"
+        +"&leftChannelParticipantLayerId="
+        +"&rightChannelParticipantLayerId=nonexistent" // nonexistent
+        +"&pauseMarkers=-");
+      fail("Should fail with nonexistent rightChannelParticipantLayerId");
+    } catch (InvalidConfigurationException x) {
+      System.out.println(x.toString());
     }
   }
   
   @Test public void P2FA() throws Exception {
     annotator.setSessionName("P2FA");
+    // annotator.getStatusObservers().add(s -> System.out.println(s));
     
     Graph f = fragment();
     Schema schema = f.getSchema();
@@ -241,8 +282,8 @@ public class TestHTKAligner {
       +"&overlapThreshold="
       +"&cleanupOption=100"
       +"&noisePatterns=laugh.* unclear .*noise.*"
-      +"&leftPattern="
-      +"&rightPattern="
+      +"&leftChannelParticipantLayerId=leftChannel"
+      +"&rightChannelParticipantLayerId=rightChannel"
       +"&pauseMarkers=-"
       +"&discOutput=on");
     Layer layer = annotator.getSchema().getLayer("utterance_htk");
@@ -255,6 +296,10 @@ public class TestHTKAligner {
                  "Transcript", annotator.getMainUtteranceGrouping());
     assertEquals("Other-Participant grouping",
                  "Transcript", annotator.getOtherUtteranceGrouping());
+    assertEquals("Left-channel-Participant layer",
+                 "leftChannel", annotator.getLeftChannelParticipantLayerId());
+    assertEquals("Right-channel-Participant layer",
+                 "rightChannel", annotator.getRightChannelParticipantLayerId());
 
     final Vector<Graph> results = new Vector<Graph>();
     annotator.transformFragments(
@@ -288,6 +333,10 @@ public class TestHTKAligner {
       }
     } // next phone    
     assertEquals("Last phone end", Double.valueOf(11.76), phones[5].getEnd().getOffset());
+    
+    // aligner should have asked for the right channel
+    assertEquals("Requested right channel only",
+                 "configright", annotator.audioConfig.getName());
   }   
 
   @Test public void trainAndAlign() throws Exception {
@@ -310,8 +359,8 @@ public class TestHTKAligner {
       +"&overlapThreshold="
       +"&cleanupOption=100"
       +"&noisePatterns=laugh.* unclear .*noise.*"
-      +"&leftPattern="
-      +"&rightPattern="
+      +"&leftChannelParticipantLayerId="
+      +"&rightChannelParticipantLayerId="
       +"&pauseMarkers=-"
       +"&discOutput=on");
     Layer layer = annotator.getSchema().getLayer("utterance_htk");
@@ -351,6 +400,8 @@ public class TestHTKAligner {
                      phones[p-1].getEnd(), phones[p].getStart());
       }
     } // next phone    
+    // aligner should have asked for no particular channel
+    assertNull("Requested no particular channel", annotator.audioConfig);
   }   
 
   @Test public void graphTransform() throws Exception {
@@ -375,8 +426,8 @@ public class TestHTKAligner {
       +"&overlapThreshold="
       +"&cleanupOption=100"
       +"&noisePatterns=laugh.* unclear .*noise.*"
-      +"&leftPattern="
-      +"&rightPattern="
+      +"&leftChannelParticipantLayerId="
+      +"&rightChannelParticipantLayerId="
       +"&pauseMarkers=-"
       +"&discOutput=on");
     Layer layer = annotator.getSchema().getLayer("utterance_htk");
@@ -452,8 +503,8 @@ public class TestHTKAligner {
       +"&overlapThreshold="
       +"&cleanupOption=100"
       +"&noisePatterns=laugh.* unclear .*noise.*"
-      +"&leftPattern="
-      +"&rightPattern="
+      +"&leftChannelParticipantLayerId="
+      +"&rightChannelParticipantLayerId="
       +"&pauseMarkers=-");
     Layer layer = annotator.getSchema().getLayer("htk_utterance");
     assertNotNull("htk_utterance layer created", layer);
@@ -544,6 +595,12 @@ public class TestHTKAligner {
   public static Graph graph() throws Exception {
     Schema schema = new Schema(
       "participant", "turn", "utterance", "word",
+      new Layer("leftChannel", "Participant in Left Channel")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
+      new Layer("rightChannel", "Participant in Right Channel")
+      .setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(false).setPeersOverlap(false).setSaturated(true),
       new Layer("participant", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
       .setPeers(true).setPeersOverlap(true).setSaturated(true),
       new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
@@ -573,6 +630,9 @@ public class TestHTKAligner {
     Anchor end = g.getOrCreateAnchorAt(15, Constants.CONFIDENCE_MANUAL);
     g.addAnnotation(
       new Annotation().setLayerId("participant").setLabel("someone")
+      .setStart(start).setEnd(end));
+    g.addAnnotation(
+      new Annotation().setLayerId("rightChannel").setLabel("someone")
       .setStart(start).setEnd(end));
     Annotation turn = g.addAnnotation(
       new Annotation().setLayerId("turn").setLabel("someone")

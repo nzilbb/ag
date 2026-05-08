@@ -62,6 +62,19 @@ getSchema(s => {
         noiseLayerId.value = "noise";
     }
               
+    const leftChannelParticipantLayerId = document.getElementById("leftChannelParticipantLayerId");
+    addLayerOptions(
+        leftChannelParticipantLayerId, schema,
+        // the word layer, or word tag layers
+        layer => layer.parentId == schema.root.id && layer.alignment == 0
+        && layer.id != schema.participantLayerId && layer.id != "corpus" && layer.id != "episode");
+    const rightChannelParticipantLayerId = document.getElementById("rightChannelParticipantLayerId");
+    addLayerOptions(
+        rightChannelParticipantLayerId, schema,
+        // the word layer, or word tag layers
+        layer => layer.parentId == schema.root.id && layer.alignment == 0
+        && layer.id != schema.participantLayerId && layer.id != "corpus" && layer.id != "episode");
+
     // populate output layer select options
 
     const wordAlignmentLayerId = document.getElementById("wordAlignmentLayerId");
@@ -138,12 +151,13 @@ getSchema(s => {
                 // set initial values of properties in the form above
                 // (this assumes bean property names match input id's in the form above)
                 for (const [key, value] of parameters) {
-                    const element = document.getElementById(key)
+                  const element = document.getElementById(key)
+                  if (element) {
                     try {
                         element.value = value;
                     } catch (x) {}
                     if (element.value != value) { // layer that hasn't been created yet
-                        try {
+                      try {
                             // add the layer to the list
                             var layerOption = document.createElement("option");
                             layerOption.appendChild(document.createTextNode(value));
@@ -152,6 +166,7 @@ getSchema(s => {
                             element.selectedIndex = element.children.length - 1;
                         } catch (x) {}
                     }
+                  } // the element exists
                 }
                 // set the checkboxes
                 document.getElementById("ignoreAlignmentStatuses").checked
@@ -164,9 +179,6 @@ getSchema(s => {
                 if (document.getElementById("useP2FA").checked) {
                     document.getElementById("sampleRate").disabled
                         = document.getElementById("sampleRate").checked
-                    // and can't split participants by channel
-                        = document.getElementById("leftPattern").disabled
-                        = document.getElementById("rightPattern").disabled
                     // and no need for grouping of utterances
                         = document.getElementById("mainUtteranceGrouping").disabled
                         = document.getElementById("otherUtteranceGrouping").disabled
@@ -232,8 +244,6 @@ document.getElementById("useP2FA").onchange = function(e) {
     // if P2FA models are used, 11025Hz must be used
     document.getElementById("sampleRate").disabled
     // and can't split participants by channel
-        = document.getElementById("leftPattern").disabled
-        = document.getElementById("rightPattern").disabled
         = document.getElementById("scoreLayerId").disabled
         = document.getElementById("useP2FA").checked;
     document.getElementById("sampleRate").checked

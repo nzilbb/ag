@@ -41,10 +41,18 @@
   <dt> useP2FA </dt> <dd> Whether to use pre-trained P2FA models or not. </dd>
   <dt> sampleRate </dt> <dd> (optional) "11025" to downsample audio to 11,025Hz before
     alignment. </dd>
-  <dt> leftPattern </dt> <dd> Regular expression for matching the ID of the
-    participant in the left audio channel. </dd>
-  <dt> rightPattern </dt> <dd> Regular expression for matching the ID of the
-    participant in the right audio channel. </dd>
+  <dt> leftChannelParticipantLayerId </dt> <dd> Optional input layer for specifiying a
+    transcript attribute that may name the participant on the left channel of a stereo
+    recording. If the participant of a given utterance is named in this attribute,
+    then only the left channel (channel 0) will be used for forced alignment.
+    If an utterance's participant is not identified by this or
+    rightChannelParticipantLayerId, then all channels are used. </dd>
+  <dt> rightChannelParticipantLayerId </dt> <dd> Optional input layer for specifiying a
+    transcript attribute that may name the participant on the right channel of a stereo
+    recording. If the participant of a given utterance is named in this attribute,
+    then only the right channel (channel 1) will be used for forced alignment.
+    If an utterance's participant is not identified by this or
+    leftChannelParticipantLayerId, then all channels are used. </dd>
   <dt> ignoreAlignmentStatuses </dt> <dd> Set any non-empty value of this parameter to
     overwrite manual alignments, otherwise omit this parameter.  </dd>
   <dt> wordAlignmentLayerId </dt> <dd> Output layer on which word alignments are
