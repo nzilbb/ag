@@ -180,7 +180,9 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
                  +" COMMENT 'Name of the field',"
                  +" type VARCHAR(30) NOT NULL DEFAULT 'string'"
                  +" COMMENT 'Type of the field, e.g. string, text, richtext, number, etc.',"
-                 +" validation VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''"
+                 +" default_value VARCHAR(202) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''"
+                 +" COMMENT 'Default value for new rows',"
+                 +" validation VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''"
                  +" COMMENT 'Constraints on values',"
                  +" ordinal INTEGER NOT NULL DEFAULT 0"
                  +" COMMENT 'Determines order between fields',"
@@ -404,8 +406,8 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
         try(PreparedStatement sqlInsertField = rdb.prepareStatement(
              sqlx.apply(
                "INSERT INTO "+getAnnotatorId()+"_field"
-               +" (table_id, field, type, validation, ordinal)"
-               +" VALUES (?,?,?,'',?)"))) {
+               +" (table_id, field, type, ordinal)"
+               +" VALUES (?,?,?,?)"))) {
           sqlInsertField.setInt(1, tableId);
           int c = 1;
           for (String column : fieldNames.split(splitPattern)) {
@@ -680,7 +682,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
    */
   @ApiEndpoint("admin") public String createField(
     String table, String field, String type) throws SQLException {
-    return createField(table, field, type, "");
+    return createField(table, field, type, "", "");
   }
   
   /**
@@ -688,11 +690,26 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
    * @param table The table ID.
    * @param field The name of the field.
    * @param type The field type.
+   * @param defaultValue The default value for new rows.
+   * @return An error message if creation failed. Otherwise, an empty string.
+   */
+  @ApiEndpoint("admin") public String createField(
+    String table, String field, String type, String defaultValue)
+    throws SQLException {
+    return createField(table, field, type, defaultValue, "");
+  }
+  
+  /**
+   * Create a new field in the given table.
+   * @param table The table ID.
+   * @param field The name of the field.
+   * @param type The field type.
+   * @param defaultValue The default value for new rows.
    * @param validation The constraints on the field values.
    * @return An error message if creation failed. Otherwise, an empty string.
    */
   @ApiEndpoint("admin") public String createField(
-    String table, String field, String type, String validation)
+    String table, String field, String type, String defaultValue, String validation)
     throws SQLException {
     try (Connection rdb = newConnection()) {
       // find the table
@@ -728,12 +745,14 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
         try (PreparedStatement sqlInsertFieldRow = rdb.prepareStatement(
                sqlx.apply(
                  "INSERT INTO "+getAnnotatorId()+"_field" // TODO ordinal
-                 +" (table_id, field, type, validation, ordinal) VALUES (?,?,?,?,?)"))) {
+                 +" (table_id, field, type, default_value, validation, ordinal)"
+                 +" VALUES (?,?,?,?,?,?)"))) {
           sqlInsertFieldRow.setInt(1, tableId);
           sqlInsertFieldRow.setString(2, field);
           sqlInsertFieldRow.setString(3, type);
-          sqlInsertFieldRow.setString(4, validation);
-          sqlInsertFieldRow.setInt(5, ordinal);
+          sqlInsertFieldRow.setString(4, defaultValue);
+          sqlInsertFieldRow.setString(5, validation);
+          sqlInsertFieldRow.setInt(6, ordinal);
           sqlInsertFieldRow.executeUpdate();
 
           if ("child-table".equals(type)) { // 1-to-n child table instead of field
@@ -791,7 +810,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
             // insert field row succeeded, so add the field to the table
             String columnType
               = "VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL";
-            if ("text".equals(type) || "richtext".equals(type)) { // TEXT
+            if ("text".equals(type) || "html".equals(type) || "geo-location".equals(type)) {
               columnType = "TEXT";
             }
             try (PreparedStatement sqlAlterTable = rdb.prepareStatement(
@@ -848,6 +867,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
               LinkedHashMap<String,String> field = new LinkedHashMap<String,String>();
               field.put("field", rsFields.getString("field"));
               field.put("type", rsFields.getString("type"));
+              field.put("defaultValue", rsFields.getString("default_value"));
               field.put("validation", rsFields.getString("validation"));
               fields.add(field);
             } // next field
@@ -877,18 +897,32 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
    * @return An error message if update failed. Otherwise, an empty string.
    */
   @ApiEndpoint("admin") public String updateField(String table, String field, String type) throws SQLException {
-    return updateField(table, field, type, "");
+    return updateField(table, field, type, "","");
   }
   /**
    * Update an existing field in the given table.
    * @param table The table ID.
    * @param field The name of the field.
    * @param type The field type.
+   * @param defaultValue The default value for new rows.
+   * @return An error message if update failed. Otherwise, an empty string.
+   */
+  @ApiEndpoint("admin") public String updateField(
+    String table, String field, String type, String defaultValue)
+    throws SQLException {
+    return updateField(table, field, type, defaultValue,"");
+  }
+  /**
+   * Update an existing field in the given table.
+   * @param table The table ID.
+   * @param field The name of the field.
+   * @param type The field type.
+   * @param defaultValue The default value for new rows.
    * @param validation The constraints on the field values.
    * @return An error message if update failed. Otherwise, an empty string.
    */
   @ApiEndpoint("admin") public String updateField(
-    String table, String field, String type, String validation)
+    String table, String field, String type, String defaultValue, String validation)
     throws SQLException {
     try (Connection rdb = newConnection()) {
       // find the table
@@ -902,18 +936,20 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
         try (PreparedStatement sqlUpdateFieldRow = rdb.prepareStatement(
                sqlx.apply(
                  "UPDATE "+getAnnotatorId()+"_field" // TODO ordinal
-                 +" SET type = ?, validation = ? WHERE table_id = ? AND field = ?"))) {
+                 +" SET type = ?, default_value = ?, validation = ?"
+                 +" WHERE table_id = ? AND field = ?"))) {
           sqlUpdateFieldRow.setString(1, type);
-          sqlUpdateFieldRow.setString(2, validation);
-          sqlUpdateFieldRow.setInt(3, tableId);
-          sqlUpdateFieldRow.setString(4, field);
+          sqlUpdateFieldRow.setString(2, defaultValue);
+          sqlUpdateFieldRow.setString(3, validation);
+          sqlUpdateFieldRow.setInt(4, tableId);
+          sqlUpdateFieldRow.setString(5, field);
           if (sqlUpdateFieldRow.executeUpdate() == 0) {
             return "No such field \""+field+"\" in " + table;
           }
 
           String columnType
             = "VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL";
-          if ("text".equals(type) || "richtext".equals(type)) {
+          if ("text".equals(type) || "html".equals(type) || "geo-location".equals(type)) {
             columnType = "TEXT";
           } // type is TEXT
           try (PreparedStatement sqlAlterTable = rdb.prepareStatement(

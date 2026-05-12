@@ -17,6 +17,15 @@ const table = parameters.get("t") || parameters.get("table");
 const field = parameters.get("f") || parameters.get("field");
 const entry = parameters.get("e") || parameters.get("entry");
 
+let user = "";
+// if we're running in LaBB-CAT, then user information is available via
+// http://baseURL/labbcat/api/user
+getJSON("../../../../api/user", response => {
+  if (response && response.model && response.model.user) {
+    user = response.model.user;
+  }
+});
+
 // replace title with link to read-only page
 document.getElementById("entry").innerText = "";
 const viewLink = document.createElement("a");
@@ -236,11 +245,34 @@ function addChildRow(childField, rows, model) {
     const td = document.createElement("td");
     td.title = name;
     td.className = name;
+
+    // determine the initial value
+    let value = model[name] || "";
+    if (!value && !model.serial) { // serial not set - it's a new row
+      const defaultValue = childFields[childField][name].defaultValue;
+      if (defaultValue) {
+        if (/^".+"$/.test(defaultValue)) { // a literal
+          value = defaultValue.slice(1,-1); // strip quotes
+        } else if (defaultValue.toLowerCase() == "now") { // current time
+          const now = new Date(); // this is in UTC
+          now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // use this timezone
+          if (childFields[childField][name].type == "date") {
+            value = now.toISOString().slice(0,10); // date part only
+          } else if (childFields[childField][name].type == "datetime") {
+            value = now.toISOString().slice(0,16); // date to minutes only
+          } else {
+            value = now.toLocaleString();
+          }
+        } else if (defaultValue.toLowerCase() == "user") { // current user
+          // we may or may not have this
+          value = user;
+        }
+      }
+    }
     
     // create the UI component for the field value
     const input = createFieldInput(
-      td, childFields[childField][name], (e)=>btnSave.style.display = null,
-      model[name] || "");
+      td, childFields[childField][name], (e)=>btnSave.style.display = null, value);
     // ensure the save function can access the input
     inputs[name] = input;
     if (!firstInput) firstInput = input;
@@ -335,7 +367,7 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
   }
   if (fieldDefinition.validation) {
     // if it's just a list of alternative, e.g. "option1|option2|option3"
-    if (/^\|?(\w+\|)+\w+/.test(fieldDefinition.validation)) { // implement as a select instead
+    if (/^\|?(.+\|)+.+/.test(fieldDefinition.validation)) { // implement as a select instead
       input = document.createElement("select");
       for (let opt of fieldDefinition.validation.split("|")) {
         const option = document.createElement("option");

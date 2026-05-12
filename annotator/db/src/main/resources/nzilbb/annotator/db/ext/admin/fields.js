@@ -74,6 +74,23 @@ function newField(attributes, field) {
     }
     type.value = field.type||"string";
     row.appendChild(type);
+
+    if (parentTable) { // only child tables can have new rows and thus default values
+      let defaultValue = document.createElement("input");
+      defaultValue.type = "text"
+      defaultValue.id = `default-value-${field.field}`;
+      defaultValue.placeholder = "Default Value";
+      defaultValue.title = "Default value for new rows, e.g."
+        +"\n - a literal fixed value (must be in quotes): \"option1\""
+        +"\n - the current date/time: now"
+        +"\n - the user's login ID (if any): user";
+      defaultValue.value = field.defaultValue||"";
+      defaultValue.onkeyup = defaultValue.onchange = function(e) {
+        // show save button
+        document.getElementById(`save-${field.field}`).disabled = false;
+      }
+      row.appendChild(defaultValue);
+    }
     
     let validation = document.createElement("input");
     validation.type = "text"
@@ -118,13 +135,16 @@ function newField(attributes, field) {
 
 function saveField(field) {
   const type = document.getElementById(`type-${field}`).value;
+  const defaultValue = document.getElementById(`default-value-${field}`)?
+        document.getElementById(`default-value-${field}`).value:"";
   const validation = document.getElementById(`validation-${field}`).value;
   startLoading();
-  getText(resourceForFunction("updateField", table, field, type, validation), error => {
-    document.getElementById("error").innerText = error;
-    document.getElementById(`save-${field}`).disabled = true;
-    finishedLoading();
-  });
+  getText(resourceForFunction("updateField", table, field, type, defaultValue, validation),
+          error => {
+            document.getElementById("error").innerText = error;
+            document.getElementById(`save-${field}`).disabled = true;
+            finishedLoading();
+          });
 }
 
 function deleteField(field) {

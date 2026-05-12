@@ -171,6 +171,7 @@ function createFieldValue(valueElement, fieldDefinition, value) {
         
         // go to the point in the middle
         const shape = value.split(":")
+              .filter(coord=>coord.includes(",")) // discard invalid points
               .map(coord=>coord.trim().split(",")
                    .map(s=>Number(s)));
         const latitudes = shape.map(coord=>coord[0]);
@@ -183,16 +184,24 @@ function createFieldValue(valueElement, fieldDefinition, value) {
       //a.href = "https://www.google.com/maps?q=" + encodeURIComponent(value);
       a.href = `https://www.openstreetmap.org/?mlat=${coords[0]}&mlon=${coords[1]}#map=16/${coords[0]}/${coords[1]}`;
       a.target = fieldDefinition.field;
-      a.appendChild(document.createTextNode(value));
+      a.appendChild(document.createTextNode("🌏"));
       span.appendChild(a);
     } else if (fieldDefinition.type == "html") {
       span.innerHTML = value;
     } else if (fieldDefinition.type == "boolean") {
       if (value == "true") span.innerHTML = "✔";
     } else if (fieldDefinition.type == "date") {
-      if (value) span.innerHTML = new Date(value).toLocaleDateString();
+      if (value) {
+        const date = new Date(value);
+        date.setMinutes(date.getMinutes() + date.getTimezoneOffset()); // use this timezone
+        span.innerHTML = date.toLocaleDateString();
+      }
     } else if (fieldDefinition.type == "datetime") {
-      if (value) span.innerHTML = new Date(value).toLocaleString();
+      if (value) {
+        const date = new Date(value);
+        date.setMinutes(date.getMinutes() + date.getTimezoneOffset()); // use this timezone
+        span.innerHTML = date.toLocaleString();
+      }
     } else {
       span.appendChild(document.createTextNode(value));
     }

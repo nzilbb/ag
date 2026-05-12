@@ -918,6 +918,7 @@ public class TestDbTagger {
     Map<String,String> field = fields.get(0);
     assertEquals("Correct field name", "type", field.get("field"));
     assertEquals("Correct field type", "string", field.get("type"));
+    assertEquals("Correct field defaultValue", "", field.get("defaultValue"));
     assertEquals("Correct field validation", "", field.get("validation"));
 
     // get get entry
@@ -932,23 +933,26 @@ public class TestDbTagger {
     assertFalse("Cannot create field that already exists",
                 annotator.createField("dict", "type", "string", "").length() == 0);
     assertEquals("Can create new field",
-                 "", annotator.createField("dict", "test", "boolean", "true|false"));
+                 "", annotator.createField(
+                   "dict", "test", "boolean", "\"true\"", "true|false"));
     fields = annotator.readFields("dict");
     assertEquals("Field created: " + fields,
                  3, fields.size());
     field = fields.get(2);
     assertEquals("Correct new field name", "test", field.get("field"));
     assertEquals("Correct new field type", "boolean", field.get("type"));
+    assertEquals("Correct new field default", "\"true\"", field.get("defaultValue"));
     assertEquals("Correct new field validation", "true|false", field.get("validation"));
     
     assertEquals("Can update new field",
-                 "", annotator.updateField("dict", "test", "integer", ""));
+                 "", annotator.updateField("dict", "test", "integer", "", ""));
     fields = annotator.readFields("dict");
     assertEquals("New field still there: " + fields,
                  3, fields.size());
     field = fields.get(2);
     assertEquals("Correct new field name", "test", field.get("field"));
     assertEquals("Correct new field new type", "integer", field.get("type"));
+    assertEquals("Correct new field new default", "", field.get("defaultValue"));
     assertEquals("Correct new field new validation", "", field.get("validation"));
 
     assertEquals("Can delete new field",
@@ -1019,6 +1023,7 @@ public class TestDbTagger {
     field = fields.get(0);
     assertEquals("Correct default field name", "child1", field.get("field"));
     assertEquals("Correct default field new type", "string", field.get("type"));
+    assertEquals("Correct default field new default", "", field.get("defaultValue"));
     assertEquals("Correct default field new validation", "", field.get("validation"));
 
     ids = annotator.getDictionaryIds();
@@ -1043,13 +1048,15 @@ public class TestDbTagger {
     assertEquals("Correct new field new type", "integer", field.get("type"));
 
     assertEquals("Can create new field in child table",
-                 "", annotator.createField("parent_child1", "test", "boolean", "true|false"));
+                 "", annotator.createField(
+                   "parent_child1", "test", "boolean", "\"false\"", "true|false"));
     fields = annotator.readFields("parent_child1");
     assertEquals("Field created: " + fields,
                  2, fields.size());
     field = fields.get(1);
     assertEquals("Correct created field name", "test", field.get("field"));
     assertEquals("Correct created field type", "boolean", field.get("type"));
+    assertEquals("Correct created field default", "\"false\"", field.get("defaultValue"));
     assertEquals("Correct created field validation", "true|false", field.get("validation"));
 
     List<Map<String,String>> childEntries = annotator.readChildEntries(
@@ -1156,6 +1163,7 @@ public class TestDbTagger {
     field = fields.get(0);
     assertEquals("Correct default field name", "child2", field.get("field"));
     assertEquals("Correct default field new type", "string", field.get("type"));
+    assertEquals("Correct default field new default", "", field.get("defaultValue"));
     assertEquals("Correct default field new validation", "", field.get("validation"));
     
     // can remove child table
