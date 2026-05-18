@@ -57,7 +57,7 @@ public class Coalescer implements GraphTransformer {
   
   /**
    * Minimum amount of time between two peers with the same parent, with no intervening
-   * peers, for which the inter-annotation pause counts as a not congituous. If the
+   * peers, for which the inter-annotation pause counts as a not contiguous. If the
    * pause is shorter than this, the annotations can merged into one. Default is 0.0; 
    * @see #getMinimumPauseLength()
    * @see #setMinimumPauseLength(Double)
@@ -66,11 +66,11 @@ public class Coalescer implements GraphTransformer {
   /**
    * Getter for {@link #minimumPauseLength}: Minimum amount of time between two peers with
    * the same parent, with no intervening peers, for which the inter-annotation pause
-   * counts as a not congituous. If the pause is shorter than this, the annotations can
+   * counts as a not contiguous. If the pause is shorter than this, the annotations can
    * merged into one.
    * @return Minimum amount of time between two peers with the same parent, with no
    * intervening peers, for which the inter-annotation pause counts as a not
-   * congituous. If the pause is shorter than this, the annotations can merged into one.
+   * contiguous. If the pause is shorter than this, the annotations can merged into one.
    */
   public Double getMinimumPauseLength()
   {
@@ -104,11 +104,11 @@ public class Coalescer implements GraphTransformer {
   /**
    * Setter for {@link #minimumPauseLength}: Minimum amount of time between two peers with
    * the same parent, with no intervening peers, for which the inter-annotation pause
-   * counts as a not congituous. If the pause is shorter than this, the annotations can
+   * counts as a not contiguous. If the pause is shorter than this, the annotations can
    * merged into one. 
    * @param newMinimumPauseLength Minimum amount of time between two peers with the same
    * parent, with no intervening peers, for which the inter-annotation pause counts as a
-   * not congituous. If the pause is shorter than this, the annotations can merged into one.
+   * not contiguous. If the pause is shorter than this, the annotations can merged into one.
    */
   public Coalescer setMinimumPauseLength(Double newMinimumPauseLength) { minimumPauseLength = newMinimumPauseLength; return this; }
       
@@ -145,7 +145,6 @@ public class Coalescer implements GraphTransformer {
    */
   public Graph transform(Graph graph) throws TransformationException {
     if (debug) setLog(new Vector<String>());
-
     // join subsequent peers with the same label...
     // for each parent
     for (Annotation parent : graph.all(graph.getLayer(layerId).getParentId())) {
