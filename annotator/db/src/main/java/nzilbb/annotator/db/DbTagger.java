@@ -115,7 +115,7 @@ import org.apache.commons.csv.CSVRecord;
  * about named entities used in transcripts.
  */
 @UsesRelationalDatabase
-public class DbTagger extends Annotator implements ImplementsDictionaries {
+public class DbTagger extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
   public String getMinimumApiVersion() { return "1.4.0"; }
   
@@ -1774,9 +1774,6 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
           + " doesn't allow peer annotations; using first variant only.");
         firstVariantOnly = true;
       }
-      if (tagLayer.getAlignment() != tagLayerAlignment) {
-        tagLayer.setAlignment(tagLayerAlignment);
-      }
     }
     if (tableLink != null
         && !"text/url".equals(tagLayer.getType())) {
@@ -1924,6 +1921,10 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
             keyField = idParser.group("keyField");
             valueField = idParser.group("valueField");
           }
+          boolean coalesceAdjacent = tagLayer.getAlignment()==Constants.ALIGNMENT_INTERVAL 
+            && tokenLayer.getParent() != null
+            && tokenLayer.getParent().getParent() != null
+            && tokenLayer.getParent().getParentId().equals(tagLayer.getParentId());
           for (String type : toAnnotate.keySet()) { // for each type
             if (isCancelling()) break;
             boolean found = false;
@@ -1956,10 +1957,29 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
               
               if (!found) setStatus("Tagging: " + type); // (log this only once)
               found = true;
+              Annotation lastToken = null;
+              Annotation tag = null;
               for (Annotation token : toAnnotate.get(type)) {
-                token.createTag(tagLayerId, label)
-                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-              }
+                boolean createTag = true;
+                if (coalesceAdjacent // tags can conver multiple tokens
+                    // this is not the first token
+                    && lastToken != null) {
+                  Annotation lastTagParent = tag.getParent();
+                  Annotation newTagParent = token.first(lastTagParent.getLayerId());
+                  if (newTagParent == lastTagParent // new tag would be peer of last tag
+                      // this token is immediately after the last token
+                      && tag.getEndId().equals(token.getStartId())) {
+                    // the tag covers both tokens
+                    tag.setEnd(token.getEnd());
+                    createTag = false;
+                  }
+                }
+                if (createTag) { // new tag is required
+                  tag = graph.createTag(token, tagLayerId, label);
+                  tag.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+                }
+                lastToken = token;
+              } // next token of this type
               
               // do we want the first entry only?
               if (firstVariantOnly) break;
@@ -1968,6 +1988,7 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
             setPercentComplete(++t * 100 / typeCount);
             
           } // next type
+          
           if (!isCancelling()) setPercentComplete(100);
         } finally {
           dictionary.close();
@@ -1994,243 +2015,6 @@ public class DbTagger extends Annotator implements ImplementsDictionaries {
     toAnnotate.get(token.getLabel()).add(token);
   } // end of registorForAnnotation()
 
-  /**
-   * Tags all instances of the given word in the given graph store, using the dictionary
-   * specified by current task configuration (i.e. the dictionary returned by
-   * <code>getDictionary(null)</code>).
-   * <p> The default implementation throws TransformationException
-   * @param store
-   * @param sourceLabel
-   * @return The number of tags created.
-   * @throws DictionaryException, TransformationException, InvalidConfigurationException,
-   * StoreException 
-   */
-  @Override public int tagAllInstances(GraphStore store, String sourceLabel)
-    throws DictionaryException, TransformationException, InvalidConfigurationException,
-    StoreException {
-    Dictionary dictionary = getDictionary(this.dictionary);
-    try {
-      
-      StringBuilder languageExpression = new StringBuilder();
-      if (targetLanguagePattern != null
-          && (phraseLanguageLayerId != null || transcriptLanguageLayerId != null)) {
-        languageExpression.append(" && /").append(targetLanguagePattern).append("/.test(");
-        if (phraseLanguageLayerId != null) {
-          languageExpression.append("first('").append(esc(phraseLanguageLayerId))
-            .append("').label");
-          if (transcriptLanguageLayerId != null) {
-            languageExpression.append(" ?? "); // add coalescing operator
-          }
-        }
-        if (transcriptLanguageLayerId != null) {
-          languageExpression.append("first('").append(esc(transcriptLanguageLayerId))
-            .append("').label");
-        }
-        languageExpression.append(")");
-      } // add language condition
-      
-      store.deleteMatchingAnnotations(
-        "layerId = '"+esc(tagLayerId)+"'"
-        +languageExpression
-        +" && first('"+esc(tokenLayerId)+"').label "
-        +(exactMatch?"===":"==") // === is slower, so we don't use it unless necessary
-        +" '"+esc(sourceLabel)+"'");
-
-      String tokenExpression = "layerId = '"+esc(tokenLayerId)+"'"
-        +languageExpression
-        +" && label "
-        +(exactMatch?"===":"==") // === is slower, so we don't use it unless necessary
-        +" '"+esc(sourceLabel)+"'";
-      int count = 0;
-      HashSet<String> soFar = new HashSet<String>(); // only unique entries
-      MessageFormat url = tableLink==null?null : new MessageFormat("\n"+tableLink);
-      Matcher idParser = Pattern.compile(
-        "^(?<table>[^:]+):(?<keyField>.+)->(?<valueField>.+)$").matcher(this.dictionary);
-      String table = null;
-      String keyField = null;
-      String valueField = null;
-      if (idParser.matches()) {
-        table = idParser.group("table");
-        keyField = idParser.group("keyField");
-        valueField = idParser.group("valueField");
-      }
-      for (String tag : dictionary.lookup(sourceLabel)) {
-        if (strip.length() > 0) tag = tag.replaceAll("["+strip+"]","");
-        if (tag.length() == 0) continue; // no blank labels
-        if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
-          String label = tag;
-          if (url != null) {
-            try {
-              label += url.format(new Object[]{
-                  URLEncoder.encode(table, "UTF-8"),
-                  URLEncoder.encode(keyField, "UTF-8"),
-                  URLEncoder.encode(sourceLabel, "UTF-8"),
-                  URLEncoder.encode(valueField, "UTF-8"),
-                  URLEncoder.encode(tag, "UTF-8")
-                });
-            } catch(java.io.UnsupportedEncodingException impossible) {
-            }
-          }
-          store.tagMatchingAnnotations(
-            tokenExpression, tagLayerId, label, Constants.CONFIDENCE_AUTOMATIC);
-          soFar.add(tag);
-          count++;
-        }
-        // do we want the first entry only?
-        if (firstVariantOnly) break;        
-      } // next entry
-      return count;
-    } catch(PermissionException x) {
-      throw new TransformationException(this, x);
-    } finally {
-      dictionary.close();
-    }
-  }
-
-  /**
-   * Transforms all graphs from the given graph store that match the given graph expression.
-   * <p> This implementation uses
-   * {@link GraphStoreQuery#aggregateMatchingAnnotations(String,String)}
-   * and {@link GraphStore#tagMatchingAnnotations​(String,String,String,Integer)}
-   * to optimize tagging transcripts en-masse.
-   * @param store The graph to store.
-   * @param expression An expression for identifying transcripts to update, or null to transform
-   * all transcripts in the store.
-   * @return The changes introduced by the tranformation.
-   * @throws TransformationException If the transformation cannot be completed.
-   */
-  public void transformTranscripts​(GraphStore store, String expression)
-    throws TransformationException, InvalidConfigurationException, StoreException,
-    PermissionException {
-
-    setRunning(true);
-    Timers timers = new Timers();
-    try {
-      setPercentComplete(0);
-      Layer tokenLayer = schema.getLayer(tokenLayerId);
-      if (tokenLayer == null) {
-        throw new InvalidConfigurationException(
-          this, "Invalid input token layer: " + tokenLayerId);
-      }
-      Layer tagLayer = schema.getLayer(tagLayerId);
-      if (tagLayer == null) {
-        throw new InvalidConfigurationException(
-          this, "Invalid output tag layer: " + tagLayerId);
-      }    
-      
-      StringBuilder labelExpression = new StringBuilder();
-      labelExpression.append("layer.id == '").append(esc(tokenLayer.getId())).append("'");
-      if (targetLanguagePattern != null
-          && (phraseLanguageLayerId != null || transcriptLanguageLayerId != null)) {
-        labelExpression.append(" && /").append(targetLanguagePattern).append("/.test(");
-        if (phraseLanguageLayerId != null) {
-          labelExpression.append("first('").append(esc(phraseLanguageLayerId))
-            .append("').label");
-          if (transcriptLanguageLayerId != null) {
-            labelExpression.append(" ?? "); // add coalescing operator
-          }
-        }
-        if (transcriptLanguageLayerId != null) {
-          labelExpression.append("first('").append(esc(transcriptLanguageLayerId))
-            .append("').label");
-        }
-        labelExpression.append(")");
-      } // add language condition
-      
-      if (expression != null && expression.trim().length() > 0) {
-        labelExpression.append(" && [");
-        String[] ids = store.getMatchingTranscriptIds(expression);
-        if (ids.length == 0) {
-          setStatus("No matching transcripts");
-          setPercentComplete(100);
-          return;
-        } else {
-          labelExpression.append(
-            Arrays.stream(ids)
-            // quote and escape each ID
-            .map(id->"'"+id.replace("'", "\\'")+"'")
-            // make a comma-delimited list
-            .collect(Collectors.joining(",")));
-          labelExpression.append("].includes(graphId)");
-        }
-      }
-      setStatus("Getting distinct token labels...");
-      // timers.start("store.aggregateMatchingAnnotations");
-      String[] distinctWords = store.aggregateMatchingAnnotations(
-        exactMatch?"DISTINCT BINARY":"DISTINCT", labelExpression.toString());
-      // timers.end("store.aggregateMatchingAnnotations");
-      setStatus("There are "+distinctWords.length+" distinct token labels");
-      int w = 0;
-      Dictionary dictionary = getDictionary(this.dictionary);
-      // for each label
-      MessageFormat url = tableLink==null?null : new MessageFormat("\n"+tableLink);
-      Matcher idParser = Pattern.compile(
-        "^(?<table>[^:]+):(?<keyField>.+)->(?<valueField>.+)$").matcher(this.dictionary);
-      String table = null;
-      String keyField = null;
-      String valueField = null;
-      if (idParser.matches()) {
-        table = idParser.group("table");
-        keyField = idParser.group("keyField");
-        valueField = idParser.group("valueField");
-      }
-      for (String word : distinctWords) {
-        setStatus(word+"...");
-        if (isCancelling()) break;
-        HashSet<String> soFar = new HashSet<String>(); // only unique entries
-        // timers.start("dictionary.lookup");
-        for (String tag : dictionary.lookup(word)) {
-          // timers.end("dictionary.lookup");
-          if (isCancelling()) break;
-          if (strip.length() > 0) tag = tag.replaceAll("["+strip+"]","");
-          if (tag.length() == 0) continue; // no blank labels
-          if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
-            StringBuilder tokenExpression = new StringBuilder(labelExpression);
-            tokenExpression.append(" && label ")
-              .append(exactMatch?"===":"==") // === is slower, so we don't use it unless necessary
-              .append(" '").append(esc(word)).append("'");
-            setStatus(word+" → "+tag);
-            // timers.start("store.tagMatchingAnnotations");
-            String label = tag;
-            if (url != null) {
-              try {
-                label += url.format(new Object[] {
-                    URLEncoder.encode(table, "UTF-8"),
-                    URLEncoder.encode(keyField, "UTF-8"),
-                    URLEncoder.encode(word, "UTF-8"),
-                    URLEncoder.encode(valueField, "UTF-8"),
-                    URLEncoder.encode(tag, "UTF-8")
-                  });
-              } catch(java.io.UnsupportedEncodingException impossible) {
-              }
-            }
-
-            store.tagMatchingAnnotations(
-              tokenExpression.toString(), tagLayerId, label, Constants.CONFIDENCE_AUTOMATIC);
-            // timers.end("store.tagMatchingAnnotations");
-            soFar.add(tag);
-          }
-          // timers.end("dictionary.lookup");
-          setStatus(timers.toString());
-          // do we want the first entry only?
-          if (firstVariantOnly) break;        
-        } // next entry
-        setPercentComplete((++w * 100) / distinctWords.length);
-      } // next word
-      if (isCancelling()) {
-        setStatus("Cancelled.");
-      } else {
-        setPercentComplete(100);
-        setStatus("Finished.");
-      }
-    } catch(DictionaryException x) {
-      setStatus(x.getMessage());
-      throw new TransformationException(this, x);
-    } finally {
-      setRunning(false);
-    }
-  }
-  
   /**
    * Escapes quotes in the given string for inclusion in QL or SQL queries.
    * @param s The string to escape.
