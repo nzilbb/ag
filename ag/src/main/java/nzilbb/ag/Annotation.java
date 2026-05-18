@@ -1894,6 +1894,8 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
     } else if (getGraph().getLayer(layerId).getParentId().equals("transcript")) {
       // the tag layer is a top level layer, so its parent is the whole graph
       tag.setParent(getGraph());
+    } else {
+      tag.setParent(first(getGraph().getLayer(layerId).getParentId()));
     }
 
     getGraph().addAnnotation(tag);
