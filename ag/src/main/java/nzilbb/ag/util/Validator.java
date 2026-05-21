@@ -465,8 +465,10 @@ public class Validator extends Transform implements GraphTransformer {
           }
           if (layer.getParentIncludes()) {
             if (annotation.getParent() != null
+                && annotation.getParent().getAnchored()
                 && !annotation.getParent().includes(annotation)) {
-              log("Annotation not included in parent: ", annotation.getId());
+              log("Annotation not included in parent: ", annotation.getId(),
+                  " parent: ", annotation.getParent());
               return true;
             }
           }
