@@ -1444,20 +1444,25 @@ public class Merger extends Transform implements GraphTransformer {
       Annotation anOriginal = GetCounterpart(anEdited);
       Annotation anOriginalParent = anOriginal.getParent();
       Annotation anEditedParent = anEdited.getParent();
-      if (anOriginalParent != null && anEdited != null) {
-        Annotation anEditedParentCounterpart = GetCounterpart(anEditedParent);
-        if (anEditedParentCounterpart != null
-            && anEditedParentCounterpart != anOriginalParent
-            && Annotation.NotDestroyed(anEditedParentCounterpart)
-            // the schema's might not totally agree, c.f. TestMerger#extractedFragmentMerge
-            && anEditedParentCounterpart.getLayerId().equals(layer.getParentId())) {
-          changeParentWithRelatedAnnotations(anOriginal, anEditedParentCounterpart);
-        } // parent has changed
-      } // there are parents in both graphs
-      if (anOriginal.getOrdinal() != anEdited.getOrdinal()) {
+      int ordinalOffset = 0;
+      if (anOriginalParent != null) {
+        ordinalOffset = anOriginalParent.ordinalMinimum(layerId) - 1;
+        if (anEdited != null) {
+          Annotation anEditedParentCounterpart = GetCounterpart(anEditedParent);
+          if (anEditedParentCounterpart != null
+              && anEditedParentCounterpart != anOriginalParent
+              && Annotation.NotDestroyed(anEditedParentCounterpart)
+              // the schema's might not totally agree, c.f. TestMerger#extractedFragmentMerge
+              && anEditedParentCounterpart.getLayerId().equals(layer.getParentId())) {
+            changeParentWithRelatedAnnotations(anOriginal, anEditedParentCounterpart);
+          } // parent has changed
+        } // there are parents in both graphs
+      } // orignal graph has parent
+      if (anOriginal.getOrdinal() != anEdited.getOrdinal() + ordinalOffset) {
         log(layerId, ": changing ordinal of: ", anOriginal,
-            " from ", anOriginal.getOrdinal(), " to ", anEdited.getOrdinal());
-        anOriginal.setOrdinal(anEdited.getOrdinal());
+            " from ", anOriginal.getOrdinal(), " to ", anEdited.getOrdinal(),
+            "+", ordinalOffset);
+        anOriginal.setOrdinal(anEdited.getOrdinal() + ordinalOffset);
       }
    
       anLastOriginal = anOriginal;
