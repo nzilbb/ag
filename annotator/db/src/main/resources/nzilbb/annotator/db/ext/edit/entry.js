@@ -16,6 +16,18 @@ const parameters = new URLSearchParams(window.location.search);
 const table = parameters.get("t") || parameters.get("table");
 const field = parameters.get("f") || parameters.get("field");
 const entry = parameters.get("e") || parameters.get("entry");
+let sourceTranscript = null;
+let sourceAnnotation = null;
+if (window.location.hash) { // there is a hash defined
+  // it might define the source of link
+  // i.e. something like: "#transcript.id%23annotation.id"
+  const match = window.location.hash.match(/#(.*)%23(.*)$/);
+  if (match) {
+    sourceTranscript = match[1];
+    sourceAnnotation = match[2];
+    console.log(`linked from ${sourceTranscript}#${sourceAnnotation}`);
+  }
+}
 
 let user = "";
 // if we're running in LaBB-CAT, then user information is available via
@@ -31,7 +43,8 @@ document.getElementById("entry").innerText = "";
 const viewLink = document.createElement("a");
 viewLink.href = "../entry.html?t="+encodeURIComponent(table)
   +"&f="+encodeURIComponent(field)
-  +"&e="+encodeURIComponent(entry);
+  +"&e="+encodeURIComponent(entry)
+  +(window.location.hash||"");
 viewLink.appendChild(document.createTextNode(entry));
 document.getElementById("entry").appendChild(viewLink);
 
@@ -46,12 +59,12 @@ function showForm(data) {
   const attributes = document.getElementById("attributes");
   attributes.innerHTML = ""; // clear any existing list
   for (let name in fields) {
+    if (fields[name].type == "hidden") continue;
     let row = document.createElement("div");
     let label = document.createElement("label");
     label.appendChild(document.createTextNode(name));
     row.appendChild(label);
     if (fields[name].type != "child-table") { // regular field
-      
       let value = document.createElement("span");
       value.id = `value-${name}`;
       value.className = "value";
@@ -110,6 +123,7 @@ function showChildForm(childField, data) {
   let tr = document.createElement("tr");
   let showHeader = false; // if it's just a single field named after the parent-table field
   for (let name in childFields[childField]) {
+    if (childFields[childField][name].type == "hidden") continue;
     const th = document.createElement("th");
     th.appendChild(document.createTextNode(name));
     tr.appendChild(th);
@@ -244,7 +258,7 @@ function addChildRow(childField, rows, model) {
   for (let name in childFields[childField]) {
     const td = document.createElement("td");
     td.title = name;
-    td.className = name;
+    td.className = name + " " + childFields[childField][name].type;
 
     // determine the initial value
     let value = model[name] || "";
@@ -350,6 +364,35 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
       }
     });
     a.appendChild(document.createTextNode("🌏"));
+    valueElement.appendChild(a);
+  } else if (fieldDefinition.type == "transcript-link") { // a link back to a source document
+    const a = document.createElement("a");
+    a.className = "transcript-link";
+    a.title = `Open ${fieldDefinition.field}`;
+    a.target = fieldDefinition.field;
+    a.href = "#";
+    a.addEventListener("click", function(e) {
+      if (input.value) {
+        // turn something like:
+        // http://example.com/labbcat/annotator/ext/DbTagger/entry.html?t=x&f=x&e=x
+        // into something like
+        // http://example.com/labbcat/transcript?id=transcriptId#annotationId
+        this.href = window.location.toString()
+          .replace(/annotator\/ext\/DbTagger\/.*$/,"transcript?id=")
+          +input.value;
+        a.target = input.value.split("#")[0]; // target is transcript ID
+        return true;
+      } else { // no value specified
+        // set the value with the current source
+        if (sourceTranscript && sourceAnnotation) {
+          input.value = `${sourceTranscript}#${sourceAnnotation}`;
+          if (saveButtonHandler) saveButtonHandler();
+        }
+        e.preventDefault();
+        return false;
+      }
+    });
+    a.appendChild(document.createTextNode("🖹"));
     valueElement.appendChild(a);
   } else if (fieldDefinition.type == "email") {
     input.type = "email";

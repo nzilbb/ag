@@ -11,7 +11,18 @@ const table = parameters.get("t") || parameters.get("table");
 const field = parameters.get("f") || parameters.get("field");
 const entry = parameters.get("e") || parameters.get("entry");
 console.log(`table "${table}" field "${field}" entry "${entry}"`);
-
+let sourceTranscript = null;
+let sourceAnnotation = null;
+if (window.location.hash) { // there is a hash defined
+  // it might define the source of link
+  // i.e. something like: "#transcript.id%23annotation.id"
+  const match = window.location.hash.match(/#(.*)%23(.*)$/);
+  if (match) {
+    sourceTranscript = match[1];
+    sourceAnnotation = match[2];
+    console.log(`linked from ${sourceTranscript}#${sourceAnnotation}`);
+  }
+}
 document.getElementById("entry").innerText = entry;
 
 let fields = {}; // definitions for fields (type/validation etc.)
@@ -25,6 +36,8 @@ function showForm(data) {
   const attributes = document.getElementById("attributes");
   attributes.innerHTML = ""; // clear any existing list
   for (let name in fields) {
+    if (fields[name].type == "hidden") continue;
+    
     let row = document.createElement("div");
     let label = document.createElement("label");
     label.appendChild(document.createTextNode(name));
@@ -134,6 +147,7 @@ function showChildForm(childField, data) {
 function addChildRow(childField, rows, model) {
   const tr = document.createElement("tr");    
   for (let name in childFields[childField]) {
+    if (childFields[childField][name].type == "hidden") continue;
     const td = document.createElement("td");
     td.title = name;
     td.className = name + " " + childFields[childField][name].type;    
@@ -180,11 +194,18 @@ function createFieldValue(valueElement, fieldDefinition, value) {
           latitudes.reduce((a, b) => a + b) / latitudes.length,
           longitudes.reduce((a, b) => a + b) / longitudes.length
         ];
-      } 
-      //a.href = "https://www.google.com/maps?q=" + encodeURIComponent(value);
-      a.href = `https://www.openstreetmap.org/?mlat=${coords[0]}&mlon=${coords[1]}#map=16/${coords[0]}/${coords[1]}`;
-      a.target = fieldDefinition.field;
-      a.appendChild(document.createTextNode("🌏"));
+      }
+    } else if (fieldDefinition.type == "transcript-link") {
+      const a = document.createElement("a");
+      // turn something like:
+      // http://example.com/labbcat/annotator/ext/DbTagger/entry.html?t=x&f=x&e=x
+      // into something like
+      // http://example.com/labbcat/transcript?id=transcriptId#annotationId
+      a.href = window.location.toString()
+        .replace(/annotator\/ext\/DbTagger\/.*$/,"transcript?id=")
+        +value;
+      a.target = value.split("#")[0]; // target is transcript ID
+      a.appendChild(document.createTextNode(value));
       span.appendChild(a);
     } else if (fieldDefinition.type == "html") {
       span.innerHTML = value;
@@ -211,7 +232,7 @@ function createFieldValue(valueElement, fieldDefinition, value) {
 }
 
 function enableEditLink() {
-  const editUrl = "edit/entry.html"+window.location.search;
+  const editUrl = "edit/entry.html"+window.location.search+(window.location.hash||"");
   getText(editUrl, (data) => {
     if (data) { // they can access the URL
       const editLink = document.getElementById("edit-link");

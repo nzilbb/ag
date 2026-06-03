@@ -62,7 +62,7 @@ function newField(attributes, field) {
     type.id = `type-${field.field}`;
     const types = [
       "string", "text", "html", "integer", "number", "boolean",
-      "url", "email", "date", "datetime", "geo-location"];
+      "url", "email", "date", "datetime", "geo-location", "transcript-link", "hidden"];
     for (let t of types) {
       const option = document.createElement("option");
       option.appendChild(document.createTextNode(t));
