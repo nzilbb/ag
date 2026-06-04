@@ -85,3 +85,14 @@ progress {
     .field { flex-direction: column; }
     .field span, .field label { width: 95vw; }
 }
+
+/* Hide edit link when printing */
+@media print {
+    #edit-link {
+        display: none;
+    }
+    a {
+        text-decoration: none;
+        color: black;
+    }
+}
