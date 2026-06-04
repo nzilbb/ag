@@ -1062,6 +1062,15 @@ public class TestDbTagger {
     assertEquals("Correct created field default", "\"false\"", field.get("defaultValue"));
     assertEquals("Correct created field validation", "true|false", field.get("validation"));
 
+    assertEquals("Can reorder fields",
+                 "", annotator.moveFieldUp("parent_child1", "test"));
+    fields = annotator.readFields("parent_child1");
+    assertEquals("Field moved up", "test", fields.get(0).get("field"));
+    assertEquals("Other field moved down", "test", fields.get(0).get("field"));
+    assertEquals("Can't move first field up",
+                 "\"test\" is first field in parent_child1",
+                 annotator.moveFieldUp("parent_child1", "test"));
+
     List<Map<String,String>> childEntries = annotator.readChildEntries(
       "parent", "type", "THE", "child1");
     assertEquals("There are no child entries", 0, childEntries.size());
