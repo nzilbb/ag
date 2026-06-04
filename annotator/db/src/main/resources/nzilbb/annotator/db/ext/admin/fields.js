@@ -49,7 +49,7 @@ function newField(attributes, field) {
     link.className = "edit-link";
     link.title = `${field.field} definition`;
     link.href = `fields.html?p=${table}&t=${table}_${field.field}`
-    const img = document.createElement("img");
+    let img = document.createElement("img");
     img.src = "../edit.svg"
     img.alt = "✎";
     link.appendChild(img);
@@ -109,6 +109,8 @@ function newField(attributes, field) {
     
     let btnSave = document.createElement("button");
     btnSave.id = `save-${field.field}`;
+    btnSave.className = "save";
+    btnSave.title = `Save changes to ${field.field}`;
     btnSave.disabled = true;
     let img = document.createElement("img");
     img.src = "../save.svg";
@@ -122,6 +124,8 @@ function newField(attributes, field) {
   
   let btnDelete = document.createElement("button");
   btnDelete.id = `delete-${field.field}`;
+  btnDelete.className = "delete";
+  btnDelete.title = `Delete ${field.field}`;
   img = document.createElement("img");
   img.src = "../delete.svg";
   img.alt= "❌";
@@ -130,6 +134,20 @@ function newField(attributes, field) {
     deleteField(field.field);
   }
   row.appendChild(btnDelete);
+  
+  let btnMoveUp = document.createElement("button");
+  btnMoveUp.id = `move-${field.field}`;
+  btnMoveUp.className = "move-up";
+  btnMoveUp.title = `Move ${field.field} up`;
+  img = document.createElement("img");
+  img.src = "../up.svg";
+  img.alt= "↑";
+  btnMoveUp.appendChild(img);
+  btnMoveUp.onclick = function(e) {
+    moveFieldUp(field.field);
+  }
+  row.appendChild(btnMoveUp);
+  
   attributes.appendChild(row);
 }
 
@@ -144,6 +162,20 @@ function saveField(field) {
             document.getElementById("error").innerText = error;
             document.getElementById(`save-${field}`).disabled = true;
             finishedLoading();
+          });
+}
+
+function moveFieldUp(field) {
+  startLoading();
+  getText(resourceForFunction("moveFieldUp", table, field),
+          error => {
+            document.getElementById("error").innerText = error;
+            finishedLoading();
+            if (!error) { // move successful
+              // move it in the document
+              const moveUp = document.getElementById(`field-${field}`);
+              moveUp.parentElement.moveBefore(moveUp, moveUp.previousElementSibling);
+            }
           });
 }
 

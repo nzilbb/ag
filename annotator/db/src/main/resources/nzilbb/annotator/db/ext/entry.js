@@ -177,36 +177,28 @@ function createFieldValue(valueElement, fieldDefinition, value) {
       a.appendChild(document.createTextNode(value));
       span.appendChild(a);
     } else if (fieldDefinition.type == "geo-location") {
-      const a = document.createElement("a");
-      let coords = value.split(",");
-      if (value.indexOf(":") >= 0) { // shape
-        // something like:
-        // -43.607048, 172.467246 : -43.626186, 172.552390 : -43.681332, 172.552390
-        
-        // go to the point in the middle
-        const shape = value.split(":")
-              .filter(coord=>coord.includes(",")) // discard invalid points
-              .map(coord=>coord.trim().split(",")
-                   .map(s=>Number(s)));
-        const latitudes = shape.map(coord=>coord[0]);
-        const longitudes = shape.map(coord=>coord[1]);
-        coords = [
-          latitudes.reduce((a, b) => a + b) / latitudes.length,
-          longitudes.reduce((a, b) => a + b) / longitudes.length
-        ];
-      }
+      // a map <div> will be added separately
     } else if (fieldDefinition.type == "transcript-link") {
-      const a = document.createElement("a");
-      // turn something like:
-      // http://example.com/labbcat/annotator/ext/DbTagger/entry.html?t=x&f=x&e=x
-      // into something like
-      // http://example.com/labbcat/transcript?id=transcriptId#annotationId
-      a.href = window.location.toString()
-        .replace(/annotator\/ext\/DbTagger\/.*$/,"transcript?id=")
-        +value;
-      a.target = value.split("#")[0]; // target is transcript ID
-      a.appendChild(document.createTextNode(value));
-      span.appendChild(a);
+      if (value.indexOf("#") > 0 || value.startsWith("http")) { // can link somewhere
+        const a = document.createElement("a");
+        if (value.startsWith("http")) { // just an http link
+          a.href = value;
+          a.target = fieldDefinition.field;
+        } else if (value.indexOf("#") > 0) {
+          // turn something like:
+          // http://example.com/labbcat/annotator/ext/DbTagger/entry.html?t=x&f=x&e=x
+          // into something like
+          // http://example.com/labbcat/transcript?id=transcriptId#annotationId
+          a.href = window.location.toString()
+            .replace(/annotator\/ext\/DbTagger\/.*$/,"transcript?id=")
+            +value;
+          a.target = value.split("#")[0]; // target is transcript ID
+        }
+        a.appendChild(document.createTextNode(value));
+        span.appendChild(a);
+      } else { // not a link, just text
+        span.appendChild(document.createTextNode(value));
+      }
     } else if (fieldDefinition.type == "html") {
       span.innerHTML = value;
     } else if (fieldDefinition.type == "boolean") {

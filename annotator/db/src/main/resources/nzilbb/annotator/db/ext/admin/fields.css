@@ -84,6 +84,10 @@ progress {
     width: 100%;
 }
 
+.field:first-child button.move-up {
+    opacity: 0;
+}
+
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
     .field { flex-direction: column; }

@@ -372,7 +372,10 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
     a.target = fieldDefinition.field;
     a.href = "#";
     a.addEventListener("click", function(e) {
-      if (input.value) {
+      if (input.value.startsWith("http")) { // plan link
+        this.href = input.value;
+        return true;
+      } else if (input.value.indexOf("#") > 0) { // can link to transcript
         // turn something like:
         // http://example.com/labbcat/annotator/ext/DbTagger/entry.html?t=x&f=x&e=x
         // into something like
@@ -382,9 +385,10 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
           +input.value;
         a.target = input.value.split("#")[0]; // target is transcript ID
         return true;
-      } else { // no value specified
-        // set the value with the current source
-        if (sourceTranscript && sourceAnnotation) {
+      } else { 
+        if (!input.value // no value specified
+            && sourceTranscript && sourceAnnotation) { // there is a current source
+          // set the value with the current source
           input.value = `${sourceTranscript}#${sourceAnnotation}`;
           if (saveButtonHandler) saveButtonHandler();
         }

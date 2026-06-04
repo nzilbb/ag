@@ -967,11 +967,86 @@ public class DbTagger extends Annotator {
         return "Nonexistent table: " + table;
       }
     } catch (Exception x) {
-      System.err.println("DbTagger.createField("+table+", "+field+"): " + x);
+      System.err.println("DbTagger.updateField("+table+", "+field+"): " + x);
       return x.toString();
     } // rdb.close()
     return "";
   } // end of updateField()
+
+  /**
+   * Change the given field's order amoung other fields, by swapping ordinals
+   * with the previous field.
+   * @param table The table ID.
+   * @param field The name of the field.
+   * @return An error message if update failed. Otherwise, an empty string.
+   */
+  @ApiEndpoint("admin") public String moveFieldUp(String table, String field)
+    throws SQLException {
+    try (Connection rdb = newConnection()) {
+      // find the table
+      int tableId = tableId(rdb, table);
+      if (tableId >= 0) {
+
+        try (PreparedStatement sqlMoveUp = rdb.prepareStatement(
+               sqlx.apply(
+                 "SELECT ordinal FROM "+getAnnotatorId()+"_field"
+                 +" WHERE table_id = ? AND field = ?"))) {
+          sqlMoveUp.setInt(1, tableId);
+          sqlMoveUp.setString(2, field);
+          try (ResultSet rsMoveUp = sqlMoveUp.executeQuery()) {
+            if (!rsMoveUp.next()) {
+              return "No such field \""+field+"\" in " + table;
+            } else { // the field is there
+              int laterOrdinal = rsMoveUp.getInt(1);              
+              try (PreparedStatement sqlMoveDown = rdb.prepareStatement(
+                     sqlx.apply(
+                       "SELECT field, ordinal FROM "+getAnnotatorId()+"_field"
+                       +" WHERE table_id = ? AND ordinal < ?"
+                       +" ORDER BY ordinal DESC LIMIT 1"))) {
+                sqlMoveDown.setInt(1, tableId);
+                sqlMoveDown.setInt(2, laterOrdinal);
+                try (ResultSet rsMoveDown = sqlMoveDown.executeQuery()) {
+                  if (!rsMoveDown.next()) {
+                    return "\""+field+"\" is first field in " + table;
+                  } else { // there's a previous field
+                    String moveDown = rsMoveDown.getString("field");
+                    int earlierOrdinal = rsMoveDown.getInt("ordinal");
+                    
+                    try (PreparedStatement sqlUpdateFieldRow = rdb.prepareStatement(
+                           sqlx.apply(
+                             "UPDATE "+getAnnotatorId()+"_field"
+                             +" SET ordinal = ?"
+                             +" WHERE table_id = ? AND field = ?"))) {
+                      // move this field up
+                      sqlUpdateFieldRow.setInt(1, earlierOrdinal);
+                      sqlUpdateFieldRow.setInt(2, tableId);
+                      sqlUpdateFieldRow.setString(3, field);
+                      if (sqlUpdateFieldRow.executeUpdate() == 0) {
+                        return "Could not update field \""+field+"\" in " + table;
+                      }
+                      // move previous field down
+                      sqlUpdateFieldRow.setInt(1, laterOrdinal);
+                      sqlUpdateFieldRow.setInt(2, tableId);
+                      sqlUpdateFieldRow.setString(3, moveDown);
+                      if (sqlUpdateFieldRow.executeUpdate() == 0) {
+                        return "Could not update field \""+moveDown+"\" in " + table;
+                      }                      
+                    } // sqlInsertFieldRow.close()
+                  } // rsMoveDown.close()
+                } // close rsMoveDown
+              } // close sqlMoveDown
+            } // rsMoveUp.close()
+          } // close rsMoveUp
+        } // close sqlMoveUp
+      } else {
+        return "Nonexistent table: " + table;
+      }
+    } catch (Exception x) {
+      System.err.println("DbTagger.moveFieldUp("+table+", "+field+"): " + x);
+      return x.toString();
+    } // rdb.close()
+    return "";
+  } // end of moveFieldUp()
 
   /**
    * Delete an existing field in the given table.
