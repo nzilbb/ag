@@ -57,12 +57,12 @@ textarea { field-sizing: content; }
     width: 75px;
     text-align: right;
 }
-.field a.url-link, .field a.geo-link, .field a.transcript-link, td a.url-link, td a.geo-link, td a.transcript-link {
+.field a.url-link, .field a.geo-link, .field a.transcript-link, .field a.cross-reference, td a.url-link, td a.geo-link, td a.transcript-link, td a.cross-reference {
     position: absolute;
     padding: 5px;
     text-decoration: none;
 }
-.field input[type="url"], .field.geo-location input, .field.transcript-link input, td input[type="url"], td.geo-location input, td.transcript-link input {
+.field input[type="url"], .field.geo-location input, .field.transcript-link input, .field.cross-reference input, td input[type="url"], td.geo-location input, td.transcript-link input, td.cross-reference input {
     padding-left: 20px;
 }
 

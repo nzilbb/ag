@@ -372,7 +372,7 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
     a.target = fieldDefinition.field;
     a.href = "#";
     a.addEventListener("click", function(e) {
-      if (input.value.startsWith("http")) { // plan link
+      if (input.value.startsWith("http")) { // plain link
         this.href = input.value;
         return true;
       } else if (input.value.indexOf("#") > 0) { // can link to transcript
@@ -398,6 +398,61 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
     });
     a.appendChild(document.createTextNode("🖹"));
     valueElement.appendChild(a);
+  } else if (fieldDefinition.type == "cross-reference") { // a link to another entry
+    const a = document.createElement("a");
+    a.className = "cross-reference";
+    a.title = `Open ${fieldDefinition.field}`;
+    a.href = "#";
+    a.addEventListener("click", function(e) {
+      if (input.value) {
+        this.href = document.URL.replace(/\?.*/,"")
+          + "?t="+encodeURIComponent(table)
+          + "&f="+encodeURIComponent(fieldDefinition.validation || field)
+          + "&e="+encodeURIComponent(input.value)
+        return true;
+      } else { 
+        e.preventDefault();
+        return false;
+      }
+    });
+    a.appendChild(document.createTextNode("↗"));
+    valueElement.appendChild(a);
+
+    // lookup as user types
+    const datalist = document.createElement("datalist");
+    datalist.id = `matches-${fieldDefinition.field}`;
+    valueElement.appendChild(datalist);
+    const lookup = function() { // ask the server for some matching options
+      if (input.value) {
+        getJSON(resourceForFunction(
+          "matches", table, fieldDefinition.validation || field, input.value), values => {
+          if (values.length == 1 && values[0].startsWith("DbTagger.")) { // error
+            document.getElementById("error").innerText = values[0];
+            // clear the error after a short delay
+            window.setTimeout(()=>document.getElementById("error").innerText = "", 3000);
+          } else {
+            datalist.innerHTML = ""; // clear any previous values
+            values.forEach((value)=>{ // add each option to the datalist
+              const option = document.createElement("option");
+              option.value = value;
+              datalist.appendChild(option);
+            });
+            if (values.includes(input.value)) {
+              input.setCustomValidity("");
+            } else {
+              input.setCustomValidity("Please select a valid option from the list");
+            }
+          }
+        });
+      } // there is a value set
+    }
+    let deferLookup = null;
+    input.setAttribute("list", datalist.id);
+    input.addEventListener("input", function(e) {
+      if (deferLookup) window.clearTimeout(deferLookup);
+      deferLookup = window.setTimeout(lookup, 1000);
+    });
+    
   } else if (fieldDefinition.type == "email") {
     input.type = "email";
   } else if (fieldDefinition.type == "date") {
@@ -412,7 +467,9 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
   } else if (fieldDefinition.type == "html") { 
     input = document.createElement("textarea"); // attach the editor later...
   }
-  if (fieldDefinition.validation) {
+  if (fieldDefinition.validation
+      // escept validation is repurposed for cross-references:
+      && fieldDefinition.type != "cross-reference") { 
     // if it's just a list of alternative, e.g. "option1|option2|option3"
     if (/^\|?(.+\|)+.+/.test(fieldDefinition.validation)) { // implement as a select instead
       input = document.createElement("select");
@@ -439,8 +496,7 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
     input.value = value || "";
   }
   // show save button:
-  input.addEventListener("keyup", saveButtonHandler);
-  input.addEventListener("change", saveButtonHandler);
+  input.addEventListener("input", saveButtonHandler);
 
   valueElement.appendChild(input);
   

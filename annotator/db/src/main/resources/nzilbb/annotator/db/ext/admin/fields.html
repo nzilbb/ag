@@ -28,6 +28,10 @@
             <li><b>date</b>: date (excluding time) </li>
             <li><b>datetime</b>: date including time of day </li>
             <li><b>geo-location</b>: coordinates for a geographic location </li>
+            <li><b>transcript-link</b>: link to a transcript, i.e. the transcript and token
+              from which the entry was linked</li>
+            <li><b>cross-reference</b>: link to another entry in this table,
+              (<i>Validation</i> must be set to the field used for lookup)</li>
           </ul>
         </dd>
 
@@ -50,8 +54,23 @@
             <li> For string fields, you can specify a regular expression that the value
               must match, e.g.<br>
               <tt>.+@gmail\.com</tt></li>
+            <li> For cross-reference fields, this must be set to the name of the file
+              that is used for the field value e.g. if linking to the cross-referenced
+              entry is by the <q>Description</q> field, then the value should be:<br>
+              <tt>Description</tt></li>
           </ul>
           Validation definitions can be up to 50 characters long.
+        </dd>
+
+        <dt>Default Value</dt>
+        <dd> For child tables (only) you can specify a default value to use for the
+          field when a new child row is added. This can be:
+          <ul>
+            <li><tt>now</tt> : the current date/time</li>
+            <li><tt>user</tt> : the user-name of the current user</li>
+            <li>An exact literal literal value in double-quotes, e.g. <br>
+            <tt>"to check"</tt></li>
+          </ul>
         </dd>
       </dl>
 
@@ -85,6 +104,7 @@
       <option>datetime</option>
       <option>geo-location</option>
       <option>transcript-link</option>
+      <option>cross-reference</option>
       <option>child-table</option>
     </select>
     <p id="error" class="error"></p>

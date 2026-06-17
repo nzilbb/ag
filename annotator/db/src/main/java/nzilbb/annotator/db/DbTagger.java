@@ -1162,7 +1162,7 @@ public class DbTagger extends Annotator {
         put("DbTagger_error", x.getMessage());
       }};
     } // rdb.close()
-  } // end of getEntry()
+  } // end of readEntry()
   
   /**
    * Get all values for the given entry.
@@ -1492,6 +1492,54 @@ public class DbTagger extends Annotator {
     return "";
   }
     
+  /**
+   * Get field values matching the given search string.
+   * @param table The table ID.
+   * @param field The field used to identify the entries.
+   * @param pattern A regular expression to match in the values of <var>field</var>,
+   * which identifies the full values to return.
+   * @return A list of values for <var>field</var> that match the given pattern.
+   */
+  @ApiEndpoint("view") public List<String> matches(String table, String field, String pattern)
+   throws SQLException {
+    Vector<String> values = new Vector<String>();
+    try (Connection rdb = newConnection()) {
+      // find the table
+      int tableId = tableId(rdb, table);
+      if (tableId >= 0) {            
+        String sTableName = getAnnotatorId()+"_table_"+tableId;
+        try {
+          String s = sqlx.apply(
+            "SELECT DISTINCT `"+field.replace(';',' ')+"` FROM "+sTableName
+            +" WHERE `"+field.replace(';',' ')+"` REGEXP ?"
+            +" ORDER BY `"+field.replace(';',' ')+"`");
+          try (PreparedStatement search = rdb.prepareStatement(s)) {
+            search.setString(1, pattern);
+            try (ResultSet matches = search.executeQuery()) {
+              while (matches.next()) {
+                values.add(matches.getString(1));
+              }
+            } // fields.close()
+          } // selectEntry.close()
+        } catch(SQLException exception) {
+          System.err.println(
+            "DbTagger.matches("+table+", "+field+", "+pattern+"): "+exception);
+          values.add("DbTagger_error: " + exception.getMessage());
+        }
+      } else {
+        System.err.println(
+          "DbTagger.matches("+table+", "+field+", "+pattern
+          +"): Nonexistent table.");
+        values.add("DbTagger_error: Nonexistent table: " + table);
+      }
+    } catch (Exception x) {
+      System.err.println(
+        "DbTagger.matches("+table+", "+field+", "+pattern+"): "+x);
+      values.add("DbTagger_error: "+x.getMessage());
+    } // rdb.close()
+    return values;
+  }
+  
   /**
    * ID of the input layer containing word tokens.
    * @see #getTokenLayerId()

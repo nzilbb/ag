@@ -29,8 +29,8 @@ let fields = {}; // definitions for fields (type/validation etc.)
 const childFields = {}; // definitions for child-table fields (key is child name)
 
 function showForm(data) {
-  if (data.FlatTableTagger_error) {
-    document.getElementById("error").innerText = data.FlatTableTagger_error;
+  if (data.DbTagger_error) {
+    document.getElementById("error").innerText = data.DbTagger_error;
     return;
   }
   const attributes = document.getElementById("attributes");
@@ -115,6 +115,7 @@ function showForm(data) {
       }
     }
   }
+  enableEditLink();
 }
 
 function showChildForm(childField, data) {
@@ -199,6 +200,16 @@ function createFieldValue(valueElement, fieldDefinition, value) {
       } else { // not a link, just text
         span.appendChild(document.createTextNode(value));
       }
+    } else if (fieldDefinition.type == "cross-reference") {
+      if (value) { // can link somewhere
+        const a = document.createElement("a");
+        a.href = document.URL.replace(/\?.*/,"")
+          + "?t="+encodeURIComponent(table)
+          + "&f="+encodeURIComponent(fieldDefinition.validation || field)
+          + "&e="+encodeURIComponent(value)
+        a.appendChild(document.createTextNode(value));
+        span.appendChild(a);
+      }
     } else if (fieldDefinition.type == "html") {
       span.innerHTML = value;
     } else if (fieldDefinition.type == "boolean") {
@@ -249,7 +260,6 @@ getJSON(resourceForFunction("readFields", table), definitions => {
     startLoading();
     showForm(data);
     finishedLoading();
-    enableEditLink();
   });
 });
 
