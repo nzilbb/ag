@@ -57,6 +57,10 @@ utterancePadding
 the end time of each utterance, to allow for alignment errors of
 first/last word in each segment.
 
+disfluencyFormat
+: False starts like "w..." can be transformed to "w~" or "&+w" by specifying
+a format like "$1~" or "&+$1", or no pattern to not transform them.
+
 The pause label definitions (*shortPauseLabel*, *mediumPauseLabel* and
 *longPauseLabel*) may specify that the duration of the pause is
 included in the label, by including a decimal format definition

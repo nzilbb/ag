@@ -42,6 +42,8 @@ import java.util.Spliterator;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonException;
@@ -459,6 +461,30 @@ public class WhisperDeserializer implements GraphDeserializer {
   public WhisperDeserializer setUtterancePadding(Double newUtterancePadding) { utterancePadding = newUtterancePadding; return this; }
   
   /**
+   * False starts like "w..." can be transformed to "w~" or "&amp;+w" by
+   * specifying a format like "$1~" or "&amp;+$1", or "" to not transform
+   * them. Default is "$1~".
+   * @see #getDisfluencyFormat()
+   * @see #setDisfluencyFormat(String)
+   */
+  protected String disfluencyFormat = "$1~";
+  /**
+   * Getter for {@link #disfluencyFormat}: False starts like "w..."
+   * can be transformed to "w~" or "&amp;+w" by specifying a format like
+   * "$1~" or "&amp;+$1".
+   * @return Format to use for disfluencies.
+   */
+  public String getDisfluencyFormat() { return disfluencyFormat; }
+  /**
+   * Setter for {@link #disfluencyFormat}: False starts like "w..."
+   * can be transformed to "w~" or "&amp;+w" by specifying a format
+   * like "$1~" or "&amp;+$1". 
+   * @param newDisfluencyFormat Format to use for disfluencies, or
+   * null or empty string to not transform them. 
+   */
+  public WhisperDeserializer setDisfluencyFormat(String newDisfluencyFormat) { disfluencyFormat = newDisfluencyFormat; return this; }
+  
+  /**
    * Layer for the document language.
    * @see #getLanguageLayer()
    * @see #setLanguageLayer(Layer)
@@ -792,6 +818,19 @@ public class WhisperDeserializer implements GraphDeserializer {
       configuration.get("utterancePadding").setValue(getUtterancePadding());
     }
 
+    if (!configuration.containsKey("disfluencyFormat")) {
+      configuration.addParameter(
+        new Parameter(
+          "disfluencyFormat", String.class, 
+          "Disfluency Format",
+          "False starts like \"w...\" can be transformed to \"w~\" or \"&+w\""
+          +" by specifying a format like \"$1~\" or \"&+$1\","
+          +" or no pattern to not transform them.", false));
+    }
+    if (configuration.get("disfluencyFormat").getValue() == null) {
+      configuration.get("disfluencyFormat").setValue(getDisfluencyFormat());
+    }
+
     return configuration;
   }   
 
@@ -1019,6 +1058,14 @@ public class WhisperDeserializer implements GraphDeserializer {
       if (!segment.containsKey("words")) { // no individual word tokens
         utterance.setLabel(segment.getString("text"));
       } else { // there are individual word tokens
+
+        // do we transform disfluencies?
+        Pattern disfluencyPattern = null;
+        if (disfluencyFormat != null && disfluencyFormat.length() > 0) {
+          disfluencyPattern = Pattern.compile(
+            "(\\w)\\.\\.\\."); // one letter followed by ellipsis
+        }
+        
         JsonArray words = segment.getJsonArray("words");
         Anchor lastEnd = start;
         // each word...
@@ -1034,7 +1081,13 @@ public class WhisperDeserializer implements GraphDeserializer {
           Annotation thisWord = new Annotation(
             null, word.getString("word"), schema.getWordLayerId(),
             wordStart.getId(), wordEnd.getId(), currentTurn.getId());
-          thisWord.setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+          thisWord.setConfidence(Constants.CONFIDENCE_AUTOMATIC);          
+          if (disfluencyPattern != null) {
+            Matcher disfluency = disfluencyPattern.matcher(word.getString("word"));
+            if (disfluency.matches()) {
+              thisWord.setLabel(disfluency.replaceFirst(disfluencyFormat));
+            }
+          }
           graph.addAnnotation(thisWord);
 
           if (lastWord != null

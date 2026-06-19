@@ -78,7 +78,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 9,
+    assertEquals("Configuration parameters" + configuration, 10,
                  deserializer.configure(configuration, schema).size());      
     
     // load the stream
@@ -185,7 +185,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration wants missing word layer" + configuration, 10,
+    assertEquals("Configuration wants missing word layer" + configuration, 11,
                  deserializer.configure(configuration, schema).size());      
     
     // load the stream
@@ -300,7 +300,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 9,
+    assertEquals("Configuration parameters" + configuration, 10,
                  deserializer.configure(configuration, schema).size());
     // defaults
     assertEquals("minShortPauseLength",
@@ -438,7 +438,7 @@ public class TestWhisperDeserializer {
     assertEquals("Correct number of words", 228, words.length);
     String[] checkWords = {
       "Okay,", "go.",
-      "New", "Zealand", "English", "word", "list.",
+      "New", "Zealand", "English", "w~", "words.",
       "Number", "one,", "hit,", "hid,", "hint.",
       "Number", "two,", "boot,", "booed,", "boo,", "tune,", "dune."};
     Double[] checkStarts = {
@@ -509,7 +509,7 @@ public class TestWhisperDeserializer {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     // defaults
-    assertEquals("Configuration parameters" + configuration, 9,
+    assertEquals("Configuration parameters" + configuration, 10,
                  deserializer.configure(configuration, schema).size());      
     assertEquals("minShortPauseLength",
                  Double.valueOf(0.35),
@@ -537,6 +537,8 @@ public class TestWhisperDeserializer {
     // disable maxUtteranceDuration
     configuration.get("maxUtteranceDuration").setValue(null);
     configuration.get("utterancePadding").setValue(null);
+    // and disfluency transformation
+    configuration.get("disfluencyFormat").setValue(null);
 
     // change thresholds
     configuration.get("minShortPauseLength").setValue(0.6);
@@ -625,7 +627,7 @@ public class TestWhisperDeserializer {
     assertEquals("Correct number of words", 228, words.length);
     String[] checkWords = {
       "Okay, (..)", "go.",
-      "New", "Zealand", "English", "word", "list. (..)",
+      "New", "Zealand", "English", "w...", "words. (..)",
       "Number", "one,", "hit,", "hid,", "hint. (0.96)",
       "Number", "two, (0.981)", "boot,", "booed, (.)", "boo, (.)", "tune,", "dune. (0.96)"
     };
@@ -696,7 +698,7 @@ public class TestWhisperDeserializer {
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
-    assertEquals("Configuration parameters" + configuration, 9,
+    assertEquals("Configuration parameters" + configuration, 10,
                  deserializer.configure(configuration, schema).size());
     // defaults
     assertEquals("minShortPauseLength",
