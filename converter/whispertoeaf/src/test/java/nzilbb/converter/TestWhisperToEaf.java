@@ -149,6 +149,6 @@ public class TestWhisperToEaf {
   public void setDir(File fNewDir) { fDir = fNewDir; }
   
   public static void main(String args[]) {
-    org.junit.runner.JUnitCore.main("nzilbb.converter.TestVttToTextGrid");
+    org.junit.runner.JUnitCore.main("nzilbb.converter.TestWhisperToEaf");
   }
 }

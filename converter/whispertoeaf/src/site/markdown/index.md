@@ -17,6 +17,7 @@ Command-line configuration parameters for deserialization:
 | `--longPauseLabel=(...)` | If an inter-word pause has a duration more than minLongPauseLength, then the word before the pause will have this string appended to its label (after a space) e.g. for the the length of the pause in parentheses, use: ({0.000}) |
 | `--maxUtteranceDuration=15.0` | Utterances longer than this will be split on longer inter-word pauses, where possible. |
 | `--utterancePadding=0.5` | Maximum number of seconds to subtract from the start time and add to the end time of each utterance, to allow for alignment errors of first/last word in each segment. |
+| `--disfluencyFormat=$1~` | False starts like "w..." can be transformed to "w~" or "&+w" by specifying a format like "$1~" or "&+$1", or no pattern to not transform them. |
 
 ## Serializing to "ELAN EAF Transcript" text/x-eaf+xml
 

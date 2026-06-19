@@ -26,7 +26,7 @@
     {
       "start": 5.063,
       "end": 7.003,
-      "text": "New Zealand English word list.",
+      "text": "New Zealand English w... words.",
       "words": [
         {
           "word": "New",
@@ -50,14 +50,14 @@
           "speaker": "SPEAKER_00"
         },
         {
-          "word": "word",
+          "word": "w...",
           "start": 6.283,
           "end": 6.603,
           "score": 0.89,
           "speaker": "SPEAKER_00"
         },
         {
-          "word": "list.",
+          "word": "words.",
           "start": 6.643,
           "end": 7.003,
           "score": 0.826,
@@ -2201,14 +2201,14 @@
       "speaker": "SPEAKER_00"
     },
     {
-      "word": "word",
+      "word": "w...",
       "start": 6.283,
       "end": 6.603,
       "score": 0.89,
       "speaker": "SPEAKER_00"
     },
     {
-      "word": "list.",
+      "word": "words.",
       "start": 6.643,
       "end": 7.003,
       "score": 0.826,
