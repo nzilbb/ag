@@ -1189,7 +1189,7 @@ public class MFA extends Annotator {
    * Determines which layers the annotator requires in order to annotate a graph.
    * @return A list of layer IDs. In this case, the annotator only requires the schema's
    * word layer.
-   * @throws InvalidConfigurationException If {@link #setTasPkarameters(String)} or 
+   * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
    * {@link #setSchema(Schema)} have not yet been called.
    */
   public String[] getRequiredLayers() throws InvalidConfigurationException {

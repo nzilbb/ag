@@ -388,7 +388,7 @@ public class TestMFA {
   /**
    * Test alignment of fragment with pre-trained IPA models/dictionary
    * (english_ipa/english_uk_ipa), updating word token alignments and creating children.
-   * Also test that channel selection by partcipant and transcript attribute works.
+   * Also test that channel selection by participant and transcript attribute works.
    */
   @Test public void pretrainedIPAModels() throws Exception {
     annotator.setSessionName("pretrainedIPAModels");
