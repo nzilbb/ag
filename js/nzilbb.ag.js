@@ -585,9 +585,11 @@
       var tag = new nzilbb.ag.Annotation(layerId, label, this.graph, this.startId, this.endId);
       if (tag.layer.parent == this.layer) {
         // tag is child of this
+	tag.parentId = this.id;
 	tag.parent = this;
       } else if (tag.layer.parent == this.layer.parent) {
         // this layer and tag layer share a parent
+	tag.parentId = this.parent.id;
 	tag.parent = this.parent;
       }
       this.graph.addAnnotation(tag);
