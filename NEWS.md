@@ -5,6 +5,8 @@
 - Include default values in documentation of converter parameters.
 - Ensure that new converter icons can replace old icons.
 
+For LaBB-CAT version 20260714.1200
+
 # nzilbb.ag 1.3.0
 
 - Graph Validator ensures there are no blank labels, and can validate graph ID length.
