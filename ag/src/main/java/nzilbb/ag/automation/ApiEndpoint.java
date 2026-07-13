@@ -24,7 +24,7 @@ package nzilbb.ag.automation;
 import java.lang.annotation.*;
 
 /**
- * Annotation for exposing an {@link #Annotator} method as a possible
+ * Annotation for exposing an {@link Annotator} method as a possible
  * API endpoint for the 'ext' webapp, which specifies the role the
  * user must have in order to access the endpoint - "view" for any
  * user, "edit" for users with read/write privileges, and "admin" for

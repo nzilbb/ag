@@ -30,15 +30,15 @@ Command-line configuration parameters for deserialization:
 | `--lexicalLayer=`*Layer* | Lexical tags |
 | `--pronounceLayer=`*Layer* | Non-standard pronunciation tags |
 | `--orthographyLayer=`*Layer* | Orthography |
-| `--useConventions=`*Boolean* | Whether to use text conventions for comment, noise, lexical, and pronounce annotations |
-| `--maxParticipantLength=`*Integer* | The maximum length of a participant name |
-| `--maxHeaderLines=`*Integer* | The maximum number of lines in a meta-data header |
-| `--participantFormat=`*String* | Format for marking a change of turn within the transcript body - e.g. {0}:, where {0} is a place-holder for the participant ID/name |
-| `--metaDataFormat=`*String* | Format for a meta-data line in the header - e.g. {0}={1}, where {0} is a place-holder for the attribute name or key, and {1} is a place-holder for the attribute value |
-| `--tagFormat=`*String* | Output format for tags - e.g. {0}_{1} for output like 'the_DET', where {0} is a place-holder for the word, and {1} is a place-holder for annotation label |
-| `--includeMissingTags=`*Boolean* | Whether to output missing tags with Tag Format, e.g. if the word 'the' has no tag, setting this to true will output 'the_', and false will output 'the'. |
-| `--timestampFormat=`*String* | Format for a time stamp - e.g. HH:mm:ss.SSS |
-| `--nonWordPattern=`*String* | Regular expression to identify non-word characters for joining to a neighboring words e.g. (\([0-9]+\.[0-9]+\))|([\p{Punct}&&[^_]]) - set this blank to simply tokenize on spaces. |
+| `--useConventions=true` | Whether to use text conventions for comment, noise, lexical, and pronounce annotations |
+| `--maxParticipantLength=20` | The maximum length of a participant name |
+| `--maxHeaderLines=50` | The maximum number of lines in a meta-data header |
+| `--participantFormat={0}: ` | Format for marking a change of turn within the transcript body - e.g. {0}:, where {0} is a place-holder for the participant ID/name |
+| `--metaDataFormat={0}={1}` | Format for a meta-data line in the header - e.g. {0}={1}, where {0} is a place-holder for the attribute name or key, and {1} is a place-holder for the attribute value |
+| `--tagFormat={0}_{1}` | Output format for tags - e.g. {0}_{1} for output like 'the_DET', where {0} is a place-holder for the word, and {1} is a place-holder for annotation label |
+| `--includeMissingTags=false` | Whether to output missing tags with Tag Format, e.g. if the word 'the' has no tag, setting this to true will output 'the_', and false will output 'the'. |
+| `--timestampFormat=HH:mm:ss.SSS` | Format for a time stamp - e.g. HH:mm:ss.SSS |
+| `--nonWordPattern=(\([0-9]+\.[0-9]+\))|([\p{Punct}&&[^_]])` | Regular expression to identify non-word characters for joining to a neighboring words e.g. (\([0-9]+\.[0-9]+\))|([\p{Punct}&&[^_]]) - set this blank to simply tokenize on spaces. |
 
 ## Serializing to "ELAN EAF Transcript" text/x-eaf+xml
 
@@ -54,6 +54,6 @@ Command-line configuration parameters for serialization:
 | `--dateLayer=`*Layer* | Document date |
 | `--languageLayer=`*Layer* | The language of the whole transcript |
 | `--phraseLanguageLayer=`*Layer* | For tagging individual phrases with a language |
-| `--useConventions=`*Boolean* | Whether to use text conventions for comment, noise, lexical, and pronounce annotations |
-| `--ignoreBlankAnnotations=`*Boolean* | Whether to skip annotations with no label, or process them |
-| `--minimumTurnPauseLength=`*Double* | Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one. |
+| `--useConventions=true` | Whether to use text conventions for comment, noise, lexical, and pronounce annotations |
+| `--ignoreBlankAnnotations=true` | Whether to skip annotations with no label, or process them |
+| `--minimumTurnPauseLength=0.0` | Minimum amount of time between two turns by the same speaker, with no intervening speaker, for which the inter-turn pause counts as a turn change boundary. If the pause is shorter than this, the turns are merged into one. |

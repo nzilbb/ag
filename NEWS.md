@@ -1,3 +1,10 @@
+# nzilbb.ag 1.4.0
+
+- Improvements to graph merge by minimising unnecessary changes.
+- Improve Annotator webapp security by only invoking methods annotated with user role.
+- Include default values in documentation of converter parameters.
+- Ensure that new converter icons can replace old icons.
+
 # nzilbb.ag 1.3.0
 
 - Graph Validator ensures there are no blank labels, and can validate graph ID length.
