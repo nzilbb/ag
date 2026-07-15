@@ -80,9 +80,22 @@ pronounceLayer
 : ID of layer for manual pronunciation tags
 (see [Transcription Conventions](#conventions)).
 
-renameShortNumericSpeakers
-: If `true`, short speaker names like 'S1' will be prefixed with the transcript name
-during import.
+renameParticipantsMatching
+: Participants matching this regular expression will be renamed using
+*renameParticipantsTo*. The regular expression can contain groups that
+can be referenced in *renameParticipantsTo*, e.g. setting
+*renameParticipantsMatching* to `speaker ([0-9]+)` and
+*renameParticipantsTo* to `${id}-$1` will rename speakers in
+`Robert-Fromont.TextGrid` with IDs like `speaker 2` to something like
+`Robert-Fromont-2`
+
+renameParticipantsTo
+: Participants matching *renameParticipantMatching* will be renamed
+using this pattern. The pattern can contain back-references to
+capturing groups in *renameParticipantMatching*, and also the
+following variables:
+- `${id}` - the transcript ID (without the filename extension/suffix)
+- `${filename}` - the TextGrid filename
 
 allowPeerOverlap
 : If `true`, allows TextGrids with, for example, multiple segment tiers,

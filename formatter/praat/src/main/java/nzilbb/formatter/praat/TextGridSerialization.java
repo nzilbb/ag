@@ -28,6 +28,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import nzilbb.ag.*;
@@ -249,28 +250,95 @@ public class TextGridSerialization
    * @return This object.
    */
   public TextGridSerialization setUseConventions(Boolean bNewUseConventions) { bUseConventions = bNewUseConventions; return this; }
-   
+  
   /**
-   * Short speaker names like "S1" should be prefixed with the transcript name during import.
-   * @see #getRenameShortNumericSpeakers()
-   * @see #setRenameShortNumericSpeakers(Boolean)
+   * Participants matching this regular expression will be renamed
+   * using {@link #renameParticipantsTo}.
+   * <p> The regular expression can contain groups that can be referenced
+   * in {@link #renameParticipantsTo},
+   * e.g. setting <var>renameParticipantsMatching</var> to <q>speaker ([0-9]+)</q>
+   * and <var>renameParticipantsTo</var> to <q>${id}-$1</q> will 
+   * rename speakers in <tt>Robert-Fromont.TextGrid</tt> with IDs like
+   * <tt>speaker 2</tt> to something like <tt>Robert-Fromont-2</tt>
+   * @see #getRenameParticipantsMatching()
+   * @see #setRenameParticipantsMatching(String)
    */
-  protected Boolean renameShortNumericSpeakers = Boolean.FALSE;
+  protected String renameParticipantsMatching;
   /**
-   * Getter for {@link #renameShortNumericSpeakers}: Short speaker names like "S1" should
-   * be prefixed with the transcript name during import. 
-   * @return Short speaker names like "S1" should be prefixed with the transcript name
-   * during import. 
+   * Getter for {@link #renameParticipantsMatching}: Participants
+   * matching this regular expression will be renamed using {@link #renameParticipantsTo}. 
+   * @return Participants matching this regular expression will be
+   * renamed using {@link #renameParticipantsTo}. 
    */
-  public Boolean getRenameShortNumericSpeakers() { return renameShortNumericSpeakers; }
+  public String getRenameParticipantsMatching() { return renameParticipantsMatching; }
   /**
-   * Setter for {@link #renameShortNumericSpeakers}: Short speaker names like "S1" should
-   * be prefixed with the transcript name during import. 
-   * @param newRenameShortNumericSpeakers Short speaker names like "S1" should be prefixed
-   * with the transcript name during import. 
-   * @return This object.
+   * Setter for {@link #renameParticipantsMatching}: Participants
+   * matching this regular expression will be renamed using
+   * {@link #renameParticipantsTo}.  
+   * <p> The regular expression can contain groups that can be referenced
+   * in {@link #renameParticipantsTo},
+   * e.g. setting <var>renameParticipantsMatching</var> to <q>speaker ([0-9]+)</q>
+   * and <var>renameParticipantsTo</var> to <q>${id}-$1</q> will 
+   * rename speakers in <tt>Robert-Fromont.TextGrid</tt> with IDs like
+   * <tt>speaker 2</tt> to something like <tt>Robert-Fromont-2</tt>
+   * @param newRenameParticipantsMatching Participants matching this
+   * pattern will be renamed using {@link #renameParticipantsTo}. 
    */
-  public TextGridSerialization setRenameShortNumericSpeakers(Boolean newRenameShortNumericSpeakers) { renameShortNumericSpeakers = newRenameShortNumericSpeakers; return this; }
+  public TextGridSerialization setRenameParticipantsMatching(
+    String newRenameParticipantsMatching) throws PatternSyntaxException {
+    if (newRenameParticipantsMatching != null
+        && newRenameParticipantsMatching.length() > 0) {
+      // ensure it's a valid pattern
+      Pattern.compile(newRenameParticipantsMatching);
+    }
+    
+    renameParticipantsMatching = newRenameParticipantsMatching;
+    return this;
+  }
+  
+  /**
+   * Participants matching {@link renameParticipantMatching} will be
+   * renamed using this pattern. 
+   * <p> The pattern can contain back-references to capturing groups in
+   * {@link renameParticipantMatching}, and also the following
+   * variables:
+   * <ul>
+   *  <li><tt>${id}</tt> - the transcript ID (without the filename extension/suffix)</li>
+   *  <li><tt>${filename}</tt> - the TextGrid filename</li>
+   * </ul>
+   * e.g. setting <var>renameParticipantsMatching</var> to <q>speaker ([0-9]+)</q>
+   * and <var>renameParticipantsTo</var> to <q>${id}-$1</q> will 
+   * rename speakers in <tt>Robert-Fromont.TextGrid</tt> with IDs like
+   * <tt>speaker 2</tt> to something like <tt>Robert-Fromont-2</tt>
+   * @see #getRenameParticipantsTo()
+   * @see #setRenameParticipantsTo(String)
+   */
+  protected String renameParticipantsTo;
+  /**
+   * Getter for {@link #renameParticipantsTo}: Participants matching
+   * {@link renameParticipantMatching} will be renamed using this pattern. 
+   * @return Participants matching {@link renameParticipantMatching} will be
+   * renamed using this pattern. 
+   */
+  public String getRenameParticipantsTo() { return renameParticipantsTo; }
+  /**
+   * Setter for {@link #renameParticipantsTo}: Participants matching
+   * {@link renameParticipantMatching} will be renamed using this pattern. 
+   * <p> The pattern can contain back-references to capturing groups in
+   * {@link renameParticipantMatching}, and also the following
+   * variables:
+   * <ul>
+   *  <li><tt>${id}</tt> - the transcript ID (without the filename extension/suffix)</li>
+   *  <li><tt>${filename}</tt> - the TextGrid filename</li>
+   * </ul>
+   * e.g. setting <var>renameParticipantsMatching</var> to <q>speaker ([0-9]+)</q>
+   * and <var>renameParticipantsTo</var> to <q>${id}-$1</q> will 
+   * rename speakers in <tt>Robert-Fromont.TextGrid</tt> with IDs like
+   * <tt>speaker 2</tt> to something like <tt>Robert-Fromont-2</tt>
+   * @param newRenameParticipantsTo Participants matching
+   * {@link renameParticipantMatching} will be renamed using this pattern. 
+   */
+  public TextGridSerialization setRenameParticipantsTo(String newRenameParticipantsTo) { renameParticipantsTo = newRenameParticipantsTo; return this; }
   
   /**
    * Allow multiple tiers when annotations actually overlap in layers where they
@@ -661,14 +729,21 @@ public class TextGridSerialization
       p.setPossibleValues(candidateLayers.values());
     }
 
-    if (!configuration.containsKey("renameShortNumericSpeakers")) {
+    if (!configuration.containsKey("renameParticipantsMatching")) {
       configuration.addParameter(
-        new Parameter("renameShortNumericSpeakers", Boolean.class, 
-                      "Rename Short Numeric Speakers",
-                      "Short speaker names like 'S1' should be prefixed with the transcript name during import", true));
+        new Parameter(
+          "renameParticipantsMatching", String.class, 
+          "Rename Speakers Matching",
+          "A regular expression identifying participants that should be renamed using renameParticipantsTo - e.g. S([0-9])",
+          false));
     }
-    if (configuration.get("renameShortNumericSpeakers").getValue() == null) {
-      configuration.get("renameShortNumericSpeakers").setValue(Boolean.TRUE);
+    if (!configuration.containsKey("renameParticipantsTo")) {
+      configuration.addParameter(
+        new Parameter(
+          "renameParticipantsTo", String.class, 
+          "Rename Speakers To",
+          "A pattern specifying how participants identified by renameParticipantsTo should be renamed - may contain capturing group referencs like $1, or ${id}/${filename} for the filename without/with extension - e.g. ${id}-$1",
+          false));
     }
 
     if (!configuration.containsKey("allowPeerOverlap")) {
@@ -1537,6 +1612,21 @@ public class TextGridSerialization
       } // parent STILL not set
     } // next annotation
     if (timers != null) timers.end("set parents");
+
+    // rename speakers if required
+    if (renameParticipantsMatching != null && renameParticipantsMatching.length() > 0
+        && renameParticipantsTo != null && renameParticipantsTo.length() > 0) {
+      Pattern regexp = Pattern.compile(renameParticipantsMatching);
+      String destinationPattern = renameParticipantsTo
+        .replace("${filename}", graph.getId())
+        .replace("${id}", IO.WithoutExtension(graph.getId()));
+      for (Annotation participant : graph.all(participantLayer.getId())) {
+        Matcher matcher = regexp.matcher(participant.getLabel());
+        if (matcher.matches()) {
+          participant.setLabel(matcher.replaceFirst(destinationPattern));
+        }
+      }
+    }
 
     // ensure anchors are shared between children and parents where required
     if (timers != null) timers.start("anchor sharing");
