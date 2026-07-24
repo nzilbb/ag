@@ -104,10 +104,7 @@ public class IloNasinTagger extends Annotator {
   }
    
   /**
-   * Downloads and installs the POS tagger.
-   * <p> If there is no .zip file from which to unpack the POS tagger, it's downloaded
-   * from <a href="https://nlp.stanford.edu/software/stanford-tagger-4.2.0.zip">
-   * https://nlp.stanford.edu/software/stanford-tagger-4.2.0.zip</a>.
+   * Installs the POS tagger from npm.
    * @throws InvalidConfigurationException
    * @see #getConfig()
    * @see #beanPropertiesFromQueryString(String)
