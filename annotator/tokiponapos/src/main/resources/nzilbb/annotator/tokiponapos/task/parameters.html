@@ -1,0 +1,21 @@
+<h3>ilo-nasin Toki Pona POS Tagger</h3>
+
+<p> This annotator tags <a href="https://tokipona.org/">Toki Pona</a> words
+  with their part of speech (POS) according to the 
+  <a href="https://github.com/cubedhuang/ilo-nasin/">ilo-nasin</a> tagger. </p>
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>tokenLayerId=orthography&chunkLayerId=utterance&posLayerId=pos</samp> </p>
+
+<p> Parameters are: </p>
+<dl>
+  <dt> tokenLayerId </dt> <dd> Input layer from which words come. </dd>
+  <dt> transcriptLanguageLayerId </dt> <dd> Transcript attribute for overall language. </dd>
+  <dt> phraseLanguageLayerId </dt> <dd> Layer for annotating phrases in a different
+    language. </dd> 
+  <dt> targetLanguagePattern </dt> <dd> Regular expression for the ISO language codes
+    of the languages to target, or blank for all. </dd> 
+  <dt> posLayerId </dt> <dd> Output layer on which part of speech annotations are added. </dd>
+  <dt> tokenExclusionPattern </dt> <dd> Pattern to match tokens that should be excluded
+    from tagging - e.g. um|ah|mm|.*~ </dd> 
+</dl>

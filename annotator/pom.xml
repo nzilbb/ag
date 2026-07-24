@@ -39,5 +39,6 @@
     <module>partitioner</module>
     <module>stanfordner</module>
     <module>db</module>
+    <module>tokiponapos</module>
   </modules>
 </project>
