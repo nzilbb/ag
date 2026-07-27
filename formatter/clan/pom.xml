@@ -11,7 +11,7 @@
   <artifactId>nzilbb.formatter.clan</artifactId>
   <name>nzilbb.formatter.clan</name>
   <description>Serialization for CHAT files produced by CLAN.</description>
-  <version>1.4.2</version>
+  <version>1.4.3</version>
 
   <properties>
     <package.path>nzilbb/formatter/clan/</package.path>
@@ -25,7 +25,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4</version>
+      <version>1.4.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

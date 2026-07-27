@@ -11,7 +11,7 @@
   <artifactId>nzilbb.formatter.pdf</artifactId>
   <name>nzilbb.formatter.pdf</name>
   <description>Serializer for producing PDFs.</description>
-  <version>0.5.2</version>
+  <version>0.5.3</version>
 
   <properties>
     <package.path>nzilbb/formatter/pdf/</package.path>
@@ -25,7 +25,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4</version>
+      <version>1.4.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

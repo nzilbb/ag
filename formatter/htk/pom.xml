@@ -11,7 +11,7 @@
   <artifactId>nzilbb.formatter.htk.mlf</artifactId>
   <name>nzilbb.formatter.htk.mlf</name>
   <description>Serializer/Deserializer of files for use with the HMM Toolkit (HTK).</description>
-  <version>1.4.0</version>
+  <version>1.4.1</version>
 
   <properties>
     <package.path>nzilbb/formatter/htk/mlf/</package.path>
@@ -25,7 +25,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4</version>
+      <version>1.4.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

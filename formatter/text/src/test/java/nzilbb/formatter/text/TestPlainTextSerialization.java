@@ -101,7 +101,7 @@ public class TestPlainTextSerialization
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
 
     // load the stream
@@ -263,7 +263,7 @@ public class TestPlainTextSerialization
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
 
     // load the stream
@@ -385,7 +385,7 @@ public class TestPlainTextSerialization
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
 
     // load the stream
@@ -570,7 +570,7 @@ public class TestPlainTextSerialization
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
     configuration.get("nonWordPattern").setValue("");
     assertEquals("Configuration parameters" + configuration,
@@ -647,7 +647,7 @@ public class TestPlainTextSerialization
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
 
     // load the stream
@@ -807,7 +807,7 @@ public class TestPlainTextSerialization
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
 
     // load the stream
@@ -976,7 +976,7 @@ public class TestPlainTextSerialization
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
 
     // load the stream
@@ -1115,7 +1115,7 @@ public class TestPlainTextSerialization
     assertEquals("timestampFormat", "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
 
     // load the stream
@@ -1238,7 +1238,7 @@ public class TestPlainTextSerialization
     assertEquals("timestampFormat", "'['HH:mm:ss']'",
                  configuration.get("timestampFormat").getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
 
     // load the stream
@@ -1366,7 +1366,7 @@ public class TestPlainTextSerialization
     assertEquals("timestampFormat", "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
 
     // load the stream
@@ -1496,7 +1496,7 @@ public class TestPlainTextSerialization
                  "HH:mm:ss.SSS",
                  configuration.get("timestampFormat").getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
 
     // load the stream

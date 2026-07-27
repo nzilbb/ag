@@ -71,7 +71,7 @@ public class TestVttSerialization {
     assertEquals("Configuration parameters" + configuration, 1,
                  deserializer.configure(configuration, schema).size());      
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
 
     // load the stream
@@ -448,7 +448,7 @@ public class TestVttSerialization {
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("nonWordPattern",
-                 "[\\p{Punct}&&[^_]]",
+                 "(\\([0-9]+\\.[0-9]+\\))|([\\p{Punct}&&[^_]])",
                  configuration.get("nonWordPattern").getValue());
     configuration.get("nonWordPattern").setValue("");
     assertEquals("Configuration parameters" + configuration, 1,

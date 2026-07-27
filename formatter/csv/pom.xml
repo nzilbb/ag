@@ -11,7 +11,7 @@
   <artifactId>nzilbb.formatter.csv</artifactId>
   <name>nzilbb.formatter.csv</name>
   <description>Serializer for converting to CSV files.</description>
-  <version>1.4.1</version>
+  <version>1.4.2</version>
 
   <properties>
     <package.path>nzilbb/formatter/csv/</package.path>
@@ -25,7 +25,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4</version>
+      <version>1.4.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

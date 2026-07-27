@@ -11,7 +11,7 @@
   <artifactId>nzilbb.formatter.webvtt</artifactId>
   <name>nzilbb.formatter.webvtt</name>
   <description>Serializer/Deserializer for WebVTT subtitle files.</description>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
 
   <properties>
     <package.path>nzilbb/formatter/webvtt/</package.path>
@@ -25,7 +25,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.2.4</version>
+      <version>1.4.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
