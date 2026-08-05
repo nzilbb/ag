@@ -11,6 +11,9 @@ authors:
 repository-code: 'https://github.com/nzilbb/ag/'
 url: 'https://github.com/nzilbb/ag/'
 repository-artifact: 'https://search.maven.org/artifact/nz.ilbb.ag/nzilbb.ag'
+programming-languages:
+  - java
+  - antlr
 abstract: >-
   Implementations of an Annotation Graph API for linguistic
   annotations.

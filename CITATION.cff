@@ -11,19 +11,22 @@ authors:
 repository-code: https://github.com/nzilbb/ag/
 url: https://github.com/nzilbb/ag/
 repository-artifact: https://search.maven.org/artifact/nz.ilbb.ag/nzilbb.ag
+programming-languages:
+- java
+- antlr
 abstract: Implementations of an Annotation Graph API for linguistic annotations.
 keywords:
 - Annotation Graph
 - Linguistic Annotation
 license: AGPL-3.0-or-later
-version: 1.4.0
-date-released: 2026-07-13
+version: 1.4.1
+date-released: 2026-08-05
 references:
 - type: software
   title: ANTLR 4 Runtime
   version: 4.7.2
   abbreviation: org.antlr:antlr4-runtime
-  license-url: http://www.antlr.org/license.html
+  license: BSD-3-Clause
   notes: More license information can be found in the ag/THIRD-PARTY/ANTLR_4_Runtime
     directory.
   authors:
@@ -125,7 +128,7 @@ references:
   title: JSR 374 (JSON Processing) Default Provider
   version: 1.1.4
   abbreviation: org.glassfish:javax.json
-  license: CDDL-1.1
+  license-url: https://oss.oracle.com/licenses/CDDL+GPL-1.1
   notes: More license information can be found in the ag/THIRD-PARTY/JSR_374_JSON_Processing_Default_Provider
     directory.
   authors:

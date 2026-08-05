@@ -1,3 +1,8 @@
+# nzilbb.ag 1.4.1
+
+For transcript/annotation file format converters, add a graphical user
+interface for configuring de/serializer configuration parameters.
+
 # nzilbb.ag 1.4.0
 
 - Improvements to graph merge by minimising unnecessary changes.
