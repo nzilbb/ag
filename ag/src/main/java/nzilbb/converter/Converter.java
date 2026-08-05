@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2023 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -22,6 +22,7 @@
 package nzilbb.converter;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
@@ -47,9 +48,12 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
 import java.util.stream.Collectors;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -60,9 +64,14 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.border.Border;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import nzilbb.ag.*;
 import nzilbb.ag.serialize.GraphDeserializer;
@@ -282,6 +291,56 @@ public abstract class Converter extends GuiProgram {
   } // end of getSchema()
   
   /**
+   * Configuration of the deserializer, accumulated from its default
+   * options, the command line, and the options panel. 
+   * @see #getDeserializerConfig()
+   * @see #setDeserializerConfig(ParameterSet)
+   */
+  protected ParameterSet deserializerConfig = null;
+  /**
+   * Getter for {@link #deserializerConfig}: Configuration of
+   * the deserializer, accumulated from its default options, the
+   * command line, and the options panel. 
+   * @return Configuration of the deserializer, accumulated from its
+   * default options, the command line, and the options panel. 
+   */
+  public ParameterSet getDeserializerConfig() { return deserializerConfig; }
+  /**
+   * Setter for {@link #deserializerConfig}: Configuration of
+   * the deserializer, accumulated from its default options, the
+   * command line, and the options panel. 
+   * @param newDeserializerConfig Configuration of the
+   * deserializer, accumulated from its default options, the command
+   * line, and the options panel. 
+   */
+  public Converter setDeserializerConfig(ParameterSet newDeserializerConfig) { deserializerConfig = newDeserializerConfig; return this; }
+
+  /**
+   * Configuration of the serializer, accumulated from its default
+   * options, the command line, and the options panel. 
+   * @see #getSerializerConfig()
+   * @see #setSerializerConfig(ParameterSet)
+   */
+  protected ParameterSet serializerConfig = null;
+  /**
+   * Getter for {@link #serializerConfig}: Configuration of the
+   * serializer, accumulated from its default options, the command
+   * line, and the options panel. 
+   * @return Configuration of the serializer, accumulated from its
+   * default options, the command line, and the options panel. 
+   */
+  public ParameterSet getSerializerConfig() { return serializerConfig; }
+  /**
+   * Setter for {@link #serializerConfig}: Configuration of the
+   * serializer, accumulated from its default options, the command
+   * line, and the options panel. 
+   * @param newSerializerConfig Configuration of the
+   * serializer, accumulated from its default options, the command
+   * line, and the options panel. 
+   */
+  public Converter setSerializerConfig(ParameterSet newSerializerConfig) { serializerConfig = newSerializerConfig; return this; }
+  
+  /**
    * Normalizer to use, if any. Default is a {@link Normalizer} object.
    * @see #getNormalizer()
    * @see #setNormalizer(GraphTransformer)
@@ -386,11 +445,14 @@ public abstract class Converter extends GuiProgram {
     if (verbose) System.out.println("Serializing with " + serializer.getDescriptor());
       
     // configure serializer
-    ParameterSet serializerConfig = serializer.configure(new ParameterSet(), schema);
-    // let the subclass adjust the config
-    serializerConfig = serializerConfiguration(serializerConfig);
-    // get setting from command line
-    configureFromCommandLine(serializerConfig, graphs[0].getSchema());
+    if (serializerConfig == null) { // not configured yet
+      serializerConfig = serializer.configure(new ParameterSet(), schema);
+      // let the subclass adjust the config
+      serializerConfig = serializerConfiguration(serializerConfig);
+      // get setting from command line
+      configureFromCommandLine(serializerConfig, graphs[0].getSchema());
+    }
+    // TODO serializerConfig = configure from option panel
     if (verbose) {
       if (serializerConfig.size() == 0) {
         System.out.println("No serializer serializerConfig parameters are required.");
@@ -489,11 +551,14 @@ public abstract class Converter extends GuiProgram {
     if (verbose) System.out.println("Serializing with " + serializer.getDescriptor());
       
     // configure serializer
-    ParameterSet serializerConfig = serializer.configure(new ParameterSet(), schema);
-    // let the subclass adjust the config
-    serializerConfig = serializerConfiguration(serializerConfig);
-    // get setting from command line
-    configureFromCommandLine(serializerConfig, schema);
+    if (serializerConfig == null) { // not configured yet
+      serializerConfig = serializer.configure(new ParameterSet(), schema);
+      // let the subclass adjust the config
+      serializerConfig = serializerConfiguration(serializerConfig);
+      // get setting from command line
+      configureFromCommandLine(serializerConfig, schema);
+    }
+    // TODO serializerConfig = serializer.configure from option pane
     if (verbose) {
       if (serializerConfig.size() == 0) {
         System.out.println("No serializer serializerConfig parameters are required.");
@@ -552,12 +617,14 @@ public abstract class Converter extends GuiProgram {
     if (verbose) System.out.println("Deserializing with " + deserializer.getDescriptor());
 
     // configure deserializer
-    ParameterSet deserializerConfig = deserializer.configure(new ParameterSet(), schema);
-    // let the subclass adjust the config
-    deserializerConfig = deserializerConfiguration(deserializerConfig);
-    // let the command line options take effect
-    configureFromCommandLine(deserializerConfig, schema);
-    
+    if (deserializerConfig == null) { // not configured yet
+      deserializerConfig = deserializer.configure(new ParameterSet(), schema);
+      // let the subclass adjust the config
+      deserializerConfig = deserializerConfiguration(deserializerConfig);
+      // let the command line options take effect
+      configureFromCommandLine(deserializerConfig, schema);
+    }
+    //TODO deserializerConfig = deserializer.configure from option panel
     if (verbose) {
       if (deserializerConfig.size() == 0) {
         System.out.println("No deserializer configuration parameters are required.");
@@ -645,12 +712,40 @@ public abstract class Converter extends GuiProgram {
   public void init() {
       
     interpretAppletParameters();
+    Schema schema = getSchema();
 
+    // configure serializer
+    GraphSerializer serializer = getSerializer();
+    serializerConfig = serializer.configure(new ParameterSet(), schema);
+    // let the subclass adjust the config
+    serializerConfig = serializerConfiguration(serializerConfig);
+    // get setting from command line
+    configureFromCommandLine(serializerConfig, schema);
+
+    // configure deserializer
+    GraphDeserializer deserializer = getDeserializer();
+    deserializerConfig = deserializer.configure(new ParameterSet(), schema);
+    // let the subclass adjust the config
+    deserializerConfig = deserializerConfiguration(deserializerConfig);
+    // get setting from command line
+    configureFromCommandLine(deserializerConfig, schema);
+    
     // build UI
     frame_.getContentPane().setLayout(new BorderLayout());
 
     JMenuBar menuBar = new JMenuBar();
     frame_.setJMenuBar(menuBar);
+
+    JMenu configMenu = new JMenu("Configuration");
+    menuBar.add(configMenu);
+    configMenu.setMnemonic(KeyEvent.VK_O);
+    JMenuItem fromConfig = new JMenuItem(getDeserializer().getDescriptor().getName());
+    configMenu.add(fromConfig);
+    fromConfig.setMnemonic(KeyEvent.VK_F);
+    JMenuItem toConfig = new JMenuItem(getSerializer().getDescriptor().getName());
+    configMenu.add(toConfig);
+    toConfig.setMnemonic(KeyEvent.VK_T);
+
     JMenu helpMenu = new JMenu("Help");
     menuBar.add(helpMenu);
     helpMenu.setMnemonic(KeyEvent.VK_H);
@@ -691,9 +786,41 @@ public abstract class Converter extends GuiProgram {
     frame_.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) { System.exit(0); }});
 
-    info.addActionListener(new ActionListener() {
+    fromConfig.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           // create a JTextArea
+          JPanel options = getOptionsPanel(deserializerConfig);
+          JDialog dlg = new JOptionPane(new JScrollPane(options)).createDialog(
+            frame_, getDeserializer().getDescriptor().getName());
+          if (dlg.getHeight() > frame_.getHeight()) {
+            dlg.setSize(dlg.getWidth() + 40, frame_.getHeight());
+          }
+          dlg.setLocation((int)(frame_.getLocation().getX()
+                                + ((frame_.getWidth() - dlg.getWidth())/2)),
+                          (int)(frame_.getLocation().getY()
+                                + ((frame_.getHeight() - dlg.getHeight())/2)));
+          dlg.setVisible(true);
+        }
+      });
+
+    toConfig.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          JPanel options = getOptionsPanel(serializerConfig);
+          JDialog dlg = new JOptionPane(new JScrollPane(options)).createDialog(
+            frame_, getSerializer().getDescriptor().getName());
+          if (dlg.getHeight() > frame_.getHeight()) {
+            dlg.setSize(dlg.getWidth() + 40, frame_.getHeight());
+          }
+          dlg.setLocation((int)(frame_.getLocation().getX()
+                                + ((frame_.getWidth() - dlg.getWidth())/2)),
+                          (int)(frame_.getLocation().getY()
+                                + ((frame_.getHeight() - dlg.getHeight())/2)));
+          dlg.setVisible(true);
+        }
+      });
+
+    info.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
           JTextArea textArea = new JTextArea();
           textArea.setText(help());
           textArea.setCaretPosition(0);
@@ -823,6 +950,153 @@ public abstract class Converter extends GuiProgram {
   }
   
   /**
+   * Return a panel with options for the given deserializer.
+   * @param deserializer
+   * @return An interactive panel for editing the options of the deserializer.
+   */
+  public JPanel getOptionsPanel(ParameterSet configuration) {
+    if (configuration.size() == 0) {
+      JPanel options = new JPanel(new FlowLayout());
+      options.add(new JLabel(
+                    "There are no configuration parameters for deserialization"));
+      return options;
+    } else {
+      
+      JPanel options = new JPanel(new java.awt.GridLayout(
+                                    configuration.size(), 2, 3, 3));
+      for (Parameter p : configuration.values()) {
+        JLabel label = new JLabel(p.getName());
+        label.setToolTipText(p.getHint());
+        options.add(label);
+        if (p.getPossibleValues() != null) {
+          Schema schema = getSchema();
+          JComboBox layer = new JComboBox();
+          for (Object v : p.getPossibleValuesArray()) layer.addItem(v);
+          layer.setEditable(true);
+          if (p.getValue() != null) {
+            layer.setSelectedItem(p.getValue());
+          }
+          layer.setToolTipText(p.getHint());
+          options.add(layer);
+          layer.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                p.setValue(layer.getSelectedItem());
+              }
+            });
+        } else if (p.getType().equals(Integer.class)) {
+          JTextField integer = new JTextField();
+          if (p.getValue() != null) {
+            integer.setText(p.getValue().toString());
+          }
+          integer.setToolTipText(p.getHint());
+          options.add(integer); // TODO ensure can be only "" or an integer
+          final Border defaultBorder = integer.getBorder();
+          integer.getDocument().addDocumentListener(new DocumentListener() {
+              public void insertUpdate(DocumentEvent e) {
+                try {
+                  p.setValue(Integer.valueOf(integer.getText()));
+                  integer.setToolTipText(p.getHint());
+                  integer.setBorder(defaultBorder);
+                } catch(Exception exception) {
+                  integer.setToolTipText("Invalid number: "+exception.getMessage());
+                  integer.setBorder(BorderFactory.createLineBorder(Color.red));
+                }
+              }
+              public void removeUpdate(DocumentEvent e) {
+                try {
+                  p.setValue(Integer.valueOf(integer.getText()));
+                  integer.setToolTipText(p.getHint());                  
+                  integer.setBorder(defaultBorder);
+                } catch(Exception exception) {
+                  integer.setToolTipText("Invalid number: "+exception.getMessage());
+                  integer.setBorder(BorderFactory.createLineBorder(Color.red));
+                }
+              }
+              public void changedUpdate(DocumentEvent e) {
+                try {
+                  p.setValue(Integer.valueOf(integer.getText()));
+                  integer.setToolTipText(p.getHint());
+                  integer.setBorder(defaultBorder);
+                } catch(Exception exception) {
+                  integer.setToolTipText("Invalid number: "+exception.getMessage());
+                  integer.setBorder(BorderFactory.createLineBorder(Color.red));
+                }
+              }
+            });
+        } else if (p.getType().equals(Double.class)) {               
+          JTextField number = new JTextField();
+          if (p.getValue() != null) {
+            number.setText(p.getValue().toString());
+          }
+          number.setToolTipText(p.getHint());
+          options.add(number); // TODO ensure can be only "" or a number
+          final Border defaultBorder = number.getBorder();
+          number.getDocument().addDocumentListener(new DocumentListener() {
+              public void insertUpdate(DocumentEvent e) {
+                try {
+                  p.setValue(Double.valueOf(number.getText()));
+                  number.setToolTipText(p.getHint());
+                  number.setBorder(defaultBorder);
+                } catch(Exception exception) {
+                  number.setToolTipText("Invalid number: "+exception.getMessage());
+                  number.setBorder(BorderFactory.createLineBorder(Color.red));
+                }
+              }
+              public void removeUpdate(DocumentEvent e) {
+                try {
+                  p.setValue(Double.valueOf(number.getText()));
+                  number.setToolTipText(p.getHint());                  
+                  number.setBorder(defaultBorder);
+                } catch(Exception exception) {
+                  number.setToolTipText("Invalid number: "+exception.getMessage());
+                  number.setBorder(BorderFactory.createLineBorder(Color.red));
+                }
+              }
+              public void changedUpdate(DocumentEvent e) {
+                try {
+                  p.setValue(Double.valueOf(number.getText()));
+                  number.setToolTipText(p.getHint());
+                  number.setBorder(defaultBorder);
+                } catch(Exception exception) {
+                  number.setToolTipText("Invalid number: "+exception.getMessage());
+                  number.setBorder(BorderFactory.createLineBorder(Color.red));
+                }
+              }
+            });
+        } else if (p.getType().equals(Boolean.class)) {               
+          JCheckBox bool = new JCheckBox();
+          if (p.getValue() != null) {
+            bool.setSelected((Boolean)p.getValue());
+          }
+          bool.setToolTipText(p.getHint());
+          options.add(bool);
+          bool.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                p.setValue(bool.isSelected());
+              }
+            });
+        } else {
+          JTextField text = new JTextField();
+          if (p.getValue() != null) {
+            text.setText(p.getValue().toString());
+          }
+          text.setToolTipText(p.getHint());
+          options.add(text);
+          text.getDocument().addDocumentListener(new DocumentListener() {
+              public void insertUpdate(DocumentEvent e) { p.setValue(text.getText()); }
+              public void removeUpdate(DocumentEvent e) { p.setValue(text.getText()); }
+              public void changedUpdate(DocumentEvent e) { p.setValue(text.getText()); }
+            });
+
+        }
+      }
+      return options;
+    }
+    
+  } // end of getDeserializerOptionsPanel()
+
+  
+  /**
    * Creates a visual component that looks and works like a hyperlink.
    * @param label
    * @param url
@@ -911,12 +1185,12 @@ public abstract class Converter extends GuiProgram {
     GraphDeserializer deserializer = getDeserializer();
     helpInfo.append("\nDeserializing from " + deserializer.getDescriptor());
     helpInfo.append("\n");
-    ParameterSet config = deserializer.configure(new ParameterSet(), schema);
-    if (config.size() == 0) {
+    //TODO ParameterSet config = deserializer.configure from option panel
+    if (deserializerConfig.size() == 0) {
       helpInfo.append(" There are no configuration parameters for deserialization\n");      
     } else {
       helpInfo.append(" Command-line configuration parameters for deserialization:\n");
-      for (Parameter p : config.values()) {
+      for (Parameter p : deserializerConfig.values()) {
         helpInfo.append(
           wrap("\t--" + p.getName() + "="
                + (p.getValue() != null?p.getValue():"["+p.getType().getSimpleName()+"]")
@@ -927,12 +1201,12 @@ public abstract class Converter extends GuiProgram {
     GraphSerializer serializer = getSerializer();
     helpInfo.append("\nSerializing to " + serializer.getDescriptor());
     helpInfo.append("\n");
-    config = serializer.configure(new ParameterSet(), schema);
-    if (config.size() == 0) {
+    //TODO config = serializer.configure frm option panel(serializerConfig, schema);
+    if (serializerConfig.size() == 0) {
       helpInfo.append(" There are no configuration parameters for serialization\n");
     } else {
       helpInfo.append(" Command-line configuration parameters for serialization:\n");
-      for (Parameter p : config.values()) {
+      for (Parameter p : serializerConfig.values()) {
         helpInfo.append(
           wrap("\t--" + p.getName() + "="
                + (p.getValue() != null?p.getValue():"["+p.getType().getSimpleName()+"]")
@@ -968,15 +1242,15 @@ public abstract class Converter extends GuiProgram {
     GraphDeserializer deserializer = getDeserializer();
     md.println("## Deserializing from " + deserializer.getDescriptor());
     md.println();
-    ParameterSet config = deserializer.configure(new ParameterSet(), schema);
-    if (config.size() == 0) {
+    //TODO ParameterSet config = deserializer.configure from options panel(deserializerConfig, schema);
+    if (deserializerConfig.size() == 0) {
       md.println("There are no configuration parameters for deserialization.");
     } else {
       md.println("Command-line configuration parameters for deserialization:");
       md.println();
       md.println("|   |   |"); // markdown table
       md.println("|:--|:--|");
-      for (Parameter p : config.values()) {
+      for (Parameter p : deserializerConfig.values()) {
         md.println("| `--"+p.getName()+"="
                    + (p.getValue() != null?p.getValue()+"`"
                       :"`*" + p.getType().getSimpleName()+"*")
@@ -987,15 +1261,15 @@ public abstract class Converter extends GuiProgram {
     md.println();
     md.println("## Serializing to " + serializer.getDescriptor());
     md.println();
-    config = serializer.configure(new ParameterSet(), schema);
-    if (config.size() == 0) {
+    //TODO config = serializer.configure from options panel(serializerConfig, schema);
+    if (serializerConfig.size() == 0) {
       md.println("There are no configuration parameters for serialization.");
     } else {
       md.println("Command-line configuration parameters for serialization:");
       md.println();
       md.println("|   |   |"); // markdown table
       md.println("|:--|:--|");
-      for (Parameter p : config.values()) {
+      for (Parameter p : serializerConfig.values()) {
         md.println("| `--"+p.getName()+"="
                    + (p.getValue() != null?p.getValue()+"`"
                       :"`*" + p.getType().getSimpleName()+"*")
