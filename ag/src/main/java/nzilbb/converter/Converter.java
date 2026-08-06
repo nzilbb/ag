@@ -951,7 +951,7 @@ public abstract class Converter extends GuiProgram {
   
   /**
    * Return a panel with options for the given deserializer.
-   * @param deserializer
+   * @param configuration The de/serializer configuration.
    * @return An interactive panel for editing the options of the deserializer.
    */
   public JPanel getOptionsPanel(ParameterSet configuration) {
