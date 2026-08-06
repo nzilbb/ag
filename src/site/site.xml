@@ -31,7 +31,7 @@
       <item name="All Classes" href="apidocs/index.html"/>
       <item name="Annotators" href="nzilbb.annotator/index.html"/>
       <item name="File Formatters" href="nzilbb.formatter/index.html"/>
-      <item name="File Converters" href="nzilbb.converter/index.html"/>
+      <item name="File Converters" href="https://nzilbb.github.io/converter/"/>
     </menu>
     
     <menu ref="reports"/>
