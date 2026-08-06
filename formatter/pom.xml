@@ -7,11 +7,12 @@
   </parent>
   <groupId>nz.ilbb.ag</groupId>
   <artifactId>nzilbb.formatter</artifactId>
-  <name>nzilbb.formatter</name>
   <version>1.0.0</version>
+  <name>nzilbb.formatter</name>
   <description>
     Formatters are modules that convert annotation graphs to and from various tool-specific formats.
   </description>
+  <url>https://github.com/nzilbb/ag/</url>
   <packaging>pom</packaging>
   <modules>
     <!--module>agcsv</module-->

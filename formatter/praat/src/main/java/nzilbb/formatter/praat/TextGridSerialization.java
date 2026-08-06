@@ -297,10 +297,10 @@ public class TextGridSerialization
   }
   
   /**
-   * Participants matching {@link renameParticipantMatching} will be
+   * Participants matching {@link #renameParticipantsMatching} will be
    * renamed using this pattern. 
    * <p> The pattern can contain back-references to capturing groups in
-   * {@link renameParticipantMatching}, and also the following
+   * {@link #renameParticipantsMatching}, and also the following
    * variables:
    * <ul>
    *  <li><tt>${id}</tt> - the transcript ID (without the filename extension/suffix)</li>
@@ -316,16 +316,16 @@ public class TextGridSerialization
   protected String renameParticipantsTo;
   /**
    * Getter for {@link #renameParticipantsTo}: Participants matching
-   * {@link renameParticipantMatching} will be renamed using this pattern. 
-   * @return Participants matching {@link renameParticipantMatching} will be
+   * {@link #renameParticipantsMatching} will be renamed using this pattern. 
+   * @return Participants matching {@link #renameParticipantsMatching} will be
    * renamed using this pattern. 
    */
   public String getRenameParticipantsTo() { return renameParticipantsTo; }
   /**
    * Setter for {@link #renameParticipantsTo}: Participants matching
-   * {@link renameParticipantMatching} will be renamed using this pattern. 
+   * {@link #renameParticipantsMatching} will be renamed using this pattern. 
    * <p> The pattern can contain back-references to capturing groups in
-   * {@link renameParticipantMatching}, and also the following
+   * {@link #renameParticipantsMatching}, and also the following
    * variables:
    * <ul>
    *  <li><tt>${id}</tt> - the transcript ID (without the filename extension/suffix)</li>
@@ -336,7 +336,7 @@ public class TextGridSerialization
    * rename speakers in <tt>Robert-Fromont.TextGrid</tt> with IDs like
    * <tt>speaker 2</tt> to something like <tt>Robert-Fromont-2</tt>
    * @param newRenameParticipantsTo Participants matching
-   * {@link renameParticipantMatching} will be renamed using this pattern. 
+   * {@link #renameParticipantsMatching} will be renamed using this pattern. 
    */
   public TextGridSerialization setRenameParticipantsTo(String newRenameParticipantsTo) { renameParticipantsTo = newRenameParticipantsTo; return this; }
   
