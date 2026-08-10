@@ -36,7 +36,7 @@ import java.util.NoSuchElementException;
 @SuppressWarnings("serial")
 public class AnnotationChain extends LinkedHashSet<Annotation> implements SortedSet<Annotation> {
   // Methods:
-   
+  
   /**
    * Default constructor.
    */
@@ -483,5 +483,10 @@ public class AnnotationChain extends LinkedHashSet<Annotation> implements Sorted
     Annotation last = i.next();
     while (i.hasNext()) last = i.next();
     return last;
+  }
+
+  /** Override for Java 21, but not required for Java 11. */
+  public SortedSet<Annotation> reversed() {
+    return null;
   }
 } // end of class AnnotationChain
