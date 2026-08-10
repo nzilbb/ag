@@ -156,18 +156,19 @@ public class PorterStemmer extends Annotator {
             tokenLayerId = schema.getWordLayerId();
          }
          
-         try {
-            Layer[] candidates = schema.getMatchingLayers(
-               "layer.parentId == schema.root.id && layer.alignment == 0" // transcript attribute
-               +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
-            if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
-            
-            candidates = schema.getMatchingLayers(
-               "layer.parentId == schema.turnLayerId" // child of turn
-               +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
-            if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
-         } catch(ScriptException impossible) {}
+         Layer[] candidates = schema.getMatchingLayers(
+           layer -> schema.getRoot().getId().equals(layer.getParentId())
+           && layer.getAlignment() == 0 // transcript attribute
+           && layer.getId().matches(".*lang.*")); // with 'lang' in the name
+         if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
          
+         // default phrase language layer
+         candidates = schema.getMatchingLayers(
+           layer -> schema.getTurnLayerId() != null
+           && schema.getTurnLayerId().equals(layer.getParentId()) // child of turn
+           && layer.getId().matches(".*lang.*")); // with 'lang' in the name
+         if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
+      
          stemLayerId = "stem";
          
       } else {

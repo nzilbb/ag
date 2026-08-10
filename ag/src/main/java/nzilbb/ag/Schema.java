@@ -460,8 +460,9 @@ public class Schema implements Cloneable, CloneableBean {
    * should match all un-aligned children of the participant layer; i.e. participant attributes.
    * @param expression A Javascript boolean expression to use to filter layers.
    * @return A list of matching layers, which may be empty.
+   * @deprecated Use {@link #getMatchingLayers(Predicate)}
    */
-  public Layer[] getMatchingLayers(String expression) throws ScriptException {
+  @Deprecated public Layer[] getMatchingLayers(String expression) throws ScriptException {
     Vector<Layer> layers = new Vector<Layer>();
     ScriptEngineManager manager = new ScriptEngineManager();
     ScriptEngine engine = manager.getEngineByMimeType("application/javascript");

@@ -718,36 +718,38 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
         tokenLayerId = schema.getWordLayerId();
       }
          
-      try {
-        // default transcript language layer
-        Layer[] candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.root.id && layer.alignment == 0" // transcript attribute
-          +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
-        if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
-            
-        // default phrase language layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.turnLayerId" // child of turn
-          +" && /.*lang.*/.test(layer.id)"); // with 'lang' in the name
-        if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
-
-        // default output layer
-        candidates = schema.getMatchingLayers(
-          "layer.parentId == schema.wordLayerId" // word tag
-          +" && (/.*phoneme.*/.test(layer.id) || /.*pronunciation.*/.test(layer.id))");
-        if (candidates.length > 0) {
-          tagLayerId = candidates[0].getId();
-        } else { // suggest adding a new one
-          tagLayerId = "phonemes";
-        }
-        // default lexicon/keyField/valueField if possible
-        List<String> dictionaries = getDictionaryIds();
-        if (dictionaries.size() > 0) { // there are dictionaries
-          // default to the first, which will be field1->field2
-          dictionary = dictionaries.get(0);
-        } // there are dictionaries
-      } catch(ScriptException impossible) {}
-         
+      // default transcript language layer
+      Layer[] candidates = schema.getMatchingLayers(
+        layer -> schema.getRoot().getId().equals(layer.getParentId())
+        && layer.getAlignment() == 0 // transcript attribute
+        && layer.getId().matches(".*lang.*")); // with 'lang' in the name
+      if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
+      
+      // default phrase language layer
+      candidates = schema.getMatchingLayers(
+        layer -> schema.getTurnLayerId() != null
+        && schema.getTurnLayerId().equals(layer.getParentId()) // child of turn
+        && layer.getId().matches(".*lang.*")); // with 'lang' in the name
+      if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
+      
+      // default output layer
+      candidates = schema.getMatchingLayers(
+        layer -> schema.getWordLayerId() != null
+        && schema.getWordLayerId().equals(layer.getParentId())
+        && (layer.getId().matches(".*phoneme.*")
+            || layer.getId().matches(".*pronunciation.*")));
+      if (candidates.length > 0) {
+        tagLayerId = candidates[0].getId();
+      } else { // suggest adding a new one
+        tagLayerId = "phonemes";
+      }
+      // default lexicon/keyField/valueField if possible
+      List<String> dictionaries = getDictionaryIds();
+      if (dictionaries.size() > 0) { // there are dictionaries
+        // default to the first, which will be field1->field2
+        dictionary = dictionaries.get(0);
+      } // there are dictionaries
+      
     } else {
       beanPropertiesFromQueryString(parameters);
     }

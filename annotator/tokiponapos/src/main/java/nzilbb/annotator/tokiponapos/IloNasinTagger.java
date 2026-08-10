@@ -448,7 +448,7 @@ public class IloNasinTagger extends Annotator {
       }
     }
     // ensure valid labels are set
-    if (posLayer.getValidLabels().size() == 0) {
+    if (posLayer.getValidLabels().size() == 0) { // TODO these are not created in LaBB-CAT
       posLayer.getValidLabels().put("noun","noun");
       posLayer.getValidLabels().put("iverb","iverb");
       posLayer.getValidLabels().put("tverb","tverb");
