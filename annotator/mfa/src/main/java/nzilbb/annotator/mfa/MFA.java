@@ -84,9 +84,6 @@ import nzilbb.encoding.PhonemeTranslator;
 import nzilbb.formatter.praat.TextGridSerialization;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
-// TODO ensure ~ isn't counted as punctuation:
-//  https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/configuration/global.html#configuration-dictionary
-// mfa ... --config_path config.yaml
 /**
  * Annotator that uses the 
  * <a href="https://montrealcorpustools.github.io/Montreal-Forced-Aligner/">
@@ -1502,6 +1499,24 @@ public class MFA extends Annotator {
                 }
                 parameters.add("--output_format");
                 parameters.add("long_textgrid");
+
+                // create config file
+                File config = new File(sessionWorkingDir, "config.yaml");
+                // The standard punctuation setting is:
+                // 、。।，@<>”(),.:;¿?¡!\&%#*~【】，…‥「」『』〝〟″⟨⟩♪・‹›«»～′$+=
+                // https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/configuration/global.html#dictionary-and-text-parsing-options
+                // but we want to exclude ~ from this list, so set it explicitly
+                try {
+                  try(PrintWriter configWriter = new PrintWriter(config)) {
+                    configWriter.println(
+                      "punctuation: 、。।，@<>”(),.:;¿?¡!\\&%#*【】，…‥「」『』〝〟″⟨⟩♪・‹›«»～′$+=");
+                  }
+                } catch (FileNotFoundException x) {
+                  setStatus("Could not write " + config.getName() + " : " + x);
+                }
+                parameters.add("--config_path");
+                parameters.add(config.getPath());
+                
                 parameters.add(corpusDir.getPath());
                 parameters.add(dictionaryFile.getPath());
                 parameters.add(modelsDir.getPath());
@@ -1548,9 +1563,26 @@ public class MFA extends Annotator {
                     dictionary = builtInDict.getPath();
                   }
                   if (!isCancelling()) {
+                    // create config file
+                    File config = new File(sessionWorkingDir, "config.yaml");
+                    // The standard punctuation setting is:
+                    // 、。।，@<>”(),.:;¿?¡!\&%#*~【】，…‥「」『』〝〟″⟨⟩♪・‹›«»～′$+=
+                    // https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/configuration/global.html#dictionary-and-text-parsing-options
+                    // but we want to exclude ~ from this list, so set it explicitly
+                    try {
+                      try(PrintWriter configWriter = new PrintWriter(config)) {
+                        configWriter.println(
+                          "punctuation: 、。।，@<>”(),.:;¿?¡!\\&%#*【】，…‥「」『』〝〟″⟨⟩♪・‹›«»～′$+=");
+                      }
+                    } catch (FileNotFoundException x) {
+                      setStatus("Could not write " + config.getName() + " : " + x);
+                    }
+
+                    // run mfa
                     mfa(
                       false, Optional.ofNullable(tempDir).orElse(getWorkingDirectory()),
                       "align", // Don't "--clean", it deletes everything including the corpus
+                      "--config_path", config.getPath(),
                       "--output_format", "long_textgrid",
                       corpusDir.getPath(), dictionary,
                       acousticModelsZip.getPath(),
