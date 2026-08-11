@@ -84,7 +84,9 @@ import nzilbb.encoding.PhonemeTranslator;
 import nzilbb.formatter.praat.TextGridSerialization;
 import nzilbb.util.Execution;
 import nzilbb.util.IO;
-
+// TODO ensure ~ isn't counted as punctuation:
+//  https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/configuration/global.html#configuration-dictionary
+// mfa ... --config_path config.yaml
 /**
  * Annotator that uses the 
  * <a href="https://montrealcorpustools.github.io/Montreal-Forced-Aligner/">
@@ -474,7 +476,7 @@ public class MFA extends Annotator {
    * which the utterance is ignored. 
    * @return Percentage of overlap with other speech, above which the utterance is ignored.
    */
-  public Integer getOverlapThreshold() { return overlapThreshold; }
+  @ApiEndpoint("admin") public Integer getOverlapThreshold() { return overlapThreshold; }
   /**
    * Setter for {@link #overlapThreshold}: Percentage of overlap with other speech, above
    * which the utterance is ignored.
@@ -1382,10 +1384,10 @@ public class MFA extends Annotator {
               try {
                 setStatus("Setting up database...");
                 // ensure other commands don't start/stop database server
-                mfa(false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
+                mfa(false, Optional.ofNullable(tempDir).orElse(getWorkingDirectory()),
                     "configure", "--disable_auto_server");
                 // start db server
-                mfa(false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
+                mfa(false, Optional.ofNullable(tempDir).orElse(getWorkingDirectory()),
                     "server", "start", "--"+(usePostgres?"":"no_")+"use_postgres");
                 dbServer = true;
               } catch (TransformationException x) {
@@ -1421,7 +1423,7 @@ public class MFA extends Annotator {
                 parameters.add(""+retryBeam);
                 parameters.add("--"+(usePostgres?"":"no_")+"use_postgres");
                 String[] paramatersArray = parameters.toArray(new String[0]);
-                mfa(false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
+                mfa(false, Optional.ofNullable(tempDir).orElse(getWorkingDirectory()),
                     paramatersArray);
                 setPercentComplete(80); // (up to 5 phases of 10% each arrives at 80%)
                 // log contents of ${tempDir}/corpus/train_acoustic_model.log
@@ -1457,7 +1459,7 @@ public class MFA extends Annotator {
                   }
                   if (!isCancelling()) {
                     mfa(
-                      false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
+                      false, Optional.ofNullable(tempDir).orElse(getWorkingDirectory()),
                       "align", // Don't "--clean", it deletes everything including the corpus
                       "--output_format", "long_textgrid",
                       corpusDir.getPath(), dictionary,
@@ -1476,7 +1478,7 @@ public class MFA extends Annotator {
               if (dbServer) {
                 try {
                   setStatus("Shutting down database server...");
-                  mfa(false, Optional.ofNullable(sessionWorkingDir).orElse(getWorkingDirectory()),
+                  mfa(false, Optional.ofNullable(tempDir).orElse(getWorkingDirectory()),
                       "server", "stop", "--mode", "smart", "--use_postgres");
                 } catch (TransformationException x) {
                   setStatus("DB shutdown failed: " + x);
