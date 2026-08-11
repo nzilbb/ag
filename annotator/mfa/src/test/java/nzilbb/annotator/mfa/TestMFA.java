@@ -66,7 +66,7 @@ import nzilbb.util.IO;
  *    </ol>
  *  </li>
  *  <li> Install MFA
- *   <br><tt>conda create -n aligner -c conda-forge montreal-forced-aligner=3.2.1</tt>
+ *   <br><tt>conda create -n aligner -c conda-forge montreal-forced-aligner=3.4.1</tt>
  *  </li>
  * <p><b>NB</b> The version above may not be up-to-date, 
  *  check the value of {@link MFA#builtForMfaVersion}</p>
@@ -75,7 +75,7 @@ import nzilbb.util.IO;
 public class TestMFA {
   static final String condaPath = "/opt/conda/bin";
   static final String condaEnvPath = "/opt/conda/envs/";
-  static final String mfaEnvironment = "aligner";
+  static final String mfaEnvironment = "mfa3310";
 
   static MFA annotator = new MFA();
 
@@ -120,28 +120,52 @@ public class TestMFA {
     return fThisClass.getParentFile();
   }
 
-  /** Ensure validDictionaryNames method works. */
-  @Test public void validDictionaryNames() throws Exception {
+  /** Ensure uploadDictionary and validDictionaryNames methods work. */
+  @Test public void uploadDictionaryAndValidDictionaryNames() throws Exception {
     // if (annotator.getStatusObservers().size() == 0) {
     //   annotator.getStatusObservers().add(status->System.out.println(status));
     // }
+
+    File invalidFile = new File(dir(), "BREY00538.zip");
+    assertNotNull("uploadDictionary rejects non-dictionary files",
+                  annotator.uploadDictionary(invalidFile));
+    
+    File custom = new File(dir(), "BREY00538.dict");
+    assertNull("uploadDictionary accepts custom dictionary file",
+               annotator.uploadDictionary(custom));
 
     Collection<String> names = annotator.validDictionaryNames();
     assertTrue("validDictionaryNames contains english_mfa " + names,
                names.contains("english_mfa")); // 2.0.0rc3 was "english"
     assertTrue("validDictionaryNames contains german_prosodylab " + names,
                names.contains("german_prosodylab"));
+    assertTrue("validDictionaryNames contains custom dictionary we added " + names,
+               names.contains(IO.WithoutExtension(custom.getName())));
+    assertTrue("validDictionaryNames doesn't contain invalid file " + names,
+               names.contains(IO.WithoutExtension(invalidFile.getName())));
     assertFalse("validDictionaryNames contains no blank entries " + names,
                names.contains(""));
   }   
 
-  /** Ensure validDictionaryNames method works. */
-  @Test public void validAcousticModels() throws Exception {
+  /** Ensure uploadAcousticModels and validDictionaryNames methods work. */
+  @Test public void uploadAcousticModelsAndValidAcousticModels() throws Exception {
+    File invalidFile = new File(dir(), "BREY00538.dict");
+    assertNotNull("uploadDictionary rejects non-models files",
+                  annotator.uploadAcousticModels(invalidFile));
+    
+    File custom = new File(dir(), "BREY00538.zip");
+    assertNull("uploadDictionary accepts custom models file",
+               annotator.uploadAcousticModels(custom));
+
     Collection<String> names = annotator.validAcousticModels();
     assertTrue("validAcousticModels contains english_mfa " + names,
                names.contains("english_mfa")); // 2.0.0rc3 was "english"
     assertTrue("validAcousticModels contains spanish " + names,
                names.contains("spanish_mfa")); // 2.0.0rc3 was "spanish"
+    assertTrue("validAcousticModels contains custom models we added " + names,
+               names.contains(IO.WithoutExtension(custom.getName())));
+    assertTrue("validAcousticModels doesn't contain invalid file " + names,
+               names.contains(IO.WithoutExtension(invalidFile.getName())));
     assertFalse("validAcousticModels contains no blank entries " + names,
                names.contains(""));
   }   

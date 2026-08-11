@@ -670,14 +670,57 @@ public class MFA extends Annotator {
   } // end of inferMfaPath()
   
   /**
+   * Takes a dictionary file to add to the local collection of dictionaries.
+   * @param file The dictionary file.
+   * @return null if upload was successful, an error message otherwise.
+   */
+  @ApiEndpoint("admin") public String uploadDictionary(File file) {
+    if (!file.getName().endsWith(".dict")) {
+      return file.getName() + " is not a dictionary (.dict) file.";
+    }
+    
+    File dir = new File(
+      new File(getWorkingDirectory(), "pretrained_models"), "dictionary");
+    if (!dir.exists()) {
+      if (!dir.getParentFile().exists()) dir.getParentFile().mkdir();
+      dir.mkdir();
+    }
+    File localFile = new File(dir, file.getName());
+    if (!file.renameTo(localFile)) {
+      try {
+        IO.Copy(file, localFile);
+      } catch(IOException exception) {
+        return "Could not copy " + file.getName() + ": " + exception.getMessage();
+      }
+    }
+    return null;
+  } // end of uploadDictionary()
+  
+  /**
    * Lists valid values for {@link #dictionaryName}.
    * <p> This is the list returned by <tt>mfa model download dictionary</tt>
+   * along with any dictionary files that have been explicitly uploaded via
+   * {@link #uploadDictionary}.
    * @return A list of valid values for {@link #dictionaryName}.
    */
   @ApiEndpoint("admin") public Collection<String> validDictionaryNames() throws TransformationException {
-    String dictionariesRaw = mfa(true, getWorkingDirectory(), "model", "download", "dictionary");
+    LinkedHashSet<String> dictionaries = new LinkedHashSet<String>();
+    
+    // include any uploaded dictionaries
+    File dir = new File(
+      new File(getWorkingDirectory(), "pretrained_models"), "dictionary");
+    if (dir.exists()) {
+      for (String file : dir.list()) {
+        dictionaries.add(IO.WithoutExtension(file));
+      }
+    }
+
+    // include dictionaries returned by `mfa model download dictionary`
+    String dictionariesRaw = mfa(
+      true, getWorkingDirectory(), "model", "download", "dictionary");
     String[] dictionaryLines = dictionariesRaw.split("\n");
-    List<String> dictionaries = Arrays.stream(dictionaryLines)
+    dictionaries.addAll(
+      Arrays.stream(dictionaryLines)
       .map(
         s->s.replace("\r","")        // remove carriage returns used on Windows systems
         .replaceAll("^[^']*'","")    // remove leading quote and anything before it
@@ -689,19 +732,66 @@ public class MFA extends Annotator {
       .filter(s->!s.equals("{"))     // not just an open-brace
       .filter(s->!s.equals("}"))     // not just a close-brace
       .sorted()
-      .collect(Collectors.toList());
+      .collect(Collectors.toList()));
     return dictionaries;
   } // end of validDictionaryNames()
    
   /**
+   * Takes an acoustic model file to be added to the collection of locally available models.
+   * @param file The model .zip file.
+   * @return null if upload was successful, an error message otherwise.
+   */
+  @ApiEndpoint("admin") public String uploadAcousticModels(File file) {
+    if (!file.getName().endsWith(".zip")) {
+      return file.getName() + " is not a model (.zip) file.";
+    }
+    
+    File dir = new File(
+      new File(getWorkingDirectory(), "pretrained_models"), "acoustic");
+    if (!dir.exists()) {
+      if (!dir.getParentFile().exists()) dir.getParentFile().mkdir();
+      dir.mkdir();
+    }
+    File localFile = new File(dir, file.getName());
+    if (!file.renameTo(localFile)) {
+      try {
+        IO.Copy(file, localFile);
+      } catch(IOException exception) {
+        return "Could not copy " + file.getName() + ": " + exception.getMessage();
+      }
+    }
+    return null;
+  } // end of uploadAcousticModels()
+  
+  /**
    * Lists valid values for {@link #modelsName}.
    * <p> This is the list returned by <tt>mfa model download acoustic</tt>
+   * along with any model files that have been explicitly uploaded via
+   * {@link #uploadAcousticModel}.
    * @return A list of valid values for {@link #modelsName}.
    */
   @ApiEndpoint("admin") public Collection<String> validAcousticModels() throws TransformationException {
-    String acousticModelsRaw = mfa(true, getWorkingDirectory(), "model", "download", "acoustic");
+    LinkedHashSet<String> acousticModels = new LinkedHashSet<String>();
+    
+    // include any uploaded dictionaries
+    File dir = new File(
+      new File(getWorkingDirectory(), "pretrained_models"), "acoustic");
+    if (!dir.exists()) {
+      if (!dir.getParentFile().exists()) dir.getParentFile().mkdir();
+      dir.mkdir();
+    }
+    if (dir.exists()) {
+      for (String file : dir.list()) {
+        acousticModels.add(IO.WithoutExtension(file));
+      }
+    }
+
+    // include models returned by `mfa model download acoustic`
+    String acousticModelsRaw = mfa(
+      true, getWorkingDirectory(), "model", "download", "acoustic");
     String[] acousticModelLines = acousticModelsRaw.split("\n");
-    List<String> acousticModels = Arrays.stream(acousticModelLines)
+    acousticModels.addAll(
+      Arrays.stream(acousticModelLines)
       .map(
         s->s.replace("\r","")        // remove carriage returns used on Windows systems
         .replaceAll("^[^']*'","")    // remove leading quote and anything before it
@@ -713,7 +803,7 @@ public class MFA extends Annotator {
       .filter(s->!s.equals("{"))     // not just an open-brace
       .filter(s->!s.equals("}"))     // not just a close-brace
       .sorted()
-      .collect(Collectors.toList());
+      .collect(Collectors.toList()));
     return acousticModels;
   } // end of validAcousticModels()
   

@@ -51,18 +51,42 @@
         <span><input id="multilingualIPA"
                      name="multilingualIPA" type="checkbox"></span>
       </div>
-      <div class="field" title="If you wish to use one of the available language dictionaries instead of specifying a Pronunciation Layer, select the name here.">
-        <label for="dictionaryName"> Dictionary Name </label>
-        <span><select id="dictionaryName" name="dictionaryName">
-            <option value="">[none]</option>
-        </select></span>
-      </div>
-      <div class="field" title="If you wish to use pre-trained acoustic models instead of training models from your speech data, select the name here.">
-        <label for="modelsName"> Pretrained Acoustic Models </label>
-        <span><select id="modelsName" name="modelsName">
-            <option value="">[none]</option>
-        </select></span>
-      </div>
+      <fieldset><legend>Dictionary</legend>
+        <div class="field" title="If you wish to use one of the available language dictionaries instead of specifying a Pronunciation Layer, select the name here.">
+          <label for="dictionaryName"> Dictionary Name </label>
+          <span><select id="dictionaryName" name="dictionaryName">
+              <option value="">[none]</option>
+          </select></span>
+        </div>
+        <details id="dictFileUpload"><summary>Add Dictionary</summary>
+          <div class="dict-file-chooser">
+            <label for="dictFile">Dictionary file</label>
+            <input id="dictFile" type="file">
+          </div>
+          <div id="uploadDictProgress" style="display: none;">
+            <progress id="dictProgress"></progress>
+            <div id="uploadDictResult"></div>
+          </div>
+        </details>
+      </fieldset>
+      <fieldset><legend>Acoustic Models</legend>
+        <div class="field" title="If you wish to use pre-trained acoustic models instead of training models from your speech data, select the name here.">
+          <label for="modelsName"> Pretrained Acoustic Models </label>
+          <span><select id="modelsName" name="modelsName">
+              <option value="">[none]</option>
+          </select></span>
+        </div>
+        <details id="modelsFileUpload"><summary>Add Acoustic Models</summary>
+          <div class="models-file-chooser">
+            <label for="modelsFile">Acoustic Models file</label>
+            <input id="modelsFile" type="file">
+          </div>
+          <div id="uploadModelsProgress" style="display: none;">
+            <progress id="modelsProgress"></progress>
+            <div id="uploadModelsResult"></div>
+          </div>
+        </details>
+      </fieldset>
       <details class="section"
                title="Settings for when different speakers are on different audio channels">
         <summary>Participants on different stereo channels</summary>

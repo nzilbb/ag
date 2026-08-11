@@ -116,30 +116,40 @@ getSchema(s => {
     //     // participant attributes
     //     layer => layer.parentId == schema.participantLayerId && layer.alignment == 0);
     
-    // populate list of dictionary names
-    getJSON("validDictionaryNames", names => {
-        const dictionaryName = document.getElementById("dictionaryName");
-        for (name of names) {
-            var layerOption = document.createElement("option");
-            layerOption.appendChild(document.createTextNode(name));
-            dictionaryName.appendChild(layerOption);
-        } // next name
-
-        // populate list of pretrained models names
-        getJSON("validAcousticModels", names => {
-            const modelsName = document.getElementById("modelsName");
-            for (name of names) {
-                var layerOption = document.createElement("option");
-                layerOption.appendChild(document.createTextNode(name));
-                modelsName.appendChild(layerOption);
-            } // next name
-
-            getTaskParameters();
-            
-        });
-    });
+  loadValidDictionaryNames()
+    .then(loadValidAcousticModels)
+    .then(getTaskParameters);
 });
 
+function loadValidDictionaryNames() {
+  return new Promise((resolve, reject) => {
+    // populate list of dictionary names
+    getJSON("validDictionaryNames", names => {
+      const dictionaryName = document.getElementById("dictionaryName");
+      dictionaryName.innerHTML = '<option value="">[none]</option>';
+      for (name of names) {
+        var layerOption = document.createElement("option");
+        layerOption.appendChild(document.createTextNode(name));
+        dictionaryName.appendChild(layerOption);
+      } // next name
+      resolve();
+    })
+  });
+}
+function loadValidAcousticModels() {
+  return new Promise((resolve, reject) => {
+    // populate list of pretrained models names
+    getJSON("validAcousticModels", names => {
+      const modelsName = document.getElementById("modelsName");
+      for (name of names) {
+        var layerOption = document.createElement("option");
+        layerOption.appendChild(document.createTextNode(name));
+        modelsName.appendChild(layerOption);
+      } // next name
+      resolve();
+    });
+  });
+}
 function getTaskParameters() {    
     // GET request to getTaskParameters retrieves the current task parameters, if any
     getText("getTaskParameters", parameters => {
@@ -231,6 +241,104 @@ function changedLayer(select, defaultNewLayerName) {
     }
 }
 
+function selectDictFile(input) {
+  if (!input.files[0]) return false;
+  if (!/.*\.dict$/.test(input.files[0].name)) {
+    alert(`${input.files[0].name} is not a dictionary file (.dict)`);
+    return false;
+  }
+  
+  document.getElementById("uploadDictProgress").style.display = "";
+  const uploadProgress = document.getElementById("dictProgress");
+  
+  const fd = new FormData();
+  fd.append("file", input.files[0]);
+  postForm("uploadDictionary", fd, function(e) {
+    console.log("uploadResult " + this.responseText);
+    uploadProgress.max = uploadProgress.max || 100;
+    uploadProgress.value = uploadProgress.max;
+    var result = this.responseText;
+    if (!result) { // no error, upload succeeded
+      document.getElementById("uploadDictResult").innerHTML
+        = "<p>Dictionary uploaded.</p>";
+      // add new file to list
+      const dictionaryName = document.getElementById("dictionaryName");
+      const layerOption = document.createElement("option");
+      const name = input.files[0].name.replace(/\.[^.]*$/,""); // remove extension
+      layerOption.appendChild(document.createTextNode(name));
+      dictionaryName.appendChild(layerOption);
+      // select the uploaded file
+      dictionaryName.value = name;
+      // close the upload form
+      document.getElementById("dictFileUpload").open = false;
+    } else { // error
+      document.getElementById("uploadDictResult").innerHTML
+        = `<p class='error'>${result}</p>`;
+    }
+  }, function(e) {
+    console.log("uploadProgress " + e.loaded);
+    if (e.lengthComputable) {
+      uploadProgress.max = e.total;
+      uploadProgress.value = e.loaded;
+    }
+  }, function(e) {
+    console.log("upload failed " + this.responseText);
+    uploadProgress.max = uploadProgress.max || 100;
+    uploadProgress.value = uploadProgress.value || 1;
+    document.getElementById("uploadDictResult").innerHTML
+      = "<p class='error'>"+(this.responseText||"Upload failed.")+"</p>";
+  });
+}
+
+function selectModelsFile(input) {
+  if (!input.files[0]) return false;
+  if (!/.*\.zip$/.test(input.files[0].name)) {
+    alert(`${input.files[0].name} is not an acoustic models file (.zip)`);
+    return false;
+  }
+  
+  document.getElementById("uploadModelsProgress").style.display = "";
+  const uploadProgress = document.getElementById("modelsProgress");
+  
+  const fd = new FormData();
+  fd.append("file", input.files[0]);
+  postForm("uploadAcousticModels", fd, function(e) {
+    console.log("uploadResult " + this.responseText);
+    uploadProgress.max = uploadProgress.max || 100;
+    uploadProgress.value = uploadProgress.max;
+    var result = this.responseText;
+    if (!result) { // no error, upload succeeded
+      document.getElementById("uploadModelsResult").innerHTML
+        = "<p>Acoustic models uploaded.</p>";
+      // add new file as an option to the list
+      const modelsName = document.getElementById("modelsName");
+      const layerOption = document.createElement("option");
+      const name = input.files[0].name.replace(/\.[^.]*$/,""); // remove extension
+      layerOption.appendChild(document.createTextNode(name));
+      modelsName.appendChild(layerOption);
+      // select the uploaded file
+      modelsName.value = name;
+      // close the upload form
+      document.getElementById("modelsFileUpload").open = false;
+    } else { // error
+      document.getElementById("uploadModelsResult").innerHTML
+        = `<p class='error'>${result}</p>`;
+    }
+  }, function(e) {
+    console.log("uploadProgress " + e.loaded);
+    if (e.lengthComputable) {
+      uploadProgress.max = e.total;
+      uploadProgress.value = e.loaded;
+    }
+  }, function(e) {
+    console.log("upload failed " + this.responseText);
+    uploadProgress.max = uploadProgress.max || 100;
+    uploadProgress.value = uploadProgress.value || 1;
+    document.getElementById("uploadModelsResult").innerHTML
+      = "<p class='error'>"+(this.responseText||"Upload failed.")+"</p>";
+  });
+}
+
 // add event handlers
 document.getElementById("wordAlignmentLayerId").onchange = function(e) {
     changedLayer(this, taskId + "Word"); };
@@ -239,6 +347,10 @@ document.getElementById("phoneAlignmentLayerId").onchange = function(e) {
 document.getElementById("utteranceTagLayerId").onchange = function(e) {
     changedLayer(this, taskId + "Time"); };
 //TODO document.getElementById("participantTagLayerId").onchange = function(e) { changedLayer(this, "participant_" + taskId + "_time"); };
+document.getElementById("dictFile").onchange = function(e) {
+  selectDictFile(this); };
+document.getElementById("modelsFile").onchange = function(e) {
+  selectModelsFile(this); };
 
 document.getElementById("form").onsubmit = function(e) {
     const wordAlignmentLayerId = document.getElementById("wordAlignmentLayerId");
