@@ -890,7 +890,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
    
   /**
    * Gets a single related annotation on the given layer.
-   * @deprecated Use #first(String) instead.
+   * @deprecated Use {@link #first(String)} instead.
    * @param layerId The layer of the desired annotation.
    * @return The related annotation (or the first one if there are many), or null if none
    * could be found on the given layer. 
@@ -1034,7 +1034,7 @@ public class Annotation extends TrackedMap implements Comparable<Annotation> {
    
   /**
    * Gets a list of related annotations on the given layer.
-   * @deprecated Use #all(String) instead.
+   * @deprecated Use {@link #all(String)} instead.
    * @param layerId The layer of the desired annotations.
    * @return The related annotations, or an empty array if none could be found on the given layer.
    */
