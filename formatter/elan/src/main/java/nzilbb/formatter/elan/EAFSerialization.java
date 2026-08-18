@@ -1317,6 +1317,8 @@ public class EAFSerialization extends Deserialize implements GraphDeserializer, 
             speaker = parser.getAttributeValue(null, "PARTICIPANT");
             if (speaker == null) speaker = tierId;
             layer = (Layer)mappings.get("tier"+tierIndex).getValue();
+            if (layer == null) continue; // no mapping
+            
             if (layer.getId().equals(schema.getUtteranceLayerId())) { // utterance layer
               // ensure that utterance tier participants are not repeated
               if (!participantToUtteranceTierId.containsKey(speaker)) {

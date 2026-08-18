@@ -1430,6 +1430,140 @@ public class TestEAFSerialization {
   }
 
   /**
+   * This tests that it's possible to deserialize to a spanning layer, ignoring
+   * tiers that would otherwise correspons to the turn/utterance/word hierarchy. 
+   */
+  @Test public void freeform_empty_mapping()  throws Exception {
+    Schema schema = new Schema(
+      "who", "turn", "utterance", "word",
+      new Layer("scribe", "Author").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("version_date", "Date").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("lang", "Language").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("who", "Participants").setAlignment(Constants.ALIGNMENT_NONE)
+      .setPeers(true).setPeersOverlap(true).setSaturated(true),
+      new Layer("p", "Participant").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true),
+      new Layer("turn", "Speaker turns").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("who").setParentIncludes(true),
+      new Layer("utterance", "Utterances").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId("turn").setParentIncludes(true),
+      new Layer("word", "Words").setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(false)
+      .setParentId("turn").setParentIncludes(true));
+    // access file
+    NamedStream[] streams = { new NamedStream(new File(getDir(), "test_utterance.eaf")) };
+      
+    // create deserializer
+    EAFSerialization deserializer = new EAFSerialization();
+      
+    // general configuration
+    ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // for (Parameter p : configuration.values()) System.out.println("config " + p.getName() + " = " + p.getValue());
+    assertEquals(12, configuration.size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
+    assertNull("comment", 
+               configuration.get("commentLayer").getValue());
+    assertNull("pronounce",
+               configuration.get("pronounceLayer").getValue());
+    assertNull("lexical",
+               configuration.get("lexicalLayer").getValue());
+    assertNull("noise",
+               configuration.get("noiseLayer").getValue());
+    assertEquals("author", "scribe", 
+                 ((Layer)configuration.get("authorLayer").getValue()).getId());
+    assertEquals("version_date", "version_date", 
+                 ((Layer)configuration.get("dateLayer").getValue()).getId());
+    assertEquals("language", "lang", 
+                 ((Layer)configuration.get("languageLayer").getValue()).getId());
+    assertEquals("useConventions", Boolean.TRUE, 
+                 (Boolean)configuration.get("useConventions").getValue());
+    assertEquals("ignoreBlankAnnotations", Boolean.TRUE, 
+                 (Boolean)configuration.get("ignoreBlankAnnotations").getValue());
+    assertEquals("minimumTurnPauseLength", Double.valueOf(0.0), 
+                 (Double)configuration.get("minimumTurnPauseLength").getValue());
+    assertEquals("wordTierPattern", ".*word.*", 
+                 (String)configuration.get("wordTierPattern").getValue());
+      
+    configuration.get("useConventions").setValue(Boolean.FALSE);
+    configuration.get("ignoreBlankAnnotations").setValue(Boolean.FALSE);
+    assertEquals(12, deserializer.configure(configuration, schema).size());
+    assertNull("phrase language",
+               configuration.get("phraseLanguageLayer").getValue());
+    assertEquals("customize useConventions", Boolean.FALSE, 
+                 deserializer.getUseConventions());
+    assertEquals("customize ignoreBlankAnnotations", Boolean.FALSE, 
+                 deserializer.getIgnoreBlankAnnotations());
+
+    // load the stream
+    ParameterSet defaultParameters = deserializer.load(streams, schema);
+    // for (Parameter p : defaultParameters.values()) System.out.println("param " + p.getName() + " = " + p.getValue());
+    assertEquals("correct number of parameters " + defaultParameters.values(),
+                 4, defaultParameters.size());
+    assertEquals("utterance mapping", "utterance", 
+                 ((Layer)defaultParameters.get("tier0").getValue()).getId());
+    assertEquals("utterance mapping", "p", 
+                 ((Layer)defaultParameters.get("tier1").getValue()).getId());
+    assertNull("no transcript attribute mapping", 
+                 defaultParameters.get("metadata:location").getValue());
+    assertNull("no participant attribute mapping",
+               defaultParameters.get("metadata:Gender").getValue());
+
+    // unset the mapping to "utterance"
+    defaultParameters.get("tier0").setValue(null);
+    assertNull("utterance mapping unset",
+               defaultParameters.get("tier0").getValue());
+
+    // configure the deserialization
+    deserializer.setParameters(defaultParameters);
+      
+    // build the graph
+    Graph[] graphs = deserializer.deserialize();
+    Graph g = graphs[0];
+
+    for (String warning : deserializer.getWarnings()) {
+      System.out.println(warning);
+    }
+      
+    assertEquals("test_utterance.eaf", g.getId());
+
+    // attributes
+    assertEquals("transcriber", "Robert", g.first("scribe").getLabel());
+    assertEquals("language", "en", g.first("lang").getLabel());
+    assertEquals("version date", "2017-08-28T16:48:05-03:00", g.first("version_date").getLabel());
+
+    // participants     
+    assertEquals(0, g.all("who").length);
+      
+    // turns
+    assertEquals(0, g.all("turn").length);
+      
+    // interviewer
+    Annotation[] utterances = g.all("i");
+    assertEquals(0, utterances.length);
+
+    // participant
+    utterances = g.all("p");
+    assertEquals(131, utterances.length);
+
+    assertEquals(Double.valueOf(4.675), utterances[0].getStart().getOffset());
+    assertEquals(Double.valueOf(6.752), utterances[0].getEnd().getOffset());
+    assertEquals("  . rest of that side of the famly[f{mli](family) so he -- ", utterances[0].getLabel());
+    assertEquals(g, utterances[0].getParent());
+      
+    // check all annotations have 'manual' confidence
+    for (Annotation a : g.getAnnotationsById().values()) {
+      assertEquals("Annotation has 'manual' confidence: " + a.getLayer() + ": " + a,
+                   Integer.valueOf(Constants.CONFIDENCE_MANUAL), a.getConfidence());
+    }
+  }
+
+  /**
    * This tests that it's possible to deserialize without reference to a
    * turn/utternance/word hierarchy. 
    * In this case the utterances are simple 'freeform' annotations that are not tokenized.
