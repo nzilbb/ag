@@ -1,5 +1,5 @@
 //
-// Copyright 2017-2022 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2017-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -1664,6 +1664,12 @@ public class PlainTextSerialization
           getWordLayer().getId(), "\\{(.*)", "(.*)\\}", true, null, null, 
           commentLayer==null?null:commentLayer.getId(), "$1", "$1", false, false);
         commentTransformer.transform(graph);
+        if (commentLayer != null) {
+          // remove any unlabelled annotations        
+          for (Annotation a : graph.all(commentLayer.getId())) {
+            if (a.getLabel().length() == 0) a.destroy();
+          }
+        }
         graph.commit();
 	    
         // word [noise noise] word
@@ -1671,6 +1677,12 @@ public class PlainTextSerialization
           getWordLayer().getId(), "\\[(.*)", "(.*)\\]", true, null, null, 
           noiseLayer==null?null:noiseLayer.getId(), "$1", "$1", false, false);
         noiseTransformer.transform(graph);
+        if (noiseLayer != null) {
+          // remove any unlabelled annotations        
+          for (Annotation a : graph.all(noiseLayer.getId())) {
+            if (a.getLabel().length() == 0) a.destroy();
+          }
+        }
         graph.commit();
 	    
         // word[pronounce]
@@ -1678,6 +1690,12 @@ public class PlainTextSerialization
           getWordLayer().getId(), "(.+)\\[(.*)\\](\\p{Punct}*)", "$1$3", 
           pronounceLayer==null?null:pronounceLayer.getId(), "$2");
         pronounceTransformer.transform(graph);
+        if (pronounceLayer != null) {
+          // remove any unlabelled annotations        
+          for (Annotation a : graph.all(pronounceLayer.getId())) {
+            if (a.getLabel().length() == 0) a.destroy();
+          }
+        }
         graph.commit();
 	    
         // word(lexical)
@@ -1685,6 +1703,12 @@ public class PlainTextSerialization
           getWordLayer().getId(), "(.+)\\((.*)\\)(\\p{Punct}*)", "$1$3", 
           lexicalLayer==null?null:lexicalLayer.getId(), "$2");
         lexicalTransformer.transform(graph);
+        if (lexicalLayer != null) {
+          // remove any unlabelled annotations        
+          for (Annotation a : graph.all(lexicalLayer.getId())) {
+            if (a.getLabel().length() == 0) a.destroy();
+          }
+        }
         graph.commit();
       } catch(TransformationException exception) {
         if (errors == null) errors = new SerializationException();
