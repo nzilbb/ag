@@ -22,8 +22,11 @@
 package nzilbb.util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -245,6 +248,23 @@ public class Execution implements Runnable {
    */
   public List<Consumer<String>> getStderrObservers() { return stderrObservers; }
   
+  /**
+   * Stream to pass as 'stdin' to the process.
+   * @see #getStdin()
+   * @see #setStdin(InputStream)
+   */
+  protected InputStream stdin;
+  /**
+   * Getter for {@link #stdin}: Stream to pass as 'stdin' to the process.
+   * @return Stream to pass as 'stdin' to the process.
+   */
+  public InputStream getStdin() { return stdin; }
+  /**
+   * Setter for {@link #stdin}: Stream to pass as 'stdin' to the process.
+   * @param newStdin Stream to pass as 'stdin' to the process.
+   */
+  public Execution setStdin(InputStream newStdin) { stdin = newStdin; return this; }
+  
   // Methods:
    
   /**
@@ -280,6 +300,25 @@ public class Execution implements Runnable {
     }
     return this;
   } // end of arg()
+  
+  /**
+   * Where to get stdin data from.
+   * @param from A stream to read data from.
+   * @return A reference to this object.
+   */
+  public Execution stdin(InputStream from) {
+    return setStdin(from);
+  } // end of stdin()
+
+  /**
+   * Where to get stdin data from.
+   * @param from A file to read data from.
+   * @return A reference to this object.
+   * @throws FileNotFoundException If the file doesn't exist.
+   */
+  public Execution stdin(File from) throws FileNotFoundException {
+    return setStdin(new FileInputStream(from));
+  } // end of stdin()
 
   /**
    * Builder-style method for adding an environment variable to {@link #environmentVariables}.
@@ -413,6 +452,26 @@ public class Execution implements Runnable {
                        envp.toArray(new String[0])));
         }
       }
+
+      if (stdin != null) {
+        if (verbose) System.out.println("Writing stdin from stream...");
+        // different thread so writing to stdin and reading form stdout can be simultaneous
+        final OutputStream toProcess = process.getOutputStream();
+        Thread stdinThread = new Thread(new Runnable() {
+            public void run() {
+              try {
+                IO.Pump(stdin, toProcess);
+              } catch(Throwable exception) {
+                if (verbose) {
+                  System.err.println(
+                    "Could not write to stdin of "+exe.getName() + ": " + exception);
+                }
+              }
+            }
+          });
+        stdinThread.start();
+      } // stdin
+      
       InputStream inStream = process.getInputStream();
       InputStream errStream = process.getErrorStream();
       byte[] buffer = new byte[1024];
@@ -465,7 +524,7 @@ public class Execution implements Runnable {
             }
             // data ready?
             bytesRead = inStream.available();
-            if (verbose) System.out.println("Execution: stdin bytes ready: " + bytesRead);
+            if (verbose) System.out.println("Execution: stdout bytes ready: " + bytesRead);
           } // next chunk of data	       
         } catch(IOException exception) {
           System.err.println("Execution: ERROR reading conversion input stream: "
