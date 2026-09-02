@@ -293,6 +293,7 @@ public class MediaFile implements CloneableBean {
       mSuffixToMimeType.put("jpeg", "image/jpeg");
       mSuffixToMimeType.put("gif", "image/gif");
       mSuffixToMimeType.put("png", "image/png");
+      mSuffixToMimeType.put("svg", "image/svg+xml");
     }
     return mSuffixToMimeType;
   } // end of SuffixToMimeType()
