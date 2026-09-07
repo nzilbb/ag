@@ -1111,6 +1111,9 @@ public class PlainTextSerialization
     MessageFormat fmtSpeakerFormat
       = participantFormat == null || participantFormat.length() == 0?null
       :new MessageFormat(participantFormat);
+    MessageFormat fmtMetaDataFormat
+      = metaDataFormat == null || metaDataFormat.length() == 0?null
+      :new MessageFormat(metaDataFormat);
     SimpleDateFormat fmtTimestampFormat = null;
     if (timestampFormat != null && timestampFormat.length() > 0) {
       // prefix with {5} and {6} to include the possibility that the timestamp
@@ -1138,24 +1141,44 @@ public class PlainTextSerialization
           try {
             Object[] oSpeaker = fmtSpeakerFormat.parse(sLine);
             String id = (String)oSpeaker[0];
+            log("Could be a speaker: ", sLine);
+            boolean metaData = false;
             if (getMaxParticipantLength() == null
                 || id.length() <= getMaxParticipantLength()) {
-              log("speaker", leftover);
-              setHasSpeakers(true);
-              if (iLine > 1 && !headerFinished) {
-                // this is the first speaker we've seen, so everything before this is header
-                setHeaderLines(getLines());
-                headerFinished = true;
-                // and the transcript content starts here
-                setLines(new Vector<String>());
+              if (fmtMetaDataFormat != null) {
+                // ensure it couldn't also be meta-data (e.g. value with a colon in it)
+                try { 
+                  Object[] oMetaData = fmtMetaDataFormat.parse(sLine);
+                  // could be meta-data, but if the patterns are so similar that they
+                  // pick out the same value,
+                  // ( e.g. speakerFormat=Author: {0}
+                  //   and metaDataFormat={0}: {1}
+                  //   both would match "Author: John Smith" )
+                  // then we'll assume speaker
+                  if (!oMetaData[1].equals(id)) {
+                    log("Could also be meta-data: ", sLine);
+                    metaData = true;
+                  }
+                } catch (ParseException exception) {}
               }
-              leftover = leftover.substring(
-                fmtSpeakerFormat.format(oSpeaker).length()).trim();
-            }
+              if (!metaData) {
+                log("speaker", leftover);
+                setHasSpeakers(true);
+                if (iLine > 1 && !headerFinished) {
+                  // this is the first speaker we've seen, so everything before this is header
+                  setHeaderLines(getLines());
+                  headerFinished = true;
+                  // and the transcript content starts here
+                  setLines(new Vector<String>());
+                }
+                leftover = leftover.substring(
+                  fmtSpeakerFormat.format(oSpeaker).length()).trim();
+              } // not meta-data
+            } // could be a participant ID
           }
           catch(ParseException exception) {} // not parseable
           catch(NullPointerException exception) {} // null ID
-        }
+        } // there is a speaker format
       } // early enough and we don't know whether has speakers or not yet
 
       if (!getHasTimestamps() && fmtTimestampFormat != null) {
@@ -1219,25 +1242,26 @@ public class PlainTextSerialization
       }
     }
 
-    // if there are headers, we need to map them to layers
-    MessageFormat fmtMetaDataFormat = new MessageFormat(metaDataFormat);
-    for (String header : getHeaderLines()) {
-      if (header.trim().length() == 0) continue;
-      try {
-        Object[] oMetaData = fmtMetaDataFormat.parse(header);
-        String key = (String)oMetaData[0];
-        Vector<String> possibleMatches = new Vector<String>();
-        possibleMatches.add("transcript" + key);
-        possibleMatches.add("participant" + key);
-        possibleMatches.add("speaker" + key);
-        possibleMatches.add(key);
-	    
-        layerToPossibilities.put(
-          new Parameter("header_"+key, Layer.class, "Header: " + key), 
-          possibleMatches);
-        layerToCandidates.put("header_"+key, metadataLayers);
-      } catch(ParseException exception) {} // not parseable
-    } // next header
+    if (fmtMetaDataFormat != null) {
+      // if there are headers, we need to map them to layers
+      for (String header : getHeaderLines()) {
+        if (header.trim().length() == 0) continue;
+        try {
+          Object[] oMetaData = fmtMetaDataFormat.parse(header);
+          String key = (String)oMetaData[0];
+          Vector<String> possibleMatches = new Vector<String>();
+          possibleMatches.add("transcript" + key);
+          possibleMatches.add("participant" + key);
+          possibleMatches.add("speaker" + key);
+          possibleMatches.add(key);
+          
+          layerToPossibilities.put(
+            new Parameter("header_"+key, Layer.class, "Header: " + key), 
+            possibleMatches);
+          layerToCandidates.put("header_"+key, metadataLayers);
+        } catch(ParseException exception) {} // not parseable
+      } // next header
+    }
 	 
     ParameterSet parameters = new ParameterSet();
     // add parameters that aren't in the configuration yet, and set possibile/default values

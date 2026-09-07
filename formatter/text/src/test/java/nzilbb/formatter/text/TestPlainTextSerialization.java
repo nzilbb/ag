@@ -626,6 +626,9 @@ public class TestPlainTextSerialization
     PlainTextSerialization deserializer = new PlainTextSerialization();
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
+    // set maximum participant lenght longer, to introduce the possibility that a
+    // header value with a colon could be confused for a participant ID\
+    configuration.get("maxParticipantLength").setValue(25);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
     assertEquals("Configuration parameters" + configuration,
                  14, deserializer.configure(configuration, schema).size());      
@@ -636,7 +639,7 @@ public class TestPlainTextSerialization
     assertNull("pronounce", configuration.get("pronounceLayer").getValue());
     assertEquals("use conventions", Boolean.TRUE, configuration.get("useConventions").getValue());
     assertEquals("maxParticipantLength",
-                 Integer.valueOf(20), configuration.get("maxParticipantLength").getValue());
+                 Integer.valueOf(25), configuration.get("maxParticipantLength").getValue());
     assertEquals("maxHeaderLines",
                  Integer.valueOf(50), configuration.get("maxHeaderLines").getValue());
     assertEquals("participantFormat", "{0}: ",
@@ -653,6 +656,7 @@ public class TestPlainTextSerialization
     // load the stream
     ParameterSet defaultParameters = deserializer.load(streams, schema);
     // for (Parameter p : defaultParameters.values()) System.out.println("" + p.getName() + " = " + p.getValue());
+
     assertEquals(6, defaultParameters.size());
     assertEquals("app", "app", 
                  ((Layer)defaultParameters.get("header_app").getValue()).getId());
@@ -689,8 +693,8 @@ public class TestPlainTextSerialization
     String[] multilineAttribute = g.labels("speech_migraine");
     assertEquals("graph meta data - multiline", 
                  2, multilineAttribute.length);
-    assertEquals("graph meta data - multiline", 
-                 "currently have migraine", multilineAttribute[0]);
+    assertEquals("graph meta data - could be confused with participant ID", 
+                 "colon: something else", multilineAttribute[0]);
     assertEquals("graph meta data - multiline", 
                  "second value", multilineAttribute[1]);
 
@@ -1466,6 +1470,7 @@ public class TestPlainTextSerialization
       
     // create deserializer
     PlainTextSerialization deserializer = new PlainTextSerialization();
+    //deserializer.setDebug(true);
 
     ParameterSet configuration = deserializer.configure(new ParameterSet(), schema);
     // for (Parameter p : configuration.values()) System.out.println("" + p.getName() + " = " + p.getValue());
