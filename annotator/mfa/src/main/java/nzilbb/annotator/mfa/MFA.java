@@ -1628,6 +1628,7 @@ public class MFA extends Annotator {
       
       // cleanup
       if (failure == null || !noCleanupOnFailure) { // no failure, or cleanup regardless
+        setStatus("Cleaning up temporary files.");
         IO.RecursivelyDelete(sessionWorkingDir);
       } else {
         setStatus("Working files not cleaned up after failure: " + sessionWorkingDir.getPath());
@@ -1762,6 +1763,7 @@ public class MFA extends Annotator {
       
       graphs.forEach(fragment -> {
           try {
+            if (isCancelling()) return;
 
             // unaligned?
             if (fragment.getStart().getOffset() == null) {
@@ -1926,7 +1928,11 @@ public class MFA extends Annotator {
       if (participants.size() > 0) {
         // now that we know some participant IDs, we can give the session a descriptive name
         String firstParticipant = participants.iterator().next();
-        renameSession(firstParticipant + (participants.size() == 1?"":"-et-al"));
+        // make sure this isn't longer than about 20 characters, otherwise paths end up being too long for PostGres socket etc.
+        String newSessionName = firstParticipant + (participants.size() == 1?"":"-et-al");
+        if (newSessionName.length() < 25) {
+          renameSession(newSessionName);
+        }
       }
 
       if (pronunciationLayerId != null) {
