@@ -373,7 +373,10 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
                         value = value.replaceAll("^(.*)(\\([0-9]+\\))$", "$1");
                       }
                       // setStatus("Row " +e+ " Column " + c + ": " + value);
-                      sqlLoad.setString(c + 1, value.trim());
+                      // we trim values for .dict files, but not .csv, which has more
+                      // explicit delimiters (and spaces might be important)
+                      if (!file.getName().endsWith(".csv")) value = value.trim();
+                      sqlLoad.setString(c + 1, value);
                     } catch(Exception exception) {
                       sqlLoad.setString(c + 1, "");
                     }
