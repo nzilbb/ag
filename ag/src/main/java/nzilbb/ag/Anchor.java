@@ -528,7 +528,7 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
     // go backward through the graph to find all following set offsets
     Double dGreatestPrecedingOffset = null;
     for(Annotation a : getEndingAnnotations()) {
-      if (!a.getInstantaneous()) {
+      if (a.getStart() != null && !a.getInstantaneous()) {
         Double dOffsetMin = a.getStart().getOffsetMin();
         if (dOffsetMin != null
             && (dGreatestPrecedingOffset == null
@@ -556,7 +556,7 @@ public class Anchor extends TrackedMap implements Comparable<Anchor> {
     // go forward through the graph to find all following set offsets
     Double dLeastFollowingOffset = null;
     for(Annotation a : getStartingAnnotations()) {
-      if (!a.getInstantaneous()) {
+      if (a.getEnd() != null && !a.getInstantaneous()) {
         Double dOffsetMax = a.getEnd().getOffsetMax();
         if (dOffsetMax != null
             && (dLeastFollowingOffset == null
