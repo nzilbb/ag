@@ -745,7 +745,7 @@ public class TestCMUDictionaryTagger {
     assertEquals(
       "aggregateMatchingAnnotations expression",
       "layer.id == 'word'"
-      +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)",
+      +" && /[Ee][Nn].*/.test(first('lang').label ?? first('transcript_language').label)",
       store.aggregateMatchingAnnotationsExpression);
     
     assertEquals("tagMatchingAnnotations num labels: " + store.tagMatchingAnnotationsLabels,
@@ -754,13 +754,13 @@ public class TestCMUDictionaryTagger {
       "tagMatchingAnnotations layerId quick",
       "K W IH1 K", store.tagMatchingAnnotationsLabels.get(
         "layer.id == 'word'"
-        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && /[Ee][Nn].*/.test(first('lang').label ?? first('transcript_language').label)"
         +" && label == 'quick'"));
     assertEquals(
       "tagMatchingAnnotations layerId brown",
       "B R AW1 N", store.tagMatchingAnnotationsLabels.get(
         "layer.id == 'word'"
-        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && /[Ee][Nn].*/.test(first('lang').label ?? first('transcript_language').label)"
         +" && label == 'brown'"));
     
     assertEquals("tagMatchingAnnotations num layerIds: " + store.tagMatchingAnnotationsLayerIds,
@@ -769,13 +769,13 @@ public class TestCMUDictionaryTagger {
       "tagMatchingAnnotations layerId quick",
       "phonemes", store.tagMatchingAnnotationsLayerIds.get(
         "layer.id == 'word'"
-        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && /[Ee][Nn].*/.test(first('lang').label ?? first('transcript_language').label)"
         +" && label == 'quick'"));
     assertEquals(
       "tagMatchingAnnotations layerId brown",
       "phonemes", store.tagMatchingAnnotationsLayerIds.get(
         "layer.id == 'word'"
-        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && /[Ee][Nn].*/.test(first('lang').label ?? first('transcript_language').label)"
         +" && label == 'brown'"));
     
     assertEquals("tagMatchingAnnotations num confidences: "
@@ -785,13 +785,13 @@ public class TestCMUDictionaryTagger {
       "tagMatchingAnnotations layerId quick",
       Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
         "layer.id == 'word'"
-        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && /[Ee][Nn].*/.test(first('lang').label ?? first('transcript_language').label)"
         +" && label == 'quick'"));
     assertEquals(
       "tagMatchingAnnotations layerId brown",
       Integer.valueOf(50), store.tagMatchingAnnotationsConfidences.get(
         "layer.id == 'word'"
-        +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
+        +" && /[Ee][Nn].*/.test(first('lang').label ?? first('transcript_language').label)"
         +" && label == 'brown'"));
   }
 

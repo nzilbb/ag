@@ -35,7 +35,7 @@ import java.util.function.Function;
  *
  * @author Robert Fromont robert@fromont.net.nz
  */
-public interface Dictionary extends Function<String,List<String>> {
+public interface Dictionary extends Function<String,List<String>>, AutoCloseable {
 
    /**
     * Provides the annotator that implements the dictionary.

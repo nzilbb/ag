@@ -886,4 +886,9 @@ public class GraphStoreHarness implements GraphStore {
     throw new StoreException("Not implemented");
   }
   
+  public String createAnchor(
+    String id, Double offset, Integer confidence, boolean existingOk)
+    throws StoreException, PermissionException, GraphNotFoundException {
+    throw new StoreException("Not implemented");
+  }
 } // end of class GraphStoreHarness

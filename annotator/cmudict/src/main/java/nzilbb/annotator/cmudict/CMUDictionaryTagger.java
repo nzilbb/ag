@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -36,9 +36,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -53,6 +55,7 @@ import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.ImplementsDictionaries;
 import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.LabelBasedTagger;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.encoding.ValidLabelsDefinitions;
@@ -77,7 +80,7 @@ import nzilbb.util.IO;
  */
 @UsesRelationalDatabase
 @UsesFileSystem
-public class CMUDictionaryTagger extends Annotator
+public class CMUDictionaryTagger extends LabelBasedTagger
   implements ImplementsDictionaries {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
   public String getMinimumApiVersion() { return "1.2.1"; }
@@ -373,94 +376,16 @@ public class CMUDictionaryTagger extends Annotator
   } // end of loadDictionary()
 
   /**
-   * ID of the input layer containing word tokens.
-   * @see #getTokenLayerId()
-   * @see #setTokenLayerId(String)
-   */
-  protected String tokenLayerId;
-  /**
-   * Getter for {@link #tokenLayerId}: ID of the input layer containing word tokens.
-   * @return ID of the input layer containing word tokens.
-   */
-  public String getTokenLayerId() { return tokenLayerId; }
-  /**
-   * Setter for {@link #tokenLayerId}: ID of the input layer containing word tokens.
-   * @param newTokenLayerId ID of the input layer containing word tokens.
-   */
-  public CMUDictionaryTagger setTokenLayerId(String newTokenLayerId) {
-    tokenLayerId = newTokenLayerId; return this; }
-
-  /**
-   * ID of the layer that determines the language of the whole transcript.
-   * @see #getTranscriptLanguageLayerId()
-   * @see #setTranscriptLanguageLayerId(String)
-   */
-  protected String transcriptLanguageLayerId;
-  /**
-   * Getter for {@link #transcriptLanguageLayerId}: ID of the layer that determines the
-   * language of the whole transcript. 
-   * @return ID of the layer that determines the language of the whole transcript.
-   */
-  public String getTranscriptLanguageLayerId() { return transcriptLanguageLayerId; }
-  /**
-   * Setter for {@link #transcriptLanguageLayerId}: ID of the layer that determines the
-   * language of the whole transcript. 
-   * @param newTranscriptLanguageLayerId ID of the layer that determines the language of
-   * the whole transcript. 
-   */
-  public CMUDictionaryTagger setTranscriptLanguageLayerId(String newTranscriptLanguageLayerId) {
-    if (newTranscriptLanguageLayerId != null // empty string means null
-        && newTranscriptLanguageLayerId.trim().length() == 0) {
-      newTranscriptLanguageLayerId = null;
-    }
-    transcriptLanguageLayerId = newTranscriptLanguageLayerId;
-    return this;
-  }
-
-  /**
-   * ID of the layer that determines the language of individual phrases.
-   * @see #getPhraseLanguageLayerId()
-   * @see #setPhraseLanguageLayerId(String)
-   */
-  protected String phraseLanguageLayerId;
-  /**
-   * Getter for {@link #phraseLanguageLayerId}: ID of the layer that determines the
-   * language of individual phrases. 
-   * @return ID of the layer that determines the language of individual phrases.
-   */
-  public String getPhraseLanguageLayerId() { return phraseLanguageLayerId; }
-  /**
-   * Setter for {@link #phraseLanguageLayerId}: ID of the layer that determines the
-   * language of individual phrases. 
-   * @param newPhraseLanguageLayerId ID of the layer that determines the language of
-   * individual phrases. 
-   */
-  public CMUDictionaryTagger setPhraseLanguageLayerId(String newPhraseLanguageLayerId) {
-    if (newPhraseLanguageLayerId != null // empty string means null
-        && newPhraseLanguageLayerId.trim().length() == 0) {
-      newPhraseLanguageLayerId = null;
-    }
-    phraseLanguageLayerId = newPhraseLanguageLayerId;
-    return this;
-  }
-
-  /**
    * ID of the output layer.
-   * @see #getPronunciationLayerId()
-   * @see #setPronunciationLayerId(String)
-   */
-  protected String pronunciationLayerId;
-  /**
-   * Getter for {@link #pronunciationLayerId}: ID of the output layer.
    * @return ID of the output layer.
    */
-  public String getPronunciationLayerId() { return pronunciationLayerId; }
+  public String getPronunciationLayerId() { return tagLayerId; }
   /**
-   * Setter for {@link #pronunciationLayerId}: ID of the output layer.
+   * ID of the output layer.
    * @param newPronunciationLayerId ID of the output layer.
    */
   public CMUDictionaryTagger setPronunciationLayerId(String newPronunciationLayerId) {
-    pronunciationLayerId = newPronunciationLayerId; return this; }
+    tagLayerId = newPronunciationLayerId; return this; }
 
   /**
    * Phoneme encoding - "CMU" or "DISC".
@@ -504,7 +429,7 @@ public class CMUDictionaryTagger extends Annotator
    * Sets the configuration for a given annotation task.
    * @param parameters The configuration of the annotator; a value of <tt> null </tt>
    * will apply the default task parameters, with {@link #tokenLayerId} set to the
-   * {@link Schema#wordLayerId} and {@link #pronunciationLayerId} set to <q>phonemes</q>.
+   * {@link Schema#wordLayerId} and pronunciationLayerId set to <q>phonemes</q>.
    * @throws InvalidConfigurationException
    */
   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
@@ -519,6 +444,9 @@ public class CMUDictionaryTagger extends Annotator
         tokenLayerId = schema.getWordLayerId();
       }
       firstVariantOnly = Boolean.FALSE;
+
+      // target English
+      targetLanguagePattern = "[Ee][Nn].*";
          
       // default transcript language layer
       Layer[] candidates = schema.getMatchingLayers(
@@ -543,9 +471,9 @@ public class CMUDictionaryTagger extends Annotator
         && (layer.getId().toLowerCase().matches(".*phoneme.*")
             || layer.getId().toLowerCase().matches(".*pronunciation.*")));
       if (candidates.length > 0) {
-        pronunciationLayerId = candidates[0].getId();
+        tagLayerId = candidates[0].getId();
       } else { // suggest adding a new one
-        pronunciationLayerId = "phonemes";
+        tagLayerId = "phonemes";
       }
       
     } else {
@@ -563,24 +491,24 @@ public class CMUDictionaryTagger extends Annotator
         this, "Phrase language layer not found: " + phraseLanguageLayerId);
       
     // does the outputLayer need to be added to the schema?
-    Layer pronunciationLayer = schema.getLayer(pronunciationLayerId);
+    Layer pronunciationLayer = schema.getLayer(tagLayerId);
     if (pronunciationLayer == null) {
       schema.addLayer(
-        new Layer(pronunciationLayerId)
+        new Layer(tagLayerId)
         .setAlignment(Constants.ALIGNMENT_NONE)
         .setPeers(!firstVariantOnly)
         .setParentId(schema.getWordLayerId()));
-      pronunciationLayer = schema.getLayer(pronunciationLayerId);
+      pronunciationLayer = schema.getLayer(tagLayerId);
     } else {
-      if (pronunciationLayerId.equals(tokenLayerId)
-          || pronunciationLayerId.equals(transcriptLanguageLayerId)
-          || pronunciationLayerId.equals(phraseLanguageLayerId)) {
+      if (tagLayerId.equals(tokenLayerId)
+          || tagLayerId.equals(transcriptLanguageLayerId)
+          || tagLayerId.equals(phraseLanguageLayerId)) {
         throw new InvalidConfigurationException(
-          this, "Invalid pronunciation layer: " + pronunciationLayerId);
+          this, "Invalid pronunciation layer: " + tagLayerId);
       }
       if (!pronunciationLayer.getPeers() && !firstVariantOnly) {
         setStatus(
-          "Pronunciation layer " + pronunciationLayerId
+          "Pronunciation layer " + tagLayerId
           + " doesn't allow peer annotations; using first variant only.");
         firstVariantOnly = true;
       }
@@ -644,141 +572,53 @@ public class CMUDictionaryTagger extends Annotator
    * {@link #setSchema(Schema)} have not yet been called.
    */
   public String[] getOutputLayers() throws InvalidConfigurationException {
-    if (pronunciationLayerId == null)
+    if (tagLayerId == null)
       throw new InvalidConfigurationException(this, "Pronunciation layer not set.");
-    return new String[] { pronunciationLayerId };
+    return new String[] { tagLayerId };
   }
    
   /**
-   * Transforms the graph. In this case, the graph is simply summarized, by counting all
-   * tokens of each word type, and printing out the result to stdout.
-   * @param graph The graph to transform.
-   * @return The changes introduced by the tranformation.
-   * @throws TransformationException If the transformation cannot be completed.
+   * Getter for {@link #taggingDictionary}: A dictionary that might be
+   * used during calls to {@link #tagsFor(String)}, which will be
+   * closed after tagging. 
+   * @return A dictionary that might be used during calls to {@link #tagsFor(String)},
+   * which will be closed after tagging.
+   * @throws DictionaryException If the dictonary could not be instantiated.
    */
-  public Graph transform(Graph graph) throws TransformationException {
-    setRunning(true);
-    try {
-      openLog();
-      setStatus(""); // clear any residual status from the last run...
-         
-      Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
-      if (tokenLayer == null) {
-        throw new InvalidConfigurationException(
-          this, "Invalid input token layer: " + tokenLayerId);
-      }
-      Layer pronLayer = graph.getSchema().getLayer(pronunciationLayerId);
-      if (pronLayer == null) {
-        throw new InvalidConfigurationException(
-          this, "Invalid output pronunciation layer: " + pronunciationLayerId);
-      }
-         
-      // what languages are in the transcript?
-      boolean transcriptIsMainlyEnglish = true;
-      if (transcriptLanguageLayerId != null) {
-        Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
-        if (transcriptLanguage != null) {
-          if (!transcriptLanguage.getLabel().toLowerCase().startsWith("en")) { // not English
-            transcriptIsMainlyEnglish = false;
-          }
-        }
-      }
-      boolean thereArePhraseTags = false;
-      if (phraseLanguageLayerId != null) {
-        if (graph.first(phraseLanguageLayerId) != null) {
-          thereArePhraseTags = true;
-        }
-      }
-
-      Vector<Annotation> toAnnotate = new Vector<Annotation>();
-      // should we just tag everything?
-      if (transcriptIsMainlyEnglish && !thereArePhraseTags) {
-        // process all tokens
-        for (Annotation token : graph.all(tokenLayerId)) {
-          // tag only tokens that are not already tagged
-          if (token.first(pronunciationLayerId) == null) { // not tagged yet
-            toAnnotate.add(token);                        
-          } // not tagged yet
-        } // next token
-      } else if (transcriptIsMainlyEnglish) {
-        // process all but the phrase-tagged tokens
-            
-        // tag the exceptions
-        for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-          if (!phrase.getLabel().toLowerCase().startsWith("en")) { // not English
-            for (Annotation token : phrase.all(tokenLayerId)) {
-              // mark the token as an exception
-              token.put("@notEnglish", Boolean.TRUE);
-            } // next token in the phrase
-          } // non-English phrase
-        } // next phrase
-            
-        for (Annotation token : graph.all(tokenLayerId)) {
-          if (token.containsKey("@notEnglish")) {
-            // while we're here, we remove the @notEnglish mark
-            token.remove("@notEnglish");
-          } else { // English, so tag it
-            // tag only tokens that are not already tagged
-            if (token.first(pronunciationLayerId) == null) { // not tagged yet
-              toAnnotate.add(token);
-            } // not tagged yet
-          } // English, so tag it
-        } // next token
-      } else if (thereArePhraseTags) {
-        // process only the tokens phrase-tagged as English
-        for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-          if (phrase.getLabel().toLowerCase().startsWith("en")) {
-            for (Annotation token : phrase.all(tokenLayerId)) {
-              // tag only tokens that are not already tagged
-              if (token.first(pronunciationLayerId) == null) { // not tagged yet
-                toAnnotate.add(token);                  
-              } // not tagged yet
-            } // next token in the phrase
-          } // English phrase
-        } // next phrase
-      } // thereArePhraseTags
-         
-      try {
-        Dictionary dictionary = getDictionary("cmudict");
-        try {
-          int t = 0;
-          int tokenCount = toAnnotate.size();
-          setPercentComplete(0);
-          for (Annotation token : toAnnotate) {
-            if (isCancelling()) break;
-            boolean found = false;
-            for (String pronunciation : dictionary.lookup(token.getLabel())) {
-
-              found = true;
-              token.createTag(pronunciationLayerId, pronunciation)
-                .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                     
-              // do we want the first entry only?
-              if (firstVariantOnly) break;
-                     
-            } // next entry
-            if (!found) { // might be a hesitation?
-              String pronunciation = hesitationToDISC(token.getLabel());
-              if (pronunciation != null) {
-                token.createTag(pronunciationLayerId, pronunciation)
-                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-              }
-            }
-            setPercentComplete(++t * 100 / tokenCount);
-          } // next token
-        } finally {
-          dictionary.close();
-        }
-      } catch (DictionaryException x) {
-        throw new TransformationException(this, x);
-      }
-      return graph;
-    } finally {
-      closeLog();
-      setRunning(false);
+  @Override public Dictionary getTaggingDictionary() throws DictionaryException {
+    if (taggingDictionary == null) {
+      taggingDictionary = getDictionary("cmudict");
     }
+    return taggingDictionary;
   }
-   
+  
+  /**
+   * Determines what tag labels should apply on the tag layer for
+   * tokens with the given label on the token layer.
+   * @param tokenLabel The label of the token(s) that must be tagged.
+   * @return A list of tags, which may be empty.
+   */
+  public Collection<String> tagsFor(String tokenLabel) throws DictionaryException {
+    LinkedHashSet<String> tags = new LinkedHashSet<String>();
+    boolean found = false;
+    for (String pronunciation : getTaggingDictionary().lookup(tokenLabel)) {
+
+      found = true;
+      tags.add(pronunciation);
+      
+      // do we want the first entry only?
+      if (firstVariantOnly) break;
+      
+    } // next entry
+    if (!found) { // might be a hesitation?
+      String pronunciation = hesitationToDISC(tokenLabel);
+      if (pronunciation != null) {
+        tags.add(pronunciation);
+      }
+    }
+    return tags;
+  }
+  
   /**
    * Lists the dictionaries implemented by this Annotator.
    * <p> This method can assume that the following methods have been previously called:
@@ -820,184 +660,6 @@ public class CMUDictionaryTagger extends Annotator
       throw new DictionaryException(null, sqlX);
     }
   }
-
-  /**
-   * Tags all instances of the given word in the given graph store, using the dictionary
-   * specified by current task configuration (i.e. the dictionary returned by
-   * <code>getDictionary(null)</code>).
-   * <p> The default implementation throws TransformationException
-   * @param store
-   * @param sourceLabel
-   * @return The number of tags created.
-   * @throws DictionaryException, TransformationException, InvalidConfigurationException,
-   * StoreException 
-   */
-  @Override public int tagAllInstances(GraphStore store, String sourceLabel)
-    throws DictionaryException, TransformationException, InvalidConfigurationException,
-    StoreException {
-    Dictionary dictionary = getDictionary("cmudict");
-    try {
-
-      StringBuilder languageExpression = new StringBuilder();
-      if (phraseLanguageLayerId != null || transcriptLanguageLayerId != null) {
-        languageExpression.append(" && /").append("en.*").append("/.test(");
-        if (phraseLanguageLayerId != null) {
-          languageExpression.append("first('").append(esc(phraseLanguageLayerId))
-            .append("').label");
-          if (transcriptLanguageLayerId != null) {
-            languageExpression.append(" ?? "); // add coalescing operator
-          }
-        }
-        if (transcriptLanguageLayerId != null) {
-          languageExpression.append("first('").append(esc(transcriptLanguageLayerId))
-            .append("').label");
-        }
-        languageExpression.append(")");
-      } // add language condition
-      
-      store.deleteMatchingAnnotations(
-        "layerId = '"+esc(pronunciationLayerId)+"'"
-        +languageExpression
-        +" && first('"+esc(tokenLayerId)+"').label == '"+esc(sourceLabel)+"'");
-
-      String tokenExpression = "layerId = '"+esc(tokenLayerId)+"'"
-        +languageExpression
-        +" && label = '"+esc(sourceLabel)+"'";
-      int count = 0;
-      for (String pronunciation : dictionary.lookup(sourceLabel)) {
-        
-        store.tagMatchingAnnotations(
-          tokenExpression, pronunciationLayerId, pronunciation, Constants.CONFIDENCE_AUTOMATIC);
-        count++;
-        // do we want the first entry only?
-        if (firstVariantOnly) break;        
-      } // next entry
-      return count;
-    } catch(PermissionException x) {
-      throw new TransformationException(this, x);
-    } finally {
-      dictionary.close();
-    }
-  }
-  
-  /**
-   * Transforms all graphs from the given graph store that match the given graph expression.
-   * <p> This implementation uses
-   * {@link GraphStoreQuery#aggregateMatchingAnnotations(String,String)}
-   * and {@link GraphStore#tagMatchingAnnotations​(String,String,String,Integer)}
-   * to optimize tagging transcripts en-masse.
-   * @param store The graph to store.
-   * @param expression An expression for identifying transcripts to update, or null to transform
-   * all transcripts in the store.
-   * @return The changes introduced by the tranformation.
-   * @throws TransformationException If the transformation cannot be completed.
-   */
-  public void transformTranscripts​(GraphStore store, String expression)
-    throws TransformationException, InvalidConfigurationException, StoreException,
-    PermissionException {
-    setRunning(true);
-    try {
-      setPercentComplete(0);
-      Layer tokenLayer = schema.getLayer(tokenLayerId);
-      if (tokenLayer == null) {
-        throw new InvalidConfigurationException(
-          this, "Invalid input token layer: " + tokenLayerId);
-      }
-      Layer pronunciationLayer = schema.getLayer(pronunciationLayerId);
-      if (pronunciationLayer == null) {
-        throw new InvalidConfigurationException(
-          this, "Invalid output pronunciation layer: " + pronunciationLayerId);
-      }    
-      
-      StringBuilder labelExpression = new StringBuilder();
-      labelExpression.append("layer.id == '").append(esc(tokenLayer.getId())).append("'");
-      if (phraseLanguageLayerId != null || transcriptLanguageLayerId != null) {
-        labelExpression.append(" && /").append("en.*").append("/.test(");
-        if (phraseLanguageLayerId != null) {
-          labelExpression.append("first('").append(esc(phraseLanguageLayerId))
-            .append("').label");
-          if (transcriptLanguageLayerId != null) {
-            labelExpression.append(" ?? "); // add coalescing operator
-          }
-        }
-        if (transcriptLanguageLayerId != null) {
-          labelExpression.append("first('").append(esc(transcriptLanguageLayerId))
-            .append("').label");
-        }
-        labelExpression.append(")");
-      } // add language condition
-      
-      if (expression != null && expression.trim().length() > 0) {
-        labelExpression.append(" && [");
-        String[] ids = store.getMatchingTranscriptIds(expression);
-        if (ids.length == 0) {
-          setStatus("No matching transcripts");
-          setPercentComplete(100);
-          return;
-        } else {
-          labelExpression.append(
-            Arrays.stream(ids)
-            // quote and escape each ID
-            .map(id->"'"+id.replace("'", "\\'")+"'")
-            // make a comma-delimited list
-            .collect(Collectors.joining(",")));
-          labelExpression.append("].includes(graphId)");
-        }
-      }
-      setStatus("Getting distinct token labels...");
-      String[] distinctWords = store.aggregateMatchingAnnotations(
-        "DISTINCT", labelExpression.toString());
-      setStatus("There are "+distinctWords.length+" distinct token labels");
-      int w = 0;
-      Dictionary dictionary = getDictionary("cmudict");
-      // for each label
-      for (String word : distinctWords) {
-        if (isCancelling()) break;
-        boolean found = false;
-        StringBuilder tokenExpression = new StringBuilder(labelExpression);
-        tokenExpression.append(" && label == '").append(esc(word)).append("'");
-        for (String pronunciation : dictionary.lookup(word)) {
-          if (isCancelling()) break;
-          setStatus(word+" → "+pronunciation);
-          found = true;
-          store.tagMatchingAnnotations(
-            tokenExpression.toString(), pronunciationLayerId, pronunciation,
-            Constants.CONFIDENCE_AUTOMATIC);
-          // do we want the first entry only?
-          if (firstVariantOnly) break;        
-        } // next entry
-        if (!found) { // might be a hesitation?
-          String pronunciation = hesitationToDISC(word);
-          if (pronunciation != null) {
-            store.tagMatchingAnnotations(
-              tokenExpression.toString(), pronunciationLayerId, pronunciation,
-              Constants.CONFIDENCE_AUTOMATIC);
-          }
-        }
-        setPercentComplete((++w * 100) / distinctWords.length);
-      } // next word
-      if (isCancelling()) {
-        setStatus("Cancelled.");
-      } else {
-        setPercentComplete(100);
-        setStatus("Finished.");
-      }
-    } catch(DictionaryException x) {
-      throw new TransformationException(this, x);
-    } finally {
-      setRunning(false);
-    }
-  }
-  
-  /**
-   * Escapes quotes in the given string for inclusion in QL or SQL queries.
-   * @param s The string to escape.
-   * @return The given string, with quotes escapeed.
-   */
-  private String esc(String s) {
-    if (s == null) return "";
-    return s.replace("\\","\\\\").replace("'","\\'");
-  } // end of esc()  
 
   /**
    * Converts a possible single-phoneme hesitation into it's DISC phonology

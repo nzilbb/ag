@@ -7,6 +7,8 @@ getVersion(version => {
 
 const taskId = window.location.search.substring(1);
 
+// TODO disable form if 'Upload new lexicon file' is open, so they know to upload first, and then set the settings
+
 // first, get the layer schema
 var schema = null;
 getSchema(s => {

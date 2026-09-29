@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2024 New Zealand Institute of Language, Brain and Behaviour, 
+// Copyright 2020-2026 New Zealand Institute of Language, Brain and Behaviour, 
 // University of Canterbury
 // Written by Robert Fromont - robert.fromont@canterbury.ac.nz
 //
@@ -21,332 +21,170 @@
 //
 package nzilbb.annotator.spanishphonology;
 
+import java.util.Collection;
 import java.util.Vector;
-import javax.script.ScriptException;
 import nz.ac.canterbury.ling.spanishphonology.SpanishPronunciation;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.LabelBasedTagger;
 
 /**
  * Annotator that tags Spanish words with their phonemic transcription, based orthography.
  * @author Robert Fromont robert@fromont.net.nz
  */
-public class SpanishPhonologyTagger extends Annotator {
+public class SpanishPhonologyTagger extends LabelBasedTagger {
    /** Get the minimum version of the nzilbb.ag API supported by the serializer.*/
-   public String getMinimumApiVersion() { return "1.0.0"; }
+   public String getMinimumApiVersion() { return "2.0.0"; }
 
    private SpanishPronunciation transcriber = new SpanishPronunciation();
-
-   /**
-    * ID of the input layer containing word tokens.
-    * @see #getTokenLayerId()
-    * @see #setTokenLayerId(String)
-    */
-   protected String tokenLayerId;
-   /**
-    * Getter for {@link #tokenLayerId}: ID of the input layer containing word tokens.
-    * @return ID of the input layer containing word tokens.
-    */
-   public String getTokenLayerId() { return tokenLayerId; }
-   /**
-    * Setter for {@link #tokenLayerId}: ID of the input layer containing word tokens.
-    * @param newTokenLayerId ID of the input layer containing word tokens.
-    */
-   public SpanishPhonologyTagger setTokenLayerId(String newTokenLayerId) {
-      tokenLayerId = newTokenLayerId; return this; }
-
-   /**
-    * ID of the layer that determines the language of the whole transcript.
-    * @see #getTranscriptLanguageLayerId()
-    * @see #setTranscriptLanguageLayerId(String)
-    */
-   protected String transcriptLanguageLayerId;
-   /**
-    * Getter for {@link #transcriptLanguageLayerId}: ID of the layer that determines the
-    * language of the whole transcript. 
-    * @return ID of the layer that determines the language of the whole transcript.
-    */
-   public String getTranscriptLanguageLayerId() { return transcriptLanguageLayerId; }
-   /**
-    * Setter for {@link #transcriptLanguageLayerId}: ID of the layer that determines the
-    * language of the whole transcript. 
-    * @param newTranscriptLanguageLayerId ID of the layer that determines the language of
-    * the whole transcript. 
-    */
-   public SpanishPhonologyTagger setTranscriptLanguageLayerId(String newTranscriptLanguageLayerId) {
-      if (newTranscriptLanguageLayerId != null // empty string means null
-          && newTranscriptLanguageLayerId.trim().length() == 0) {
-         newTranscriptLanguageLayerId = null;
-      }
-      transcriptLanguageLayerId = newTranscriptLanguageLayerId;
-      return this;
-   }
 
    /**
     * Which variety of Spanish to use.
     * @see #getLocale()
     * @see #setLocale(String)
     */
-   protected String locale;
-   /**
-    * Getter for {@link #locale}: Which variety of Spanish to use.
-    * @return Which variety of Spanish to use.
-    */
-   public String getLocale() { return locale; }
-   /**
-    * Setter for {@link #locale}: Which variety of Spanish to use.
-    * @param newLocale Which variety of Spanish to use.
-    */
-   public SpanishPhonologyTagger setLocale(String newLocale) { locale = newLocale; return this; }
+  protected String locale;
+  /**
+   * Getter for {@link #locale}: Which variety of Spanish to use.
+   * @return Which variety of Spanish to use.
+   */
+  public String getLocale() { return locale; }
+  /**
+   * Setter for {@link #locale}: Which variety of Spanish to use.
+   * @param newLocale Which variety of Spanish to use.
+   */
+  public SpanishPhonologyTagger setLocale(String newLocale) { locale = newLocale; return this; }
 
-   /**
-    * ID of the layer that determines the language of individual phrases.
-    * @see #getPhraseLanguageLayerId()
-    * @see #setPhraseLanguageLayerId(String)
-    */
-   protected String phraseLanguageLayerId;
-   /**
-    * Getter for {@link #phraseLanguageLayerId}: ID of the layer that determines the
-    * language of individual phrases. 
-    * @return ID of the layer that determines the language of individual phrases.
-    */
-   public String getPhraseLanguageLayerId() { return phraseLanguageLayerId; }
-   /**
-    * Setter for {@link #phraseLanguageLayerId}: ID of the layer that determines the
-    * language of individual phrases. 
-    * @param newPhraseLanguageLayerId ID of the layer that determines the language of
-    * individual phrases. 
-    */
-   public SpanishPhonologyTagger setPhraseLanguageLayerId(String newPhraseLanguageLayerId) {
-      if (newPhraseLanguageLayerId != null // empty string means null
-          && newPhraseLanguageLayerId.trim().length() == 0) {
-         newPhraseLanguageLayerId = null;
-      }
-      phraseLanguageLayerId = newPhraseLanguageLayerId;
-      return this;
-   }
+  /**
+   * ID of the layer that the annotator outputs its annotations to. 
+   * @return ID of the layer that the annotator outputs its annotations to.
+   */
+  public String getPhonemeLayerId() { return tagLayerId; }
+  /**
+   * ID of the layer that the annotator outputs its annotations to.
+   * @param newPhonemeLayerId ID of the layer that the annotator outputs its annotations to.
+   */
+  public SpanishPhonologyTagger setPhonemeLayerId(String newPhonemeLayerId) { tagLayerId = newPhonemeLayerId; return this; }
 
-   /**
-    * ID of the layer that the annotator outputs its annotations to.
-    * @see #getPhonemeLayerId()
-    * @see #setPhonemeLayerId(String)
-    */
-   protected String phonemeLayerId;
-   /**
-    * Getter for {@link #phonemeLayerId}: ID of the layer that the annotator outputs its
-    * annotations to. 
-    * @return ID of the layer that the annotator outputs its annotations to.
-    */
-   public String getPhonemeLayerId() { return phonemeLayerId; }
-   /**
-    * Setter for {@link #phonemeLayerId}: ID of the layer that the annotator outputs its 
-    * annotations to.
-    * @param newPhonemeLayerId ID of the layer that the annotator outputs its annotations to.
-    */
-   public SpanishPhonologyTagger setPhonemeLayerId(String newPhonemeLayerId) { phonemeLayerId = newPhonemeLayerId; return this; }
-
-   /**
-    * Sets the configuration for a given annotation task.
-    * @param parameters The configuration of the annotator; a value of <tt> null </tt>
-    * will apply the default task parameters, with {@link #tokenLayerId} set to the
-    * {@link Schema#wordLayerId} and {@link #phonemeLayerId} set to <q>phonemes</q>.
-    * @throws InvalidConfigurationException
-    */
-   public void setTaskParameters(String parameters) throws InvalidConfigurationException {
-      if (schema == null)
-         throw new InvalidConfigurationException(this, "Schema is not set.");
+  /**
+   * Sets the configuration for a given annotation task.
+   * @param parameters The configuration of the annotator; a value of <tt> null </tt>
+   * will apply the default task parameters, with {@link #tokenLayerId} set to the
+   * {@link Schema#wordLayerId} and {@link #phonemeLayerId} set to <q>phonemes</q>.
+   * @throws InvalidConfigurationException
+   */
+  public void setTaskParameters(String parameters) throws InvalidConfigurationException {
+    if (schema == null)
+      throw new InvalidConfigurationException(this, "Schema is not set.");
       
-      if (parameters == null) { // apply default configuration
+    // target Spanish
+    targetLanguagePattern = "[Ee][Ss].*";
+      
+    if (parameters == null) { // apply default configuration
          
-         if (schema.getLayer("orthography") != null) {
-            tokenLayerId = "orthography";
-         } else {
-            tokenLayerId = schema.getWordLayerId();
-         }
-         
-         Layer[] candidates = schema.getMatchingLayers(
-           layer -> schema.getRoot().getId().equals(layer.getParentId())
-           && layer.getAlignment() == 0 // transcript attribute
-           && layer.getId().matches(".*lang.*")); // with 'lang' in the name
-         if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
-         
-         // default phrase language layer
-         candidates = schema.getMatchingLayers(
-           layer -> schema.getTurnLayerId() != null
-           && schema.getTurnLayerId().equals(layer.getParentId()) // child of turn
-           && layer.getId().matches(".*lang.*")); // with 'lang' in the name
-         if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
-         
-         // default output layer
-         candidates = schema.getMatchingLayers(
-           layer -> schema.getWordLayerId() != null
-           && schema.getWordLayerId().equals(layer.getParentId())
-           && (layer.getId().matches(".*phoneme.*")
-               || layer.getId().matches(".*pronunciation.*")));
-         
-         phonemeLayerId = "phonemes";
-         
+      if (schema.getLayer("orthography") != null) {
+        tokenLayerId = "orthography";
       } else {
-         beanPropertiesFromQueryString(parameters);
+        tokenLayerId = schema.getWordLayerId();
       }
-
-      if (locale == null) locale = "es_ES";
-      if (!transcriber.getSupportedLocales().contains(locale)) {
-         throw new InvalidConfigurationException(this, "Invalid locale: " + locale);
-      }
-      
-      // does the outputLayer need to be added to the schema?
-      Layer layer = schema.getLayer(phonemeLayerId);
-      if (layer == null) {
-         schema.addLayer(
-            new Layer(phonemeLayerId)
-            .setAlignment(Constants.ALIGNMENT_NONE)
-            .setPeers(false).setSaturated(true)
-            .setParentId(schema.getWordLayerId())
-            .setType(Constants.TYPE_IPA));
-      } else {
-        if (layer.getAlignment() != Constants.ALIGNMENT_NONE) {
-          layer.setAlignment(Constants.ALIGNMENT_NONE);
-        }
-        if (layer.getPeers()) layer.setPeers(false);
-        if (layer.getPeersOverlap()) layer.setPeersOverlap(false);
-        if (!layer.getSaturated()) layer.setSaturated(true);
-      }
-   }
-   
-   /**
-    * Determines which layers the annotator requires in order to annotate a graph.
-    * @return A list of layer IDs. In this case, the annotator only requires the schema's
-    * word layer.
-    * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
-    * {@link #setSchema(Schema)} have not yet been called.
-    */
-   public String[] getRequiredLayers() throws InvalidConfigurationException {
-      if (schema == null)
-         throw new InvalidConfigurationException(this, "Schema is not set.");
-      if (tokenLayerId == null)
-         throw new InvalidConfigurationException(this, "No input token layer set.");
-      Vector<String> requiredLayers = new Vector<String>();
-      requiredLayers.add(tokenLayerId);
-      if (transcriptLanguageLayerId != null) requiredLayers.add(transcriptLanguageLayerId);
-      if (phraseLanguageLayerId != null) requiredLayers.add(phraseLanguageLayerId);
-      return requiredLayers.toArray(new String[0]);
-   }
-
-   /**
-    * Determines which layers the annotator will create/update/delete annotations on.
-    * @return A list of layer IDs. In this case, the annotator has no task web-app for
-    * specifying an output layer, and doesn't update any layers, so this method returns an
-    * empty array.
-    * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
-    * {@link #setSchema(Schema)} have not yet been called.
-    */
-   public String[] getOutputLayers() throws InvalidConfigurationException {
-      if (phonemeLayerId == null)
-         throw new InvalidConfigurationException(this, "Phoneme layer not set.");
-      return new String[] { phonemeLayerId };
-   }
-   
-   /**
-    * Transforms the graph. In this case, the graph is simply summarized, by counting all
-    * tokens of each word type, and printing out the result to stdout.
-    * @param graph The graph to transform.
-    * @return The changes introduced by the tranformation.
-    * @throws TransformationException If the transformation cannot be completed.
-    */
-   public Graph transform(Graph graph) throws TransformationException {
-      setRunning(true);
-     
-      Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
-      if (tokenLayer == null) {
-         throw new InvalidConfigurationException(
-            this, "Invalid input token layer: " + tokenLayerId);
-      }
-      Layer phonemeLayer = graph.getSchema().getLayer(phonemeLayerId);
-      if (phonemeLayer == null) {
-         throw new InvalidConfigurationException(
-            this, "Invalid output phoneme layer: " + phonemeLayerId);
-      }
-
-      // what languages are in the transcript?
-      boolean transcriptIsMainlySpanish = true;
-      if (transcriptLanguageLayerId != null) {
-         Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
-         if (transcriptLanguage != null) {
-            if (!transcriptLanguage.getLabel().startsWith("es")) { // not Spanish
-               transcriptIsMainlySpanish = false;
-            }
-         }
-      }
-      boolean thereArePhraseTags = false;
-      if (phraseLanguageLayerId != null) {
-         if (graph.first(phraseLanguageLayerId) != null) {
-            thereArePhraseTags = true;
-         }
-      }
-      
-      // should we just tag everything?
-      if (transcriptIsMainlySpanish && !thereArePhraseTags) {
-         // process all tokens
-         for (Annotation token : graph.all(tokenLayerId)) {
-            // tag only tokens that are not already tagged
-            if (token.first(phonemeLayerId) == null) { // not tagged yet
-               token.createTag(phonemeLayerId, transcribe(token.getLabel()))
-                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-            } // not tagged yet
-         } // next token
-      } else if (transcriptIsMainlySpanish) {
-         // process all but the phrase-tagged tokens
-
-         // tag the exceptions
-         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-            if (!phrase.getLabel().startsWith("es")) { // not Spanish
-               for (Annotation token : phrase.all(tokenLayerId)) {
-                  // mark the token as an exception
-                  token.put("@notSpanish", Boolean.TRUE);
-               } // next token in the phrase
-            } // non-Spanish phrase
-         } // next phrase
          
-         for (Annotation token : graph.all(tokenLayerId)) {
-            if (token.containsKey("@notSpanish")) {
-               // while we're here, we remove the @notSpanish mark
-               token.remove("@notSpanish");
-            } else { // Spanish, so tag it
-               // tag only tokens that are not already tagged
-               if (token.first(phonemeLayerId) == null) { // not tagged yet
-                  token.createTag(phonemeLayerId, transcribe(token.getLabel()))
-                     .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-               } // not tagged yet
-            } // Spanish, so tag it
-         } // next token
-      } else if (thereArePhraseTags) {
-         // process only the tokens phrase-tagged as Spanish
-         for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-            if (phrase.getLabel().startsWith("es")) {
-               for (Annotation token : phrase.all(tokenLayerId)) {
-                  // tag only tokens that are not already tagged
-                  if (token.first(phonemeLayerId) == null) { // not tagged yet
-                     token.createTag(phonemeLayerId, transcribe(token.getLabel()))
-                        .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-                  } // not tagged yet
-               } // next token in the phrase
-            } // Spanish phrase
-         } // next phrase
-      } // thereArePhraseTags
+      Layer[] candidates = schema.getMatchingLayers(
+        layer -> schema.getRoot().getId().equals(layer.getParentId())
+        && layer.getAlignment() == 0 // transcript attribute
+        && layer.getId().matches(".*lang.*")); // with 'lang' in the name
+      if (candidates.length > 0) transcriptLanguageLayerId = candidates[0].getId();
+         
+      // default phrase language layer
+      candidates = schema.getMatchingLayers(
+        layer -> schema.getTurnLayerId() != null
+        && schema.getTurnLayerId().equals(layer.getParentId()) // child of turn
+        && layer.getId().matches(".*lang.*")); // with 'lang' in the name
+      if (candidates.length > 0) phraseLanguageLayerId = candidates[0].getId();
+         
+      // default output layer
+      candidates = schema.getMatchingLayers(
+        layer -> schema.getWordLayerId() != null
+        && schema.getWordLayerId().equals(layer.getParentId())
+        && (layer.getId().matches(".*phoneme.*")
+            || layer.getId().matches(".*pronunciation.*")));
+         
+      tagLayerId = "phonemes";
+         
+    } else {
+      beanPropertiesFromQueryString(parameters);
+    }
 
-      setRunning(false);
-      return graph;
-   }
+    if (locale == null) locale = "es_ES";
+    if (!transcriber.getSupportedLocales().contains(locale)) {
+      throw new InvalidConfigurationException(this, "Invalid locale: " + locale);
+    }
+      
+    // does the outputLayer need to be added to the schema?
+    Layer layer = schema.getLayer(tagLayerId);
+    if (layer == null) {
+      schema.addLayer(
+        new Layer(tagLayerId)
+        .setAlignment(Constants.ALIGNMENT_NONE)
+        .setPeers(false).setSaturated(true)
+        .setParentId(schema.getWordLayerId())
+        .setType(Constants.TYPE_IPA));
+    } else {
+      if (layer.getAlignment() != Constants.ALIGNMENT_NONE) {
+        layer.setAlignment(Constants.ALIGNMENT_NONE);
+      }
+      if (layer.getPeers()) layer.setPeers(false);
+      if (layer.getPeersOverlap()) layer.setPeersOverlap(false);
+      if (!layer.getSaturated()) layer.setSaturated(true);
+    }
+  }
+   
+  /**
+   * Determines which layers the annotator requires in order to annotate a graph.
+   * @return A list of layer IDs. In this case, the annotator only requires the schema's
+   * word layer.
+   * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
+   * {@link #setSchema(Schema)} have not yet been called.
+   */
+  public String[] getRequiredLayers() throws InvalidConfigurationException {
+    if (schema == null)
+      throw new InvalidConfigurationException(this, "Schema is not set.");
+    if (tokenLayerId == null)
+      throw new InvalidConfigurationException(this, "No input token layer set.");
+    Vector<String> requiredLayers = new Vector<String>();
+    requiredLayers.add(tokenLayerId);
+    if (transcriptLanguageLayerId != null) requiredLayers.add(transcriptLanguageLayerId);
+    if (phraseLanguageLayerId != null) requiredLayers.add(phraseLanguageLayerId);
+    return requiredLayers.toArray(new String[0]);
+  }
 
-   /**
-    * Phonetically transcribes the given word.
-    * @param word The word to transcribe.
-    * @return The phonemic transcription of the given word.
-    */
-   public String transcribe(String word) {
-      return transcriber.convert_spanish_word_to_phonetic_transcription(word, locale);
-   } // end of transcribe()
+  /**
+   * Determines which layers the annotator will create/update/delete annotations on.
+   * @return A list of layer IDs. In this case, the annotator has no task web-app for
+   * specifying an output layer, and doesn't update any layers, so this method returns an
+   * empty array.
+   * @throws InvalidConfigurationException If {@link #setTaskParameters(String)} or 
+   * {@link #setSchema(Schema)} have not yet been called.
+   */
+  public String[] getOutputLayers() throws InvalidConfigurationException {
+    if (tagLayerId == null)
+      throw new InvalidConfigurationException(this, "Phoneme layer not set.");
+    return new String[] { tagLayerId };
+  }
+   
+  /**
+   * Determines what tag labels should apply on the tag layer for
+   * tokens with the given label on the token layer.
+   * This is the method that must be implemented by derived classes.
+   * @param tokenLabel The label of the token(s) that must be tagged.
+   * @return A list of tags, which may be empty.
+   */
+  public Collection<String> tagsFor(String tokenLabel) throws DictionaryException {
+    Vector<String> tags = new Vector<String>();
+    tags.add(transcriber.convert_spanish_word_to_phonetic_transcription(
+               tokenLabel, locale));
+    return tags;
+  } // end of transcribe()
 
 } // end of class SpanishPhonologyTagger

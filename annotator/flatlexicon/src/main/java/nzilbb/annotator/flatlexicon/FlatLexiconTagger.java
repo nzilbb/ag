@@ -40,8 +40,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,7 @@ import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.ImplementsDictionaries;
 import nzilbb.ag.automation.InvalidConfigurationException;
+import nzilbb.ag.automation.LabelBasedTagger;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.sql.ConnectionFactory;
@@ -75,9 +77,9 @@ import org.apache.commons.csv.CSVRecord;
  * 'flat', plain text files - e.g. CSV files.
  */
 @UsesRelationalDatabase
-public class FlatLexiconTagger extends Annotator implements ImplementsDictionaries {
+public class FlatLexiconTagger extends LabelBasedTagger implements ImplementsDictionaries {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.4.0"; }
+  public String getMinimumApiVersion() { return "2.0.0"; }
      
   /**
    * Setter for {@link #status}: The current status of the task.
@@ -495,105 +497,6 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       rdb.close();
     }
   } // end of deleteLexicon()  
-
-  /**
-   * ID of the input layer containing word tokens.
-   * @see #getTokenLayerId()
-   * @see #setTokenLayerId(String)
-   */
-  protected String tokenLayerId;
-  /**
-   * Getter for {@link #tokenLayerId}: ID of the input layer containing word tokens.
-   * @return ID of the input layer containing word tokens.
-   */
-  public String getTokenLayerId() { return tokenLayerId; }
-  /**
-   * Setter for {@link #tokenLayerId}: ID of the input layer containing word tokens.
-   * @param newTokenLayerId ID of the input layer containing word tokens.
-   */
-  public FlatLexiconTagger setTokenLayerId(String newTokenLayerId) {
-    tokenLayerId = newTokenLayerId; return this; }
-
-  /**
-   * ID of the layer that determines the language of the whole transcript.
-   * @see #getTranscriptLanguageLayerId()
-   * @see #setTranscriptLanguageLayerId(String)
-   */
-  protected String transcriptLanguageLayerId;
-  /**
-   * Getter for {@link #transcriptLanguageLayerId}: ID of the layer that determines the
-   * language of the whole transcript. 
-   * @return ID of the layer that determines the language of the whole transcript.
-   */
-  public String getTranscriptLanguageLayerId() { return transcriptLanguageLayerId; }
-  /**
-   * Setter for {@link #transcriptLanguageLayerId}: ID of the layer that determines the
-   * language of the whole transcript. 
-   * @param newTranscriptLanguageLayerId ID of the layer that determines the language of
-   * the whole transcript. 
-   */
-  public FlatLexiconTagger setTranscriptLanguageLayerId(String newTranscriptLanguageLayerId) {
-    if (newTranscriptLanguageLayerId != null // empty string means null
-        && newTranscriptLanguageLayerId.trim().length() == 0) {
-      newTranscriptLanguageLayerId = null;
-    }
-    transcriptLanguageLayerId = newTranscriptLanguageLayerId;
-    return this;
-  }
-
-  /**
-   * ID of the layer that determines the language of individual phrases.
-   * @see #getPhraseLanguageLayerId()
-   * @see #setPhraseLanguageLayerId(String)
-   */
-  protected String phraseLanguageLayerId;
-  /**
-   * Getter for {@link #phraseLanguageLayerId}: ID of the layer that determines the
-   * language of individual phrases. 
-   * @return ID of the layer that determines the language of individual phrases.
-   */
-  public String getPhraseLanguageLayerId() { return phraseLanguageLayerId; }
-  /**
-   * Setter for {@link #phraseLanguageLayerId}: ID of the layer that determines the
-   * language of individual phrases. 
-   * @param newPhraseLanguageLayerId ID of the layer that determines the language of
-   * individual phrases. 
-   */
-  public FlatLexiconTagger setPhraseLanguageLayerId(String newPhraseLanguageLayerId) {
-    if (newPhraseLanguageLayerId != null // empty string means null
-        && newPhraseLanguageLayerId.trim().length() == 0) {
-      newPhraseLanguageLayerId = null;
-    }
-    phraseLanguageLayerId = newPhraseLanguageLayerId;
-    return this;
-  }
-  
-  /**
-   * Regular expression for specifying which language to tag the tokens of.
-   * @see #getTargetLanguagePattern()
-   * @see #setTargetLanguagePattern(String)
-   */
-  protected String targetLanguagePattern;
-  /**
-   * Getter for {@link #targetLanguagePattern}: Regular expression for specifying which
-   * language to tag the tokens of. 
-   * @return Regular expression for specifying which language to tag the tokens of.
-   */
-  public String getTargetLanguagePattern() { return targetLanguagePattern; }
-  /**
-   * Setter for {@link #targetLanguagePattern}: Regular expression for specifying which
-   * language to tag the tokens of. 
-   * @param newTargetLanguagePattern Regular expression for specifying which language to
-   * tag the tokens of. 
-   */
-  public FlatLexiconTagger setTargetLanguagePattern(String newTargetLanguagePattern) {
-    if (newTargetLanguagePattern != null // empty string means null
-        && newTargetLanguagePattern.trim().length() == 0) {
-      newTargetLanguagePattern = null;
-    }
-    targetLanguagePattern = newTargetLanguagePattern;
-    return this;
-  }
   
   /**
    * The ID of the dictionary to use.
@@ -611,24 +514,6 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    * @param newDictionary The ID of the dictionary to use.
    */
   public FlatLexiconTagger setDictionary(String newDictionary) { dictionary = newDictionary; return this; }
-
-  /**
-   * ID of the output layer.
-   * @see #getTagLayerId()
-   * @see #setTagLayerId(String)
-   */
-  protected String tagLayerId;
-  /**
-   * Getter for {@link #tagLayerId}: ID of the output layer.
-   * @return ID of the output layer.
-   */
-  public String getTagLayerId() { return tagLayerId; }
-  /**
-   * Setter for {@link #tagLayerId}: ID of the output layer.
-   * @param newTagLayerId ID of the output layer.
-   */
-  public FlatLexiconTagger setTagLayerId(String newTagLayerId) {
-    tagLayerId = newTagLayerId; return this; }
 
   /**
    * Whether to use only the first pronunciation if there are multiple pronunciations.
@@ -668,13 +553,6 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
    */
   public FlatLexiconTagger setStrip(String newStrip) { strip = newStrip; return this; }
   
-  /**
-   * Whether dictionary lookups are case/accent sensitive or not. By default, lookups are
-   * case/accent insensitive. 
-   * @see #getExactMatch()
-   * @see #setExactMatch(Boolean)
-   */
-  protected Boolean exactMatch = Boolean.FALSE;
   /**
    * Getter for {@link #exactMatch}: Whether dictionary lookups are case/accent sensitive
    * or not. By default, lookups are case/accent insensitive. 
@@ -849,355 +727,50 @@ public class FlatLexiconTagger extends Annotator implements ImplementsDictionari
       throw new InvalidConfigurationException(this, "Output tag layer not set.");
     return new String[] { tagLayerId };
   }
-   
-  /**
-   * Transforms the graph. In this case, the graph is simply summarized, by counting all
-   * tokens of each word type, and printing out the result to stdout.
-   * @param graph The graph to transform.
-   * @return The changes introduced by the tranformation.
-   * @throws TransformationException If the transformation cannot be completed.
-   */
-  public Graph transform(Graph graph) throws TransformationException {
-    setRunning(true);
-    try {
-      setStatus("Tagging " + graph.getId());
-         
-      Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
-      if (tokenLayer == null) {
-        throw new InvalidConfigurationException(
-          this, "Invalid input token layer: " + tokenLayerId);
-      }
-      Layer tagLayer = graph.getSchema().getLayer(tagLayerId);
-      if (tagLayer == null) {
-        throw new InvalidConfigurationException(
-          this, "Invalid output tag layer: " + tagLayerId);
-      }
-         
-      // what languages are in the transcript?
-      boolean transcriptIsMainlyTargetLang = true;
-      if (transcriptLanguageLayerId != null && targetLanguagePattern != null) {
-        Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
-        if (transcriptLanguage != null) {
-          if (!transcriptLanguage.getLabel().matches(targetLanguagePattern)) { // not TargetLang
-            transcriptIsMainlyTargetLang = false;
-          }
-        }
-      }
-      boolean thereArePhraseTags = false;
-      if (phraseLanguageLayerId != null) {
-        if (graph.first(phraseLanguageLayerId) != null) {
-          thereArePhraseTags = true;
-        }
-      }
 
-      TreeMap<String,Vector<Annotation>> toAnnotate = new TreeMap<String,Vector<Annotation>>();
-      // should we just tag everything?
-      if (transcriptIsMainlyTargetLang && !thereArePhraseTags) {
-        // process all tokens
-        for (Annotation token : graph.all(tokenLayerId)) {
-          // tag only tokens that are not already tagged
-          if (token.first(tagLayerId) == null) { // not tagged yet
-            registorForAnnotation(token, toAnnotate);
-          } // not tagged yet
-        } // next token
-      } else if (transcriptIsMainlyTargetLang) {
-        // process all but the phrase-tagged tokens
-            
-        // tag the exceptions
-        for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-          if (targetLanguagePattern != null
-              && !phrase.getLabel().matches(targetLanguagePattern)) { // not TargetLang
-            for (Annotation token : phrase.all(tokenLayerId)) {
-              // mark the token as an exception
-              token.put("@notTargetLang", Boolean.TRUE);
-            } // next token in the phrase
-          } // non-TargetLang phrase
-        } // next phrase
-            
-        for (Annotation token : graph.all(tokenLayerId)) {
-          if (token.containsKey("@notTargetLang")) {
-            // while we're here, we remove the @notTargetLang mark
-            token.remove("@notTargetLang");
-          } else { // TargetLang, so tag it
-            // tag only tokens that are not already tagged
-            if (token.first(tagLayerId) == null) { // not tagged yet
-            registorForAnnotation(token, toAnnotate);
-            } // not tagged yet
-          } // TargetLang, so tag it
-        } // next token
-      } else if (thereArePhraseTags) {
-        // process only the tokens phrase-tagged as TargetLang
-        for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
-          if (phrase.getLabel().matches(targetLanguagePattern)) {
-            for (Annotation token : phrase.all(tokenLayerId)) {
-              // tag only tokens that are not already tagged
-              if (token.first(tagLayerId) == null) { // not tagged yet
-                registorForAnnotation(token, toAnnotate);
-              } // not tagged yet
-            } // next token in the phrase
-          } // TargetLang phrase
-        } // next phrase
-      } // thereArePhraseTags
-         
-      try {
-        Dictionary dictionary = getDictionary(this.dictionary);
-        try {
-          int t = 0;
-          int typeCount = toAnnotate.size();
-          setPercentComplete(0);
-          for (String type : toAnnotate.keySet()) { // for each type
-            if (isCancelling()) break;
-            boolean found = false;
-            for (String entry : dictionary.lookup(type)) {
-              if (strip.length() > 0) {
-                entry = entry.replaceAll(
-                  // replace characters in this class
-                  "["+strip
-                  // ...escape ']' so it doesn't accidentally close the class
-                  .replace("]","\\]") 
-                  // also any trailing space in case phonemes are space-delimited,
-                  // extra spaces aren't left behind
-                  +"] *","");
-              }
-              if (entry.length() == 0) continue; // no blank labels
-              
-              if (!found) setStatus("Tagging: " + type); // (log this only once)
-              found = true;
-              for (Annotation token : toAnnotate.get(type)) {
-                token.createTag(tagLayerId, entry)
-                  .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
-              }
-              
-              // do we want the first entry only?
-              if (firstVariantOnly) break;
-              
-            } // next entry
-            setPercentComplete(++t * 100 / typeCount);
-            
-          } // next type
-          if (!isCancelling()) setPercentComplete(100);
-        } finally {
-          dictionary.close();
-        }
-      } catch (DictionaryException x) {
-        throw new TransformationException(this, x);
-      }
-      return graph;
-    } finally {
-      setRunning(false);
+  /**
+   * Getter for {@link #taggingDictionary}: A dictionary that might be
+   * used during calls to {@link #tagsFor(String)}, which will be
+   * closed after tagging. 
+   * @return A dictionary that might be used during calls to {@link #tagsFor(String)},
+   * which will be closed after tagging.
+   * @throws DictionaryException If the dictonary could not be instantiated.
+   */
+  @Override public Dictionary getTaggingDictionary() throws DictionaryException {
+    if (taggingDictionary == null) {
+      taggingDictionary = getDictionary(this.dictionary);
     }
+    return taggingDictionary;
   }
   
   /**
-   * Registers a token for annotation.
-   * @param token
-   * @param toAnnotate
+   * Determines what tag labels should apply on the tag layer for
+   * tokens with the given label on the token layer.
+   * @param tokenLabel The label of the token(s) that must be tagged.
+   * @return A list of tags, which may be empty.
    */
-  protected void registorForAnnotation(
-    Annotation token, TreeMap<String,Vector<Annotation>> toAnnotate) {
-    if (!toAnnotate.containsKey(token.getLabel())) {
-      toAnnotate.put(token.getLabel(), new Vector<Annotation>());
-    }
-    toAnnotate.get(token.getLabel()).add(token);
-  } // end of registorForAnnotation()
-
-  /**
-   * Tags all instances of the given word in the given graph store, using the dictionary
-   * specified by current task configuration (i.e. the dictionary returned by
-   * <code>getDictionary(null)</code>).
-   * <p> The default implementation throws TransformationException
-   * @param store
-   * @param sourceLabel
-   * @return The number of tags created.
-   * @throws DictionaryException, TransformationException, InvalidConfigurationException,
-   * StoreException 
-   */
-  @Override public int tagAllInstances(GraphStore store, String sourceLabel)
-    throws DictionaryException, TransformationException, InvalidConfigurationException,
-    StoreException {
-    Dictionary dictionary = getDictionary(this.dictionary);
-    try {
+  public Collection<String> tagsFor(String tokenLabel) throws DictionaryException {
+    LinkedHashSet<String> tags = new LinkedHashSet<String>();
+    for (String entry : getTaggingDictionary().lookup(tokenLabel)) {
+      if (strip.length() > 0) {
+        entry = entry.replaceAll(
+          // replace characters in this class
+          "["+strip
+          // ...escape ']' so it doesn't accidentally close the class
+          .replace("]","\\]") 
+          // also any trailing space in case phonemes are space-delimited,
+          // extra spaces aren't left behind
+          +"] *","");
+      }
+      if (entry.length() == 0) continue; // no blank labels
+      if (tags.contains(entry)) continue;
+      tags.add(entry);
+      // do we want the first entry only?
+      if (firstVariantOnly) break;
       
-      StringBuilder languageExpression = new StringBuilder();
-      if (targetLanguagePattern != null
-          && (phraseLanguageLayerId != null || transcriptLanguageLayerId != null)) {
-        languageExpression.append(" && /").append(targetLanguagePattern).append("/.test(");
-        if (phraseLanguageLayerId != null) {
-          languageExpression.append("first('").append(esc(phraseLanguageLayerId))
-            .append("').label");
-          if (transcriptLanguageLayerId != null) {
-            languageExpression.append(" ?? "); // add coalescing operator
-          }
-        }
-        if (transcriptLanguageLayerId != null) {
-          languageExpression.append("first('").append(esc(transcriptLanguageLayerId))
-            .append("').label");
-        }
-        languageExpression.append(")");
-      } // add language condition
-      
-      store.deleteMatchingAnnotations(
-        "layerId = '"+esc(tagLayerId)+"'"
-        +languageExpression
-        +" && first('"+esc(tokenLayerId)+"').label "
-        +(exactMatch?"===":"==") // === is slower, so we don't use it unless necessary
-        +" '"+esc(sourceLabel)+"'");
-
-      String tokenExpression = "layerId = '"+esc(tokenLayerId)+"'"
-        +languageExpression
-        +" && label "
-        +(exactMatch?"===":"==") // === is slower, so we don't use it unless necessary
-        +" '"+esc(sourceLabel)+"'";
-      int count = 0;
-      HashSet<String> soFar = new HashSet<String>(); // only unique entries
-      for (String tag : dictionary.lookup(sourceLabel)) {
-        if (strip.length() > 0) tag = tag.replaceAll("["+strip+"]","");
-        if (tag.length() == 0) continue; // no blank labels
-        if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
-          store.tagMatchingAnnotations(
-            tokenExpression, tagLayerId, tag, Constants.CONFIDENCE_AUTOMATIC);
-          soFar.add(tag);
-          count++;
-        }
-        // do we want the first entry only?
-        if (firstVariantOnly) break;        
-      } // next entry
-      return count;
-    } catch(PermissionException x) {
-      throw new TransformationException(this, x);
-    } finally {
-      dictionary.close();
-    }
+    } // next entry
+    return tags;
   }
-
-  /**
-   * Transforms all graphs from the given graph store that match the given graph expression.
-   * <p> This implementation uses
-   * {@link GraphStoreQuery#aggregateMatchingAnnotations(String,String)}
-   * and {@link GraphStore#tagMatchingAnnotations​(String,String,String,Integer)}
-   * to optimize tagging transcripts en-masse.
-   * @param store The graph to store.
-   * @param expression An expression for identifying transcripts to update, or null to transform
-   * all transcripts in the store.
-   * @return The changes introduced by the tranformation.
-   * @throws TransformationException If the transformation cannot be completed.
-   */
-  public void transformTranscripts​(GraphStore store, String expression)
-    throws TransformationException, InvalidConfigurationException, StoreException,
-    PermissionException {
-
-    setRunning(true);
-    Timers timers = new Timers();
-    try {
-      setPercentComplete(0);
-      Layer tokenLayer = schema.getLayer(tokenLayerId);
-      if (tokenLayer == null) {
-        throw new InvalidConfigurationException(
-          this, "Invalid input token layer: " + tokenLayerId);
-      }
-      Layer tagLayer = schema.getLayer(tagLayerId);
-      if (tagLayer == null) {
-        throw new InvalidConfigurationException(
-          this, "Invalid output tag layer: " + tagLayerId);
-      }    
-      
-      StringBuilder labelExpression = new StringBuilder();
-      labelExpression.append("layer.id == '").append(esc(tokenLayer.getId())).append("'");
-      if (targetLanguagePattern != null
-          && (phraseLanguageLayerId != null || transcriptLanguageLayerId != null)) {
-        labelExpression.append(" && /").append(targetLanguagePattern).append("/.test(");
-        if (phraseLanguageLayerId != null) {
-          labelExpression.append("first('").append(esc(phraseLanguageLayerId))
-            .append("').label");
-          if (transcriptLanguageLayerId != null) {
-            labelExpression.append(" ?? "); // add coalescing operator
-          }
-        }
-        if (transcriptLanguageLayerId != null) {
-          labelExpression.append("first('").append(esc(transcriptLanguageLayerId))
-            .append("').label");
-        }
-        labelExpression.append(")");
-      } // add language condition
-      
-      if (expression != null && expression.trim().length() > 0) {
-        labelExpression.append(" && [");
-        String[] ids = store.getMatchingTranscriptIds(expression);
-        if (ids.length == 0) {
-          setStatus("No matching transcripts");
-          setPercentComplete(100);
-          return;
-        } else {
-          labelExpression.append(
-            Arrays.stream(ids)
-            // quote and escape each ID
-            .map(id->"'"+id.replace("'", "\\'")+"'")
-            // make a comma-delimited list
-            .collect(Collectors.joining(",")));
-          labelExpression.append("].includes(graphId)");
-        }
-      }
-      setStatus("Getting distinct token labels...");
-      timers.start("store.aggregateMatchingAnnotations");
-      String[] distinctWords = store.aggregateMatchingAnnotations(
-        exactMatch?"DISTINCT BINARY":"DISTINCT", labelExpression.toString());
-      timers.end("store.aggregateMatchingAnnotations");
-      setStatus("There are "+distinctWords.length+" distinct token labels");
-      int w = 0;
-      Dictionary dictionary = getDictionary(this.dictionary);
-      // for each label
-      for (String word : distinctWords) {
-        setStatus(word+"...");
-        if (isCancelling()) break;
-        HashSet<String> soFar = new HashSet<String>(); // only unique entries
-        timers.start("dictionary.lookup");
-        for (String tag : dictionary.lookup(word)) {
-          timers.end("dictionary.lookup");
-          if (isCancelling()) break;
-          if (strip.length() > 0) tag = tag.replaceAll("["+strip+"]","");
-          if (tag.length() == 0) continue; // no blank labels
-          if (!soFar.contains(tag)) { // duplicates are possible if stripSyllStress
-            StringBuilder tokenExpression = new StringBuilder(labelExpression);
-            tokenExpression.append(" && label ")
-              .append(exactMatch?"===":"==") // === is slower, so we don't use it unless necessary
-              .append(" '").append(esc(word)).append("'");
-            setStatus(word+" → "+tag);
-            timers.start("store.tagMatchingAnnotations");
-            store.tagMatchingAnnotations(
-              tokenExpression.toString(), tagLayerId, tag, Constants.CONFIDENCE_AUTOMATIC);
-            timers.end("store.tagMatchingAnnotations");
-            soFar.add(tag);
-          }
-          timers.end("dictionary.lookup");
-          setStatus(timers.toString());
-          // do we want the first entry only?
-          if (firstVariantOnly) break;        
-        } // next entry
-        setPercentComplete((++w * 100) / distinctWords.length);
-      } // next word
-      if (isCancelling()) {
-        setStatus("Cancelled.");
-      } else {
-        setPercentComplete(100);
-        setStatus("Finished.");
-      }
-    } catch(DictionaryException x) {
-      setStatus(x.getMessage());
-      throw new TransformationException(this, x);
-    } finally {
-      setRunning(false);
-    }
-  }
-  
-  /**
-   * Escapes quotes in the given string for inclusion in QL or SQL queries.
-   * @param s The string to escape.
-   * @return The given string, with quotes escapeed.
-   */
-  private String esc(String s) {
-    if (s == null) return "";
-    return s.replace("\\","\\\\").replace("'","\\'");
-  } // end of esc()
 
   /**
    * Lists the dictionaries implemented by this Annotator.
