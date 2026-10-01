@@ -5,6 +5,9 @@ getVersion(version => {
   document.getElementById("version").innerHTML = version;
 });
 
+// Code editor
+let editor = null;
+
 const taskId = window.location.search.substring(1);
 
 // first, get the layer schema
@@ -54,16 +57,27 @@ getSchema(s => {
   // GET request to getTaskParameters retrieves the current task parameters, if any
   getText("getTaskParameters", text => {
     try {
-      const parameters = new URLSearchParams(text);
-      
-      // set initial values of properties in the form above
-      // (this assumes bean property names match input id's in the form above)
-      for (const [key, value] of parameters) {
-        document.getElementById(key).value = value;
+      if (!text) { // new task
+        // set some sensible defaults
+        document.getElementById("targetLanguagePattern").value = "en.*";
+        
+      } else { // there are parameters
+        
+        const parameters = new URLSearchParams(text);
+        
+        // set initial values of properties in the form above
+        // (this assumes bean property names match input id's in the form above)
+        for (const [key, value] of parameters) {
+          try {
+            document.getElementById(key).value = value;
+          } catch (x) {
+          }
+        }
+        // set the checkbox
+        document.getElementById("firstVariantOnly").checked
+          = parameters.get("firstVariantOnly");
       }
-      // set the checkbox
-      document.getElementById("firstVariantOnly").checked
-        = parameters.get("firstVariantOnly");
+      
       // if there's no pronunciation layer defined
       if (tagLayerId.selectedIndex == 0) {
         // but there's a layer named after the task
@@ -78,14 +92,35 @@ getSchema(s => {
             tagLayerId.value = layerId;
           }
         }
-        // if there's no option for the output layer, add one
-        if (tagLayerId.value != taskId) {
-          const layerOption = document.createElement("option");
-          layerOption.appendChild(document.createTextNode(taskId));
-          tagLayerId.appendChild(layerOption);
-          tagLayerId.value = taskId;
-        }
       } // no tag layer defined
+      
+      // if there's no option for the output layer, add one
+      if (tagLayerId.value != taskId) {
+        const layerOption = document.createElement("option");
+        layerOption.appendChild(document.createTextNode(taskId));
+        tagLayerId.appendChild(layerOption);
+        tagLayerId.value = taskId;
+      }
+      
+      editor = CodeMirror.fromTextArea(
+        document.getElementById("sql"), { 
+          mode: "text/x-mysql",
+          indentWithTabs: true,
+          smartIndent: true,
+          lineNumbers: false,
+          matchBrackets : true
+        });
+      editor.setSize(500, 300);
+      editor.on("change", function(cm, change) {
+        const sql = document.getElementById("sql");
+        sql.value = cm.getValue();
+        setOptionForSql(sql);
+        deferredTestSql();
+      });
+      
+      setOptionForSql(document.getElementById("sql"));
+      testSql();
+      
     } finally {
       finishedLoading();
     }
@@ -192,18 +227,33 @@ for (let optionId in optionIdToSql) {
 }
 
 function setSqlForOption(opt) {
-  if (opt.checked) {
-    document.getElementById("sql").value = optionIdToSql[opt.id];
-    if (document.getElementById("firstVariantOnly").checked) {
-      document.getElementById("sql").value += "\nLIMIT 1";
+  console.log("setSqlForOption " + opt);
+  const sql = document.getElementById("sql");
+  if (opt) {
+    if (opt.checked) {
+      sql.value = optionIdToSql[opt.id];
+      if (document.getElementById("firstVariantOnly").checked) {
+        sql.value += "\nLIMIT 1";
+      }
+      document.getElementById('delimiters').disabled = opt.id != "optSyllablesFromPhonology";
     }
-    editor.setValue(document.getElementById("Sql").value);
-    testSql();
+  } else { // no specific option, but still should set firstVariantOnly
+    if (document.getElementById("firstVariantOnly").checked) {
+      console.log("LIMIT 1");
+      sql.value += "\nLIMIT 1";
+    } else {
+      console.log("no LIMIT 1");
+      sql.value = sql.value.replace(/\nLIMIT 1$/,"");
+    }
   }
+  editor.setValue(sql.value);    
+  testSql();
 }
 
 function getOptionForSql(sql) {
+  console.log("getOptionForSql " + sql);
   const optionId = sqlToOptionId[sql.value.replace(/\nLIMIT 1$/,"")];
+  console.log("optionId " + optionId)
   if (optionId) {
     return document.getElementById(optionId);
   } else {
@@ -224,34 +274,26 @@ function setOptionForSql(sql) {
 }
 
 function setSqlForFirstOnly() {
-   setSqlForOption(getOptionForSql(document.getElementById("Sql")));
+   setSqlForOption(getOptionForSql(document.getElementById("sql")));
 }
 
 let testTimeout = null;
 function deferredTestSql() {
-  startLoading();
   if (testTimeout) clearTimeout(testTimeout);
   testTimeout = setTimeout("testSql();", 1000);
 }
 
 function testSql() {
-  finishedLoading();
   testTimeout = null;
   const testWord = document.getElementById("test-word").value;
   const sql = document.getElementById("sql").value;
+  document.getElementById("test-result").className = "loading";
   getJSON(resourceForFunction("testSql", testWord, sql), matches => {
+    document.getElementById("test-result").className = null;
     const testResult = document.getElementById("test-result");
     // empty it
     while (testResult.firstChild) testResult.removeChild(testResult.firstChild);
     
-    // report any errors first
-    for (e in data.errors) {
-         const div = document.createElement("div");
-         div.className = "error";
-         div.appendChild(document.createTextNode(data.errors[e]));
-         testResult.appendChild(div);
-      }
-
     // results
     if (matches) {
       for (let match of matches) {
@@ -263,23 +305,6 @@ function testSql() {
     }
   });
 } // testSql
-
-// Code editor
-const editor = CodeMirror.fromTextArea(
-  document.getElementById("Sql"), { 
-    mode: "text/x-mysql",
-    indentWithTabs: true,
-    smartIndent: true,
-    lineNumbers: false,
-    matchBrackets : true
-  });
-editor.setSize(800, 300);
-editor.on("change", function(cm, change) {
-  const sql = document.getElementById("sql");
-  sql.value = cm.getValue();
-  setOptionForSql(sql);
-  deferredTestSql();
-})
 
 document.getElementById("tagLayerId").onchange = function(e) {
   changedLayer(this); };
@@ -306,6 +331,5 @@ document.getElementById("optSyllablesFromPhonology").onclick = function(e) {
 };
 document.getElementById("firstVariantOnly").onclick = function(e) {
   setSqlForFirstOnly(); };
-
-setOptionForSql(document.getElementById("sql"));
-testSql();
+document.getElementById("test-word").onkeyup = function(e) {
+  deferredTestSql(); };

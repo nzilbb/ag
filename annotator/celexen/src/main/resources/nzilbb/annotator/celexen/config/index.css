@@ -50,6 +50,10 @@ footer {
     color: red;
 }
 
+#messages li {
+    font-style: italic;
+}
+
 progress {
     width: 100%;
 }

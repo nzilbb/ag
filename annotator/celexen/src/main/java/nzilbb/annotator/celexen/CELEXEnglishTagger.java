@@ -268,6 +268,50 @@ public class CELEXEnglishTagger extends LabelBasedTagger
     return new File(getWorkingDirectory(), "CELEX-EN.zip").exists();
   } // end of lexiconFileExists()
 
+  /**
+   * Determines whether the lexicon database schema has already been created or not.
+   * @return TRUE if the lexicon database tables are present, FALSE otherwise.
+   */
+  @ApiEndpoint("admin") public Boolean lexiconSchemaExists() {
+    try (Connection rdb = newLexiconConnection()) {
+      return countWordformMorphologyRecords(rdb) >= 0;
+    } catch (Exception x) {
+      return Boolean.FALSE;
+    }
+  } // end of lexiconFileExists()
+  
+  /**
+   * Determines whether the lexicon data has already been imported or not.
+   * @return TRUE if the lexicon data is present, FALSE otherwise.
+   */
+  @ApiEndpoint("admin") public Boolean lexiconDataExists() {
+    try (Connection rdb = newLexiconConnection()) {
+      return countWordformMorphologyRecords(rdb) > 0;
+    } catch (Exception x) {
+      return Boolean.FALSE;
+    }
+  } // end of lexiconFileExists()
+  
+  /**
+   * Determines how many records there are in the cxen_wordformmorphology table,
+   * i.e. the last table created and populated during installation.
+   * @param rdb A connected database connection,
+   * @return The number of records in the cxen_wordformmorphology table,
+   * or -1 if the table table doesn't exist.
+   */
+  public int countWordformMorphologyRecords(Connection rdb) {
+    try { // check existence of schema
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply("SELECT COUNT(*) AS theCount FROM cxen_wordclass"))) {
+        try (ResultSet rs = sql.executeQuery()) {
+          rs.next();
+          return rs.getInt(1);
+        } // rs.close
+      } // sql.close
+    } catch (SQLException x) {
+    }
+    return -1;
+  } // end of lexiconFileExists()
   
   /**
    * Runs a given SQL query for a given word, and returns the resulting matches.
@@ -326,18 +370,8 @@ public class CELEXEnglishTagger extends LabelBasedTagger
       // has the dictionary data been added?
       try (Connection rdb = newLexiconConnection()) {
 
-        long wordCount = -1;
-        try { // check existence of schema
-          try (PreparedStatement sql = rdb.prepareStatement(
-                 sqlx.apply("SELECT COUNT(*) AS theCount FROM cxen_wordclass"))) {
-            try (ResultSet rs = sql.executeQuery()) {
-              rs.next();
-              wordCount = rs.getLong(1);
-            } // rs.close
-          } // sql.close
-        } catch (SQLException x) {
-        }
-        if (wordCount < 0 ) { // schema isn't created yet
+        int recordCount = countWordformMorphologyRecords(rdb);
+        if (recordCount < 0 ) { // schema isn't created yet
           setStatus("Creating CELEX ENGLISH database schema...");
           
           // open schema file
@@ -375,7 +409,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
         }
         setPercentComplete(10);
 
-        if (wordCount <= 0 ) { // lexicon isn't loaded yet
+        if (recordCount <= 0 ) { // lexicon isn't loaded yet
           install(rdb, new File(getWorkingDirectory(), "CELEX-EN.zip"));
         }
         
@@ -447,6 +481,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
       if (isCancelling()) {
         setStatus("Data import cancelled by user");
       } else {
+        setPercentComplete(100);
         setStatus("Data import finished.");
       }
     } catch (NoSuchElementException x) {

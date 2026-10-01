@@ -22,6 +22,8 @@
     <p> This tagger can load the data from these text files into its own databases,
       and from there annotate word tokens with lexical information.</p>
 
+    <ul id="messages"></ul>
+
     <div id="upload-form">
       <p> The annotator does not include the CELEX data files, which must be purchased
         from the LDC. Once you have the files, packed in a zip file called something like
@@ -37,22 +39,24 @@
     </div>
     
     <form method="POST" action="setConfig">
-      <div>If your organisation uses a shared CELEX database, and the lexical data
-        has already been loaded into it, please enter the database connection details below.
-        If you have no shared CELEX database, leave these details blank.
-      </div>
-      <div class="field" title="The database connection URL, something like: jdbc:mysql://localhost/celex">
-        <label for="dbConnectString"> JDBC Connect String </label>
-        <span><input id="dbConnectString" name="dbConnectString" type="text"></span>
-      </div>
-      <div class="field" title="User ID for the database connection">
-        <label for="dbUser"> Database User </label>
-        <span><input id="dbUser" name="dbUser" type="text"></span>
-      </div>
-      <div class="field" title="Password for the database connection">
-        <label for="dbPassword"> Database Passord </label>
-        <span><input id="dbPassword" name="dbPassword" type="password"></span>
-      </div>
+      <details><summary>Shared database configuration</summary>
+        <div>If your organisation uses a shared CELEX database, and the lexical data
+          has already been loaded into it, please enter the database connection details below.
+          If you have no shared CELEX database, leave these details blank.
+        </div>
+        <div class="field" title="The database connection URL, something like: jdbc:mysql://localhost/celex">
+          <label for="dbConnectString"> JDBC Connect String </label>
+          <span><input id="dbConnectString" name="dbConnectString" type="text"></span>
+        </div>
+        <div class="field" title="User ID for the database connection">
+          <label for="dbUser"> Database User </label>
+          <span><input id="dbUser" name="dbUser" type="text"></span>
+        </div>
+        <div class="field" title="Password for the database connection">
+          <label for="dbPassword"> Database Passord </label>
+          <span><input id="dbPassword" name="dbPassword" type="password"></span>
+        </div>
+      </details>
       <div class="controls">        
         <input type="submit" id="submit" value="Configure" disabled>
       </div>

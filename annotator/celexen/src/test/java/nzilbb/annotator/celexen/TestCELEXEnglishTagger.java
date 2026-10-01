@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 import java.util.stream.Collectors;
 import nzilbb.ag.Anchor;
 import nzilbb.ag.Annotation;
@@ -404,6 +405,41 @@ public class TestCELEXEnglishTagger {
     assertEquals("ps~", "s@", annotator.hesitationToDISC("ps~"));
     assertEquals("pt~", "t@", annotator.hesitationToDISC("pt~"));
     assertEquals("wr~", "r@", annotator.hesitationToDISC("wr~"));
+  }   
+    
+  /** Ensure that methods for providing information to config/task apps work. */
+  @Test public void appInfoMethods() throws Exception {
+
+    assertTrue("lexiconFileExists", annotator.lexiconFileExists());
+    assertTrue("lexiconSchemaExists", annotator.lexiconSchemaExists());
+    assertTrue("lexiconDataExists", annotator.lexiconDataExists());
+
+    Vector<String> results = annotator.testSql(
+      "the", "SELECT PhonStrsDISC FROM cxen_wordformphonologypron"
+      +" INNER JOIN cxen_wordformortho"
+      +" ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum"
+      +" INNER JOIN cxen_wordform"
+      +" ON cxen_wordformphonologypron.IdNum = cxen_wordform.IdNum"
+      +" WHERE cxen_wordformortho.WordDia = ?"
+      +" ORDER BY cxen_wordformphonologypron.Variant, cxen_wordform.IdNum");
+    assertEquals("testSql works with real word: " + Arrays.asList(results),
+                 8, results.size());
+    results = annotator.testSql(
+      "blog", "SELECT PhonStrsDISC FROM cxen_wordformphonologypron"
+      +" INNER JOIN cxen_wordformortho"
+      +" ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum"
+      +" INNER JOIN cxen_wordform"
+      +" ON cxen_wordformphonologypron.IdNum = cxen_wordform.IdNum"
+      +" WHERE cxen_wordformortho.WordDia = ?"
+      +" ORDER BY cxen_wordformphonologypron.Variant, cxen_wordform.IdNum");
+    assertEquals("testSql works with absent word: " + Arrays.asList(results),
+                 0, results.size());
+    results = annotator.testSql(
+      "blog", "This is not a valid query");
+    assertEquals("testSql returns one value with invalid query: " + Arrays.asList(results),
+                 1, results.size());
+    assertTrue("testSql returns an error with invalid query: " + Arrays.asList(results),
+               results.get(0).startsWith("ERROR:"));
   }   
     
   /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly,

@@ -33,15 +33,24 @@ label:after {
     display: flex;
     flex-direction: row;
 }
-.field label, .field fieldset.presets {
-    width: 50%;
+.field > fieldset {
+    display: flex;
+    flex-direction: column;
+}
+.field > label {
     display: block;
 }
-.field span, .field fieldset.sql {
-    width: 50%;
+.field > label, .field > fieldset.presets {
+    width: 30%;
+}
+.field > span, .field > fieldset.sql {
+    width: 70%;
 }
 .field input[type="number"] {
     width: 75px;
+}
+.field textarea {
+    width: 100%;
 }
 
 #sql {
@@ -55,6 +64,13 @@ footer {
 
 .error {
     color: red;
+}
+
+.loading {
+    color: silver;
+}
+.loading::before {
+    content: "…";
 }
 
 progress {

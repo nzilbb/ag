@@ -188,16 +188,6 @@ CREATE TABLE cxen_wordformfrequency (
   PRIMARY KEY  (IdNum)
 ) ENGINE=MyISAM; 
 
-/*Table structure for table wordformmorphology */
-
-CREATE TABLE cxen_wordformmorphology (
-  IdNum int(11) NOT NULL,
-  Cob int(11) default NULL,
-  FlectType varchar(50) default NULL,
-  TransInfl varchar(50) default NULL,
-  PRIMARY KEY  (IdNum)
-) ENGINE=MyISAM; 
-
 /*Table structure for table wordformortho */
 
 CREATE TABLE cxen_wordformortho (
@@ -232,5 +222,15 @@ CREATE TABLE cxen_wordformphonologypron (
   PhonCVBr varchar(60) default NULL,
   PhonSylBCLX varchar(60) default NULL,
   PRIMARY KEY  (IdNum,Variant)
+) ENGINE=MyISAM; 
+
+/*Table structure for table wordformmorphology */
+
+CREATE TABLE cxen_wordformmorphology (
+  IdNum int(11) NOT NULL,
+  Cob int(11) default NULL,
+  FlectType varchar(50) default NULL,
+  TransInfl varchar(50) default NULL,
+  PRIMARY KEY  (IdNum)
 ) ENGINE=MyISAM; 
 

@@ -4,9 +4,23 @@ getVersion(version => { // <- a function to execute when we have a response
 
 getText("lexiconFileExists", value => {
   if (value == "true") {
+    const fileMessage = document.createElement("li");
+    fileMessage.innerHTML = "The lexicon file has already been uploaded.";    
+    document.getElementById("messages").appendChild(fileMessage);
     document.getElementById("upload-form").className = "hidden";
     enableSubmit();
   }
+  getText("lexiconDataExists", value => {
+    const dataMessage = document.createElement("li");
+    if (value == "true") {
+      dataMessage.innerHTML = "The lexicon data has already been imported.";    
+      document.getElementById("upload-form").className = "hidden";
+      enableSubmit();
+    } else {
+      dataMessage.innerHTML = "The lexicon data has not yet been imported.";    
+    }
+    document.getElementById("messages").appendChild(dataMessage);
+  });
 });
 
 getText("getDbConnectString", value => {
