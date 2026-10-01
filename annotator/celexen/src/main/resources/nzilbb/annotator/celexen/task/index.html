@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> CELEX English Tagger </title>
+    <link rel="stylesheet" href="codemirror/lib/codemirror.css" type="text/css">
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="codemirror/lib/codemirror.js" type="text/javascript"></script>
+    <script src="codemirror/mode/sql/sql.js" type="text/javascript"></script>
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <p> This annotator tags words with their lexical entries (pronunciations, frequency,
+      etc.) according to the
+      <a href="https://catalog.ldc.upenn.edu/LDC96L14" target="LDC"> CELEX English lexicon </a>. </p> 
+
+    <form method="POST" action="setTaskParameters">
+      <div class="field" title="Input layer from which words come">
+        <label for="tokenLayerId"> Token Layer </label>
+        <span><select id="tokenLayerId" name="tokenLayerId" required></select></span>
+      </div>
+      <div class="field" title="Transcript attribute for overall language">
+        <label for="transcriptLanguageLayerId"> Transcript Language Attribute </label>
+        <span>
+          <select id="transcriptLanguageLayerId" name="transcriptLanguageLayerId">
+            <option value="">[none]</option>
+          </select>
+        </span>
+      </div>
+      <div class="field" title="Layer for annotating phrases in a different language">
+        <label for="phraseLanguageLayerId"> Phrase Language Layer </label>
+        <span>
+          <select id="phraseLanguageLayerId" name="phraseLanguageLayerId">
+            <option value="">[none]</option>
+          </select>
+        </span>
+      </div>
+      <div class="field"
+           title="Regular expression for the ISO language codes of the languages to target, or blank for all">
+        <label for="targetLanguagePattern">Target Language Pattern</label>
+        <span><input id="targetLanguagePattern" name="targetLanguagePattern" type="text" placeholder=".*"></span>
+      </div>
+      <div class="field" title="Output layer on which lexical annotations are added">
+        <label for="tagLayerId"> Tag Layer </label>
+        <span>
+          <select id="tagLayerId" name="tagLayerId" required>
+            <option disabled>[select layer]</option> <!-- force choice the first time -->
+            <option>[add new layer]</option>         <!-- allow adding a new layer -->
+          </select>
+        </span>
+      </div>
+      <div class="field"
+           title="If there are multiple pronunciations for the word, use only the first one.">
+        <fieldset class="presets"><legend>Presets</legend>
+	  <label for="optPhonology" title="Phonemic transcriptions">
+            <input type="radio" name="preset"
+		   id="optPhonology"/>Phonology</label>
+	  <label for="optSyllableCount" title="Number of syllables">
+            <input type="radio" name="preset"
+		   id="optSyllableCount"/>Syllable Count</label>
+          <label for="optMorphology" title="Morphological parses">
+            <input type="radio" name="preset"
+		   id="optMorphology"/>Morphology</label>
+          <label for="optSyntax" title="Syntactic categories">
+            <input type="radio" name="preset" 
+		   id="optSyntax"/>Syntax</label>
+	  <label for="optLemma" title="Lemmata">
+            <input type="radio" name="preset"
+		   id="optLemma"/>Lemma</label>
+          <label for="optWordFormFrequency" title="Wordform token counts">
+            <input type="radio" name="preset"
+		   id="optWordFormFrequency"/>Frequency (wordform)</label>
+	  <label for="optLemmaFrequency" title="Lemma token counts">
+            <input type="radio" name="preset"
+		   id="optLemmaFrequency"/>Frequency (lemma)</label>
+	  <label for="optSyllablesFromPhonology"
+                 title="Recover syllable structure from phonemes on segment layer">
+            <input type="radio" name="preset"
+		   id="optSyllablesFromPhonology"/>Syllables from Phonology</label>
+        </fieldset>
+        <fieldset class="sql"><legend>CELEX SQL Query</legend>
+          <textarea id="sql" name="sql"></textarea>
+        </fieldset>
+      </div>
+      <div class="field"
+           title="If there are multiple pronunciations for the word, use only the first one.">
+        <label for="firstVariantOnly"> First variant only </label>
+        <span><input id="firstVariantOnly" name="firstVariantOnly" type="checkbox"></span>
+      </div>
+      <div class="field"
+           title="Delimiters for splitting annotations across the word, for syllable recovery">
+        <label for="delimiters">Delimiters</label>
+        <span><input id="delimiters" name="delimiters" type="text" disabled></span>
+      </div>
+      <div class="controls"><input type="submit" value="Set Parameters"></div>
+      <div class="field"
+           title="Enter a word here to test the CELEX SQL Query">
+        <label for="test-word">Test word</label>
+        <span><input id="test-word" type="text" value="tesing"></span>
+      </div>
+      <div class="field"
+           title="Values returned by the CELEX SQL Query">
+        <label for="test-word">Test results</label>
+        <span id="test-result"></span>
+      </div>
+    </form>
+    
+    <footer><div> CELEX English Tagger <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>

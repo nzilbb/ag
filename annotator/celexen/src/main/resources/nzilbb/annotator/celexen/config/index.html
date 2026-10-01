@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> CELEX English Tagger </title>    
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="util.js" type="text/javascript"></script>
+  </head>
+  <body>
+
+    <h1> CELEX English Tagger </h1>
+
+    <p>The CELEX English Tagger tags words with their lexical entries
+      (pronunciations, frequency, etc.)
+      according to the
+      <a href="https://catalog.ldc.upenn.edu/LDC96L14" target="LDC"> CELEX English lexicon </a>,
+      which can be purchased from the LDC, who provide a number of text files for the lexicon. </p>
+    
+    <p> This tagger can load the data from these text files into its own databases,
+      and from there annotate word tokens with lexical information.</p>
+
+    <div id="upload-form">
+      <p> The annotator does not include the CELEX data files, which must be purchased
+        from the LDC. Once you have the files, packed in a zip file called something like
+        <q>ENGLISH.zip</q>, select the zip file below:</p>
+      <div class="file-chooser">
+        <label for="file">CELEX ENGLISH .zip file</label>
+        <input id="file" type="file" onchange="selectFile(this);">
+      </div>
+      <div id="upload-progress" style="display: none;">
+        <progress id="progress"></progress>
+        <div id="upload-result"></div>
+      </div>
+    </div>
+    
+    <form method="POST" action="setConfig">
+      <div>If your organisation uses a shared CELEX database, and the lexical data
+        has already been loaded into it, please enter the database connection details below.
+        If you have no shared CELEX database, leave these details blank.
+      </div>
+      <div class="field" title="The database connection URL, something like: jdbc:mysql://localhost/celex">
+        <label for="dbConnectString"> JDBC Connect String </label>
+        <span><input id="dbConnectString" name="dbConnectString" type="text"></span>
+      </div>
+      <div class="field" title="User ID for the database connection">
+        <label for="dbUser"> Database User </label>
+        <span><input id="dbUser" name="dbUser" type="text"></span>
+      </div>
+      <div class="field" title="Password for the database connection">
+        <label for="dbPassword"> Database Passord </label>
+        <span><input id="dbPassword" name="dbPassword" type="password"></span>
+      </div>
+      <div class="controls">        
+        <input type="submit" id="submit" value="Configure" disabled>
+      </div>
+    </form>
+
+    <footer><div> CELEX English Tagger <small id="version"></small> </div></footer>
+    
+    <script src="index.js" type="text/javascript"></script>
+  </body>
+</html>

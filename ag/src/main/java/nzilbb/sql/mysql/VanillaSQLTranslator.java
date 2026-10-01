@@ -52,6 +52,8 @@ public class VanillaSQLTranslator extends MySQLTranslator {
             .replaceAll(" CHARACTER SET \\w+","")
             .replaceAll(" COLLATE \\w+","")
             .replace(" NOT NULL","")
+            .replace(" DEFAULT NULL","")
+            .replace(" default NULL","")
             .replace(" NULL","")
             .replace(" BIT"," SMALLINT")
             .replaceAll(" COMMENT '[^']*'","");

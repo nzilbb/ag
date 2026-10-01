@@ -67,6 +67,7 @@ public class DerbySQLTranslator extends VanillaSQLTranslator {
       .replaceAll("\\s+AUTO_INCREMENT",
                   " GENERATED ALWAYS AS IDENTITY(Start with 1, Increment by 1)")
       .replaceAll(",?\\s*INDEX\\s+\\w+\\s*\\([^)]+\\)","")
+      .replaceAll(" (int|INT)\\([0-9]+\\)"," INT")
       // Grr! CASTing VARCHAR to BLOB is not supported in Derby, so BINARY comparison can't work
       // // 'x' = BINARY 'y'
       // .replaceAll("\\s+(['\"])([^'\"=]+)\\1\\s+=\\s+BINARY\\s+(['\"])([^'\"]+)\\3", 

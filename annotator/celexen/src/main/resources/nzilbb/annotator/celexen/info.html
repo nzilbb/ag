@@ -1,0 +1,36 @@
+<h2>CELEX English Tagger</h2>
+
+<p>The CELEX English Tagger tags words with their lexical entries
+  (pronunciations, frequency, etc.)
+  according to the
+  <a href="https://catalog.ldc.upenn.edu/LDC96L14"> CELEX English lexicon </a>,
+  which can be purchased from the LDC, who provide a number of text files for the lexicon. </p>
+
+<p> This tagger can load the data from these text files into its own databases,
+  and from there annotate word tokens with lexical information, including:</p>
+<ul>
+  <li>standard phonemic transcriptions - e.g. <q>difference</q> → <q>dɪfrəns</q> or <q>dɪfərəns</q></li>
+  <li>morphological information - e.g. <q>difference</q> → <q>different+ence</q></li>
+  <li>possible syntactic category - e.g. <q>difference</q> → <q>N</q></li>
+  <li>frequency data</li>
+  <li>lemma</li>
+  <li>syllable count</li>
+</ul>
+<p> The annotator also supports automatically tagging
+  short hesitations with pronunciations. Orthographies with trailing '~' are recognized
+  as short hesitations  e.g. </p>
+<ul>
+  <li> <q> s~ </q> → <tt> s@ </tt></li>
+  <li> <q> se~ </q> → <tt> s@ </tt></li>
+  <li> <q> a~ </q> → <tt> { </tt></li>
+  <li> <q> ph~ </q> → <tt> f@ </tt></li>
+</ul>
+
+<h3 id="getting">Getting the CELEX English lexicon files</h3>
+
+<p>The CELEX English files are available under a non-free license, and must be
+  acquired seperately from this annotator. You can buy a license to use the CELEX English
+  data from the LDC: <a href="https://catalog.ldc.upenn.edu/LDC96L14" target="LDC">
+    https://catalog.ldc.upenn.edu/LDC96L14</a>
+</p> 
+
