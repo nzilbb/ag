@@ -49,6 +49,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
@@ -319,8 +320,8 @@ public class CELEXEnglishTagger extends LabelBasedTagger
    * @param sql The query to run.
    * @return The results of the query. Entries prefixed with "ERROR:" are error messages.
    */
-  @ApiEndpoint("admin") public Vector<String> testSql(String word, String sql) {
-    Vector<String> results = new Vector<String>();
+  @ApiEndpoint("admin") public Collection<String> testSql(String word, String sql) {
+    LinkedHashSet<String> results = new LinkedHashSet<String>();
     try {
       try (Connection rdb = newLexiconConnection()) {
         try (PreparedStatement sqlQuery = rdb.prepareStatement(
@@ -1528,4 +1529,61 @@ public class CELEXEnglishTagger extends LabelBasedTagger
     return disc;
   } // end of hestitationToDISC()
   
+  /**
+   * Returns the CELEX relational database schema, rendered as an HTML document.
+   * @return An HTML document describing the CELEX database schema.
+   */
+  @ApiEndpoint("admin") public String schemaHtml() {
+    StringBuilder html = new StringBuilder();
+    html.append("<!DOCTYPE html>")
+      .append("\n<html><head>")
+      .append("\n  <meta content=\"text/html;charset=utf-8\" http-equiv=\"Content-Type\">")
+      .append("\n  <meta content=\"utf-8\" http-equiv=\"encoding\">")
+      .append("\n  <title> CELEX English Relational Database Schema </title>")
+      .append("\n  <link rel=\"stylesheet\" href=\"index.css\" type=\"text/css\">")
+      .append("\n  <link rel=\"stylesheet\" href=\"schema.css\" type=\"text/css\">")
+      .append("\n  </head><body><h1>CELEX English Relational Database Schema</h1>");
+    try {
+      URL urlSchema = getClass().getResource("schema.sql");
+      try (BufferedReader reader = new BufferedReader(
+             new InputStreamReader(urlSchema.openStream()))) {
+        html.append("<div class=\"schema\">");
+        Pattern fieldPattern = Pattern.compile("^\\s*(\\w+) (.+)*,\\s*$");
+        String line = reader.readLine();
+        while (line != null) {
+          //html.append(line + "\n");
+          // build HTML
+          if (line.matches("^CREATE TABLE.*")) {
+            String sTableName = line.substring(13).replaceAll("\\(", "").trim();
+            html.append("\n<table class=\"schema\" title=\""+sTableName+"\">"
+                        +"<caption>"+sTableName+"</caption>"
+                        +"<tbody>");
+          } else if (line.matches("^\\) ENGINE=MyISAM;.*")) {
+            html.append("\n</tbody></table>");
+          } else if (line.matches("^.*KEY.*$")) {	    
+          } else if (line.matches("^\\s*(\\w+) .*,\\s*$")) {
+            Matcher m = fieldPattern.matcher(line);
+            if (m.find()) {
+              String fieldName = m.group(1);
+              String fieldType = m.group(2);
+              if (fieldType.indexOf("default") >= 0) {
+                fieldType = fieldType.substring(0, fieldType.indexOf("default"));
+              }
+              html.append(
+                "\n<tr"
+                +(fieldType.contains("NOT NULL")?" class=\"primarykey\"":"")
+                +"><td class=\"fieldname\">"+fieldName+"</td>"
+                +"<td class=\"fieldtype\">"
+                +fieldType.replaceAll("NOT NULL","")+"</td></tr>");
+            }
+          }
+          line = reader.readLine();
+        } // next line
+      } // close reader
+    } catch (Exception x) {
+      html.append("<p class=\"error\">"+x.getMessage()+"</p>");
+    }
+    html.append("</body></html>");
+    return html.toString();
+  }
 }

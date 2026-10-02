@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -214,9 +215,9 @@ public class CELEXEnglishDictionary implements Dictionary {
    * @return a Vector of Strings, one for each entry for the given word
    * @throws SQLException
    */
-  protected Vector<String> lookupEntries(String key, boolean supplementalOnly)
+  protected List<String> lookupEntries(String key, boolean supplementalOnly)
     throws SQLException {      
-    Vector<String> queryResults = new Vector<String>();
+    LinkedHashSet<String> queryResults = new LinkedHashSet<String>();
     if (key != null) {
       key = key.toLowerCase();
       if (supplementalOnly) { // only return entries for newly-added words
@@ -227,7 +228,7 @@ public class CELEXEnglishDictionary implements Dictionary {
           sqlSupplemental.setString(2, key);
           try (ResultSet rsSupplemental = sql.executeQuery()) {
             if (!rsSupplemental.next()) { // not editable
-              return queryResults; // empty
+              return new Vector<String>(queryResults); // empty
             }
           } // close rsSupplemental
         } // close sqlSupplemental
@@ -246,7 +247,7 @@ public class CELEXEnglishDictionary implements Dictionary {
         }
       } // rs.close()
     }
-    return queryResults;
+    return new Vector<String>(queryResults);
   }
 
   /**
@@ -329,7 +330,7 @@ public class CELEXEnglishDictionary implements Dictionary {
         try (ResultSet rs = sql.executeQuery()) {
           while (rs.next()) {
             String word = rs.getString("wordform");
-            Vector<String> entries = lookupEntries(word, false);
+            List<String> entries = lookupEntries(word, false);
             if (entries.size() == 0) continue;
             words.put(word, entries);
           } // next word

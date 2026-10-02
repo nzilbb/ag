@@ -227,7 +227,6 @@ for (let optionId in optionIdToSql) {
 }
 
 function setSqlForOption(opt) {
-  console.log("setSqlForOption " + opt);
   const sql = document.getElementById("sql");
   if (opt) {
     if (opt.checked) {
@@ -239,10 +238,8 @@ function setSqlForOption(opt) {
     }
   } else { // no specific option, but still should set firstVariantOnly
     if (document.getElementById("firstVariantOnly").checked) {
-      console.log("LIMIT 1");
       sql.value += "\nLIMIT 1";
     } else {
-      console.log("no LIMIT 1");
       sql.value = sql.value.replace(/\nLIMIT 1$/,"");
     }
   }
@@ -251,9 +248,7 @@ function setSqlForOption(opt) {
 }
 
 function getOptionForSql(sql) {
-  console.log("getOptionForSql " + sql);
   const optionId = sqlToOptionId[sql.value.replace(/\nLIMIT 1$/,"")];
-  console.log("optionId " + optionId)
   if (optionId) {
     return document.getElementById(optionId);
   } else {

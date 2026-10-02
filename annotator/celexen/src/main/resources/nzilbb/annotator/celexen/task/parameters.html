@@ -1,0 +1,90 @@
+<h3>CELEX English Tagger</h3>
+
+<p>The CELEX English Tagger tags words with their lexical entries
+  (pronunciations, frequency, etc.)
+  according to the
+  <a href="https://catalog.ldc.upenn.edu/LDC96L14"> CELEX English lexicon </a>,
+  which can be purchased from the LDC, who provide a number of text files for the lexicon. </p>
+
+<p> Configuration parameters are encoded as a URL query string, e.g. <br>
+  <samp>tokenLayerId=orthography&amp;tagLayerId=phonemes&amp;encoding=DISC</samp></p>
+
+<p> Parameters are: </p>
+<dl>
+  <dt> tokenLayerId </dt> <dd> Input layer from which words come. </dd>
+  <dt> transcriptLanguageLayerId </dt> <dd> Transcript attribute for overall language, so the
+    annotator can avoid tagging non-English transcripts.</dd>
+  <dt> phraseLanguageLayerId </dt> <dd> Layer for annotating phrases in a different
+    language, so the annotator can avoid tagging non-English phrases. </dd> 
+  <dt> targetLanguagePattern </dt> <dd> Regular expression for the ISO language codes
+    of the languages to target, or blank for all. </dd> 
+  <dt> sql </dt> <dd> SQL for querying the CELEX relational database in order to look up
+    the desired lexical tag(s). The query should includ one parameter <tt>?</tt> for
+    the input token label (usually the word orthography). Standard values are: <ul>
+      <li>"Syllables From Phonology" - <pre>SELECT DISTINCT BINARY PhonStrsDISC AS label, LOCATE('\\'', PhonStrsDISC), cxen_wordformphonologypron.Variant
+FROM cxen_wordformphonologypron
+WHERE BINARY REPLACE(REPLACE(REPLACE(REPLACE(PhonStrsDISC, '-',''), '\"',''),'\\'',''),'R','') = BINARY REPLACE(?,'R','')" // ignore possible-linking-r - i.e. 'R'
+    +"\n ORDER BY LOCATE('\\'', PhonStrsDISC) DESC, cxen_wordformphonologypron.Variant</pre></li>
+      <li>"Phonology" - <pre>SELECT DISTINCT BINARY REPLACE(REPLACE(REPLACE(PhonStrsDISC, '-',''), '\"',''),'\\'','') AS label, cxen_wordformphonologypron.Variant, cxen_wordform.IdNum
+FROM cxen_wordformphonologypron
+INNER JOIN cxen_wordformortho
+ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum
+INNER JOIN cxen_wordform
+ON cxen_wordformphonologypron.IdNum = cxen_wordform.IdNum
+WHERE cxen_wordformortho.WordDia = ?
+ORDER BY cxen_wordformphonologypron.Variant, cxen_wordform.IdNum</pre></li>
+      <li>"Syllable Count" - <pre>SELECT CHAR_LENGTH(PhonStrsDISC) - CHAR_LENGTH(REPLACE(PhonStrsDISC,'-','')) + 1
+FROM cxen_wordformphonologypron
+INNER JOIN cxen_wordformortho
+ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum
+INNER JOIN cxen_wordform
+ON cxen_wordformphonologypron.IdNum = cxen_wordform.IdNum
+WHERE cxen_wordformortho.WordDia = ?
+ORDER BY cxen_wordform.cob DESC, cxen_wordformphonologypron.Variant,"
+    +" cxen_wordform.IdNum</pre></li>
+      <li>"Morphology" - <pre>SELECT
+COALESCE(CONCAT(COALESCE(cxen_lemmamorphologyparse.Imm,cxen_lemma.HeadDia,''),
+REPLACE(COALESCE(cxen_wordformmorphology.TransInfl,''), '@','')),'')
+FROM cxen_wordformmorphology
+INNER JOIN cxen_wordform ON cxen_wordformmorphology.IdNum = cxen_wordform.IdNum
+INNER JOIN cxen_wordformortho"
+    +" ON cxen_wordformmorphology.IdNum = cxen_wordformortho.IdNum
+INNER JOIN cxen_lemma ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma
+INNER JOIN cxen_lemmamorphologyparse"
+    +" ON cxen_wordform.IdNumLemma = cxen_lemmamorphologyparse.IdNumLemma
+WHERE cxen_wordformortho.WordDia = ?
+ORDER BY cxen_lemma.Cob DESC</pre></li>
+      <li>"Syntax" - <pre>SELECT cxen_wordclass.Label
+FROM cxen_wordform
+INNER JOIN cxen_wordformortho"
+    +" ON cxen_wordform.IdNum = cxen_wordformortho.IdNum
+INNER JOIN cxen_lemma ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma
+INNER JOIN cxen_lemmasyntax"
+    +" ON cxen_wordform.IdNumLemma = cxen_lemmasyntax.IdNumLemma
+LEFT OUTER JOIN cxen_wordclass"
+    +" ON cxen_lemmasyntax.ClassNum = cxen_wordclass.ClassNum
+WHERE cxen_wordformortho.WordDia = ?
+ORDER BY cxen_lemma.Cob DESC</pre></li>
+      <li>"Lemma" - <pre>SELECT cxen_lemma.HeadDia
+FROM cxen_wordform
+INNER JOIN cxen_wordformortho"
+    +" ON cxen_wordform.IdNum = cxen_wordformortho.IdNum
+INNER JOIN cxen_lemma ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma
+WHERE cxen_wordformortho.WordDia = ?
+ORDER BY cxen_lemma.Cob DESC</pre></li>
+      <li>"WordForm Frequency" - <pre>SELECT cxen_wordform.Cob
+FROM cxen_wordform
+INNER JOIN cxen_wordformortho
+ON cxen_wordformortho.IdNum = cxen_wordform.IdNum
+WHERE cxen_wordformortho.WordDia = ?
+ORDER BY cxen_wordform.Cob DESC</pre></li>
+      <li>"Lemma Frequency" - <pre>SELECT cxen_lemma.Cob
+FROM cxen_wordform
+INNER JOIN cxen_wordformortho
+ON cxen_wordformortho.IdNum = cxen_wordform.IdNum
+INNER JOIN cxen_lemma
+ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma
+WHERE cxen_wordformortho.WordDia = ?
+ORDER BY cxen_lemma.Cob DESC</pre></li></ul></dd> 
+  <dt> tagLayerId </dt> <dd> Output layer to which pronunciations are added. </dd>
+</dl>

@@ -11,10 +11,160 @@
     <script src="util.js" type="text/javascript"></script>
   </head>
   <body>
-    <p> This annotator tags words with their lexical entries (pronunciations, frequency,
+    <details><summary> This annotator tags words with their lexical entries (pronunciations, frequency,
       etc.) according to the
-      <a href="https://catalog.ldc.upenn.edu/LDC96L14" target="LDC"> CELEX English lexicon </a>. </p> 
+        <a href="https://catalog.ldc.upenn.edu/LDC96L14" target="LDC"> CELEX English lexicon </a>. </summary>
+      
+      <p> The CELEX tagger basically takes word annotations already
+      stored on one layer, uses each one to look up certain data in
+      the CELEX database, and stores the results of the lookup on
+      another layer.</p> 
+       
+      <p>The main settings for a CELEX layer are:</p>
+      <ul>
+        <li><i>Token Layer</i> - This is where the layer manager will
+          get the words it needs to look up from.  Under most
+          circumstances, this should be the <i>orthography</i> layer,
+          which contains the orthographic (ordinary spelling)
+          representation of the word.</li> 
+        <li><i>CELEX SQL Query</i> - This defines what should be
+          looked up, given a word taken from the <i>Token Layer</i>.
+          This takes the form of an SQL <code>SELECT</code> statement,
+          which is used to query the CELEX database.  However, you don't
+          need to know anything about SQL to configure the layer, you
+          can use pre-prepared queries that are frequently desired,
+          simply by clicking the option you want to the left of the SQL query:
+          <ul>
+            <li><i>Phonology</i> - the standard pronunciation of the
+              given word, expressed using the <i>DISC</i> encoding for
+              phonemes, with syllabification and stress-marking
+              removed</li> 
+            <li><i>Syllable Count</i> - the number of syllables in the word</li>
+            <li><i>Morphology</i> - the morphological parse for the word</li>
+            <li><i>Syntax</i> - possible syntactic categories for the word</li>
+            <li><i>Frequency (wordform)</i> - the frequency of the
+              wordform in the Cobuild corpus</li> 
+            <li><i>Frequency (lemma)</i> - the frequency of the word's
+              lemma in the Cobuild corpus</li> 
+            <li><i>Syllables from Phonology</i> - if
+              the <i>segments</i> layer has been populated with phone
+              annotation (e.g. from HTK forced-alignment), then the
+              syllable structure and stress pattern of the words can be
+              recovered using this option.  For this to work: 
+              <ol><li>The layer must be a word layer</li>
+              <li>The layer must be a time-intervals layer</li>
+                <li>The source layer must be the <i>segments</i> layer
+                  (this layer is automatically selected when you click
+                  on this option)</li> 
+                <li>The source layer must contain phones that
+                  correspond to a phonemic transcription in CELEX</li>
+                <li>The Delimiters must be set to <code>-</code> (see below)</li></ol>
+            </li>
+          </ul>
+        </li>
+        <li><i>First variant only</i> - Any of the queries above may
+          return more than one result for a given orthographic word -
+          e.g. the word <q>mean</q> can be a verb, adjective, or
+          noun.  <u>All</u> of these possibilities would be annotated
+          against an instance of the word <q>mean</q> on a "syntax"
+          layer, unless you tick the <i>First variant only</i> option,
+          in which case only the most frequent possibility will annotate
+          the word.</li></ul>
 
+      <p>Other options are for special cases, and include:</p>
+      <ul>
+        <li><i>Target Language Pattern</i> - Specifies what language
+          to target for annotations. This is a regular expression that
+          is matched against the language code
+          (two-letter <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" target="_blank">ISO-639-1</a> codes like <code>en</code>,
+          possibly with a suffix to indicate a variety,
+          like <code>en-nz</code>) of each word in order to decide
+          whether to annotate it or not. If this setting is left blank,
+          all words are annotated, regardless of language (this can help
+          boost performance on very large databases).  The language of a
+          word is determines as follows: 
+          <ol>
+            <li>If the word is inside an annotation on the layer
+              specified by the <i>Phrase Language Layer</i> setting,
+              then this annotation determines the word's language.  If
+              not:</li> 
+            <li>The transcript attribute specified by
+              the <i>Transcript Language Attribute</i> setting is
+              assumed to be the language of the word. If the transcript
+              has no language label:</li> 
+            <li>The language of the corpus of the transcript is
+              assumed to be the language of the word.</li>  
+        </ol></li>
+        <li><i>Delimiters</i> - This is a list of characters that are
+          used to split the resulting annotation into chunks, and is
+          used when the <i>Source Layer</i> is the <i>segments</i>
+          layer.  Each chunk is used to identify a group of segments
+          that belong together, and so the result is a set of
+          annotations that partition the word by the resulting chunks.
+          This can be used to look up the syllable-marked version of the
+          phonemic transcription, given the segments chosen for the
+          word, and then produce syllable annotations for the word by
+          using hyphen <code>-</code> as the delimiter.</li></ul>
+
+      <h3>First Variant Only</h3>
+      
+      <p>In many cases, a given wordform will have multiple possible
+        matches in CELEX.  For example, on a <i>Syntax</i>, layer, the
+        word <q>fine</q> might be an adjective, an adverb, a noun, or a
+        verb.  All of these possibilities will be added as annotations
+        on all tokens of the word <q>fine</q>.</p> 
+      
+      <p>If you want to ensure that each token has only one
+        annotation, tick the <i>First match only</i> option.  This will
+        annotate words only with the first matching annotation from
+        CELEX.  If you use the predefined definition options, these
+        order the annotations most-frequent-first, so the most frequent
+        annotation (e.g. adjective, in the case of <q>fine</q>) will be
+        chosen as the one annotation.</p> 
+      
+      <p><em>NB</em> if you are computing syllable counts in order to
+        then compute speech rate, then you <b>must tick this option</b>.
+        Otherwise, words with multiple possible syllable counts will
+        have all possibilities added together.  e.g. the
+        word <q>family</q> can have either 3 or 2 syllables; if you do
+        not tick <i>First match only</i>, then this will count as a
+        5-syllable word for speech rate computation.</p> 
+      
+      <h3>Testing</h3>
+
+      <p>Below the settings a box labelled <i>Test word</i> with the
+        word <q>testing</q> in it.</p> 
+      <p>This allows you to test your settings for the layer and see
+        what the resulting annotations would be for a single word.  The
+        word is <q>testing</q> by default, but if you type another word
+        in that box, that word will be used with your definition, and
+        the result or results will be displayed below the word.</p> 
+      
+      <p>For example, if you want to see what annotations your
+        'Syntax' configuration will generate for the word <q>fine</q>,
+        type <q>fine</q> in the box to replace <q>testing</q>, and you
+        will see various syntactic-category labels appear listed in the
+        box below it (<samp>A</samp>, <samp>ADV</samp>, <samp>N</samp>,
+        and <samp>V</samp>) - these are the possible syntactic
+        categories for <q>fine</q> according to CELEX, and so each token
+        of the word <q>fine</q> will be annotated with all of these
+        labels.</p> 
+      
+      <h3>Manually Specify SQL</h3>
+      <p>If you are familiar with how to write SQL <code>SELECT</code>
+        queries, you can write your own query. The CELEX database schema
+        is shown at the bottom of this page.</p>
+      
+      <p>As can be seen from the example queries by selecting the
+        preprepared query options, a single question mark <code>?</code>
+        is used as a parameter to identify the orthography of the word
+        being looked up (or more correctly, the annotation on
+        the <i>Source Layer</i> that's being looked up).</p>
+
+      <p>Full information about the tables and fields available are
+        in the <a href="schemaHtml" target="schema">database schema document</a>.</p>
+    </details>
+    
     <form method="POST" action="setTaskParameters">
       <div class="field" title="Input layer from which words come">
         <label for="tokenLayerId"> Token Layer </label>
@@ -79,10 +229,12 @@
             <input type="radio" name="preset"
 		   id="optSyllablesFromPhonology"/>Syllables from Phonology</label>
         </fieldset>
-        <fieldset class="sql"><legend>CELEX SQL Query</legend>
+        <fieldset class="sql"><legend>CELEX SQL Query
+            (<a href="schemaHtml" target="schema">database schema</a>)</legend>
           <textarea id="sql" name="sql"></textarea>
         </fieldset>
       </div>
+      </details></div>
       <div class="field"
            title="If there are multiple pronunciations for the word, use only the first one.">
         <label for="firstVariantOnly"> First variant only </label>
