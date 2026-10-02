@@ -27,6 +27,10 @@
     <module>basservices</module>
     <module>reaper</module>
     <module>unisyn</module>
+    <module>partitioner</module>
+    <module>stanfordner</module>
+    <module>db</module>
+    <module>tokiponapos</module>
     <!-- only on Linux: -->
     <module>mor</module>
     <!-- only on Ubuntu, and requires `sudo apt install python3-venv` first: -->
@@ -36,9 +40,6 @@
     <!-- These require manual 3rd party software installation so are disabled by default: -->
     <!--module>htk</module-->
     <!--module>mfa</module-->
-    <module>partitioner</module>
-    <module>stanfordner</module>
-    <module>db</module>
-    <module>tokiponapos</module>
+    <!--module>celexen</module-->
   </modules>
 </project>
