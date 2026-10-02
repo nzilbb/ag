@@ -225,7 +225,7 @@ public class CELEXEnglishDictionary implements Dictionary {
                  "SELECT WordDia FROM cxen_wordformortho WHERE IdNum >= ? AND WordDia = ?"))) {
           sqlSupplemental.setLong(1, IDNUM_PARTITION_START);
           sqlSupplemental.setString(2, key);
-          try (ResultSet rsSupplemental = sql.executeQuery()) {
+          try (ResultSet rsSupplemental = sqlSupplemental.executeQuery()) {
             if (!rsSupplemental.next()) { // not editable
               return new Vector<String>(queryResults); // empty
             }
@@ -254,10 +254,10 @@ public class CELEXEnglishDictionary implements Dictionary {
    * representation for dictionary editing.   
    */
   public List<String> lookupRaw(String key) throws DictionaryException {
-    Vector<String> queryResults = new Vector<String>();
+    LinkedHashSet<String> queryResults = new LinkedHashSet<String>();
     if (key != null) {
       try {
-        sql.setString(1, key);
+        sqlRaw.setString(1, key);
         try (ResultSet rs = sqlRaw.executeQuery()) {
           while (rs.next()) {
             queryResults.add(rs.getString(1));
@@ -272,7 +272,7 @@ public class CELEXEnglishDictionary implements Dictionary {
         }
       } // rs.close()
     }
-    return queryResults;
+    return new Vector<String>(queryResults);
   }
   
   /** 
@@ -347,7 +347,7 @@ public class CELEXEnglishDictionary implements Dictionary {
    * dictionary, false otherwise
    */
   public boolean isReadOnly() {
-    return field == null;
+    return field == null || name != null;
   }
 
   /**
@@ -366,15 +366,6 @@ public class CELEXEnglishDictionary implements Dictionary {
     } catch (SQLException sqlX) {
       throw new DictionaryException(this, sqlX);
     } // sql.close()
-  }
-  /**
-   * {@link Dictionary} method - Returns a count of all editable entries in the dictionary.
-   * @return the number of entries that would be returned by a call to listEditableEntries
-   * @throws DictionaryReadOnlyException
-   */
-  public int countEditableEntries()
-    throws DictionaryReadOnlyException, DictionaryException {
-    return countEditableKeys(); // TODO check this
   }
 
   /**
@@ -397,6 +388,13 @@ public class CELEXEnglishDictionary implements Dictionary {
         +"\n ON cxen_wordformortho.IdNum = cxen_wordform.IdNum"
         +"\n INNER JOIN cxen_lemma"
         +"\n ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma";
+    } else if (field.equals("PhonStrsDISC")) {
+      query = "SELECT "+operation+"(cxen_wordformphonologypron.PhonStrsDISC)"
+        +" FROM cxen_wordformphonologypron"
+        +" INNER JOIN cxen_wordformortho"
+        +" ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum"
+        +" INNER JOIN cxen_wordform"
+        +" ON cxen_wordformphonologypron.IdNum = cxen_wordform.IdNum";
     } else {
       return null;
     }
@@ -432,6 +430,13 @@ public class CELEXEnglishDictionary implements Dictionary {
         +"\n ON cxen_wordformortho.IdNum = cxen_wordform.IdNum"
         +"\n INNER JOIN cxen_lemma"
         +"\n ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma";
+    } else if (field.equals("PhonStrsDISC")) {
+      query = "SELECT "+operation+"(cxen_wordformortho.WordDia)"
+        +" FROM cxen_wordformphonologypron"
+        +" INNER JOIN cxen_wordformortho"
+        +" ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum"
+        +" INNER JOIN cxen_wordform"
+        +" ON cxen_wordformphonologypron.IdNum = cxen_wordform.IdNum";
     } else {
       return null;
     }
@@ -607,8 +612,35 @@ public class CELEXEnglishDictionary implements Dictionary {
       throw new DictionaryReadOnlyException(this, key + " is read only.");
     }
     try (PreparedStatement sql = rdb.prepareStatement(
-           // TODO should delete all entries in all tables
            sqlx.apply("DELETE FROM cxen_wordformphonologypron WHERE IdNum = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxen_wordformphonology WHERE IdNum = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxen_lemma WHERE IdNumLemma = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxen_wordformortho WHERE IdNum = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxen_wordform WHERE IdNum = ?"))) {
       sql.setLong(1, lIdNum);
       sql.executeUpdate();
     } catch (SQLException x) {
@@ -694,6 +726,19 @@ public class CELEXEnglishDictionary implements Dictionary {
    */
   public List<String> lookupEditableEntry(String key)
     throws DictionaryReadOnlyException, DictionaryException {
+    try (PreparedStatement sqlSupplemental = rdb.prepareStatement(
+           sqlx.apply(
+             "SELECT WordDia FROM cxen_wordformortho WHERE IdNum >= ? AND WordDia = ?"))) {
+      sqlSupplemental.setLong(1, IDNUM_PARTITION_START);
+      sqlSupplemental.setString(2, key);
+      try (ResultSet rsSupplemental = sqlSupplemental.executeQuery()) {
+        if (!rsSupplemental.next()) { // not editable
+          return new Vector<String>(); // empty
+        }
+      } // close rsSupplemental
+    } catch (SQLException x) {
+      return new Vector<String>(); // empty
+    } // close sqlSupplemental
     return lookupRaw(key);
   }
 

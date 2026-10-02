@@ -723,6 +723,12 @@ public class TestCELEXEnglishTagger {
                  Double.valueOf(52), syll.getStart().getOffset());
     assertEquals("Last syllable shares end",
                  words[5].getEndId(), syll.getEndId());
+
+    try {
+      annotator.getDictionary(null);        
+    } catch (Exception x) {
+      fail("null dictionary ID is supported when sql is set: " + x);
+    }
   }   
 
   /** Test dictionary registration. */
@@ -747,6 +753,54 @@ public class TestCELEXEnglishTagger {
     } catch (Exception x) {
       System.out.println(""+x);
     }
+
+    assertTrue("name-based dictionary is read only",
+               annotator.getDictionary("Phonology (wordform)").isReadOnly());
+    
+    // basic lookups
+    Dictionary dictionary = annotator.getDictionary(
+      "SELECT PhonStrsDISC FROM cxen_wordformphonologypron"
+      +" INNER JOIN cxen_wordformortho"
+      +" ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum"
+      +" INNER JOIN cxen_wordform"
+      +" ON cxen_wordformphonologypron.IdNum = cxen_wordform.IdNum"
+      +" WHERE cxen_wordformortho.WordDia = ?"
+      +" ORDER BY cxen_wordformphonologypron.Variant, cxen_wordform.IdNum");
+    assertFalse("SQL-based dictionary is not read only",
+                dictionary.isReadOnly());
+    List<String> entries = dictionary.lookup("and");
+    assertEquals("'and' has correct number of entries " + entries,
+                 7, entries.size());entries = dictionary.lookup("and");
+    entries = dictionary.lookup("blog");
+    assertEquals("'blog' has no entries " + entries,
+                 0, entries.size());
+    
+    entries = dictionary.lookupRaw("and");
+    assertEquals("'and' has correct number of raw entries " + entries,
+                 7, entries.size());entries = dictionary.lookup("and");
+
+    entries = dictionary.lookupEditableEntry("and");
+    assertEquals("'and' has no editable entries " + entries,
+                 0, entries.size());
+    
+    assertEquals("countAllKeys correct", 172330, dictionary.countAllKeys());
+    assertEquals("no editable keys", 0, dictionary.countEditableKeys());
+
+    assertEquals("aggregateKeys works", "`a la", dictionary.aggregateKeys("MIN"));
+    assertEquals("aggregateEntries works", "_@", dictionary.aggregateEntries("MIN"));
+
+    // CRUD
+    dictionary.add("blog", "blQg");
+    assertEquals("'blog' now has one entry ",
+                 1, dictionary.lookupEditableEntry("blog").size());
+    assertEquals("The new 'blog' entry is editable ",
+                 1, dictionary.lookupEditableEntry("blog").size()); 
+    dictionary.add("blog", "another");
+    assertEquals("'blog' now has two entries ",
+                 2, dictionary.lookupEditableEntry("blog").size());
+    dictionary.remove("blog");
+    assertEquals("'blog' has no entries again ",
+                 0, dictionary.lookupEditableEntry("blog").size());
   }   
  
   /**

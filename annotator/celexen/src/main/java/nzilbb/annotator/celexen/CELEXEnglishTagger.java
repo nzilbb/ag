@@ -1749,12 +1749,9 @@ public class CELEXEnglishTagger extends LabelBasedTagger
    * @throws DictionaryException If the given dictionary doesn't exist.
    */
   public Dictionary getDictionary(String id) throws DictionaryException {
-    if (id == null || id.trim().length() == 0) { // null is not allowed
-      throw new DictionaryException(null, "Invalid dictionary: " + id);
-    }
     try {
       return new CELEXEnglishDictionary(
-        this, newLexiconConnection(), sqlx, id);
+        this, newLexiconConnection(), sqlx, Optional.ofNullable(id).orElse(sql));
     } catch (SQLException sqlX) {
       throw new DictionaryException(null, sqlX);
     }
