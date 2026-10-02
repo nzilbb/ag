@@ -219,7 +219,6 @@ public class CELEXEnglishDictionary implements Dictionary {
     throws SQLException {      
     LinkedHashSet<String> queryResults = new LinkedHashSet<String>();
     if (key != null) {
-      key = key.toLowerCase();
       if (supplementalOnly) { // only return entries for newly-added words
         try (PreparedStatement sqlSupplemental = rdb.prepareStatement(
                sqlx.apply(
@@ -257,7 +256,6 @@ public class CELEXEnglishDictionary implements Dictionary {
   public List<String> lookupRaw(String key) throws DictionaryException {
     Vector<String> queryResults = new Vector<String>();
     if (key != null) {
-      key = key.toLowerCase();
       try {
         sql.setString(1, key);
         try (ResultSet rs = sqlRaw.executeQuery()) {

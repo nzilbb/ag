@@ -21,7 +21,7 @@ getSchema(s => {
     tokenLayerId, schema,
     // this is a function that takes a layer and returns true for the ones we want
     layer => layer.id == schema.wordLayerId
-      || (layer.parentId == schema.wordLayerId && layer.alignment == 0));
+      || layer.parentId == schema.wordLayerId);
   // default value:
   if (schema.layers["orthography"]) {
     tokenLayerId.value = "orthography";
@@ -260,12 +260,15 @@ function setOptionForSql(sql) {
   const option = getOptionForSql(sql);
   if (option) { // check the corresponding option
     option.checked = true;
+    document.getElementById('delimiters').disabled
+      = option.id != "optSyllablesFromPhonology";
   } else { // ensure all options are unticked
     for (let optionId in optionIdToSql) {
       document.getElementById(optionId).checked = false;
     }
   }
   document.getElementById("firstVariantOnly").checked = sql.value.match(/\nLIMIT 1$/)?true:false;
+
 }
 
 function setSqlForFirstOnly() {

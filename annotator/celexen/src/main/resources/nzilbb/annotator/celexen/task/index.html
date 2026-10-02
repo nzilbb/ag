@@ -233,8 +233,7 @@
             (<a href="schemaHtml" target="schema">database schema</a>)</legend>
           <textarea id="sql" name="sql"></textarea>
         </fieldset>
-      </div>
-      </details></div>
+      </div>      
       <div class="field"
            title="If there are multiple pronunciations for the word, use only the first one.">
         <label for="firstVariantOnly"> First variant only </label>
@@ -246,16 +245,19 @@
         <span><input id="delimiters" name="delimiters" type="text" disabled></span>
       </div>
       <div class="controls"><input type="submit" value="Set Parameters"></div>
-      <div class="field"
-           title="Enter a word here to test the CELEX SQL Query">
-        <label for="test-word">Test word</label>
-        <span><input id="test-word" type="text" value="testing"></span>
-      </div>
-      <div class="field"
-           title="Values returned by the CELEX SQL Query">
-        <label for="test-word">Test results</label>
-        <span id="test-result"></span>
-      </div>
+      <fieldset><legend>Test Configuration</legend>
+        <div class="field"
+             title="Enter a word here to test the CELEX SQL Query">
+          <label for="test-word">Test word</label>
+          <span><input id="test-word" type="text" value="testing"></span>
+        </div>
+        <div class="field"
+             title="Values returned by the CELEX SQL Query">
+          <label for="test-word">Test results</label>
+          <span id="test-result"></span>
+        </div>
+      </fieldset>
+      
     </form>
     
     <footer><div> CELEX English Tagger <small id="version"></small> </div></footer>

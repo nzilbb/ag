@@ -27,7 +27,10 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +47,7 @@ import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
 import nzilbb.sql.derby.DerbyConnectionFactory;
+import nzilbb.sql.derby.DerbySQLTranslator;
 
 // IMPORTANT:
 // These tests require access to the CELEX lexicon files in a zip file
@@ -69,7 +73,6 @@ public class TestCELEXEnglishTagger {
     
     // use derby for relational database
     annotator.setRdbConnectionFactory(new DerbyConnectionFactory(dir));
-
     annotator.getStatusObservers().add(s->System.out.println(s));
 
     // 'upload' the zip file
@@ -90,6 +93,20 @@ public class TestCELEXEnglishTagger {
     System.out.println("Lexicon installed.");
     annotator.getStatusObservers().clear();
   }
+  
+  /**
+   * Implementation for the REPLACE SQL function.
+   * @param haystack
+   * @param needle
+   * @param replacement
+   * @return The given string with replacements made.
+   */
+  public static String REPLACE(String haystack, String needle, String replacement) {
+    if (haystack == null) return null;
+    if (needle == null) return haystack;
+    if (replacement == null) replacement = "";
+    return haystack.replace(needle, replacement);
+  } // end of REPLACE()
   
   public static File dir() throws Exception { 
     URL urlThisClass = TestCELEXEnglishTagger.class.getResource(
@@ -414,7 +431,7 @@ public class TestCELEXEnglishTagger {
     assertTrue("lexiconSchemaExists", annotator.lexiconSchemaExists());
     assertTrue("lexiconDataExists", annotator.lexiconDataExists());
 
-    Vector<String> results = annotator.testSql(
+    Collection<String> results = annotator.testSql(
       "the", "SELECT PhonStrsDISC FROM cxen_wordformphonologypron"
       +" INNER JOIN cxen_wordformortho"
       +" ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum"
@@ -423,7 +440,7 @@ public class TestCELEXEnglishTagger {
       +" WHERE cxen_wordformortho.WordDia = ?"
       +" ORDER BY cxen_wordformphonologypron.Variant, cxen_wordform.IdNum");
     assertEquals("testSql works with real word: " + Arrays.asList(results),
-                 8, results.size());
+                 4, results.size());
     results = annotator.testSql(
       "blog", "SELECT PhonStrsDISC FROM cxen_wordformphonologypron"
       +" INNER JOIN cxen_wordformortho"
@@ -439,7 +456,14 @@ public class TestCELEXEnglishTagger {
     assertEquals("testSql returns one value with invalid query: " + Arrays.asList(results),
                  1, results.size());
     assertTrue("testSql returns an error with invalid query: " + Arrays.asList(results),
-               results.get(0).startsWith("ERROR:"));
+               results.iterator().next().startsWith("ERROR:"));
+
+    String schemaHtml = annotator.schemaHtml();
+    assertTrue("schemaHtml starts like an HTML document",
+               schemaHtml.startsWith("<!DOCTYPE html>\n<html><head>"));
+    assertTrue("schemaHtml ends like an HTML document",
+               schemaHtml.endsWith("</body></html>"));
+
   }   
     
   /** Test whole-layer generation uses GraphStore.tagMatchingAnnotations correctly,
@@ -526,6 +550,180 @@ public class TestCELEXEnglishTagger {
         +" && /en.*/.test(first('lang').label ?? first('transcript_language').label)"
         +" && label == 'brown'"));
   }
+
+  /** Ensure syllables are correctly recovered. */
+  @Test public void syllableRecovery() throws Exception {
+
+    Graph g = graph();
+    g.addTag(g, "transcript_language", "en-NZ");
+    Schema schema = g.getSchema();
+    // add segment layer
+    schema.addLayer(
+      new Layer("segment")
+      .setAlignment(Constants.ALIGNMENT_INTERVAL)
+      .setPeers(true).setPeersOverlap(false).setSaturated(true)
+      .setParentId(annotator.getSchema().getWordLayerId()));
+
+    // use our own annotator to avoid Derby problems
+    CELEXEnglishTagger annotator = new CELEXEnglishTagger();
+    annotator.setSchema(g.getSchema());
+    annotator.setWorkingDirectory(dir());
+    annotator.setRdbConnectionFactory(new DerbyConnectionFactory(dir()));
+    annotator.setConfig(annotator.getConfig());
+
+    // we need the REPLACE function for the SQL to work...
+    try (Connection rdb = annotator.newConnection()) {
+      try (PreparedStatement sql = rdb.prepareStatement("DROP FUNCTION REPLACE")) {
+        sql.executeUpdate();
+      }
+      try (PreparedStatement sql = rdb.prepareStatement(
+             "CREATE FUNCTION REPLACE"
+             +" ( HAYSTACK VARCHAR(32672), NEEDLE VARCHAR(32672), REPLACEMENT VARCHAR(32672) )"
+             +" RETURNS VARCHAR(32672)"
+             +" PARAMETER STYLE JAVA"
+             +" NO SQL LANGUAGE JAVA"
+             +" CALLED ON NULL INPUT"
+             +" DETERMINISTIC"
+             +" EXTERNAL NAME 'nzilbb.annotator.celexen.TestCELEXEnglishTagger.REPLACE'")) {
+        sql.executeUpdate();
+      }
+    } // close connection
+    
+    // add aligned segments to word tokens
+    Annotation[] words = g.all("word");
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("2")
+                    .setStart(g.getOrCreateAnchorAt(10)).setEnd(g.getOrCreateAnchorAt(20))
+                    .setParent(words[0])); // I
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("s")
+                    .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(23))
+                    .setParent(words[1])); // sang
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("{")
+                    .setStart(g.getOrCreateAnchorAt(23)).setEnd(g.getOrCreateAnchorAt(27))
+                    .setParent(words[1])); // sang
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("N")
+                    .setStart(g.getOrCreateAnchorAt(20)).setEnd(g.getOrCreateAnchorAt(30))
+                    .setParent(words[1])); // sang
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("@")
+                    .setStart(g.getOrCreateAnchorAt(30)).setEnd(g.getOrCreateAnchorAt(35))
+                    .setParent(words[2])); // and
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("n")
+                    .setStart(g.getOrCreateAnchorAt(35)).setEnd(g.getOrCreateAnchorAt(40))
+                    .setParent(words[2])); // and
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("w")
+                    .setStart(g.getOrCreateAnchorAt(40)).setEnd(g.getOrCreateAnchorAt(42))
+                    .setParent(words[3])); // w~
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("@")
+                    .setStart(g.getOrCreateAnchorAt(42)).setEnd(g.getOrCreateAnchorAt(45))
+                    .setParent(words[3])); // w~
+    // skip "walked"
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("@")
+                    .setStart(g.getOrCreateAnchorAt(50)).setEnd(g.getOrCreateAnchorAt(52))
+                    .setParent(words[5]));
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("b")
+                    .setStart(g.getOrCreateAnchorAt(52)).setEnd(g.getOrCreateAnchorAt(54))
+                    .setParent(words[5]));
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("6")
+                    .setStart(g.getOrCreateAnchorAt(54)).setEnd(g.getOrCreateAnchorAt(57))
+                    .setParent(words[5]));
+    g.addAnnotation(new Annotation().setLayerId("segment").setLabel("t")
+                    .setStart(g.getOrCreateAnchorAt(57)).setEnd(g.getOrCreateAnchorAt(60))
+                    .setParent(words[5]));
+
+    
+    // use specified configuration
+    annotator.setTaskParameters(
+      "tokenLayerId=segment"
+      +"&transcriptLanguageLayerId="   // no transcript language layer
+      +"&phraseLanguageLayerId="       // no phrase language layer
+      +"&targetLanguagePattern="       // no language pattern
+      +"&delimiters=-"                 // delimiter for syllable recovery
+      +"&tagLayerId=syllable"
+      +"&sql=SELECT%20DISTINCT%20BINARY%20PhonStrsDISC%20AS%20label"
+      +"%20FROM%20cxen_wordformphonologypron"
+      +"%20WHERE%20BINARY%20REPLACE(REPLACE(REPLACE(REPLACE(PhonStrsDISC,%20'-',''),%20'\"',''),'''',''),'R','')%20=%20BINARY%20REPLACE(?,'R','')"
+      +"%20ORDER%20BY%20PhonStrsDISC");
+    
+    assertEquals("token layer",
+                 "segment", annotator.getTokenLayerId());
+    assertNull("transcript language layer",
+               annotator.getTranscriptLanguageLayerId());
+    assertNull("phrase language layer",
+               annotator.getPhraseLanguageLayerId());
+    assertNull("language pattern",
+               annotator.getTargetLanguagePattern());
+    assertEquals(
+      "sql",
+      "SELECT DISTINCT BINARY PhonStrsDISC AS label"
+      +" FROM cxen_wordformphonologypron"
+      +" WHERE BINARY REPLACE(REPLACE(REPLACE(REPLACE(PhonStrsDISC, '-',''), '\"',''),'''',''),'R','') = BINARY REPLACE(?,'R','')"
+      +" ORDER BY PhonStrsDISC",
+      annotator.getSql());
+    assertEquals("syllable layer",
+                 "syllable", annotator.getTagLayerId());
+    assertNotNull("syllable layer was created",
+                  schema.getLayer(annotator.getTagLayerId()));
+    Layer syllableLayer = schema.getLayer(annotator.getTagLayerId());
+    assertEquals("syllable layer child of word",
+                 "word", syllableLayer.getParentId());
+    assertEquals("syllable layer aligned",
+                 Constants.ALIGNMENT_INTERVAL,
+                 syllableLayer.getAlignment());
+    assertEquals("syllable layer type correct",
+                 Constants.TYPE_IPA,
+                 syllableLayer.getType());
+    assertTrue("syllable layer allows peers",
+                schema.getLayer(syllableLayer.getId()).getPeers());
+    Set<String> requiredLayers = Arrays.stream(annotator.getRequiredLayers())
+      .collect(Collectors.toSet());
+    assertEquals("1 required layer: "+requiredLayers,
+                 2, requiredLayers.size());
+    assertTrue("word required "+requiredLayers,
+               requiredLayers.contains("word"));
+    assertTrue("segment required "+requiredLayers,
+               requiredLayers.contains("segment"));
+    String outputLayers[] = annotator.getOutputLayers();
+    assertEquals("1 output layer: "+Arrays.asList(outputLayers),
+                 1, outputLayers.length);
+    assertEquals("output layer correct "+Arrays.asList(outputLayers),
+                 "syllable", outputLayers[0]);
+
+    Annotation firstWord = g.first("word");
+    assertEquals("double check the first word is what we think it is: "+firstWord,
+                 "I", firstWord.getLabel());
+    
+    // run the annotator
+    annotator.transform(g);
+    List<Annotation> syllables = Arrays.stream(g.all("syllable"))
+      .collect(Collectors.toList());
+    assertEquals("Correct number of tokens "+syllables,
+                 6, syllables.size());
+    Iterator<Annotation> sylls = syllables.iterator();
+    Annotation syll = sylls.next();
+    assertEquals("'2", syll.getLabel());
+    assertTrue(syll.tags(words[0]));
+    syll = sylls.next();
+    assertEquals("'s{N", syll.getLabel());
+    assertTrue(syll.tags(words[1]));
+    syll = sylls.next();
+    assertEquals("@n", syll.getLabel());
+    assertTrue(syll.tags(words[2]));
+    syll = sylls.next();
+    assertEquals("w@", syll.getLabel());
+    assertTrue(syll.tags(words[3]));
+    // skipped "walked"
+    syll = sylls.next();
+    assertEquals("@", syll.getLabel());
+    assertEquals("First syllable shares start",
+                 words[5].getStartId(), syll.getStartId());
+    assertEquals("First syllable end during word",
+                 Double.valueOf(52), syll.getEnd().getOffset());
+    syll = sylls.next();
+    assertEquals("'b6t", syll.getLabel());
+    assertEquals("Last syllable start during word",
+                 Double.valueOf(52), syll.getStart().getOffset());
+    assertEquals("Last syllable shares end",
+                 words[5].getEndId(), syll.getEndId());
+  }   
 
   /** Test dictionary registration. */
   @Test public void dictionaryRegistration() throws Exception {

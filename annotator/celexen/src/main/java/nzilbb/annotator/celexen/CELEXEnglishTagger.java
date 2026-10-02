@@ -66,10 +66,13 @@ import nzilbb.ag.automation.InvalidConfigurationException;
 import nzilbb.ag.automation.LabelBasedTagger;
 import nzilbb.ag.automation.UsesFileSystem;
 import nzilbb.ag.automation.UsesRelationalDatabase;
+import nzilbb.editpath.EditStep;
+import nzilbb.editpath.MinimumEditPathString;
 import nzilbb.encoding.ValidLabelsDefinitions;
+import nzilbb.encoding.comparator.DISC2DISCComparator;
 import nzilbb.sql.ConnectionFactory;
-import nzilbb.sql.mysql.MySQLConnectionFactory;
 import nzilbb.sql.derby.DerbyConnectionFactory;
+import nzilbb.sql.mysql.MySQLConnectionFactory;
 import nzilbb.util.IO;
 
 /**
@@ -1238,6 +1241,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
     tagLayerId = null;
     firstVariantOnly = Boolean.FALSE;
     sql = null;
+    delimiters = null;
         
     beanPropertiesFromQueryString(parameters);
 
@@ -1280,15 +1284,21 @@ public class CELEXEnglishTagger extends LabelBasedTagger
         throw new InvalidConfigurationException(
           this, "Invalid pronunciation layer: " + tagLayerId);
       }
-      if (!tagLayer.getPeers() && !firstVariantOnly && delimiters == null) {
-        setStatus(
-          "Pronunciation layer " + tagLayerId
-          + " doesn't allow peer annotations; using first variant only.");
-        firstVariantOnly = true;
-      }
-      if (tagLayer.getAlignment() != Constants.ALIGNMENT_NONE
-          && delimiters != null) {
-        tagLayer.setAlignment(Constants.ALIGNMENT_NONE);
+      if (delimiters == null) { // not recovering syllables
+        if (!tagLayer.getPeers() && !firstVariantOnly) {
+          setStatus(
+            "Pronunciation layer " + tagLayerId
+            + " doesn't allow peer annotations; using first variant only.");
+          firstVariantOnly = true;
+        }
+        if (tagLayer.getAlignment() != Constants.ALIGNMENT_NONE
+            && schema.getWordLayerId().equals(tagLayer.getParentId())) {
+          tagLayer.setAlignment(Constants.ALIGNMENT_NONE);
+        }
+      } else { // recoving syllables
+        if (tagLayer.getAlignment() != Constants.ALIGNMENT_INTERVAL) {
+          tagLayer.setAlignment(Constants.ALIGNMENT_INTERVAL);
+        }
       }
     }
     // set valid labels (they're actually valid label parts!)
@@ -1318,6 +1328,8 @@ public class CELEXEnglishTagger extends LabelBasedTagger
       throw new InvalidConfigurationException(this, "No input token layer set.");
     Vector<String> requiredLayers = new Vector<String>();
     requiredLayers.add(tokenLayerId);
+    // if we're recovering syllables, we need the word layer
+    if (delimiters != null) requiredLayers.add(schema.getWordLayerId());
     if (transcriptLanguageLayerId != null) requiredLayers.add(transcriptLanguageLayerId);
     if (phraseLanguageLayerId != null) requiredLayers.add(phraseLanguageLayerId);
     return requiredLayers.toArray(new String[0]);
@@ -1336,7 +1348,329 @@ public class CELEXEnglishTagger extends LabelBasedTagger
       throw new InvalidConfigurationException(this, "Pronunciation layer not set.");
     return new String[] { tagLayerId };
   }
+
+  /**
+   * Transforms the graph. In this case, the graph is simply summarized, by counting all
+   * tokens of each word type, and printing out the result to stdout.
+   * @param graph The graph to transform.
+   * @return The changes introduced by the tranformation.
+   * @throws TransformationException If the transformation cannot be completed.
+   */
+  @Override public Graph transform(Graph graph) throws TransformationException {
+    if (delimiters == null) { // we're not splitting labels to recover syllables
+      // the LabelBasedTagger method is more efficient
+      return super.transform(graph);
+    } else { // we're splitting labels to recover syllables...
+    setRunning(true);
+    try {
+      setStatus("Recovering syllables in " + graph.getId());
+      
+      Layer tokenLayer = graph.getSchema().getLayer(tokenLayerId);
+      if (tokenLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid input token layer: " + tokenLayerId);
+      }
+      String wordLayerId = graph.getSchema().getWordLayerId();
+      Layer tagLayer = graph.getSchema().getLayer(tagLayerId);
+      if (tagLayer == null) {
+        throw new InvalidConfigurationException(
+          this, "Invalid output tag layer: " + tagLayerId);
+      }
+      
+      // what languages are in the transcript?
+      boolean transcriptIsMainlyTargetLang = true;
+      if (transcriptLanguageLayerId != null && targetLanguagePattern != null) {
+        Annotation transcriptLanguage = graph.first(transcriptLanguageLayerId);
+        if (transcriptLanguage != null) {
+          if (!transcriptLanguage.getLabel().matches(targetLanguagePattern)) { // not TargetLang
+            transcriptIsMainlyTargetLang = false;
+          }
+        }
+      }
+      boolean thereArePhraseTags = false;
+      if (phraseLanguageLayerId != null && targetLanguagePattern != null) {
+        if (graph.first(phraseLanguageLayerId) != null) {
+          thereArePhraseTags = true;
+        }
+      }
+      
+      TreeMap<String,Vector<Annotation>> toAnnotate = new TreeMap<String,Vector<Annotation>>();
+      // should we just tag everything?
+      if (transcriptIsMainlyTargetLang && !thereArePhraseTags) {
+        // process all tokens
+        for (Annotation token : graph.all(wordLayerId)) {
+          // tag only tokens that are not already tagged
+          if (token.first(tagLayerId) == null) { // not tagged yet
+            registorForAnnotation(token, toAnnotate);
+          } // not tagged yet
+        } // next token
+      } else if (transcriptIsMainlyTargetLang) {
+        // process all but the phrase-tagged tokens
+        
+        // tag the exceptions
+        for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
+          if (!phrase.getLabel().matches(targetLanguagePattern)) { // not TargetLang
+            for (Annotation token : phrase.all(wordLayerId)) {
+              // mark the token as an exception
+              token.put("@notTargetLang", Boolean.TRUE);
+            } // next token in the phrase
+          } // non-TargetLang phrase
+        } // next phrase
+        
+        for (Annotation token : graph.all(wordLayerId)) {
+          if (token.containsKey("@notTargetLang")) {
+            // while we're here, we remove the @notTargetLang mark
+            token.remove("@notTargetLang");
+          } else { // TargetLang, so tag it
+            // tag only tokens that are not already tagged
+            if (token.first(tagLayerId) == null) { // not tagged yet
+              registorForAnnotation(token, toAnnotate);
+            } // not tagged yet
+          } // TargetLang, so tag it
+        } // next token
+      } else if (thereArePhraseTags) {
+        // process only the tokens phrase-tagged as TargetLang
+        for (Annotation phrase : graph.all(phraseLanguageLayerId)) {
+          if (phrase.getLabel().matches(targetLanguagePattern)) {
+            for (Annotation token : phrase.all(wordLayerId)) {
+              // tag only tokens that are not already tagged
+              if (token.first(tagLayerId) == null) { // not tagged yet
+                registorForAnnotation(token, toAnnotate);
+              } // not tagged yet
+            } // next token in the phrase
+          } // TargetLang phrase
+        } // next phrase
+      } // thereArePhraseTags
+      
+      try {
+        Dictionary dictionary = getTaggingDictionary();
+        try {
+          int t = 0;
+          int typeCount = toAnnotate.size();
+          setStatus("Distinct words: " + typeCount);
+          setPercentComplete(0);
+          for (String pronunciation : toAnnotate.keySet()) { // for each type
+            if (isCancelling()) break;
+            setStatus("Pron: " + pronunciation + " = " + dictionary.lookup(pronunciation));
+            recoverSyllables(
+              toAnnotate.get(pronunciation), dictionary.lookup(pronunciation));
+            setPercentComplete(++t * 100 / typeCount);            
+          } // next type
+          if (!isCancelling()) setPercentComplete(100);
+        } finally {
+          dictionary.close();
+        }
+      } catch (DictionaryException x) {
+        throw new TransformationException(this, x);
+      }
+      return graph;
+    } finally {
+      setRunning(false);
+    }
+    }    
+  }
   
+  /**
+   * Registers a token for annotation, by adding it to the list in the given map of labels
+   * to annotations with that label.
+   * @param wordToken The word token to annotate.
+   * @param toAnnotate A map of label→Annotations that may or may not contain an entry for
+   * this token's label
+   */
+  protected void registorForAnnotation(
+    Annotation token, TreeMap<String,Vector<Annotation>> toAnnotate) {
+    // we need to lookup the pronunciation, i.e. concantenation of the phone labels
+    String lookup = Arrays.stream(token.all(tokenLayerId))
+      .map(annotation->annotation.getLabel())
+      .collect(Collectors.joining());
+    if (lookup.length() > 0) {
+      if (!toAnnotate.containsKey(lookup)) {
+        toAnnotate.put(lookup, new Vector<Annotation>());
+      }
+      toAnnotate.get(lookup).add(token);
+    }
+  } // end of registorForAnnotation()
+  
+  /**
+   * Recover syllables for all the given tokens of the given type.
+   * @param words Word tokens to recover the syllables of.
+   * @param pronunciations Syllable/stress marked possible pronunciations from dictionary.
+   */
+  protected void recoverSyllables(Vector<Annotation> words, List<String> pronunciations) {
+    if (pronunciations.size() == 0) return; // no pronunciation entries
+    if (words.size() == 0) return; // no tokens
+    Graph graph = words.get(0).getGraph();    
+    
+    for (Annotation word : words) {
+      
+      if (word.first(tagLayerId) != null) {
+        setStatus(
+          "Skipping word with existing " + tagLayerId + " annotations: "
+          + word.getLabel() + " ("+word.getId()+")");
+        continue;
+      }
+      Annotation phones[] = word.all(tokenLayerId);
+      if (phones.length > 0) { // there are phones to recover syllabification from
+        
+        // find the best entry for these segments
+        final String concatenatedSegments = Arrays.stream(phones)
+          .map(segment -> segment.getLabel())
+          .collect(Collectors.joining());
+        final String stressMarkers = "['\",]";
+        final String syllableStressMarkers = "['\",-]";
+        final Character syllableBoundary = delimiters.charAt(0); // TODO remove delimiters
+        String firstPron = pronunciations.get(0);
+        Optional<String> firstMatchingPron = pronunciations.stream()
+          .filter(pron -> concatenatedSegments.equals(pron.replaceAll(syllableStressMarkers,"")))
+          .findAny();
+        Optional<String> firstMatchingStressedPron = pronunciations.stream()
+          .filter(pron -> concatenatedSegments.equals(pron.replaceAll(syllableStressMarkers,"")))
+          .filter(pron -> pron.matches(".*"+stressMarkers+".*"))
+          .findAny();
+        String bestPron = firstMatchingStressedPron
+          .orElse(firstMatchingPron
+                  .orElse(firstPron));
+        setStatus("Token " + word + " -> " + bestPron);
+        
+        // find an edit path between bestPron and the phone labels
+        MinimumEditPathString editPath  = new MinimumEditPathString(new DISC2DISCComparator());
+        List<EditStep<Character>> path = editPath.minimumEditPath(bestPron, concatenatedSegments);
+        
+        // traverse the edit path looking for syllable boundaries, annotating as we go
+        int p = -1; // phones index
+        int o = 1; // syllable ordinal
+        Annotation firstPhone = phones[0];
+        Annotation lastPhone = phones[0];
+        StringBuilder label = new StringBuilder();
+        for (EditStep<Character> step : path) {
+          Character syllableCharacter = step.getFrom();
+          Character phoneLabel = step.getTo();
+          // increment phone index if this step has one
+          if (phoneLabel != null) {
+            if (p < phones.length-1) {
+              p++;
+            }
+            lastPhone = phones[p];
+            if (firstPhone == null) firstPhone = phones[p];
+          }
+          // have we hit a syllable boundary?
+          if (syllableBoundary.equals(syllableCharacter)) {
+            if (firstPhone == null) firstPhone = lastPhone;
+            // annotate the syllable
+            graph.createSpan​(firstPhone, lastPhone, tagLayerId, label.toString(), word)
+              .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+            // next syllable should start on the next phone            
+            firstPhone = null;
+            label.setLength(0);
+          } else if (syllableCharacter != null) {
+            // accumulate label
+            label.append(syllableCharacter);
+          }
+        } // next edit step
+        
+        // finish last syllable
+        if (firstPhone == null) firstPhone = lastPhone;
+        graph.createSpan​(firstPhone, lastPhone, tagLayerId, label.toString(), word)
+          .setConfidence(Constants.CONFIDENCE_AUTOMATIC);
+        
+      } // there are phones
+    } // token doesn't already have syllables
+  } // end of recoverSyllables()
+
+  /**
+   * Transforms all graphs from the given graph store that match the given graph expression.
+   * <p> This implementation uses
+   * {@link GraphStoreQuery#aggregateMatchingAnnotations(String,String)}
+   * and {@link GraphStore#tagMatchingAnnotations​(String,String,String,Integer)}
+   * to optimize tagging transcripts en-masse.
+   * @param store The graph to store.
+   * @param expression An expression for identifying transcripts to update, or null to transform
+   * all transcripts in the store.
+   * @return The changes introduced by the tranformation.
+   * @throws TransformationException If the transformation cannot be completed.
+   */
+  public void transformTranscripts​(GraphStore store, String expression)
+    throws TransformationException, InvalidConfigurationException, StoreException,
+    PermissionException {
+    if (delimiters == null) { // we're not splitting labels to recover syllables
+      // the LabelBasedTagger method is more efficient
+      super.transformTranscripts(store, expression);
+    } else { // we're splitting labels to recover syllables...
+      // annotate one graph at a time...
+
+      setRunning(true);    
+      setStatus(
+        "Annotating"+(expression==null?" all":"")+" transcripts"
+        +(expression==null?"":" matching"+expression)+"...");
+      try {    
+        final LinkedHashSet<String> layerIds = new LinkedHashSet<String>();
+        for (String layerId : getRequiredLayers()) {
+          // we want this layer
+          layerIds.add(layerId);
+          // and all it's ancestors, in case they're affected by the transformation
+          Layer layer = schema.getLayer(layerId);
+          if (layer != null) {
+            layer.getAncestors().stream()
+              .map(l->l.getId())
+              .forEach(ancestorId -> layerIds.add(ancestorId));
+          }
+        } // next required layer
+        for (String layerId : getOutputLayers()) {
+          // we want this layer
+          layerIds.add(layerId);
+          Layer layer = schema.getLayer(layerId);
+          if (layer != null) {
+            // and all it's ancestors, in case they're affected by the transformation
+            layer.getAncestors().stream()
+              .map(l->l.getId())
+              .forEach(ancestorId -> layerIds.add(ancestorId));
+            // and all it's descendants, in case they're affected by the transformation
+            layer.getDescendants().stream()
+              .map(l->l.getId())
+              .forEach(descendantId -> layerIds.add(descendantId));
+          }
+          
+        } // next output layer
+        String[] ids = expression == null
+          ?store.getTranscriptIds()
+          :store.getMatchingTranscriptIds(expression);
+        percentComplete = 0; // TODO multithread this so it's faster
+        StoreException transcriptException = null;
+        int soFar = 0;
+        for (String id : ids) {
+          try {
+            if (isCancelling()) break;
+            setStatus("Annotating " + id);
+            Graph graph = store.getTranscript(id, layerIds.toArray(new String[0]));
+            if (isCancelling()) break;
+            graph.trackChanges();
+            try {
+              globalProgress = true; // don't set transform set progress or running
+              transform(graph);
+            } finally {
+              globalProgress = false;
+            }
+            if (isCancelling()) break;
+            store.saveTranscript(graph);
+            setPercentComplete((++soFar * 100) / ids.length);
+          } catch (StoreException storeX) {
+            // we don't let a single transcript's problem stop all the others from
+            // being annotated, but we save the exception for throwing later               
+            if (transcriptException == null) transcriptException = storeX;
+          } catch (GraphNotFoundException extremelyUnlikely) {
+            // we just got the ID from the store, so this is pretty unlikely, and ignorable
+            System.err.println("Annotator.transformTranscripts: " + extremelyUnlikely);
+          }
+        } // next transcript
+        setStatus("Finished.");
+        setPercentComplete(100);
+        if (transcriptException != null) throw transcriptException;
+      } finally {
+        setRunning(false);
+      }
+    }    
+  }
+
   /**
    * Getter for {@link #taggingDictionary}: A dictionary that might be
    * used during calls to {@link #tagsFor(String)}, which will be
