@@ -547,10 +547,10 @@ public abstract class LabelBasedTagger extends Annotator {
             setStatus(word+" → "+tag);
             store.tagMatchingAnnotations(
               tokenExpression.toString(), tagLayerId, tag, Constants.CONFIDENCE_AUTOMATIC);
-          }
-        } // next entry
-        setPercentComplete((++w * 100) / distinctWords.length);
-      } // next word
+          } // next entry
+          setPercentComplete((++w * 100) / distinctWords.length);
+        } // next word
+      } // close dictionary
       if (isCancelling()) {
         setStatus("Cancelled.");
       } else {
