@@ -327,7 +327,7 @@ public class CELEXEnglishDictionary implements Dictionary {
                + (length > 0? " LIMIT " + start + ", " + length:"")))) {
         try (ResultSet rs = sql.executeQuery()) {
           while (rs.next()) {
-            String word = rs.getString("wordform");
+            String word = rs.getString(1);
             List<String> entries = lookupEntries(word, false);
             if (entries.size() == 0) continue;
             words.put(word, entries);
@@ -607,7 +607,8 @@ public class CELEXEnglishDictionary implements Dictionary {
 
     if (isReadOnly()) throw new DictionaryReadOnlyException(this);
     
-    long lIdNum = getIdNumFromWordForm(key);	 
+    long lIdNum = getIdNumFromWordForm(key);
+    if (lIdNum < 0) return null; // doesn't exist
     if (lIdNum < IDNUM_PARTITION_START) {
       throw new DictionaryReadOnlyException(this, key + " is read only.");
     }
@@ -705,7 +706,7 @@ public class CELEXEnglishDictionary implements Dictionary {
         sql.setLong(1, IDNUM_PARTITION_START);
         try (ResultSet rs = sql.executeQuery()) {
           while (rs.next()) {
-            String word = rs.getString("wordform");
+            String word = rs.getString(1);
             List<String> entries = lookupRaw(word);
             if (entries.size() == 0) continue;
             words.put(word, entries);

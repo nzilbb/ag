@@ -790,6 +790,9 @@ public class TestCELEXEnglishTagger {
     assertEquals("aggregateEntries works", "_@", dictionary.aggregateEntries("MIN"));
 
     // CRUD
+    // removing an entry before it exists is ignored
+    dictionary.remove("blog");
+
     dictionary.add("blog", "blQg");
     assertEquals("'blog' now has one entry ",
                  1, dictionary.lookupEditableEntry("blog").size());
