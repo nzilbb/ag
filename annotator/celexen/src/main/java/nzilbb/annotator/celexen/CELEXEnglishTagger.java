@@ -23,12 +23,14 @@ package nzilbb.annotator.celexen;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -154,12 +156,8 @@ public class CELEXEnglishTagger extends LabelBasedTagger
     try {
       Connection rdb = newConnection();      
       try {
-            
-        // check the schema has been created
-        PreparedStatement sql = rdb.prepareStatement(
-          sqlx.apply("DROP TABLE "+getAnnotatorId()+"_wordform"));
-        sql.executeUpdate();
-        sql.close();
+
+        // TODO if it's not a shared connection, delete all the tables
             
       } finally {
         try { rdb.close(); } catch(SQLException x) {}
@@ -354,6 +352,13 @@ public class CELEXEnglishTagger extends LabelBasedTagger
    * @see #beanPropertiesToQueryString()
    */
   public String getConfig() {
+    // load configuration, if any
+    File f = new File(getWorkingDirectory(), getAnnotatorId() + ".cfg");
+    if (f.exists()) {
+      try {
+        beanPropertiesFromQueryString(IO.InputStreamToString(new FileInputStream(f)));
+      } catch(IOException exception) {}
+    }
     return null;
   }
    
@@ -371,8 +376,21 @@ public class CELEXEnglishTagger extends LabelBasedTagger
       
       beanPropertiesFromQueryString(config);
       
+      // persist configuration
+      if (dbConnectString != null && dbConnectString.length() > 0) {
+        try (PrintWriter writer = new PrintWriter(
+               new File(getWorkingDirectory(), getAnnotatorId() + ".cfg"), "UTF-8")) {
+          writer.print(
+            "dbConnectString="+URLEncoder.encode(dbConnectString, "UTF-8")
+            +"&dbUser="+URLEncoder.encode(Optional.ofNullable(dbUser).orElse(""), "UTF-8")
+            +"&dbPassword="+URLEncoder.encode(
+              Optional.ofNullable(dbPassword).orElse(""), "UTF-8"));
+        } // close writer
+      }
+
       // has the dictionary data been added?
       try (Connection rdb = newLexiconConnection()) {
+        setStatus("Connected to database.");
 
         int recordCount = countWordformMorphologyRecords(rdb);
         if (recordCount < 0 ) { // schema isn't created yet
@@ -415,8 +433,10 @@ public class CELEXEnglishTagger extends LabelBasedTagger
 
         if (recordCount <= 0 ) { // lexicon isn't loaded yet
           install(rdb, new File(getWorkingDirectory(), "CELEX-EN.zip"));
-        }
-        
+        } 
+       
+        setPercentComplete(100);
+        setStatus("Finished.");
       } // rdb.close()
     } catch (SQLException sqlX) {
       setStatus("ERROR: " + sqlX);
