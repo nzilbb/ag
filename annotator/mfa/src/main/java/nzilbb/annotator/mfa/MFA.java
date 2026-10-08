@@ -101,7 +101,7 @@ public class MFA extends Annotator {
    * install if it's not already installed. (This only works inside Docker containers.) 
    * @see #getBuiltForMfaVersion()
    */
-  protected final String builtForMfaVersion = "3.2.1";
+  protected final String builtForMfaVersion = "3.4.2";
   /**
    * Getter for {@link #builtForMfaVersion}: The version of the montreal-forced-aligner
    * package that the aligner will attempt to install if it's not already installed. (This
@@ -884,11 +884,18 @@ public class MFA extends Annotator {
       return "mfaPath="+mfaPath;
     } else {
       if (System.getProperty("os.name").startsWith("Windows")) {
-        return "condaPath=C:\\ProgramData\\Miniconda3";
+        File miniconda3 = new File("C:\\ProgramData\\Miniconda3");
+        if (miniconda3.exists()) {
+          return "condaPath="+URLEncoder.encode("C:\\ProgramData\\Miniconda3");
+        }
       } else { // linux
-        return "condaPath=/opt/conda/bin"; // TODO defaults for OSX
-      }
+        File conda = new File("/opt/conda/bin");
+        if (conda.exists()) {
+          return "condaPath=/opt/conda/bin"; // TODO defaults for OSX
+        }
+      }      
     }
+    return "condaPath=";
   }
   
   /**

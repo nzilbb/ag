@@ -5,10 +5,10 @@ getVersion(version => { // <- a function to execute when we have a response
 
 function checkForm() {
     if (document.getElementById("mfaPath").value) {
-        // we have mfaPath, so we don't need condaPath and mfaEnvironment, nor MFA installation
-        document.getElementById("attemptInstallation").style.display = "none";
-        document.getElementById("condaPathField").style.display = "none";
-        document.getElementById("mfaEnvironmentField").style.display = "none";
+      // we have mfaPath, so we don't need condaPath and mfaEnvironment, nor MFA installation
+      document.getElementById("attemptInstallation").style.display = "none";
+      // close inference settings but allow them to be accessed again if required 
+      document.getElementById("inferenceSettings").removeAttribute("open");
     } else {
         inferMfaPath();
     }

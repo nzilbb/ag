@@ -57,7 +57,7 @@
           <tt>chmod -R go-w /opt/conda</tt><br>
           <tt>chmod -R go+rX /opt/conda</tt></li>
         <li> Install the Montreal Forced Aligner <br>
-          <tt>/opt/conda/bin/conda create -n aligner -c conda-forge montreal-forced-aligner=3.2.10</tt></li>
+          <tt>/opt/conda/bin/conda create -n aligner -c conda-forge montreal-forced-aligner=3.4.2</tt></li>
       </ol>
       
       <h3> Windows </h3>
@@ -72,7 +72,7 @@
           <tt>C:\ProgramData\Miniconda3</tt></li>
         <li> When asked, tick the <q>add to PATH</q> option.</li>
         <li> Install the Montreal Forced Aligner by specifying a path to the environment <br>
-          <tt>conda create -c conda-forge -p C:\ProgramData\Miniconda3\envs\aligner montreal-forced-aligner=3.2.10</tt></li>
+          <tt>conda create -c conda-forge -p C:\ProgramData\Miniconda3\envs\aligner montreal-forced-aligner=3.4.2</tt></li>
       </ol>
       
     </details>
@@ -85,16 +85,18 @@
       <pre id="installMfaStatus" style="display: none;"></pre>
     </div> 
     <form method="POST" id="setConfig" action="setConfig">
-      <div class="field" id="condaPathField"
-           title="This is the path to where Miniconda or Anaconda is installed on the server, e.g. /opt/conda">
-        <label for="condaPath">Miniconda/Anaconda path</label>
-        <input id="condaPath" name="condaPath" type="text">
-      </div>
-      <div class="field" id="mfaEnvironmentField"
-           title="Name of the Conda environment in which MFA was installed">
-        <label for="mfaEnvironment">MFA Environment Name</label>
-        <input id="mfaEnvironment" name="mfaEnvironment" type="text" value="aligner">
-      </div>
+      <details id="inferenceSettings" open><summary>Settings for inferring Path to MFA</summary>
+        <div class="field" id="condaPathField"
+             title="This is the path to where Miniconda or Anaconda is installed on the server, e.g. /opt/conda">
+          <label for="condaPath">Miniconda/Anaconda path</label>
+          <input id="condaPath" name="condaPath" type="text">
+        </div>
+        <div class="field" id="mfaEnvironmentField"
+             title="Name of the Conda environment in which MFA was installed">
+          <label for="mfaEnvironment">MFA Environment Name</label>
+          <input id="mfaEnvironment" name="mfaEnvironment" type="text" value="aligner">
+        </div>
+      </details>
       <div class="field"
            title="This is the path to the Montreal Forced Aligner command line on the server. e.g. /opt/conda/envs/aligner/bin">
         <label for="mfaPath">Path to MFA</label>
