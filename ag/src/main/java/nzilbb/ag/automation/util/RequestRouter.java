@@ -85,7 +85,12 @@ public class RequestRouter {
         registerMethod(method);
       }
     } // next method
-
+    
+    // allow configuration to be retrieved
+    try {
+      registerMethod(annotator.getClass().getMethod("getConfig"));
+    } catch(NoSuchMethodException impossible) {}
+      
     // allow annotator ID to be retrieved
     try {
       registerMethod(annotator.getClass().getMethod("getAnnotatorId"));
@@ -202,6 +207,11 @@ public class RequestRouter {
     String path = uri.getPath().replaceAll(".*/([^/]*)$","$1");
     List<Method> possibleMethods = routes.get(path);
     if (possibleMethods == null) throw new RequestException(404, "Not found.", method, uri);
+
+    if ("getConfig".equals(path)
+        && !userHasRole.apply("admin")) { // only admin users can getConfig
+      throw new RequestException(403, "Forbidden", method, uri); // forbidden
+    }
 
     String query = uri.getRawQuery();
     if ("application/x-www-form-urlencoded".equals(contentType)
