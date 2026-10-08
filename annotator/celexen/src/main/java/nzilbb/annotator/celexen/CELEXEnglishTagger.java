@@ -533,7 +533,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
    */
   public void processEOL(Connection rdb, ZipFile zip)
     throws SQLException, IOException, NoSuchElementException {
-    setStatus("Processing EOL...");
+    setStatus("Importing and indexing EOL.CD ...");
     ZipEntry eolFile = findEntry(zip, "EOL.CD");
     
     try (PreparedStatement sqlDelete = rdb.prepareStatement(
@@ -602,7 +602,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
   public void processEPL(Connection rdb, ZipFile zip)
     throws SQLException, IOException, NoSuchElementException
   {
-    setStatus("Processing EPL...");
+    setStatus("Importing and indexing EPL.CD ...");
     ZipEntry eplFile = findEntry(zip, "EPL.CD");
     
     try (PreparedStatement sqlDelete = rdb.prepareStatement(
@@ -699,7 +699,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
    */
   public void processEML(Connection rdb, ZipFile zip)
     throws SQLException, IOException, NoSuchElementException {
-    setStatus("Processing EML...");
+    setStatus("Importing and indexing EML.CD ...");
     ZipEntry emlFile = findEntry(zip, "EML.CD");
     
     try (PreparedStatement sqlDelete = rdb.prepareStatement(
@@ -817,7 +817,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
    */
   public void processEFL(Connection rdb, ZipFile zip)
     throws SQLException, IOException, NoSuchElementException {
-    setStatus("Processing EFL...");
+    setStatus("Importing and indexing EFL.CD ...");
     ZipEntry eflFile = findEntry(zip, "EFL.CD");
     
     try (PreparedStatement sqlDelete = rdb.prepareStatement(
@@ -859,7 +859,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
    */
   public void processESL(Connection rdb, ZipFile zip)
     throws SQLException, IOException, NoSuchElementException {
-    setStatus("Processing ESL...");
+    setStatus("Importing and indexing ESL.CD ...");
     ZipEntry eslFile = findEntry(zip, "ESL.CD");
     
     try (PreparedStatement sqlDelete = rdb.prepareStatement(
@@ -940,7 +940,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
    */
   public void processEOW(Connection rdb, ZipFile zip)
     throws SQLException, IOException, NoSuchElementException {
-    setStatus("Processing EOW...");
+    setStatus("Importing and indexing EOW.CD ...");
     ZipEntry eowFile = findEntry(zip, "EOW.CD");
     
     try (PreparedStatement sqlDelete = rdb.prepareStatement(
@@ -1013,7 +1013,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
    */
   public void processEPW(Connection rdb, ZipFile zip)
     throws SQLException, IOException, NoSuchElementException {
-    setStatus("Processing EPW...");
+    setStatus("Importing and indexing EPW.CD ...");
     ZipEntry epwFile = findEntry(zip, "EPW.CD");
     
     try (PreparedStatement sqlDelete = rdb.prepareStatement(
@@ -1109,7 +1109,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
    */
   public void processEFW(Connection rdb, ZipFile zip)
     throws SQLException, IOException, NoSuchElementException {
-    setStatus("Processing EFW...");
+    setStatus("Importing and indexing EFW.CD ...");
     ZipEntry efwFile = findEntry(zip, "EFW.CD");
     
     try (PreparedStatement sqlDelete = rdb.prepareStatement(
@@ -1152,7 +1152,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
    */
   public void processEMW(Connection rdb, ZipFile zip)
     throws SQLException, IOException, NoSuchElementException {
-    setStatus("Processing EMW...");
+    setStatus("Importing and indexing EMW.CD ...");
     ZipEntry emwFile = findEntry(zip, "EMW.CD");
     
     try (PreparedStatement sqlDelete = rdb.prepareStatement(
@@ -1323,7 +1323,8 @@ public class CELEXEnglishTagger extends LabelBasedTagger
     }
     // set valid labels (they're actually valid label parts!)
     List<Map<String,Object>> validLabelsDefinition = new Vector<Map<String,Object>>();
-    if (sql.indexOf("PhonStrsDISC") >= 0) {
+    if (sql.indexOf("PhonStrsDISC") >= 0 // could be phonological
+        && sql.indexOf("CHAR_LENGTH") < 0) { // but not syllable count
       tagLayer.setType(Constants.TYPE_IPA);
       ValidLabelsDefinitions.AddDISCDefinitions(validLabelsDefinition);
     } 

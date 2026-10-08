@@ -309,8 +309,8 @@ document.getElementById("tagLayerId").onchange = function(e) {
 document.getElementById("optPhonology").onclick = function(e) {
   setSqlForOption(this); };
 document.getElementById("optSyllableCount").onclick = function(e) {
-  setSqlForOption(this);
   document.getElementById('firstVariantOnly').checked = true;
+  setSqlForOption(this);
 };
 document.getElementById("optMorphology").onclick = function(e) {
   setSqlForOption(this); };
