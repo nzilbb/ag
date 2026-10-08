@@ -1288,7 +1288,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
     }
       
     // does the outputLayer need to be added to the schema?
-    Layer tagLayer = schema.getLayer(tagLayerId);
+    tagLayer = schema.getLayer(tagLayerId);
     if (tagLayer == null) {
       schema.addLayer(
         new Layer(tagLayerId)
@@ -1392,7 +1392,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
           this, "Invalid input token layer: " + tokenLayerId);
       }
       String wordLayerId = graph.getSchema().getWordLayerId();
-      Layer tagLayer = graph.getSchema().getLayer(tagLayerId);
+      tagLayer = graph.getSchema().getLayer(tagLayerId);
       if (tagLayer == null) {
         throw new InvalidConfigurationException(
           this, "Invalid output tag layer: " + tagLayerId);
@@ -1706,6 +1706,8 @@ public class CELEXEnglishTagger extends LabelBasedTagger
     }
     return taggingDictionary;
   }
+
+  private Layer tagLayer; // use this to track whether hesitationToDISC is needed
   
   /**
    * Determines what tag labels should apply on the tag layer for
@@ -1725,7 +1727,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
       if (firstVariantOnly) break;
       
     } // next entry
-    if (!found && sql.indexOf("PhonStrsDISC") >= 0) { // might be a hesitation?
+    if (!found && tagLayer.getType() == Constants.TYPE_IPA) { // might be a hesitation?
       String pronunciation = hesitationToDISC(tokenLabel);
       if (pronunciation != null) {
         tags.add(pronunciation);
