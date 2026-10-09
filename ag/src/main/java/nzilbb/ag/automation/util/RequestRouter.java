@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Vector;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -202,6 +203,7 @@ public class RequestRouter {
   public InputStream request(String method, URI uri, String contentType, InputStream body)
     throws RequestException {
     if (annotator == null) throw new RequestException(404, "No annotator set.", method, uri);
+    contentType = Optional.ofNullable(contentType).orElse("");
       
     // is there a route? - use only the part after the last slash
     String path = uri.getPath().replaceAll(".*/([^/]*)$","$1");
@@ -214,7 +216,7 @@ public class RequestRouter {
     }
 
     String query = uri.getRawQuery();
-    if ("application/x-www-form-urlencoded".equals(contentType)
+    if (contentType.startsWith("application/x-www-form-urlencoded")
         && "POST".equals(method) && body != null) {
       try {
         query = IO.InputStreamToString(body);
@@ -225,7 +227,7 @@ public class RequestRouter {
       
     Object result = null;
     if ("GET".equals(method)
-        || "application/x-www-form-urlencoded".equals(contentType)) {
+        || contentType.startsWith("application/x-www-form-urlencoded")) {
       // how many parameters are there?
       String[] parameterStrings = query == null?new String[0] : query.split(",");
          
