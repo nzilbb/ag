@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.ImplementsDictionaries;
@@ -77,7 +78,7 @@ import nzilbb.util.IO;
 @UsesFileSystem
 public class StanfordPosTagger extends Annotator {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.2.1"; }
+  public String getMinimumApiVersion() { return "2.0.0"; }
   
   /**
    * Runs any processing required to uninstall the annotator.
@@ -197,7 +198,7 @@ public class StanfordPosTagger extends Annotator {
    * @param file The lexicon file.
    * @return null if upload was successful, an error message otherwise.
    */
-  public String uploadZip(File file) {
+  @ApiEndpoint("admin") public String uploadZip(File file) {
     if (!file.getName().endsWith(".zip")) {
       return file.getName() + " is not a .zip file.";
     }
@@ -217,7 +218,7 @@ public class StanfordPosTagger extends Annotator {
    * Lists the model files that are available for use.
    * @return A list of file names that can be selected.
    */
-  public List<String> availableModels() {
+  @ApiEndpoint("admin") public List<String> availableModels() {
     File models = new File(getWorkingDirectory(), "models");
     if (!models.exists()) return new Vector<String>();
     return Arrays.asList(
