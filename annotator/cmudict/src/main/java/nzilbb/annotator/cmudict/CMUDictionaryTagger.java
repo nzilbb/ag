@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 import javax.script.ScriptException;
 import nzilbb.ag.*;
 import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.ApiEndpoint;
 import nzilbb.ag.automation.Dictionary;
 import nzilbb.ag.automation.DictionaryException;
 import nzilbb.ag.automation.ImplementsDictionaries;
@@ -297,14 +298,12 @@ public class CMUDictionaryTagger extends LabelBasedTagger
    * @param file The lexicon file.
    * @return null if upload was successful, an error message otherwise.
    */
-  public String uploadLexicon(File file) {
+  @ApiEndpoint("admin") public String uploadLexicon(File file) {
     File cmuDictFile = new File(getWorkingDirectory(), "cmudict.txt");
-    if (file.renameTo(file)) {
-      try {
-        IO.Copy(file, cmuDictFile);
-      } catch(IOException exception) {
-        return "Could not copy " + file.getName() + ": " + exception.getMessage();
-      }
+    try {
+      IO.Rename(file, cmuDictFile);
+    } catch(IOException exception) {
+      return "Could not copy " + file.getName() + ": " + exception.getMessage();
     }
     return null;
   } // end of uploadLexicon()
@@ -436,6 +435,9 @@ public class CMUDictionaryTagger extends LabelBasedTagger
     if (schema == null)
       throw new InvalidConfigurationException(this, "Schema is not set.");
 
+    // target English
+    targetLanguagePattern = "[Ee][Nn].*";
+         
     if (parameters == null) { // apply default configuration
          
       if (schema.getLayer("orthography") != null) {
@@ -445,9 +447,6 @@ public class CMUDictionaryTagger extends LabelBasedTagger
       }
       firstVariantOnly = Boolean.FALSE;
 
-      // target English
-      targetLanguagePattern = "[Ee][Nn].*";
-         
       // default transcript language layer
       Layer[] candidates = schema.getMatchingLayers(
         layer -> schema.getRoot().getId().equals(layer.getParentId())

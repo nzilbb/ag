@@ -54,7 +54,7 @@ public class CMUDictionary implements Dictionary {
   private DISC2CMU disc2cmu = new DISC2CMU();
 
   /**
-   * The TheWorksExample annotator that created this dictionary.
+   * The annotator that created this dictionary.
    * @see #getAnnotator()
    */
   protected Annotator annotator;
