@@ -84,7 +84,7 @@ import nzilbb.util.IO;
 public class CMUDictionaryTagger extends LabelBasedTagger
   implements ImplementsDictionaries {
   /** Get the minimum version of the nzilbb.ag API supported by the annotator.*/
-  public String getMinimumApiVersion() { return "1.2.1"; }
+  public String getMinimumApiVersion() { return "2.0.0"; }
    
   private PrintWriter log;
   private static SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
