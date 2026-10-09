@@ -75,7 +75,7 @@ import nzilbb.util.IO;
 public class TestMFA {
   static final String condaPath = "/opt/conda/bin";
   static final String condaEnvPath = "/opt/conda/envs/";
-  static final String mfaEnvironment = "mfa3310";
+  static final String mfaEnvironment = "mfa342";
 
   static MFA annotator = new MFA();
 
