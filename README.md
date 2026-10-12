@@ -176,15 +176,4 @@ To release another module (e.g. formatters, annotators, etc.)
    ```
    mvn clean deploy -P release -pl :nzilbb.formatter.praat
    ```
-3. Happy with everything? Complete the release with:
-   ```
-   mvn nexus-staging:release -P release -pl :nzilbb.formatter.praat
-   ```
-   Otherwise:
-   ```
-   mvn nexus-staging:drop -P release -pl :nzilbb.formatter.praat
-   ```
-   ...and start again.
-4. Start a new .SNAPSHOT version.  
-   *NB* Don't use `mvn versions:set` for this if the module is a nzilbb.formatter, because it
-   will fix versions in nzilbb.converter projects, which are manually set in their pom.xml
+3. Start a new .SNAPSHOT version.  

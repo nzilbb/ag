@@ -22,8 +22,8 @@
 package nzilbb.ag.automation;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.stream.Collectors;
@@ -31,6 +31,8 @@ import nzilbb.ag.Annotation;
 import nzilbb.ag.Constants;
 import nzilbb.ag.Graph;
 import nzilbb.ag.GraphStore;
+import nzilbb.ag.GraphStoreQuery;
+import nzilbb.ag.GraphTransformer;
 import nzilbb.ag.Layer;
 import nzilbb.ag.PermissionException;
 import nzilbb.ag.Schema;
@@ -258,7 +260,6 @@ public abstract class LabelBasedTagger extends Annotator {
    * {@link #transformTranscripts​(GraphStore,String)} need to use the
    * 'exact match' operator <tt>===</tt>. If this is the case, the subclass
    * should set this to <tt>true</tt> 
-   * @see #getExactMatch()
    */
   protected Boolean exactMatch = Boolean.FALSE;
 
@@ -470,7 +471,6 @@ public abstract class LabelBasedTagger extends Annotator {
    * @param store The graph to store.
    * @param expression An expression for identifying transcripts to update, or null to transform
    * all transcripts in the store.
-   * @return The changes introduced by the tranformation.
    * @throws TransformationException If the transformation cannot be completed.
    */
   public void transformTranscripts​(GraphStore store, String expression)
