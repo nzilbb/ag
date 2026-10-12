@@ -192,7 +192,7 @@ public class FlatLexiconTagger extends LabelBasedTagger implements ImplementsDic
    * @param file The lexicon file.
    * @return null if upload was successful, an error message otherwise.
    */
-  @ApiEndpoint("admin") public String loadLexicon(
+  @ApiEndpoint("edit") public String loadLexicon(
     String lexicon, String fieldDelimiter, String quote, String comment, String fieldNames,
     String skipFirstLine, File file) {
     return loadLexicon(
@@ -448,7 +448,7 @@ public class FlatLexiconTagger extends LabelBasedTagger implements ImplementsDic
    * @param lexicon
    * @return An error message, if any, or an empty string if not.
    */
-  @ApiEndpoint("admin") public String deleteLexicon(String lexicon) throws SQLException {
+  @ApiEndpoint("edit") public String deleteLexicon(String lexicon) throws SQLException {
     Connection rdb = newConnection();      
     try {
       // find the lexicon
