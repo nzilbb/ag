@@ -1,3 +1,15 @@
+# nzilbb.ag 2.0.0
+
+- ensure Annotator.getConfig can be called from webapps, but only by admin users.
+- Implement LabelBasedTagger, a base class to share implementation for 
+  token-label-based taggers (lexicons, generation of pronunciation from orthography) 
+  so that their implementations can be simpler.
+- Add support for process execution with stdin take from a file or input stream.
+- Add SVG as a recognised image format.
+- Ensure API will work with Java 11 or 21.
+
+For LaBB-CAT version 20261012.1814
+
 # nzilbb.ag 1.4.1
 
 For transcript/annotation file format converters, add a graphical user
