@@ -283,6 +283,7 @@
       </plugin>
     </plugins>
   </reporting>
+
   <profiles>
     <profile>
       <id>release</id>
@@ -333,17 +334,17 @@
               </execution>
             </executions>
           </plugin>
-          <!--plugin>
+          <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.7</version>
+            <version>1.7.0</version>
             <extensions>true</extensions>
             <configuration>
               <serverId>sonatype</serverId>
               <nexusUrl>https://ossrh-staging-api.central.sonatype.com/</nexusUrl>
               <autoReleaseAfterClose>false</autoReleaseAfterClose>
             </configuration>
-          </plugin-->
+          </plugin>
         </plugins>
       </build>
     </profile>
