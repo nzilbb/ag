@@ -1926,7 +1926,7 @@ public class UnisynTagger extends Annotator implements ImplementsDictionaries {
    * </ul>
    * @return A (possibly empty) list of IDs of dictionaries.
    */
-  public List<String> getLexiconIds() {
+  @ApiEndpoint("admin") public List<String> getLexiconIds() {
     List<String> ids = new Vector<String>();
     try {
       Connection rdb = newConnection();      
