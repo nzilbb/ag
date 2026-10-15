@@ -304,7 +304,7 @@ public class CELEXEnglishTagger extends LabelBasedTagger
   public int countWordformMorphologyRecords(Connection rdb) {
     try { // check existence of schema
       try (PreparedStatement sql = rdb.prepareStatement(
-             sqlx.apply("SELECT COUNT(*) AS theCount FROM cxen_wordclass"))) {
+             sqlx.apply("SELECT COUNT(*) AS theCount FROM cxen_wordformmorphology"))) {
         try (ResultSet rs = sql.executeQuery()) {
           rs.next();
           return rs.getInt(1);
@@ -1883,6 +1883,15 @@ public class CELEXEnglishTagger extends LabelBasedTagger
     return disc;
   } // end of hestitationToDISC()
   
+  /**
+   * Returns the CELEX relational database schema, rendered as an HTML document.
+   * @param taskId This parameter is ignored, but is required for task app requests to work.
+   * @return An HTML document describing the CELEX database schema.
+   */
+  @ApiEndpoint("admin") public String schemaHtml(String taskId) {
+    return schemaHtml();
+  }
+
   /**
    * Returns the CELEX relational database schema, rendered as an HTML document.
    * @return An HTML document describing the CELEX database schema.

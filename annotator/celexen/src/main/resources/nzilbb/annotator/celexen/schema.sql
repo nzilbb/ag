@@ -156,7 +156,7 @@ CREATE TABLE cxen_wordclass (
   PRIMARY KEY  (ClassNum)
 ) ENGINE=MyISAM; 
 
-insert into cxen_wordclass values (1,'N','Noun'),(2,'A','Adjective'),(3,'NUM','Numeral'),(4,'V','Verb'),(5,'ART','Article'),(6,'PRON','Pronoun'),(7,'ADV','Adverb'),(8,'PREP','Preposition'),(9,'C','Conjunction'),(10,'I','Interjection'),(11,'SCON','Single Contraction'),(12,'CCON','Complex Contraction'),(13,'LET','Letter'),(14,'ABB','Abbreviation'),(15,'TO','TO');
+INSERT INTO cxen_wordclass VALUES (1,'N','Noun'),(2,'A','Adjective'),(3,'NUM','Numeral'),(4,'V','Verb'),(5,'ART','Article'),(6,'PRON','Pronoun'),(7,'ADV','Adverb'),(8,'PREP','Preposition'),(9,'C','Conjunction'),(10,'I','Interjection'),(11,'SCON','Single Contraction'),(12,'CCON','Complex Contraction'),(13,'LET','Letter'),(14,'ABB','Abbreviation'),(15,'TO','TO');
 
 
 /*Table structure for table wordform */

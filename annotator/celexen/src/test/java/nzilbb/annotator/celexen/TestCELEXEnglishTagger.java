@@ -195,7 +195,7 @@ public class TestCELEXEnglishTagger {
     
     assertEquals("double check there are tokens: "+Arrays.asList(g.all("word")),
                  9, g.all("word").length);
-    assertEquals("double check there are no pronunciations: "+Arrays.asList(g.all("cmudict")),
+    assertEquals("double check there are no pronunciations: "+Arrays.asList(g.all("phonemes")),
                  0, g.all("phonemes").length);
     // run the annotator
     annotator.transform(g);
@@ -575,6 +575,8 @@ public class TestCELEXEnglishTagger {
     try (Connection rdb = annotator.newConnection()) {
       try (PreparedStatement sql = rdb.prepareStatement("DROP FUNCTION REPLACE")) {
         sql.executeUpdate();
+      } catch (Exception x) {
+        System.out.println(""+x);
       }
       try (PreparedStatement sql = rdb.prepareStatement(
              "CREATE FUNCTION REPLACE"

@@ -95,7 +95,7 @@ getSchema(s => {
       } // no tag layer defined
       
       // if there's no option for the output layer, add one
-      if (tagLayerId.value != taskId) {
+      if (tagLayerId.value != taskId && !/.+:.+/.test(taskId)) {
         const layerOption = document.createElement("option");
         layerOption.appendChild(document.createTextNode(taskId));
         tagLayerId.appendChild(layerOption);
@@ -331,3 +331,7 @@ document.getElementById("firstVariantOnly").onclick = function(e) {
   setSqlForFirstOnly(); };
 document.getElementById("test-word").onkeyup = function(e) {
   deferredTestSql(); };
+
+// add taskId to schema link so LaBB-CAT can instantiate the annotator
+document.getElementById("schema-link-help").href += `?${taskId}`;
+document.getElementById("schema-link").href += `?${taskId}`;

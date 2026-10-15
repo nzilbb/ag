@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.celexen</artifactId>
-  <version>5.0.2</version>
+  <version>5.0.3</version>
 
   <name>nzilbb.annotator.celexen</name>
   <description>Tags words with entries looked up in the CELEX English lexicon.</description>

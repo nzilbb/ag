@@ -187,7 +187,6 @@ public class CELEXEnglishDictionary implements Dictionary {
       field = "cxen_wordclass.Label";
     } else {
       setQuery(definition);
-      setQuery(definition);
     }
     sql = rdb.prepareStatement(sqlx.apply(this.query));
 
