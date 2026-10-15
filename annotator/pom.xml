@@ -41,5 +41,7 @@
     <!--module>htk</module-->
     <!--module>mfa</module-->
     <!--module>celexen</module-->
+
+    <!--module>celexde</module-->
   </modules>
 </project>

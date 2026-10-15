@@ -1,0 +1,33 @@
+.error {
+    color: red;
+}
+div.schema {
+    vertical-align: top;
+}
+
+table.schema {
+    border: 1px black dotted;
+    margin: 5mm;
+    display: inline-table;
+}
+
+table.schema caption {
+    font-weight: bold;
+    text-align: left;
+}
+
+td.fieldname {
+    padding-right: 5mm;
+}
+
+td.fieldtype {
+    font-style: italic;
+}
+
+tr.primarykey td.fieldname {
+    font-weight: bold;
+}
+
+html {
+  background-image: none;
+}

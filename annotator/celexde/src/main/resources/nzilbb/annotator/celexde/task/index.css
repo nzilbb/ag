@@ -1,0 +1,84 @@
+body {
+    background-color: #ffffff;
+    color: #353833;
+    font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin: auto;
+    height: 100%;
+    width: 100%;
+    max-width: 800px;
+}
+details>summary {
+    cursor: pointer;
+}
+body>details>summary {
+    cursor: help;
+    list-style-type: 'ⓘ';
+}
+
+h1 { font-size: 17pt; color: #859044; text-align: center; }
+h2 { font-size: 15pt; color: #859044; text-align: center; }
+h3 { font-size: 13pt; color: #859044; font-style:italic; }
+h4 { font-size: 13pt; color: #859044; }
+h5 { font-size: 12pt; color: #859044; }
+h6 { font-size: 11pt; color: #859044; }
+
+label {
+    font-weight: bold;
+}
+label:after {
+    content: ':';
+}
+.field {
+    display: flex;
+    flex-direction: row;
+}
+.field > fieldset {
+    display: flex;
+    flex-direction: column;
+}
+.field > label {
+    display: block;
+}
+.field > label, .field > fieldset.presets {
+    width: 30%;
+}
+.field > span, .field > fieldset.sql {
+    width: 70%;
+}
+.field input[type="number"] {
+    width: 75px;
+}
+.field textarea {
+    width: 100%;
+}
+
+#sql {
+    min-height: 300px;
+}
+
+footer {
+    text-align: center;
+    font-style: italic;
+}
+
+.error {
+    color: red;
+}
+
+.loading {
+    color: silver;
+}
+.loading::before {
+    content: "…";
+}
+
+progress {
+    width: 100%;
+}
+
+/* Layout on narrower screens */
+@media all and (max-width: 640px) {
+    .field { flex-direction: column; }
+    .field span, .field label { width: 100%; }
+}
