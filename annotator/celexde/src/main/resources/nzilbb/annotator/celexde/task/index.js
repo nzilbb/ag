@@ -59,7 +59,7 @@ getSchema(s => {
     try {
       if (!text) { // new task
         // set some sensible defaults
-        document.getElementById("targetLanguagePattern").value = "en.*";
+        document.getElementById("targetLanguagePattern").value = "de.*";
         
       } else { // there are parameters
         
@@ -156,7 +156,7 @@ const optionIdToSql = {
   optSyllablesFromPhonology: "SELECT PhonStrsDISC"
     +"\n FROM cxde_wordformphonology"
     +"\n WHERE BINARY REPLACE(REPLACE(REPLACE(PhonStrsDISC, '-',''), '\"',''),'\\'','') = BINARY ?"
-    +"\n ORDER BY LOCATE('\'', PhonStrsDISC) DESC",
+    +"\n ORDER BY LOCATE('\\'', PhonStrsDISC) DESC",
   optPhonology: "SELECT REPLACE(REPLACE(REPLACE(PhonStrsDISC, '-',''), '\"',''),'\\\'','')"
     +"\n FROM cxde_wordformphonology"
     +"\n INNER JOIN cxde_wordform ON cxde_wordformphonology.IdNum = cxde_wordform.IdNum"

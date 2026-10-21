@@ -1,0 +1,845 @@
+//
+// Copyright 2026 New Zealand Institute of Language, Brain and Behaviour, 
+// University of Canterbury
+// Written by Robert Fromont - robert.fromont@canterbury.ac.nz
+//
+//    This file is part of nzilbb.ag.
+//
+//    nzilbb.ag is free software; you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation; either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    nzilbb.ag is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with nzilbb.ag; if not, write to the Free Software
+//    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+package nzilbb.annotator.celexnl;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.Vector;
+import java.util.regex.Pattern;
+import nzilbb.ag.automation.Annotator;
+import nzilbb.ag.automation.Dictionary;
+import nzilbb.ag.automation.DictionaryException;
+import nzilbb.ag.automation.DictionaryReadOnlyException;
+import nzilbb.encoding.CMU2DISC;
+import nzilbb.encoding.DISC2CMU;
+import nzilbb.sql.mysql.MySQLTranslator;
+
+/**
+ * Dictionary for lexical entries (pronunciations, frequency, etc.) according to the 
+ * <a href="https://catalog.ldc.upenn.edu/LDC96L14"> CELEX Dutch lexicon </a>.
+ */
+@SuppressWarnings("serial")
+public class CELEXDutchDictionary implements Dictionary {
+
+  public static final long IDNUM_PARTITION_START = 400000;
+  private Connection rdb;
+  private MySQLTranslator sqlx = new MySQLTranslator();
+  private PreparedStatement sql; 
+  private PreparedStatement sqlRaw; 
+  private String field;
+
+  /**
+   * The annotator that created this dictionary.
+   * @see #getAnnotator()
+   */
+  protected Annotator annotator;
+  /**
+   * {@link Dictionary} method - Provides the annotator that implements the dictionary.
+   * @return The dictionary's annotator.
+   */
+  public Annotator getAnnotator() {
+    return annotator;
+  }
+  
+  /**
+   * Name of the dictionary, which is the {@link #query} by default.
+   * @see #getName()
+   * @see #setName(String)
+   */
+  protected String name;
+  /**
+   * Getter for {@link #name}: Name of the dictionary, or {@link #query} if no name has
+   * been set.
+   * @return Name of the dictionary.
+   */
+  public String getName() { return Optional.ofNullable(name).orElse(query); }
+  /**
+   * Setter for {@link #name}: Name of the dictionary.
+   * @param newName Name of the dictionary.
+   */
+  public CELEXDutchDictionary setName(String newName) { name = newName; return this; }
+  
+  /**
+   * SQL query that returns entries.
+   * @see #getQuery()
+   * @see #setQuery(String)
+   */
+  protected String query;
+  /**
+   * Getter for {@link #query}: SQL query that returns entries.
+   * @return SQL query that returns entries.
+   */
+  public String getQuery() { return query; }
+  /**
+   * Setter for {@link #query}: SQL query that returns entries.
+   * @param newQuery SQL query that returns entries.
+   */
+  public CELEXDutchDictionary setQuery(String newQuery) { query = newQuery; return this; }
+  
+  /**
+   * {@link Dictionary} method - Name of the dictionary, which must be unique among the
+   * dictionaries implemented by the same annotator.
+   * @return The dictionary's ID.
+   */
+  public String getDictionaryId() {
+    return query;
+  }
+
+  /**
+   * Constructor.
+   */
+  public CELEXDutchDictionary(
+    CELEXDutchTagger annotator, Connection rdb, MySQLTranslator translator,
+    String definition) throws SQLException {
+    this.annotator = annotator;
+    this.rdb = rdb;
+    this.sqlx = translator;
+
+    // TODO define some named queries for publishing dictionaries
+    // if (definition.equals("Cobuild Frequency (wordform)")) {
+    //   setName(definition);
+    //   setQuery("SELECT cxen_wordform.Cob"
+    //            +"\n FROM cxen_wordform"
+    //            +"\n INNER JOIN cxen_wordformortho"
+    //            +"\n ON cxen_wordformortho.IdNum = cxen_wordform.IdNum"
+    //            +"\n WHERE cxen_wordformortho.WordDia = ?"
+    //            +"\n ORDER BY cxen_wordform.Cob DESC");
+    //   field = "cxen_wordform.Cob";
+    // } else if (definition.equals("Cobuild Frequency (lemma)")) {
+    //   setName(definition);
+    //   setQuery("SELECT cxen_lemma.Cob"
+    //            +"\n FROM cxen_wordform"
+    //            +"\n INNER JOIN cxen_wordformortho"
+    //            +"\n ON cxen_wordformortho.IdNum = cxen_wordform.IdNum"
+    //            +"\n INNER JOIN cxen_lemma"
+    //            +"\n ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma"
+    //            +"\n WHERE cxen_wordformortho.WordDia = ?"
+    //            +"\n ORDER BY cxen_lemma.Cob DESC");
+    //   field = "cxen_lemma.Cob";
+    // } else if (definition.equals("Phonology (wordform)")) {
+    //   setName(definition);
+    //   setQuery(
+    //     "SELECT DISTINCT BINARY cxen_wordformphonologypron.PhonStrsDISC, cxen_wordformphonologypron.Variant, cxen_wordform.IdNum"
+    //     +"\n FROM cxen_wordformphonologypron"
+    //     +"\n INNER JOIN cxen_wordformortho"
+    //     +"\n ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum"
+    //     +"\n INNER JOIN cxen_wordform"
+    //     +"\n ON cxen_wordformphonologypron.IdNum = cxen_wordform.IdNum"
+    //     +"\n WHERE cxen_wordformortho.WordDia = ?"
+    //     +"\n ORDER BY cxen_wordformphonologypron.Variant, cxen_wordform.IdNum");
+    //   field = "cxen_wordformphonologypron.PhonStrsDISC";
+    // } else if (definition.equals("Morphology (wordform)")) {
+    //   setName(definition);
+    //   setQuery(
+    //     "SELECT"
+    //     +"\n COALESCE(CONCAT(COALESCE(cxen_lemmamorphologyparse.Imm,cxen_lemma.HeadDia,''),"
+    //     +"\n REPLACE(COALESCE(cxen_wordformmorphology.TransInfl,''), '@','')),'')"
+    //     +"\n FROM cxen_wordformmorphology"
+    //     +"\n INNER JOIN cxen_wordform ON cxen_wordformmorphology.IdNum = cxen_wordform.IdNum"
+    //     +"\n INNER JOIN cxen_wordformortho"
+    //     +" ON cxen_wordformmorphology.IdNum = cxen_wordformortho.IdNum"
+    //     +"\n INNER JOIN cxen_lemma ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma"
+    //     +"\n INNER JOIN cxen_lemmamorphologyparse"
+    //     +" ON cxen_wordform.IdNumLemma = cxen_lemmamorphologyparse.IdNumLemma"
+    //     +"\n WHERE cxen_wordformortho.WordDia = ?"
+    //     +"\n ORDER BY cxen_lemma.Cob DESC");
+    //   field = "cxen_wordformmorphology.TransInfl";
+    // } else if (definition.equals("Syntax (wordform)")) {
+    //   setName(definition);
+    //   setQuery(
+    //     "SELECT cxen_wordclass.Label"
+    //     +"\n FROM cxen_wordform"
+    //     +"\n INNER JOIN cxen_wordformortho"
+    //     +" ON cxen_wordform.IdNum = cxen_wordformortho.IdNum"
+    //     +"\n INNER JOIN cxen_lemma ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma"
+    //     +"\n INNER JOIN cxen_lemmasyntax"
+    //     +" ON cxen_wordform.IdNumLemma = cxen_lemmasyntax.IdNumLemma"
+    //     +"\n LEFT OUTER JOIN cxen_wordclass"
+    //     +" ON cxen_lemmasyntax.ClassNum = cxen_wordclass.ClassNum"
+    //     +"\n WHERE cxen_wordformortho.WordDia = ?"
+    //     +"\n ORDER BY cxen_lemma.Cob DESC");
+    //   field = "cxen_wordclass.Label";
+    // } else {
+    setQuery(definition);
+    // }
+    sql = rdb.prepareStatement(sqlx.apply(this.query));
+
+    if (field == null) {
+      String[] possibleFields = { "PhonStrsDISC", "PhonCVBr", "PhonSylBCLX" };
+      for (String possibleField : possibleFields) {
+        if (this.query.indexOf(possibleField) > 0) {
+          field = possibleField;
+          break;
+        }
+      } // next possibility
+    }
+    
+    String rawQuery = Pattern.compile(
+      "SELECT\\s.+\\sAS\\slabel", Pattern.MULTILINE + Pattern.DOTALL)
+      .matcher(this.query).replaceAll("SELECT DISTINCT BINARY " + field);
+    sqlRaw = rdb.prepareStatement(sqlx.apply(rawQuery));
+  }
+
+  /**
+   * Looks up a word and provides possible matches.
+   * @param key The key to look up.
+   * @param supplementalOnly Whether to return only supplemental entries (true) or all
+   * entries (false) 
+   * @return a Vector of Strings, one for each entry for the given word
+   * @throws SQLException
+   */
+  protected List<String> lookupEntries(String key, boolean supplementalOnly)
+    throws SQLException {      
+    LinkedHashSet<String> queryResults = new LinkedHashSet<String>();
+    if (key != null) {
+      if (supplementalOnly) { // only return entries for newly-added words
+        try (PreparedStatement sqlSupplemental = rdb.prepareStatement(
+               sqlx.apply(
+                 "SELECT WordDia FROM cxnl_wordform WHERE IdNum >= ? AND WordDia = ?"))) {
+          sqlSupplemental.setLong(1, IDNUM_PARTITION_START);
+          sqlSupplemental.setString(2, key);
+          try (ResultSet rsSupplemental = sqlSupplemental.executeQuery()) {
+            if (!rsSupplemental.next()) { // not editable
+              return new Vector<String>(queryResults); // empty
+            }
+          } // close rsSupplemental
+        } // close sqlSupplemental
+      }
+      sql.setString(1, key);
+      try (ResultSet rs = sql.executeQuery()) {
+        while (rs.next()) {
+          queryResults.add(rs.getString(1));
+        } // next result
+      } catch(SQLException exception) {
+        // ignore collation errors - it means we're looking up something that's not Latin
+        // which isn't in CELEX anyway
+        if (exception.getMessage().indexOf("Illegal mix of collations") < 0) {
+          // not the exception we're looking for, so throw it
+          throw exception;
+        }
+      } // rs.close()
+    }
+    return new Vector<String>(queryResults);
+  }
+
+  /**
+   * Looks up a key and provides all possible matches, in their <q>raw</q>
+   * representation for dictionary editing.   
+   */
+  public List<String> lookupRaw(String key) throws DictionaryException {
+    LinkedHashSet<String> queryResults = new LinkedHashSet<String>();
+    if (key != null) {
+      try {
+        sqlRaw.setString(1, key);
+        try (ResultSet rs = sqlRaw.executeQuery()) {
+          while (rs.next()) {
+            queryResults.add(rs.getString(1));
+          } // next result
+        } // close rs
+      } catch(SQLException exception) {
+        // ignore collation errors - it means we're looking up something that's not Latin
+        // which isn't in CELEX anyway
+        if (exception.getMessage().indexOf("Illegal mix of collations") < 0) {
+          // not the exception we're looking for, so throw it
+          throw new DictionaryException(this, exception);
+        }
+      } // rs.close()
+    }
+    return new Vector<String>(queryResults);
+  }
+  
+  /** 
+   * {@link Dictionary} method - Look up all entries for the given key.
+   */ 
+  public List<String> lookup(String key) throws DictionaryException {
+    try {
+      return lookupEntries(key, false);
+    } catch (SQLException sqlX) {
+      throw new DictionaryException(this, sqlX);
+    }
+  }
+
+  /**
+   * {@link Dictionary} method - Returns a count of all entries in the dictionary.
+   * @return the number of keys that would be returned by a call to listAllEntries
+   */
+  public int countAllKeys() throws DictionaryException {
+    // TODO ?? if (isReadOnly()) throw new DictionaryReadOnlyException(iLayerId);
+    try {
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply("SELECT COUNT(*) FROM cxnl_wordform"))) {
+        try (ResultSet rs = sql.executeQuery()) {
+          if (!rs.next()) return 0;
+          return rs.getInt(1);
+        } // rs.close()
+      } // sql.close()
+    } catch(Throwable x) {
+      System.err.println("CELEXDutchDictionary.countAllKeys: " + x);
+      return 0;
+    }
+  }
+
+  /**
+   * {@link Dictionary} method - Returns a sub-list of all entries in the dictionary
+   * - i.e. allentries between the two specified indexes.  This primarily allows LaBB-CAT to
+   * paginate the list on the Edit Dictionary page.
+   * @param start the(zero-based) index of the first entry to list
+   * @param length the number of entries to return, or 0, meaning to the end of the list
+   * @return a map of keys to their definitions.
+   * @throws DictionaryReadOnlyException
+   * @throws Exception
+   */
+  public Map<String, List<String>> listAllEntries(int start, int length)
+    throws DictionaryReadOnlyException, DictionaryException {
+    try {
+      Map<String,List<String>> words = new LinkedHashMap<String,List<String>>();
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply(
+               "SELECT WordDia FROM cxnl_wordform"
+               + " ORDER BY WordDia "
+               + (length > 0? " LIMIT " + start + ", " + length:"")))) {
+        try (ResultSet rs = sql.executeQuery()) {
+          while (rs.next()) {
+            String word = rs.getString(1);
+            List<String> entries = lookupEntries(word, false);
+            if (entries.size() == 0) continue;
+            words.put(word, entries);
+          } // next word
+        } // rs.close()
+      } // sql.close()
+      return words;
+    } catch (SQLException sqlX) {
+      throw new DictionaryException(this, sqlX);
+    }
+  }
+      
+  /**
+   * {@link Dictionary} method - Determines whether the dictionary is entirely read-only, or
+   * has facility for adding/editing entries.
+   * @return true if there is no facility to add/edit entries in the
+   * dictionary, false otherwise
+   */
+  public boolean isReadOnly() {
+    return field == null || name != null;
+  }
+
+  /**
+   * Returns a count of all editable keys in the dictionary.
+   * @return the number of keys that would be returned by a call to listEditableKeys
+   * @throws DictionaryReadOnlyException
+   */
+  public int countEditableKeys() throws DictionaryReadOnlyException, DictionaryException {
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("SELECT COUNT(*) FROM cxnl_wordform WHERE IdNum >= ?"))) {
+      sql.setLong(1, IDNUM_PARTITION_START);      
+      try (ResultSet rs = sql.executeQuery()) {
+        if (!rs.next()) return 0;
+        return rs.getInt(1);
+      } // rs.close()
+    } catch (SQLException sqlX) {
+      throw new DictionaryException(this, sqlX);
+    } // sql.close()
+  }
+
+  /**
+   * {@link Dictionary} method - Returns an aggregrate of all values of all entries in the
+   * dictionary.
+   * @param operation Any aggregate operation supported by SQL for VARCHAR fields.. 
+   * @return The result of the aggregation, or null if the operation is not supported.
+   */
+  public String aggregateEntries(String operation) throws DictionaryException {
+    String query = null;
+    // TODO add support for named dictionaries
+    // if (field.equals("cxen_wordform.Cob")) {
+    //   query = "SELECT "+operation+"(cxen_wordform.Cob)"
+    //     +"\n FROM cxen_wordform"
+    //     +"\n INNER JOIN cxen_wordformortho"
+    //     +"\n ON cxen_wordformortho.IdNum = cxen_wordform.IdNum";
+    // } else if (field.equals("cxen_lemma.Cob")) {
+    //   query = "SELECT "+operation+"(cxen_lemma.Cob)"
+    //     +"\n FROM cxen_wordform"
+    //     +"\n INNER JOIN cxen_wordformortho"
+    //     +"\n ON cxen_wordformortho.IdNum = cxen_wordform.IdNum"
+    //     +"\n INNER JOIN cxen_lemma"
+    //     +"\n ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma";
+    // } else if (field.equals("PhonStrsDISC")) {
+    //   query = "SELECT "+operation+"(cxen_wordformphonologypron.PhonStrsDISC)"
+    //     +" FROM cxen_wordformphonologypron"
+    //     +" INNER JOIN cxen_wordformortho"
+    //     +" ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum"
+    //     +" INNER JOIN cxen_wordform"
+    //     +" ON cxen_wordformphonologypron.IdNum = cxen_wordform.IdNum";
+    // } else {
+    return null;
+    // }
+    
+    // try (PreparedStatement sqlAggregate = rdb.prepareStatement(sqlx.apply(query))) {
+    //   try (ResultSet rsAggregate = sqlAggregate.executeQuery()) {
+    //     rsAggregate.next();
+    //     return rsAggregate.getString(1);
+    //   } // rsAggregate.close()
+    // } catch (SQLException x) {
+    //   throw new DictionaryException(this, x);
+    // } // sqlAggregate.close()
+  }
+
+  /**
+   * {@link Dictionary} method - Returns an aggregrate of all entries (i.e. keys) in the
+   * dictionary.
+   * @param operation Any aggregate operation supported by SQL for VARCHAR fields.. 
+   * @return The result of the aggregation, or null if the operation is not supported.
+   * @throws DictionaryException
+   */
+  public String aggregateKeys(String operation) throws DictionaryException {    
+    String query = null;
+    // TODO add support for named dictionaries
+    // if (field.equals("cxen_wordform.Cob")) {
+    //   query = "SELECT "+operation+"(cxen_wordformortho.WordDia)"
+    //     +"\n FROM cxen_wordform"
+    //     +"\n INNER JOIN cxen_wordformortho"
+    //     +"\n ON cxen_wordformortho.IdNum = cxen_wordform.IdNum";
+    // } else if (field.equals("cxen_lemma.Cob")) {
+    //   query = "SELECT "+operation+"(cxen_wordformortho.WordDia)"
+    //     +"\n FROM cxen_wordform"
+    //     +"\n INNER JOIN cxen_wordformortho"
+    //     +"\n ON cxen_wordformortho.IdNum = cxen_wordform.IdNum"
+    //     +"\n INNER JOIN cxen_lemma"
+    //     +"\n ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma";
+    // } else if (field.equals("PhonStrsDISC")) {
+    //   query = "SELECT "+operation+"(cxen_wordformortho.WordDia)"
+    //     +" FROM cxen_wordformphonologypron"
+    //     +" INNER JOIN cxen_wordformortho"
+    //     +" ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum"
+    //     +" INNER JOIN cxen_wordform"
+    //     +" ON cxen_wordformphonologypron.IdNum = cxen_wordform.IdNum";
+    // } else {
+    return null;
+    // }
+    // try {
+    //   try (PreparedStatement sqlAggregate = rdb.prepareStatement(sqlx.apply(query))) {
+    //     try (ResultSet rsAggregate = sqlAggregate.executeQuery()) {
+    //       rsAggregate.next();
+    //       return rsAggregate.getString(1);
+    //     } // rsAggregate.close()
+    //   } // sqlAggregate.close()
+      
+    // } catch (SQLException x) {
+    //   throw new DictionaryException(this, x);
+    // }
+  }
+
+  /**
+   * Looks up the IdNum of the given word
+   * @param sWordform
+   * @return IdNum of the given wordform, or -1 if the wordform is not present
+   */
+  private long getIdNumFromWordForm(String sWordform) {
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply(
+             "SELECT IdNum FROM cxnl_wordformortho WHERE WordDia = ?"))) {
+      sql.setString(1, sWordform);
+      try (ResultSet rs = sql.executeQuery()) {
+        if (rs.next()) {
+          return rs.getLong("IdNum");
+        } else {
+          return -1;
+        }
+      } // rs.close()
+    } catch(SQLException exception) {
+      System.err.println("CELEXDutchDictionary.getIdNumFromWordForm: " + exception);
+      return -2;
+    } // sql.close()
+  } // end of getIdNumFromWordForm()
+  
+  /**
+   * Determines the next free IdNum.
+   * @return the next unused IdNum
+   * @throws SQLException
+   */
+  public long nextIdNum() throws SQLException {
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("SELECT MAX(IdNum) + 1 FROM cxnl_wordform"))) {
+      try (ResultSet rs = sql.executeQuery()) {
+        rs.next();
+        long lNextId = rs.getLong(1);
+        if (lNextId < IDNUM_PARTITION_START) {
+          return IDNUM_PARTITION_START;
+        } else {
+          return lNextId;
+        }
+      } // rs.close()
+    } catch (Exception ex) {
+      return IDNUM_PARTITION_START;
+    } // sql.close()
+  } // end of nextIdNum()
+  
+  /**
+   * Adds a wordform/lemma to the CELEX DB if it's not already there.
+   * @param sWordform
+   * @return the new IdNum of the word, or th existing IdNum, if it was already there.
+   */
+  public long ensureWordExists(String sWordform) throws SQLException {
+    // check whether the word's already there...
+    long lIdNum = getIdNumFromWordForm(sWordform);
+    if (lIdNum >= 0) {
+      // word already exists, just return the IdNum
+      return lIdNum;
+    } else {
+      // get IdNum
+      lIdNum = nextIdNum();
+      
+      // create lemma records
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply(
+               "INSERT INTO cxnl_lemma (IdNumLemma, HeadDia) VALUES (?,?)"))) {
+        sql.setLong(1, lIdNum);
+        sql.setString(2, sWordform);
+        sql.executeUpdate();
+      } // sql.close()
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply(
+               "INSERT INTO cxnl_lemmaortho (IdNumLemma, Variant, HeadDia, StemDia)"
+               +" VALUES (?,1,?,?)"))) {
+        sql.setLong(1, lIdNum);
+        sql.setString(2, sWordform);
+        sql.setString(3, sWordform);
+        sql.executeUpdate();
+      } // sql.close()
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply("INSERT INTO cxnl_lemmafrequency (IdNumLemma) VALUES (?)"))) {
+        sql.setLong(1, lIdNum);
+        sql.executeUpdate();
+      } // sql.close()
+	       
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply("INSERT INTO cxnl_lemmamorphology (IdNumLemma) VALUES (?)"))) {
+        sql.setLong(1, lIdNum);
+        sql.executeUpdate();
+      } // sql.close()
+      
+      // try (PreparedStatement sql = rdb.prepareStatement(
+      //        sqlx.apply("INSERT INTO cxnl_lemmaphonology (IdNumLemma) VALUES (?)"))) {
+      //   sql.setLong(1, lIdNum);
+      //   sql.executeUpdate();
+      // } // sql.close()
+	       
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply("INSERT INTO cxnl_lemmasyntax (IdNumLemma) VALUES (?)"))) {
+        sql.setLong(1, lIdNum);
+        sql.executeUpdate();
+      } // sql.close()
+	    
+      // create wordform records
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply(
+               "INSERT INTO cxnl_wordform (IdNum, IdNumLemma, Inl)"
+               +" VALUES (?,?,?)"))) {
+        sql.setLong(1, lIdNum);
+        sql.setLong(2, lIdNum);
+        sql.setInt(3,0);
+        sql.executeUpdate();
+      } // sql.close()
+
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply(
+               "INSERT INTO cxnl_wordformortho (IdNum,Variant,WordDia) VALUES (?,1,?)"))) {
+        sql.setLong(1, lIdNum);
+        sql.setString(2, sWordform);
+        sql.executeUpdate();
+      } // sql.close()
+      // try (PreparedStatement sql = rdb.prepareStatement(
+      //        sqlx.apply("INSERT INTO cxnl_wordformfrequency (IdNum) VALUES (?)"))) {
+      //   sql.setLong(1, lIdNum);
+      //   sql.executeUpdate();
+      // } // sql.close()
+
+      // try (PreparedStatement sql = rdb.prepareStatement(
+      //        sqlx.apply("INSERT INTO cxnl_wordformmorphology (IdNum) VALUES (?)"))) {
+      //   sql.setLong(1, lIdNum);
+      //   sql.executeUpdate();
+      // } // sql.close()
+	    
+      // try (PreparedStatement sql = rdb.prepareStatement(
+      //        sqlx.apply("INSERT INTO cxnl_wordformphonology (IdNum) VALUES (?)"))) {
+      //   sql.setLong(1, lIdNum);
+      //   sql.executeUpdate();
+      // } // sql.close()
+      return lIdNum;
+    }
+  } // end of ensureWordExists()
+  
+  /**
+   * {@link Dictionary} method - Adds a entry to the dictionary.
+   * @param key The key to add an entry for - e.g. the entry orthorgraphy.
+   * @param entry The entry for the key - e.g. its pronunciation.
+   * @return the ID for the entry in the dictionary, if appropriate
+   */
+  public String add(String key, String entry)
+    throws DictionaryReadOnlyException, DictionaryException {
+
+    try {
+      long lIdNum = ensureWordExists(key);
+      if (lIdNum < IDNUM_PARTITION_START) {
+        throw new DictionaryReadOnlyException(this, key + " is read only.");
+      }
+      List<String> entries = lookup(key);
+      if (entries.size() > 0) {
+        throw new DictionaryReadOnlyException(
+          this, "This dictionary supports only one entry per key,"
+          +" and there is already an entry for \""+key+"\": " + entries.get(0));
+      }
+      // insert the pronunciation
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply("INSERT INTO cxnl_wordformphonology (IdNum, Inl, " + field 
+                        + ") VALUES (?,?,?)"))) {
+        sql.setLong(1, lIdNum);
+        sql.setInt(2, 0);
+        sql.setString(3, entry);
+        sql.executeUpdate();
+        return ""+lIdNum;
+      } // close sql
+    } catch (SQLException sqlX) {
+      throw new DictionaryException(this, sqlX);
+    } // sql.close()
+  }
+
+  /**
+   * {@link Dictionary} method - Removes a key from the dictionary.
+   * @param key
+   * @return the ID for the entry in the dictionary, if appropriate
+   * @throws DictionaryReadOnlyException
+   */
+  public String remove(String key)
+    throws DictionaryReadOnlyException, DictionaryException {
+
+    if (isReadOnly()) throw new DictionaryReadOnlyException(this);
+    
+    long lIdNum = getIdNumFromWordForm(key);
+    if (lIdNum < 0) lIdNum = IDNUM_PARTITION_START; // TODO Remove this
+    if (lIdNum < 0) return null; // doesn't exist
+    if (lIdNum < IDNUM_PARTITION_START) {
+      throw new DictionaryReadOnlyException(this, key + " is read only.");
+    }
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxnl_wordformphonology WHERE IdNum = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxnl_wordformmorphology WHERE IdNum = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxnl_wordformfrequency WHERE IdNum = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxnl_wordformortho WHERE IdNum = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxnl_wordform WHERE IdNum = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxnl_lemmasyntax WHERE IdNumLemma = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxnl_lemmaphonology WHERE IdNumLemma = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxnl_lemmamorphology WHERE IdNumLemma = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxnl_lemmafrequency WHERE IdNumLemma = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxnl_lemmaortho WHERE IdNumLemma = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    try (PreparedStatement sql = rdb.prepareStatement(
+           sqlx.apply("DELETE FROM cxnl_lemma WHERE IdNumLemma = ?"))) {
+      sql.setLong(1, lIdNum);
+      sql.executeUpdate();
+    } catch (SQLException x) {
+      throw new DictionaryException(this, x);
+    } // sql.close()
+    
+    return "" +lIdNum;
+  }
+
+  /**
+   * {@link Dictionary} method - Removes a entry entry from the dictionary.
+   * @param key
+   * @param entry
+   * @return the ID for the entry in the dictionary, if appropriate
+   * @throws DictionaryReadOnlyException
+   */
+  public String remove(String key, String entry)
+    throws DictionaryReadOnlyException, DictionaryException {
+    if (isReadOnly()) {
+      throw new DictionaryReadOnlyException(this);
+    }
+    try {
+      
+      long lIdNum = getIdNumFromWordForm(key);
+      if (lIdNum < IDNUM_PARTITION_START) {
+        throw new DictionaryReadOnlyException(this, key + " is read only");
+      }
+      
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply(
+               "DELETE FROM cxnl_wordformphonology WHERE IdNum = ?"
+               +" AND " + field + " = ?"))) {
+        sql.setLong(1, lIdNum);
+        sql.setString(2, entry);
+        sql.executeUpdate();
+      } // sql.close()
+      
+      return ""+lIdNum;
+    } catch (SQLException sqlX) {
+      throw new DictionaryException(this, sqlX);
+    }
+  }
+
+  /**
+   * {@link Dictionary} method - Returns a sub-list of editable entries in the dictionary
+   * - i.e. all entries between the two specified indexes.  This primarily allows
+   * pagination of the list on an Edit Dictionary page.
+   * @param start the(zero-based) index of the first entry to list
+   * @param length the number of entries to return, or 0, meaning to the end of the list
+   * @return a map of keys to their definitions. 
+   * @throws DictionaryReadOnlyException
+   */
+  public Map<String, List<String>> listEditableEntries(int start, int length)
+    throws DictionaryReadOnlyException, DictionaryException {
+    try {
+      Map<String,List<String>> words = new LinkedHashMap<String,List<String>>();
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply(
+               "SELECT WordDia FROM cxnl_wordform WHERE IdNum >= ?"
+               + " ORDER BY WordDia "
+               + (length > 0? " LIMIT " + start + ", " + length:"")))) {
+        sql.setLong(1, IDNUM_PARTITION_START);
+        try (ResultSet rs = sql.executeQuery()) {
+          while (rs.next()) {
+            String word = rs.getString(1);
+            List<String> entries = lookupRaw(word);
+            if (entries.size() == 0) continue;
+            words.put(word, entries);
+          } // next word
+        } // rs.close()
+      } // sql.close()
+      return words;
+    } catch (SQLException sqlX) {
+      throw new DictionaryException(this, sqlX);
+    }    
+  }
+
+  /**
+   * {@link Dictionary} method - Returns a specific editable key from the dictionary.
+   * @param key the key to look up
+   * @return List of entries.
+   * @throws DictionaryReadOnlyException
+   */
+  public List<String> lookupEditableEntry(String key)
+    throws DictionaryReadOnlyException, DictionaryException {
+    try (PreparedStatement sqlSupplemental = rdb.prepareStatement(
+           sqlx.apply(
+             "SELECT WordDia FROM cxnl_wordformortho WHERE IdNum >= ? AND WordDia = ?"))) {
+      sqlSupplemental.setLong(1, IDNUM_PARTITION_START);
+      sqlSupplemental.setString(2, key);
+      try (ResultSet rsSupplemental = sqlSupplemental.executeQuery()) {
+        if (!rsSupplemental.next()) { // not editable
+          return new Vector<String>(); // empty
+        }
+      } // close rsSupplemental
+    } catch (SQLException x) {
+      return new Vector<String>(); // empty
+    } // close sqlSupplemental
+    return lookupRaw(key);
+  }
+
+  /**
+   * {@link Dictionary} method - Suggests a possible entry for the given entry.  
+   * <p> In this case, no suggestions are ever returned. 
+   * @param key The unknown word.
+   * @return A suggested pronunciation for the given word, or null if no suggestion is
+   * possible.
+   * @throws OperationNotSupportedException When sEntry is already in the dictionary
+   */
+  public String suggest(String key) throws DictionaryException {
+    if (lookup(key).size() > 0) {
+      throw new DictionaryException(this, "Suggestion for existing word: " + key);
+    }
+    return null;
+  }
+   
+  /** {@link Dictionary} method - Frees any resources reserved by the dictionary */
+  public void close() {
+    try {
+      rdb.close();
+    } catch (SQLException sqlX) {
+    }
+  }
+}
