@@ -1045,8 +1045,8 @@ public class CELEXGermanTagger extends LabelBasedTagger
         sLine = reader.readLine();
       } // next line
     } // close sqlInsertWordFormMorphology, reader
-    if (!isCancelling()) setStatus("EFW complete.");
-  } // end of processEFW()
+    if (!isCancelling()) setStatus("GMW complete.");
+  } // end of processGMW()
   
   /**
    * Converts the FlectType codes in a string to descriptive labels,

@@ -24,7 +24,7 @@
       <li>"Syllables From Phonology" - <pre>SELECT DISTINCT BINARY PhonStrsDISC AS label, LOCATE('\\'', PhonStrsDISC), cxen_wordformphonologypron.Variant
 FROM cxen_wordformphonologypron
 WHERE BINARY REPLACE(REPLACE(REPLACE(REPLACE(PhonStrsDISC, '-',''), '\"',''),'\\'',''),'R','') = BINARY REPLACE(?,'R','')" // ignore possible-linking-r - i.e. 'R'
-    +"\n ORDER BY LOCATE('\\'', PhonStrsDISC) DESC, cxen_wordformphonologypron.Variant</pre></li>
+ ORDER BY LOCATE('\\'', PhonStrsDISC) DESC, cxen_wordformphonologypron.Variant</pre></li>
       <li>"Phonology" - <pre>SELECT DISTINCT BINARY REPLACE(REPLACE(REPLACE(PhonStrsDISC, '-',''), '\"',''),'\\'','') AS label, cxen_wordformphonologypron.Variant, cxen_wordform.IdNum
 FROM cxen_wordformphonologypron
 INNER JOIN cxen_wordformortho
@@ -40,35 +40,35 @@ ON cxen_wordformphonologypron.IdNum = cxen_wordformortho.IdNum
 INNER JOIN cxen_wordform
 ON cxen_wordformphonologypron.IdNum = cxen_wordform.IdNum
 WHERE cxen_wordformortho.WordDia = ?
-ORDER BY cxen_wordform.cob DESC, cxen_wordformphonologypron.Variant,"
-    +" cxen_wordform.IdNum</pre></li>
+ORDER BY cxen_wordform.cob DESC, cxen_wordformphonologypron.Variant,
+ cxen_wordform.IdNum</pre></li>
       <li>"Morphology" - <pre>SELECT
 COALESCE(CONCAT(COALESCE(cxen_lemmamorphologyparse.Imm,cxen_lemma.HeadDia,''),
 REPLACE(COALESCE(cxen_wordformmorphology.TransInfl,''), '@','')),'')
 FROM cxen_wordformmorphology
 INNER JOIN cxen_wordform ON cxen_wordformmorphology.IdNum = cxen_wordform.IdNum
-INNER JOIN cxen_wordformortho"
-    +" ON cxen_wordformmorphology.IdNum = cxen_wordformortho.IdNum
+INNER JOIN cxen_wordformortho
+ ON cxen_wordformmorphology.IdNum = cxen_wordformortho.IdNum
 INNER JOIN cxen_lemma ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma
-INNER JOIN cxen_lemmamorphologyparse"
-    +" ON cxen_wordform.IdNumLemma = cxen_lemmamorphologyparse.IdNumLemma
+INNER JOIN cxen_lemmamorphologyparse
+ ON cxen_wordform.IdNumLemma = cxen_lemmamorphologyparse.IdNumLemma
 WHERE cxen_wordformortho.WordDia = ?
 ORDER BY cxen_lemma.Cob DESC</pre></li>
       <li>"Syntax" - <pre>SELECT cxen_wordclass.Label
 FROM cxen_wordform
-INNER JOIN cxen_wordformortho"
-    +" ON cxen_wordform.IdNum = cxen_wordformortho.IdNum
+INNER JOIN cxen_wordformortho
+ ON cxen_wordform.IdNum = cxen_wordformortho.IdNum
 INNER JOIN cxen_lemma ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma
-INNER JOIN cxen_lemmasyntax"
-    +" ON cxen_wordform.IdNumLemma = cxen_lemmasyntax.IdNumLemma
-LEFT OUTER JOIN cxen_wordclass"
-    +" ON cxen_lemmasyntax.ClassNum = cxen_wordclass.ClassNum
+INNER JOIN cxen_lemmasyntax
+ ON cxen_wordform.IdNumLemma = cxen_lemmasyntax.IdNumLemma
+LEFT OUTER JOIN cxen_wordclass
+ ON cxen_lemmasyntax.ClassNum = cxen_wordclass.ClassNum
 WHERE cxen_wordformortho.WordDia = ?
 ORDER BY cxen_lemma.Cob DESC</pre></li>
       <li>"Lemma" - <pre>SELECT cxen_lemma.HeadDia
 FROM cxen_wordform
-INNER JOIN cxen_wordformortho"
-    +" ON cxen_wordform.IdNum = cxen_wordformortho.IdNum
+INNER JOIN cxen_wordformortho
+ ON cxen_wordform.IdNum = cxen_wordformortho.IdNum
 INNER JOIN cxen_lemma ON cxen_wordform.IdNumLemma = cxen_lemma.IdNumLemma
 WHERE cxen_wordformortho.WordDia = ?
 ORDER BY cxen_lemma.Cob DESC</pre></li>
