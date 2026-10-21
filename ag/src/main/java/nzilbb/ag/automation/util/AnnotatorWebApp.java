@@ -327,7 +327,10 @@ public class AnnotatorWebApp extends StandAloneWebApp {
       }
       
       if (annotator.getClass().isAnnotationPresent(UsesRelationalDatabase.class)) {
-         annotator.setRdbConnectionFactory(new DerbyConnectionFactory(workingDir));
+         annotator.setRdbConnectionFactory(
+           new DerbyConnectionFactory(workingDir)
+           // ensure case/punctuation-sensitivity
+           .setCollation("UCS_BASIC"));
       }
       
    } // end of init()
