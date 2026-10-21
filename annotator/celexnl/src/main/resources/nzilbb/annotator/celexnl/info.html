@@ -1,0 +1,35 @@
+<h2>CELEX Dutch Tagger</h2>
+
+<p>The CELEX Dutch Tagger tags words with their lexical entries
+  (pronunciations, frequency, etc.)
+  according to the
+  <a href="https://catalog.ldc.upenn.edu/LDC96L14"> CELEX Dutch lexicon </a>,
+  which can be purchased from the LDC, who provide a number of text files for the lexicon. </p>
+
+<p> This tagger can load the data from these text files into its own databases,
+  and from there annotate word tokens with lexical information, including:</p>
+<ul>
+  <li>standard phonemic transcriptions - e.g. <q>verschillend</q> → <q>vərsxɪlənt</q></li>
+  <li>syllable count - e.g. <q>verschillend</q> → <q>3</q></li>
+  <li>possible syntactic category - e.g. <q>verschillend</q> → <q>V</q> or <q>A</q> or <q>NUM</q></li>
+  <li>frequency data</li>
+  <li>lemma</li>
+</ul>
+<p> The annotator also supports automatically tagging
+  short hesitations with pronunciations. Orthographies with trailing '~' are recognized
+  as short hesitations  e.g. </p>
+<ul>
+  <li> <q> s~ </q> → <tt> s@ </tt></li>
+  <li> <q> se~ </q> → <tt> s@ </tt></li>
+  <li> <q> a~ </q> → <tt> { </tt></li>
+  <li> <q> ph~ </q> → <tt> f@ </tt></li>
+</ul>
+
+<h3 id="getting">Getting the CELEX Dutch lexicon files</h3>
+
+<p>The CELEX Dutch files are available under a non-free license, and must be
+  acquired seperately from this annotator. You can buy a license to use the CELEX Dutch
+  data from the LDC: <a href="https://catalog.ldc.upenn.edu/LDC96L14" target="LDC">
+    https://catalog.ldc.upenn.edu/LDC96L14</a>
+</p> 
+
