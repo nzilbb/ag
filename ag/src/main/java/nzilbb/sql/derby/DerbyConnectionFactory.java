@@ -69,6 +69,28 @@ public class DerbyConnectionFactory implements ConnectionFactory {
    * @param newName Database name.
    */
   public DerbyConnectionFactory setName(String newName) { name = newName; return this; }
+  
+  /**
+   * 'collation=' setting for connections.
+   * @see #getCollation()
+   * @see #setCollation(String)
+   */
+  protected String collation;
+  /**
+    * Getter for {@link #collation}: 'collation=' setting for connections.
+    * <p> Default is "TERRITORY_BASED:PRIMARY"
+    * @return 'collation=' setting for connections.
+    */
+   public String getCollation() {
+     if (collation == null || collation.length() == 0) return "TERRITORY_BASED:PRIMARY";
+     return collation;
+   }
+   /**
+    * Setter for {@link #collation}: 'collation=' setting for connections.
+    * @param newCollation 'collation=' setting for connections.
+    */
+   public DerbyConnectionFactory setCollation(String newCollation) { collation = newCollation; return this; }
+
    
   // Methods:
    
@@ -93,7 +115,7 @@ public class DerbyConnectionFactory implements ConnectionFactory {
       +location.getPath().replace('\\','/') +"/"+name+";create=true;"
       // the PRIMARY collation is case and accent insensitive
       // use BINARY comparisons to get accent/case sensitivity
-      +"collation=TERRITORY_BASED:PRIMARY";
+      +"collation="+getCollation();
     // TODO Can't register functions implemented in a jar that's not on the classpath
     // return DerbySQLTranslator.CreateFunctions(
     //   DriverManager.getConnection(connectionURL, null, null));

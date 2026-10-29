@@ -24,6 +24,8 @@ package nzilbb.util;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,14 +45,17 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
+import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Helper functions for Input/Output operations.
@@ -604,6 +609,144 @@ public class IO
     return dir.delete();
   } // end of RecursivelyDelete()
 
+  /**
+   * Recursively adds all files and directories to the given zipfile stream
+   * @param dir The root directory to zip.
+   * @param zip The stream to add files to, which remains open after the method returns.
+   * @param filter Files to include.
+   * @param consumer Receives file paths as they are added to the stream.
+   * @param cancelling Returns true if processing should be cancelled.
+   * @return The number of files (excluding directory entries) added to the zip stream.
+   */
+  public static int RecursivelyZip(
+    File dir, ZipOutputStream zip, Consumer<String> monitor, Supplier<Boolean> cancelling)
+    throws IOException {
+    return RecursivelyZip(dir, zip, null, null, monitor, cancelling);
+  }
+  /**
+   * Recursively adds all files and directories to the given zipfile stream
+   * @param dir The root directory to zip.
+   * @param zip The stream to add files to, which remains open after the method returns.
+   * @return The number of files (excluding directory entries) added to the zip stream.
+   */
+  public static int RecursivelyZip(File dir, ZipOutputStream zip) throws IOException {
+    return RecursivelyZip(dir, zip, null, null, null, null);
+  }
+  /**
+   * Recursively adds files and directories to the given zipfile stream
+   * @param dir The root directory to zip.
+   * @param zip The stream to add files to, which remains open after the method returns.
+   * @param filter Files to include.
+   * @return The number of files (excluding directory entries) added to the zip stream.
+   */
+  public static int RecursivelyZip(File dir, ZipOutputStream zip, FileFilter filter)
+    throws IOException {
+    return RecursivelyZip(dir, zip, null, filter, null, null);
+  }
+  /**
+   * Recursively adds files and directories to the given zipfile stream
+   * @param dir The root directory to zip.
+   * @param zip The stream to add files to, which remains open after the method returns.
+   * @param filter Files to include.
+   * @param consumer Receives file paths as they are added to the stream.
+   * @return The number of files (excluding directory entries) added to the zip stream.
+   */
+  public static int RecursivelyZip(
+    File dir, ZipOutputStream zip, FileFilter filter, Consumer<String> monitor)
+    throws IOException {
+    return RecursivelyZip(dir, zip, null, filter, monitor, null);
+  }
+  
+  /**
+   * Recursively adds files and directories to the given zipfile stream
+   * @param dir The root directory to zip.
+   * @param zip The stream to add files to, which remains open after the method returns.
+   * @param filter Files to include.
+   * @param consumer Receives file paths as they are added to the stream.
+   * @param cancelling Returns true if processing should be cancelled.
+   * @return The number of files (excluding directory entries) added to the zip stream.
+   */
+  public static int RecursivelyZip(
+    File dir, ZipOutputStream zip, FileFilter filter,
+    Consumer<String> monitor, Supplier<Boolean> cancelling)
+    throws IOException {
+    return RecursivelyZip(dir, zip, null, filter, monitor, cancelling);
+  }
+  
+  /**
+   * Recursively adds files and directories to the given zipfile stream
+   * @param file The root directory to zip.
+   * @param zip The stream to add files to, which remains open after the method returns.
+   * @param path The current path prefix for adding files with.
+   * @param filter Files to include.
+   * @param consumer Receives file paths as they are added to the stream.
+   * @param cancelling Returns true if processing should be cancelled.
+   * @return The number of files (excluding directory entries) added to the zip stream.
+   */
+  private static int RecursivelyZip(
+    File file, ZipOutputStream zip, String path, FileFilter filter,
+    Consumer<String> monitor, Supplier<Boolean> cancelling)
+    throws IOException {
+    if (filter == null) { // accept all files
+      filter = new FileFilter() { public boolean accept(File f) { return true; } };
+    }
+    //if (cancelling == null) cancelling = ()->Boolean.FALSE;
+    if (monitor == null) monitor = (name)->{}; // do nothing with names    
+    if (path == null) {
+      path = "";
+    } else if (path.length() > 0) {
+      path += "/" + file.getName();
+    } else {
+      path = file.getName();
+    }
+    
+    int count = 0;
+    if (!cancelling.get()) {
+      ZipEntry entry = new ZipEntry(path);
+      if (file.isDirectory()) {
+        File[] files = file.listFiles(filter);
+        if (files != null) {
+          for (File f : files) {
+            if (cancelling.get()) break;
+            count += RecursivelyZip(f, zip, path, filter, monitor, cancelling);
+          } // next file
+        }
+      } else {
+        monitor.accept(path);
+        try (FileInputStream input = new FileInputStream(file)) {
+          zip.putNextEntry(entry);
+          Pump(input, zip, false);        
+          count++;
+        } // close input
+      }
+    }
+    return count;
+  } // end of RecursivelyZip()
+
+  /**
+   * Recursively counts files in a given directory.
+   * @param dir The root directory to count from.
+   * @param filter Files to include in the count.
+   * @return The number of files (excluding directory entries) that match.
+   */
+  public static int RecursivelyCountFiles(File dir, FileFilter filter) throws IOException {
+    if (filter == null) { // accept all files
+      filter = new FileFilter() { public boolean accept(File f) { return true; } };
+    }
+    int count = 0;
+    if (dir.isDirectory()) {
+      File[] files = dir.listFiles(filter);
+      if (files != null) {
+        for (File f : files) {
+          count += RecursivelyCountFiles(f, filter);
+        } // next file
+      }
+    } else {
+      count++;
+    }
+    return count;
+  } // end of RecursivelyZip()
+  
   /**
    * Encodes the content of the given url content as a BASE64-encoded string.
    * @param url A URL to the content to be encoded.
