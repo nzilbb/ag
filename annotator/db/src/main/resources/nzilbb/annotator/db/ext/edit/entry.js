@@ -468,15 +468,30 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
     input = document.createElement("textarea"); // attach the editor later...
   }
   if (fieldDefinition.validation
-      // escept validation is repurposed for cross-references:
+      // except validation is repurposed for cross-references:
       && fieldDefinition.type != "cross-reference") { 
     // if it's just a list of alternative, e.g. "option1|option2|option3"
     if (/^\|?(.+\|)+.+/.test(fieldDefinition.validation)) { // implement as a select instead
-      input = document.createElement("select");
+      let optionsList = null;
+      if (fieldDefinition.validation.endsWith("|*")) { // an open set of options
+        // so the list of options is a suggestion but they can enter anything
+        optionsList = document.createElement("datalist");
+        optionsList.id = `matches-${fieldDefinition.field}`;
+        valueElement.appendChild(optionsList);
+        input.setAttribute("list", optionsList.id);
+      } else { // a closed set of options
+        input = document.createElement("select");
+        optionsList = input;
+      }
       for (let opt of fieldDefinition.validation.split("|")) {
+        if (optionsList.tagName.toLowerCase() == "datalist"
+            && (opt == "*" || opt == "")) {
+          // datalist ignores these options
+          continue;
+        }
         const option = document.createElement("option");
         option.appendChild(document.createTextNode(opt));
-        input.appendChild(option);
+        optionsList.appendChild(option);
       } // next option
     } else if (fieldDefinition.validation.split("<").length == 2) { // min<max
       const interval = fieldDefinition.validation.split("<");
