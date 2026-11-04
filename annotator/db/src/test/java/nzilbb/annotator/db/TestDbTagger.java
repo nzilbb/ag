@@ -924,7 +924,7 @@ public class TestDbTagger {
     assertEquals("Correct field defaultValue", "", field.get("defaultValue"));
     assertEquals("Correct field validation", "", field.get("validation"));
 
-    // get get entry
+    // get entry
     Map<String,String> entry = annotator.readEntry("dict", "type", "THE");
     assertEquals("Correct type value", "THE", entry.get("type"));
     assertEquals("Correct Pronunciation value ", "ð ə", entry.get("phonemes"));

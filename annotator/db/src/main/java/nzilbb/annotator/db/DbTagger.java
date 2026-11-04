@@ -540,20 +540,17 @@ public class DbTagger extends Annotator {
    */
   @ApiEndpoint("view") public List<String> listTables() throws SQLException {
     Vector<String> names = new Vector<String>();
-    Connection rdb = newConnection();
-    try {
-      PreparedStatement sql = rdb.prepareStatement(
-        sqlx.apply("SELECT name FROM "+getAnnotatorId()+"_table"
-                   +" WHERE parent_table_id IS NULL ORDER BY name"));
-      ResultSet rs = sql.executeQuery();
-      while (rs.next()) {
-        names.add(rs.getString("name"));
-      } // next table
-      rs.close();
-      sql.close();
-    } finally {
-      rdb.close();
-    }
+    try (Connection rdb = newConnection()) {
+      try (PreparedStatement sql = rdb.prepareStatement(
+             sqlx.apply("SELECT name FROM "+getAnnotatorId()+"_table"
+                        +" WHERE parent_table_id IS NULL ORDER BY name"))) {
+        try (ResultSet rs = sql.executeQuery()) {
+          while (rs.next()) {
+            names.add(rs.getString("name"));
+          } // next table
+        } // close rs
+      } // close sql
+    } // close rdb
     return names;
   } // end of listTables()
   
@@ -805,7 +802,7 @@ public class DbTagger extends Annotator {
               } // sqlDeleteChildTableRow.close();
               throw x;
             }
-
+            
           } else { // regular field
             // insert field row succeeded, so add the field to the table
             String columnType
@@ -1521,11 +1518,29 @@ public class DbTagger extends Annotator {
               }
             } // fields.close()
           } // selectEntry.close()
-        } catch(SQLException exception) {
-          System.err.println(
-            "DbTagger.matches("+table+", "+field+", "+pattern+"): "+exception);
-          values.add("DbTagger_error: " + exception.getMessage());
-        }
+        } catch(SQLException exception) { // maybe we're running in Derby?
+          // try LIKE instead
+          try {
+            String s = sqlx.apply(
+              "SELECT DISTINCT `"+field.replace(';',' ')+"` FROM "+sTableName
+              +" WHERE `"+field.replace(';',' ')+"` LIKE ?"
+              +" ORDER BY `"+field.replace(';',' ')+"`");
+            try (PreparedStatement search = rdb.prepareStatement(s)) {
+              search.setString(1, "%"+pattern+"%");
+              if (".*".equals(pattern)) search.setString(1, "%"); // match everything
+              try (ResultSet matches = search.executeQuery()) {
+                while (matches.next()) {
+                  values.add(matches.getString(1));
+                }
+              } // fields.close()
+            } // selectEntry.close()
+          } catch(SQLException exception2) { // LIKE didn't work
+            // report the original exception
+            System.err.println(
+              "DbTagger.matches("+table+", "+field+", "+pattern+"): "+exception);
+            values.add("DbTagger_error: " + exception.getMessage());
+          } // LIKE didn't work
+        } // REGEXP didn't work
       } else {
         System.err.println(
           "DbTagger.matches("+table+", "+field+", "+pattern
