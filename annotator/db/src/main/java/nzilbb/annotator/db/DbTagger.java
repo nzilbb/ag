@@ -1261,7 +1261,8 @@ public class DbTagger extends Annotator {
    * and the second is the parent serial.
    */
   private long[] readChildEntries(
-    Connection rdb, String parentTable, String field, String entry, String childField) throws Exception {
+    Connection rdb, String parentTable, String field, String entry, String childField)
+    throws Exception {
     long[] ids = new long[2];
     Vector<Map<String,String>> entries = new Vector<Map<String,String>>();
     // find the table
@@ -1270,6 +1271,14 @@ public class DbTagger extends Annotator {
     if (parentTableId >= 0 && ids[0] >= 0) {
       String parentTableName = getAnnotatorId()+"_table_"+parentTableId;
       String childTableName = getAnnotatorId()+"_table_"+ids[0];
+      if ("serial".equals(field)) { // we already have it!
+        try {
+          ids[1] = Long.parseLong(entry);
+        } catch(NumberFormatException exception) {
+          ids[1] = -1;
+        }
+        return ids;
+      }
       // get serial of parent entry
       String s = sqlx.apply(
         "SELECT serial FROM "+parentTableName+" WHERE `"+field.replace(';',' ')+"` = ?");
@@ -1312,9 +1321,12 @@ public class DbTagger extends Annotator {
       long parentSerial = ids[1];
       List<Map<String,String>> fields = readFields(parentTable+"_"+childField);
       String columnList = fields.stream()
+        .filter(def->!"child-table".equals(def.get("type")))
         .map(def->"`"+def.get("field")+"`")
         .collect(Collectors.joining(","));
-      String argumentList = fields.stream().map(def->"?").collect(Collectors.joining(","));
+      String argumentList = fields.stream()
+        .filter(def->!"child-table".equals(def.get("type")))
+        .map(def->"?").collect(Collectors.joining(","));
       try (PreparedStatement insertEntry = rdb.prepareStatement(
              sqlx.apply("INSERT INTO "+getAnnotatorId() +"_table_"+childTableId
                         +" (parent_serial, supplemental,"+columnList+")"
@@ -1322,6 +1334,7 @@ public class DbTagger extends Annotator {
         int p = 1;
         insertEntry.setLong(p++, parentSerial);
         for (Map<String,String> f : fields) {
+          if ("child-table".equals(f.get("type"))) continue;
           String name = f.get("field");
           String value = json.containsKey(name)?json.getString(name):"";
           insertEntry.setString(p++, value);
@@ -1387,6 +1400,7 @@ public class DbTagger extends Annotator {
     } catch (Exception x) {
       System.err.println(
         "readChildEntries("+parentTable+", "+field+", "+entry+", "+childField+"): "+x);
+      x.printStackTrace(System.err);
       entries.add(new LinkedHashMap<String,String>(){{
         put("DbTagger_error", x.getMessage());
       }});

@@ -102,11 +102,12 @@ function showForm(data) {
         getJSON(
           resourceForFunction("readChildEntries", table, field, entry, name), data => {
             finishedLoading();
-            showChildForm(name, data);
+            row.appendChild(
+              showChildForm(table, field, ()=>entry, name, data));
           }); // readChildEntries
         
       }); // readFields
-    }
+    } // child-table
     row.id = `row-${name}`;
     row.className = "field " + fields[name].type;
     row.title = name;
@@ -116,8 +117,7 @@ function showForm(data) {
   document.getElementById("btnSave").style.display = "none";
 }
 
-function showChildForm(childField, data) {
-  const value = document.getElementById(`row-${childField}`);
+function showChildForm(parentTable, parentField, getParentEntry, childField, data) {
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   let tr = document.createElement("tr");
@@ -125,7 +125,9 @@ function showChildForm(childField, data) {
   for (let name in childFields[childField]) {
     if (childFields[childField][name].type == "hidden") continue;
     const th = document.createElement("th");
-    th.appendChild(document.createTextNode(name));
+    if (childFields[childField][name].type != "child-table") { // child tables self-label
+      th.appendChild(document.createTextNode(name));
+    }
     tr.appendChild(th);
     if (name != childField) showHeader = true;
   } // next field
@@ -144,7 +146,7 @@ function showChildForm(childField, data) {
   const tbody = document.createElement("tbody");
   tbody.id = `rows-${childField}`;
   for (let r in data) { // for each child row
-    addChildRow(childField, tbody, data[r])
+    addChildRow(parentTable, parentField, getParentEntry, childField, tbody, data[r])
   } // next child row
   
   table.appendChild(tbody);
@@ -157,17 +159,21 @@ function showChildForm(childField, data) {
   img.alt= "➕";
   btnCreate.appendChild(img);
   btnCreate.addEventListener("click", function(e) {
-    const firstInput = addChildRow(childField, tbody, {});
-    if (firstInput) firstInput.focus();
+    if (!getParentEntry()) {
+      alert("Please save this row first");
+    } else {
+      const firstInput = addChildRow(parentTable, parentField, getParentEntry, childField, tbody, {});
+      if (firstInput) firstInput.focus();
+    }
   });
   td.appendChild(btnCreate);
   tr.appendChild(td);
   tfoot.appendChild(tr);
   table.appendChild(tfoot);
-  value.appendChild(table);
+  return table;
 }
 
-function addChildRow(childField, rows, model) {
+function addChildRow(parentTable, parentField, getParentEntry, childField, rows, model) {
   let firstInput = null;
   
   const tr = document.createElement("tr");
@@ -185,16 +191,18 @@ function addChildRow(childField, rows, model) {
   btnSave.addEventListener("click", function(e) {    
     // load data from inputs into model 
     for (let name in childFields[childField]) {
-      if (inputs[name].type == "checkbox") {
-        model[name] = inputs[name].checked?"true":"false";
-      } else {
-        model[name] = inputs[name].value;
+      if (inputs[name]) { // (e.g. grandchild-table has no inputs entry)
+        if (inputs[name].type == "checkbox") {
+          model[name] = inputs[name].checked?"true":"false";
+        } else {
+          model[name] = inputs[name].value;
+        }
       }
     }
     if (!model.serial) { // serial not set - it's a new row
       startLoading();
       getJSON(resourceForFunction(
-        "createChildEntry", table, field, entry, childField, JSON.stringify(model)),
+        "createChildEntry", parentTable, parentField, getParentEntry(), childField, JSON.stringify(model)),
               newModel => {
                 finishedLoading();
                 if (newModel.DbTagger_error) {
@@ -207,7 +215,7 @@ function addChildRow(childField, rows, model) {
     } else { // serial already set - it's an existing row
       startLoading();
       getJSON(resourceForFunction(
-        "updateChildEntry", table, field, entry, childField, JSON.stringify(model)),
+        "updateChildEntry", parentTable, parentField, getParentEntry(), childField, JSON.stringify(model)),
               newModel => {
                 finishedLoading();
                 if (newModel.DbTagger_error) {
@@ -234,7 +242,7 @@ function addChildRow(childField, rows, model) {
       if (model.serial) { // serial not set - it's a new row
         startLoading();
         getJSON(resourceForFunction(
-          "deleteChildEntry", table, field, entry, childField, JSON.stringify(model)),
+          "deleteChildEntry", parentTable, parentField, getParentEntry(), childField, JSON.stringify(model)),
                 error => {
                   finishedLoading();
                   if (error) {
@@ -284,12 +292,46 @@ function addChildRow(childField, rows, model) {
       }
     }
     
-    // create the UI component for the field value
-    const input = createFieldInput(
-      td, childFields[childField][name], (e)=>btnSave.style.display = null, value);
-    // ensure the save function can access the input
-    inputs[name] = input;
-    if (!firstInput) firstInput = input;
+    if (childFields[childField][name].type != "child-table") { // regular field
+      // create the UI component for the field value
+      const input = createFieldInput(
+        td, childFields[childField][name], (e)=>btnSave.style.display = null, value);
+      // ensure the save function can access the input
+      inputs[name] = input;
+      if (!firstInput) firstInput = input;
+    } else { // (grand)child-table
+      const values = document.createElement("details");
+      const label = document.createElement("summary");
+      label.appendChild(document.createTextNode(name));
+      values.appendChild(label);
+      td.appendChild(values);
+      
+      // get child field definitions
+      const childTable = `${parentTable}_${childField}_${name}`;
+      getJSON(resourceForFunction("readFields", childTable), definitions => {
+        childFields[name] = {};
+        // build a dictionary of definitions
+        for (let definition of definitions) {
+          if (definition.field) {
+            childFields[name][definition.field] = definition;
+          }
+        } // next child field definition
+
+        // get all field values for entry
+        startLoading();
+        getJSON(
+          resourceForFunction(
+            "readChildEntries",
+            `${parentTable}_${childField}`, "serial", model.serial||"", name),
+          data => {
+            finishedLoading();
+            values.appendChild(
+              showChildForm(
+                `${parentTable}_${childField}`, "serial", ()=>model.serial||"", name, data));
+          }); // readChildEntries
+        
+      }); // readFields
+    } // (grand)child-table
     
     tr.appendChild(td);
   } // next field
