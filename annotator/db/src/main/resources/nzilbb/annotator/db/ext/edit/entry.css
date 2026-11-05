@@ -37,6 +37,9 @@ textarea { field-sizing: content; }
 .field input, .field textarea {
     width: 99%;
 }
+.field > span.value > input[type=checkbox] { /* put top-level checkboxes near their labels */
+    width: auto;
+}
 .field th {
     text-align: left;
     white-space: nowrap;
