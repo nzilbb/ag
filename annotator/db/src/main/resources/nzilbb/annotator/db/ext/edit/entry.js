@@ -103,7 +103,7 @@ function showForm(data) {
           resourceForFunction("readChildEntries", table, field, entry, name), data => {
             finishedLoading();
             row.appendChild(
-              showChildForm(table, field, ()=>entry, name, data));
+              showChildForm(1, table, field, ()=>entry, name, data));
           }); // readChildEntries
         
       }); // readFields
@@ -117,7 +117,7 @@ function showForm(data) {
   document.getElementById("btnSave").style.display = "none";
 }
 
-function showChildForm(parentTable, parentField, getParentEntry, childField, data) {
+function showChildForm(depth, parentTable, parentField, getParentEntry, childField, data) {
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   let tr = document.createElement("tr");
@@ -125,9 +125,10 @@ function showChildForm(parentTable, parentField, getParentEntry, childField, dat
   for (let name in childFields[childField]) {
     if (childFields[childField][name].type == "hidden") continue;
     const th = document.createElement("th");
-    if (childFields[childField][name].type != "child-table") { // child tables self-label
-      th.appendChild(document.createTextNode(name));
-    }
+    th.className = childFields[childField][name].type;
+    const span = document.createElement("span");
+    span.appendChild(document.createTextNode(name));
+    th.appendChild(span);
     tr.appendChild(th);
     if (name != childField) showHeader = true;
   } // next field
@@ -146,7 +147,7 @@ function showChildForm(parentTable, parentField, getParentEntry, childField, dat
   const tbody = document.createElement("tbody");
   tbody.id = `rows-${childField}`;
   for (let r in data) { // for each child row
-    addChildRow(parentTable, parentField, getParentEntry, childField, tbody, data[r])
+    addChildRow(depth, parentTable, parentField, getParentEntry, childField, tbody, data[r])
   } // next child row
   
   table.appendChild(tbody);
@@ -162,7 +163,7 @@ function showChildForm(parentTable, parentField, getParentEntry, childField, dat
     if (!getParentEntry()) {
       alert("Please save this row first");
     } else {
-      const firstInput = addChildRow(parentTable, parentField, getParentEntry, childField, tbody, {});
+      const firstInput = addChildRow(depth, parentTable, parentField, getParentEntry, childField, tbody, {});
       if (firstInput) firstInput.focus();
     }
   });
@@ -173,7 +174,8 @@ function showChildForm(parentTable, parentField, getParentEntry, childField, dat
   return table;
 }
 
-function addChildRow(parentTable, parentField, getParentEntry, childField, rows, model) {
+function addChildRow(
+  depth, parentTable, parentField, getParentEntry, childField, rows, model) {
   let firstInput = null;
   
   const tr = document.createElement("tr");
@@ -300,11 +302,15 @@ function addChildRow(parentTable, parentField, getParentEntry, childField, rows,
       inputs[name] = input;
       if (!firstInput) firstInput = input;
     } else { // (grand)child-table
-      const values = document.createElement("details");
-      const label = document.createElement("summary");
-      label.appendChild(document.createTextNode(name));
-      values.appendChild(label);
-      td.appendChild(values);
+      let values = td;
+      if (depth > 1) { // deeper than grandchild table
+        // to avoid clutter, hide under a summary
+        values = document.createElement("details");
+        const label = document.createElement("summary");
+        label.appendChild(document.createTextNode(name));
+        values.appendChild(label);
+        td.appendChild(values);
+      }
       
       // get child field definitions
       const childTable = `${parentTable}_${childField}_${name}`;
@@ -327,7 +333,7 @@ function addChildRow(parentTable, parentField, getParentEntry, childField, rows,
             finishedLoading();
             values.appendChild(
               showChildForm(
-                `${parentTable}_${childField}`, "serial", ()=>model.serial||"", name, data));
+                depth+1, `${parentTable}_${childField}`, "serial", ()=>model.serial||"", name, data));
           }); // readChildEntries
         
       }); // readFields

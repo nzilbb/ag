@@ -6,7 +6,7 @@ body {
     margin: auto;
     height: 100%;
     width: 100%;
-    max-width: 800px;
+    max-width: 1000px;
 }
 
 h1 { font-size: 17pt; color: #859044; text-align: center; }
@@ -27,8 +27,6 @@ textarea { field-sizing: content; }
     display: flex;
     flex-direction: row;
 }
-.field:nth-child(odd)  { background: #EEEEEE; }
-.field:nth-child(even) { background: #FFFFFF; }
 .field label {
     width: 30%;
     display: block;
@@ -72,10 +70,29 @@ textarea { field-sizing: content; }
 
 fieldset table {
     width: 100%;
+    border-collapse: collapse;
 }
 
 th.save-column {
     width: 34px;
+}
+
+.field:nth-child(odd)  { background: #F0F0F0; }
+.field:nth-child(even) { background: #FFFFFF; }
+
+tbody tr:nth-child(odd)  { background: #E0E0E0; }
+tbody tr:nth-child(even) { background: #E7E7E7; }
+
+table table tbody tr:nth-child(odd)  { background: #D0D0D0; }
+table table tbody tr:nth-child(even) { background: #D7D7D7; }
+
+table table table tbody tr:nth-child(odd)  { background: #E0E0E0; }
+table table table tbody tr:nth-child(even) { background: #E7E7E7; }
+
+
+/* hide table headers for great-grand-child-tables and deeper, they label themselves */
+table table th.child-table span {
+    display: none;
 }
 
 button img {
