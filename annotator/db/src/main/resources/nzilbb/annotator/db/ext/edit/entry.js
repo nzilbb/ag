@@ -48,8 +48,7 @@ viewLink.href = "../entry.html?t="+encodeURIComponent(table)
 viewLink.appendChild(document.createTextNode(entry));
 document.getElementById("entry").appendChild(viewLink);
 
-const fields = {}; // definitions for fields (type/validation etc.)
-const childFields = {}; // definitions for child-table fields (key is child name)
+const tableFields = {}; // definitions for table fields (key is table name)
 
 function showForm(data) {
   if (data.DbTagger_error) {
@@ -58,6 +57,7 @@ function showForm(data) {
   }
   const attributes = document.getElementById("attributes");
   attributes.innerHTML = ""; // clear any existing list
+  const fields = tableFields[table];
   for (let name in fields) {
     if (fields[name].type == "hidden") continue;
     let row = document.createElement("div");
@@ -85,18 +85,9 @@ function showForm(data) {
       label = document.createElement("legend");
       label.appendChild(document.createTextNode(name));
       row.appendChild(label);
-      
-      // get child field definitions
-      const childTable = `${table}_${name}`;
-      getJSON(resourceForFunction("readFields", childTable), definitions => {
-        childFields[name] = {};
-        // build a dictionary of definitions
-        for (let definition of definitions) {
-          if (definition.field) {
-            childFields[name][definition.field] = definition;
-          }
-        } // next child field definition
 
+      // function for loading rows
+      const readChildEntries = function() {
         // get all field values for entry
         startLoading();
         getJSON(
@@ -105,8 +96,27 @@ function showForm(data) {
             row.appendChild(
               showChildForm(1, table, field, ()=>entry, name, data));
           }); // readChildEntries
-        
-      }); // readFields
+      };
+      
+      // get child field definitions
+      const childTable = `${table}_${name}`;
+      if (!tableFields[childTable]) { // we don't have the definition of this table yet
+        // load the table definition
+        getJSON(resourceForFunction("readFields", childTable), definitions => {
+          const fields = {};
+          // build a dictionary of definitions
+          for (let definition of definitions) {
+            if (definition.field) {
+              fields[definition.field] = definition;
+            }
+          } // next child field definition
+          tableFields[childTable] = fields
+          
+          readChildEntries();
+        }); // readFields
+      } else { // already have field definition
+        readChildEntries();
+      }
     } // child-table
     row.id = `row-${name}`;
     row.className = "field " + fields[name].type;
@@ -122,10 +132,11 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
   const thead = document.createElement("thead");
   let tr = document.createElement("tr");
   let showHeader = false; // if it's just a single field named after the parent-table field
-  for (let name in childFields[childField]) {
-    if (childFields[childField][name].type == "hidden") continue;
+  const fields = tableFields[`${parentTable}_${childField}`];
+  for (let name in fields) {
+    if (fields[name].type == "hidden") continue;
     const th = document.createElement("th");
-    th.className = childFields[childField][name].type;
+    th.className = fields[name].type;
     const span = document.createElement("span");
     span.appendChild(document.createTextNode(name));
     th.appendChild(span);
@@ -177,6 +188,7 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
 function addChildRow(
   depth, parentTable, parentField, getParentEntry, childField, rows, model) {
   let firstInput = null;
+  const fields = tableFields[`${parentTable}_${childField}`];
   
   const tr = document.createElement("tr");
   
@@ -192,7 +204,7 @@ function addChildRow(
   btnSave.style.display = "none"; // hidden to start with
   btnSave.addEventListener("click", function(e) {    
     // load data from inputs into model 
-    for (let name in childFields[childField]) {
+    for (let name in fields) {
       if (inputs[name]) { // (e.g. grandchild-table has no inputs entry)
         if (inputs[name].type == "checkbox") {
           model[name] = inputs[name].checked?"true":"false";
@@ -265,24 +277,24 @@ function addChildRow(
   });
   tdDelete.appendChild(btnDelete);
   
-  for (let name in childFields[childField]) {
+  for (let name in fields) {
     const td = document.createElement("td");
     td.title = name;
-    td.className = name + " " + childFields[childField][name].type;
+    td.className = name + " " + fields[name].type;
 
     // determine the initial value
     let value = model[name] || "";
     if (!value && !model.serial) { // serial not set - it's a new row
-      const defaultValue = childFields[childField][name].defaultValue;
+      const defaultValue = fields[name].defaultValue;
       if (defaultValue) {
         if (/^".+"$/.test(defaultValue)) { // a literal
           value = defaultValue.slice(1,-1); // strip quotes
         } else if (defaultValue.toLowerCase() == "now") { // current time
           const now = new Date(); // this is in UTC
           now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // use this timezone
-          if (childFields[childField][name].type == "date") {
+          if (fields[name].type == "date") {
             value = now.toISOString().slice(0,10); // date part only
-          } else if (childFields[childField][name].type == "datetime") {
+          } else if (fields[name].type == "datetime") {
             value = now.toISOString().slice(0,16); // date to minutes only
           } else {
             value = now.toLocaleString();
@@ -294,10 +306,10 @@ function addChildRow(
       }
     }
     
-    if (childFields[childField][name].type != "child-table") { // regular field
+    if (fields[name].type != "child-table") { // regular field
       // create the UI component for the field value
       const input = createFieldInput(
-        td, childFields[childField][name], (e)=>btnSave.style.display = null, value);
+        td, fields[name], (e)=>btnSave.style.display = null, value);
       // ensure the save function can access the input
       inputs[name] = input;
       if (!firstInput) firstInput = input;
@@ -312,17 +324,8 @@ function addChildRow(
         td.appendChild(values);
       }
       
-      // get child field definitions
-      const childTable = `${parentTable}_${childField}_${name}`;
-      getJSON(resourceForFunction("readFields", childTable), definitions => {
-        childFields[name] = {};
-        // build a dictionary of definitions
-        for (let definition of definitions) {
-          if (definition.field) {
-            childFields[name][definition.field] = definition;
-          }
-        } // next child field definition
-
+      // function for loading rows
+      const readChildEntries = function() {
         // get all field values for entry
         startLoading();
         getJSON(
@@ -335,8 +338,26 @@ function addChildRow(
               showChildForm(
                 depth+1, `${parentTable}_${childField}`, "serial", ()=>model.serial||"", name, data));
           }); // readChildEntries
-        
-      }); // readFields
+      };
+      
+      // get child field definitions
+      const childTable = `${parentTable}_${childField}_${name}`;
+      if (!tableFields[childTable]) { // we don't have the table definition yet
+        getJSON(resourceForFunction("readFields", childTable), definitions => {
+          const fields = {};
+          // build a dictionary of definitions
+          for (let definition of definitions) {
+            if (definition.field) {
+              fields[definition.field] = definition;
+            }
+          } // next child field definition
+          tableFields[childTable] = fields;
+
+          readChildEntries();
+        }); // readFields
+      } else { // already have the table definitions
+        readChildEntries();
+      }
     } // (grand)child-table
     
     tr.appendChild(td);
@@ -646,11 +667,13 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
 getJSON(resourceForFunction("readFields", table), definitions => {
 
   // build a dictionary of definitions
+  const fields = {};
   for (let definition of definitions) {
     if (definition.field) {
       fields[definition.field] = definition;
     }
   } // next field definition
+  tableFields[table] = fields;
 
   // get all field values for entry
   getJSON(resourceForFunction("readEntry", table, field, entry), data => {
@@ -668,6 +691,7 @@ document.getElementById("btnSave").addEventListener("click", function (e) {
   fd.append("f", field);
   fd.append("e", entry);
   const data = {};
+  const fields = tableFields[table];
   for (let name in fields) {
     const input = document.getElementById(`attribute-${name}`);    
     if (input) {      
