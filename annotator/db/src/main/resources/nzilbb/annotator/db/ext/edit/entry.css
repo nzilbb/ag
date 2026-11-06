@@ -87,11 +87,6 @@ th.save-column {
     background: #FFFFFF;
 }
 
-/* hide table headers for great-grand-child-tables and deeper, they label themselves */
-table table th.child-table span {
-    display: none;
-}
-
 button img {
     width: 16px;
     height: 16px;
