@@ -80,18 +80,12 @@ th.save-column {
     width: 34px;
 }
 
-.field:nth-child(odd)  { background: #F0F0F0; }
-.field:nth-child(even) { background: #FFFFFF; }
-
-tbody tr:nth-child(odd)  { background: #E0E0E0; }
-tbody tr:nth-child(even) { background: #E7E7E7; }
-
-table table tbody tr:nth-child(odd)  { background: #D0D0D0; }
-table table tbody tr:nth-child(even) { background: #D7D7D7; }
-
-table table table tbody tr:nth-child(odd)  { background: #E0E0E0; }
-table table table tbody tr:nth-child(even) { background: #E7E7E7; }
-
+.field:nth-child(odd),  fieldset > table > tbody > tr:nth-child(odd)  {
+    background: #EEEEEE;
+}
+.field:nth-child(even), fieldset > table > tbody > tr:nth-child(even) {
+    background: #FFFFFF;
+}
 
 /* hide table headers for great-grand-child-tables and deeper, they label themselves */
 table table th.child-table span {
@@ -103,6 +97,24 @@ button img {
     height: 16px;
     vertical-align: middle;
     vertical-align: center; /* for Firefox, ignored by Chrome */
+}
+
+inline-details {
+    display: flex;
+    flex-direction: row;
+    white-space: nowrap;
+}
+inline-details > inline-summary {
+    cursor: pointer;
+    display: list-item;
+    list-style-position: inside;
+    list-style-type: disclosure-closed;
+}
+inline-details[open] > inline-summary {
+    list-style-type: disclosure-open;
+}
+inline-details:not([open]) > *:not(inline-summary) {
+    display: none;
 }
 
 footer {

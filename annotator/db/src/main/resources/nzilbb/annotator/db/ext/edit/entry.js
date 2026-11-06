@@ -102,6 +102,7 @@ function showForm(data) {
       const childTable = `${table}_${name}`;
       if (!tableFields[childTable]) { // we don't have the definition of this table yet
         // load the table definition
+        
         getJSON(resourceForFunction("readFields", childTable), definitions => {
           const fields = {};
           // build a dictionary of definitions
@@ -127,7 +128,7 @@ function showForm(data) {
   document.getElementById("btnSave").style.display = "none";
 }
 
-function showChildForm(depth, parentTable, parentField, getParentEntry, childField, data) {
+function showChildForm(depth, parentTable, parentField, getParentEntry, childField, data, countId) {
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   let tr = document.createElement("tr");
@@ -158,7 +159,8 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
   const tbody = document.createElement("tbody");
   tbody.id = `rows-${childField}`;
   for (let r in data) { // for each child row
-    addChildRow(depth, parentTable, parentField, getParentEntry, childField, tbody, data[r])
+    addChildRow(
+      depth, parentTable, parentField, getParentEntry, childField, tbody, data[r], countId);
   } // next child row
   
   table.appendChild(tbody);
@@ -174,8 +176,17 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
     if (!getParentEntry()) {
       alert("Please save this row first");
     } else {
-      const firstInput = addChildRow(depth, parentTable, parentField, getParentEntry, childField, tbody, {});
+      const firstInput = addChildRow(
+        depth, parentTable, parentField, getParentEntry, childField, tbody, {}, countId);
+      if (countId) {
+        const count = document.getElementById(countId);
+        if (count) {
+          count.count++;
+          count.innerHTML = `(${count.count})`;
+        }
+      }
       if (firstInput) firstInput.focus();
+        
     }
   });
   td.appendChild(btnCreate);
@@ -185,12 +196,14 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
   return table;
 }
 
+let childRowsId = 0; // for generating unique IDs
 function addChildRow(
-  depth, parentTable, parentField, getParentEntry, childField, rows, model) {
+  depth, parentTable, parentField, getParentEntry, childField, rows, model, countId) {
   let firstInput = null;
   const fields = tableFields[`${parentTable}_${childField}`];
   
   const tr = document.createElement("tr");
+  childRowsId++;
   
   const tdSave = document.createElement("td");
   tdSave.className = "save-column";
@@ -264,14 +277,28 @@ function addChildRow(
                   } else {
                     // remove the row from the table
                     tr.remove();
-                    // esnure UI has time to remove the row
+                    // ensure UI has time to remove the row
                     setTimeout(()=>alert(`${childField} deleted.`), 100);
+                    if (countId) { // update summary count
+                      const count = document.getElementById(countId);
+                      if (count) {
+                        count.count--;
+                        count.innerHTML = `(${count.count})`;
+                      }
+                    }                    
                   }
                 });
       } else { // a new row
         tr.remove();
         // esnure UI has time to remove the row
         setTimeout(()=>alert(`${childField} deleted.`), 100);
+        if (countId) { // update summary count
+          const count = document.getElementById(countId);
+          if (count) {
+            count.count--;
+            count.innerHTML = `(${count.count})`;
+          }
+        }                    
       }
     } // yes I'm sure
   });
@@ -314,12 +341,15 @@ function addChildRow(
       inputs[name] = input;
       if (!firstInput) firstInput = input;
     } else { // (grand)child-table
+      const childTable = `${parentTable}_${childField}_${name}`;
+      const countId = `count-${childTable}-${childRowsId}`;
       let values = td;
       if (depth > 1) { // deeper than grandchild table
         // to avoid clutter, hide under a summary
-        values = document.createElement("details");
-        const label = document.createElement("summary");
-        label.appendChild(document.createTextNode(name));
+        values = document.createElement("inline-details");
+        const label = document.createElement("inline-summary");
+        label.id = countId;
+        label.onclick = ()=>{ values.toggleAttribute("open"); };
         values.appendChild(label);
         td.appendChild(values);
       }
@@ -336,12 +366,21 @@ function addChildRow(
             finishedLoading();
             values.appendChild(
               showChildForm(
-                depth+1, `${parentTable}_${childField}`, "serial", ()=>model.serial||"", name, data));
+                depth+1, `${parentTable}_${childField}`, "serial", ()=>model.serial||"", name, data, countId));
+            if (depth > 0) { // deeper than grandchild table
+              const count = document.getElementById(countId);
+              if (count) {
+                count.count = data.length; // add/delete causes updates later...
+                count.innerHTML = `(${data.length})`;
+              }
+              if (data.length <= 4) {
+                values.setAttribute("open", true);
+              }
+            }
           }); // readChildEntries
       };
       
-      // get child field definitions
-      const childTable = `${parentTable}_${childField}_${name}`;
+      // get child field definitions      
       if (!tableFields[childTable]) { // we don't have the table definition yet
         getJSON(resourceForFunction("readFields", childTable), definitions => {
           const fields = {};

@@ -136,8 +136,9 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
   let showHeader = false; // if it's just a single field named after the parent-table field
   const fields = tableFields[`${parentTable}_${childField}`];
   for (let name in fields) {
+    if (fields[name].type == "hidden") continue;
     const th = document.createElement("th");
-    th.appendChild(document.createTextNode(name));
+    th.className = fields[name].type;
     const span = document.createElement("span");
     span.appendChild(document.createTextNode(name));
     th.appendChild(span);
@@ -159,10 +160,12 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
   return table;
 }
 
+let childRowsId = 0; // for generating unique IDs
 function addChildRow(
   depth, parentTable, parentField, getParentEntry, childField, rows, model) {
   const fields = tableFields[`${parentTable}_${childField}`];
-  const tr = document.createElement("tr");    
+  const tr = document.createElement("tr");
+  childRowsId++;
   for (let name in fields) {
     if (fields[name].type == "hidden") continue;
     const td = document.createElement("td");
@@ -173,12 +176,15 @@ function addChildRow(
       createFieldValue(
         td, fields[name], model[name] || "");
     } else { // (grand)child-table
+      const childTable = `${parentTable}_${childField}_${name}`;
+      const countId = `count-${childTable}-${childRowsId}`;
       let values = td;
       if (depth > 1) { // deeper than grandchild table
         // to avoid clutter, hide under a summary
-        values = document.createElement("details");
-        const label = document.createElement("summary");
-        label.appendChild(document.createTextNode(name));
+        values = document.createElement("inline-details");
+        const label = document.createElement("inline-summary");
+        label.id = countId;
+        label.onclick = ()=>{ values.toggleAttribute("open"); };        
         values.appendChild(label);
         td.appendChild(values);
       }
@@ -196,11 +202,17 @@ function addChildRow(
             values.appendChild(
               showChildForm(
                 depth+1, `${parentTable}_${childField}`, "serial", ()=>model.serial||"", name, data));
+            if (depth > 0) { // deeper than grandchild table
+              document.getElementById(countId).innerHTML = `(${data.length})`;
+              if (data.length <= 4) {
+                values.setAttribute("open", true);
+              }
+            }
+
           }); // readChildEntries
       };
       
       // get child field definitions
-      const childTable = `${parentTable}_${childField}_${name}`;
       if (!tableFields[childTable]) { // we don't have the table definition yet
         getJSON(resourceForFunction("readFields", childTable), definitions => {
           const fields = {};
