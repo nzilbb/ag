@@ -80,6 +80,13 @@ function showForm(data) {
           data[name]);
       }
       row.appendChild(value);
+      
+      let hint = document.createElement("span");
+      hint.id = `hint-${name}`;
+      hint.className = "hint";
+      hint.appendChild(document.createTextNode(fields[name].hint||""));
+      row.appendChild(hint);
+      
     } else { // child-table
       row = document.createElement("fieldset");
       label = document.createElement("legend");
@@ -121,7 +128,7 @@ function showForm(data) {
     } // child-table
     row.id = `row-${name}`;
     row.className = "field " + fields[name].type;
-    row.title = name;
+    row.title = name + (fields[name].hint?" - " + fields[name].hint:"");
     attributes.appendChild(row);
   } // next field
   // hide save button
@@ -138,6 +145,7 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
     if (fields[name].type == "hidden") continue;
     const th = document.createElement("th");
     th.className = fields[name].type;
+    if (fields[name].hint) th.title = fields[name].hint;
     const span = document.createElement("span");
     span.appendChild(document.createTextNode(name));
     th.appendChild(span);
@@ -337,6 +345,7 @@ function addChildRow(
       // create the UI component for the field value
       const input = createFieldInput(
         td, fields[name], (e)=>btnSave.style.display = null, value);
+      if (fields[name].hint) input.title = fields[name].hint;
       // ensure the save function can access the input
       inputs[name] = input;
       if (!firstInput) firstInput = input;
@@ -567,17 +576,18 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
     input.type = "date";
   } else if (fieldDefinition.type == "datetime") {
     input.type = "datetime-local";
-  } else if (fieldDefinition.type == "boolean" && !fieldDefinition.validation) {
+  } else if (fieldDefinition.type == "boolean") {
     input.type = "checkbox";
-    input.value = "true";
+    input.value = fieldDefinition.validation||"true";
   } else if (fieldDefinition.type == "text") {
     input = document.createElement("textarea");
   } else if (fieldDefinition.type == "html") { 
     input = document.createElement("textarea"); // attach the editor later...
   }
   if (fieldDefinition.validation
-      // except validation is repurposed for cross-references:
-      && fieldDefinition.type != "cross-reference") {
+      // except validation is repurposed for cross-references/boolean:
+      && fieldDefinition.type != "cross-reference"
+      && fieldDefinition.type != "boolean") {
     const lookupPattern = /^lookup:(.*)\.(.*)$/;
     // if it's just a list of alternative, e.g. "option1|option2|option3"
     if (/^\|?(.+\|)+.+/.test(fieldDefinition.validation)) { // implement as a select instead
@@ -657,7 +667,7 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
   input.id = `attribute-${fieldDefinition.field}`;
   input.placeholder = fieldDefinition.field;
   if (fieldDefinition.type == "boolean") { // it's a checkbox
-    input.checked = value == "true";
+    input.checked = value == (fieldDefinition.validation||"true");
   } else {
     input.value = value || "";
   }
@@ -742,7 +752,7 @@ document.getElementById("btnSave").addEventListener("click", function (e) {
         if (input.editor) {
           data[name] = input.editor.getData();
         } else if (input.type == "checkbox") {
-          data[name] = input.checked?"true":"false";
+          data[name] = input.checked?input.value:"";
         } else {
           data[name] = input.value;
         }

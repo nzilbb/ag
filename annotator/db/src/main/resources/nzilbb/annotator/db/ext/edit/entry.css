@@ -31,8 +31,19 @@ textarea { field-sizing: content; }
     width: 30%;
     display: block;
 }
-.field span {
+.field span.value {
+    width: 30%;
+}
+.field span.hint {
+    width: 40%;
+    margin-left: 5px;
+    font-style: italic;
+}
+.field.geo-location span.value, .field.text span.value {
     width: 70%;
+}
+.field.geo-location span.hint, .field.text span.hint {
+    display: none;
 }
 .field input, .field textarea {
     width: 99%;

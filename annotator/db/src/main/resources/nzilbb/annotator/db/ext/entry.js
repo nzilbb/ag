@@ -298,7 +298,7 @@ function createFieldValue(valueElement, fieldDefinition, value) {
     } else if (fieldDefinition.type == "html") {
       span.innerHTML = value;
     } else if (fieldDefinition.type == "boolean") {
-      if (value == "true") span.innerHTML = "✔";
+      span.innerHTML = (value == "true"?"✔":value);
     } else if (fieldDefinition.type == "date") {
       if (value) {
         const date = new Date(value);

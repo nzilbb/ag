@@ -108,6 +108,18 @@ function newField(attributes, field) {
     }
     row.appendChild(validation);
     
+    let hint = document.createElement("input");
+    hint.type = "text"
+    hint.id = `hint-${field.field}`;
+    hint.placeholder = "Hint";
+    hint.title = "Information to help users understand how to use the field.";
+    hint.value = field.hint||"";
+    hint.onkeyup = hint.onchange = function(e) {
+      // show save button
+      document.getElementById(`save-${field.field}`).disabled = false;
+    }
+    row.appendChild(hint);
+    
     let btnSave = document.createElement("button");
     btnSave.id = `save-${field.field}`;
     btnSave.className = "save";
@@ -157,8 +169,10 @@ function saveField(field) {
   const defaultValue = document.getElementById(`default-value-${field}`)?
         document.getElementById(`default-value-${field}`).value:"";
   const validation = document.getElementById(`validation-${field}`).value;
+  const hint = document.getElementById(`hint-${field}`).value;
   startLoading();
-  getText(resourceForFunction("updateField", table, field, type, defaultValue, validation),
+  getText(resourceForFunction(
+    "updateField", table, field, defaultValue, validation, hint, type),
           error => {
             document.getElementById("error").innerText = error;
             document.getElementById(`save-${field}`).disabled = true;
@@ -208,7 +222,7 @@ document.getElementById("newFieldType").onchange = function(e) {
     const field = prompt(`Enter a name for the new ${type}`);
     if (field) {
       startLoading();
-      getText(resourceForFunction("createField", table, field, type),
+      getText(resourceForFunction("createField", table, field, "", "", "", type),
               error => {
                 document.getElementById("error").innerText = error;
                 if (!error) {
