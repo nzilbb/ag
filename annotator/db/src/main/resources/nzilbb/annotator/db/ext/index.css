@@ -36,14 +36,27 @@ label:after {
     flex-direction: row;
 }
 .field label {
-    width: 50%;
+    width: 30%;
     display: block;
 }
-.field span {
-    width: 50%;
+.field span.value {
+    width: 30%;
 }
-.field input[type="number"] {
-    width: 75px;
+.field span.hint {
+    width: 40%;
+    margin-left: 5px;
+}
+.field.text span.value {
+    width: 70%;
+}
+.field.text span.hint {
+    display: none;
+}
+.field.geo-location span.value {
+    display: none;
+}
+.field.geo-location span.hint {
+    width: 70%;
 }
 
 a img, button img {

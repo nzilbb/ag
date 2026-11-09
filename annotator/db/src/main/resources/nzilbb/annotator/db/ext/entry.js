@@ -48,6 +48,13 @@ function showForm(data) {
       value.className = "value";
       createFieldValue(value, fields[name], data[name]);
       row.appendChild(value);
+      
+      let hint = document.createElement("span");
+      hint.id = `hint-${name}`;
+      hint.className = "hint";
+      hint.appendChild(document.createTextNode(fields[name].hint||""));
+      row.appendChild(hint);
+      
     } else { // child-table
       row = document.createElement("fieldset");
       label = document.createElement("legend");
@@ -88,7 +95,7 @@ function showForm(data) {
     } // child table
     row.id = `row-${name}`;
     row.className = "field " + fields[name].type;
-    row.title = name;
+    row.title = name + (fields[name].hint?" - " + fields[name].hint:"");
     attributes.appendChild(row);
     if (data[name] && fields[name].type == "geo-location") {
       // add a map showing the location
@@ -139,6 +146,7 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
     if (fields[name].type == "hidden") continue;
     const th = document.createElement("th");
     th.className = fields[name].type;
+    if (fields[name].hint) th.title = fields[name].hint;
     const span = document.createElement("span");
     span.appendChild(document.createTextNode(name));
     th.appendChild(span);
@@ -175,6 +183,7 @@ function addChildRow(
       // create the UI component for the field value
       createFieldValue(
         td, fields[name], model[name] || "");
+      if (fields[name].hint) td.title = fields[name].hint;
     } else { // (grand)child-table
       const childTable = `${parentTable}_${childField}_${name}`;
       const countId = `count-${childTable}-${childRowsId}`;

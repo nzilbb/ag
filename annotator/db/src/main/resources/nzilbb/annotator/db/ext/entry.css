@@ -31,7 +31,24 @@ label:after {
     width: 30%;
     display: block;
 }
-.field span {
+.field span.value {
+    width: 30%;
+}
+.field span.hint {
+    width: 40%;
+    margin-left: 5px;
+    font-style: italic;
+}
+.field.text span.value {
+    width: 70%;
+}
+.field.text span.hint {
+    display: none;
+}
+.field.geo-location span.value {
+    display: none;
+}
+.field.geo-location span.hint {
     width: 70%;
 }
 .field span.text {

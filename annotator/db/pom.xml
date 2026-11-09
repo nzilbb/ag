@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.db</artifactId>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
 
   <name>nzilbb.annotator.db</name>
   <description>Annotator for tagging entities from an editable relational database.</description>
@@ -26,7 +26,7 @@
     <dependency>
       <groupId>nz.ilbb.ag</groupId>
       <artifactId>nzilbb.ag</artifactId>
-      <version>1.4.0</version>
+      <version>2.0.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -153,7 +153,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <trimStackTrace>true</trimStackTrace>
+          <trimStackTrace>false</trimStackTrace>
         </configuration>
       </plugin>
       <!-- copy info.html as the 'site' index (wrapping it in html/body tags) -->

@@ -136,7 +136,7 @@ public class DbTagger extends Annotator {
     try {
       
       try {        
-        // check the schema has been created
+        // check the 'table' table has been created
         // either of prepareStatement or executeQuery may fail if the table doesn't exist
         try (PreparedStatement sql = rdb.prepareStatement(
                sqlx.apply("SELECT table_id, name FROM "+getAnnotatorId()+"_table"))) {
@@ -145,6 +145,7 @@ public class DbTagger extends Annotator {
         } // sql.close()
       } catch(SQLException exception) { // table table does't exist
         
+        setStatus("Creating 'table' table.");
         try(PreparedStatement sql = rdb.prepareStatement(
               sqlx.apply(
                 "CREATE TABLE "+getAnnotatorId()+"_table ("
@@ -159,18 +160,37 @@ public class DbTagger extends Annotator {
                 +") ENGINE=MyISAM;"))) {
           sql.executeUpdate();
         } // sql.close();
-      } // table table does't exist
+      } // table table doesn't exist
       
       try {        
-        // check the schema has been created
+        // check the 'field' table has been created
         // either of prepareStatement or executeQuery may fail if the table doesn't exist
         try (PreparedStatement sql = rdb.prepareStatement(
                sqlx.apply("SELECT table_id, field FROM "+getAnnotatorId()+"_field"))) {
           try (ResultSet rsCheck = sql.executeQuery()) {
           } // rsCheck.close()
         } // sql.close()
+
+        try {
+          // check the 'field' table includes 'hint' column
+          try (PreparedStatement sql = rdb.prepareStatement(
+                 sqlx.apply("SELECT hint FROM "+getAnnotatorId()+"_field"))) {
+            try (ResultSet rsCheck = sql.executeQuery()) {
+            } // rsCheck.close()
+          } // sql.close()
+        } catch (SQLException exception) { // no 'hint' field'
+          // create it
+          setStatus("Creating 'hint' column.");
+          try (PreparedStatement sql = rdb.prepareStatement(
+                 sqlx.apply(
+                   "ALTER TABLE "+getAnnotatorId()+"_field ADD COLUMN"
+                   +" hint TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"))) {
+            sql.executeUpdate();
+          } // sql.close();
+        }
       } catch(SQLException exception) { // field table doesn't exist
         // create it
+        setStatus("Creating 'field' table.");
         try (PreparedStatement sql = rdb.prepareStatement(
                sqlx.apply(
                  "CREATE TABLE "+getAnnotatorId()+"_field ("
@@ -186,6 +206,8 @@ public class DbTagger extends Annotator {
                  +" COMMENT 'Constraints on values',"
                  +" ordinal INTEGER NOT NULL DEFAULT 0"
                  +" COMMENT 'Determines order between fields',"
+                 +" hint TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
+                 +" COMMENT 'Help text describing the field',"
                  +" PRIMARY KEY (table_id, field)"
                  +") ENGINE=MyISAM;"))) {
           sql.executeUpdate();
@@ -667,7 +689,7 @@ public class DbTagger extends Annotator {
    * @return An error message if creation failed. Otherwise, an empty string.
    */
   @ApiEndpoint("admin") public String createField(String table, String field) throws SQLException {
-    return createField(table, field, "string", "");
+    return createField(table, field, "", "", "", "string");
   }
   
   /**
@@ -679,34 +701,22 @@ public class DbTagger extends Annotator {
    */
   @ApiEndpoint("admin") public String createField(
     String table, String field, String type) throws SQLException {
-    return createField(table, field, type, "", "");
+    return createField(table, field, "", "", "", type);
   }
   
   /**
    * Create a new field in the given table.
    * @param table The table ID.
    * @param field The name of the field.
-   * @param type The field type.
-   * @param defaultValue The default value for new rows.
-   * @return An error message if creation failed. Otherwise, an empty string.
-   */
-  @ApiEndpoint("admin") public String createField(
-    String table, String field, String type, String defaultValue)
-    throws SQLException {
-    return createField(table, field, type, defaultValue, "");
-  }
-  
-  /**
-   * Create a new field in the given table.
-   * @param table The table ID.
-   * @param field The name of the field.
-   * @param type The field type.
    * @param defaultValue The default value for new rows.
    * @param validation The constraints on the field values.
+   * @param hint Information to help users understand how to use the field.
+   * @param type The field type.
    * @return An error message if creation failed. Otherwise, an empty string.
    */
   @ApiEndpoint("admin") public String createField(
-    String table, String field, String type, String defaultValue, String validation)
+    String table, String field, String defaultValue, String validation, String hint,
+    String type)
     throws SQLException {
     try (Connection rdb = newConnection()) {
       // find the table
@@ -742,14 +752,15 @@ public class DbTagger extends Annotator {
         try (PreparedStatement sqlInsertFieldRow = rdb.prepareStatement(
                sqlx.apply(
                  "INSERT INTO "+getAnnotatorId()+"_field" // TODO ordinal
-                 +" (table_id, field, type, default_value, validation, ordinal)"
-                 +" VALUES (?,?,?,?,?,?)"))) {
+                 +" (table_id, field, type, default_value, validation, hint, ordinal)"
+                 +" VALUES (?,?,?,?,?,?,?)"))) {
           sqlInsertFieldRow.setInt(1, tableId);
           sqlInsertFieldRow.setString(2, field);
           sqlInsertFieldRow.setString(3, type);
           sqlInsertFieldRow.setString(4, defaultValue);
           sqlInsertFieldRow.setString(5, validation);
-          sqlInsertFieldRow.setInt(6, ordinal);
+          sqlInsertFieldRow.setString(6, hint);
+          sqlInsertFieldRow.setInt(7, ordinal);
           sqlInsertFieldRow.executeUpdate();
 
           if ("child-table".equals(type)) { // 1-to-n child table instead of field
@@ -866,6 +877,7 @@ public class DbTagger extends Annotator {
               field.put("type", rsFields.getString("type"));
               field.put("defaultValue", rsFields.getString("default_value"));
               field.put("validation", rsFields.getString("validation"));
+              field.put("hint", rsFields.getString("hint"));
               fields.add(field);
             } // next field
           } // rsFields.close()
@@ -894,7 +906,7 @@ public class DbTagger extends Annotator {
    * @return An error message if update failed. Otherwise, an empty string.
    */
   @ApiEndpoint("admin") public String updateField(String table, String field, String type) throws SQLException {
-    return updateField(table, field, type, "","");
+    return updateField(table, field, "","","", type);
   }
   /**
    * Update an existing field in the given table.
@@ -907,19 +919,21 @@ public class DbTagger extends Annotator {
   @ApiEndpoint("admin") public String updateField(
     String table, String field, String type, String defaultValue)
     throws SQLException {
-    return updateField(table, field, type, defaultValue,"");
+    return updateField(table, field, defaultValue,"","", type);
   }
   /**
    * Update an existing field in the given table.
    * @param table The table ID.
    * @param field The name of the field.
-   * @param type The field type.
    * @param defaultValue The default value for new rows.
    * @param validation The constraints on the field values.
+   * @param hint Information to help users understand how to use the field.
+   * @param type The field type.
    * @return An error message if update failed. Otherwise, an empty string.
    */
   @ApiEndpoint("admin") public String updateField(
-    String table, String field, String type, String defaultValue, String validation)
+    String table, String field, String defaultValue, String validation, String hint,
+    String type)
     throws SQLException {
     try (Connection rdb = newConnection()) {
       // find the table
@@ -933,13 +947,14 @@ public class DbTagger extends Annotator {
         try (PreparedStatement sqlUpdateFieldRow = rdb.prepareStatement(
                sqlx.apply(
                  "UPDATE "+getAnnotatorId()+"_field" // TODO ordinal
-                 +" SET type = ?, default_value = ?, validation = ?"
+                 +" SET type = ?, default_value = ?, validation = ?, hint = ?"
                  +" WHERE table_id = ? AND field = ?"))) {
           sqlUpdateFieldRow.setString(1, type);
           sqlUpdateFieldRow.setString(2, defaultValue);
           sqlUpdateFieldRow.setString(3, validation);
-          sqlUpdateFieldRow.setInt(4, tableId);
-          sqlUpdateFieldRow.setString(5, field);
+          sqlUpdateFieldRow.setString(4, hint);
+          sqlUpdateFieldRow.setInt(5, tableId);
+          sqlUpdateFieldRow.setString(6, field);
           if (sqlUpdateFieldRow.executeUpdate() == 0) {
             return "No such field \""+field+"\" in " + table;
           }

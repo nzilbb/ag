@@ -6,7 +6,7 @@ body {
     margin: auto;
     height: 100%;
     width: 100%;
-    max-width: 800px;
+    max-width: 1000px;
 }
 
 details>summary {
@@ -46,14 +46,14 @@ label:after {
     align-items: center;
 }
 .field label {
-    width: 30%;
+    width: 25%;
     display: block;
 }
 .field select {
-    width: 35%;
+    width: 25%;
 }
 .field input {
-    width: 35%;
+    width: 25%;
 }
 .field span.type {
     width: 35%;
