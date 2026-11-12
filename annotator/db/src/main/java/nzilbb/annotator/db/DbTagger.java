@@ -1177,6 +1177,105 @@ public class DbTagger extends Annotator {
   } // end of readEntry()
   
   /**
+   * Get the first <var>n</var> entries of the given table that match the given pattern
+   * in the given field.
+   * @param table The table ID.
+   * @param field The field used to identify the entries.
+   * @param pattern A regular expression to match in the values of <var>field</var>,
+   * which identifies the rows to return.
+   * @param maxRows The maximum number of rows to return.
+   * @return A list of rows, each row being an object with keys/values for the fields.
+   */
+  @ApiEndpoint("admin") public List<Map<String,String>> readEntries(
+    String table, String field, String pattern, int maxRows)
+    throws SQLException {
+    List<Map<String,String>> entries = new Vector<Map<String,String>>();
+    try (Connection rdb = newConnection()) {
+      // find the table
+      int tableId = tableId(rdb, table);
+      if (tableId >= 0) {            
+        String sTableName = getAnnotatorId()+"_table_"+tableId;
+        try {
+          try (PreparedStatement selectEntries = rdb.prepareStatement(
+                 sqlx.apply(
+                   "SELECT * FROM "+sTableName
+                   +" WHERE `"+field.replace(';',' ')+"` REGEXP ?"
+                   +" LIMIT ?"))) {
+            selectEntries.setString(1, pattern);
+            selectEntries.setInt(2, maxRows);
+            try (ResultSet rows = selectEntries.executeQuery()) {
+              while (rows.next()) {
+                Map<String,String> values = new LinkedHashMap<String,String>();
+                entries.add(values);
+                ResultSetMetaData meta = rows.getMetaData();
+                for (int c = 1; c <= meta.getColumnCount(); c++) {
+                  String f = meta.getColumnName(c);
+                  if (f.equalsIgnoreCase("serial")) {
+                    // derby makes this uppercase, we don't want that
+                    values.put(f.toLowerCase(), rows.getString(f));
+                  } else if(!f.equalsIgnoreCase("supplemental")) {
+                    values.put(f, rows.getString(f));
+                  }
+                } // next column
+              } // next row
+            } // rows.close()
+          } // selectEntries.close()
+        } catch(SQLException exception) { // maybe we're running in Derby?
+          // try LIKE instead
+          try {
+            try (PreparedStatement selectEntries = rdb.prepareStatement(
+                   sqlx.apply(
+                     "SELECT * FROM "+sTableName
+                     +" WHERE `"+field.replace(';',' ')+"` LIKE ?"
+                     +" FETCH FIRST ? ROWS ONLY"))) {
+              selectEntries.setString(1, "%"+pattern+"%");
+              if (".*".equals(pattern)) selectEntries.setString(1, "%"); // match everything
+              selectEntries.setInt(2, maxRows);
+              try (ResultSet rows = selectEntries.executeQuery()) {
+                while (rows.next()) {
+                  Map<String,String> values = new LinkedHashMap<String,String>();
+                  entries.add(values);
+                  ResultSetMetaData meta = rows.getMetaData();
+                  for (int c = 1; c <= meta.getColumnCount(); c++) {
+                    String f = meta.getColumnName(c);
+                    if (f.equalsIgnoreCase("serial")) {
+                      // derby makes this uppercase, we don't want that
+                      values.put(f.toLowerCase(), rows.getString(f));
+                    } else if(!f.equalsIgnoreCase("supplemental")) {
+                      values.put(f, rows.getString(f));
+                    }
+                  } // next column
+                } // next row
+              } // rows.close()
+            } // selectEntries.close()
+          } catch(SQLException exception2) { // LIKE didn't work
+            // report the original exception
+            System.err.println(
+              "DbTagger.readEntries("+table+", "+field+", "+pattern+"): "+exception);
+            entries.add(new LinkedHashMap<String,String>(){{
+              put("DbTagger_error", exception.getMessage());
+            }});
+          } // LIKE didn't work
+        } // SQLException
+      } else {
+        System.err.println(
+          "DbTagger.readEntries("+table+", "+field+", "+pattern
+          +"): Nonexistent table.");
+        entries.add(new LinkedHashMap<String,String>(){{
+          put("DbTagger_error", "Nonexistent table: " + table);
+        }});
+      }
+    } catch (Exception x) {
+      System.err.println(
+        "DbTagger.readEntries("+table+", "+field+", "+pattern+"): "+x);
+      entries.add(new LinkedHashMap<String,String>(){{
+        put("DbTagger_error", x.getMessage());
+      }});
+    } // rdb.close()
+    return entries;
+  } // end of readEntries()
+  
+  /**
    * Get all values for the given entry.
    * @param table The table ID.
    * @param field The field used to identify the entry.
@@ -1195,6 +1294,7 @@ public class DbTagger extends Annotator {
         String sTableName = getAnnotatorId()+"_table_"+tableId;
         try {
           LinkedHashMap<String,String> values = new LinkedHashMap<String,String>();
+          if (field.equalsIgnoreCase("serial")) field = "SERIAL"; // derby likes uppercase
           String s = sqlx.apply(
             "SELECT * FROM "+sTableName+" WHERE `"+field.replace(';',' ')+"` = ?");
           try (PreparedStatement selectEntry = rdb.prepareStatement(s)) {
@@ -1249,6 +1349,7 @@ public class DbTagger extends Annotator {
         } catch(SQLException exception) {
           System.err.println(
             "DbTagger.updateEntry("+table+", "+field+", "+entry+"): "+exception);
+          exception.printStackTrace(System.err);
           return new LinkedHashMap<String,String>(){{
             put("DbTagger_error", exception.getMessage());
           }};
@@ -1368,6 +1469,55 @@ public class DbTagger extends Annotator {
       System.err.println(
         "createChildEntry("+parentTable+", "+field+", "+entry+", "+childField+"): "+x);
       newEntry.put("DbTagger_error", x.getMessage());
+    } // rdb.close()
+    return newEntry;
+  }
+  
+  /**
+   * Creates a top level entry.
+   * @param table The parent table name.
+   * @param data JSON representation of the new entry's attribute values.
+   * @return The keys/values for the entry.
+   */
+  @ApiEndpoint("admin") public Map<String,String> createEntry(
+    String table, String data) throws SQLException {
+    JsonObject json = Json.createReader(new StringReader(data)).readObject();
+    LinkedHashMap<String,String> newEntry = new LinkedHashMap<String,String>();
+    try (Connection rdb = newConnection()) {
+      int tableId = tableId(rdb, table);
+      if (tableId >= 0) {            
+        String sTableName = getAnnotatorId()+"_table_"+tableId;
+        List<Map<String,String>> fields = readFields(table);
+        String columnList = fields.stream()
+          .filter(def->!"child-table".equals(def.get("type")))
+          .map(def->"`"+def.get("field")+"`")
+          .collect(Collectors.joining(","));
+        String argumentList = fields.stream()
+          .filter(def->!"child-table".equals(def.get("type")))
+          .map(def->"?").collect(Collectors.joining(","));
+        try (PreparedStatement insertEntry = rdb.prepareStatement(
+               sqlx.apply("INSERT INTO "+sTableName
+                          +" (supplemental,"+columnList+")"
+                          +" VALUES (1,"+argumentList+")"))) {
+          int p = 1;
+          for (Map<String,String> f : fields) {
+            if ("child-table".equals(f.get("type"))) continue;
+            String name = f.get("field");
+            String value = json.containsKey(name)?json.getString(name):"";
+            insertEntry.setString(p++, value);
+            newEntry.put(name, value);
+          } // next field
+          insertEntry.executeUpdate();
+        } // close insertEntry
+        try (PreparedStatement sqlSerial = rdb.prepareStatement(
+               sqlx.apply("SELECT LAST_INSERT_ID() FROM "+sTableName))) {
+          try (ResultSet rs = sqlSerial.executeQuery()) {
+            if (rs.next()) newEntry.put("serial", rs.getString(1));
+          } // close rs
+        } // close sqlChildTableId
+      } else {
+        newEntry.put("DbTagger_error", "Nonexistent table: " + table);
+      }
     } // rdb.close()
     return newEntry;
   }
@@ -1515,6 +1665,36 @@ public class DbTagger extends Annotator {
     } else { // serial no present
       return "\"serial\" is required to identify the entry";
     }
+    return "";
+  }
+    
+  /**
+   * Deletes an existing table entry for the given table.
+   * @param table The parent table name.
+   * @param field The field used to identify the parent entry.
+   * @param entry The value for <var>field</var>, which identifies the
+   * parent entry of the child rows.
+   * @return An error if any.
+   */
+  @ApiEndpoint("admin") public String deleteEntry(String table, String field, String entry)
+    throws SQLException {
+    try (Connection rdb = newConnection()) {
+      int tableId = tableId(rdb, table);
+      if (tableId >= 0) {            
+        String sTableName = getAnnotatorId()+"_table_"+tableId;
+        if (field.equalsIgnoreCase("serial")) field = "SERIAL"; // derby likes uppercase
+        try (PreparedStatement deleteEntry = rdb.prepareStatement(
+               sqlx.apply("DELETE FROM "+sTableName
+                          +" WHERE `"+field.replace(';',' ')+"` = ?"))) {
+          deleteEntry.setString(1, entry);
+          if (deleteEntry.executeUpdate() < 1) {
+            return "Nonexistent entry";
+          }
+        } // close deleteEntry
+      } else {
+        return "Nonexistent table: " + table;
+      }
+    } // close connection
     return "";
   }
     

@@ -21,10 +21,6 @@ function listTables() {
             td = document.createElement("td");
             tr.appendChild(td);
         }
-        if (!tableIds.length) {
-            // no tables yet, so they'll want to upload a file
-            document.getElementById("uploadForm").setAttribute("open",true);
-        }
         finishedLoading();
     });
 }

@@ -274,7 +274,7 @@ function addChildRow(
   btnDelete.addEventListener("click", function(e) {
     if (confirm(
       `Are you sure you want to delete this ${childField}?\nThis cannot be undone.`)) {
-      if (model.serial) { // serial not set - it's a new row
+      if (model.serial) { // serial set - it's not a new row
         startLoading();
         getJSON(resourceForFunction(
           "deleteChildEntry", parentTable, parentField, getParentEntry(), childField, JSON.stringify(model)),
@@ -416,7 +416,7 @@ function addChildRow(
   tr.appendChild(tdDelete);
   rows.appendChild(tr);
 
-  return firstInput; // in case we wat to focus on it
+  return firstInput; // in case we want to focus on it
 }
 
 function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, value) {

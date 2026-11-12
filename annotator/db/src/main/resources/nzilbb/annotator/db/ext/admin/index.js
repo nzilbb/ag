@@ -11,26 +11,39 @@ function listTables() {
     getJSON("listTables", tableIds => {
         var tables = document.getElementById("tables");
         tables.innerHTML = ""; // clear any existing list
-        for (var l in tableIds) {
+        for (let l in tableIds) {
             const tableId = tableIds[l];
-            var tr = document.createElement("tr");
+            const tr = document.createElement("tr");
             tables.appendChild(tr);
-            var td = document.createElement("td");
+            let td = document.createElement("td");
             tr.appendChild(td);
             td.appendChild(document.createTextNode(tableId));
+
             td = document.createElement("td");
             tr.appendChild(td);
-            var link = document.createElement("a");
+            let link = document.createElement("a");
+            td.appendChild(link);
+            link.title = `${tableId} entries`;
+            link.href = `entries.html?t=${tableId}`
+            let img = document.createElement("img");
+            img.src = "../entries.svg"
+            img.alt = "☰";
+            link.appendChild(img);
+
+            td = document.createElement("td");
+            tr.appendChild(td);
+            link = document.createElement("a");
             td.appendChild(link);
             link.title = `${tableId} definition`;
             link.href = `fields.html?t=${tableId}`
-            var img = document.createElement("img");
+            img = document.createElement("img");
             img.src = "../edit.svg"
             img.alt = "✎";
             link.appendChild(img);
+
             td = document.createElement("td");
             tr.appendChild(td);
-            var button = document.createElement("button");            
+            let button = document.createElement("button");            
             td.appendChild(button);
             button.title = `Delete ${tableId}`;
             img = document.createElement("img");
