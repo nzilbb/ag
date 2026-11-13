@@ -930,14 +930,37 @@ public class TestDbTagger {
     assertEquals("Correct Pronunciation value ", "ð ə", entry.get("phonemes"));
     assertTrue("serial is present " + entry, entry.keySet().contains("serial")); 
 
+    // get entries
+    List<Map<String,String>> rows = annotator.readEntries("dict", "type", "THE", 10);
+    assertNotNull("Entries returned", rows);
+    assertEquals("Correct number of entries returned: " + rows, 2, rows.size());
+    entry = rows.get(0);
+    assertEquals("1st: Correct type value " + entry, "THE", entry.get("type"));
+    assertEquals("1st: Correct Pronunciation value " + entry, "ð ə", entry.get("phonemes"));
+    assertTrue("1st: serial is present " + entry, entry.keySet().contains("serial")); 
+    entry = rows.get(1);
+    assertEquals("2nd: Correct type value " + entry, "THE", entry.get("type"));
+    assertEquals("2nd: Correct Pronunciation value " + entry, "ð i:", entry.get("phonemes"));
+    assertTrue("2nd: serial is present " + entry, entry.keySet().contains("serial"));
+
+    // error reporting
+    rows = annotator.readEntries("nonexistent", "type", "THE", 10);
+    assertNotNull("Entries returned", rows);
+    assertEquals("One entry returned: " + rows, 1, rows.size());
+    entry = rows.get(0);
+    assertFalse("Error: No type value " + entry, entry.containsKey("type"));
+    assertTrue("Error: Error value present " + entry, entry.containsKey("DbTagger_error"));
+    assertEquals("Error: Correct message " + entry,
+                 "Nonexistent table: nonexistent", entry.get("DbTagger_error"));
+
     // field CRUD
     assertFalse("Cannot create field in nonexistent table",
-                annotator.createField("nonexistent", "xxx", "string", "").length() == 0);
+                annotator.createField("nonexistent", "xxx", "string").length() == 0);
     assertFalse("Cannot create field that already exists",
-                annotator.createField("dict", "type", "string", "").length() == 0);
+                annotator.createField("dict", "type", "string").length() == 0);
     assertEquals("Can create new field",
                  "", annotator.createField(
-                   "dict", "test", "boolean", "\"true\"", "true|false"));
+                   "dict", "test", "\"true\"", "true|false", "help text", "boolean"));
     fields = annotator.readFields("dict");
     assertEquals("Field created: " + fields,
                  3, fields.size());
@@ -946,9 +969,10 @@ public class TestDbTagger {
     assertEquals("Correct new field type", "boolean", field.get("type"));
     assertEquals("Correct new field default", "\"true\"", field.get("defaultValue"));
     assertEquals("Correct new field validation", "true|false", field.get("validation"));
+    assertEquals("Correct new field hint", "help text", field.get("hint"));
     
     assertEquals("Can update new field",
-                 "", annotator.updateField("dict", "test", "integer", "", ""));
+                 "", annotator.updateField("dict", "test", "", "", "help", "integer"));
     fields = annotator.readFields("dict");
     assertEquals("New field still there: " + fields,
                  3, fields.size());
@@ -957,6 +981,7 @@ public class TestDbTagger {
     assertEquals("Correct new field new type", "integer", field.get("type"));
     assertEquals("Correct new field new default", "", field.get("defaultValue"));
     assertEquals("Correct new field new validation", "", field.get("validation"));
+    assertEquals("Correct new field new hint", "help", field.get("hint"));
 
     assertEquals("Can delete new field",
                  "", annotator.deleteField("dict", "test"));
@@ -1007,7 +1032,7 @@ public class TestDbTagger {
 
     // create child table field
     assertEquals("Can create child field",
-                 "", annotator.createField("parent", "child1", "child-table", "ignored"));
+                 "", annotator.createField("parent", "child1", "child-table"));
     List<Map<String,String>> fields = annotator.readFields("parent");
     assertEquals("Field created: " + fields,
                  3, fields.size());
@@ -1033,7 +1058,7 @@ public class TestDbTagger {
     assertEquals("Child table not a dictionary present: " + ids,
                  8, ids.size());
     
-    error = annotator.updateField("parent", "child1", "integer", "");
+    error = annotator.updateField("parent", "child1", "integer");
     assertFalse("Can't update new field", error.length() == 0);
     fields = annotator.readFields("parent");
     assertEquals("New field still there: " + fields,
@@ -1042,7 +1067,7 @@ public class TestDbTagger {
     assertEquals("New field unchanged", "child-table", field.get("type"));
 
     assertEquals("Can update new field",
-                 "", annotator.updateField("parent_child1", "child1", "integer", ""));
+                 "", annotator.updateField("parent_child1", "child1", "integer"));
     fields = annotator.readFields("parent_child1");
     assertEquals("New child field still there: " + fields,
                  1, fields.size());
@@ -1052,7 +1077,7 @@ public class TestDbTagger {
 
     assertEquals("Can create new field in child table",
                  "", annotator.createField(
-                   "parent_child1", "test", "boolean", "\"false\"", "true|false"));
+                   "parent_child1", "test", "\"false\"", "true|false", "help", "boolean"));
     fields = annotator.readFields("parent_child1");
     assertEquals("Field created: " + fields,
                  2, fields.size());
@@ -1061,6 +1086,7 @@ public class TestDbTagger {
     assertEquals("Correct created field type", "boolean", field.get("type"));
     assertEquals("Correct created field default", "\"false\"", field.get("defaultValue"));
     assertEquals("Correct created field validation", "true|false", field.get("validation"));
+    assertEquals("Correct created field hint", "help", field.get("hint"));
 
     assertEquals("Can reorder fields",
                  "", annotator.moveFieldUp("parent_child1", "test"));
@@ -1160,7 +1186,7 @@ public class TestDbTagger {
 
     // create another child table field
     assertEquals("Can create child2 field",
-                 "", annotator.createField("parent", "child2", "child-table", "ignored"));
+                 "", annotator.createField("parent", "child2", "child-table"));
     fields = annotator.readFields("parent");
     assertEquals("Field created: " + fields,
                  3, fields.size());

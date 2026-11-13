@@ -267,34 +267,33 @@ function addRow(
       inputs[name] = input;
       if (!firstInput) firstInput = input;
     } else { // (grand)child-table
-      const childTable = `${parentTable}_${childField}_${name}`;
+      const childTable = childField?`${parentTable}_${childField}_${name}`
+        :`${parentTable}_${name}`;
       const countId = `count-${childTable}-${childRowsId}`;
-      let values = td;
-      if (depth > 1) { // deeper than grandchild table
-        // to avoid clutter, hide under a summary
-        values = document.createElement("inline-details");
-        const label = document.createElement("inline-summary");
-        label.id = countId;
-        label.onclick = ()=>{ values.toggleAttribute("open"); };
-        values.appendChild(label);
-        td.appendChild(values);
-      }
-      
-      // function for loading rows
-      const readChildEntries = function() {
-        // get all field values for entry
-        startLoading();
-        getJSON(
-          resourceForFunction(
-            "readChildEntries",
-            `${parentTable}_${childField}`, "serial", model.serial||"", name),
-          data => {
-            finishedLoading();
-            values.appendChild(
-              showForm(
-                depth+1, `${parentTable}_${childField}`, "serial", ()=>model.serial||"",
-                name, data, countId));
-            if (depth > 0) { // deeper than grandchild table
+      // to avoid clutter, hide under a summary
+      let values = document.createElement("inline-details");
+      const label = document.createElement("inline-summary");
+      label.id = countId;
+      label.onclick = ()=>{
+        values.toggleAttribute("open");
+
+        // load rows the first time they open the child
+        const count = document.getElementById(countId);
+        if (count && !count.count && count.count != 0) { // haven't loaded entries yet
+          // get all field values for entry
+          startLoading();
+          getJSON(
+            resourceForFunction(
+              "readChildEntries",
+              childField?`${parentTable}_${childField}`:parentTable,
+              "serial", model.serial||"", name),
+            data => {
+              finishedLoading();
+              values.appendChild(
+                showForm(
+                  depth+1,
+                  childField?`${parentTable}_${childField}`:parentTable,
+                  "serial", ()=>model.serial||"", name, data, countId));
               const count = document.getElementById(countId);
               if (count) {
                 count.count = data.length; // add/delete causes updates later...
@@ -303,9 +302,11 @@ function addRow(
               if (data.length <= 4) {
                 values.setAttribute("open", true);
               }
-            }
-          }); // readChildEntries
+            }); // readChildEntries
+        } // entries not yet loaded
       };
+      values.appendChild(label);
+      td.appendChild(values);
       
       // get child field definitions      
       if (!tableFields[childTable]) { // we don't have the table definition yet
@@ -318,11 +319,7 @@ function addRow(
             }
           } // next child field definition
           tableFields[childTable] = fields;
-
-          readChildEntries();
         }); // readFields
-      } else { // already have the table definitions
-        readChildEntries();
       }
     } // (grand)child-table
     
@@ -500,7 +497,7 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
   } else if (fieldDefinition.type == "text") {
     input = document.createElement("textarea");
   } else if (fieldDefinition.type == "html") { 
-    input = document.createElement("textarea"); // attach the editor later...
+    input = document.createElement("textarea"); // no rich text editor here
   }
   if (fieldDefinition.validation
       // except validation is repurposed for cross-references/boolean:
@@ -598,71 +595,71 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
 }
 
 function showForm(depth, parentTable, parentField, getParentEntry, childField, data, countId) {
-  console.log(`showForm(${depth}, ${parentTable}, ${parentField}, ${getParentEntry}, ${childField}, ${data}, ${countId})`);
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   let tr = document.createElement("tr");
   let showHeader = false; // if it's just a single field named after the parent-table field
-  console.log(childField?`${parentTable}_${childField}`:parentTable);
   const fields = tableFields[childField?`${parentTable}_${childField}`:parentTable];
-  console.log("fields " + JSON.stringify(fields));
   for (let name in fields) {
     if (fields[name].type == "hidden") continue;
     const th = document.createElement("th");
     th.className = fields[name].type;
     if (fields[name].hint) th.title = fields[name].hint;
-    if (childField) {
+    if (childField || fields[name].type == "child-table") {
       const span = document.createElement("span");
       span.appendChild(document.createTextNode(name));
       th.appendChild(span);
     } else { // top level table
       // add filter boxes, one per field
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "filter";
-      input.id = `filter-${name}`;
-      input.name = name;
-      input.placeholder = name;
-      if (!filterInput) {
-        filterInput = input;
-      } else if (filterInput.id == input.id) { // this was the filter field
-        // maintain filter value
-        input.value = filterInput.value;
-        input.setAttribute("autofocus", true);
-        filterInput = input;
+      const filterId = `filter-${name}`;
+      if (filterInput && filterInput.id == filterId) {
+        // reuse existing input
+        th.appendChild(filterInput);
+        setTimeout(()=>filterInput.focus(), 1000);
+      } else { // add input for filter
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "filter";
+        input.id = filterId;
+        input.name = name;
+        input.placeholder = name;
+        input.title = name;
+        if (!filterInput) filterInput = input; // first field is default filter
+        // event to trigger filter
+        input.addEventListener("input", function(e) {
+          if (deferListing) window.clearTimeout(deferListing);
+          deferListing = window.setTimeout(()=>listing(input), 1000);
+        });
+        th.appendChild(input);
       }
-      // event to trigger filter
-      input.addEventListener("input", function(e) {
-        if (deferListing) window.clearTimeout(deferListing);
-        deferListing = window.setTimeout(()=>listing(input), 1000);
-      });
-      th.appendChild(input);
     }
     tr.appendChild(th);
     if (name != childField) showHeader = true;
   } // next field
   // add columns for save/delete buttons
   const thSave = document.createElement("th");
-  thSave.id = "max-rows-label";
   thSave.className = "save-column";
-  thSave.appendChild(document.createTextNode("Rows"));
+  if (depth == 0) { // top level only
+    thSave.id = "max-rows-label";
+    thSave.appendChild(document.createTextNode("Rows"));
+  }
   tr.appendChild(thSave);
   const thDelete = document.createElement("th");
   thDelete.className = "delete-column";
-  const maxRowsInput = document.createElement("input");
-  maxRowsInput.id = "max-rows";
-  maxRowsInput.type = "number";
-  maxRowsInput.step = 1;
-  maxRowsInput.min = 1;
-  maxRowsInput.value = maxRows;
-  maxRowsInput.addEventListener("input", function(e) {
-    console.log("maxRowsInput " + filterInput);
-    if (deferListing) window.clearTimeout(deferListing);
-    deferListing = window.setTimeout(()=>listing(filterInput), 1000);
-  });
-  thDelete.appendChild(maxRowsInput);
+  if (depth == 0) { // top level only
+    const maxRowsInput = document.createElement("input");
+    maxRowsInput.id = "max-rows";
+    maxRowsInput.type = "number";
+    maxRowsInput.step = 1;
+    maxRowsInput.min = 1;
+    maxRowsInput.value = maxRows;
+    maxRowsInput.addEventListener("input", function(e) {
+      if (deferListing) window.clearTimeout(deferListing);
+      deferListing = window.setTimeout(()=>listing(filterInput), 1000);
+    });
+    thDelete.appendChild(maxRowsInput);
+  } 
   tr.appendChild(thDelete);
-  console.log(`showHeader ${showHeader}`);
   if (showHeader) {
     thead.appendChild(tr);
     table.appendChild(thead);
