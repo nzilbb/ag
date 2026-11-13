@@ -29,26 +29,24 @@ let maxRows = 10;
 function listing(input) { // ask the server for some matching rows
   filterInput = input;
   maxRows = parseInt(document.getElementById("max-rows").value);
-  if (input.value) {
-    startLoading();
-    getJSON(resourceForFunction(
-      "readEntries", t, input.name, input.value, maxRows), values => {
-        if (values.length == 1 && values[0]["DbTagger_error"]) { // error
-          document.getElementById("error").innerText = values[0]["DbTagger_error"];
-          // clear the error after a short delay
-          window.setTimeout(()=>document.getElementById("error").innerText = "", 3000);
-        } else { // rows returned
-          
-          // clear any previous data
-          document.getElementById("rows").innerHTML = "";
-          
-           // list the rows
-          document.getElementById("rows").appendChild(
-            showForm(0, t, "serial", ()=>t, "", values, "row-count"));
-        }
-        finishedLoading();
-      });
-  } // there is a value set
+  startLoading();
+  getJSON(resourceForFunction(
+    "readEntries", t, input.name, input.value||".*", maxRows), values => {
+      if (values.length == 1 && values[0]["DbTagger_error"]) { // error
+        document.getElementById("error").innerText = values[0]["DbTagger_error"];
+        // clear the error after a short delay
+        window.setTimeout(()=>document.getElementById("error").innerText = "", 3000);
+      } else { // rows returned
+        
+        // clear any previous data
+        document.getElementById("rows").innerHTML = "";
+        
+        // list the rows
+        document.getElementById("rows").appendChild(
+          showForm(0, t, "serial", ()=>t, "", values, "row-count"));
+      }
+      finishedLoading();
+    });
 } // listing
 
 let childRowsId = 0; // for generating unique IDs
@@ -625,10 +623,13 @@ function showForm(depth, parentTable, parentField, getParentEntry, childField, d
       input.id = `filter-${name}`;
       input.name = name;
       input.placeholder = name;
-      if (filterInput && filterInput.id == input.id) { // this was the filter field
+      if (!filterInput) {
+        filterInput = input;
+      } else if (filterInput.id == input.id) { // this was the filter field
         // maintain filter value
         input.value = filterInput.value;
         input.setAttribute("autofocus", true);
+        filterInput = input;
       }
       // event to trigger filter
       input.addEventListener("input", function(e) {
@@ -655,6 +656,7 @@ function showForm(depth, parentTable, parentField, getParentEntry, childField, d
   maxRowsInput.min = 1;
   maxRowsInput.value = maxRows;
   maxRowsInput.addEventListener("input", function(e) {
+    console.log("maxRowsInput " + filterInput);
     if (deferListing) window.clearTimeout(deferListing);
     deferListing = window.setTimeout(()=>listing(filterInput), 1000);
   });
@@ -721,16 +723,29 @@ getJSON(resourceForFunction("readFields", t), definitions => {
   
   // build a dictionary of definitions
   const fields = {};
+  let firstField = null;
   for (let definition of definitions) {
     if (definition.field) {
       fields[definition.field] = definition;
+      if (!firstField) firstField = definition.field;
     }
   } // next field definition
   tableFields[t] = fields;
 
-  document.getElementById("rows").appendChild(
-    showForm(0, t, "serial", ()=>t, "", [], "row-count"));
-  finishedLoading();
+  getJSON(resourceForFunction(
+    "readEntries", t, firstField, ".*", maxRows), values => {
+      if (values.length == 1 && values[0]["DbTagger_error"]) { // error
+        document.getElementById("error").innerText = values[0]["DbTagger_error"];
+        // clear the error after a short delay
+        window.setTimeout(()=>document.getElementById("error").innerText = "", 3000);
+      } else { // rows returned
+        
+        // list the rows
+        document.getElementById("rows").appendChild(
+          showForm(0, t, "serial", ()=>t, "", values, "row-count"));
+      }
+      finishedLoading();
+    });
 
 });
 
