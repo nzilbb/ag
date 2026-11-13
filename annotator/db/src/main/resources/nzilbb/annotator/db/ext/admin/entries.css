@@ -55,7 +55,8 @@ input:invalid, textarea:invalid {
 }
 
 table {
-    width: 100%;
+    width: fit-content;
+    margin: auto;
     border-collapse: collapse;
 }
 

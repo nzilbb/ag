@@ -334,6 +334,7 @@ function addRow(
   return firstInput; // in case we want to focus on it
 } // addRow
 
+let datalistId = 0; // for unique IDs
 function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, value) {
   let input = document.createElement("input");
   
@@ -451,8 +452,9 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
     valueElement.appendChild(a);
 
     // lookup as user types
+    datalistId++;
     const datalist = document.createElement("datalist");
-    datalist.id = `matches-${fieldDefinition.field}`;
+    datalist.id = `matches-${fieldDefinition.field}-${datalistId}`;
     valueElement.appendChild(datalist);
     const lookup = function() { // ask the server for some matching options
       if (input.value) {
@@ -509,8 +511,9 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
       let optionsList = null;
       if (fieldDefinition.validation.endsWith("|*")) { // an open set of options
         // so the list of options is a suggestion but they can enter anything
+        datalistId++;
         optionsList = document.createElement("datalist");
-        optionsList.id = `matches-${fieldDefinition.field}`;
+        optionsList.id = `matches-${fieldDefinition.field}-${datalistId}`;
         valueElement.appendChild(optionsList);
         input.setAttribute("list", optionsList.id);
       } else { // a closed set of options
@@ -534,8 +537,9 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
       const lookupField = groups[2];
       
       // lookup as user types
+      datalistId++;
       const datalist = document.createElement("datalist");
-      datalist.id = `matches-${fieldDefinition.field}`;
+      datalist.id = `matches-${fieldDefinition.field}-${datalistId}`;
       datalist.optionValues = [];
       valueElement.appendChild(datalist);
       const lookup = function() { // ask the server for some matching options
