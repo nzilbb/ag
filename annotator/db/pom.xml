@@ -9,7 +9,7 @@
 
   <groupId>nzilbb</groupId>
   <artifactId>nzilbb.annotator.db</artifactId>
-  <version>0.4.1</version>
+  <version>0.5.0</version>
 
   <name>nzilbb.annotator.db</name>
   <description>Annotator for tagging entities from an editable relational database.</description>

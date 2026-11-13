@@ -1059,12 +1059,25 @@ public class TestDbTagger {
                  8, ids.size());
     
     error = annotator.updateField("parent", "child1", "integer");
-    assertFalse("Can't update new field", error.length() == 0);
+    assertFalse("Can't update new field " + error, error.length() == 0);
+    // System.out.println(error);
     fields = annotator.readFields("parent");
     assertEquals("New field still there: " + fields,
                  3, fields.size());
     field = fields.get(2);
     assertEquals("New field unchanged", "child-table", field.get("type"));
+
+    error = annotator.updateField(
+      "parent", "child1", "ignored", "child1", "ignored", "ignored");
+    assertTrue("Can update new field's validation (order) " + error, error.length() == 0);
+    // System.out.println(error);
+    fields = annotator.readFields("parent");
+    assertEquals("New field still there: " + fields,
+                 3, fields.size());
+    field = fields.get(2);
+    assertEquals("Child table field type unchanged", "child-table", field.get("type"));
+    assertEquals("Child table field validation (order) changed",
+                 "child1", field.get("validation"));
 
     assertEquals("Can update new field",
                  "", annotator.updateField("parent_child1", "child1", "integer"));

@@ -89,6 +89,32 @@
             <tt>"to check"</tt></li>
           </ul>
         </dd>
+        
+        <dt>Hint</dt>
+        <dd> This defines text that view and edit users can see which helps explain
+          in more detail what the given field is for, or how to interpret the value of it.
+        </dd>
+        
+        <dt>Order of Rows</dt>
+        <dd> For fields with the 'type' set to <q>child-table</q> an <q>Order of Rows</q>
+          setting is available. This defines the order that child-table entries will be
+          listed in, when view/edit users are displaying an entry. 
+          <ul>
+            <li> If this is blank, child-table entries are listed in the order they
+              were added. </li>
+            <li> Otherwise, it should be the name of a field in the child-table,
+              in which case child-table entries are listed in the (alphabetical) order
+              of the values of that field.</li>
+            <li> If the child-table field is itself defined as a child-table
+              (i.e. a grandchild table), child-table entries are listed in order
+              according the <i>number of matching rows</i> in the grandchild table.</li>
+          </ul>
+          To reverse the order, add the word <tt>DESC</tt> (all uppercase) after the name
+          of the child-table field.<br>
+          e.g. to list child-table rows newest-first (assuming the child-table has a field
+          called <i>AnnotationDate</i>), the <q>Order of Rows</q> setting should be:<br>
+          <tt>AnnotationDate DESC</tt>
+        </dd>
       </dl>
 
       <p> When you make a change to the definition of a field, use the field's save button

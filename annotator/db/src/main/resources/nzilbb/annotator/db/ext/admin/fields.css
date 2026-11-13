@@ -59,6 +59,9 @@ label:after {
     width: 35%;
     flex-grow: 1;
 }
+.field .order-label {
+    text-align: right;
+}
 a.edit-link {
     padding: 3px;
 }

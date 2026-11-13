@@ -39,12 +39,6 @@ function newField(attributes, field) {
 
   if (field.type == "child-table") {
     
-    const type = document.createElement("span");
-    type.className = "type";
-    type.id = `type-${field.field}`;
-    type.appendChild(document.createTextNode(field.type));
-    row.appendChild(type);
-    
     const link = document.createElement("a");
     link.className = "edit-link";
     link.title = `${field.field} definition`;
@@ -55,6 +49,30 @@ function newField(attributes, field) {
     link.appendChild(img);
     row.appendChild(link);
 
+    const type = document.createElement("span");
+    type.className = "type";
+    type.id = `type-${field.field}`;
+    type.appendChild(document.createTextNode(field.type));
+    row.appendChild(type);
+    
+    const orderLabel = document.createElement("label");
+    orderLabel.className = "order-label";
+    orderLabel.id = `order-label-${field.field}`;
+    orderLabel.appendChild(document.createTextNode("Order of rows"));
+    row.appendChild(orderLabel);
+    const order = document.createElement("input");
+    order.className = "order";
+    order.id = `order-${field.field}`;
+    orderLabel.setAttribute("for", order.id);
+    order.placeholder = "Order rows were entered";
+    order.title = "The order child table rows are listed";
+    order.value = field.validation||"";
+    order.addEventListener("input", function(e) {
+      // show save button
+      document.getElementById(`save-${field.field}`).disabled = false;
+    });
+    row.appendChild(order);
+    
   } else { // regular field
     
     let type = document.createElement("select");
@@ -69,10 +87,10 @@ function newField(attributes, field) {
       option.appendChild(document.createTextNode(t));
       type.appendChild(option);
     } // next possible type
-    type.onkeyup = type.onchange = function(e) {
+    type.addEventListener("input", function(e) {
       // show save button
       document.getElementById(`save-${field.field}`).disabled = false;
-    }
+    });
     type.value = field.type||"string";
     row.appendChild(type);
 
@@ -86,10 +104,10 @@ function newField(attributes, field) {
         +"\n - the current date/time: now"
         +"\n - the user's login ID (if any): user";
       defaultValue.value = field.defaultValue||"";
-      defaultValue.onkeyup = defaultValue.onchange = function(e) {
+      defaultValue.addEventListener("input", function(e) {
         // show save button
         document.getElementById(`save-${field.field}`).disabled = false;
-      }
+      });
       row.appendChild(defaultValue);
     }
     
@@ -102,10 +120,10 @@ function newField(attributes, field) {
       +"\n - \"option1|option2|option3\" for a list of options"
       +"\n - \"[a-zA-Z0-9]*\" for only alphanumeric values";
     validation.value = field.validation||"";
-    validation.onkeyup = validation.onchange = function(e) {
+    validation.addEventListener("input", function(e) {
       // show save button
       document.getElementById(`save-${field.field}`).disabled = false;
-    }
+    });
     row.appendChild(validation);
     
     let hint = document.createElement("input");
@@ -114,26 +132,27 @@ function newField(attributes, field) {
     hint.placeholder = "Hint";
     hint.title = "Information to help users understand how to use the field.";
     hint.value = field.hint||"";
-    hint.onkeyup = hint.onchange = function(e) {
+    hint.addEventListener("input", function(e) {
       // show save button
       document.getElementById(`save-${field.field}`).disabled = false;
-    }
+    });
     row.appendChild(hint);
     
-    let btnSave = document.createElement("button");
-    btnSave.id = `save-${field.field}`;
-    btnSave.className = "save";
-    btnSave.title = `Save changes to ${field.field}`;
-    btnSave.disabled = true;
-    let img = document.createElement("img");
-    img.src = "../save.svg";
-    img.alt= "💾";
-    btnSave.appendChild(img);
-    btnSave.onclick = function(e) {
-      saveField(field.field);
-    }
-    row.appendChild(btnSave);
   } // regular field (not child-table)
+  
+  let btnSave = document.createElement("button");
+  btnSave.id = `save-${field.field}`;
+  btnSave.className = "save";
+  btnSave.title = `Save changes to ${field.field}`;
+  btnSave.disabled = true;
+  let img = document.createElement("img");
+  img.src = "../save.svg";
+  img.alt= "💾";
+  btnSave.appendChild(img);
+  btnSave.onclick = function(e) {
+    saveField(field.field);
+  }
+  row.appendChild(btnSave);
   
   let btnDelete = document.createElement("button");
   btnDelete.id = `delete-${field.field}`;
@@ -165,19 +184,32 @@ function newField(attributes, field) {
 }
 
 function saveField(field) {
-  const type = document.getElementById(`type-${field}`).value;
-  const defaultValue = document.getElementById(`default-value-${field}`)?
-        document.getElementById(`default-value-${field}`).value:"";
-  const validation = document.getElementById(`validation-${field}`).value;
-  const hint = document.getElementById(`hint-${field}`).value;
-  startLoading();
-  getText(resourceForFunction(
-    "updateField", table, field, defaultValue, validation, hint, type),
-          error => {
-            document.getElementById("error").innerText = error;
-            document.getElementById(`save-${field}`).disabled = true;
-            finishedLoading();
-          });
+  const typeSelect = document.getElementById(`order-${field}`);
+  if (!typeSelect) { // ordinary field
+    const type = typeSelect.value;
+    const defaultValue = document.getElementById(`default-value-${field}`)?
+          document.getElementById(`default-value-${field}`).value:"";
+    const validation = document.getElementById(`validation-${field}`).value;
+    const hint = document.getElementById(`hint-${field}`).value;
+    startLoading();
+    getText(resourceForFunction(
+      "updateField", table, field, defaultValue, validation, hint, type),
+            error => {
+              document.getElementById("error").innerText = error;
+              document.getElementById(`save-${field}`).disabled = true;
+              finishedLoading();
+            });
+  } else { // child-table
+    const order = document.getElementById(`order-${field}`).value;
+    startLoading();
+    getText(resourceForFunction(
+      "updateField", table, field, "", order, "", "child-table"),
+            error => {
+              document.getElementById("error").innerText = error;
+              document.getElementById(`save-${field}`).disabled = true;
+              finishedLoading();
+            });
+  }
 }
 
 function moveFieldUp(field) {

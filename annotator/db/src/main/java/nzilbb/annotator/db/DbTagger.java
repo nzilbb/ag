@@ -939,42 +939,56 @@ public class DbTagger extends Annotator {
       // find the table
       int tableId = tableId(rdb, table);
       if (tableId >= 0) {
-        // is it a child table field?
-        if (tableId(rdb, table+"_"+field) >= 0) {
-          return "Cannot update child table field: " + table+"_"+field;
+        String update = "UPDATE "+getAnnotatorId()+"_field" // TODO ordinal
+          +" SET type = ?, default_value = ?, hint = ?, validation = ?"
+          +" WHERE table_id = ? AND field = ?";
+        boolean childTable = false;
+        if (tableId(rdb, table+"_"+field) >= 0) { // child table
+          // only update 'validation', which defines the row listing order
+          update = "UPDATE "+getAnnotatorId()+"_field" // TODO ordinal
+            +" SET validation = ? WHERE validation != ? AND table_id = ? AND field = ?";
+          childTable = true;
         }
-
+          
         try (PreparedStatement sqlUpdateFieldRow = rdb.prepareStatement(
-               sqlx.apply(
-                 "UPDATE "+getAnnotatorId()+"_field" // TODO ordinal
-                 +" SET type = ?, default_value = ?, validation = ?, hint = ?"
-                 +" WHERE table_id = ? AND field = ?"))) {
-          sqlUpdateFieldRow.setString(1, type);
-          sqlUpdateFieldRow.setString(2, defaultValue);
-          sqlUpdateFieldRow.setString(3, validation);
-          sqlUpdateFieldRow.setString(4, hint);
-          sqlUpdateFieldRow.setInt(5, tableId);
-          sqlUpdateFieldRow.setString(6, field);
+               sqlx.apply(update))) {
+          int p = 1;
+          if (!childTable) {
+            sqlUpdateFieldRow.setString(p++, type);
+            sqlUpdateFieldRow.setString(p++, defaultValue);
+            sqlUpdateFieldRow.setString(p++, hint);
+          } else {
+            sqlUpdateFieldRow.setString(p++, validation); // twice...
+          }
+          sqlUpdateFieldRow.setString(p++, validation);
+          sqlUpdateFieldRow.setInt(p++, tableId);
+          sqlUpdateFieldRow.setString(p++, field);
           if (sqlUpdateFieldRow.executeUpdate() == 0) {
-            return "No such field \""+field+"\" in " + table;
+            if (!childTable) {
+              return "No such field \""+field+"\" in " + table;
+            } else {
+              return "Child-table field \""+field+"\" in " + table + " not changed";
+            }
           }
 
-          String columnType
-            = "VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL";
-          if ("text".equals(type) || "html".equals(type) || "geo-location".equals(type)) {
-            columnType = "TEXT";
-          } // type is TEXT
-          try (PreparedStatement sqlAlterTable = rdb.prepareStatement(
-                 sqlx.apply(
-                   "ALTER TABLE "+getAnnotatorId() +"_table_"+tableId
-                   +" CHANGE COLUMN `"+field+"` `"+field+"` " + columnType))) {
-            sqlAlterTable.executeUpdate();
-          } catch (SQLException alterX) { // ALTER TABLE failed
-            return "Could not update column type: " + alterX.getMessage();
-          }
+          if (!childTable) {
+            String columnType
+              = "VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL";
+            if ("text".equals(type) || "html".equals(type) || "geo-location".equals(type)) {
+              columnType = "TEXT";
+            } // type is TEXT
+            try (PreparedStatement sqlAlterTable = rdb.prepareStatement(
+                   sqlx.apply(
+                     "ALTER TABLE "+getAnnotatorId() +"_table_"+tableId
+                     +" CHANGE COLUMN `"+field+"` `"+field+"` " + columnType))) {
+              sqlAlterTable.executeUpdate();
+            } catch (SQLException alterX) { // ALTER TABLE failed
+              return "Could not update column type: " + alterX.getMessage();
+            }
+          } // ordinary field
         } catch (SQLException x) { // field is already there
           return x.toString();
-        } // sqlInsertFieldRow.close()
+        } // sqlUpdateFieldRow.close()
       } else {
         return "Nonexistent table: " + table;
       }
@@ -1539,10 +1553,55 @@ public class DbTagger extends Annotator {
       long childTableId = ids[0];
       long parentSerial = ids[1];
       String childTableName = getAnnotatorId()+"_table_"+childTableId;
-      try (PreparedStatement selectEntries = rdb.prepareStatement(
-             sqlx.apply("SELECT * FROM "+childTableName
-                        +" WHERE parent_serial = ?"
-                        +" ORDER BY serial"))) {
+      String order = null;
+      // determine the order to list the entries in
+      try (PreparedStatement selectField = rdb.prepareStatement(
+             sqlx.apply("SELECT validation AS orderField, type"
+                        +" FROM "+getAnnotatorId()+"_field"
+                        +" WHERE table_id = ? AND field = ?"))) {
+        selectField.setInt(1, tableId(rdb, parentTable));
+        selectField.setString(2, childField);
+        try (ResultSet o = selectField.executeQuery()) {
+          if (o.next()) {
+            String orderBy = o.getString("orderField");
+            if (orderBy.trim().length() > 0) {
+              String ascOrDesc = "";
+              if (orderBy.endsWith(" DESC")) { // DESC = descending
+                orderBy = orderBy.substring(0, orderBy.length() - 5);
+                ascOrDesc = " DESC";
+              } else if (orderBy.endsWith(" ASC")) { // ASC = ascending
+                orderBy = orderBy.substring(0, orderBy.length() - 4);
+                ascOrDesc = " ASC";
+              }
+              // check the orderBy field in the child table
+              selectField.setLong(1, childTableId);
+              selectField.setString(2, orderBy);
+              try (ResultSet t = selectField.executeQuery()) {
+                if (t.next()) { // the field exists in the child table
+                  order = "`"+orderBy+"`"+ascOrDesc;
+                  if (t.getString("type").equals("child-table")) { // a grandchild table
+                    // a child table field has no value, ordering by this field is
+                    // ordering by number of rows in the grandchild tabel
+                    long grandchildTableId = tableId(
+                      rdb, parentTable+"_"+childField+"_"+orderBy);
+                    String grandChildTableName
+                      = getAnnotatorId()+"_table_"+grandchildTableId;
+                    orderBy = "(SELECT COUNT(*) FROM "+grandChildTableName
+                      +" WHERE "+grandChildTableName+".parent_serial = "
+                      +childTableName+".serial)";
+                    order = orderBy+ascOrDesc;
+                  }
+                } // order field exists in child table
+              } // t.close()
+            } // order is set
+          } // field row found
+        } // o.close()
+      } // selectField.close()
+      
+      String sqlEntries = "SELECT * FROM "+childTableName
+        +" WHERE parent_serial = ?"
+        +" ORDER BY " + (order != null?order+", ":"") + "serial";
+      try (PreparedStatement selectEntries = rdb.prepareStatement(sqlx.apply(sqlEntries))) {
         selectEntries.setLong(1, parentSerial);
         try (ResultSet rows = selectEntries.executeQuery()) {
           while (rows.next()) {
