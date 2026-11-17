@@ -131,15 +131,17 @@ function showForm(data) {
       label.appendChild(document.createTextNode(name));
       row.appendChild(label);
 
+      const placeHolder = document.createElement("div");
+      placeHolder.className = "loading";
+      row.appendChild(placeHolder);
       // function for loading rows
       const readChildEntries = function() {
         // get all field values for entry
-        startLoading();
         getJSON(
           resourceForFunction("readChildEntries", table, field, entry, name), data => {
-            finishedLoading();
-            row.appendChild(
-              showChildForm(1, table, field, ()=>entry, name, data));
+            row.replaceChild(
+              showChildForm(1, table, field, ()=>entry, name, data),
+              placeHolder);
           }); // readChildEntries
       };
       
@@ -372,38 +374,43 @@ function addChildRow(
     } else { // (grand)child-table
       const childTable = `${parentTable}_${childField}_${name}`;
       const countId = `count-${childTable}-${childRowsId}`;
-      let values = td;
-      if (depth > 1) { // deeper than grandchild table
-        // to avoid clutter, hide under a summary
-        values = document.createElement("inline-details");
-        const label = document.createElement("inline-summary");
-        label.id = countId;
-        label.onclick = ()=>{ values.toggleAttribute("open"); };
-        values.appendChild(label);
-        td.appendChild(values);
-      }
-      
+
+      const placeHolder = document.createElement("div");
+      placeHolder.className = "loading";
+      td.appendChild(placeHolder);
+
       // function for loading rows
       const readChildEntries = function() {
         // get all field values for entry
-        startLoading();
         getJSON(
           resourceForFunction(
             "readChildEntries",
             `${parentTable}_${childField}`, "serial", model.serial||"", name),
           data => {
-            finishedLoading();
-            values.appendChild(
-              showChildForm(
-                depth+1, `${parentTable}_${childField}`, "serial", ()=>model.serial||"", name, data, countId));
+            const childForm = showChildForm(
+              depth+1, `${parentTable}_${childField}`, "serial", ()=>model.serial||"",
+              name, data, countId);
+            let details = null;
+            if (depth > 1) { // deeper than grandchild table
+              // to avoid clutter, hide under a summary
+              details = document.createElement("inline-details");
+              const label = document.createElement("inline-summary");
+              label.id = countId;
+              label.onclick = ()=>{ details.toggleAttribute("open"); };
+              details.appendChild(label);
+              details.appendChild(childForm);
+              td.replaceChild(details, placeHolder);
+            } else {
+              td.replaceChild(childForm, placeHolder);
+            }
             if (depth > 0) { // deeper than grandchild table
               const count = document.getElementById(countId);
               if (count) {
                 count.count = data.length; // add/delete causes updates later...
                 count.innerHTML = `(${data.length})`;
               }
-              if (data.length <= 4) {
-                values.setAttribute("open", true);
+              if (details && data.length <= 4) {
+                details.setAttribute("open", true);
               }
             }
           }); // readChildEntries

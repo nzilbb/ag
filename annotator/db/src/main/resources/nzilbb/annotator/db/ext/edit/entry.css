@@ -132,6 +132,35 @@ progress {
     width: 100%;
 }
 
+/* Spinner for loading entries */
+
+.loading {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    left: 0px;
+    top: 0px;
+    z-index: 2;
+    cursor: wait;
+    background: white;
+    opacity: 0.5;
+}
+.loading:before {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin-top: -4px;
+  margin-left: -4px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  border-top-color: #859044;
+  animation: spinner .6s linear infinite;
+}
+
 /* Layout on narrower screens */
 @media all and (max-width: 640px) {
     .field { flex-direction: column; }
