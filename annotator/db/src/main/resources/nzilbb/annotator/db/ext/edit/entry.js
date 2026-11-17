@@ -321,6 +321,8 @@ function addChildRow(
                       resolve();
                     }
                   }); // deleteChildEntry
+        } else { // added then deleted before saving
+          resolve();
         }
       }; // _toDelete
       tr.remove();
@@ -791,7 +793,6 @@ function saveNextTable() {
     // is there an update required?
     let doUpdate = entry._toDelete || entry._toUpdate;
     if (doUpdate) {
-      console.log("Updating " + JSON.stringify(entry));
       const promiseToUpdate = new Promise(doUpdate);
       savePromises.push(promiseToUpdate);
       promiseToUpdate.then(()=>{ // on success
@@ -835,7 +836,6 @@ function saveNextTable() {
 btnSave.addEventListener("click", function (e) {
   document.getElementById("error").innerHTML = "";
   tablesToSave = Object.keys(model);
-  console.log("Tables to save: " + JSON.stringify(tablesToSave));
   // disable save button while saving
   btnSave.setAttribute("disabled", true);
   saveNextTable();
