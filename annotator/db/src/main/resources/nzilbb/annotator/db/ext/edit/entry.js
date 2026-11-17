@@ -293,6 +293,10 @@ function addChildRow(
               });
     }
   };
+  if (!model.serial) { // it's a new entry, so save it even if there are no further changes
+    btnSave.style.display = null;
+    model._toUpdate = saveEntry;    
+  }
   
   const tdDelete = document.createElement("td");
   tdDelete.className = "delete-column";
