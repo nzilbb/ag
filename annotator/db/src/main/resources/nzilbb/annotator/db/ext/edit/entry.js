@@ -794,6 +794,18 @@ function saveNextTable() {
         // unset the function entries
         delete entry._toDelete;
         delete entry._toUpdate;
+      }, (error)=>{
+        if (!entry._toDelete
+            && entry._toUpdate // it was an update
+            && !entry.serial) { // ...which was actually a create
+          // it's probably the 'create child then delete parent' case, so let it pass
+          delete entry._toDelete;
+          delete entry._toUpdate;
+        } else {
+          if (error) {
+            document.getElementById("error").innerHTML += `<p>${error}</p>`;
+          }
+        }
       });
     }
   } // next entry
@@ -809,14 +821,10 @@ function saveNextTable() {
       btnSave.style.display = "none";
     }
   }, (error)=>{ // a failure of some kind
-    if (error) {
-      document.getElementById("error").innerHTML += `<p>${error}</p>`;
-    }
     finishedLoading();
     // re-enable save button
     btnSave.removeAttribute("disabled");
-    // hide save button
-    btnSave.style.display = "none";
+    // leave the save button visible, maybe they can fix it
   });
 }
 
