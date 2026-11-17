@@ -49,12 +49,15 @@ viewLink.appendChild(document.createTextNode(entry));
 document.getElementById("entry").appendChild(viewLink);
 
 const tableFields = {}; // definitions for table fields (key is table name)
+const model = {}; // all rows (key is table name, value is array of entries for that table)
+const btnSave = document.getElementById("btnSave");
 
 function showForm(data) {
   if (data.DbTagger_error) {
-    document.getElementById("error").innerText = data.DbTagger_error;
+    document.getElementById("error").innerHTML = `<p>${data.DbTagger_error}</p>`;
     return;
   }
+  model[table] = [data]; // keep a track of the main entry
   const attributes = document.getElementById("attributes");
   attributes.innerHTML = ""; // clear any existing list
   const fields = tableFields[table];
@@ -76,8 +79,43 @@ function showForm(data) {
         value.appendChild(span);
       } else {
         createFieldInput(
-          value, fields[name], (e)=>document.getElementById("btnSave").style.display = null,
-          data[name]);
+          value, fields[name], (e) => {
+            // show save button
+            btnSave.style.display = null;
+            // mark entry as edited
+            data._toUpdate = (resolve, reject)=>{
+              
+              const data = {};
+              const fields = tableFields[table];
+              for (let name in fields) {
+                const input = document.getElementById(`attribute-${name}`);    
+                if (input) {      
+                  if (name != field) { // not read only
+                    if (!input.checkValidity()) { // not valid    
+                      input.reportValidity();
+                      reject();
+                      return;
+                    }
+                    if (input.editor) {
+                      data[name] = input.editor.getData();
+                    } else if (input.type == "checkbox") {
+                      data[name] = input.checked?input.value:"";
+                    } else {
+                      data[name] = input.value;
+                    }
+                  } // not read only
+                } // input found
+              } // next field
+              getJSON(resourceForFunction(
+                "updateEntry", table, field, entry, JSON.stringify(data)), newModel => {
+                  if (newModel.DbTagger_error) {
+                    reject(newModel.DbTagger_error);
+                  } else {
+                    resolve();
+                  }
+                });
+            }
+          }, data[name]);
       }
       row.appendChild(value);
       
@@ -132,7 +170,7 @@ function showForm(data) {
     attributes.appendChild(row);
   } // next field
   // hide save button
-  document.getElementById("btnSave").style.display = "none";
+  btnSave.style.display = "none";
 }
 
 function showChildForm(depth, parentTable, parentField, getParentEntry, childField, data, countId) {
@@ -166,7 +204,11 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
   
   const tbody = document.createElement("tbody");
   tbody.id = `rows-${childField}`;
+  if (!model[`${parentTable}_${childField}`]) model[`${parentTable}_${childField}`] = [];  
   for (let r in data) { // for each child row
+     // keep track of the child entry
+    model[`${parentTable}_${childField}`].push(data[r]);
+    // add UI for it
     addChildRow(
       depth, parentTable, parentField, getParentEntry, childField, tbody, data[r], countId);
   } // next child row
@@ -181,21 +223,20 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
   img.alt= "➕";
   btnCreate.appendChild(img);
   btnCreate.addEventListener("click", function(e) {
-    if (!getParentEntry()) {
-      alert("Please save this row first");
-    } else {
-      const firstInput = addChildRow(
-        depth, parentTable, parentField, getParentEntry, childField, tbody, {}, countId);
-      if (countId) {
-        const count = document.getElementById(countId);
-        if (count) {
-          count.count++;
-          count.innerHTML = `(${count.count})`;
-        }
+    const newEntry = {};
+    model[`${parentTable}_${childField}`].push(newEntry);
+
+    const firstInput = addChildRow(
+      depth, parentTable, parentField, getParentEntry, childField, tbody,
+      newEntry, countId);
+    if (countId) {
+      const count = document.getElementById(countId);
+      if (count) {
+        count.count++;
+        count.innerHTML = `(${count.count})`;
       }
-      if (firstInput) firstInput.focus();
-        
     }
+    if (firstInput) firstInput.focus();    
   });
   td.appendChild(btnCreate);
   tr.appendChild(td);
@@ -213,17 +254,8 @@ function addChildRow(
   const tr = document.createElement("tr");
   childRowsId++;
   
-  const tdSave = document.createElement("td");
-  tdSave.className = "save-column";
-  const btnSave = document.createElement("button");
-  btnSave.className = "save";
-  const img = document.createElement("img");
   const inputs = {};
-  img.src = "../save.svg";
-  img.alt= "💾";
-  btnSave.appendChild(img);
-  btnSave.style.display = "none"; // hidden to start with
-  btnSave.addEventListener("click", function(e) {    
+  function saveEntry(resolve, reject) {
     // load data from inputs into model 
     for (let name in fields) {
       if (inputs[name]) { // (e.g. grandchild-table has no inputs entry)
@@ -235,34 +267,30 @@ function addChildRow(
       }
     }
     if (!model.serial) { // serial not set - it's a new row
-      startLoading();
       getJSON(resourceForFunction(
         "createChildEntry", parentTable, parentField, getParentEntry(), childField, JSON.stringify(model)),
               newModel => {
-                finishedLoading();
                 if (newModel.DbTagger_error) {
-                  document.getElementById("error").innerText = newModel.DbTagger_error;
+                  reject(newModel.DbTagger_error);
                 } else {
                   Object.assign(model, newModel); // should include serial
-                  btnSave.style.display = "none"; // hide button again
+                  resolve();
                 }
               });
     } else { // serial already set - it's an existing row
-      startLoading();
       getJSON(resourceForFunction(
-        "updateChildEntry", parentTable, parentField, getParentEntry(), childField, JSON.stringify(model)),
+        "updateChildEntry", parentTable, parentField, getParentEntry(), childField,
+        JSON.stringify(model)),
               newModel => {
-                finishedLoading();
                 if (newModel.DbTagger_error) {
-                  document.getElementById("error").innerText = newModel.DbTagger_error;
+                  reject(newModel.DbTagger_error);
                 } else {
                   Object.assign(model, newModel); // should include serial
-                  btnSave.style.display = "none"; // hide button again
+                  resolve();
                 }
               });
     }
-  });
-  tdSave.appendChild(btnSave);
+  };
   
   const tdDelete = document.createElement("td");
   tdDelete.className = "delete-column";
@@ -274,39 +302,28 @@ function addChildRow(
   btnDelete.addEventListener("click", function(e) {
     if (confirm(
       `Are you sure you want to delete this ${childField}?\nThis cannot be undone.`)) {
-      if (model.serial) { // serial set - it's not a new row
-        startLoading();
-        getJSON(resourceForFunction(
-          "deleteChildEntry", parentTable, parentField, getParentEntry(), childField, JSON.stringify(model)),
-                error => {
-                  finishedLoading();
-                  if (error) {
-                    document.getElementById("error").innerText = error;
-                  } else {
-                    // remove the row from the table
-                    tr.remove();
-                    // ensure UI has time to remove the row
-                    setTimeout(()=>alert(`${childField} deleted.`), 100);
-                    if (countId) { // update summary count
-                      const count = document.getElementById(countId);
-                      if (count) {
-                        count.count--;
-                        count.innerHTML = `(${count.count})`;
-                      }
-                    }                    
-                  }
-                });
-      } else { // a new row
-        tr.remove();
-        // esnure UI has time to remove the row
-        setTimeout(()=>alert(`${childField} deleted.`), 100);
-        if (countId) { // update summary count
-          const count = document.getElementById(countId);
-          if (count) {
-            count.count--;
-            count.innerHTML = `(${count.count})`;
-          }
-        }                    
+      btnSave.style.display = null;
+      model._toDelete = (resolve, reject)=>{
+        if (model.serial) { // serial set - it's not a new row
+          getJSON(resourceForFunction(
+            "deleteChildEntry", parentTable, parentField, getParentEntry(), childField, JSON.stringify(model)),
+                  error => {
+                    finishedLoading();
+                    if (error) {
+                      reject(error);
+                    } else {
+                      resolve();
+                    }
+                  }); // deleteChildEntry
+        }
+      }; // _toDelete
+      tr.remove();
+      if (countId) { // update summary count
+        const count = document.getElementById(countId);
+        if (count) {
+          count.count--;
+          count.innerHTML = `(${count.count})`;
+        }
       }
     } // yes I'm sure
   });
@@ -316,7 +333,7 @@ function addChildRow(
     const td = document.createElement("td");
     td.title = name;
     td.className = name + " " + fields[name].type;
-
+    
     // determine the initial value
     let value = model[name] || "";
     if (!value && !model.serial) { // serial not set - it's a new row
@@ -344,7 +361,10 @@ function addChildRow(
     if (fields[name].type != "child-table") { // regular field
       // create the UI component for the field value
       const input = createFieldInput(
-        td, fields[name], (e)=>btnSave.style.display = null, value);
+        td, fields[name], (e)=> {
+          btnSave.style.display = null;
+          model._toUpdate = saveEntry; 
+        }, value);
       if (fields[name].hint) input.title = fields[name].hint;
       // ensure the save function can access the input
       inputs[name] = input;
@@ -410,12 +430,11 @@ function addChildRow(
     
     tr.appendChild(td);
   } // next field
-
+  
   // add save button at the end
-  tr.appendChild(tdSave);
   tr.appendChild(tdDelete);
   rows.appendChild(tr);
-
+  
   return firstInput; // in case we want to focus on it
 }
 
@@ -546,7 +565,7 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
         getJSON(resourceForFunction(
           "matches", table, fieldDefinition.validation || field, input.value), values => {
           if (values.length == 1 && values[0].startsWith("DbTagger.")) { // error
-            document.getElementById("error").innerText = values[0];
+            document.getElementById("error").innerHTML = values[0];
             // clear the error after a short delay
             window.setTimeout(()=>document.getElementById("error").innerText = "", 3000);
           } else {
@@ -631,9 +650,9 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
         getJSON(resourceForFunction(
           "matches", lookupTable, lookupField, input.value||".*"), values => {
             if (values.length == 1 && values[0].startsWith("DbTagger.")) { // error
-              document.getElementById("error").innerText = values[0];
+              document.getElementById("error").innerHTML = values[0];
               // clear the error after a short delay
-              window.setTimeout(()=>document.getElementById("error").innerText = "",3000);
+              window.setTimeout(()=>document.getElementById("error").innerHTML = "",3000);
             } else {
               datalist.innerHTML = ""; // clear any previous values
               values.forEach((value)=>{ // add each option to the datalist
@@ -737,40 +756,6 @@ getJSON(resourceForFunction("readFields", table), definitions => {
 
 });
 
-document.getElementById("btnSave").addEventListener("click", function (e) {
-  document.getElementById("error").innerText = "";
-  var fd = new FormData();
-  fd.append("t", table);
-  fd.append("f", field);
-  fd.append("e", entry);
-  const data = {};
-  const fields = tableFields[table];
-  for (let name in fields) {
-    const input = document.getElementById(`attribute-${name}`);    
-    if (input) {      
-      if (name != field) { // not read only
-        if (!input.checkValidity()) { // not valid    
-          input.reportValidity();
-          return;
-        }
-        if (input.editor) {
-          data[name] = input.editor.getData();
-        } else if (input.type == "checkbox") {
-          data[name] = input.checked?input.value:"";
-        } else {
-          data[name] = input.value;
-        }
-      } // not read only
-    } // input found
-  } // next field
-  fd.append("data", JSON.stringify(data));
-  startLoading();
-  postForm("updateEntry", fd, function(e) {
-    showForm(JSON.parse(this.responseText));
-    finishedLoading();
-  });
-});
-
 window.addEventListener("beforeunload", (event) => { // before they navigate away
   // are there any save buttons visible?
   for (let btnSave of document.getElementsByClassName("save")) {
@@ -781,3 +766,59 @@ window.addEventListener("beforeunload", (event) => { // before they navigate awa
     } // button currently displayed
   } // next save button
 });
+
+// tables must be saved in order, top down,
+// so that parent rows exist before children are created, etc.
+// so we have a queue of table name which we process one at a time
+let tablesToSave = [];
+function saveNextTable() {
+  startLoading();
+  const savingTable = tablesToSave.shift();
+  console.log(`Saving table ${savingTable}`);
+  const savePromises = [];
+  for (let entry of model[savingTable]) {
+    // is there an update required?
+    let doUpdate = entry._toDelete || entry._toUpdate;
+    if (doUpdate) {
+      console.log("Updating " + JSON.stringify(entry));
+      const promiseToUpdate = new Promise(doUpdate);
+      savePromises.push(promiseToUpdate);
+      promiseToUpdate.then(()=>{ // on success
+        // unset the function entries
+        delete entry._toDelete;
+        delete entry._toUpdate;
+      });
+    }
+  } // next entry
+  // once they're all finished saving...
+  Promise.all(savePromises).then(()=>{
+    if (tablesToSave.length > 0) { // there are more to save
+      saveNextTable();
+    } else { // finished saving
+      finishedLoading();
+      // re-enable save button
+      btnSave.removeAttribute("disabled");
+      // hide save button
+      btnSave.style.display = "none";
+    }
+  }, (error)=>{ // a failure of some kind
+    if (error) {
+      document.getElementById("error").innerHTML += `<p>${error}</p>`;
+    }
+    finishedLoading();
+    // re-enable save button
+    btnSave.removeAttribute("disabled");
+    // hide save button
+    btnSave.style.display = "none";
+  });
+}
+
+btnSave.addEventListener("click", function (e) {
+  document.getElementById("error").innerHTML = "";
+  tablesToSave = Object.keys(model);
+  console.log("Tables to save: " + JSON.stringify(tablesToSave));
+  // disable save button while saving
+  btnSave.setAttribute("disabled", true);
+  saveNextTable();
+});
+

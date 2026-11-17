@@ -87,10 +87,6 @@ fieldset table {
     border-collapse: collapse;
 }
 
-th.save-column {
-    width: 34px;
-}
-
 .field:nth-child(odd),  fieldset > table > tbody > tr:nth-child(odd)  {
     background: #EEEEEE;
 }

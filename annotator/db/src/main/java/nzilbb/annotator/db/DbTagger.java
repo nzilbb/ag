@@ -793,7 +793,12 @@ public class DbTagger extends Annotator {
                      +" supplemental SMALLINT NOT NULL DEFAULT 0"
                      +" COMMENT 'Whether the word/variant has been manually added since uploading from the original file',"
                      +" parent_serial INTEGER NOT NULL,"
-                     +" PRIMARY KEY (serial)) ENGINE=MyISAM;"))) {
+                     +" PRIMARY KEY (serial),"
+                     +" CONSTRAINT "+getAnnotatorId() +"_table_"+childTableId+"_FK"
+                     +" FOREIGN KEY (parent_serial)"
+                     +" REFERENCES "+getAnnotatorId()+"_table_"+tableId+" (serial)"
+                     +" ON DELETE CASCADE"
+                     +") ENGINE=MyISAM;"))) {
               sqlCreateChildTable.executeUpdate();
               
               // create a default field named after the table

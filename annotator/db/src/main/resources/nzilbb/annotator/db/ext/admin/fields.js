@@ -184,8 +184,8 @@ function newField(attributes, field) {
 }
 
 function saveField(field) {
-  const typeSelect = document.getElementById(`order-${field}`);
-  if (!typeSelect) { // ordinary field
+  const typeSelect = document.getElementById(`type-${field}`);
+  if (typeSelect) { // ordinary field
     const type = typeSelect.value;
     const defaultValue = document.getElementById(`default-value-${field}`)?
           document.getElementById(`default-value-${field}`).value:"";
