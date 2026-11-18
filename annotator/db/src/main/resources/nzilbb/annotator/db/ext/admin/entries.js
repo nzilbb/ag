@@ -308,19 +308,6 @@ function addRow(
       values.appendChild(label);
       td.appendChild(values);
       
-      // get child field definitions      
-      if (!tableFields[childTable]) { // we don't have the table definition yet
-        getJSON(resourceForFunction("readFields", childTable), definitions => {
-          const fields = {};
-          // build a dictionary of definitions
-          for (let definition of definitions) {
-            if (definition.field) {
-              fields[definition.field] = definition;
-            }
-          } // next child field definition
-          tableFields[childTable] = fields;
-        }); // readFields
-      }
     } // (grand)child-table
     
     tr.appendChild(td);
@@ -719,22 +706,36 @@ function showForm(depth, parentTable, parentField, getParentEntry, childField, d
   return table;
 }
 
-// get field definitions
-getJSON(resourceForFunction("readFields", t), definitions => {
-  
-  // build a dictionary of definitions
-  const fields = {};
-  let firstField = null;
-  for (let definition of definitions) {
-    if (definition.field) {
-      fields[definition.field] = definition;
-      if (!firstField) firstField = definition.field;
-    }
-  } // next field definition
-  tableFields[t] = fields;
+function readFields(tableName) {
+  return new Promise((resolve, reject)=>{
+    getJSON(resourceForFunction("readFields", tableName), definitions => {
+      
+      // build a dictionary of definitions
+      const fields = {};
+      const childTablePromises = [];
+      for (let definition of definitions) {
+        if (definition.field) {
+          fields[definition.field] = definition;
+          if (fields[definition.field].type == "child-table") {
+            // get the child table's definition
+            childTablePromises.push(
+              readFields(`${tableName}_${definition.field}`));
+          }
+        }
+      } // next field definition
+      tableFields[tableName] = fields;
+      
+      // resolve only after all child tables are resolved
+      Promise.all(childTablePromises).then(()=>{
+        resolve();
+      });
+    });
+  });
+} // readFields
 
+readFields(t).then(()=>{
   getJSON(resourceForFunction(
-    "readEntries", t, firstField, ".*", maxRows), values => {
+    "readEntries", t, Object.keys(tableFields[t])[0], ".*", maxRows), values => {
       if (values.length == 1 && values[0]["DbTagger_error"]) { // error
         document.getElementById("error").innerText = values[0]["DbTagger_error"];
         // clear the error after a short delay

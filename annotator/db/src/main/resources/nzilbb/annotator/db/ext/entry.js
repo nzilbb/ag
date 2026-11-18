@@ -64,36 +64,14 @@ function showForm(data) {
       const placeHolder = document.createElement("div");
       placeHolder.className = "loading";
       row.appendChild(placeHolder);
-      // function for loading rows
-      const readChildEntries = function() {
-        // get all field values for entry
-        getJSON(
-          resourceForFunction("readChildEntries", table, field, entry, name), data => {
-            row.replaceChild(
-              showChildForm(1, table, field, ()=>entry, name, data),
-              placeHolder);
-          }); // readChildEntries
-      };
       
       // get child field definitions
-      const childTable = `${table}_${name}`;
-      if (!tableFields[childTable]) { // we don't have the definition of this table yet
-        // load the table definition
-        getJSON(resourceForFunction("readFields", childTable), definitions => {
-          const fields = {};
-          // build a dictionary of definitions
-          for (let definition of definitions) {
-            if (definition.field) {
-              fields[definition.field] = definition;
-            }
-          } // next child field definition
-          tableFields[childTable] = fields
-          
-          readChildEntries();
-        }); // readFields
-      } else { // already have field definition
-        readChildEntries();
-      }
+      getJSON(
+        resourceForFunction("readChildEntries", table, field, entry, name), data => {
+          row.replaceChild(
+            showChildForm(1, table, field, ()=>entry, name, data),
+            placeHolder);
+        }); // readChildEntries
     } // child table
     row.id = `row-${name}`;
     row.className = "field " + fields[name].type;
@@ -194,61 +172,40 @@ function addChildRow(
       placeHolder.className = "loading";
       td.appendChild(placeHolder);
       
-      // function for loading rows
-      const readChildEntries = function() {
-        // get all field values for entry
-        getJSON(
-          resourceForFunction(
-            "readChildEntries",
-            `${parentTable}_${childField}`, "serial", model.serial||"", name),
-          data => {
-            const childForm = showChildForm(
-              depth+1, `${parentTable}_${childField}`, "serial", ()=>model.serial||"",
-              name, data);
-            let details = null;
-            if (depth > 1) { // deeper than grandchild table
-              // to avoid clutter, hide under a summary
-              details = document.createElement("inline-details");
-              const label = document.createElement("inline-summary");
-              label.id = countId;
-              label.onclick = ()=>{ details.toggleAttribute("open"); };        
-              details.appendChild(label);
-              details.appendChild(childForm);
-              td.replaceChild(details, placeHolder);
-            } else {
-              td.replaceChild(childForm, placeHolder);
-            }
-            
-            if (depth > 0) { 
-              const count = document.getElementById(countId);
-              if (count) {
-                count.innerHTML = `(${data.length})`;
-              }
-              if (details && data.length <= 4) {
-                details.setAttribute("open", true);
-              }
-            }
-
-          }); // readChildEntries
-      };
-      
       // get child field definitions
-      if (!tableFields[childTable]) { // we don't have the table definition yet
-        getJSON(resourceForFunction("readFields", childTable), definitions => {
-          const fields = {};
-          // build a dictionary of definitions
-          for (let definition of definitions) {
-            if (definition.field) {
-              fields[definition.field] = definition;
+      getJSON(
+        resourceForFunction(
+          "readChildEntries",
+          `${parentTable}_${childField}`, "serial", model.serial||"", name),
+        data => {
+          const childForm = showChildForm(
+            depth+1, `${parentTable}_${childField}`, "serial", ()=>model.serial||"",
+            name, data);
+          let details = null;
+          if (depth > 1) { // deeper than grandchild table
+            // to avoid clutter, hide under a summary
+            details = document.createElement("inline-details");
+            const label = document.createElement("inline-summary");
+            label.id = countId;
+            label.onclick = ()=>{ details.toggleAttribute("open"); };        
+            details.appendChild(label);
+            details.appendChild(childForm);
+            td.replaceChild(details, placeHolder);
+          } else {
+            td.replaceChild(childForm, placeHolder);
+          }
+          
+          if (depth > 0) { 
+            const count = document.getElementById(countId);
+            if (count) {
+              count.innerHTML = `(${data.length})`;
             }
-          } // next child field definition
-          tableFields[childTable] = fields;
-
-          readChildEntries();
-        }); // readFields
-      } else { // already have the table definitions
-        readChildEntries();
-      }
+            if (details && data.length <= 4) {
+              details.setAttribute("open", true);
+            }
+          }
+          
+        }); // readChildEntries
       
     } // (grand)child-table
     tr.appendChild(td);
@@ -341,18 +298,34 @@ function enableEditLink() {
   });
 }
 
-// get field definitions
-getJSON(resourceForFunction("readFields", table), definitions => {
-  
-  // build a dictionary of definitions
-  const fields = {};
-  for (let definition of definitions) {
-    if (definition.field) {
-      fields[definition.field] = definition;
-    }
-  } // next field definition
-  tableFields[table] = fields;
-  
+function readFields(tableName) {
+  return new Promise((resolve, reject)=>{
+    getJSON(resourceForFunction("readFields", tableName), definitions => {
+      
+      // build a dictionary of definitions
+      const fields = {};
+      const childTablePromises = [];
+      for (let definition of definitions) {
+        if (definition.field) {
+          fields[definition.field] = definition;
+          if (fields[definition.field].type == "child-table") {
+            // get the child table's definition
+            childTablePromises.push(
+              readFields(`${tableName}_${definition.field}`));
+          }
+        }
+      } // next field definition
+      tableFields[tableName] = fields;
+      
+      // resolve only after all child tables are resolved
+      Promise.all(childTablePromises).then(()=>{
+        resolve();
+      });
+    });
+  });
+} // readFields
+
+readFields(table).then(()=>{
   // get all fields for entry
   getJSON(resourceForFunction("readEntry", table, field, entry), data => {
     startLoading();
