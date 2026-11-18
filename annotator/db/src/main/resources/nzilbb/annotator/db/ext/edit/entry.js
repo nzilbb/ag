@@ -227,7 +227,7 @@ function showChildForm(depth, parentTable, parentField, getParentEntry, childFie
   btnCreate.addEventListener("click", function(e) {
     const newEntry = {};
     model[`${parentTable}_${childField}`].push(newEntry);
-
+    console.log(`adding new row to ${parentTable}_${childField}`);
     const firstInput = addChildRow(
       depth, parentTable, parentField, getParentEntry, childField, tbody,
       newEntry, countId);
@@ -272,7 +272,10 @@ function addChildRow(
       getJSON(resourceForFunction(
         "createChildEntry", parentTable, parentField, getParentEntry(), childField, JSON.stringify(model)),
               newModel => {
-                if (newModel.DbTagger_error) {
+                if (newModel.DbTagger_error
+                    // if the error mentions a foreign key constraint it's probably the
+                    // 'create child then delete parent' case, so let it pass
+                    && !newModel.DbTagger_error.includes("_FK")) {
                   reject(newModel.DbTagger_error);
                 } else {
                   Object.assign(model, newModel); // should include serial
@@ -800,16 +803,8 @@ function saveNextTable() {
         delete entry._toDelete;
         delete entry._toUpdate;
       }, (error)=>{
-        if (!entry._toDelete
-            && entry._toUpdate // it was an update
-            && !entry.serial) { // ...which was actually a create
-          // it's probably the 'create child then delete parent' case, so let it pass
-          delete entry._toDelete;
-          delete entry._toUpdate;
-        } else {
-          if (error) {
-            document.getElementById("error").innerHTML += `<p>${error}</p>`;
-          }
+        if (error) {
+          document.getElementById("error").innerHTML += `<p>${error}</p>`;
         }
       });
     }

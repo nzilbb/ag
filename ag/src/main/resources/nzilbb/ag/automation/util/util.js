@@ -36,7 +36,7 @@ function encode(parameter) {
 }
 
 // encode a function parameter
-function resourceForFunction(functionName, param1, param2, param3, param4, param5) {
+function resourceForFunction(functionName, param1, param2, param3, param4, param5, param6) {
     var resource = functionName;
     if (param1 != null) {
         resource += "?" + encode(param1);
@@ -46,8 +46,11 @@ function resourceForFunction(functionName, param1, param2, param3, param4, param
                 resource += "," + encode(param3);
                 if (param4 != null) {
                     resource += "," + encode(param4);
-                    if (param5 != null) {
+                  if (param5 != null) {
                         resource += "," + encode(param5);
+                        if (param6 != null) {
+                          resource += "," + encode(param6);
+                        }
                     }
                 }
             }

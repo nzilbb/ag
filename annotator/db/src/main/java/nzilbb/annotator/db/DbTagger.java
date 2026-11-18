@@ -157,7 +157,7 @@ public class DbTagger extends Annotator {
                 +" parent_table_id INTEGER NULL"
                 +" COMMENT 'If a child table, this is the table_id of parent table',"
                 +" PRIMARY KEY (table_id)"
-                +") ENGINE=MyISAM;"))) {
+                +") ENGINE=InnoDB;"))) {
           sql.executeUpdate();
         } // sql.close();
       } // table table doesn't exist
@@ -209,7 +209,7 @@ public class DbTagger extends Annotator {
                  +" hint TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
                  +" COMMENT 'Help text describing the field',"
                  +" PRIMARY KEY (table_id, field)"
-                 +") ENGINE=MyISAM;"))) {
+                 +") ENGINE=InnoDB;"))) {
           sql.executeUpdate();
         } // sql.close();
       } // field table doesn't exist
@@ -472,7 +472,7 @@ public class DbTagger extends Annotator {
           +" supplemental SMALLINT NOT NULL DEFAULT 0"
           +" COMMENT 'Whether the word/variant has been manually added since uploading from the original file'"
           + columnDefinitions
-          +", PRIMARY KEY (serial)) ENGINE=MyISAM;";
+          +", PRIMARY KEY (serial)) ENGINE=InnoDB;";
         sql = rdb.prepareStatement(sqlx.apply(sSql));
         sql.executeUpdate();
         sql.close();
@@ -798,7 +798,7 @@ public class DbTagger extends Annotator {
                      +" FOREIGN KEY (parent_serial)"
                      +" REFERENCES "+getAnnotatorId()+"_table_"+tableId+" (serial)"
                      +" ON DELETE CASCADE"
-                     +") ENGINE=MyISAM;"))) {
+                     +") ENGINE=InnoDB;"))) {
               sqlCreateChildTable.executeUpdate();
               
               // create a default field named after the table

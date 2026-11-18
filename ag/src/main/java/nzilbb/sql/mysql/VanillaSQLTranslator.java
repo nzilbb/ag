@@ -49,6 +49,7 @@ public class VanillaSQLTranslator extends MySQLTranslator {
         || translated.startsWith("ALTER TABLE")) {
          translated = translated
             .replace(" ENGINE=MyISAM","")
+            .replace(" ENGINE=InnoDB","")
             .replaceAll(" CHARACTER SET \\w+","")
             .replaceAll(" COLLATE \\w+","")
             .replace(" NOT NULL","")
