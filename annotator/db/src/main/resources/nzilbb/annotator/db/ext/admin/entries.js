@@ -494,7 +494,78 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
       && fieldDefinition.type != "boolean") {
     const lookupPattern = /^lookup:(.*)\.(.*)$/;
     // if it's just a list of alternative, e.g. "option1|option2|option3"
-    if (/^\|?(.+\|)+.+/.test(fieldDefinition.validation)) { // implement as a select instead
+    if (lookupPattern.test(fieldDefinition.validation)) { // lookup other table
+
+      const groups = lookupPattern.exec(fieldDefinition.validation);
+      const lookupTable = groups[1];
+      let lookupField = groups[2];
+      const closedSet = !lookupField.endsWith("|*");
+      if (!closedSet) {
+        // use 'datalist' so there are suggested values but they can enter their own
+        // strip off the trailing "|*"
+        lookupField = lookupField.substring(0, lookupField.length - 2);
+        
+        // lookup as user types
+        datalistId++;
+        const datalist = document.createElement("datalist");
+        datalist.id = `matches-${fieldDefinition.field}-${datalistId}`;
+        datalist.optionValues = [];
+        valueElement.appendChild(datalist);
+        const lookup = function() { // ask the server for some matching options
+          getJSON(resourceForFunction(
+            "matches", lookupTable, lookupField, input.value||".*"), values => {
+              if (values.length == 1 && values[0].startsWith("DbTagger.")) { // error
+                document.getElementById("error").innerHTML = values[0];
+                // clear the error after a short delay
+                window.setTimeout(()=>document.getElementById("error").innerHTML = "",3000);
+              } else {
+                datalist.innerHTML = ""; // clear any previous values
+                values.forEach((value)=>{ // add each option to the datalist
+                  const option = document.createElement("option");
+                  option.appendChild(document.createTextNode(value));
+                  datalist.appendChild(option);
+                });
+                datalist.optionValues = values;
+              }
+            });
+        }
+        let deferLookup = null;
+        input.setAttribute("list", datalist.id);
+        input.addEventListener("input", function(e) {
+          if (deferLookup) window.clearTimeout(deferLookup);
+          // did it change because they selected one of the items?
+          if (!datalist.optionValues.includes(input.value)) {
+            deferLookup = window.setTimeout(lookup, 1000);
+          }
+        });
+        if (!value) { // no value yet
+          // lookup all values now
+          lookup();
+        }
+      } else { // closedSet
+        // use 'select' instead of 'datalist'
+        const select = document.createElement("select");
+        input = select;
+        if (!fieldDefinition.defaultValue) { // no default value specified
+          // add a blank option
+          select.appendChild(document.createElement("option"));
+        }
+        getJSON(resourceForFunction(
+          "matches", lookupTable, lookupField, ".*", "serial"), values => {
+            if (values.length == 1 && values[0].startsWith("DbTagger.")) { // error
+              document.getElementById("error").innerHTML = values[0];
+              // clear the error after a short delay
+              window.setTimeout(()=>document.getElementById("error").innerHTML = "",3000);
+            } else {
+              values.forEach((value)=>{ // add each option to the datalist
+                const option = document.createElement("option");
+                option.appendChild(document.createTextNode(value));
+                select.appendChild(option);
+              });
+            }
+          });
+      }
+    } else if (/^\|?(.+\|)+.+/.test(fieldDefinition.validation)) { // implement as a select instead
       let optionsList = null;
       if (fieldDefinition.validation.endsWith("|*")) { // an open set of options
         // so the list of options is a suggestion but they can enter anything
@@ -517,49 +588,6 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
         option.appendChild(document.createTextNode(opt));
         optionsList.appendChild(option);
       } // next option
-    } else if (lookupPattern.test(fieldDefinition.validation)) { // lookup other table
-
-      const groups = lookupPattern.exec(fieldDefinition.validation);
-      const lookupTable = groups[1];
-      const lookupField = groups[2];
-      
-      // lookup as user types
-      datalistId++;
-      const datalist = document.createElement("datalist");
-      datalist.id = `matches-${fieldDefinition.field}-${datalistId}`;
-      datalist.optionValues = [];
-      valueElement.appendChild(datalist);
-      const lookup = function() { // ask the server for some matching options
-        getJSON(resourceForFunction(
-          "matches", lookupTable, lookupField, input.value||".*"), values => {
-            if (values.length == 1 && values[0].startsWith("DbTagger.")) { // error
-              document.getElementById("error").innerText = values[0];
-              // clear the error after a short delay
-              window.setTimeout(()=>document.getElementById("error").innerText = "",3000);
-            } else {
-              datalist.innerHTML = ""; // clear any previous values
-              values.forEach((value)=>{ // add each option to the datalist
-                const option = document.createElement("option");
-                option.value = value;
-                datalist.appendChild(option);
-              });
-              datalist.optionValues = values;
-            }
-          });
-      }
-      let deferLookup = null;
-      input.setAttribute("list", datalist.id);
-      input.addEventListener("input", function(e) {
-        if (deferLookup) window.clearTimeout(deferLookup);
-        // did it change because they selected one of the items?
-        if (!datalist.optionValues.includes(input.value)) {
-          deferLookup = window.setTimeout(lookup, 1000);
-        }
-      });
-      if (!value) { // no value yet
-        // lookup all values now
-        lookup();
-      }
     } else if (fieldDefinition.validation.split("<").length == 2) { // min<max
       const interval = fieldDefinition.validation.split("<");
       if (interval[0]) input.min = interval[0];

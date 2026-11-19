@@ -47,6 +47,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -1772,7 +1773,20 @@ public class DbTagger extends Annotator {
    */
   @ApiEndpoint("view") public List<String> matches(String table, String field, String pattern)
    throws SQLException {
-    Vector<String> values = new Vector<String>();
+    return matches(table, field, pattern, field);
+  }
+  /**
+   * Get field values matching the given search string.
+   * @param table The table ID.
+   * @param field The field used to identify the entries.
+   * @param pattern A regular expression to match in the values of <var>field</var>,
+   * which identifies the full values to return.
+   * @return A list of values for <var>field</var> that match the given pattern.
+   */
+  @ApiEndpoint("view") public List<String> matches(
+    String table, String field, String pattern, String orderBy)
+   throws SQLException {
+    LinkedHashSet<String> values = new LinkedHashSet<String>();
     try (Connection rdb = newConnection()) {
       // find the table
       int tableId = tableId(rdb, table);
@@ -1780,9 +1794,9 @@ public class DbTagger extends Annotator {
         String sTableName = getAnnotatorId()+"_table_"+tableId;
         try {
           String s = sqlx.apply(
-            "SELECT DISTINCT `"+field.replace(';',' ')+"` FROM "+sTableName
+            "SELECT `"+field.replace(';',' ')+"` FROM "+sTableName
             +" WHERE `"+field.replace(';',' ')+"` REGEXP ?"
-            +" ORDER BY `"+field.replace(';',' ')+"`");
+            +" ORDER BY `"+orderBy.replace(';',' ')+"`");
           try (PreparedStatement search = rdb.prepareStatement(s)) {
             search.setString(1, pattern);
             try (ResultSet matches = search.executeQuery()) {
@@ -1795,9 +1809,10 @@ public class DbTagger extends Annotator {
           // try LIKE instead
           try {
             String s = sqlx.apply(
-              "SELECT DISTINCT `"+field.replace(';',' ')+"` FROM "+sTableName
+              "SELECT `"+field.replace(';',' ')+"` FROM "+sTableName
               +" WHERE `"+field.replace(';',' ')+"` LIKE ?"
-              +" ORDER BY `"+field.replace(';',' ')+"`");
+              +" ORDER BY `"
+              +(orderBy.equals("serial")?"SERIAL":orderBy.replace(';',' '))+"`");
             try (PreparedStatement search = rdb.prepareStatement(s)) {
               search.setString(1, "%"+pattern+"%");
               if (".*".equals(pattern)) search.setString(1, "%"); // match everything
@@ -1811,6 +1826,8 @@ public class DbTagger extends Annotator {
             // report the original exception
             System.err.println(
               "DbTagger.matches("+table+", "+field+", "+pattern+"): "+exception);
+            System.err.println(
+              "DbTagger.matches("+table+", "+field+", "+pattern+"): "+exception2);
             values.add("DbTagger_error: " + exception.getMessage());
           } // LIKE didn't work
         } // REGEXP didn't work
@@ -1825,7 +1842,7 @@ public class DbTagger extends Annotator {
         "DbTagger.matches("+table+", "+field+", "+pattern+"): "+x);
       values.add("DbTagger_error: "+x.getMessage());
     } // rdb.close()
-    return values;
+    return new Vector<String>(values);
   }
   
   /**

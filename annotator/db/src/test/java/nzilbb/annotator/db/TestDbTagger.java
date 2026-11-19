@@ -953,6 +953,22 @@ public class TestDbTagger {
     assertEquals("Error: Correct message " + entry,
                  "Nonexistent table: nonexistent", entry.get("DbTagger_error"));
 
+    List<String> matches = annotator.matches("dict", "phonemes", "ð");
+    assertNotNull("Matches returned", matches);
+    assertEquals("Correct number of entries returned: " + matches, 2, matches.size());
+    String match = matches.get(0);
+    assertEquals("1st match correct", "ð i:", match);
+    match = matches.get(1);
+    assertEquals("2nd match correct", "ð ə", match);
+
+    matches = annotator.matches("dict", "phonemes", "ð", "serial");
+    assertNotNull("Matches returned (serial order)", matches);
+    assertEquals("Correct number of entries returned: " + matches, 2, matches.size());
+    match = matches.get(0);
+    assertEquals("1st match correct (serial order)", "ð ə", match);
+    match = matches.get(1);
+    assertEquals("2nd match correct (serial order)", "ð i:", match);
+    
     // field CRUD
     assertFalse("Cannot create field in nonexistent table",
                 annotator.createField("nonexistent", "xxx", "string").length() == 0);
