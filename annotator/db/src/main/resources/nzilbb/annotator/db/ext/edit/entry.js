@@ -410,6 +410,7 @@ function addChildRow(
 }
 
 let datalistId = 0; // for unique IDs
+let inputId = 0; // for unique IDs
 function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, value) {
   let input = document.createElement("input");
   
@@ -649,6 +650,8 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
                 option.appendChild(document.createTextNode(value));
                 select.appendChild(option);
               });
+              // ensure the value is set after options are added
+              select.value = value;
             }
           });
       }
@@ -687,7 +690,8 @@ function createFieldInput(valueElement, fieldDefinition, saveButtonHandler, valu
   }
   
   input.name = fieldDefinition.field;
-  input.id = `attribute-${fieldDefinition.field}`;
+  inputId++;
+  input.id = `attribute-${fieldDefinition.field}-${inputId}`;
   input.placeholder = fieldDefinition.field;
   if (fieldDefinition.type == "boolean") { // it's a checkbox
     input.checked = value == (fieldDefinition.validation||"true");
