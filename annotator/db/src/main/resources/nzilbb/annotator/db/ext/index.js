@@ -28,9 +28,16 @@ function listTables() {
 listTables();
 
 // are they a privileged user?
-const url = "admin/index.html";
+let url = "admin/index.html";
 getText(url, (data) => {
   if (data) { // they can access the URL
     window.location = url;
+  } else {
+    url = "edit/index.html";
+    getText(url, (data) => {
+      if (data) { // they can access the URL
+        window.location = url;
+      }
+    });
   }
 });

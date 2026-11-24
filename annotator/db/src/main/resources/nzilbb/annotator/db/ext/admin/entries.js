@@ -18,7 +18,7 @@ getJSON("../../../../api/user", response => {
   }
 });
 
-// replace title with link to read-only page
+// set title
 document.getElementById("entries").innerText = `Entries for ${t}`;
 
 const tableFields = {}; // definitions for table fields (key is table name)

@@ -1,0 +1,134 @@
+body {
+    background-color: #ffffff;
+    color: #353833;
+    font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin: auto;
+    height: 100%;
+    width: 100%;
+}
+
+h1 { font-size: 17pt; color: #859044; text-align: center; }
+h2 { font-size: 16pt; color: #859044; text-align: center; }
+h3 { font-size: 15pt; color: #859044; font-style:italic; }
+h4 { font-size: 14pt; color: #859044; }
+h5 { font-size: 13pt; color: #859044; }
+h6 { font-size: 12pt; color: #859044; }
+
+#search-form {
+    display: flex;
+    flex-direction: row;
+    width: min-content;
+    margin: auto;
+}
+
+label, legend {
+    font-weight: bold;
+}
+label:after, legend:after {
+    content: ':';
+}
+textarea { field-sizing: content; }
+th {
+    text-align: left;
+    white-space: nowrap;
+}
+td {
+    vertical-align: top;
+}
+td input, th input {
+    width: 90%;
+    min-width: 45px;
+}
+td textarea {
+    width: 90%;
+    min-width: 200px;
+}
+input[type="number"] {
+    width: 75px;
+    text-align: right;
+}
+td a.url-link, td a.geo-link, td a.transcript-link, td a.cross-reference {
+    position: absolute;
+    padding: 5px;
+    text-decoration: none;
+}
+td input[type="url"], td.geo-location input, td.transcript-link input, td.cross-reference input {
+    padding-left: 20px;
+}
+
+input:invalid, textarea:invalid {
+  outline: red solid 3px;
+}
+
+table {
+    width: fit-content;
+    margin: auto;
+    border-collapse: collapse;
+}
+
+th.save-column {
+    width: 34px;
+}
+
+table > tbody > tr:nth-child(odd)  {
+    background: #EEEEEE;
+}
+table > tbody > tr:nth-child(even) {
+    background: #FFFFFF;
+}
+
+a img, button img {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    vertical-align: center; /* for Firefox, ignored by Chrome */
+}
+
+inline-details {
+    display: flex;
+    flex-direction: row;
+    white-space: nowrap;
+}
+inline-details > inline-summary {
+    cursor: pointer;
+    display: list-item;
+    list-style-position: inside;
+    list-style-type: disclosure-closed;
+}
+inline-details[open] > inline-summary {
+    list-style-type: disclosure-open;
+}
+inline-details:not([open]) > *:not(inline-summary) {
+    display: none;
+}
+
+footer {
+    text-align: center;
+    font-style: italic;
+}
+
+.error {
+    color: red;
+}
+
+progress {
+    width: 100%;
+}
+
+input.filter {
+    color: #859044;
+    font-weight: bold;
+}
+#max-rows {
+    width: 40px;
+}
+#max-rows-label:after {
+    content: ":";
+}
+
+/* Layout on narrower screens */
+@media all and (max-width: 640px) {
+    .field { flex-direction: column; }
+    .field span, .field label { width: 95vw; }
+}

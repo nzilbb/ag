@@ -1206,7 +1206,7 @@ public class DbTagger extends Annotator {
    * @param maxRows The maximum number of rows to return.
    * @return A list of rows, each row being an object with keys/values for the fields.
    */
-  @ApiEndpoint("admin") public List<Map<String,String>> readEntries(
+  @ApiEndpoint("edit") public List<Map<String,String>> readEntries(
     String table, String field, String pattern, int maxRows)
     throws SQLException {
     List<Map<String,String>> entries = new Vector<Map<String,String>>();

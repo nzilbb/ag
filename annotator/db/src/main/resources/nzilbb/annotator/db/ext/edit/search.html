@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title> Search </title>
+    <link rel="stylesheet" href="../ckeditor5/ckeditor5.css">
+    <link rel="stylesheet" href="search.css" type="text/css">
+    <script src="../util.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <h1 id="entries">Search</h1>
+
+    <div id="search-form">
+      <select id="field" title="Column to search"></select>
+      <input id="query" title="Pattern to search for" autofocus>
+      <button id="btn-search"><img src="../search.svg"></button>
+    </div>
+
+    <table>
+      <thead><tr id="header"></tr></thead>
+      <tbody id="matches"></tbody>
+    </table>
+    <p id="error" class="error"></p>
+    <footer><div> DB Tagger <small id="version"></small> </div></footer>
+    
+    <script type="module" src="search.js" type="text/javascript"></script>
+  </body>
+</html>

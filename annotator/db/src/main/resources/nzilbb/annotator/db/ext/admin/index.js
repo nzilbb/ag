@@ -23,9 +23,18 @@ function listTables() {
             tr.appendChild(td);
             let link = document.createElement("a");
             td.appendChild(link);
+            link.title = `Search ${tableId}`;
+            link.href = `../edit/search.html?t=${tableId}`
+            let img = document.createElement("img");
+            img.src = "../search.svg"
+            img.alt = "🔍";
+            link.appendChild(img);
+
+            link = document.createElement("a");
+            td.appendChild(link);
             link.title = `${tableId} entries`;
             link.href = `entries.html?t=${tableId}`
-            let img = document.createElement("img");
+            img = document.createElement("img");
             img.src = "../entries.svg"
             img.alt = "☰";
             link.appendChild(img);
