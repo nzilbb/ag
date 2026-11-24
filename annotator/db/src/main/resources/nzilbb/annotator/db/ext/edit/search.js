@@ -12,7 +12,7 @@ const field = document.getElementById("field");
 const query = document.getElementById("query");
 const matches = document.getElementById("matches");
 const hiddenTypes = ["child-table", "text", "html", "hidden","geo-location"];
-const maxRows = 100;
+const maxRows = 10000;
 
 // set title
 document.getElementById("entries").innerText = `Search ${t}`;
